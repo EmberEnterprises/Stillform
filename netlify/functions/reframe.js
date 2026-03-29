@@ -1,27 +1,22 @@
-export default async (request) => {
-  if (request.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST",
-        "Access-Control-Allow-Headers": "Content-Type"
-      }
-    });
+export default async (req) => {
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405 });
   }
 
-  const { input } = await request.json();
+  try {
+    const { text } = await req.json();
 
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": process.env.ANTHROPIC_API_KEY,
-      "anthropic-version": "2023-06-01"
-    },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 1000,
-      system: `You are a CBT-trained cognitive reframing tool embedded in Stillform, a composure app. Your job is to apply evidence-based Cognitive Behavioral Therapy techniques to help someone interrupt an escalating thought pattern in real time.
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": process.env.ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `You are a CBT-trained cognitive reframing tool embedded in Stillform, a composure app. Your job is to apply evidence-based Cognitive Behavioral Therapy techniques to help someone interrupt an escalating thought pattern in real time.
 
 When the user describes what they are experiencing:
 1. Identify the primary cognitive distortion present (e.g. catastrophizing, all-or-nothing thinking, mind reading, emotional reasoning, fortune telling, personalization, should statements, mental filter, overgeneralization, labeling, magnification/minimization)
@@ -37,23 +32,29 @@ When the user describes what they are experiencing:
    - Overgeneralization → Look for exceptions and specifics
 4. End with one grounding statement — something true and present tense
 
-Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Do not use headers or bullet points — write in flowing paragraphs.
+Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Write in flowing paragraphs — no headers or bullet points.
 
-Return your response as JSON only, no markdown, no backticks: { "distortion": "name of distortion", "reframe": "your full response" }`,
-      messages: [{ role: "user", content: input }]
-    })
-  });
+Return ONLY valid JSON with no markdown formatting: { "distortion": "name of distortion", "reframe": "your full response" }`,
+        messages: [{ role: "user", content: text }]
+      })
+    });
 
-  const data = await response.json();
-  const text = data.content?.[0]?.text || "";
-  const parsed = JSON.parse(text.replace(/```json|```/g, "").trim());
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || "";
+    const clean = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
 
-  return new Response(JSON.stringify(parsed), {
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*"
-    }
-  });
+    return new Response(JSON.stringify(parsed), {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    });
+
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
+  }
 };
 
 export const config = { path: "/api/reframe" };
