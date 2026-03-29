@@ -1238,15 +1238,23 @@ function ReframeTool({ onComplete }) {
           {loading && (
             <div className="message ai">
               <div className="message-avatar">✦</div>
-              <div className="message-bubble" style={{ color: "var(--text-muted)" }}>...</div>
+              <div className="message-bubble" style={{ color: "var(--text-muted)" }}>
+                <span style={{ letterSpacing: "0.2em" }}>···</span>
+              </div>
             </div>
           )}
           {error && (
-            <div style={{ padding: "12px 0" }}>
-              <div style={{ fontSize: 13, color: "#c04", marginBottom: 10 }}>{error}</div>
+            <div style={{
+              background: "rgba(200,0,50,0.08)",
+              border: "1px solid rgba(200,0,50,0.25)",
+              borderRadius: 10,
+              padding: "14px 16px",
+              margin: "8px 0"
+            }}>
+              <div style={{ fontSize: 14, color: "#e05", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
               <button
-                className="btn btn-ghost"
-                style={{ fontSize: 13 }}
+                className="btn btn-primary"
+                style={{ fontSize: 14, padding: "10px 20px" }}
                 onClick={() => handleSend(lastInput)}
               >
                 ↺ Retry
