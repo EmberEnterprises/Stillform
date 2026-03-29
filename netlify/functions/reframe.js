@@ -1,17 +1,10 @@
-export default async (req) => {
-  if (req.method !== "POST") {
-    return new Response("Method not allowed", { status: 405 });
+exports.handler = async function(event) {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method not allowed" };
   }
 
   try {
-    const { input } = await req.json();
-
-    if (!input || !input.trim()) {
-      return new Response(JSON.stringify({ error: "No input provided" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" }
-      });
-    }
+    const { input } = JSON.parse(event.body);
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -39,28 +32,27 @@ When the user describes what they are experiencing:
    - Overgeneralization → Look for exceptions and specifics
 4. End with one grounding statement — something true and present tense
 
-Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Write in flowing paragraphs — no headers, no bullet points.
+Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Do not use headers or bullet points — write in flowing paragraphs.
 
-Return ONLY valid JSON with no markdown, no backticks, no preamble: { "distortion": "name of distortion", "reframe": "your full response" }`,
+Return your response as JSON: { "distortion": "name of distortion", "reframe": "your full response" }`,
         messages: [{ role: "user", content: input }]
       })
     });
 
     const data = await response.json();
     const text = data.content?.[0]?.text || "";
-    const parsed = JSON.parse(text.trim());
+    const clean = text.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
 
-    return new Response(JSON.stringify(parsed), {
-      status: 200,
-      headers: { "Content-Type": "application/json" }
-    });
-
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(parsed)
+    };
   } catch (err) {
-    return new Response(JSON.stringify({ error: "Service unavailable. Please try again." }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" }
-    });
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: err.message })
+    };
   }
 };
-
-export const config = { path: "/api/reframe" };

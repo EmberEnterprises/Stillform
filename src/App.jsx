@@ -1024,7 +1024,7 @@ function ReframeTool({ onComplete }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch("/api/reframe", {
+      const response = await fetch("/.netlify/functions/reframe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ input })
