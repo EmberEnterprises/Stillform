@@ -1169,7 +1169,7 @@ function AIConsultTool() {
   return (
     <div>
       <div className="disclaimer">
-        This is not therapy or crisis intervention. If you are in crisis, please contact your local emergency services or a mental health crisis line. In the US: call or text 988. This tool is a calm, structured space to process what you're experiencing.
+        This is not therapy or crisis intervention. If you are in crisis, please contact your local emergency services or a mental health professional. This tool is a calm, structured space to process what you're experiencing.
       </div>
       <div className="ai-container">
         <div className="ai-messages">
@@ -1297,7 +1297,7 @@ export default function Stillform() {
               <p>Choose a tool. Each one takes less than 6 minutes.</p>
             </div>
             <div className="disclaimer">
-              Stillform is not a substitute for professional mental health treatment. If you are in crisis, please contact your local emergency services or a mental health crisis line. In the US: call or text 988.
+              Stillform is not a substitute for professional mental health treatment. If you are in crisis, please contact your local emergency services or a mental health professional.
             </div>
             <div className="tools-grid">
               {TOOLS.map(tool => (
@@ -1385,7 +1385,7 @@ export default function Stillform() {
             <p>The AI Consult feature sends text you enter to Anthropic's Claude API to generate responses. Text entered into AI Consult is processed by Anthropic's servers in accordance with <a href="https://www.anthropic.com/privacy" style={{ color: "var(--amber)" }}>Anthropic's privacy policy</a>. Do not enter sensitive personal or medical information into AI Consult.</p>
 
             <h2>Medical Disclaimer</h2>
-            <p>Stillform is not medical treatment, therapy, or a crisis intervention service. It is a composure tool. If you are experiencing a mental health crisis, please contact your local emergency services or a crisis line. In the US: call or text 988.</p>
+            <p>Stillform is not medical treatment, therapy, or a crisis intervention service. It is a composure tool. If you are experiencing a mental health crisis, please contact your local emergency services or a mental health professional.</p>
 
             <h2>Contact</h2>
             <p>For privacy questions: emberenterprises@proton.me</p>
