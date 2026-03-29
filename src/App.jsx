@@ -1251,55 +1251,6 @@ function ReframeTool({ onComplete }) {
   );
 }
 
-  useEffect(() => {
-    if (!running) return;
-    if (count === 0) {
-      const next = (phaseIdx + 1) % phases.length;
-      if (next === 0) {
-        if (cycle >= totalCycles) { setDone(true); setRunning(false); return; }
-        setCycle(c => c + 1);
-      }
-      setPhaseIdx(next);
-      setCount(phases[next].duration);
-    } else {
-      const t = setTimeout(() => setCount(c => c - 1), 1000);
-      return () => clearTimeout(t);
-    }
-  }, [count, running, phaseIdx, cycle]);
-
-  const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
-
-  if (done) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>Well done.</h2>
-      <p>You completed {totalCycles} rounds of 4-4-6-2 breathing. Your nervous system is slowing. Stay here for a moment.</p>
-      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-    </div>
-  );
-
-  return (
-    <div className="breath-container">
-      <div className="breath-circle-wrap">
-        <div className={circleClass}>
-          <div className="breath-inner">
-            <span className="breath-count">{count}</span>
-          </div>
-        </div>
-      </div>
-      <div className="breath-phase">{phases[phaseIdx].name} · Cycle {cycle} of {totalCycles}</div>
-      <div className="breath-instruction">{phases[phaseIdx].instruction}</div>
-      {!running ? (
-        <button className="btn btn-primary" onClick={() => { setRunning(true); }}>
-          Begin
-        </button>
-      ) : (
-        <button className="btn btn-ghost" onClick={() => setRunning(false)}>Pause</button>
-      )}
-    </div>
-  );
-}
-
 export default function Stillform() {
   const [screen, setScreen] = useState("home");
   const [activeTool, setActiveTool] = useState(null);
