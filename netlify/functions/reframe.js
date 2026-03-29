@@ -4,7 +4,14 @@ export default async (req) => {
   }
 
   try {
-    const { text } = await req.json();
+    const { input } = await req.json();
+
+    if (!input || !input.trim()) {
+      return new Response(JSON.stringify({ error: "No input provided" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
@@ -32,17 +39,16 @@ When the user describes what they are experiencing:
    - Overgeneralization → Look for exceptions and specifics
 4. End with one grounding statement — something true and present tense
 
-Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Write in flowing paragraphs — no headers or bullet points.
+Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Write in flowing paragraphs — no headers, no bullet points.
 
-Return ONLY valid JSON with no markdown formatting: { "distortion": "name of distortion", "reframe": "your full response" }`,
-        messages: [{ role: "user", content: text }]
+Return ONLY valid JSON with no markdown, no backticks, no preamble: { "distortion": "name of distortion", "reframe": "your full response" }`,
+        messages: [{ role: "user", content: input }]
       })
     });
 
     const data = await response.json();
-    const raw = data.content?.[0]?.text || "";
-    const clean = raw.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(clean);
+    const text = data.content?.[0]?.text || "";
+    const parsed = JSON.parse(text.trim());
 
     return new Response(JSON.stringify(parsed), {
       status: 200,
@@ -50,7 +56,7 @@ Return ONLY valid JSON with no markdown formatting: { "distortion": "name of dis
     });
 
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
+    return new Response(JSON.stringify({ error: "Service unavailable. Please try again." }), {
       status: 500,
       headers: { "Content-Type": "application/json" }
     });
