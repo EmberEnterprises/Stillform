@@ -839,70 +839,258 @@ const TOOLS = [
   {
     id: "breathe",
     icon: "◎",
-    name: "Breathe",
-    desc: "Slow your nervous system with a structured breathing sequence.",
-    time: "3 min"
-  },
-  {
-    id: "ground",
-    icon: "◈",
-    name: "Ground",
-    desc: "Reconnect with the present moment through your senses.",
-    time: "5 min"
-  },
-  {
-    id: "reframe",
-    icon: "◇",
-    name: "Reframe",
-    desc: "Interrupt a thought spiral with guided cognitive questions.",
-    time: "4 min"
+    name: "Breathe & Ground",
+    desc: "Regulate your nervous system, then anchor to the present moment.",
+    time: "8 min"
   },
   {
     id: "scan",
     icon: "◉",
     name: "Body Scan",
-    desc: "Locate and release tension held in your body.",
-    time: "6 min"
+    desc: "Locate tension and release it with targeted acupressure.",
+    time: "10 min"
   },
   {
-    id: "ai",
+    id: "reframe",
     icon: "✦",
-    name: "AI Consult",
-    desc: "Talk through what you're experiencing with an intelligent, calm companion.",
+    name: "Reframe",
+    desc: "Talk through what's happening. AI applies CBT to exactly what you say — stay as long as you need.",
     time: "Open"
   }
 ];
 
-const REFRAME_QUESTIONS = [
-  "What is the specific thought that is causing the most distress right now?",
-  "What evidence supports this thought? What evidence contradicts it?",
-  "If a person you respected were in this situation, what would you tell them?",
-  "What is the most realistic outcome, separate from the worst-case scenario?",
-  "What is one small action you can take right now, regardless of how you feel?"
-];
-
-const AI_RESPONSES = [
-  "I hear you. That sounds genuinely difficult. Before we think about what to do — can you tell me more about what your body feels like right now? What are you noticing physically?",
-  "That makes sense. When we're in this state, the nervous system is trying to protect us — even when the threat isn't physical. Let's slow this down together. What would it feel like to take one full breath right now?",
-  "You don't have to solve this in the next five minutes. The only thing you need to do right now is stay present. What is one thing in the room around you that you can see clearly?",
-  "I want to reflect something back to you: what you're describing is a stress response, not a permanent state. It will pass. What has helped you come back to yourself in the past?",
-  "That's a lot to carry. I want you to know that reaching out — even to an app — took something. You're taking care of yourself. What feels most urgent to you right now?"
-];
-
-function BreathingTool({ onComplete }) {
+function BreatheGroundTool({ onComplete }) {
+  const [phase, setPhase] = useState("breathe"); // breathe | ground
+  
+  // --- BREATHE ---
   const phases = [
     { name: "Inhale", duration: 4, instruction: "Breathe in slowly..." },
     { name: "Hold", duration: 4, instruction: "Hold gently..." },
     { name: "Exhale", duration: 6, instruction: "Release completely..." },
     { name: "Hold", duration: 2, instruction: "Rest here..." }
   ];
-
+  const totalCycles = 4;
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [count, setCount] = useState(phases[0].duration);
   const [cycle, setCycle] = useState(1);
   const [running, setRunning] = useState(false);
-  const [done, setDone] = useState(false);
-  const totalCycles = 4;
+  const [breatheDone, setBreatheDone] = useState(false);
+
+  useEffect(() => {
+    if (!running) return;
+    if (count === 0) {
+      const next = (phaseIdx + 1) % phases.length;
+      if (next === 0) {
+        if (cycle >= totalCycles) { setBreatheDone(true); setRunning(false); return; }
+        setCycle(c => c + 1);
+      }
+      setPhaseIdx(next);
+      setCount(phases[next].duration);
+    } else {
+      const t = setTimeout(() => setCount(c => c - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [count, running, phaseIdx, cycle]);
+
+  // --- GROUND ---
+  const steps = [
+    { num: 5, label: "Five things you can see", prompt: "Look around. Name 5 things visible to you right now." },
+    { num: 4, label: "Four things you can touch", prompt: "What 4 surfaces or textures can you feel right now?" },
+    { num: 3, label: "Three things you can hear", prompt: "Listen. What 3 sounds do you notice?" },
+    { num: 2, label: "Two things you can smell", prompt: "What 2 scents can you identify, however faint?" },
+    { num: 1, label: "One thing you can taste", prompt: "What do you taste, even subtly?" }
+  ];
+  const [current, setCurrent] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [groundDone, setGroundDone] = useState(false);
+
+  const handleGroundNext = () => {
+    if (current < steps.length - 1) setCurrent(c => c + 1);
+    else setGroundDone(true);
+  };
+
+  const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
+
+  if (groundDone) return (
+    <div className="complete">
+      <div className="complete-icon">✓</div>
+      <h2>You're here.</h2>
+      <p>Your nervous system has slowed. Your senses have anchored you. You are present.</p>
+      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
+    </div>
+  );
+
+  if (phase === "breathe") return (
+    <div>
+      <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 24, textAlign: "center" }}>
+        Step 1 of 2 — Breathing
+      </div>
+      {!breatheDone ? (
+        <div className="breath-container">
+          <div className="breath-circle-wrap">
+            <div className={circleClass}>
+              <div className="breath-inner">
+                <span className="breath-count">{count}</span>
+              </div>
+            </div>
+          </div>
+          <div className="breath-phase">{phases[phaseIdx].name} · Cycle {cycle} of {totalCycles}</div>
+          <div className="breath-instruction">{phases[phaseIdx].instruction}</div>
+          {!running ? (
+            <button className="btn btn-primary" onClick={() => setRunning(true)}>Begin</button>
+          ) : (
+            <button className="btn btn-ghost" onClick={() => setRunning(false)}>Pause</button>
+          )}
+        </div>
+      ) : (
+        <div className="complete">
+          <div className="complete-icon">✓</div>
+          <h2>Breathing complete.</h2>
+          <p>Your nervous system is slowing. Now let's anchor you to the present moment.</p>
+          <button className="btn btn-primary" onClick={() => setPhase("ground")}>Continue to Grounding →</button>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 24 }}>
+        Step 2 of 2 — Grounding
+      </div>
+      <div className="grounding-steps">
+        {steps.map((step, i) => (
+          <div key={i} className={`ground-step ${i === current ? "active" : i < current ? "done" : ""}`}>
+            <div className="ground-step-header">
+              <div className="ground-number">{i < current ? "✓" : step.num}</div>
+              <div className="ground-label">{step.label}</div>
+            </div>
+            <div className="ground-desc">{step.prompt}</div>
+            {i === current && (
+              <>
+                <textarea
+                  className="ground-input"
+                  rows={2}
+                  placeholder="Write what you notice..."
+                  value={answers[i] || ""}
+                  onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
+                />
+                <div style={{ paddingLeft: 42, marginTop: 12 }}>
+                  <button className="btn btn-primary" onClick={handleGroundNext} style={{ fontSize: 13 }}>
+                    {i < steps.length - 1 ? "Continue →" : "Complete"}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ReframeTool({ onComplete }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg = { role: "user", text: input };
+    const history = [...messages, userMsg];
+    setMessages(history);
+    setInput("");
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/.netlify/functions/reframe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input,
+          history: messages.map(m => ({
+            role: m.role === "ai" ? "assistant" : "user",
+            content: m.text
+          }))
+        })
+      });
+      if (!response.ok) throw new Error("Server error");
+      const parsed = await response.json();
+      setMessages(prev => [...prev, {
+        role: "ai",
+        text: parsed.reframe,
+        distortion: parsed.distortion
+      }]);
+    } catch (err) {
+      setError("Connection issue. Try again.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <div className="disclaimer">
+        This is not therapy. It is an AI-powered CBT tool. If you are in crisis, please contact your local emergency services or a mental health professional.
+      </div>
+      <div className="ai-container">
+        <div className="ai-messages">
+          {messages.length === 0 && (
+            <div style={{ color: "var(--text-muted)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
+              Say what's happening. Don't explain it — just say it. The AI will read exactly what you wrote and respond with it directly.
+            </div>
+          )}
+          {messages.map((msg, i) => (
+            <div key={i} className={`message ${msg.role}`}>
+              <div className="message-avatar">{msg.role === "ai" ? "✦" : "◎"}</div>
+              <div className="message-bubble">
+                {msg.distortion && (
+                  <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    {msg.distortion}
+                  </div>
+                )}
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div className="message ai">
+              <div className="message-avatar">✦</div>
+              <div className="message-bubble" style={{ color: "var(--text-muted)" }}>...</div>
+            </div>
+          )}
+          {error && (
+            <div style={{ fontSize: 13, color: "#c04", padding: "8px 0" }}>{error}</div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="ai-input-row">
+          <input
+            className="ai-input"
+            placeholder="Say what's happening..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => e.key === "Enter" && handleSend()}
+          />
+          <button className="btn-send" onClick={handleSend} disabled={!input.trim() || loading}>
+            Send
+          </button>
+        </div>
+      </div>
+      {messages.length > 2 && (
+        <button className="btn btn-ghost" style={{ marginTop: 16, fontSize: 13 }} onClick={onComplete}>
+          I'm done for now
+        </button>
+      )}
+    </div>
+  );
+}
 
   useEffect(() => {
     if (!running) return;
@@ -953,449 +1141,6 @@ function BreathingTool({ onComplete }) {
   );
 }
 
-function GroundingTool({ onComplete }) {
-  const steps = [
-    { num: 5, label: "Five things you can see", prompt: "Look around and name 5 things visible to you right now." },
-    { num: 4, label: "Four things you can touch", prompt: "What 4 surfaces or textures can you feel right now?" },
-    { num: 3, label: "Three things you can hear", prompt: "Listen carefully. What 3 sounds do you notice?" },
-    { num: 2, label: "Two things you can smell", prompt: "What 2 scents can you identify, however faint?" },
-    { num: 1, label: "One thing you can taste", prompt: "What do you taste, even subtly?" }
-  ];
-
-  const [current, setCurrent] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [done, setDone] = useState(false);
-
-  const handleNext = () => {
-    if (current < steps.length - 1) setCurrent(c => c + 1);
-    else setDone(true);
-  };
-
-  if (done) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>You're here.</h2>
-      <p>You just moved your attention through five senses. The present moment is real. You are in it.</p>
-      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-    </div>
-  );
-
-  return (
-    <div className="grounding-steps">
-      {steps.map((step, i) => (
-        <div key={i} className={`ground-step ${i === current ? "active" : i < current ? "done" : ""}`}>
-          <div className="ground-step-header">
-            <div className="ground-number">{i < current ? "✓" : step.num}</div>
-            <div className="ground-label">{step.label}</div>
-          </div>
-          <div className="ground-desc">{step.prompt}</div>
-          {i === current && (
-            <>
-              <textarea
-                className="ground-input"
-                rows={2}
-                placeholder="Write what you notice..."
-                value={answers[i] || ""}
-                onChange={e => setAnswers(a => ({ ...a, [i]: e.target.value }))}
-              />
-              <div style={{ paddingLeft: 42, marginTop: 12 }}>
-                <button className="btn btn-primary" onClick={handleNext} style={{ fontSize: 13 }}>
-                  {i < steps.length - 1 ? "Continue →" : "Complete"}
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ReframeTool({ onComplete }) {
-  const [input, setInput] = useState("");
-  const [reframe, setReframe] = useState(null);
-  const [distortion, setDistortion] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState(null);
-
-  const handleReframe = async () => {
-    if (!input.trim() || loading) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/.netlify/functions/reframe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ input })
-      });
-      if (!response.ok) throw new Error("Server error");
-      const parsed = await response.json();
-      setDistortion(parsed.distortion);
-      setReframe(parsed.reframe);
-    } catch (err) {
-      setError("Something went wrong. Try again.");
-    }
-    setLoading(false);
-  };
-
-  if (done) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>Reframe complete.</h2>
-      <p>You gave your brain a different story to work with. That matters.</p>
-      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-    </div>
-  );
-
-  return (
-    <div>
-      <div className="disclaimer">
-        This tool is not therapy. It is an AI-powered CBT pattern interrupt for moments of emotional escalation. If you are in crisis, please contact your local emergency services or a mental health professional.
-      </div>
-
-      {!reframe ? (
-        <div className="reframe-card">
-          <div className="reframe-question">
-            What's actually happening right now?
-          </div>
-          <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, lineHeight: 1.6 }}>
-            Don't explain. Don't justify. Just describe what's going on — whatever is in your head right now.
-          </p>
-          <textarea
-            className="reframe-input"
-            placeholder="Just say it. Whatever it is..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            rows={5}
-            autoFocus
-          />
-          {error && (
-            <p style={{ fontSize: 13, color: "#c04", marginTop: 10 }}>{error}</p>
-          )}
-          <div style={{ marginTop: 16 }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleReframe}
-              disabled={!input.trim() || loading}
-            >
-              {loading ? "Reading what you wrote..." : "Reframe this →"}
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div>
-          {distortion && (
-            <div style={{
-              fontSize: 11,
-              letterSpacing: "0.12em",
-              textTransform: "uppercase",
-              color: "var(--amber)",
-              marginBottom: 16
-            }}>
-              {distortion}
-            </div>
-          )}
-          <div className="reframe-insight" style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 16, lineHeight: 1.8 }}>{reframe}</p>
-          </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <button className="btn btn-primary" onClick={() => setDone(true)}>
-              That helped
-            </button>
-            <button className="btn btn-ghost" onClick={() => {
-              setReframe(null);
-              setDistortion(null);
-              setInput("");
-            }}>
-              Try again with something else
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function BodyScanTool({ onComplete }) {
-  const areas = [
-    {
-      name: "Jaw & Face",
-      prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes.",
-      point: "GV24.5 — Third Eye Point",
-      pointLocation: "Place two fingers between your eyebrows, just above the bridge of your nose.",
-      pointInstruction: "Apply firm, steady pressure. Close your eyes. Hold.",
-      holdSeconds: 60,
-      benefit: "Calms racing thoughts and reduces tension headaches."
-    },
-    {
-      name: "Shoulders & Neck",
-      prompt: "Notice if your shoulders are raised. Let them drop completely.",
-      point: "GB21 — Shoulder Well",
-      pointLocation: "Find the highest point of your shoulder muscle, halfway between your neck and the edge of your shoulder.",
-      pointInstruction: "Press firmly with your thumb or two fingers. You may feel a tender ache — that's the point. Hold.",
-      holdSeconds: 45,
-      benefit: "Releases shoulder and neck tension. A primary stress relief point."
-    },
-    {
-      name: "Chest & Breath",
-      prompt: "Is your breath shallow? Take one slow, full breath down to your belly.",
-      point: "CV17 — Sea of Tranquility",
-      pointLocation: "Find the center of your sternum (breastbone), level with your heart. Place your flat palm here.",
-      pointInstruction: "Apply gentle but firm pressure with your palm. Breathe into it. Hold.",
-      holdSeconds: 60,
-      benefit: "Eases emotional distress and regulates the breath."
-    },
-    {
-      name: "Hands & Arms",
-      prompt: "Are your hands gripping anything? Open them fully. Let your arms go heavy.",
-      point: "LI4 — Union Valley",
-      pointLocation: "Find the webbing between your thumb and index finger. Pinch the highest point of the muscle there.",
-      pointInstruction: "Squeeze firmly — this point is often tender. Switch hands halfway. Hold.",
-      holdSeconds: 45,
-      benefit: "One of the most powerful acupressure points for stress, anxiety, and tension."
-    },
-    {
-      name: "Gut & Core",
-      prompt: "Scan your stomach and core. Notice tightness without trying to fix it.",
-      point: "PC6 — Inner Gate",
-      pointLocation: "Turn your wrist palm-up. Measure three finger-widths down from your wrist crease, between the two tendons.",
-      pointInstruction: "Press firmly with your thumb. Switch wrists halfway. Hold.",
-      holdSeconds: 60,
-      benefit: "Relieves anxiety, nausea, and racing heart. Directly calms the nervous system."
-    },
-    {
-      name: "Legs & Feet",
-      prompt: "Feel the full weight of your legs. Press your feet flat into the floor.",
-      point: "ST36 — Leg Three Miles",
-      pointLocation: "Find the outer edge of your kneecap, then measure four finger-widths straight down your shin.",
-      pointInstruction: "Press firmly into the muscle beside the bone. Switch legs halfway. Hold.",
-      holdSeconds: 60,
-      benefit: "Grounds the nervous system. Restores energy and stability."
-    }
-  ];
-
-  const [tension, setTension] = useState({});
-  const [currentArea, setCurrentArea] = useState(0);
-  const [phase, setPhase] = useState("scan"); // scan | pressure
-  const [holdCount, setHoldCount] = useState(0);
-  const [holding, setHolding] = useState(false);
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (!holding) return;
-    const target = areas[currentArea].holdSeconds;
-    if (holdCount >= target) {
-      setHolding(false);
-      return;
-    }
-    const t = setTimeout(() => setHoldCount(c => c + 1), 1000);
-    return () => clearTimeout(t);
-  }, [holding, holdCount, currentArea]);
-
-  const startHold = () => {
-    setHoldCount(0);
-    setHolding(true);
-  };
-
-  const handleNext = () => {
-    setPhase("scan");
-    setHolding(false);
-    setHoldCount(0);
-    if (currentArea < areas.length - 1) setCurrentArea(a => a + 1);
-    else setDone(true);
-  };
-
-  const area = areas[currentArea];
-  const holdTarget = area.holdSeconds;
-  const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
-
-  if (done) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>Scan complete.</h2>
-      <p>You've moved awareness and pressure through your body. Notice what has shifted.</p>
-      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-    </div>
-  );
-
-  return (
-    <div className="scan-body">
-      {areas.map((a, i) => (
-        <div
-          key={i}
-          className={`scan-area ${i === currentArea ? "active" : i < currentArea ? "done" : ""}`}
-          onClick={() => i <= currentArea && setCurrentArea(i)}
-        >
-          <div className="scan-area-name">{a.name}</div>
-          {i !== currentArea && (
-            <div className="scan-area-prompt">{i < currentArea ? "✓ Complete" : a.prompt}</div>
-          )}
-
-          {i === currentArea && phase === "scan" && (
-            <>
-              <div className="scan-area-prompt" style={{ marginTop: 8 }}>{a.prompt}</div>
-              <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em" }}>
-                TENSION LEVEL
-              </div>
-              <div className="tension-bar">
-                {[1,2,3,4,5].map(n => (
-                  <div
-                    key={n}
-                    className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
-                    onClick={(e) => { e.stopPropagation(); setTension(t => ({ ...t, [i]: n })); }}
-                  />
-                ))}
-              </div>
-              <div style={{ marginTop: 20 }}>
-                <button
-                  className="btn btn-primary"
-                  style={{ fontSize: 13 }}
-                  onClick={(e) => { e.stopPropagation(); setPhase("pressure"); }}
-                >
-                  Apply pressure point →
-                </button>
-              </div>
-            </>
-          )}
-
-          {i === currentArea && phase === "pressure" && (
-            <>
-              <div style={{
-                background: "var(--amber-glow)",
-                border: "1px solid var(--amber-dim)",
-                borderRadius: 8,
-                padding: "16px 20px",
-                marginTop: 16
-              }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  {a.point}
-                </div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}>
-                  <strong>Find it:</strong> {a.pointLocation}
-                </div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}>
-                  <strong>Apply:</strong> {a.pointInstruction}
-                </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic" }}>
-                  {a.benefit}
-                </div>
-              </div>
-
-              {!holding && holdCount === 0 && (
-                <button
-                  className="btn btn-primary"
-                  style={{ marginTop: 16, fontSize: 13 }}
-                  onClick={(e) => { e.stopPropagation(); startHold(); }}
-                >
-                  Start {holdTarget}s hold
-                </button>
-              )}
-
-              {(holding || holdCount > 0) && (
-                <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em" }}>
-                    {holding ? `HOLDING — ${holdTarget - holdCount}s remaining` : "HOLD COMPLETE"}
-                  </div>
-                  <div style={{ background: "var(--border)", borderRadius: 4, height: 4, overflow: "hidden" }}>
-                    <div style={{
-                      width: `${holdProgress}%`,
-                      height: "100%",
-                      background: holdProgress >= 100 ? "var(--green)" : "var(--amber)",
-                      transition: "width 1s linear"
-                    }} />
-                  </div>
-                  {!holding && holdCount >= holdTarget && (
-                    <button
-                      className="btn btn-primary"
-                      style={{ marginTop: 16, fontSize: 13 }}
-                      onClick={(e) => { e.stopPropagation(); handleNext(); }}
-                    >
-                      {currentArea < areas.length - 1 ? "Next area →" : "Complete scan"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function AIConsultTool() {
-  const [messages, setMessages] = useState([
-    {
-      role: "ai",
-      text: "I'm here. You don't need to explain everything — just tell me what's happening right now, in whatever words come."
-    }
-  ]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [responseIdx, setResponseIdx] = useState(0);
-  const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
-
-  const handleSend = () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", text: input };
-    setMessages(m => [...m, userMsg]);
-    setInput("");
-    setLoading(true);
-    setTimeout(() => {
-      const aiMsg = { role: "ai", text: AI_RESPONSES[responseIdx % AI_RESPONSES.length] };
-      setMessages(m => [...m, aiMsg]);
-      setResponseIdx(r => r + 1);
-      setLoading(false);
-    }, 1400);
-  };
-
-  return (
-    <div>
-      <div className="disclaimer">
-        This is not therapy or crisis intervention. If you are in crisis, please contact your local emergency services or a mental health professional. This tool is a calm, structured space to process what you're experiencing.
-      </div>
-      <div className="ai-container">
-        <div className="ai-messages">
-          {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.role}`}>
-              <div className="message-avatar">
-                {msg.role === "ai" ? "✦" : "◎"}
-              </div>
-              <div className="message-bubble">{msg.text}</div>
-            </div>
-          ))}
-          {loading && (
-            <div className="message ai">
-              <div className="message-avatar">✦</div>
-              <div className="message-bubble" style={{ color: "var(--text-muted)" }}>
-                ...
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="ai-input-row">
-          <input
-            className="ai-input"
-            placeholder="What's happening right now..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-          />
-          <button className="btn-send" onClick={handleSend} disabled={!input.trim() || loading}>
-            Send
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default function Stillform() {
   const [screen, setScreen] = useState("home");
   const [activeTool, setActiveTool] = useState(null);
@@ -1408,11 +1153,9 @@ export default function Stillform() {
   const renderTool = () => {
     const props = { onComplete: () => setScreen("tools") };
     switch (activeTool?.id) {
-      case "breathe": return <BreathingTool {...props} />;
-      case "ground": return <GroundingTool {...props} />;
-      case "reframe": return <ReframeTool {...props} />;
+      case "breathe": return <BreatheGroundTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "ai": return <AIConsultTool />;
+      case "reframe": return <ReframeTool {...props} />;
       default: return null;
     }
   };
@@ -1461,11 +1204,9 @@ export default function Stillform() {
             </div>
             <div className="home-features">
               {[
-                { icon: "◎", title: "Breathe", desc: "Structured breathing patterns that activate the parasympathetic nervous system within 60 seconds." },
-                { icon: "◈", title: "Ground", desc: "Sensory anchoring techniques that interrupt dissociation and bring you back to the present moment." },
-                { icon: "◇", title: "Reframe", desc: "Guided cognitive questions that interrupt thought spirals before they escalate." },
-                { icon: "◉", title: "Body Scan", desc: "Directed awareness through physical tension points, releasing held stress from the body." },
-                { icon: "✦", title: "AI Consult", desc: "A calm, intelligent companion to talk through what you're experiencing in real time." },
+                { icon: "◎", title: "Breathe & Ground", desc: "Structured breathing to slow your nervous system, followed by sensory anchoring to bring you back to the present." },
+                { icon: "◉", title: "Body Scan", desc: "Directed awareness through six body areas with targeted acupressure points and timed holds for real tension release." },
+                { icon: "✦", title: "Reframe", desc: "AI reads exactly what you wrote and applies the specific CBT technique for what you're experiencing. Stay as long as you need." },
               ].map((f, i) => (
                 <div key={i} className="feature-card">
                   <div className="feature-icon">{f.icon}</div>
