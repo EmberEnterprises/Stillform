@@ -1159,27 +1159,39 @@ function ReframeTool({ onComplete }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const userMsg = { role: "user", text: input };
-    const history = [...messages, userMsg];
-    setMessages(history);
-    setInput("");
+  const [lastInput, setLastInput] = useState("");
+
+  const handleSend = async (retryText) => {
+    const textToSend = retryText || input;
+    if (!textToSend.trim() || loading) return;
+
+    const userMsg = { role: "user", text: textToSend };
+    const prevMessages = retryText ? messages.slice(0, -1) : messages;
+    const history = [...prevMessages, userMsg];
+
+    setMessages(retryText ? [...prevMessages, userMsg] : [...messages, userMsg]);
+    setLastInput(textToSend);
+    if (!retryText) setInput("");
     setLoading(true);
     setError(null);
 
     try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 30000);
+
       const response = await fetch("/.netlify/functions/reframe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
         body: JSON.stringify({
-          input,
-          history: messages.map(m => ({
+          input: textToSend,
+          history: prevMessages.map(m => ({
             role: m.role === "ai" ? "assistant" : "user",
             content: m.text
           }))
         })
       });
+      clearTimeout(timeout);
       if (!response.ok) throw new Error("Server error");
       const parsed = await response.json();
       setMessages(prev => [...prev, {
@@ -1187,8 +1199,13 @@ function ReframeTool({ onComplete }) {
         text: parsed.reframe,
         distortion: parsed.distortion
       }]);
+      setError(null);
     } catch (err) {
-      setError("Connection issue. Try again.");
+      if (err.name === "AbortError") {
+        setError("This is taking longer than usual. Check your connection and try again.");
+      } else {
+        setError("Couldn't connect. Your message is saved — tap Retry to send it again.");
+      }
     }
     setLoading(false);
   };
@@ -1225,7 +1242,16 @@ function ReframeTool({ onComplete }) {
             </div>
           )}
           {error && (
-            <div style={{ fontSize: 13, color: "#c04", padding: "8px 0" }}>{error}</div>
+            <div style={{ padding: "12px 0" }}>
+              <div style={{ fontSize: 13, color: "#c04", marginBottom: 10 }}>{error}</div>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 13 }}
+                onClick={() => handleSend(lastInput)}
+              >
+                ↺ Retry
+              </button>
+            </div>
           )}
           <div ref={messagesEndRef} />
         </div>
