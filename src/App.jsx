@@ -1012,56 +1012,89 @@ function GroundingTool({ onComplete }) {
 }
 
 function ReframeTool({ onComplete }) {
-  const [qIdx, setQIdx] = useState(0);
-  const [answers, setAnswers] = useState({});
-  const [showInsight, setShowInsight] = useState(false);
+  const [input, setInput] = useState("");
+  const [reframe, setReframe] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(false);
 
-  const insights = [
-    "Naming the thought creates distance from it. You are not your thoughts.",
-    "Evidence-testing interrupts automatic catastrophizing.",
-    "Compassion toward yourself in crisis is not weakness — it is the most effective intervention.",
-    "The realistic outcome is almost always more manageable than the feared one.",
-    "Action, however small, restores agency."
+  const AI_REFRAMES = [
+    "What you're describing is your nervous system doing its job — it detected a threat and fired. The thought isn't the truth. It's the alarm. You don't have to act on an alarm. You just have to let it ring out. The intensity you feel right now is not a measure of how bad things are. It's a measure of how much your brain is trying to protect you. That protection is working too hard. You can acknowledge it without obeying it.",
+    "There's a difference between what is happening and what your mind is telling you is happening. Right now those two things feel identical — but they're not. What is actually, physically true in this moment? You are somewhere. You are breathing. Whatever is pulling at you exists in your mind right now, not in your hands. You have more time than it feels like you do.",
+    "The story your brain is writing right now is the worst-case version. It always starts there — that's how threat-detection works. But the worst case is rarely what lands. What would the most likely case actually look like? Not the best case. Just the most probable one. Start there instead.",
+    "You are not behind. You are not failing. You are in the middle of something hard and your nervous system is responding accordingly. The feeling of urgency is not the same as actual urgency. Slow is not the same as stuck. You are allowed to take one more breath before you decide anything.",
+    "Whatever you're carrying right now — you don't have to solve it in the next five minutes. You don't have to solve it today. The weight of it is real, but the timeline your brain is imposing is not. What is the one smallest thing that is actually true right now, separate from everything else?"
   ];
 
-  const handleNext = () => {
-    setShowInsight(true);
+  const [reframeIdx, setReframeIdx] = useState(0);
+
+  const handleReframe = async () => {
+    if (!input.trim() || loading) return;
+    setLoading(true);
     setTimeout(() => {
-      setShowInsight(false);
-      if (qIdx < REFRAME_QUESTIONS.length - 1) setQIdx(q => q + 1);
-      else onComplete();
-    }, 3000);
+      setReframe(AI_REFRAMES[reframeIdx % AI_REFRAMES.length]);
+      setReframeIdx(r => r + 1);
+      setLoading(false);
+    }, 1800);
   };
+
+  if (done) return (
+    <div className="complete">
+      <div className="complete-icon">✓</div>
+      <h2>Reframe complete.</h2>
+      <p>You gave your brain a different story to work with. That matters.</p>
+      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
+    </div>
+  );
 
   return (
     <div>
       <div className="disclaimer">
-        This tool is not therapy. It is a structured thought exercise designed to interrupt automatic thinking patterns. If you are in crisis, please contact a mental health professional.
+        This tool is not therapy. It is an AI-powered pattern interrupt for moments of emotional escalation. If you are in crisis, please contact your local emergency services or a mental health professional.
       </div>
-      <div className="reframe-card">
-        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-          Question {qIdx + 1} of {REFRAME_QUESTIONS.length}
-        </div>
-        <div className="reframe-question">{REFRAME_QUESTIONS[qIdx]}</div>
-        <textarea
-          className="reframe-input"
-          placeholder="Write whatever comes — there is no wrong answer..."
-          value={answers[qIdx] || ""}
-          onChange={e => setAnswers(a => ({ ...a, [qIdx]: e.target.value }))}
-        />
-      </div>
-      {showInsight ? (
-        <div className="reframe-insight">
-          <p>{insights[qIdx]}</p>
+
+      {!reframe ? (
+        <div className="reframe-card">
+          <div className="reframe-question">
+            What's actually happening right now?
+          </div>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 20, lineHeight: 1.6 }}>
+            Don't explain. Don't justify. Just describe what's going on — whatever is in your head right now.
+          </p>
+          <textarea
+            className="reframe-input"
+            placeholder="Just say it. Whatever it is..."
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            rows={5}
+            autoFocus
+          />
+          <div style={{ marginTop: 16 }}>
+            <button
+              className="btn btn-primary"
+              onClick={handleReframe}
+              disabled={!input.trim() || loading}
+            >
+              {loading ? "Reading what you wrote..." : "Reframe this →"}
+            </button>
+          </div>
         </div>
       ) : (
-        <button
-          className="btn btn-primary"
-          onClick={handleNext}
-          disabled={!answers[qIdx]}
-        >
-          {qIdx < REFRAME_QUESTIONS.length - 1 ? "Next question →" : "Complete"}
-        </button>
+        <div>
+          <div className="reframe-insight" style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 16, lineHeight: 1.8 }}>{reframe}</p>
+          </div>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <button className="btn btn-primary" onClick={() => setDone(true)}>
+              That helped
+            </button>
+            <button className="btn btn-ghost" onClick={() => {
+              setReframe(null);
+              setInput("");
+            }}>
+              Try again with something else
+            </button>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -1336,7 +1369,7 @@ export default function Stillform() {
             <div className="pricing-cards">
               <div className="pricing-card">
                 <div className="pricing-period">Monthly</div>
-                <div className="pricing-price"><sup>$</sup>6<span style={{ fontSize: 28 }}>.99</span></div>
+                <div className="pricing-price"><sup>$</sup>9<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
                   <li>All 5 composure tools</li>
@@ -1351,8 +1384,8 @@ export default function Stillform() {
               <div className="pricing-card featured">
                 <div className="pricing-badge">Best Value</div>
                 <div className="pricing-period">Annual</div>
-                <div className="pricing-price"><sup>$</sup>54<span style={{ fontSize: 28 }}>.99</span></div>
-                <div className="pricing-save">$4.58/mo · Save 34%</div>
+                <div className="pricing-price"><sup>$</sup>89<span style={{ fontSize: 28 }}>.99</span></div>
+                <div className="pricing-save">$7.50/mo · Save 25%</div>
                 <ul className="pricing-features">
                   <li>All 5 composure tools</li>
                   <li>Unlimited sessions</li>
