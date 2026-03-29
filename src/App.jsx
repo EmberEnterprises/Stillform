@@ -1102,48 +1102,122 @@ function ReframeTool({ onComplete }) {
 
 function BodyScanTool({ onComplete }) {
   const areas = [
-    { name: "Jaw & Face", prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes." },
-    { name: "Shoulders & Neck", prompt: "Notice if your shoulders are raised. Let them drop completely." },
-    { name: "Chest & Breath", prompt: "Is your breath shallow? Take one slow breath to the belly." },
-    { name: "Hands & Arms", prompt: "Are your hands gripping anything? Open them fully." },
-    { name: "Gut & Core", prompt: "Notice any tightness. You don't need to fix it — just notice." },
-    { name: "Legs & Feet", prompt: "Feel the weight of your legs. Press your feet into the floor." }
+    {
+      name: "Jaw & Face",
+      prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes.",
+      point: "GV24.5 — Third Eye Point",
+      pointLocation: "Place two fingers between your eyebrows, just above the bridge of your nose.",
+      pointInstruction: "Apply firm, steady pressure. Close your eyes. Hold.",
+      holdSeconds: 60,
+      benefit: "Calms racing thoughts and reduces tension headaches."
+    },
+    {
+      name: "Shoulders & Neck",
+      prompt: "Notice if your shoulders are raised. Let them drop completely.",
+      point: "GB21 — Shoulder Well",
+      pointLocation: "Find the highest point of your shoulder muscle, halfway between your neck and the edge of your shoulder.",
+      pointInstruction: "Press firmly with your thumb or two fingers. You may feel a tender ache — that's the point. Hold.",
+      holdSeconds: 45,
+      benefit: "Releases shoulder and neck tension. A primary stress relief point."
+    },
+    {
+      name: "Chest & Breath",
+      prompt: "Is your breath shallow? Take one slow, full breath down to your belly.",
+      point: "CV17 — Sea of Tranquility",
+      pointLocation: "Find the center of your sternum (breastbone), level with your heart. Place your flat palm here.",
+      pointInstruction: "Apply gentle but firm pressure with your palm. Breathe into it. Hold.",
+      holdSeconds: 60,
+      benefit: "Eases emotional distress and regulates the breath."
+    },
+    {
+      name: "Hands & Arms",
+      prompt: "Are your hands gripping anything? Open them fully. Let your arms go heavy.",
+      point: "LI4 — Union Valley",
+      pointLocation: "Find the webbing between your thumb and index finger. Pinch the highest point of the muscle there.",
+      pointInstruction: "Squeeze firmly — this point is often tender. Switch hands halfway. Hold.",
+      holdSeconds: 45,
+      benefit: "One of the most powerful acupressure points for stress, anxiety, and tension."
+    },
+    {
+      name: "Gut & Core",
+      prompt: "Scan your stomach and core. Notice tightness without trying to fix it.",
+      point: "PC6 — Inner Gate",
+      pointLocation: "Turn your wrist palm-up. Measure three finger-widths down from your wrist crease, between the two tendons.",
+      pointInstruction: "Press firmly with your thumb. Switch wrists halfway. Hold.",
+      holdSeconds: 60,
+      benefit: "Relieves anxiety, nausea, and racing heart. Directly calms the nervous system."
+    },
+    {
+      name: "Legs & Feet",
+      prompt: "Feel the full weight of your legs. Press your feet flat into the floor.",
+      point: "ST36 — Leg Three Miles",
+      pointLocation: "Find the outer edge of your kneecap, then measure four finger-widths straight down your shin.",
+      pointInstruction: "Press firmly into the muscle beside the bone. Switch legs halfway. Hold.",
+      holdSeconds: 60,
+      benefit: "Grounds the nervous system. Restores energy and stability."
+    }
   ];
 
   const [tension, setTension] = useState({});
   const [currentArea, setCurrentArea] = useState(0);
+  const [phase, setPhase] = useState("scan"); // scan | pressure
+  const [holdCount, setHoldCount] = useState(0);
+  const [holding, setHolding] = useState(false);
   const [done, setDone] = useState(false);
 
-  const handleTension = (areaIdx, level) => {
-    setTension(t => ({ ...t, [areaIdx]: level }));
+  useEffect(() => {
+    if (!holding) return;
+    const target = areas[currentArea].holdSeconds;
+    if (holdCount >= target) {
+      setHolding(false);
+      return;
+    }
+    const t = setTimeout(() => setHoldCount(c => c + 1), 1000);
+    return () => clearTimeout(t);
+  }, [holding, holdCount, currentArea]);
+
+  const startHold = () => {
+    setHoldCount(0);
+    setHolding(true);
   };
 
   const handleNext = () => {
+    setPhase("scan");
+    setHolding(false);
+    setHoldCount(0);
     if (currentArea < areas.length - 1) setCurrentArea(a => a + 1);
     else setDone(true);
   };
+
+  const area = areas[currentArea];
+  const holdTarget = area.holdSeconds;
+  const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
 
   if (done) return (
     <div className="complete">
       <div className="complete-icon">✓</div>
       <h2>Scan complete.</h2>
-      <p>You've moved awareness through your body. Notice if anything has shifted — even slightly.</p>
+      <p>You've moved awareness and pressure through your body. Notice what has shifted.</p>
       <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
     </div>
   );
 
   return (
     <div className="scan-body">
-      {areas.map((area, i) => (
+      {areas.map((a, i) => (
         <div
           key={i}
           className={`scan-area ${i === currentArea ? "active" : i < currentArea ? "done" : ""}`}
           onClick={() => i <= currentArea && setCurrentArea(i)}
         >
-          <div className="scan-area-name">{area.name}</div>
-          <div className="scan-area-prompt">{area.prompt}</div>
-          {i === currentArea && (
+          <div className="scan-area-name">{a.name}</div>
+          {i !== currentArea && (
+            <div className="scan-area-prompt">{i < currentArea ? "✓ Complete" : a.prompt}</div>
+          )}
+
+          {i === currentArea && phase === "scan" && (
             <>
+              <div className="scan-area-prompt" style={{ marginTop: 8 }}>{a.prompt}</div>
               <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em" }}>
                 TENSION LEVEL
               </div>
@@ -1152,15 +1226,79 @@ function BodyScanTool({ onComplete }) {
                   <div
                     key={n}
                     className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
-                    onClick={() => handleTension(i, n)}
+                    onClick={(e) => { e.stopPropagation(); setTension(t => ({ ...t, [i]: n })); }}
                   />
                 ))}
               </div>
-              <div style={{ marginTop: 16 }}>
-                <button className="btn btn-primary" onClick={handleNext} style={{ fontSize: 13 }}>
-                  {i < areas.length - 1 ? "Next area →" : "Complete scan"}
+              <div style={{ marginTop: 20 }}>
+                <button
+                  className="btn btn-primary"
+                  style={{ fontSize: 13 }}
+                  onClick={(e) => { e.stopPropagation(); setPhase("pressure"); }}
+                >
+                  Apply pressure point →
                 </button>
               </div>
+            </>
+          )}
+
+          {i === currentArea && phase === "pressure" && (
+            <>
+              <div style={{
+                background: "var(--amber-glow)",
+                border: "1px solid var(--amber-dim)",
+                borderRadius: 8,
+                padding: "16px 20px",
+                marginTop: 16
+              }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  {a.point}
+                </div>
+                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}>
+                  <strong>Find it:</strong> {a.pointLocation}
+                </div>
+                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}>
+                  <strong>Apply:</strong> {a.pointInstruction}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic" }}>
+                  {a.benefit}
+                </div>
+              </div>
+
+              {!holding && holdCount === 0 && (
+                <button
+                  className="btn btn-primary"
+                  style={{ marginTop: 16, fontSize: 13 }}
+                  onClick={(e) => { e.stopPropagation(); startHold(); }}
+                >
+                  Start {holdTarget}s hold
+                </button>
+              )}
+
+              {(holding || holdCount > 0) && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em" }}>
+                    {holding ? `HOLDING — ${holdTarget - holdCount}s remaining` : "HOLD COMPLETE"}
+                  </div>
+                  <div style={{ background: "var(--border)", borderRadius: 4, height: 4, overflow: "hidden" }}>
+                    <div style={{
+                      width: `${holdProgress}%`,
+                      height: "100%",
+                      background: holdProgress >= 100 ? "var(--green)" : "var(--amber)",
+                      transition: "width 1s linear"
+                    }} />
+                  </div>
+                  {!holding && holdCount >= holdTarget && (
+                    <button
+                      className="btn btn-primary"
+                      style={{ marginTop: 16, fontSize: 13 }}
+                      onClick={(e) => { e.stopPropagation(); handleNext(); }}
+                    >
+                      {currentArea < areas.length - 1 ? "Next area →" : "Complete scan"}
+                    </button>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
