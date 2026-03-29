@@ -1014,27 +1014,54 @@ function GroundingTool({ onComplete }) {
 function ReframeTool({ onComplete }) {
   const [input, setInput] = useState("");
   const [reframe, setReframe] = useState(null);
+  const [distortion, setDistortion] = useState(null);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
-
-  const AI_REFRAMES = [
-    "What you're describing is your nervous system doing its job — it detected a threat and fired. The thought isn't the truth. It's the alarm. You don't have to act on an alarm. You just have to let it ring out. The intensity you feel right now is not a measure of how bad things are. It's a measure of how much your brain is trying to protect you. That protection is working too hard. You can acknowledge it without obeying it.",
-    "There's a difference between what is happening and what your mind is telling you is happening. Right now those two things feel identical — but they're not. What is actually, physically true in this moment? You are somewhere. You are breathing. Whatever is pulling at you exists in your mind right now, not in your hands. You have more time than it feels like you do.",
-    "The story your brain is writing right now is the worst-case version. It always starts there — that's how threat-detection works. But the worst case is rarely what lands. What would the most likely case actually look like? Not the best case. Just the most probable one. Start there instead.",
-    "You are not behind. You are not failing. You are in the middle of something hard and your nervous system is responding accordingly. The feeling of urgency is not the same as actual urgency. Slow is not the same as stuck. You are allowed to take one more breath before you decide anything.",
-    "Whatever you're carrying right now — you don't have to solve it in the next five minutes. You don't have to solve it today. The weight of it is real, but the timeline your brain is imposing is not. What is the one smallest thing that is actually true right now, separate from everything else?"
-  ];
-
-  const [reframeIdx, setReframeIdx] = useState(0);
+  const [error, setError] = useState(null);
 
   const handleReframe = async () => {
     if (!input.trim() || loading) return;
     setLoading(true);
-    setTimeout(() => {
-      setReframe(AI_REFRAMES[reframeIdx % AI_REFRAMES.length]);
-      setReframeIdx(r => r + 1);
-      setLoading(false);
-    }, 1800);
+    setError(null);
+    try {
+      const response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1000,
+          system: `You are a CBT-trained cognitive reframing tool embedded in Stillform, a composure app. Your job is to apply evidence-based Cognitive Behavioral Therapy techniques to help someone interrupt an escalating thought pattern in real time.
+
+When the user describes what they are experiencing:
+1. Identify the primary cognitive distortion present (e.g. catastrophizing, all-or-nothing thinking, mind reading, emotional reasoning, fortune telling, personalization, should statements, mental filter, overgeneralization, labeling, magnification/minimization)
+2. Name it briefly and clearly — one sentence, plain language, no jargon
+3. Apply the appropriate CBT technique to directly address THAT specific distortion:
+   - Catastrophizing → Decatastrophizing: walk through worst/most likely/best case
+   - All-or-nothing → Continuum technique: find the grey
+   - Mind reading → Evidence testing: what do you actually know vs assume
+   - Emotional reasoning → Fact vs feeling separation
+   - Fortune telling → Probability assessment
+   - Personalization → Responsibility pie chart thinking
+   - Should statements → Reframe as preferences not rules
+   - Overgeneralization → Look for exceptions and specifics
+4. End with one grounding statement — something true and present tense
+
+Be direct, warm, and human. No clinical distance. No generic encouragement. Read exactly what they wrote and respond to THAT, not to a hypothetical version of it. Keep it under 200 words. Do not use headers or bullet points — write in flowing paragraphs.
+
+Return your response as JSON: { "distortion": "name of distortion", "reframe": "your full response" }`,
+          messages: [{ role: "user", content: input }]
+        })
+      });
+      const data = await response.json();
+      const text = data.content?.[0]?.text || "";
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      setDistortion(parsed.distortion);
+      setReframe(parsed.reframe);
+    } catch (err) {
+      setError("Something went wrong. Try again.");
+    }
+    setLoading(false);
   };
 
   if (done) return (
@@ -1049,7 +1076,7 @@ function ReframeTool({ onComplete }) {
   return (
     <div>
       <div className="disclaimer">
-        This tool is not therapy. It is an AI-powered pattern interrupt for moments of emotional escalation. If you are in crisis, please contact your local emergency services or a mental health professional.
+        This tool is not therapy. It is an AI-powered CBT pattern interrupt for moments of emotional escalation. If you are in crisis, please contact your local emergency services or a mental health professional.
       </div>
 
       {!reframe ? (
@@ -1068,6 +1095,9 @@ function ReframeTool({ onComplete }) {
             rows={5}
             autoFocus
           />
+          {error && (
+            <p style={{ fontSize: 13, color: "#c04", marginTop: 10 }}>{error}</p>
+          )}
           <div style={{ marginTop: 16 }}>
             <button
               className="btn btn-primary"
@@ -1080,6 +1110,17 @@ function ReframeTool({ onComplete }) {
         </div>
       ) : (
         <div>
+          {distortion && (
+            <div style={{
+              fontSize: 11,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "var(--amber)",
+              marginBottom: 16
+            }}>
+              {distortion}
+            </div>
+          )}
           <div className="reframe-insight" style={{ marginBottom: 24 }}>
             <p style={{ fontSize: 16, lineHeight: 1.8 }}>{reframe}</p>
           </div>
@@ -1089,6 +1130,7 @@ function ReframeTool({ onComplete }) {
             </button>
             <button className="btn btn-ghost" onClick={() => {
               setReframe(null);
+              setDistortion(null);
               setInput("");
             }}>
               Try again with something else
