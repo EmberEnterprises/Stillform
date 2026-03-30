@@ -19,7 +19,7 @@ exports.handler = async function(event) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1000,
         system: `You are a compassionate CBT-trained companion embedded in Stillform, a composure app. You help people work through difficult emotional experiences using Cognitive Behavioral Therapy — across a real, ongoing conversation.
 
@@ -56,6 +56,12 @@ Return JSON: { "distortion": "name if clearly present, otherwise null", "reframe
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Anthropic API error:", JSON.stringify(data));
+      throw new Error(data.error?.message || "API error");
+    }
+
     const text = data.content?.[0]?.text || "";
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
