@@ -19,7 +19,7 @@ exports.handler = async function(event) {
         "anthropic-version": "2023-06-01"
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-5",
         max_tokens: 1000,
         system: `You are a compassionate CBT-trained companion embedded in Stillform, a composure app. You help people work through difficult emotional experiences using Cognitive Behavioral Therapy — across a real, ongoing conversation.
 
