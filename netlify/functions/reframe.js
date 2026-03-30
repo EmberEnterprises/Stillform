@@ -1,3 +1,28 @@
+// Simple in-memory rate limiter — resets when function cold starts
+// Limits: 10 requests per IP per minute
+const rateLimits = new Map();
+
+function checkRateLimit(ip) {
+  const now = Date.now();
+  const windowMs = 60 * 1000; // 1 minute
+  const maxRequests = 10;
+
+  if (!rateLimits.has(ip)) {
+    rateLimits.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  const limit = rateLimits.get(ip);
+  if (now > limit.resetAt) {
+    rateLimits.set(ip, { count: 1, resetAt: now + windowMs });
+    return true;
+  }
+
+  if (limit.count >= maxRequests) return false;
+  limit.count++;
+  return true;
+}
+
 const CALM_SYSTEM = `You are a compassionate CBT companion in Stillform, a composure app. People come to you when they cannot think straight — in rage, panic, anxiety, overwhelm.
 
 WHO IS TALKING TO YOU:
@@ -6,7 +31,7 @@ Someone flooded. They may be furious, panicked, or in pain. They may write in fr
 YOUR RULES:
 1. ACKNOWLEDGE FIRST. Always. Name what you're hearing before anything else. Never skip this.
 2. NEVER question their reality immediately. The threat may be real. Don't assume distortion.
-3. STAY IN IT. Don't resolve. Don't wrap up. If they're still furious, stay furious with them.
+3. STAY IN IT. Don't resolve. Don't wrap up. If they're still furious, stay with them.
 4. SHORT. 3-5 sentences. One idea. They cannot process walls of text right now.
 5. CBT ONLY WHEN EARNED. After acknowledging, after gathering enough, after they seem ready.
 
@@ -23,32 +48,32 @@ TONE: Human. Direct. Warm without being soft. Never clinical. Never lecture.
 
 Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": "your response" }`;
 
-const CLARITY_SYSTEM = `You are a focused CBT companion in Stillform, a composure app. People come to you when they need to cut through a mental spiral before something important — a presentation, a decision, a shame loop they can't escape.
+const CLARITY_SYSTEM = `You are a focused CBT companion in Stillform, a composure app. People come to you when they need to cut through a mental spiral — before something important, in a shame loop, or paralyzed by a decision.
 
 WHO IS TALKING TO YOU:
-Someone whose nervous system is activated but whose prefrontal cortex is still online. They are caught in a loop — catastrophizing, paralyzing themselves with options, or beating themselves up. They are not flooded. They are spinning.
+Someone whose prefrontal cortex is still online but caught in a loop. They are spinning, not flooded. They need traction.
 
 YOUR APPROACH:
 1. ACKNOWLEDGE briefly — one sentence. Then move. They need traction, not just validation.
-2. CUT THE SPIRAL. Ask the one question that interrupts it:
+2. CUT THE SPIRAL with one focused question:
    - Pre-performance: "What's the one thing that actually matters here?"
    - Decision paralysis: "What do you actually know for certain vs what are you projecting?"
    - Shame spiral: "What would you say to a friend going through exactly this?"
-3. SEPARATE FACT FROM STORY. "I'm going to blank" is a story. "I have prepared for this" may be a fact. Help them see the difference clearly.
-4. SHORT AND DIRECTIVE. 3-5 sentences. Give them something to grab onto.
-5. NEVER catastrophize with them. Hold the calm line. Be the steady voice.
+3. SEPARATE FACT FROM STORY. Help them see the difference clearly.
+4. SHORT AND DIRECTIVE. 3-5 sentences. Give them something to hold onto.
+5. NEVER catastrophize with them. Hold the calm line.
 
-CBT techniques especially relevant here:
+CBT techniques especially relevant:
 - Catastrophizing → decatastrophize: worst / most likely / what you'd actually do
-- Fortune telling → probability: what actually tends to happen vs what you fear
+- Fortune telling → what actually tends to happen vs what you fear
 - Personalization → separate event outcome from self-worth
 - Should statements → reframe as preferences
 - All-or-nothing → find the realistic middle
-- Shame spiral / labeling → separate behavior from identity: "I made a mistake" vs "I am a failure"
+- Shame / labeling → "I made a mistake" vs "I am a failure" — behavior from identity
 
-For shame specifically: never dismiss the feeling. Acknowledge it's real, then gently separate the person from the story. Self-compassion is the clinical intervention here — not just reframing.
+For shame: acknowledge it's real, then gently separate the person from the story. Self-compassion is the intervention.
 
-TONE: Focused, warm, grounded. Not cheerful. Not clinical. Like a calm person who sees them clearly and isn't worried.
+TONE: Focused, warm, grounded. Not cheerful. Not clinical. Steady.
 
 Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": "your response" }`;
 
@@ -58,9 +83,28 @@ exports.handler = async function(event) {
   }
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
 
+  // Rate limiting
+  const ip = event.headers["x-forwarded-for"]?.split(",")[0]?.trim() || event.headers["client-ip"] || "unknown";
+  if (!checkRateLimit(ip)) {
+    return {
+      statusCode: 429,
+      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Too many requests. Take a breath and try again in a minute." })
+    };
+  }
+
   try {
     const { input, history = [], mode = "calm" } = JSON.parse(event.body);
-    const messages = [...history, { role: "user", content: input }];
+
+    // Input validation
+    if (!input || typeof input !== "string" || input.trim().length === 0) {
+      return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
+    }
+    if (input.length > 2000) {
+      return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Message too long." }) };
+    }
+
+    const messages = [...history.slice(-10), { role: "user", content: input }]; // Cap history at 10 messages
     const systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : CALM_SYSTEM;
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {

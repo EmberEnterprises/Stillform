@@ -14,8 +14,8 @@ const styles = `
     --amber-dim: #8a6228;
     --amber-glow: rgba(201,147,58,0.12);
     --text: #e8e4dc;
-    --text-dim: #8a8680;
-    --text-muted: #4a4845;
+    --text-dim: #a09c97;
+    --text-muted: #6a6662;
     --green: #4a8c6a;
     --green-glow: rgba(74,140,106,0.12);
   }
@@ -55,7 +55,9 @@ const styles = `
   }
 
   .nav-logo {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.05em;
     font-size: 22px;
     font-weight: 300;
     letter-spacing: 0.12em;
@@ -146,8 +148,8 @@ const styles = `
   }
 
   .home-sub {
-    font-size: 16px;
-    line-height: 1.7;
+    font-size: 17px;
+    line-height: 1.8;
     color: var(--text-dim);
     max-width: 520px;
     margin-bottom: 48px;
@@ -351,7 +353,7 @@ const styles = `
     font-size: 11px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-dim);
     margin-bottom: 12px;
     text-align: center;
   }
@@ -780,7 +782,7 @@ const styles = `
     margin-bottom: 8px;
   }
 
-  .privacy-date { color: var(--text-muted); font-size: 13px; margin-bottom: 40px; }
+  .privacy-date { color: var(--text-dim); font-size: 13px; margin-bottom: 40px; }
 
   .privacy h2 {
     font-size: 16px;
@@ -819,7 +821,7 @@ const styles = `
   .footer-links button {
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: var(--text-dim);
     font-family: 'DM Sans', sans-serif;
     font-size: 12px;
     cursor: pointer;
@@ -829,7 +831,7 @@ const styles = `
 
   .footer-links button:hover { color: var(--amber); }
 
-  .footer-copy { color: var(--text-muted); font-size: 12px; }
+  .footer-copy { color: var(--text-dim); font-size: 12px; }
 
   /* DISCLAIMER */
   .disclaimer {
@@ -839,7 +841,7 @@ const styles = `
     border-radius: 6px;
     padding: 14px 18px;
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--text-dim);
     line-height: 1.6;
     margin-bottom: 32px;
   }
@@ -887,6 +889,56 @@ const TOOLS = [
     time: "Open"
   }
 ];
+
+// Tally feedback form — replace TALLY_FORM_ID with your actual form ID from tally.so
+const TALLY_FORM_ID = "YOUR_FORM_ID";
+
+function FeedbackPrompt({ tool }) {
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
+  return (
+    <div style={{
+      marginTop: 24,
+      padding: "16px 18px",
+      background: "var(--surface)",
+      border: "1px solid var(--border)",
+      borderRadius: 10,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12
+    }}>
+      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
+        Did this help? 60 seconds of feedback makes it better.
+      </div>
+      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+        <a
+          href={`https://tally.so/r/${TALLY_FORM_ID}?tool=${tool}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: "var(--amber-glow)",
+            border: "1px solid var(--amber-dim)",
+            borderRadius: 6,
+            padding: "7px 14px",
+            fontSize: 12,
+            color: "var(--amber)",
+            textDecoration: "none",
+            whiteSpace: "nowrap"
+          }}
+        >
+          Give feedback
+        </a>
+        <button
+          onClick={() => setDismissed(true)}
+          style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 16, cursor: "pointer", padding: "0 4px" }}
+        >
+          ×
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function PhysiologicalSighTool({ onComplete }) {
   const totalReps = 3;
@@ -937,16 +989,17 @@ function PhysiologicalSighTool({ onComplete }) {
       <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
         I'm good
       </button>
+      <FeedbackPrompt tool="sigh" />
     </div>
   );
 
   return (
     <div>
       <div style={{ textAlign: "center", marginBottom: 8 }}>
-        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 4 }}>
           Physiological sigh
         </div>
-        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+        <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
           {rep} of {totalReps}
         </div>
       </div>
@@ -1066,6 +1119,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
           I'm good
         </button>
       </div>
+      <FeedbackPrompt tool="breathe" />
     </div>
   );
 
@@ -1123,7 +1177,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             {phases[phaseIdx].name}
           </div>
           <div className="breath-instruction">{phases[phaseIdx].instruction}</div>
-          <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4, marginBottom: 20 }}>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 20 }}>
             Round {cycle} of {totalCycles}
           </div>
           {!running ? (
@@ -1152,7 +1206,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             }}>
               Keep breathing
             </button>
-            <button className="btn btn-ghost" onClick={onComplete} style={{ color: "var(--text-muted)", fontSize: 13 }}>
+            <button className="btn btn-ghost" onClick={onComplete} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               I'm ready to stop
             </button>
           </div>
@@ -1255,6 +1309,7 @@ function BodyScanTool({ onComplete }) {
       <h2>Scan complete.</h2>
       <p>You've moved awareness and pressure through your body. Notice what has shifted.</p>
       <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
+      <FeedbackPrompt tool="bodyscan" />
     </div>
   );
 
@@ -1268,7 +1323,7 @@ function BodyScanTool({ onComplete }) {
           {i === currentArea && phase === "scan" && (
             <>
               <div className="scan-area-prompt" style={{ marginTop: 8 }}>{a.prompt}</div>
-              <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
+              <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
               <div className="tension-bar">
                 {[1,2,3,4,5].map(n => (
                   <div key={n} className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
@@ -1299,7 +1354,7 @@ function BodyScanTool({ onComplete }) {
               )}
               {(holding || holdCount > 0) && (
                 <div style={{ marginTop: 16 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em" }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.08em" }}>
                     {holding ? `HOLDING — ${holdTarget - holdCount}s remaining` : "HOLD COMPLETE"}
                   </div>
                   <div style={{ background: "var(--border)", borderRadius: 4, height: 4, overflow: "hidden" }}>
@@ -1427,7 +1482,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
             </button>
           </div>
           <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
               While you wait, try one of these
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -1445,7 +1500,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
       <div className="ai-container">
         <div className="ai-messages">
           {messages.length === 0 && (
-            <div style={{ color: "var(--text-muted)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
+            <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
               {openingText}
             </div>
           )}
@@ -1465,7 +1520,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           {loading && (
             <div className="message ai">
               <div className="message-avatar">✦</div>
-              <div className="message-bubble" style={{ color: "var(--text-muted)" }}>
+              <div className="message-bubble" style={{ color: "var(--text-dim)" }}>
                 <span style={{ letterSpacing: "0.2em", animation: "pulse 1.5s ease-in-out infinite" }}>···</span>
               </div>
             </div>
@@ -1474,7 +1529,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
         </div>
         <div className="ai-input-row">
           {loading ? (
-            <div style={{ flex: 1, fontSize: 13, color: "var(--text-muted)", padding: "0 12px", display: "flex", alignItems: "center" }}>
+            <div style={{ flex: 1, fontSize: 13, color: "var(--text-dim)", padding: "0 12px", display: "flex", alignItems: "center" }}>
               Reading what you wrote<span style={{ animation: "pulse 1.5s ease-in-out infinite" }}>...</span>
             </div>
           ) : (
@@ -1487,7 +1542,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
             />
           )}
           {loading ? (
-            <button className="btn-send" style={{ background: "var(--surface2)", color: "var(--text-muted)" }} onClick={() => {
+            <button className="btn-send" style={{ background: "var(--surface2)", color: "var(--text-dim)" }} onClick={() => {
               setLoading(false);
               setError("Cancelled. Your message is saved — tap Retry when you're ready.");
             }}>
@@ -1501,22 +1556,25 @@ function ReframeTool({ onComplete, mode = "calm" }) {
         </div>
       </div>
       {messages.length > 0 && (
-        <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
-          {messages.length > 2 && (
-            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
+        <div style={{ marginTop: 16 }}>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
+            {messages.length > 2 && (
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
+                try { localStorage.removeItem(STORAGE_KEY); } catch {}
+                onComplete();
+              }}>
+                I'm done for now
+              </button>
+            )}
+            <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-dim)" }} onClick={() => {
               try { localStorage.removeItem(STORAGE_KEY); } catch {}
-              onComplete();
+              setMessages([]);
+              setError(null);
             }}>
-              I'm done for now
+              Start fresh
             </button>
-          )}
-          <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={() => {
-            try { localStorage.removeItem(STORAGE_KEY); } catch {}
-            setMessages([]);
-            setError(null);
-          }}>
-            Start fresh
-          </button>
+          </div>
+          {messages.length > 2 && <FeedbackPrompt tool="reframe" />}
         </div>
       )}
     </div>
@@ -1686,7 +1744,7 @@ export default function Stillform() {
 
               {/* Other tools — small, secondary */}
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 16 }}>
                   Other tools
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
@@ -1695,19 +1753,19 @@ export default function Stillform() {
                     onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
                   >
                     <div style={{ fontSize: 14, marginBottom: 2 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Tension release</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Tension release</div>
                   </button>
                   <button
                     style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
                     onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }}
                   >
                     <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Talk it through</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Talk it through</div>
                   </button>
                 </div>
               </div>
 
-              <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, textAlign: "center" }}>
+              <p style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, textAlign: "center" }}>
                 Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
               </p>
             </div>
@@ -1721,7 +1779,7 @@ export default function Stillform() {
               <button className="intervention-back" onClick={() => setScreen("tools")} style={{ marginBottom: 0 }}>
                 ← Back
               </button>
-              <div style={{ fontSize: 13, color: "var(--text-muted)" }}>
+              <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
                 {activeTool.icon} {activeTool.name}
               </div>
               <div style={{ width: 60 }} />
@@ -1743,9 +1801,9 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>9<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>All 5 composure tools</li>
+                  <li>All composure tools</li>
                   <li>Unlimited sessions</li>
-                  <li>AI Consult included</li>
+                  <li>AI-powered Reframe included</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-secondary" style={{ width: "100%" }}>
@@ -1758,9 +1816,9 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>89<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">$7.50/mo · Save 25%</div>
                 <ul className="pricing-features">
-                  <li>All 5 composure tools</li>
+                  <li>All composure tools</li>
                   <li>Unlimited sessions</li>
-                  <li>AI Consult included</li>
+                  <li>AI-powered Reframe included</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
@@ -1768,7 +1826,7 @@ export default function Stillform() {
                 </button>
               </div>
             </div>
-            <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-muted)" }}>
+            <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
               Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy Policy</button>.
             </p>
           </section>
@@ -1786,7 +1844,7 @@ export default function Stillform() {
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
 
             <h2>AI Consult</h2>
-            <p>The AI Consult feature sends text you enter to Anthropic's Claude API to generate responses. Text entered into AI Consult is processed by Anthropic's servers in accordance with <a href="https://www.anthropic.com/privacy" style={{ color: "var(--amber)" }}>Anthropic's privacy policy</a>. Do not enter sensitive personal or medical information into AI Consult.</p>
+            <p>The Reframe feature sends text you enter to Anthropic's Claude API to generate responses. Text entered into Reframe is processed by Anthropic's servers in accordance with <a href="https://www.anthropic.com/privacy" style={{ color: "var(--amber)" }}>Anthropic's privacy policy</a>. Do not enter sensitive personal or medical information.</p>
 
             <h2>Medical Disclaimer</h2>
             <p>Stillform is not medical treatment, therapy, or a crisis intervention service. It is a composure tool. If you are experiencing a mental health crisis, please contact your local emergency services or a mental health professional.</p>
