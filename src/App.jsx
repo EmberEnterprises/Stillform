@@ -1196,7 +1196,7 @@ function ReframeTool({ onComplete }) {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 25000);
+      const timeout = setTimeout(() => controller.abort(), 24000);
 
       const response = await fetch("/.netlify/functions/reframe", {
         method: "POST",
