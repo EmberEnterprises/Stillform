@@ -849,6 +849,13 @@ const TOOLS = [
     time: "8 min"
   },
   {
+    id: "sigh",
+    icon: "◌",
+    name: "Clear Your Head",
+    desc: "Physiological sigh to reset, then talk through what's spiraling.",
+    time: "2 min"
+  },
+  {
     id: "scan",
     icon: "◉",
     name: "Body Scan",
@@ -864,7 +871,109 @@ const TOOLS = [
   }
 ];
 
-function BreatheGroundTool({ onComplete }) {
+function PhysiologicalSighTool({ onComplete }) {
+  const totalReps = 3;
+  const [rep, setRep] = useState(1);
+  const [phase, setPhase] = useState("inhale1"); // inhale1 | inhale2 | exhale | rest | done
+  const [count, setCount] = useState(2);
+  const [running, setRunning] = useState(false);
+
+  const phases = {
+    inhale1: { label: "Inhale", sub: "Breathe in through your nose.", next: "inhale2", duration: 2 },
+    inhale2: { label: "Inhale again", sub: "One more short breath in — top it off.", next: "exhale", duration: 2 },
+    exhale: { label: "Exhale slowly", sub: "Long breath out through your mouth. Empty completely.", next: "rest", duration: 6 },
+    rest: { label: "Rest", sub: "Let your body settle.", next: null, duration: 2 }
+  };
+
+  useEffect(() => {
+    if (!running) return;
+    if (count === 0) {
+      const current = phases[phase];
+      if (current.next) {
+        setPhase(current.next);
+        setCount(phases[current.next].duration);
+      } else {
+        // Completed a rep
+        if (rep < totalReps) {
+          setRep(r => r + 1);
+          setPhase("inhale1");
+          setCount(phases.inhale1.duration);
+        } else {
+          setRunning(false);
+          setPhase("done");
+        }
+      }
+    } else {
+      const t = setTimeout(() => setCount(c => c - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [count, running, phase, rep]);
+
+  if (phase === "done") return (
+    <div className="complete">
+      <div className="complete-icon">✓</div>
+      <h2>Reset complete.</h2>
+      <p style={{ marginBottom: 24 }}>Three physiological sighs. Your nervous system has had a reset. Your head is clearer than it was 60 seconds ago.</p>
+      <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
+        Talk through what's happening →
+      </button>
+      <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
+        I'm good
+      </button>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ textAlign: "center", marginBottom: 8 }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+          Physiological sigh
+        </div>
+        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>
+          {rep} of {totalReps}
+        </div>
+      </div>
+
+      <div className="breath-container">
+        <div className="breath-circle-wrap">
+          <div className={`breath-circle ${phase === "exhale" ? "contract" : phase === "rest" ? "hold" : "expand"}`}>
+            <div className="breath-inner">
+              <span className="breath-count">{count}</span>
+            </div>
+          </div>
+        </div>
+
+        {running && phase !== "done" ? (
+          <>
+            <div className="breath-phase" style={{ fontSize: 22, marginBottom: 6 }}>
+              {phases[phase]?.label}
+            </div>
+            <div className="breath-instruction">{phases[phase]?.sub}</div>
+            <div style={{ height: 32 }} />
+          </>
+        ) : (
+          <>
+            <div className="breath-phase" style={{ fontSize: 18, marginBottom: 8 }}>
+              Double inhale, long exhale.
+            </div>
+            <div className="breath-instruction" style={{ marginBottom: 24 }}>
+              The fastest way to reset your nervous system. Three times.
+            </div>
+            <button
+              className="btn btn-primary"
+              style={{ fontSize: 16, padding: "14px 40px" }}
+              onClick={() => { setRunning(true); }}
+            >
+              Begin
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BreatheGroundTool({ onComplete, pathway }) {
   const [phase, setPhase] = useState("breathe"); // breathe | ground | done
 
   // --- BREATHE ---
@@ -930,7 +1039,7 @@ function BreatheGroundTool({ onComplete }) {
       <h2>You're here.</h2>
       <p>Nervous system regulated. Senses anchored. You're back in the present.</p>
       <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
-        <button className="btn btn-primary" onClick={() => onComplete("reframe")}>
+        <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
           Talk it through →
         </button>
         <button className="btn btn-ghost" onClick={onComplete}>
@@ -1189,7 +1298,11 @@ function BodyScanTool({ onComplete }) {
   );
 }
 
-function ReframeTool({ onComplete }) {
+function ReframeTool({ onComplete, mode = "calm" }) {
+  const isClarity = mode === "clarity";
+  const openingText = isClarity
+    ? "What's spiraling? Say it plainly — the presentation, the decision, the thing you keep telling yourself. Don't organize it. Just say it."
+    : "Say what's happening. Don't filter it. Don't make it make sense. Just say it — whatever is in your head right now. The AI will read exactly what you wrote.";
   const STORAGE_KEY = "stillform_reframe_session";
 
   const [messages, setMessages] = useState(() => {
@@ -1240,6 +1353,7 @@ function ReframeTool({ onComplete }) {
         signal: controller.signal,
         body: JSON.stringify({
           input: textToSend,
+          mode,
           history: prevMessages.map(m => ({
             role: m.role === "ai" ? "assistant" : "user",
             content: m.text
@@ -1309,7 +1423,7 @@ function ReframeTool({ onComplete }) {
         <div className="ai-messages">
           {messages.length === 0 && (
             <div style={{ color: "var(--text-muted)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
-              Say what's happening. Don't filter it. Don't make it make sense. Just say it — whatever is in your head right now. The AI will read exactly what you wrote.
+              {openingText}
             </div>
           )}
           {messages.map((msg, i) => (
@@ -1389,10 +1503,20 @@ function ReframeTool({ onComplete }) {
 export default function Stillform() {
   const [screen, setScreen] = useState("home");
   const [activeTool, setActiveTool] = useState(null);
+  const [pathway, setPathway] = useState(null); // "calm" | "clarity"
 
   const startTool = (tool) => {
     setActiveTool(tool);
     setScreen("tool");
+  };
+
+  const startPathway = (p) => {
+    setPathway(p);
+    if (p === "calm") {
+      startTool(TOOLS.find(t => t.id === "breathe"));
+    } else {
+      startTool(TOOLS.find(t => t.id === "sigh"));
+    }
   };
 
   const renderTool = () => {
@@ -1400,13 +1524,20 @@ export default function Stillform() {
       if (redirectTo) {
         const tool = TOOLS.find(t => t.id === redirectTo);
         if (tool) { startTool(tool); return; }
+        // Special case: reframe with mode
+        if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity") {
+          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo === "reframe-calm" ? "calm" : "clarity" });
+          setScreen("tool");
+          return;
+        }
       }
       setScreen("tools");
     }};
     switch (activeTool?.id) {
-      case "breathe": return <BreatheGroundTool {...props} />;
+      case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
+      case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : "calm")} />;
       default: return null;
     }
   };
@@ -1469,88 +1600,92 @@ export default function Stillform() {
           </section>
         )}
 
-        {/* TOOLS */}
+        {/* TOOLS — two pathways, not a menu */}
         {screen === "tools" && (
           <section className="tools">
-            <div style={{ maxWidth: 600, margin: "0 auto", padding: "48px 24px 24px" }}>
+            <div style={{ maxWidth: 560, margin: "0 auto", padding: "48px 24px 24px" }}>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 300, lineHeight: 1.2, color: "var(--text)", marginBottom: 8 }}>
+                What's happening right now?
+              </h2>
+              <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 36 }}>
+                One tap. The right tool finds you.
+              </p>
 
-              {/* Primary directive */}
-              <div style={{ marginBottom: 40 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-                  Right now
-                </div>
-                <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, lineHeight: 1.2, color: "var(--text)", marginBottom: 16 }}>
-                  Start with your breath.
-                </h2>
-                <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
-                  When you can't think straight, your body got there first. Regulation before everything else — then we'll work through the rest.
-                </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
+                {/* Path 1 — overwhelmed */}
                 <button
-                  className="btn btn-primary"
-                  style={{ fontSize: 16, padding: "16px 36px", width: "100%", marginBottom: 12 }}
-                  onClick={() => startTool(TOOLS.find(t => t.id === "breathe"))}
+                  onClick={() => startPathway("calm")}
+                  style={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 14,
+                    padding: "22px 24px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    transition: "border-color 0.2s"
+                  }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
                 >
-                  ◎ Begin breathing
+                  <div style={{ fontSize: 22, marginBottom: 10 }}>◎</div>
+                  <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>
+                    I can't calm down
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Rage, panic, anxiety, overwhelm — body first, everything else after.
+                  </div>
                 </button>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center" }}>
-                  Nervous system first. Everything else after.
-                </p>
+
+                {/* Path 2 — spiraling thoughts */}
+                <button
+                  onClick={() => startPathway("clarity")}
+                  style={{
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 14,
+                    padding: "22px 24px",
+                    textAlign: "left",
+                    cursor: "pointer",
+                    transition: "border-color 0.2s"
+                  }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 22, marginBottom: 10 }}>✦</div>
+                  <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>
+                    I need to think clearly
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Spiraling thoughts, big moment coming, shame loop, can't decide — cut the noise.
+                  </div>
+                </button>
               </div>
 
-              {/* Secondary tools — smaller, clearly secondary */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 28, marginBottom: 28 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-                  Or if you need something else
+              {/* Other tools — small, secondary */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                  Other tools
                 </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", gap: 10 }}>
                   <button
-                    style={{
-                      background: "var(--surface)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 10,
-                      padding: "14px 18px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      color: "var(--text)"
-                    }}
+                    style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
                     onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
                   >
-                    <span style={{ fontSize: 20, color: "var(--amber)" }}>◉</span>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>Body Scan</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate and release tension with acupressure</div>
-                    </div>
+                    <div style={{ fontSize: 14, marginBottom: 2 }}>◉ Body Scan</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Tension release</div>
                   </button>
                   <button
-                    style={{
-                      background: "var(--surface)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 10,
-                      padding: "14px 18px",
-                      textAlign: "left",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 14,
-                      color: "var(--text)"
-                    }}
-                    onClick={() => startTool(TOOLS.find(t => t.id === "reframe"))}
+                    style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                    onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }}
                   >
-                    <span style={{ fontSize: 20, color: "var(--amber)" }}>✦</span>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>Reframe</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Talk it through with AI — CBT applied to exactly what you say</div>
-                    </div>
+                    <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Reframe</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Talk it through</div>
                   </button>
                 </div>
               </div>
 
-              {/* Disclaimer — at the bottom, small */}
               <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, textAlign: "center" }}>
-                Stillform is not therapy or crisis intervention. If you are in crisis, contact your local emergency services or a mental health professional.
+                Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
               </p>
             </div>
           </section>
