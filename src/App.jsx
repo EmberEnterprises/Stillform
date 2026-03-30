@@ -303,17 +303,31 @@ const styles = `
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,147,58,0.15) 0%, rgba(201,147,58,0.04) 60%, transparent 100%);
+    background: radial-gradient(circle, rgba(201,147,58,0.12) 0%, rgba(201,147,58,0.03) 60%, transparent 100%);
     border: 1px solid var(--amber-dim);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 4s ease-in-out;
+    transition: transform var(--breath-duration, 4s) ease-in-out, box-shadow var(--breath-duration, 4s) ease-in-out;
   }
 
-  .breath-circle.expand { transform: scale(1.3); }
-  .breath-circle.hold { transform: scale(1.3); }
-  .breath-circle.contract { transform: scale(1); }
+  .breath-circle.expand {
+    transform: scale(1.35);
+    box-shadow: 0 0 60px rgba(201,147,58,0.15), 0 0 120px rgba(201,147,58,0.06);
+  }
+  .breath-circle.hold {
+    transform: scale(1.35);
+    box-shadow: 0 0 40px rgba(201,147,58,0.1), 0 0 80px rgba(201,147,58,0.04);
+  }
+  .breath-circle.contract {
+    transform: scale(1);
+    box-shadow: 0 0 20px rgba(201,147,58,0.05);
+  }
+
+  @keyframes breathe-ring {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.08; transform: scale(1.5); }
+  }
 
   .breath-inner {
     width: 100px;
@@ -334,21 +348,24 @@ const styles = `
   }
 
   .breath-phase {
-    font-size: 13px;
-    letter-spacing: 0.14em;
+    font-size: 11px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: var(--text-dim);
-    margin-bottom: 8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
     text-align: center;
   }
 
   .breath-instruction {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 24px;
+    font-size: 28px;
     font-style: italic;
-    color: var(--amber);
+    font-weight: 300;
+    color: var(--text);
     text-align: center;
-    margin-bottom: 32px;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    transition: opacity 0.5s ease;
   }
 
   /* GROUNDING */
@@ -879,10 +896,10 @@ function PhysiologicalSighTool({ onComplete }) {
   const [running, setRunning] = useState(false);
 
   const phases = {
-    inhale1: { label: "Inhale", sub: "Breathe in through your nose.", next: "inhale2", duration: 2 },
-    inhale2: { label: "Inhale again", sub: "One more short breath in — top it off.", next: "exhale", duration: 2 },
-    exhale: { label: "Exhale slowly", sub: "Long breath out through your mouth. Empty completely.", next: "rest", duration: 6 },
-    rest: { label: "Rest", sub: "Let your body settle.", next: null, duration: 2 }
+    inhale1: { label: "Inhale", sub: "In through your nose.", next: "inhale2", duration: 2 },
+    inhale2: { label: "Inhale again", sub: "One more. Top it off.", next: "exhale", duration: 2 },
+    exhale: { label: "Exhale slowly", sub: "Out through your mouth. Slow. All of it.", next: "rest", duration: 6 },
+    rest: { label: "Rest", sub: "Rest.", next: null, duration: 2 }
   };
 
   useEffect(() => {
@@ -936,7 +953,10 @@ function PhysiologicalSighTool({ onComplete }) {
 
       <div className="breath-container">
         <div className="breath-circle-wrap">
-          <div className={`breath-circle ${phase === "exhale" ? "contract" : phase === "rest" ? "hold" : "expand"}`}>
+          <div
+            className={`breath-circle ${phase === "exhale" ? "contract" : phase === "rest" ? "hold" : "expand"}`}
+            style={{ '--breath-duration': `${phases[phase]?.duration || 2}s` }}
+          >
             <div className="breath-inner">
               <span className="breath-count">{count}</span>
             </div>
@@ -979,10 +999,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
   // --- BREATHE ---
   // 4-4-8-2: longer exhale activates parasympathetic faster — clinically more effective for acute stress/rage
   const phases = [
-    { name: "Inhale", duration: 4, instruction: "Breathe in through your nose." },
-    { name: "Hold", duration: 4, instruction: "Hold gently." },
-    { name: "Exhale", duration: 8, instruction: "Breathe out slowly through your mouth." },
-    { name: "Rest", duration: 2, instruction: "Rest here." }
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 4, instruction: "Hold." },
+    { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
+    { name: "Rest", duration: 2, instruction: "Rest." }
   ];
   const totalCycles = 3; // 3 cycles then check in — don't force more
   const [phaseIdx, setPhaseIdx] = useState(0);
@@ -1090,7 +1110,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
       {!breatheDone ? (
         <div className="breath-container">
           <div className="breath-circle-wrap">
-            <div className={circleClass}>
+            <div
+              className={circleClass}
+              style={{ '--breath-duration': `${phases[phaseIdx].duration}s` }}
+            >
               <div className="breath-inner">
                 <span className="breath-count">{count}</span>
               </div>
@@ -1457,7 +1480,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           ) : (
             <input
               className="ai-input"
-              placeholder="Say it. Whatever it is."
+              placeholder="Say what's spinning..."
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
@@ -1574,7 +1597,7 @@ export default function Stillform() {
               can't <em>think straight.</em>
             </h1>
             <p className="home-sub">
-              Stillform delivers fast, structured interventions for moments of stress, panic, and overwhelm. Not meditation. Not therapy. Stabilization — right now.
+              Not meditation. Not therapy. When you're overwhelmed, anxious, or spiraling — this brings you back.
             </p>
             <div className="home-cta">
               <button className="btn btn-primary" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("tools")}>
@@ -1608,7 +1631,7 @@ export default function Stillform() {
                 What's happening right now?
               </h2>
               <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 36 }}>
-                One tap. The right tool finds you.
+                No decisions. Just tell us what's happening.
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
@@ -1632,7 +1655,7 @@ export default function Stillform() {
                     I can't calm down
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Rage, panic, anxiety, overwhelm — body first, everything else after.
+                    Your body is flooded. Your mind is offline. Start here.
                   </div>
                 </button>
 
@@ -1656,7 +1679,7 @@ export default function Stillform() {
                     I need to think clearly
                   </div>
                   <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Spiraling thoughts, big moment coming, shame loop, can't decide — cut the noise.
+                    Stuck in your head. Spiraling. Big moment coming. Cut through it.
                   </div>
                 </button>
               </div>
