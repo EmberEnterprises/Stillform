@@ -1234,6 +1234,41 @@ function ReframeTool({ onComplete }) {
       <div className="disclaimer">
         This is not therapy. It is an AI-powered CBT tool. If you are in crisis, please contact your local emergency services or a mental health professional.
       </div>
+
+      {/* Error banner — always visible above input, never buried in scroll */}
+      {error && (
+        <div style={{
+          background: "rgba(200,0,50,0.08)",
+          border: "1px solid rgba(200,0,50,0.25)",
+          borderRadius: 10,
+          padding: "14px 16px",
+          marginBottom: 12
+        }}>
+          <div style={{ fontSize: 14, color: "#e05", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
+            <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => handleSend(lastInput)}>
+              ↺ Retry
+            </button>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setError(null)}>
+              Dismiss
+            </button>
+          </div>
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
+              While you wait, try one of these
+            </div>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("breathe")}>
+                ◎ Breathe & Ground
+              </button>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("scan")}>
+                ◉ Body Scan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="ai-container">
         <div className="ai-messages">
           {messages.length === 0 && (
@@ -1262,58 +1297,34 @@ function ReframeTool({ onComplete }) {
               </div>
             </div>
           )}
-          {error && (
-            <div style={{
-              background: "rgba(200,0,50,0.08)",
-              border: "1px solid rgba(200,0,50,0.25)",
-              borderRadius: 10,
-              padding: "14px 16px",
-              margin: "8px 0"
-            }}>
-              <div style={{ fontSize: 14, color: "#e05", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
-              <button
-                className="btn btn-primary"
-                style={{ fontSize: 14, padding: "10px 20px", marginBottom: 16 }}
-                onClick={() => handleSend(lastInput)}
-              >
-                ↺ Retry
-              </button>
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
-                  While you wait, try one of these
-                </div>
-                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 13 }}
-                    onClick={() => onComplete("breathe")}
-                  >
-                    ◎ Breathe & Ground
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 13 }}
-                    onClick={() => onComplete("scan")}
-                  >
-                    ◉ Body Scan
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           <div ref={messagesEndRef} />
         </div>
         <div className="ai-input-row">
-          <input
-            className="ai-input"
-            placeholder="Say what's happening..."
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && handleSend()}
-          />
-          <button className="btn-send" onClick={() => handleSend()} disabled={!input.trim() || loading}>
-            Send
-          </button>
+          {loading ? (
+            <div style={{ flex: 1, fontSize: 13, color: "var(--text-muted)", padding: "0 12px", display: "flex", alignItems: "center" }}>
+              Reading what you wrote<span style={{ animation: "pulse 1.5s ease-in-out infinite" }}>...</span>
+            </div>
+          ) : (
+            <input
+              className="ai-input"
+              placeholder="Say what's happening..."
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && handleSend()}
+            />
+          )}
+          {loading ? (
+            <button className="btn-send" style={{ background: "var(--surface2)", color: "var(--text-muted)" }} onClick={() => {
+              setLoading(false);
+              setError("Cancelled. Your message is saved — tap Retry when you're ready.");
+            }}>
+              Cancel
+            </button>
+          ) : (
+            <button className="btn-send" onClick={() => handleSend()} disabled={!input.trim()}>
+              Send
+            </button>
+          )}
         </div>
       </div>
       {messages.length > 0 && (
@@ -1329,6 +1340,7 @@ function ReframeTool({ onComplete }) {
           <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={() => {
             try { localStorage.removeItem(STORAGE_KEY); } catch {}
             setMessages([]);
+            setError(null);
           }}>
             Start fresh
           </button>
