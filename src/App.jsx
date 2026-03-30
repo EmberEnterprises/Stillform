@@ -1254,11 +1254,32 @@ function ReframeTool({ onComplete }) {
               <div style={{ fontSize: 14, color: "#e05", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
               <button
                 className="btn btn-primary"
-                style={{ fontSize: 14, padding: "10px 20px" }}
+                style={{ fontSize: 14, padding: "10px 20px", marginBottom: 16 }}
                 onClick={() => handleSend(lastInput)}
               >
                 ↺ Retry
               </button>
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
+                  While you wait, try one of these
+                </div>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 13 }}
+                    onClick={() => onComplete("breathe")}
+                  >
+                    ◎ Breathe & Ground
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 13 }}
+                    onClick={() => onComplete("scan")}
+                  >
+                    ◉ Body Scan
+                  </button>
+                </div>
+              </div>
             </div>
           )}
           <div ref={messagesEndRef} />
@@ -1295,7 +1316,13 @@ export default function Stillform() {
   };
 
   const renderTool = () => {
-    const props = { onComplete: () => setScreen("tools") };
+    const props = { onComplete: (redirectTo) => {
+      if (redirectTo) {
+        const tool = TOOLS.find(t => t.id === redirectTo);
+        if (tool) { startTool(tool); return; }
+      }
+      setScreen("tools");
+    }};
     switch (activeTool?.id) {
       case "breathe": return <BreatheGroundTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
