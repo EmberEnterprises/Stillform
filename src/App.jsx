@@ -569,6 +569,11 @@ const styles = `
   .btn-send:hover { background: #d9a34a; }
   .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
   /* BODY SCAN */
   .scan-body {
     display: flex;
@@ -1191,7 +1196,7 @@ function ReframeTool({ onComplete }) {
 
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 30000);
+      const timeout = setTimeout(() => controller.abort(), 25000);
 
       const response = await fetch("/.netlify/functions/reframe", {
         method: "POST",
@@ -1253,7 +1258,7 @@ function ReframeTool({ onComplete }) {
             <div className="message ai">
               <div className="message-avatar">✦</div>
               <div className="message-bubble" style={{ color: "var(--text-muted)" }}>
-                <span style={{ letterSpacing: "0.2em" }}>···</span>
+                <span style={{ letterSpacing: "0.2em", animation: "pulse 1.5s ease-in-out infinite" }}>···</span>
               </div>
             </div>
           )}
