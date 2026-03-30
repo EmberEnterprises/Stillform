@@ -1149,11 +1149,25 @@ function BodyScanTool({ onComplete }) {
 }
 
 function ReframeTool({ onComplete }) {
-  const [messages, setMessages] = useState([]);
+  const STORAGE_KEY = "stillform_reframe_session";
+
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Persist every message change to localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch {}
+  }, [messages]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -1297,10 +1311,23 @@ function ReframeTool({ onComplete }) {
           </button>
         </div>
       </div>
-      {messages.length > 2 && (
-        <button className="btn btn-ghost" style={{ marginTop: 16, fontSize: 13 }} onClick={onComplete}>
-          I'm done for now
-        </button>
+      {messages.length > 0 && (
+        <div style={{ marginTop: 16, display: "flex", gap: 10, flexWrap: "wrap" }}>
+          {messages.length > 2 && (
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
+              try { localStorage.removeItem(STORAGE_KEY); } catch {}
+              onComplete();
+            }}>
+              I'm done for now
+            </button>
+          )}
+          <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={() => {
+            try { localStorage.removeItem(STORAGE_KEY); } catch {}
+            setMessages([]);
+          }}>
+            Start fresh
+          </button>
+        </div>
       )}
     </div>
   );
