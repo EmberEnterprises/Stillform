@@ -1306,7 +1306,7 @@ function ReframeTool({ onComplete }) {
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === "Enter" && handleSend()}
           />
-          <button className="btn-send" onClick={handleSend} disabled={!input.trim() || loading}>
+          <button className="btn-send" onClick={() => handleSend()} disabled={!input.trim() || loading}>
             Send
           </button>
         </div>
