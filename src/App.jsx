@@ -973,6 +973,26 @@ const styles = `
     line-height: 1.6;
     margin-bottom: 32px;
   }
+
+  /* Screen-light mode overlay */
+  .screenlight-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.92);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+  .screenlight-overlay * { pointer-events: auto; }
+  .screenlight-active .breath-circle { opacity: 0.3; }
+  .screenlight-active .panic-phase { font-size: 24px; }
+  .screenlight-active .panic-counter { opacity: 0.2; }
+
+  /* Reduced motion */
+  .reduced-motion .breath-circle { transition: none !important; animation: none !important; }
+  .reduced-motion .scan-area { transition: none !important; }
 `;
 
 const TOOLS = [
@@ -1094,6 +1114,54 @@ function FeedbackPrompt({ tool }) {
       </div>
     </div>
   );
+}
+
+// Quick post-session journal note
+function SessionNote() {
+  const [note, setNote] = useState("");
+  const [saved, setSaved] = useState(false);
+
+  const save = () => {
+    if (!note.trim()) return;
+    try {
+      const notes = JSON.parse(localStorage.getItem("stillform_notes") || "[]");
+      notes.push({ timestamp: new Date().toISOString(), text: note.trim() });
+      localStorage.setItem("stillform_notes", JSON.stringify(notes));
+    } catch {}
+    setSaved(true);
+  };
+
+  if (saved) return <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12 }}>✓ Noted.</div>;
+
+  return (
+    <div style={{ marginTop: 16 }}>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          style={{
+            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6,
+            padding: "8px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
+          }}
+          placeholder="What triggered this? (optional)"
+          value={note}
+          onChange={e => setNote(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && save()}
+        />
+        {note.trim() && (
+          <button onClick={save} style={{
+            background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 6,
+            padding: "8px 12px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+          }}>Save</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Check display preferences
+function useDisplayPrefs() {
+  const screenLight = (() => { try { return localStorage.getItem("stillform_screenlight") === "on"; } catch { return false; } })();
+  const reducedMotion = (() => { try { return localStorage.getItem("stillform_reducedmotion") === "on"; } catch { return false; } })();
+  return { screenLight, reducedMotion };
 }
 
 function PhysiologicalSighTool({ onComplete }) {
@@ -2862,7 +2930,9 @@ function PanicMode({ onComplete }) {
 export default function Stillform() {
   const [screen, setScreen] = useState("home");
   const [activeTool, setActiveTool] = useState(null);
-  const [pathway, setPathway] = useState(null); // "calm" | "clarity"
+  const [pathway, setPathway] = useState(null);
+  const { screenLight, reducedMotion } = useDisplayPrefs();
+  const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
   const startTool = (tool) => {
     setActiveTool(tool);
@@ -2909,7 +2979,7 @@ export default function Stillform() {
   return (
     <>
       <style>{styles}</style>
-      <div className="app">
+      <div className={appClasses}>
         {/* NAV */}
         <nav className="nav">
           <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => setScreen("home")}>
