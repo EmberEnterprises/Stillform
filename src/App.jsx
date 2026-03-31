@@ -1636,6 +1636,20 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
+  const [savedIds, setSavedIds] = useState(new Set());
+
+  const saveReframe = (msg, idx) => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+      saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString() });
+      localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
+      setSavedIds(prev => new Set([...prev, idx]));
+    } catch {}
+  };
+
+  const getSavedReframes = () => {
+    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; }
+  };
 
   // Persist every message change to localStorage
   useEffect(() => {
@@ -1743,9 +1757,22 @@ function ReframeTool({ onComplete, mode = "calm" }) {
       <div className="ai-container">
         <div className="ai-messages">
           {messages.length === 0 && (
-            <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
-              {openingText}
-            </div>
+            <>
+              {getSavedReframes().length > 0 && (
+                <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>What helped before</div>
+                  {getSavedReframes().slice(-2).map((r, i) => (
+                    <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: i < 1 ? 8 : 0, paddingBottom: i < 1 ? 8 : 0, borderBottom: i < 1 ? "1px solid var(--border)" : "none" }}>
+                      {r.distortion && <span style={{ color: "var(--amber)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.distortion} — </span>}
+                      {r.text.length > 120 ? r.text.slice(0, 120) + "..." : r.text}
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
+                {openingText}
+              </div>
+            </>
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`message ${msg.role}`}>
@@ -1757,6 +1784,16 @@ function ReframeTool({ onComplete, mode = "calm" }) {
                   </div>
                 )}
                 {msg.text}
+                {msg.role === "ai" && (
+                  <button onClick={() => saveReframe(msg, i)} style={{
+                    display: "block", marginTop: 8, background: "none", border: "none",
+                    fontSize: 11, color: savedIds.has(i) ? "var(--green)" : "var(--text-muted)",
+                    cursor: savedIds.has(i) ? "default" : "pointer", padding: 0,
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    {savedIds.has(i) ? "✓ Saved" : "Save this"}
+                  </button>
+                )}
               </div>
             </div>
           ))}
