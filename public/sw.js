@@ -1,4 +1,4 @@
-const CACHE_NAME = 'stillform-v1';
+const CACHE_NAME = 'stillform-v2';
 const OFFLINE_URLS = [
   '/',
   '/index.html'
@@ -26,36 +26,41 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch — serve from cache first for app shell, network first for API
+// Fetch — network first for HTML (always get latest), cache first for assets
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Never cache API calls (reframe function)
+  // Never cache API calls
   if (url.pathname.startsWith('/.netlify/functions/')) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Cache-first for app assets
+  // Network-first for HTML pages — always get latest deploy
+  if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(event.request).then((response) => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
+        return response;
+      }).catch(() => caches.match(event.request) || caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Cache-first for static assets (JS, CSS, fonts)
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request).then((response) => {
-        // Cache successful responses
         if (response.ok && response.type === 'basic') {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         }
         return response;
-      }).catch(() => {
-        // Offline fallback — serve index for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-        return new Response('Offline', { status: 503 });
-      });
+      }).catch(() => new Response('Offline', { status: 503 }));
     })
   );
 });

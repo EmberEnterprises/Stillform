@@ -3296,29 +3296,29 @@ export default function Stillform() {
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need help right now</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing starts immediately.</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>Emergency reset</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>I can't calm down</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing + grounding. 2 minutes.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need to think clearly</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>Get sharp</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Cut noise. Restore clarity.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("hype"); }} style={{
                         width: "100%", background: "var(--surface)", border: "none",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need to lock in</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Pre-performance focus.</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>Lock in</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Composure before the moment.</div>
                       </button>
                     </div>
                     <button onClick={() => { completeOnboarding(); setScreen("explore"); }} style={{
@@ -3417,32 +3417,32 @@ export default function Stillform() {
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need help right now</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing starts immediately. Free.</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>Emergency reset</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
                   </button>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>I can't calm down</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing + grounding. 2 minutes.</div>
                   </button>
                   <button onClick={() => startPathway("clarity")} style={{
                     width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need to think clearly</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>Get sharp</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Cut noise. Restore clarity.</div>
                   </button>
                   <button onClick={() => startPathway("hype")} style={{
                     width: "100%", background: "var(--surface)", border: "none",
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need to lock in</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Pre-performance focus + confidence.</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>Lock in</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Composure before the moment.</div>
                   </button>
                 </div>
               </div>
@@ -3451,7 +3451,7 @@ export default function Stillform() {
               {/* FOUR LEVELS — what you're building toward */}
               <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16, textAlign: "center" }}>
-                  Composure is a skill. This is how it grows.
+                  The system.
                 </div>
                 {[
                   { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work." },
@@ -3521,10 +3521,10 @@ export default function Stillform() {
                 onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
               >
                 <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                  I can't calm down
+                  Regulate
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                  Body flooded. Mind offline. Start here.
+                  Nervous system override. Breathing + grounding.
                 </div>
               </button>
 
@@ -3539,10 +3539,10 @@ export default function Stillform() {
                 onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
               >
                 <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                  I need to think clearly
+                  Get sharp
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                  Spiraling. Big moment coming. Cut through it.
+                  Cut through noise. Restore clarity.
                 </div>
               </button>
 
