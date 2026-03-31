@@ -1910,8 +1910,22 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     setLoading(false);
   };
 
+  const modeConfig = {
+    calm: { icon: "◎", title: "Reframe", subtitle: "Say what you're feeling. The AI reads exactly what you wrote.", color: "var(--amber)" },
+    clarity: { icon: "✦", title: "Get Sharp", subtitle: "Name the thought loop. Cut through it.", color: "#7aadcf" },
+    hype: { icon: "◌", title: "Lock In", subtitle: "What are you about to walk into? Say it.", color: "#c9793a" }
+  };
+  const mc = modeConfig[mode] || modeConfig.calm;
+
   return (
     <div>
+      {/* MODE HEADER — visually distinct per mode */}
+      <div style={{ textAlign: "center", marginBottom: 16, padding: "16px 0 12px", borderBottom: `1px solid ${mc.color}33` }}>
+        <div style={{ fontSize: 28, marginBottom: 6, color: mc.color }}>{mc.icon}</div>
+        <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, color: mc.color, marginBottom: 4 }}>{mc.title}</div>
+        <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{mc.subtitle}</div>
+      </div>
+
       <div className="disclaimer">
         This is not therapy. It is an AI-powered CBT tool. If you are in crisis, see our Crisis Resources for international helplines.
       </div>
@@ -1972,7 +1986,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`message ${msg.role}`}>
-              <div className="message-avatar">{msg.role === "ai" ? "✦" : "◎"}</div>
+              <div className="message-avatar">{msg.role === "ai" ? mc.icon : "●"}</div>
               <div className="message-bubble">
                 {msg.distortion && (
                   <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
@@ -2031,7 +2045,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           ) : (
             <input
               className="ai-input"
-              placeholder={speech.listening ? "Listening..." : "Say what's spinning..."}
+              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "Say what's happening..."}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
