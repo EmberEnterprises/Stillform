@@ -1337,52 +1337,58 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Jaw & Face",
       prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes.",
-      point: "GV24.5 — Third Eye Point",
+      pointEffect: "Calm racing thoughts",
+      pointName: "GV24.5 — Third Eye Point",
       pointLocation: "Place two fingers between your eyebrows, just above the bridge of your nose.",
       pointInstruction: "Apply firm, steady pressure. Close your eyes. Hold.",
       holdSeconds: 60,
-      benefit: "Calms racing thoughts and reduces tension headaches."
+      benefit: "Reduces tension headaches and quiets mental noise."
     },
     {
       name: "Shoulders & Neck",
       prompt: "Notice if your shoulders are raised. Let them drop completely.",
-      point: "GB21 — Shoulder Well",
+      pointEffect: "Release shoulder tension",
+      pointName: "GB21 — Shoulder Well",
       pointLocation: "Find the highest point of your shoulder muscle, halfway between your neck and the edge of your shoulder.",
-      pointInstruction: "Press firmly with your thumb or two fingers. You may feel a tender ache — that's the point. Hold.",
+      pointInstruction: "Press firmly with your thumb or two fingers. You may feel a tender ache — that's the right spot. Hold.",
       holdSeconds: 45,
-      benefit: "Releases shoulder and neck tension. A primary stress relief point."
+      benefit: "Primary stress relief point. Releases held tension."
     },
     {
       name: "Chest & Breath",
       prompt: "Is your breath shallow? Take one slow, full breath down to your belly.",
-      point: "CV17 — Sea of Tranquility",
-      pointLocation: "Find the center of your sternum (breastbone), level with your heart. Place your flat palm here.",
+      pointEffect: "Ease emotional distress",
+      pointName: "CV17 — Sea of Tranquility",
+      pointLocation: "Find the center of your breastbone, level with your heart. Place your flat palm here.",
       pointInstruction: "Apply gentle but firm pressure with your palm. Breathe into it. Hold.",
       holdSeconds: 60,
-      benefit: "Eases emotional distress and regulates the breath."
+      benefit: "Eases emotional heaviness and regulates the breath."
     },
     {
       name: "Hands & Arms",
       prompt: "Are your hands gripping anything? Open them fully. Let your arms go heavy.",
-      point: "LI4 — Union Valley",
+      pointEffect: "Reduce stress and anxiety",
+      pointName: "LI4 — Union Valley",
       pointLocation: "Find the webbing between your thumb and index finger. Pinch the highest point of the muscle there.",
       pointInstruction: "Squeeze firmly — this point is often tender. Switch hands halfway. Hold.",
       holdSeconds: 45,
-      benefit: "One of the most powerful acupressure points for stress, anxiety, and tension."
+      benefit: "One of the most powerful points for anxiety and tension."
     },
     {
       name: "Gut & Core",
       prompt: "Scan your stomach and core. Notice tightness without trying to fix it.",
-      point: "PC6 — Inner Gate",
+      pointEffect: "Calm nausea and racing heart",
+      pointName: "PC6 — Inner Gate",
       pointLocation: "Turn your wrist palm-up. Measure three finger-widths down from your wrist crease, between the two tendons.",
       pointInstruction: "Press firmly with your thumb. Switch wrists halfway. Hold.",
       holdSeconds: 60,
-      benefit: "Relieves anxiety, nausea, and racing heart. Directly calms the nervous system."
+      benefit: "Directly calms the nervous system. Relieves anxiety and nausea."
     },
     {
       name: "Legs & Feet",
       prompt: "Feel the full weight of your legs. Press your feet flat into the floor.",
-      point: "ST36 — Leg Three Miles",
+      pointEffect: "Ground and stabilize",
+      pointName: "ST36 — Leg Three Miles",
       pointLocation: "Find the outer edge of your kneecap, then measure four finger-widths straight down your shin.",
       pointInstruction: "Press firmly into the muscle beside the bone. Switch legs halfway. Hold.",
       holdSeconds: 60,
@@ -1396,6 +1402,7 @@ function BodyScanTool({ onComplete }) {
   const [holdCount, setHoldCount] = useState(0);
   const [holding, setHolding] = useState(false);
   const [done, setDone] = useState(false);
+  const [showPointName, setShowPointName] = useState(false);
 
   useEffect(() => {
     if (!holding) return;
@@ -1411,6 +1418,7 @@ function BodyScanTool({ onComplete }) {
     setPhase("scan");
     setHolding(false);
     setHoldCount(0);
+    setShowPointName(false);
     if (currentArea < areas.length - 1) setCurrentArea(a => a + 1);
     else setDone(true);
   };
@@ -1449,7 +1457,7 @@ function BodyScanTool({ onComplete }) {
               <div style={{ marginTop: 20 }}>
                 <button className="btn btn-primary" style={{ fontSize: 13 }}
                   onClick={(e) => { e.stopPropagation(); setPhase("pressure"); }}>
-                  Apply pressure point →
+                  Apply pressure here →
                 </button>
               </div>
             </>
@@ -1457,10 +1465,16 @@ function BodyScanTool({ onComplete }) {
           {i === currentArea && phase === "pressure" && (
             <>
               <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 8, padding: "16px 20px", marginTop: 16 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{a.point}</div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Find it:</strong> {a.pointLocation}</div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Apply:</strong> {a.pointInstruction}</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic" }}>{a.benefit}</div>
+                <div style={{ fontSize: 15, fontWeight: 500, color: "var(--amber)", marginBottom: 10 }}>{a.pointEffect}</div>
+                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Where:</strong> {a.pointLocation}</div>
+                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>How:</strong> {a.pointInstruction}</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 8 }}>{a.benefit}</div>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowPointName(!showPointName); }}
+                  style={{ background: "none", border: "none", fontSize: 11, color: "var(--text-muted)", cursor: "pointer", padding: 0, letterSpacing: "0.06em" }}
+                >
+                  {showPointName ? `▾ ${a.pointName}` : "▸ Acupressure point name"}
+                </button>
               </div>
               {!holding && holdCount === 0 && (
                 <button className="btn btn-primary" style={{ marginTop: 16, fontSize: 13 }}
