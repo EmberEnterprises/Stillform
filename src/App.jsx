@@ -1019,6 +1019,22 @@ const TOOLS = [
     desc: "10-second body scan. Are you holding tension you haven't noticed?",
     time: "10 sec",
     level: 2
+  },
+  {
+    id: "patterns",
+    icon: "◇",
+    name: "Your Patterns",
+    desc: "What the data shows about how you regulate.",
+    time: "1 min",
+    level: 3
+  },
+  {
+    id: "meta",
+    icon: "✦",
+    name: "Watch & Choose",
+    desc: "Narrate what's happening in real time. See the spiral. Choose your response.",
+    time: "3 min",
+    level: 4
   }
 ];
 
@@ -1829,6 +1845,265 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   );
 }
 
+function PatternsTool({ onComplete }) {
+  const [sessions, setSessions] = useState([]);
+  const [checkins, setCheckins] = useState([]);
+  const [signals, setSignals] = useState({});
+
+  useEffect(() => {
+    try { setSessions(JSON.parse(localStorage.getItem("stillform_sessions") || "[]")); } catch {}
+    try { setCheckins(JSON.parse(localStorage.getItem("stillform_checkins") || "[]")); } catch {}
+    try { setSignals(JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}")); } catch {}
+  }, []);
+
+  // Generate insights from data
+  const insights = [];
+
+  if (sessions.length >= 3) {
+    // Most used tool
+    const toolCounts = {};
+    sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
+    const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
+    if (topTool) {
+      const names = { breathe: "Breathe & Ground", ground: "Grounding", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Physiological Sigh" };
+      insights.push({ label: "Most effective tool", value: names[topTool[0]] || topTool[0], detail: `Used ${topTool[1]} times` });
+    }
+
+    // Average regulation time
+    const times = sessions.filter(s => s.duration).map(s => s.duration);
+    if (times.length >= 2) {
+      const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length / 1000);
+      const min = Math.floor(avg / 60);
+      const sec = avg % 60;
+      insights.push({ label: "Average time to regulate", value: min > 0 ? `${min}m ${sec}s` : `${sec}s`, detail: `Across ${times.length} sessions` });
+    }
+
+    // Getting faster?
+    if (times.length >= 4) {
+      const firstHalf = times.slice(0, Math.floor(times.length / 2));
+      const secondHalf = times.slice(Math.floor(times.length / 2));
+      const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+      const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+      if (avgSecond < avgFirst * 0.85) {
+        const pct = Math.round((1 - avgSecond / avgFirst) * 100);
+        insights.push({ label: "Regulation speed", value: `${pct}% faster`, detail: "Compared to your first sessions" });
+      }
+    }
+
+    // Session count
+    insights.push({ label: "Total sessions", value: `${sessions.length}`, detail: "Every one of these worked" });
+  }
+
+  // Check-in patterns
+  if (checkins.length >= 3) {
+    const areaTotals = {};
+    checkins.forEach(c => {
+      Object.entries(c.levels || {}).forEach(([area, level]) => {
+        if (!areaTotals[area]) areaTotals[area] = { total: 0, count: 0 };
+        areaTotals[area].total += level;
+        areaTotals[area].count++;
+      });
+    });
+    const highest = Object.entries(areaTotals).sort((a, b) => (b[1].total / b[1].count) - (a[1].total / a[1].count))[0];
+    if (highest && highest[1].total / highest[1].count > 1) {
+      const names = { jaw: "Jaw", shoulders: "Shoulders", chest: "Chest", gut: "Gut" };
+      insights.push({ label: "Tension pattern", value: names[highest[0]] || highest[0], detail: "Consistently your highest tension area" });
+    }
+  }
+
+  if (insights.length === 0) {
+    return (
+      <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>◇</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Not enough data yet.</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+          Keep using the tools and doing check-ins. Patterns emerge after about 10 sessions.
+        </p>
+        <button className="btn btn-ghost" onClick={onComplete}>Back</button>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+      <div style={{ fontSize: 28, marginBottom: 12, textAlign: "center" }}>◇</div>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8, textAlign: "center" }}>Your Patterns</h2>
+      <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 28, textAlign: "center" }}>What the data shows. One insight at a time.</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {insights.map((ins, i) => (
+          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px" }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>{ins.label}</div>
+            <div style={{ fontSize: 20, fontWeight: 500, color: "var(--amber)", marginBottom: 4 }}>{ins.value}</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{ins.detail}</div>
+          </div>
+        ))}
+      </div>
+
+      <button className="btn btn-ghost" style={{ width: "100%", marginTop: 24 }} onClick={onComplete}>Done</button>
+    </div>
+  );
+}
+
+function MetacognitionTool({ onComplete }) {
+  const [step, setStep] = useState(0);
+  const [responses, setResponses] = useState({});
+
+  const prompts = [
+    {
+      label: "Notice",
+      question: "What's happening in your body right now?",
+      sub: "Don't fix it. Just notice it. Where is it? What does it feel like?",
+      placeholder: "My chest is tight, my jaw is clenched..."
+    },
+    {
+      label: "Name",
+      question: "What thought just fired?",
+      sub: "The first thought. Not the story, not the explanation. The raw thought.",
+      placeholder: "I'm going to lose everything..."
+    },
+    {
+      label: "Recognize",
+      question: "Have you been here before?",
+      sub: "Does this thought have a pattern? Is this familiar?",
+      placeholder: "This is the money spiral. I do this when I'm tired..."
+    },
+    {
+      // EQ integration — light, not labeled
+      label: "Perspective",
+      question: "What do you actually need right now?",
+      sub: "Not what you think you should do. What does the part of you that's hurting actually need?",
+      placeholder: "I need to know it's going to be okay..."
+    },
+    {
+      label: "Choose",
+      question: "What do you want to do with the next 60 seconds?",
+      sub: "You caught the spiral. You named it. Now you choose.",
+      placeholder: ""
+    }
+  ];
+
+  const choices = [
+    { label: "Breathe", desc: "Regulate first", action: () => onComplete("breathe") },
+    { label: "Sit with it", desc: "I see it. That's enough.", action: () => {
+      // Save as metacognition session
+      try {
+        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+        sessions.push({
+          timestamp: new Date().toISOString(),
+          duration: 0,
+          tools: ["metacognition"],
+          exitPoint: "self-regulated",
+          source: "metacognition",
+          responses
+        });
+        localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      } catch {}
+      setStep(prompts.length);
+    }},
+    { label: "Talk it through", desc: "Use Reframe", action: () => onComplete("reframe-calm") },
+    { label: "I've got this", desc: "No tools needed", action: () => {
+      try {
+        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+        sessions.push({
+          timestamp: new Date().toISOString(),
+          duration: 0,
+          tools: ["metacognition"],
+          exitPoint: "autonomous",
+          source: "metacognition",
+          responses
+        });
+        localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      } catch {}
+      setStep(prompts.length);
+    }}
+  ];
+
+  // Completion screen
+  if (step >= prompts.length) {
+    const autonomousCount = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("stillform_sessions") || "[]")
+          .filter(s => s.source === "metacognition" && (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated")).length;
+      } catch { return 0; }
+    })();
+    return (
+      <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>
+          You watched it. You named it. You chose.
+        </h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+          That's metacognition. The ability to see your own mind in motion.
+        </p>
+        {autonomousCount > 1 && (
+          <div style={{ fontSize: 13, color: "var(--amber)", marginBottom: 24 }}>
+            You've done this {autonomousCount} times without tools.
+          </div>
+        )}
+        <button className="btn btn-ghost" onClick={onComplete}>Done</button>
+      </div>
+    );
+  }
+
+  const prompt = prompts[step];
+  const isChoiceStep = step === prompts.length - 1;
+
+  return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
+        {prompt.label} — {step + 1} of {prompts.length}
+      </div>
+
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>
+        {prompt.question}
+      </h2>
+      <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
+        {prompt.sub}
+      </p>
+
+      {isChoiceStep ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {choices.map((c, i) => (
+            <button key={i} onClick={c.action} style={{
+              background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+              padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.label}</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{c.desc}</div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <>
+          <textarea
+            style={{
+              width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+              padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+              lineHeight: 1.6, resize: "none", minHeight: 80
+            }}
+            placeholder={prompt.placeholder}
+            value={responses[step] || ""}
+            onChange={e => setResponses(r => ({ ...r, [step]: e.target.value }))}
+            autoFocus
+          />
+          <button className="btn btn-primary" style={{ width: "100%", marginTop: 16 }}
+            disabled={!(responses[step] || "").trim()}
+            onClick={() => setStep(s => s + 1)}>
+            Next →
+          </button>
+        </>
+      )}
+
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 24 }}>
+        {prompts.map((_, i) => (
+          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= step ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function SignalMapTool({ onComplete }) {
   const [step, setStep] = useState(0);
   const [signals, setSignals] = useState(() => {
@@ -2435,6 +2710,8 @@ export default function Stillform() {
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : "calm")} />;
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
+      case "patterns": return <PatternsTool {...props} />;
+      case "meta": return <MetacognitionTool {...props} />;
       default: return null;
     }
   };
@@ -2635,6 +2912,48 @@ export default function Stillform() {
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 sec</div>
                       </button>
                     </div>
+                  </div>
+                );
+              })()}
+
+              {/* Level 3 — See Your Patterns */}
+              {(() => {
+                let sessionCount = 0;
+                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+                if (sessionCount < 8) return null;
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
+                      See your patterns
+                    </div>
+                    <button
+                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                      onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))}
+                    >
+                      <div style={{ fontSize: 14, marginBottom: 2 }}>◇ Your Patterns</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate</div>
+                    </button>
+                  </div>
+                );
+              })()}
+
+              {/* Level 4 — Metacognition */}
+              {(() => {
+                let sessionCount = 0;
+                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+                if (sessionCount < 12) return null;
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
+                      Watch & choose
+                    </div>
+                    <button
+                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                      onClick={() => startTool(TOOLS.find(t => t.id === "meta"))}
+                    >
+                      <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Watch & Choose</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>See the spiral in real time. Name it. Choose what to do.</div>
+                    </button>
                   </div>
                 );
               })()}
