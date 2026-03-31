@@ -3596,7 +3596,7 @@ export default function Stillform() {
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
             <button className="intervention-back" onClick={() => setScreen("home")}>← Home</button>
 
-            {/* L1 TOOLS */}
+            {/* L1 TOOLS — four distinct tools */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
                 Level 1 · Regulate
@@ -3608,26 +3608,17 @@ export default function Stillform() {
                   onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
                   onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
                 >
-                  <div style={{ fontSize: 14, marginBottom: 3 }}>◎ Regulate</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathe + ground</div>
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◎ Settle</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing + grounding</div>
                 </button>
                 <button
-                  onClick={() => startPathway("clarity")}
+                  onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }}
                   style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
                   onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
                   onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
                 >
-                  <div style={{ fontSize: 14, marginBottom: 3 }}>✦ Get sharp</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Reset + reframe</div>
-                </button>
-                <button
-                  onClick={() => startPathway("hype")}
-                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
-                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-                >
-                  <div style={{ fontSize: 14, marginBottom: 3 }}>◌ Lock in</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Focus + confidence</div>
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>✦ Reframe</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>AI conversation</div>
                 </button>
                 <button
                   onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
@@ -3635,8 +3626,17 @@ export default function Stillform() {
                   onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
                   onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
                 >
-                  <div style={{ fontSize: 14, marginBottom: 3 }}>◉ Body scan</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Release tension</div>
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◉ Body Scan</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Tension + acupressure</div>
+                </button>
+                <button
+                  onClick={() => startPathway("hype")}
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◌ Lock In</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Pre-performance prep</div>
                 </button>
               </div>
             </div>
