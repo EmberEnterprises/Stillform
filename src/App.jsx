@@ -1911,19 +1911,43 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   };
 
   const modeConfig = {
-    calm: { icon: "◎", title: "Reframe", subtitle: "Say what you're feeling. The AI reads exactly what you wrote.", color: "var(--amber)" },
-    clarity: { icon: "✦", title: "Get Sharp", subtitle: "Name the thought loop. Cut through it.", color: "#7aadcf" },
-    hype: { icon: "◌", title: "Lock In", subtitle: "What are you about to walk into? Say it.", color: "#c9793a" }
+    calm: {
+      icon: "◎", title: "Reframe", subtitle: "Say what you're feeling. The AI reads exactly what you wrote.",
+      color: "#c9933a",
+      bg: "linear-gradient(180deg, rgba(201,147,58,0.06) 0%, transparent 40%)",
+      border: "rgba(201,147,58,0.2)",
+      inputBg: "rgba(201,147,58,0.05)",
+      aiBubble: "rgba(201,147,58,0.08)",
+      sendBg: "#c9933a"
+    },
+    clarity: {
+      icon: "✦", title: "Get Sharp", subtitle: "Name the thought loop. Cut through it.",
+      color: "#7aadcf",
+      bg: "linear-gradient(180deg, rgba(122,173,207,0.08) 0%, transparent 40%)",
+      border: "rgba(122,173,207,0.2)",
+      inputBg: "rgba(122,173,207,0.05)",
+      aiBubble: "rgba(122,173,207,0.08)",
+      sendBg: "#7aadcf"
+    },
+    hype: {
+      icon: "◌", title: "Lock In", subtitle: "What are you about to walk into? Say it.",
+      color: "#c9793a",
+      bg: "linear-gradient(180deg, rgba(201,121,58,0.08) 0%, transparent 40%)",
+      border: "rgba(201,121,58,0.25)",
+      inputBg: "rgba(201,121,58,0.06)",
+      aiBubble: "rgba(201,121,58,0.1)",
+      sendBg: "#c9793a"
+    }
   };
   const mc = modeConfig[mode] || modeConfig.calm;
 
   return (
-    <div>
+    <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
       {/* MODE HEADER — visually distinct per mode */}
-      <div style={{ textAlign: "center", marginBottom: 16, padding: "16px 0 12px", borderBottom: `1px solid ${mc.color}33` }}>
-        <div style={{ fontSize: 28, marginBottom: 6, color: mc.color }}>{mc.icon}</div>
-        <div style={{ fontSize: 18, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, color: mc.color, marginBottom: 4 }}>{mc.title}</div>
-        <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{mc.subtitle}</div>
+      <div style={{ textAlign: "center", marginBottom: 16, padding: "20px 0 16px", borderBottom: `1px solid ${mc.border}` }}>
+        <div style={{ fontSize: 32, marginBottom: 8, color: mc.color }}>{mc.icon}</div>
+        <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, color: mc.color, marginBottom: 6 }}>{mc.title}</div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>{mc.subtitle}</div>
       </div>
 
       <div className="disclaimer">
@@ -1969,8 +1993,8 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           {messages.length === 0 && (
             <>
               {getSavedReframes().length > 0 && (
-                <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10 }}>
-                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>What helped before</div>
+                <div style={{ marginBottom: 16, padding: "12px 14px", background: mc.aiBubble, border: `1px solid ${mc.border}`, borderRadius: 10 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>What helped before</div>
                   {getSavedReframes().slice(-2).map((r, i) => (
                     <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: i < 1 ? 8 : 0, paddingBottom: i < 1 ? 8 : 0, borderBottom: i < 1 ? "1px solid var(--border)" : "none" }}>
                       {r.distortion && <span style={{ color: "var(--amber)", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>{r.distortion} — </span>}
@@ -1986,10 +2010,10 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           )}
           {messages.map((msg, i) => (
             <div key={i} className={`message ${msg.role}`}>
-              <div className="message-avatar">{msg.role === "ai" ? mc.icon : "●"}</div>
-              <div className="message-bubble">
+              <div className="message-avatar" style={msg.role === "ai" ? { color: mc.color } : {}}>{msg.role === "ai" ? mc.icon : "●"}</div>
+              <div className="message-bubble" style={msg.role === "ai" ? { background: mc.aiBubble, borderColor: mc.border } : {}}>
                 {msg.distortion && (
-                  <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>
                     {msg.distortion}
                   </div>
                 )}
@@ -2029,8 +2053,8 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           )}
           {loading && (
             <div className="message ai">
-              <div className="message-avatar">✦</div>
-              <div className="message-bubble" style={{ color: "var(--text-dim)" }}>
+              <div className="message-avatar" style={{ color: mc.color }}>{mc.icon}</div>
+              <div className="message-bubble" style={{ background: mc.aiBubble, borderColor: mc.border, color: "var(--text-dim)" }}>
                 <span style={{ letterSpacing: "0.2em", animation: "pulse 1.5s ease-in-out infinite" }}>···</span>
               </div>
             </div>
@@ -2045,6 +2069,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           ) : (
             <input
               className="ai-input"
+              style={{ borderColor: mc.border }}
               placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "Say what's happening..."}
               value={input}
               onChange={e => setInput(e.target.value)}
@@ -2072,7 +2097,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
               Cancel
             </button>
           ) : (
-            <button className="btn-send" onClick={() => handleSend()} disabled={!input.trim()}>
+            <button className="btn-send" style={{ background: mc.sendBg }} onClick={() => handleSend()} disabled={!input.trim()}>
               Send
             </button>
           )}
