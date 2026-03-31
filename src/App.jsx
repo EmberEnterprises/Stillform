@@ -1647,6 +1647,26 @@ function ReframeTool({ onComplete, mode = "calm" }) {
               </div>
             </div>
           ))}
+          {/* Escape route — shows after AI response, not during loading */}
+          {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
+            <div style={{ padding: "8px 0 4px 44px" }}>
+              <button
+                onClick={() => onComplete("breathe")}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  padding: "4px 0",
+                  fontFamily: "'DM Sans', sans-serif",
+                  transition: "color 0.2s"
+                }}
+              >
+                This isn't helping → try breathing instead
+              </button>
+            </div>
+          )}
           {loading && (
             <div className="message ai">
               <div className="message-avatar">✦</div>
