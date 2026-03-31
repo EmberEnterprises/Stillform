@@ -3126,101 +3126,142 @@ export default function Stillform() {
           }} />
         )}
 
-        {/* HOME — radically simple. Panic + two choices. That's it. */}
-        {screen === "home" && (
-          <section style={{ maxWidth: 480, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 140px)" }}>
+        {/* HOME — different for first-time vs returning users */}
+        {screen === "home" && (() => {
+          let sessionCount = 0;
+          try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+          const isNew = sessionCount === 0;
 
-            {/* PANIC */}
-            <button
-              className="panic-btn"
-              onClick={() => setScreen("panic")}
-              style={{ marginBottom: 12 }}
-            >
-              <span className="panic-btn-text">I need help<br/>right now</span>
-            </button>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 48, fontStyle: "italic", textAlign: "center" }}>
-              Free. No decisions. Just follow the circle.
-            </div>
+          if (isNew) return (
+            /* ── FIRST TIME: what is this, why should I care ── */
+            <section className="home">
+              <h1 className="home-title">
+                Think clearly<br />under <em>pressure.</em>
+              </h1>
+              <p className="home-sub">
+                Stillform trains your nervous system to catch the reaction before it happens — so you respond instead of react.
+              </p>
 
-            {/* Repeat what worked */}
-            {(() => {
-              try {
-                const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-                if (sessions.length < 2) return null;
-                const last = sessions[sessions.length - 1];
-                const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
-                const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
-                const mainTool = (last.tools || [])[0];
-                if (!mainTool || !toolNames[mainTool]) return null;
-                return (
-                  <button
-                    onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
-                    style={{
-                      width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                      borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
-                      marginBottom: 14, transition: "all 0.2s"
-                    }}
-                  >
-                    <div style={{ fontSize: 13, color: "var(--amber)" }}>
-                      ↺ {toolNames[mainTool]} worked last time · {last.durationFormatted || "tap to repeat"}
+              <button className="btn btn-primary" style={{ fontSize: 16, padding: "16px 40px", marginBottom: 16 }}
+                onClick={() => startPathway("calm")}>
+                Start your first session
+              </button>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 56 }}>Free. Takes 2 minutes.</div>
+
+              {/* FOUR LEVELS — what you're building toward */}
+              <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16, textAlign: "center" }}>
+                  Composure is a skill. This is how it grows.
+                </div>
+                {[
+                  { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work." },
+                  { icon: "◇", name: "Recognize", desc: "Learn your body's warning signals before the flood hits." },
+                  { icon: "◈", name: "See Patterns", desc: "Your data shows what triggers you and what works." },
+                  { icon: "✦", name: "Watch & Choose", desc: "See your mind in motion. Choose your response." }
+                ].map((l, i) => (
+                  <div key={i} style={{
+                    display: "flex", gap: 14, alignItems: "flex-start",
+                    padding: "12px 0", borderBottom: i < 3 ? "1px solid var(--border)" : "none"
+                  }}>
+                    <span style={{ fontSize: 18, color: "var(--amber)", flexShrink: 0, marginTop: 2 }}>{l.icon}</span>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>{l.name}</div>
+                      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>{l.desc}</div>
                     </div>
-                  </button>
-                );
-              } catch { return null; }
-            })()}
+                  </div>
+                ))}
+              </div>
 
-            {/* TWO CHOICES — that's it */}
-            <button
-              onClick={() => startPathway("calm")}
-              style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
-                padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
-                marginBottom: 12
-              }}
-              onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-              onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-            >
-              <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                I can't calm down
+              <div style={{ marginTop: 40, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.04em" }}>
+                Built from lived experience.
               </div>
-              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                Body flooded. Mind offline. Start here.
-              </div>
-            </button>
+            </section>
+          );
 
-            <button
-              onClick={() => startPathway("clarity")}
-              style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
-                padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
-                marginBottom: 32
-              }}
-              onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-              onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-            >
-              <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                I need to think clearly
-              </div>
-              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                Spiraling. Big moment coming. Cut through it.
-              </div>
-            </button>
+          /* ── RETURNING USER: what do you need right now ── */
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 140px)" }}>
 
-            {/* MORE — everything else lives here */}
-            <button
-              onClick={() => setScreen("explore")}
-              style={{
-                background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
-                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em",
-                padding: "8px 0", transition: "color 0.2s"
-              }}
-              onMouseOver={e => e.currentTarget.style.color = "var(--amber)"}
-              onMouseOut={e => e.currentTarget.style.color = "var(--text-muted)"}
-            >
-              All tools & levels →
-            </button>
-          </section>
-        )}
+              {/* Repeat what worked */}
+              {(() => {
+                try {
+                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  if (sessions.length < 2) return null;
+                  const last = sessions[sessions.length - 1];
+                  const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
+                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
+                  const mainTool = (last.tools || [])[0];
+                  if (!mainTool || !toolNames[mainTool]) return null;
+                  return (
+                    <button
+                      onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
+                      style={{
+                        width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                        borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
+                        marginBottom: 16, transition: "all 0.2s"
+                      }}
+                    >
+                      <div style={{ fontSize: 13, color: "var(--amber)" }}>
+                        ↺ {toolNames[mainTool]} worked last time · {last.durationFormatted || "tap to repeat"}
+                      </div>
+                    </button>
+                  );
+                } catch { return null; }
+              })()}
+
+              {/* TWO CHOICES */}
+              <button
+                onClick={() => startPathway("calm")}
+                style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
+                  padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
+                  marginBottom: 12
+                }}
+                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
+                  I can't calm down
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                  Body flooded. Mind offline. Start here.
+                </div>
+              </button>
+
+              <button
+                onClick={() => startPathway("clarity")}
+                style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
+                  padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
+                  marginBottom: 32
+                }}
+                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
+                  I need to think clearly
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                  Spiraling. Big moment coming. Cut through it.
+                </div>
+              </button>
+
+              {/* MORE */}
+              <button
+                onClick={() => setScreen("explore")}
+                style={{
+                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em",
+                  padding: "8px 0", transition: "color 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.color = "var(--amber)"}
+                onMouseOut={e => e.currentTarget.style.color = "var(--text-muted)"}
+              >
+                All tools & levels →
+              </button>
+            </section>
+          );
+        })()}
 
         {/* EXPLORE — all tools, levels, journal, stats */}
         {screen === "explore" && (
