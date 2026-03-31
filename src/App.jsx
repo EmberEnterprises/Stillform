@@ -1003,6 +1003,22 @@ const TOOLS = [
     name: "Reframe",
     desc: "Talk through what's happening. AI applies CBT to exactly what you say — stay as long as you need.",
     time: "Open"
+  },
+  {
+    id: "signals",
+    icon: "◇",
+    name: "Map Your Signals",
+    desc: "Learn where your body warns you first. Build your personal signal profile.",
+    time: "2 min",
+    level: 2
+  },
+  {
+    id: "checkin",
+    icon: "◈",
+    name: "Quick Check-In",
+    desc: "10-second body scan. Are you holding tension you haven't noticed?",
+    time: "10 sec",
+    level: 2
   }
 ];
 
@@ -1813,6 +1829,256 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   );
 }
 
+function SignalMapTool({ onComplete }) {
+  const [step, setStep] = useState(0);
+  const [signals, setSignals] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_signal_profile")) || {}; } catch { return {}; }
+  });
+
+  const bodyAreas = [
+    { id: "jaw", label: "Jaw & Face", desc: "Clenching, tightness, grinding" },
+    { id: "shoulders", label: "Shoulders & Neck", desc: "Rising, stiffness, pain" },
+    { id: "chest", label: "Chest", desc: "Tightness, pressure, shallow breath" },
+    { id: "hands", label: "Hands & Arms", desc: "Gripping, tingling, fists" },
+    { id: "gut", label: "Stomach & Core", desc: "Knots, nausea, heaviness" },
+    { id: "legs", label: "Legs & Feet", desc: "Restlessness, numbness, pacing urge" }
+  ];
+
+  const sensations = [
+    "Tightness", "Heat", "Numbness", "Racing heart", "Shallow breath", "Nausea", "Trembling", "Brain fog"
+  ];
+
+  const triggers = [
+    "Work / deadlines", "Relationships", "Health / pain", "Money", "Self-worth", "Sensory overload", "Conflict", "Uncertainty"
+  ];
+
+  const save = (key, value) => {
+    const updated = { ...signals, [key]: value };
+    setSignals(updated);
+    try { localStorage.setItem("stillform_signal_profile", JSON.stringify(updated)); } catch {}
+  };
+
+  const steps = [
+    // Step 0: Intro
+    () => (
+      <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
+          Your body warns you before a crisis hits. Most people never learn to read those warnings. This takes 2 minutes and teaches the app how YOUR nervous system works.
+        </p>
+        <button className="btn btn-primary" onClick={() => setStep(1)}>Start →</button>
+      </div>
+    ),
+    // Step 1: Where tension shows first
+    () => (
+      <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>Where does tension show up first?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that react first when stress is building. Select all that apply.</p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {bodyAreas.map(area => {
+            const selected = (signals.firstAreas || []).includes(area.id);
+            return (
+              <button key={area.id} onClick={() => {
+                const current = signals.firstAreas || [];
+                const updated = selected ? current.filter(a => a !== area.id) : [...current, area.id];
+                save("firstAreas", updated);
+              }} style={{
+                background: selected ? "var(--amber-glow)" : "var(--surface)",
+                border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
+                borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
+              }}>
+                <div style={{ fontSize: 14, fontWeight: 500, color: selected ? "var(--amber)" : "var(--text)" }}>{area.label}</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{area.desc}</div>
+              </button>
+            );
+          })}
+        </div>
+        <button className="btn btn-primary" style={{ width: "100%", marginTop: 20 }}
+          disabled={!(signals.firstAreas || []).length}
+          onClick={() => setStep(2)}>Next →</button>
+      </div>
+    ),
+    // Step 2: What sensations come before crisis
+    () => (
+      <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What do you feel before it hits?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up before a spiral, panic, or explosion.</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {sensations.map(s => {
+            const selected = (signals.preSensations || []).includes(s);
+            return (
+              <button key={s} onClick={() => {
+                const current = signals.preSensations || [];
+                const updated = selected ? current.filter(x => x !== s) : [...current, s];
+                save("preSensations", updated);
+              }} style={{
+                background: selected ? "var(--amber-glow)" : "var(--surface)",
+                border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
+                borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer",
+                color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
+              }}>{s}</button>
+            );
+          })}
+        </div>
+        <button className="btn btn-primary" style={{ width: "100%", marginTop: 20 }}
+          disabled={!(signals.preSensations || []).length}
+          onClick={() => setStep(3)}>Next →</button>
+      </div>
+    ),
+    // Step 3: Common triggers
+    () => (
+      <div style={{ maxWidth: 400, margin: "0 auto" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What usually triggers you?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The situations or topics that activate your nervous system most often.</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {triggers.map(t => {
+            const selected = (signals.triggers || []).includes(t);
+            return (
+              <button key={t} onClick={() => {
+                const current = signals.triggers || [];
+                const updated = selected ? current.filter(x => x !== t) : [...current, t];
+                save("triggers", updated);
+              }} style={{
+                background: selected ? "var(--amber-glow)" : "var(--surface)",
+                border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
+                borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer",
+                color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
+              }}>{t}</button>
+            );
+          })}
+        </div>
+        <button className="btn btn-primary" style={{ width: "100%", marginTop: 20 }}
+          disabled={!(signals.triggers || []).length}
+          onClick={() => setStep(4)}>Done →</button>
+      </div>
+    ),
+    // Step 4: Profile complete
+    () => (
+      <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Signal profile saved.</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+          Now you know what to watch for. Over time, you'll start catching these signals before they become a crisis.
+        </p>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+          <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your signals</div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
+            <strong style={{ color: "var(--text)" }}>First to react:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
+            <strong style={{ color: "var(--text)" }}>Warning sensations:</strong> {(signals.preSensations || []).join(", ")}
+          </div>
+          <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
+            <strong style={{ color: "var(--text)" }}>Common triggers:</strong> {(signals.triggers || []).join(", ")}
+          </div>
+        </div>
+        <button className="btn btn-primary" onClick={onComplete}>Done</button>
+      </div>
+    )
+  ];
+
+  return (
+    <div>
+      {steps[step]()}
+    </div>
+  );
+}
+
+function BodyCheckInTool({ onComplete }) {
+  const areas = [
+    { id: "jaw", label: "Jaw" },
+    { id: "shoulders", label: "Shoulders" },
+    { id: "chest", label: "Chest" },
+    { id: "gut", label: "Gut" }
+  ];
+  const [levels, setLevels] = useState({});
+  const [done, setDone] = useState(false);
+  const [currentIdx, setCurrentIdx] = useState(0);
+
+  const handleTap = (areaId, level) => {
+    const updated = { ...levels, [areaId]: level };
+    setLevels(updated);
+    if (currentIdx < areas.length - 1) {
+      setTimeout(() => setCurrentIdx(i => i + 1), 300);
+    } else {
+      // Save check-in
+      try {
+        const checkins = JSON.parse(localStorage.getItem("stillform_checkins") || "[]");
+        checkins.push({ timestamp: new Date().toISOString(), levels: updated });
+        localStorage.setItem("stillform_checkins", JSON.stringify(checkins));
+      } catch {}
+      setTimeout(() => setDone(true), 300);
+    }
+  };
+
+  if (done) {
+    const highest = Object.entries(levels).sort((a, b) => b[1] - a[1])[0];
+    const highArea = areas.find(a => a.id === highest[0]);
+    const needsHelp = highest[1] >= 2;
+    return (
+      <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>Checked in.</h2>
+        {needsHelp ? (
+          <>
+            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>
+              Your {highArea.label.toLowerCase()} is carrying tension. Want to address it?
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
+              <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe & Ground</button>
+              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>I'm fine</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>Low tension across the board. You're regulated.</p>
+            <button className="btn btn-ghost" onClick={onComplete}>Done</button>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  const area = areas[currentIdx];
+  return (
+    <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
+      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>
+        Quick scan — {currentIdx + 1} of {areas.length}
+      </div>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 32 }}>
+        {area.label}
+      </h2>
+      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+        {[
+          { level: 0, label: "Calm", color: "var(--green)" },
+          { level: 1, label: "Mild", color: "var(--amber-dim)" },
+          { level: 2, label: "Tense", color: "var(--amber)" },
+          { level: 3, label: "High", color: "#c05040" }
+        ].map(opt => (
+          <button key={opt.level} onClick={() => handleTap(area.id, opt.level)} style={{
+            background: levels[area.id] === opt.level ? "var(--surface2)" : "var(--surface)",
+            border: `1px solid ${levels[area.id] === opt.level ? opt.color : "var(--border)"}`,
+            borderRadius: 10, padding: "14px 6px", flex: 1, cursor: "pointer", transition: "all 0.2s",
+            textAlign: "center"
+          }}>
+            <div style={{ fontSize: 13, color: levels[area.id] === opt.level ? opt.color : "var(--text-dim)" }}>{opt.label}</div>
+          </button>
+        ))}
+      </div>
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 24 }}>
+        {areas.map((_, i) => (
+          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= currentIdx ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PanicMode({ onComplete }) {
   // Auto-starting breathing — no Begin button, no choices
   // 4-4-6-2 pattern, 4 cycles, then gently offer next step
@@ -2167,6 +2433,8 @@ export default function Stillform() {
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : "calm")} />;
+      case "signals": return <SignalMapTool {...props} />;
+      case "checkin": return <BodyCheckInTool {...props} />;
       default: return null;
     }
   };
@@ -2340,6 +2608,36 @@ export default function Stillform() {
                   </button>
                 </div>
               </div>
+
+              {/* Level 2 — Build Awareness */}
+              {(() => {
+                let sessionCount = 0;
+                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+                if (sessionCount < 3) return null; // Show after 3+ sessions (lower for UAT testing)
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
+                      Build awareness
+                    </div>
+                    <div style={{ display: "flex", gap: 10 }}>
+                      <button
+                        style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                        onClick={() => startTool(TOOLS.find(t => t.id === "signals"))}
+                      >
+                        <div style={{ fontSize: 14, marginBottom: 2 }}>◇ Map Your Signals</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>2 min</div>
+                      </button>
+                      <button
+                        style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                        onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))}
+                      >
+                        <div style={{ fontSize: 14, marginBottom: 2 }}>◈ Quick Check-In</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 sec</div>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })()}
 
               <p style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, textAlign: "center" }}>
                 Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
