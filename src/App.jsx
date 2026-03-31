@@ -1032,7 +1032,7 @@ const TOOLS = [
     id: "meta",
     icon: "✦",
     name: "Watch & Choose",
-    desc: "Narrate what's happening in real time. See the spiral. Choose your response.",
+    desc: "Catch the spiral in real time. Name it. Choose your next move.",
     time: "3 min",
     level: 4
   }
@@ -1927,6 +1927,14 @@ function PatternsTool({ onComplete }) {
       }
     }
 
+    // Fastest recovery
+    if (times.length >= 2) {
+      const fastest = Math.min(...times);
+      const fastMin = Math.floor(Math.round(fastest / 1000) / 60);
+      const fastSec = Math.round(fastest / 1000) % 60;
+      insights.push({ label: "Fastest recovery", value: fastMin > 0 ? `${fastMin}m ${fastSec}s` : `${fastSec}s`, detail: "Your personal best" });
+    }
+
     // Session count
     insights.push({ label: "Total sessions", value: `${sessions.length}`, detail: "Every one of these worked" });
   }
@@ -2071,7 +2079,7 @@ function MetacognitionTool({ onComplete }) {
           You watched it. You named it. You chose.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
-          That's metacognition. The ability to see your own mind in motion.
+          That's the skill. Seeing your own mind in motion and choosing what to do with it.
         </p>
         {autonomousCount > 1 && (
           <div style={{ fontSize: 13, color: "var(--amber)", marginBottom: 24 }}>
@@ -2850,6 +2858,33 @@ export default function Stillform() {
                 No decisions. Just tell us what's happening.
               </p>
 
+              {/* Repeat what worked — one-tap shortcut */}
+              {(() => {
+                try {
+                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  if (sessions.length < 2) return null;
+                  const last = sessions[sessions.length - 1];
+                  const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
+                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
+                  const mainTool = (last.tools || [])[0];
+                  if (!mainTool || !toolNames[mainTool]) return null;
+                  return (
+                    <button
+                      onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
+                      style={{
+                        width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                        borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
+                        marginBottom: 20, transition: "all 0.2s"
+                      }}
+                    >
+                      <div style={{ fontSize: 13, color: "var(--amber)" }}>
+                        ↺ Last time: {toolNames[mainTool]} worked in {last.durationFormatted || "a few minutes"}
+                      </div>
+                    </button>
+                  );
+                } catch { return null; }
+              })()}
+
               <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
                 {/* Path 1 — overwhelmed */}
                 <button
@@ -2982,14 +3017,14 @@ export default function Stillform() {
                 return (
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
                     <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                      Watch & choose
+                      Think clearly under pressure
                     </div>
                     <button
                       style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
                       onClick={() => startTool(TOOLS.find(t => t.id === "meta"))}
                     >
                       <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Watch & Choose</div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>See the spiral in real time. Name it. Choose what to do.</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it and choose differently</div>
                     </button>
                   </div>
                 );
