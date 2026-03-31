@@ -2444,7 +2444,7 @@ function PanicMode({ onComplete }) {
   const [breathDone, setBreathDone] = useState(false);
   const [running, setRunning] = useState(true); // auto-start
   const [audioOn, setAudioOn] = useState(() => {
-    try { return localStorage.getItem("stillform_audio") !== "off"; } catch { return true; }
+    try { return localStorage.getItem("stillform_audio") === "on"; } catch { return false; }
   });
 
   const toggleAudio = () => {
@@ -2834,18 +2834,35 @@ export default function Stillform() {
                 Pricing
               </button>
             </div>
-            <div className="home-features">
-              {[
-                { icon: "◎", title: "Breathe & Ground", desc: "Structured breathing to slow your nervous system, followed by sensory anchoring to bring you back to the present." },
-                { icon: "◉", title: "Body Scan", desc: "Directed awareness through six body areas with targeted acupressure points and timed holds for real tension release." },
-                { icon: "✦", title: "Reframe", desc: "AI reads exactly what you wrote and applies the specific CBT technique for what you're experiencing. Stay as long as you need." },
-              ].map((f, i) => (
-                <div key={i} className="feature-card">
-                  <div className="feature-icon">{f.icon}</div>
-                  <div className="feature-title">{f.title}</div>
-                  <div className="feature-desc">{f.desc}</div>
-                </div>
-              ))}
+
+            {/* SKILL GROWTH — how composure develops */}
+            <div style={{ maxWidth: 480, margin: "48px auto 0", textAlign: "center" }}>
+              <div style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
+                Composure is a skill. This is how it grows.
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left" }}>
+                {[
+                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Free — always available", active: true },
+                  { icon: "◇", level: "Level 2", name: "Recognize", desc: "Learn your body's warning signals. Catch it before the spiral.", status: "Unlocks after 3 sessions", active: false },
+                  { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works.", status: "Unlocks after 8 sessions", active: false },
+                  { icon: "✦", level: "Level 4", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response.", status: "Unlocks after 12 sessions", active: false }
+                ].map((l, i) => (
+                  <div key={i} style={{
+                    background: l.active ? "var(--surface)" : "var(--bg)",
+                    border: `1px solid ${l.active ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 10, padding: "14px 18px",
+                    opacity: l.active ? 1 : 0.7
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
+                      <span style={{ fontSize: 16 }}>{l.icon}</span>
+                      <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>{l.level}</span>
+                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{l.name}</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 4, paddingLeft: 26 }}>{l.desc}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", paddingLeft: 26 }}>{l.status}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </section>
         )}
@@ -2855,10 +2872,10 @@ export default function Stillform() {
           <section className="tools">
             <div style={{ maxWidth: 560, margin: "0 auto", padding: "48px 24px 24px" }}>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 300, lineHeight: 1.2, color: "var(--text)", marginBottom: 8 }}>
-                What's happening right now?
+                What do you need?
               </h2>
               <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 36 }}>
-                No decisions. Just tell us what's happening.
+                Tell us what's happening.
               </p>
 
               {/* Repeat what worked — one-tap shortcut */}
@@ -3050,7 +3067,13 @@ export default function Stillform() {
               <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
                 {activeTool.icon} {activeTool.name}
               </div>
-              <div style={{ width: 60 }} />
+              <button onClick={() => setScreen("panic")} style={{
+                background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 6,
+                padding: "4px 10px", fontSize: 11, color: "rgba(200,80,80,0.8)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
+              }}>
+                Panic
+              </button>
             </div>
             {renderTool()}
           </section>
@@ -3061,17 +3084,19 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>7-day free trial. No credit card required. Cancel any time.</p>
+              <p>Level 1 tools are free forever. Levels 2–4 require a subscription.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
                 <div className="pricing-period">Monthly</div>
-                <div className="pricing-price"><sup>$</sup>9<span style={{ fontSize: 28 }}>.99</span></div>
+                <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>All composure tools</li>
-                  <li>Unlimited sessions</li>
-                  <li>AI-powered Reframe included</li>
+                  <li>Level 1: Regulate — free always</li>
+                  <li>Level 2: Recognize your signals</li>
+                  <li>Level 3: See your patterns</li>
+                  <li>Level 4: Watch & Choose</li>
+                  <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-secondary" style={{ width: "100%" }}>
@@ -3079,14 +3104,16 @@ export default function Stillform() {
                 </button>
               </div>
               <div className="pricing-card featured">
-                <div className="pricing-badge">Best Value</div>
+                <div className="pricing-badge">Save 38%</div>
                 <div className="pricing-period">Annual</div>
-                <div className="pricing-price"><sup>$</sup>89<span style={{ fontSize: 28 }}>.99</span></div>
-                <div className="pricing-save">$7.50/mo · Save 25%</div>
+                <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
+                <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>All composure tools</li>
-                  <li>Unlimited sessions</li>
-                  <li>AI-powered Reframe included</li>
+                  <li>Level 1: Regulate — free always</li>
+                  <li>Level 2: Recognize your signals</li>
+                  <li>Level 3: See your patterns</li>
+                  <li>Level 4: Watch & Choose</li>
+                  <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
@@ -3095,7 +3122,7 @@ export default function Stillform() {
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
-              Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy Policy</button>.
+              Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
             </p>
           </section>
         )}
