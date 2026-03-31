@@ -2811,6 +2811,9 @@ export default function Stillform() {
             <p className="home-sub">
               Stillform helps you regain control in under 2 minutes when stress shuts down your ability to think.
             </p>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24, letterSpacing: "0.04em" }}>
+              Built from lived experience.
+            </div>
 
             {/* PANIC BUTTON — primary action */}
             <button
