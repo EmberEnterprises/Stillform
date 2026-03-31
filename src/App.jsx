@@ -1059,9 +1059,22 @@ function FeedbackPrompt({ tool }) {
 function PhysiologicalSighTool({ onComplete }) {
   const totalReps = 3;
   const [rep, setRep] = useState(1);
-  const [phase, setPhase] = useState("inhale1"); // inhale1 | inhale2 | exhale | rest | done
+  const [phase, setPhase] = useState("inhale1");
   const [count, setCount] = useState(2);
   const [running, setRunning] = useState(false);
+
+  // TIME-TO-REGULATION
+  const startTime = useRef(Date.now());
+  const saveSession = () => {
+    const elapsed = Date.now() - startTime.current;
+    const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["sigh"], exitPoint: "sigh-complete", source: "sigh" });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+    return elapsed;
+  };
 
   const phases = {
     inhale1: { label: "Inhale", sub: "In through your nose.", next: "inhale2", duration: 2 },
@@ -1094,20 +1107,26 @@ function PhysiologicalSighTool({ onComplete }) {
     }
   }, [count, running, phase, rep]);
 
-  if (phase === "done") return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>Reset complete.</h2>
-      <p style={{ marginBottom: 24 }}>Three physiological sighs. Your nervous system has had a reset. Your head is clearer than it was 60 seconds ago.</p>
-      <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
-        Talk through what's happening →
-      </button>
-      <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
-        I'm good
-      </button>
-      <FeedbackPrompt tool="sigh" />
-    </div>
-  );
+  if (phase === "done") {
+    const elapsed = saveSession();
+    const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
+    const count = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })();
+    return (
+      <div className="complete">
+        <div className="complete-icon">✓</div>
+        <h2>Reset complete.</h2>
+        <p style={{ marginBottom: 8 }}>Three physiological sighs. Your head is clearer than it was {fmt(elapsed)} ago.</p>
+        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {count} times.</div>}
+        <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
+          Talk through what's happening →
+        </button>
+        <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
+          I'm good
+        </button>
+        <FeedbackPrompt tool="sigh" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -1164,6 +1183,25 @@ function PhysiologicalSighTool({ onComplete }) {
 
 function BreatheGroundTool({ onComplete, pathway }) {
   const [phase, setPhase] = useState("breathe"); // breathe | ground | done
+
+  // TIME-TO-REGULATION
+  const startTime = useRef(Date.now());
+  const formatTime = (ms) => {
+    const totalSec = Math.round(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+  };
+  const saveSession = (tools, exitPoint) => {
+    const elapsed = Date.now() - startTime.current;
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: formatTime(elapsed), tools, exitPoint, source: "breathe-ground" });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+    return elapsed;
+  };
+  const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
 
   // --- BREATHE ---
   // 4-4-8-2: longer exhale activates parasympathetic faster — clinically more effective for acute stress/rage
@@ -1222,22 +1260,28 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
   const progress = ((cycle - 1) * phases.length + phaseIdx) / (totalCycles * phases.length);
 
-  if (groundDone) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>You're here.</h2>
-      <p>Nervous system regulated. Senses anchored. You're back in the present.</p>
-      <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
-        <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
-          Talk it through →
-        </button>
-        <button className="btn btn-ghost" onClick={onComplete}>
-          I'm good
-        </button>
+  if (groundDone) {
+    const elapsed = saveSession(["breathe", "ground"], "grounding-complete");
+    const count = getSessionCount();
+    return (
+      <div className="complete">
+        <div className="complete-icon">✓</div>
+        <h2>You're here.</h2>
+        <p>Nervous system regulated. Senses anchored.</p>
+        <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
+        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {count} times.</div>}
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
+          <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
+            Talk it through →
+          </button>
+          <button className="btn btn-ghost" onClick={onComplete}>
+            I'm good
+          </button>
       </div>
       <FeedbackPrompt tool="breathe" />
     </div>
   );
+  }
 
   if (phase === "ground") return (
     <div>
@@ -1322,7 +1366,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             }}>
               Keep breathing
             </button>
-            <button className="btn btn-ghost" onClick={onComplete} style={{ color: "var(--text-dim)", fontSize: 13 }}>
+            <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); onComplete(); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               I'm ready to stop
             </button>
           </div>
@@ -1333,6 +1377,25 @@ function BreatheGroundTool({ onComplete, pathway }) {
 }
 
 function BodyScanTool({ onComplete }) {
+  // TIME-TO-REGULATION
+  const startTime = useRef(Date.now());
+  const formatTime = (ms) => {
+    const totalSec = Math.round(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+  };
+  const saveSession = () => {
+    const elapsed = Date.now() - startTime.current;
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: formatTime(elapsed), tools: ["body-scan"], exitPoint: "scan-complete", source: "body-scan" });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+    return elapsed;
+  };
+  const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
+
   const areas = [
     {
       name: "Jaw & Face",
@@ -1427,15 +1490,21 @@ function BodyScanTool({ onComplete }) {
   const holdTarget = area.holdSeconds;
   const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
 
-  if (done) return (
-    <div className="complete">
-      <div className="complete-icon">✓</div>
-      <h2>Scan complete.</h2>
-      <p>You've moved awareness and pressure through your body. Notice what has shifted.</p>
-      <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-      <FeedbackPrompt tool="bodyscan" />
-    </div>
-  );
+  if (done) {
+    const elapsed = saveSession();
+    const sessionCount = getSessionCount();
+    return (
+      <div className="complete">
+        <div className="complete-icon">✓</div>
+        <h2>Scan complete.</h2>
+        <p>You've moved awareness and pressure through your body.</p>
+        <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
+        {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {sessionCount} times.</div>}
+        <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
+        <FeedbackPrompt tool="bodyscan" />
+      </div>
+    );
+  }
 
   return (
     <div className="scan-body">
@@ -1512,6 +1581,18 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     ? "What's spiraling? Say it plainly — the presentation, the decision, the thing you keep telling yourself. Don't organize it. Just say it."
     : "Say what's happening. Don't filter it. Don't make it make sense. Just say it — whatever is in your head right now. The AI will read exactly what you wrote.";
   const STORAGE_KEY = "stillform_reframe_session";
+
+  // TIME-TO-REGULATION
+  const startTime = useRef(Date.now());
+  const saveSession = () => {
+    const elapsed = Date.now() - startTime.current;
+    const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+  };
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -1651,7 +1732,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
             <div style={{ padding: "8px 0 4px 44px" }}>
               <button
-                onClick={() => onComplete("breathe")}
+                onClick={() => { saveSession(); onComplete("breathe"); }}
                 style={{
                   background: "none",
                   border: "none",
@@ -1710,6 +1791,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             {messages.length > 2 && (
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
+                saveSession();
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
                 onComplete();
               }}>
