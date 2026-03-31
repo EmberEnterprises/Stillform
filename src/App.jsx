@@ -2514,7 +2514,20 @@ function SignalMapTool({ onComplete }) {
   ];
 
   const triggers = [
-    "Work / deadlines", "Relationships", "Health / pain", "Money", "Self-worth", "Sensory overload", "Conflict", "Uncertainty"
+    // Situational
+    "Work / deadlines", "Conflict / confrontation", "Being put on the spot", "Public speaking / performing",
+    "Difficult conversations", "Being judged or evaluated", "Waiting for results or news",
+    // Emotional
+    "Rejection or abandonment", "Feeling disrespected", "Jealousy", "Guilt or shame from the past",
+    "Grief / loss / anniversaries", "Feeling invisible or unheard",
+    // Relational
+    "Family dynamics", "Romantic relationship tension", "Parenting moments", "Social situations / networking",
+    // Physical / environmental
+    "Chronic pain flares", "Sleep deprivation", "Sensory overload (noise, light, crowds)",
+    "Hormonal changes", "Hunger or blood sugar drops",
+    // Cognitive
+    "Money / financial pressure", "Self-worth / impostor feelings", "Uncertainty / not knowing",
+    "Being alone with your thoughts", "Comparison to others", "Unfinished tasks piling up"
   ];
 
   const save = (key, value) => {
@@ -2597,8 +2610,9 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What usually triggers you?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The situations or topics that activate your nervous system most often.</p>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Most people don't recognize half their triggers. Scroll through — tap any that feel familiar, even slightly. You might be surprised.</p>
+        <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 24, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {triggers.map(t => {
             const selected = (signals.triggers || []).includes(t);
@@ -4263,6 +4277,114 @@ export default function Stillform() {
             {/* Links */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
+
+            {/* PREMIUM CUSTOMIZATION */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Customization</div>
+
+              {/* Theme — free: dark. Others IAP */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
+                {[
+                  { id: "dark", label: "Dark", free: true },
+                  { id: "midnight", label: "Midnight Blue", free: false },
+                  { id: "warm", label: "Warm Amber", free: false },
+                  { id: "light", label: "Light", free: false }
+                ].map(t => (
+                  <div key={t.id} style={{
+                    background: t.id === "dark" ? "var(--amber-glow)" : "var(--surface)",
+                    border: `1px solid ${t.id === "dark" ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 8, padding: "12px 16px", marginBottom: 4,
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    opacity: t.free ? 1 : 0.4
+                  }}>
+                    <div style={{ fontSize: 14, color: t.free ? "var(--text)" : "var(--text-muted)" }}>{t.label}</div>
+                    {!t.free && <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Premium</div>}
+                  </div>
+                ))}
+              </div>
+
+              {/* AI Tone — IAP */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
+                {[
+                  { id: "default", label: "Balanced (default)", free: true },
+                  { id: "gentle", label: "Gentle", free: false },
+                  { id: "direct", label: "Direct & blunt", free: false },
+                  { id: "clinical", label: "Clinical / technical", free: false },
+                  { id: "motivational", label: "Motivational", free: false }
+                ].map(t => (
+                  <div key={t.id} style={{
+                    background: t.id === "default" ? "var(--amber-glow)" : "var(--surface)",
+                    border: `1px solid ${t.id === "default" ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 8, padding: "12px 16px", marginBottom: 4,
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    opacity: t.free ? 1 : 0.4
+                  }}>
+                    <div style={{ fontSize: 14, color: t.free ? "var(--text)" : "var(--text-muted)" }}>{t.label}</div>
+                    {!t.free && <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Premium</div>}
+                  </div>
+                ))}
+              </div>
+
+              {/* Export — IAP */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Export</div>
+                {[
+                  { label: "Export journal entries (PDF)", desc: "Download your full journal" },
+                  { label: "Export session history (CSV)", desc: "Your regulation data for personal records or a provider" }
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    padding: "12px 16px", marginBottom: 4, opacity: 0.4,
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text-muted)" }}>{item.label}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Premium</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Notifications — grayed, needs native */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Notifications</div>
+                {[
+                  { label: "Daily check-in reminder", desc: "Configurable time" },
+                  { label: "Micro-nudges", desc: "Brief composure prompts throughout the day" }
+                ].map((item, i) => (
+                  <div key={i} style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    padding: "12px 16px", marginBottom: 4, opacity: 0.3,
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text-muted)" }}>{item.label}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Wearable — grayed, needs native */}
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Wearable Integration</div>
+                <div style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "12px 16px", opacity: 0.3,
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Connect HR / HRV monitor</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Auto-detect elevated heart rate and prompt composure tools</div>
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
+                </div>
+              </div>
+            </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
