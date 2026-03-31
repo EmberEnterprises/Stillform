@@ -1029,6 +1029,14 @@ const TOOLS = [
     level: 3
   },
   {
+    id: "bias",
+    icon: "⬡",
+    name: "Know Your Blind Spots",
+    desc: "Learn the cognitive biases that shape how you think under pressure.",
+    time: "5 min",
+    level: 3
+  },
+  {
     id: "meta",
     icon: "✦",
     name: "Watch & Choose",
@@ -1878,6 +1886,141 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           {messages.length > 2 && <FeedbackPrompt tool="reframe" />}
         </div>
       )}
+    </div>
+  );
+}
+
+function MicroBiasTool({ onComplete }) {
+  const [current, setCurrent] = useState(0);
+  const [identified, setIdentified] = useState([]);
+  const [done, setDone] = useState(false);
+
+  const biases = [
+    {
+      name: "Confirmation Bias",
+      what: "Your brain seeks evidence that confirms what you already believe — and filters out what doesn't.",
+      example: "You're convinced your partner is pulling away. You notice every short text and missed call. You don't notice the three kind things they did today.",
+      question: "When you're upset, do you find yourself only seeing evidence that supports the worst interpretation?"
+    },
+    {
+      name: "Fundamental Attribution Error",
+      what: "When someone else does something wrong, you blame their character. When you do something wrong, you blame the situation.",
+      example: "They cut you off in traffic — they're reckless. You cut someone off — you were late for something important.",
+      question: "Do you tend to judge others by their actions but judge yourself by your intentions?"
+    },
+    {
+      name: "Negativity Bias",
+      what: "Your brain gives more weight to bad experiences than good ones. One criticism outweighs ten compliments.",
+      example: "Nine people loved your presentation. One person looked bored. You go home thinking about the one.",
+      question: "Does one negative thing tend to overshadow multiple positive things?"
+    },
+    {
+      name: "Sunk Cost Fallacy",
+      what: "You keep investing in something — a relationship, a job, a decision — because of what you've already put in, not because it's still right.",
+      example: "You stay in a situation that's hurting you because 'I've already given it three years.'",
+      question: "Have you ever stayed in something too long because leaving would mean admitting the investment was wasted?"
+    },
+    {
+      name: "Self-Serving Bias",
+      what: "You take credit for successes and externalize blame for failures. Your brain protects your self-image.",
+      example: "The project succeeded — you led it. The project failed — the team dropped the ball.",
+      question: "When something goes wrong, is your first instinct to look outward for the cause?"
+    },
+    {
+      name: "Anchoring",
+      what: "The first piece of information you receive carries disproportionate weight in every decision after.",
+      example: "Someone told you you're 'too much' at age 12. You're 35 and still shrinking yourself in rooms.",
+      question: "Is there an old belief or early experience that still shapes how you see yourself — even though everything has changed since then?"
+    },
+    {
+      name: "In-Group Bias",
+      what: "You naturally favor people who are like you and view outsiders with more suspicion.",
+      example: "You trust someone's opinion more because they share your background, not because their reasoning is stronger.",
+      question: "Do you find it easier to empathize with people who share your experience than people who don't?"
+    },
+    {
+      name: "Spotlight Effect",
+      what: "You overestimate how much other people notice or care about your mistakes.",
+      example: "You said something awkward in a meeting. You replay it for days. Nobody else remembers.",
+      question: "Do you assume people are thinking about your mistakes as much as you are?"
+    }
+  ];
+
+  const handleResponse = (recognized) => {
+    if (recognized) {
+      setIdentified(prev => [...prev, biases[current].name]);
+    }
+    if (current < biases.length - 1) {
+      setCurrent(c => c + 1);
+    } else {
+      // Save identified biases
+      try {
+        localStorage.setItem("stillform_bias_profile", JSON.stringify(identified));
+      } catch {}
+      setDone(true);
+    }
+  };
+
+  if (done) {
+    return (
+      <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
+        <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>
+          Awareness is the intervention.
+        </h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
+          You don't need to fix these. Just knowing they're there changes how you respond to them. The AI in Reframe is also watching for these patterns in your conversations.
+        </p>
+        {identified.length > 0 && (
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized</div>
+            {identified.map((b, i) => (
+              <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
+            ))}
+          </div>
+        )}
+        {identified.length === 0 && (
+          <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>You didn't identify with any of these right now. That may change — biases show up differently under stress.</p>
+        )}
+        <button className="btn btn-ghost" onClick={onComplete}>Done</button>
+      </div>
+    );
+  }
+
+  const bias = biases[current];
+  return (
+    <div style={{ maxWidth: 420, margin: "0 auto" }}>
+      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
+        {current + 1} of {biases.length}
+      </div>
+
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 16 }}>
+        {bias.name}
+      </h2>
+
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", marginBottom: 16 }}>
+        <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>{bias.what}</div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, fontStyle: "italic" }}>{bias.example}</div>
+      </div>
+
+      <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 24 }}>
+        {bias.question}
+      </p>
+
+      <div style={{ display: "flex", gap: 10 }}>
+        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
+          Yes, I see this
+        </button>
+        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
+          Not really
+        </button>
+      </div>
+
+      <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
+        {biases.map((_, i) => (
+          <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+        ))}
+      </div>
     </div>
   );
 }
@@ -2757,6 +2900,7 @@ export default function Stillform() {
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
       case "patterns": return <PatternsTool {...props} />;
+      case "bias": return <MicroBiasTool {...props} />;
       case "meta": return <MetacognitionTool {...props} />;
       default: return null;
     }
@@ -2855,7 +2999,7 @@ export default function Stillform() {
                 {[
                   { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Panic button free — full tools with subscription", active: true, action: () => setScreen("tools") },
                   { icon: "◇", level: "Level 2", name: "Recognize", desc: "Learn your body's warning signals. Catch it before the spiral.", status: "Unlocks after 3 sessions", active: false },
-                  { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works.", status: "Unlocks after 8 sessions", active: false },
+                  { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works. Learn the cognitive biases that shape your reactions.", status: "Unlocks after 8 sessions", active: false },
                   { icon: "✦", level: "Level 4", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response.", status: "Unlocks after 12 sessions", active: false }
                 ].map((l, i) => (
                   <div key={i} onClick={l.action || undefined} style={{
@@ -3032,11 +3176,18 @@ export default function Stillform() {
                       See your patterns
                     </div>
                     <button
-                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)", marginBottom: 8 }}
                       onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))}
                     >
                       <div style={{ fontSize: 14, marginBottom: 2 }}>◇ Your Patterns</div>
                       <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate</div>
+                    </button>
+                    <button
+                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                      onClick={() => startTool(TOOLS.find(t => t.id === "bias"))}
+                    >
+                      <div style={{ fontSize: 14, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>The biases shaping how you think under pressure</div>
                     </button>
                   </div>
                 );
@@ -3238,6 +3389,41 @@ export default function Stillform() {
                   }} />
                 </button>
               </div>
+            </div>
+
+            {/* Display */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Display</div>
+              {[
+                { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
+                { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" }
+              ].map(opt => {
+                const isOn = (() => { try { return localStorage.getItem(opt.key) === "on"; } catch { return false; } })();
+                return (
+                  <div key={opt.key} style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
+                    marginBottom: 8
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
+                    </div>
+                    <button onClick={() => {
+                      try { localStorage.setItem(opt.key, isOn ? "off" : "on"); window.location.reload(); } catch {}
+                    }} style={{
+                      background: isOn ? "var(--amber)" : "var(--border)",
+                      border: "none", borderRadius: 12, width: 44, height: 24, cursor: "pointer",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: isOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </button>
+                  </div>
+                );
+              })}
             </div>
 
             {/* Session Data */}
