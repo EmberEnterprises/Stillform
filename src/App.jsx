@@ -3224,7 +3224,7 @@ export default function Stillform() {
               title: "Recognize",
               subtitle: "Catch it earlier.",
               body: "Map where tension shows first in your body. Build a personal signal profile so you reach for help at a 3, not a 10.",
-              note: "Included free with Level 1."
+              note: "Available immediately."
             },
             {
               icon: "◈",
@@ -3997,7 +3997,7 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Levels 1 & 2 are free — regulation tools and signal recognition. Subscription unlocks pattern awareness and metacognition.</p>
+              <p>Instant reset is free forever. Full system requires a subscription.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
@@ -4005,12 +4005,12 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>✓ Level 1: Regulation tools (free)</li>
-                  <li>✓ Level 2: Signal recognition (free)</li>
-                  <li>★ Level 3: Pattern awareness</li>
-                  <li>★ Level 4: Watch & Choose</li>
-                  <li>★ AI-powered Reframe</li>
-                  <li>★ Premium customization</li>
+                  <li>Instant reset — always free</li>
+                  <li>Level 1: All regulation tools</li>
+                  <li>Level 2: Signal recognition</li>
+                  <li>Level 3: Pattern awareness</li>
+                  <li>Level 4: Watch & Choose</li>
+                  <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-secondary" style={{ width: "100%" }}>
@@ -4023,12 +4023,12 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
                 <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>✓ Level 1: Regulation tools (free)</li>
-                  <li>✓ Level 2: Signal recognition (free)</li>
-                  <li>★ Level 3: Pattern awareness</li>
-                  <li>★ Level 4: Watch & Choose</li>
-                  <li>★ AI-powered Reframe</li>
-                  <li>★ Premium customization</li>
+                  <li>Instant reset — always free</li>
+                  <li>Level 1: All regulation tools</li>
+                  <li>Level 2: Signal recognition</li>
+                  <li>Level 3: Pattern awareness</li>
+                  <li>Level 4: Watch & Choose</li>
+                  <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
