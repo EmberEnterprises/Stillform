@@ -2827,9 +2827,6 @@ export default function Stillform() {
             </div>
 
             <div className="home-cta">
-              <button className="btn btn-primary" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("tools")}>
-                Explore tools →
-              </button>
               <button className="btn btn-ghost" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("pricing")}>
                 Pricing
               </button>
@@ -2842,16 +2839,18 @@ export default function Stillform() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left" }}>
                 {[
-                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Free — always available", active: true },
+                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Free — tap to open tools →", active: true, action: () => setScreen("tools") },
                   { icon: "◇", level: "Level 2", name: "Recognize", desc: "Learn your body's warning signals. Catch it before the spiral.", status: "Unlocks after 3 sessions", active: false },
                   { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works.", status: "Unlocks after 8 sessions", active: false },
                   { icon: "✦", level: "Level 4", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response.", status: "Unlocks after 12 sessions", active: false }
                 ].map((l, i) => (
-                  <div key={i} style={{
+                  <div key={i} onClick={l.action || undefined} style={{
                     background: l.active ? "var(--surface)" : "var(--bg)",
                     border: `1px solid ${l.active ? "var(--amber-dim)" : "var(--border)"}`,
                     borderRadius: 10, padding: "14px 18px",
-                    opacity: l.active ? 1 : 0.7
+                    opacity: l.active ? 1 : 0.7,
+                    cursor: l.action ? "pointer" : "default",
+                    transition: "border-color 0.2s"
                   }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
                       <span style={{ fontSize: 16 }}>{l.icon}</span>
