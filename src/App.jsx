@@ -3297,14 +3297,14 @@ export default function Stillform() {
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>When any feeling is running too loud.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing + grounding. 2 minutes.</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Steady your system. 2 minutes.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
@@ -3418,7 +3418,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>When any feeling is running too loud.</div>
                   </button>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
@@ -3426,7 +3426,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
                     <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing + grounding. 2 minutes.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Steady your system. 2 minutes.</div>
                   </button>
                   <button onClick={() => startPathway("clarity")} style={{
                     width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
@@ -3524,7 +3524,7 @@ export default function Stillform() {
                   Regulate
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                  Nervous system override. Breathing + grounding.
+                  Settle what.s too loud. Breathing + grounding.
                 </div>
               </button>
 
@@ -3574,26 +3574,42 @@ export default function Stillform() {
                 Level 1 · Regulate
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                {[
-                  { id: "breathe", icon: "◎", label: "Breathe & Ground", sub: "8 min" },
-                  { id: "sigh", icon: "◌", label: "Clear Your Head", sub: "2 min" },
-                  { id: "scan", icon: "◉", label: "Body Scan", sub: "10 min" },
-                  { id: "reframe", icon: "✦", label: "Reframe", sub: "Open" }
-                ].map(t => (
-                  <button key={t.id}
-                    onClick={() => { if (t.id === "reframe") setPathway("calm"); startTool(TOOLS.find(tool => tool.id === t.id)); }}
-                    style={{
-                      background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                      padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                    }}
-                    onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                    onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-                  >
-                    <div style={{ fontSize: 14, marginBottom: 3 }}>{t.icon} {t.label}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{t.sub}</div>
-                  </button>
-                ))}
+                <button
+                  onClick={() => startPathway("calm")}
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◎ Regulate</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathe + ground</div>
+                </button>
+                <button
+                  onClick={() => startPathway("clarity")}
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>✦ Get sharp</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Reset + reframe</div>
+                </button>
+                <button
+                  onClick={() => startPathway("hype")}
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◌ Lock in</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Focus + confidence</div>
+                </button>
+                <button
+                  onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
+                  style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 3 }}>◉ Body scan</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Release tension</div>
+                </button>
               </div>
             </div>
 
