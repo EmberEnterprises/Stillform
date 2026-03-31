@@ -2839,7 +2839,7 @@ export default function Stillform() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left" }}>
                 {[
-                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Free — tap to open tools →", active: true, action: () => setScreen("tools") },
+                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Panic button free — full tools with subscription", active: true, action: () => setScreen("tools") },
                   { icon: "◇", level: "Level 2", name: "Recognize", desc: "Learn your body's warning signals. Catch it before the spiral.", status: "Unlocks after 3 sessions", active: false },
                   { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works.", status: "Unlocks after 8 sessions", active: false },
                   { icon: "✦", level: "Level 4", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response.", status: "Unlocks after 12 sessions", active: false }
@@ -3083,7 +3083,7 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Level 1 tools are free forever. Levels 2–4 require a subscription.</p>
+              <p>Panic button is free forever. Full system requires a subscription.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
@@ -3091,9 +3091,10 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>Level 1: Regulate — free always</li>
-                  <li>Level 2: Recognize your signals</li>
-                  <li>Level 3: See your patterns</li>
+                  <li>Panic mode — always free</li>
+                  <li>Level 1: All regulation tools</li>
+                  <li>Level 2: Signal recognition</li>
+                  <li>Level 3: Pattern awareness</li>
                   <li>Level 4: Watch & Choose</li>
                   <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
@@ -3108,9 +3109,10 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
                 <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>Level 1: Regulate — free always</li>
-                  <li>Level 2: Recognize your signals</li>
-                  <li>Level 3: See your patterns</li>
+                  <li>Panic mode — always free</li>
+                  <li>Level 1: All regulation tools</li>
+                  <li>Level 2: Signal recognition</li>
+                  <li>Level 3: Pattern awareness</li>
                   <li>Level 4: Watch & Choose</li>
                   <li>AI-powered Reframe</li>
                   <li>7-day free trial</li>
