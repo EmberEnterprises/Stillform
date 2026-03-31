@@ -3224,7 +3224,7 @@ export default function Stillform() {
               title: "Recognize",
               subtitle: "Catch it earlier.",
               body: "Map where tension shows first in your body. Build a personal signal profile so you reach for help at a 3, not a 10.",
-              note: "Unlocks after 3 sessions."
+              note: "Included free with Level 1."
             },
             {
               icon: "◈",
@@ -3349,6 +3349,18 @@ export default function Stillform() {
                     }}>
                       ← Back
                     </button>
+                    <div style={{ marginTop: 32, padding: "16px 20px", borderTop: "1px solid var(--border)", textAlign: "center" }}>
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 8 }}>
+                        Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis:
+                      </p>
+                      <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
+                        background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                        padding: "8px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                      }}>
+                        Crisis resources & helplines →
+                      </button>
+                    </div>
                   </>
                 ) : (
                   <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
@@ -3633,14 +3645,14 @@ export default function Stillform() {
             {(() => {
               let sessionCount = 0;
               try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-              const unlocked = sessionCount >= 3;
+              const unlocked = true; // L1 + L2 are free
               return (
                 <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.5 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                     <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
                       Level 2 · Recognize
                     </div>
-                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{3 - sessionCount} sessions to unlock</div>}
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>Included free</div>}
                   </div>
                   {unlocked ? (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -3985,7 +3997,7 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Instant reset is free forever. Full system requires a subscription.</p>
+              <p>Levels 1 & 2 are free — regulation tools and signal recognition. Subscription unlocks pattern awareness and metacognition.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
@@ -3993,12 +4005,12 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>Instant reset — always free</li>
-                  <li>Level 1: All regulation tools</li>
-                  <li>Level 2: Signal recognition</li>
-                  <li>Level 3: Pattern awareness</li>
-                  <li>Level 4: Watch & Choose</li>
-                  <li>AI-powered Reframe</li>
+                  <li>✓ Level 1: Regulation tools (free)</li>
+                  <li>✓ Level 2: Signal recognition (free)</li>
+                  <li>★ Level 3: Pattern awareness</li>
+                  <li>★ Level 4: Watch & Choose</li>
+                  <li>★ AI-powered Reframe</li>
+                  <li>★ Premium customization</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-secondary" style={{ width: "100%" }}>
@@ -4011,12 +4023,12 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
                 <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>Instant reset — always free</li>
-                  <li>Level 1: All regulation tools</li>
-                  <li>Level 2: Signal recognition</li>
-                  <li>Level 3: Pattern awareness</li>
-                  <li>Level 4: Watch & Choose</li>
-                  <li>AI-powered Reframe</li>
+                  <li>✓ Level 1: Regulation tools (free)</li>
+                  <li>✓ Level 2: Signal recognition (free)</li>
+                  <li>★ Level 3: Pattern awareness</li>
+                  <li>★ Level 4: Watch & Choose</li>
+                  <li>★ AI-powered Reframe</li>
+                  <li>★ Premium customization</li>
                   <li>7-day free trial</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
