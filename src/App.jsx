@@ -3379,10 +3379,35 @@ export default function Stillform() {
                 Stillform trains your nervous system to catch the reaction before it happens — so you respond instead of react.
               </p>
 
-              <button className="btn btn-primary" style={{ fontSize: 16, padding: "16px 40px", marginBottom: 16 }}
-                onClick={() => startPathway("calm")}>
-                Start your first session
-              </button>
+              <div style={{ width: "100%", maxWidth: 360 }}>
+                <div style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12, textAlign: "center" }}>
+                  Start your first session
+                </div>
+                <button onClick={() => setScreen("panic")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I need help right now</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Breathing starts immediately. Free.</div>
+                </button>
+                <button onClick={() => startPathway("calm")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I can't calm down</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                </button>
+                <button onClick={() => startPathway("clarity")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
+                }}>
+                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I need to think clearly</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                </button>
+              </div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 56 }}>Free. Takes 2 minutes.</div>
 
               {/* FOUR LEVELS — what you're building toward */}
