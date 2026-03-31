@@ -2783,6 +2783,19 @@ export default function Stillform() {
           </div>
         </nav>
 
+        {/* FLOATING PANIC — accessible from any screen */}
+        {screen !== "home" && screen !== "panic" && (
+          <button onClick={() => setScreen("panic")} style={{
+            position: "fixed", bottom: 24, right: 24, zIndex: 100,
+            background: "var(--bg)", border: "1px solid rgba(200,60,60,0.3)",
+            borderRadius: 28, padding: "10px 18px", fontSize: 12, letterSpacing: "0.06em",
+            color: "rgba(200,80,80,0.9)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+            boxShadow: "0 2px 12px rgba(0,0,0,0.3)", transition: "all 0.2s"
+          }}>
+            ◎ Panic
+          </button>
+        )}
+
         {/* PANIC MODE — zero decisions, auto-start breathing */}
         {screen === "panic" && (
           <PanicMode onComplete={(redirectTo) => {
@@ -3184,6 +3197,7 @@ export default function Stillform() {
                 }}
               >
                 <option value="en">English</option>
+                <option value="hy" disabled>Հայերեն — Armenian (coming soon)</option>
                 <option value="es" disabled>Español (coming soon)</option>
                 <option value="fr" disabled>Français (coming soon)</option>
                 <option value="de" disabled>Deutsch (coming soon)</option>
