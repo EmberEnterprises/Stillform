@@ -1348,7 +1348,17 @@ function BreatheGroundTool({ onComplete, pathway }) {
     setPatternId(id);
     try { localStorage.setItem("stillform_breath_pattern", id); } catch {}
     setShowPatternPicker(false);
+    setStarted(true);
   };
+
+  const [started, setStarted] = useState(false);
+  const breathPrompts = [
+    { id: "calm", label: "Flooded right now", desc: "Rage, panic, anxiety, overwhelm", why: "Extended exhale forces your nervous system down" },
+    { id: "box", label: "Need to stay steady", desc: "Sustained pressure, staying composed", why: "Equal rhythm stabilizes over time" },
+    { id: "478", label: "Can't sleep / deep anxiety", desc: "Quiet moment, need deep calm", why: "Long hold + exhale is the deepest reset" },
+    { id: "quick", label: "Quick reset", desc: "Public, limited time, 60 seconds", why: "Shortest effective pattern" }
+  ];
+
   const totalCycles = 3; // 3 cycles then check in — don't force more
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [count, setCount] = useState(phases[0].duration);
@@ -1458,6 +1468,36 @@ function BreatheGroundTool({ onComplete, pathway }) {
   );
 
   // Breathe phase
+  if (!started && phase === "breathe") return (
+    <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+        What's happening?
+      </h2>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
+        The app picks the right breathing pattern for you.
+      </p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {breathPrompts.map(bp => (
+          <button key={bp.id} onClick={() => selectPattern(bp.id)} style={{
+            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+            fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+          }}>
+            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>{bp.label}</div>
+            <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>{bp.desc}</div>
+            <div style={{ fontSize: 10, color: "var(--amber)", fontStyle: "italic" }}>{bp.why}</div>
+          </button>
+        ))}
+      </div>
+      <button onClick={() => setStarted(true)} style={{
+        background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
+        cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 16
+      }}>
+        Skip — use {pattern.name}
+      </button>
+    </div>
+  );
+
   return (
     <div>
       {!breatheDone ? (
@@ -1796,14 +1836,39 @@ function MicButton({ onTranscript }) {
 }
 
 function ReframeTool({ onComplete, mode = "calm" }) {
-  const isClarity = mode === "clarity";
-  const isHype = mode === "hype";
+  const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
+  const [tab, setTab] = useState("talk");
+  const effectiveMode = activeMode || "calm";
+  const isClarity = effectiveMode === "clarity";
+  const isHype = effectiveMode === "hype";
   const openingText = isHype
     ? "What are you about to walk into? A stage, a room, a conversation, a meeting — say what it is and what's making it hard."
     : isClarity
     ? "What won't stop spinning? The thought, the decision, the thing you keep replaying. Say it — don't organize it."
     : "Say what you're feeling. Rage, anxiety, grief, shame, overwhelm — whatever it is. Don't filter it. The AI reads exactly what you wrote.";
-  const STORAGE_KEY = `stillform_reframe_session_${mode}`;
+  const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
+
+  // Journal state
+  const [journalText, setJournalText] = useState("");
+  const saveJournal = () => {
+    if (!journalText.trim()) return;
+    try {
+      const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+      entries.unshift({
+        id: Date.now(),
+        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+        time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+        trigger: journalText.trim(),
+        emotions: [],
+        intensity: 0,
+        body: "",
+        outcome: "",
+        mode: effectiveMode
+      });
+      localStorage.setItem("stillform_journal", JSON.stringify(entries));
+    } catch {}
+    setJournalText("");
+  };
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1812,7 +1877,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode });
+      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
   };
@@ -1837,14 +1902,14 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   const saveReframe = (msg, idx) => {
     try {
       const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
-      saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString(), mode });
+      saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString(), mode: effectiveMode });
       localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
       setSavedIds(prev => new Set([...prev, idx]));
     } catch {}
   };
 
   const getSavedReframes = () => {
-    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === mode); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === effectiveMode); } catch { return []; }
   };
 
   // Persist every message change to localStorage
@@ -1884,7 +1949,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
         signal: controller.signal,
         body: JSON.stringify({
           input: textToSend,
-          mode,
+          mode: effectiveMode,
           history: prevMessages.map(m => ({
             role: m.role === "ai" ? "assistant" : "user",
             content: m.text
@@ -1939,11 +2004,11 @@ function ReframeTool({ onComplete, mode = "calm" }) {
       sendBg: "#c9793a"
     }
   };
-  const mc = modeConfig[mode] || modeConfig.calm;
+  const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
-      {/* MODE HEADER — visually distinct per mode */}
+      {/* MODE HEADER — visually distinct per effectiveMode */}
       <div style={{ textAlign: "center", marginBottom: 16, padding: "20px 0 16px", borderBottom: `1px solid ${mc.border}` }}>
         <div style={{ fontSize: 32, marginBottom: 8, color: mc.color }}>{mc.icon}</div>
         <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, color: mc.color, marginBottom: 6 }}>{mc.title}</div>
@@ -3351,17 +3416,6 @@ export default function Stillform() {
                       <span style={{ fontSize: 12 }}>▾</span>
                     </button>
                     <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
-                      <button onClick={() => { completeOnboarding(); setScreen("panic"); }} style={{
-                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                        display: "flex", alignItems: "center", gap: 12
-                      }}>
-                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Instant reset</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Any feeling running too loud</div>
-                        </div>
-                      </button>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
                         width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
@@ -3369,30 +3423,30 @@ export default function Stillform() {
                       }}>
                         <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Regulate</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Breathing + grounding · 2 min</div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Breathe</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Smart breathing + grounding</div>
                         </div>
                       </button>
-                      <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
+                      <button onClick={() => { completeOnboarding(); startTool(TOOLS.find(t => t.id === "scan")); }} style={{
                         width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: 12
+                      }}>
+                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Find tension · acupressure release</div>
+                        </div>
+                      </button>
+                      <button onClick={() => { completeOnboarding(); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                        width: "100%", background: "transparent", border: "none",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
                         display: "flex", alignItems: "center", gap: 12
                       }}>
                         <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
                         <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Get sharp</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Cut noise · restore clarity</div>
-                        </div>
-                      </button>
-                      <button onClick={() => { completeOnboarding(); startPathway("hype"); }} style={{
-                        width: "100%", background: "transparent", border: "none",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                        display: "flex", alignItems: "center", gap: 12
-                      }}>
-                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◌</span>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Lock in</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Composure before the moment</div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk it through or journal it</div>
                         </div>
                       </button>
                     </div>
@@ -3499,17 +3553,6 @@ export default function Stillform() {
                   <span style={{ fontSize: 12 }}>▾</span>
                 </button>
                 <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
-                  <button onClick={() => setScreen("panic")} style={{
-                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
-                  }}>
-                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Instant reset</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Any feeling running too loud</div>
-                    </div>
-                  </button>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
                     padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
@@ -3517,30 +3560,30 @@ export default function Stillform() {
                   }}>
                     <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Regulate</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Breathing + grounding · 2 min</div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Breathe</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Smart breathing + grounding</div>
                     </div>
                   </button>
-                  <button onClick={() => startPathway("clarity")} style={{
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
+                  }}>
+                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Find tension · acupressure release</div>
+                    </div>
+                  </button>
+                  <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                    width: "100%", background: "transparent", border: "none",
                     padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
                   }}>
                     <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Get sharp</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Cut noise · restore clarity</div>
-                    </div>
-                  </button>
-                  <button onClick={() => startPathway("hype")} style={{
-                    width: "100%", background: "transparent", border: "none",
-                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
-                  }}>
-                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◌</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Lock in</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Composure before the moment</div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk it through or journal it</div>
                     </div>
                   </button>
                 </div>
@@ -3619,8 +3662,8 @@ export default function Stillform() {
                     padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe & Ground</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Settle your nervous system. Breathing + sensory grounding.</div>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Smart breathing + grounding. The app picks the right pattern for what you're feeling.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -3636,23 +3679,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI reads what you say. Helps you see it differently.</div>
-                  </button>
-                  <button onClick={() => startPathway("clarity")} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3, color: "#7aadcf" }}>✦ Get Sharp</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Cut through mental noise. Restore clarity.</div>
-                  </button>
-                  <button onClick={() => startPathway("hype")} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3, color: "#c9793a" }}>◌ Lock In</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Pre-performance composure. Stage fright. Big moments.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Talk it through or journal it. AI learns from everything you share.</div>
                   </button>
                 </div>
               </div>
