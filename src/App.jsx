@@ -3231,16 +3231,16 @@ export default function Stillform() {
               label: "Level 3",
               title: "See Patterns",
               subtitle: "Understand your loops.",
-              body: "Your session data surfaces what triggers you, what works, and the cognitive biases shaping your reactions.",
-              note: "Unlocks after 8 sessions."
+              body: "Your session data surfaces what triggers you, what works, and the cognitive biases shaping your reactions. This level needs real data from your sessions to show you something meaningful — not guesses.",
+              note: "Unlocks after 8 sessions — that's when the app has enough data to show you real patterns."
             },
             {
               icon: "✦",
               label: "Level 4",
               title: "Watch & Choose",
               subtitle: "Think clearly in real time.",
-              body: "Notice what's happening in your body. Name the thought. Recognize the pattern. Choose your response instead of reacting.",
-              note: "Unlocks after 12 sessions."
+              body: "Notice what's happening in your body. Name the thought. Recognize the pattern. Choose your response instead of reacting. This is a skill that builds on everything before it — regulation, signal recognition, and pattern awareness.",
+              note: "Unlocks after 12 sessions — by then you've built the foundation this level requires."
             }
           ];
           const step = steps[onboardStep];
@@ -3687,7 +3687,7 @@ export default function Stillform() {
                     <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
                       Level 3 · Patterns
                     </div>
-                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{8 - sessionCount} sessions to unlock</div>}
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{8 - sessionCount} more sessions — needs real data to find patterns</div>}
                   </div>
                   {unlocked ? (
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -3705,7 +3705,7 @@ export default function Stillform() {
                       </button>
                     </div>
                   ) : (
-                    <div style={{ fontSize: 13, color: "var(--text-muted)" }}>See what triggers you and what works.</div>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Your data reveals what triggers you and what works. Needs enough sessions to surface real patterns, not noise.</div>
                   )}
                 </div>
               );
@@ -3722,7 +3722,7 @@ export default function Stillform() {
                     <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
                       Level 4 · Watch & Choose
                     </div>
-                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{12 - sessionCount} sessions to unlock</div>}
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{12 - sessionCount} more sessions — builds on everything before it</div>}
                   </div>
                   {unlocked ? (
                     <button style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}
@@ -3732,7 +3732,7 @@ export default function Stillform() {
                       <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it and choose differently</div>
                     </button>
                   ) : (
-                    <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Watch your mind in motion. Choose your response.</div>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Real-time metacognition — watching your own thinking and choosing differently. You build this skill through the previous levels.</div>
                   )}
                 </div>
               );
