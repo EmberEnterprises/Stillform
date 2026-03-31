@@ -3061,11 +3061,18 @@ function PanicMode({ onComplete }) {
 }
 
 export default function Stillform() {
-  const [screen, setScreen] = useState("home");
+  const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
+  const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
+  const [onboardStep, setOnboardStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
+
+  const completeOnboarding = () => {
+    try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    setScreen("home");
+  };
 
   // Journal state
   const [journalEntries, setJournalEntries] = useState(() => {
@@ -3155,7 +3162,8 @@ export default function Stillform() {
     <>
       <style>{styles}</style>
       <div className={appClasses}>
-        {/* NAV */}
+        {/* NAV — hidden during onboarding */}
+        {screen !== "onboarding" && (
         <nav className="nav">
           <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => setScreen("home")}>
             Still<span>form</span>
@@ -3169,9 +3177,127 @@ export default function Stillform() {
             </button>
           </div>
         </nav>
+        )}
+
+        {/* ONBOARDING — first visit only */}
+        {screen === "onboarding" && (() => {
+          const steps = [
+            {
+              icon: "◎",
+              title: "Stillform",
+              subtitle: "Think clearly under pressure.",
+              body: "This is a composure training system. Four levels that take you from crisis to clarity — at your own pace.",
+              note: null
+            },
+            {
+              icon: "◎",
+              label: "Level 1",
+              title: "Regulate",
+              subtitle: "When you can't think.",
+              body: "Breathing, grounding, body scan, and AI-powered reframing. The tools do the work — you just follow them.",
+              note: "Panic button is always free."
+            },
+            {
+              icon: "◇",
+              label: "Level 2",
+              title: "Recognize",
+              subtitle: "Catch it earlier.",
+              body: "Map where tension shows first in your body. Build a personal signal profile so you reach for help at a 3, not a 10.",
+              note: "Unlocks after 3 sessions."
+            },
+            {
+              icon: "◈",
+              label: "Level 3",
+              title: "See Patterns",
+              subtitle: "Understand your loops.",
+              body: "Your session data surfaces what triggers you, what works, and the cognitive biases shaping your reactions.",
+              note: "Unlocks after 8 sessions."
+            },
+            {
+              icon: "✦",
+              label: "Level 4",
+              title: "Watch & Choose",
+              subtitle: "Think clearly in real time.",
+              body: "Notice what's happening in your body. Name the thought. Recognize the pattern. Choose your response instead of reacting.",
+              note: "Unlocks after 12 sessions."
+            }
+          ];
+          const step = steps[onboardStep];
+          const isLast = onboardStep === steps.length - 1;
+          const isFirst = onboardStep === 0;
+
+          return (
+            <section style={{
+              maxWidth: 480, margin: "0 auto", padding: "0 24px",
+              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1
+            }}>
+              {/* Progress dots */}
+              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
+                {steps.map((_, i) => (
+                  <div key={i} style={{
+                    width: 8, height: 8, borderRadius: "50%",
+                    background: i === onboardStep ? "var(--amber)" : "var(--border)",
+                    transition: "background 0.3s"
+                  }} />
+                ))}
+              </div>
+
+              <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
+              {step.label && (
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  {step.label}
+                </div>
+              )}
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: isFirst ? 42 : 32,
+                fontWeight: 300, lineHeight: 1.1, marginBottom: 8
+              }}>
+                {step.title}
+              </h1>
+              <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 24 }}>
+                {step.subtitle}
+              </div>
+              <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12 }}>
+                {step.body}
+              </p>
+              {step.note && (
+                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+                  {step.note}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
+                {!isFirst && (
+                  <button className="btn btn-ghost" onClick={() => setOnboardStep(s => s - 1)}>
+                    Back
+                  </button>
+                )}
+                {isLast ? (
+                  <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={completeOnboarding}>
+                    Start using Stillform
+                  </button>
+                ) : (
+                  <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
+                    {isFirst ? "See how it works" : "Next"}
+                  </button>
+                )}
+              </div>
+
+              {!isFirst && (
+                <button onClick={completeOnboarding} style={{
+                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 20
+                }}>
+                  Skip — take me to the app
+                </button>
+              )}
+            </section>
+          );
+        })()}
 
         {/* FLOATING PANIC — accessible from any screen */}
-        {screen !== "home" && screen !== "panic" && (
+        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && (
           <button onClick={() => setScreen("panic")} style={{
             position: "fixed", bottom: 80, right: 24, zIndex: 100,
             background: "var(--bg)", border: "1px solid rgba(200,60,60,0.3)",
@@ -3962,6 +4088,7 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_saved_reframes");
                     localStorage.removeItem("stillform_reframe_session");
                     localStorage.removeItem("stillform_journal");
+                    localStorage.removeItem("stillform_onboarded");
                     window.location.reload();
                   } catch {}
                 }
@@ -3999,6 +4126,17 @@ export default function Stillform() {
                 }}>
                   Contact us
                 </a>
+                <button onClick={() => {
+                  try { localStorage.removeItem("stillform_onboarded"); } catch {}
+                  setOnboardStep(0);
+                  setScreen("onboarding");
+                }} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Replay tutorial
+                </button>
               </div>
             </div>
 
