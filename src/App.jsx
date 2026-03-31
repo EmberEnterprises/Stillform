@@ -2672,28 +2672,29 @@ function PanicMode({ onComplete }) {
   // BREATHING ACTIVE — auto-started, one instruction only
   return (
     <div className="panic-screen">
-      {/* Audio toggle — small, top-right, non-intrusive */}
+      {/* Audio toggle — visible, labeled */}
       <button
         onClick={toggleAudio}
         style={{
           position: "absolute",
           top: 16,
           right: 16,
-          background: "none",
-          border: "1px solid var(--border)",
+          background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+          border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
           borderRadius: 8,
-          padding: "6px 10px",
-          fontSize: 16,
-          color: audioOn ? "var(--amber)" : "var(--text-muted)",
+          padding: "8px 14px",
+          fontSize: 12,
+          color: audioOn ? "var(--amber)" : "var(--text-dim)",
           cursor: "pointer",
           WebkitTapHighlightColor: "transparent",
           transition: "all 0.2s ease",
           zIndex: 10,
-          textDecoration: audioOn ? "none" : "line-through"
+          fontFamily: "'DM Sans', sans-serif",
+          letterSpacing: "0.04em"
         }}
         aria-label={audioOn ? "Mute audio" : "Unmute audio"}
       >
-        ♪
+        {audioOn ? "♪ Sound on" : "♪ Sound off"}
       </button>
 
       <div className="panic-instruction">
@@ -3164,6 +3165,142 @@ export default function Stillform() {
           </section>
         )}
 
+        {/* SETTINGS */}
+        {screen === "settings" && (
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
+            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
+
+            {/* Language */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Language</div>
+              <select
+                value={(() => { try { return localStorage.getItem("stillform_lang") || "en"; } catch { return "en"; } })()}
+                onChange={e => { try { localStorage.setItem("stillform_lang", e.target.value); } catch {} }}
+                style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                  borderRadius: 8, padding: "12px 14px", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif", appearance: "none", cursor: "pointer"
+                }}
+              >
+                <option value="en">English</option>
+                <option value="es" disabled>Español (coming soon)</option>
+                <option value="fr" disabled>Français (coming soon)</option>
+                <option value="de" disabled>Deutsch (coming soon)</option>
+                <option value="pt" disabled>Português (coming soon)</option>
+                <option value="ja" disabled>日本語 (coming soon)</option>
+                <option value="ko" disabled>한국어 (coming soon)</option>
+                <option value="zh" disabled>中文 (coming soon)</option>
+                <option value="ar" disabled>العربية (coming soon)</option>
+                <option value="tr" disabled>Türkçe (coming soon)</option>
+              </select>
+            </div>
+
+            {/* Audio */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Audio</div>
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
+                </div>
+                <button onClick={() => {
+                  try {
+                    const current = localStorage.getItem("stillform_audio") === "on";
+                    localStorage.setItem("stillform_audio", current ? "off" : "on");
+                    window.location.reload();
+                  } catch {}
+                }} style={{
+                  background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
+                  border: "none", borderRadius: 12, width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
+                }}>
+                  <div style={{
+                    width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
+                    left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
+                    transition: "left 0.2s"
+                  }} />
+                </button>
+              </div>
+            </div>
+
+            {/* Session Data */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your Data</div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
+                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Session history</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} completed sessions · stored on this device only
+                </div>
+              </div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
+                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet"; } catch { return "Not set up yet"; } })()}
+                </div>
+              </div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
+                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Saved reframes</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
+                </div>
+              </div>
+              <button onClick={() => {
+                if (window.confirm("This will permanently delete all your session history, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
+                  try {
+                    localStorage.removeItem("stillform_sessions");
+                    localStorage.removeItem("stillform_signal_profile");
+                    localStorage.removeItem("stillform_checkins");
+                    localStorage.removeItem("stillform_saved_reframes");
+                    localStorage.removeItem("stillform_reframe_session");
+                    window.location.reload();
+                  } catch {}
+                }
+              }} style={{
+                background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 8,
+                padding: "10px 16px", fontSize: 13, color: "rgba(200,80,80,0.8)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", width: "100%", marginTop: 4
+              }}>
+                Clear all data
+              </button>
+            </div>
+
+            {/* Links */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => setScreen("privacy")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Privacy & Disclaimers
+                </button>
+                <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Give feedback
+                </a>
+                <a href="mailto:emberenterprises@proton.me" style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Contact us
+                </a>
+              </div>
+            </div>
+
+            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32 }}>
+              Stillform · Ember Enterprises LLC · v1.0
+            </div>
+          </section>
+        )}
+
         {/* FOOTER */}
         <footer className="footer">
           <div className="footer-logo">Stillform</div>
@@ -3171,6 +3308,7 @@ export default function Stillform() {
             <button onClick={() => setScreen("home")}>Home</button>
             <button onClick={() => setScreen("tools")}>Open App</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
+            <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("privacy")}>Privacy</button>
           </div>
           <div className="footer-copy">© 2026 Ember Enterprises LLC</div>
