@@ -3145,7 +3145,11 @@ export default function Stillform() {
     if (p === "calm") {
       startTool(TOOLS.find(t => t.id === "breathe"));
     } else if (p === "hype") {
-      startTool(TOOLS.find(t => t.id === "sigh"));
+      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" });
+      setScreen("tool");
+    } else if (p === "clarity") {
+      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
+      setScreen("tool");
     } else {
       startTool(TOOLS.find(t => t.id === "sigh"));
     }
