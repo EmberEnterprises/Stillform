@@ -1290,6 +1290,31 @@ function PhysiologicalSighTool({ onComplete }) {
   );
 }
 
+const BREATHING_PATTERNS = [
+  { id: "calm", name: "Calm (4-4-8-2)", desc: "Longer exhale activates parasympathetic response", phases: [
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 4, instruction: "Hold." },
+    { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
+    { name: "Rest", duration: 2, instruction: "Rest." }
+  ]},
+  { id: "box", name: "Box (4-4-4-4)", desc: "Equal rhythm. Used by Navy SEALs for focus", phases: [
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 4, instruction: "Hold." },
+    { name: "Exhale", duration: 4, instruction: "Out through your mouth." },
+    { name: "Hold", duration: 4, instruction: "Hold." }
+  ]},
+  { id: "478", name: "4-7-8", desc: "Deep calm. Best when you have a quiet moment", phases: [
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 7, instruction: "Hold." },
+    { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." }
+  ]},
+  { id: "quick", name: "Quick Reset (4-4-6)", desc: "Shorter pattern when time is tight", phases: [
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 4, instruction: "Hold." },
+    { name: "Exhale", duration: 6, instruction: "Out through your mouth." }
+  ]}
+];
+
 function BreatheGroundTool({ onComplete, pathway }) {
   const [phase, setPhase] = useState("breathe"); // breathe | ground | done
 
@@ -1313,13 +1338,17 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
 
   // --- BREATHE ---
-  // 4-4-8-2: longer exhale activates parasympathetic faster — clinically more effective for acute stress/rage
-  const phases = [
-    { name: "Inhale", duration: 4, instruction: "In through your nose." },
-    { name: "Hold", duration: 4, instruction: "Hold." },
-    { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
-    { name: "Rest", duration: 2, instruction: "Rest." }
-  ];
+  const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
+  const [patternId, setPatternId] = useState(savedPatternId);
+  const [showPatternPicker, setShowPatternPicker] = useState(false);
+  const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
+  const phases = pattern.phases;
+
+  const selectPattern = (id) => {
+    setPatternId(id);
+    try { localStorage.setItem("stillform_breath_pattern", id); } catch {}
+    setShowPatternPicker(false);
+  };
   const totalCycles = 3; // 3 cycles then check in — don't force more
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [count, setCount] = useState(phases[0].duration);
@@ -1447,9 +1476,34 @@ function BreatheGroundTool({ onComplete, pathway }) {
             {phases[phaseIdx].name}
           </div>
           <div className="breath-instruction">{phases[phaseIdx].instruction}</div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 20 }}>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 12 }}>
             Round {cycle} of {totalCycles}
           </div>
+          {!running && !showPatternPicker && (
+            <button onClick={() => setShowPatternPicker(true)} style={{
+              background: "none", border: "none", color: "var(--text-muted)", fontSize: 11,
+              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginBottom: 16,
+              letterSpacing: "0.04em"
+            }}>
+              {pattern.name} · change pattern
+            </button>
+          )}
+          {showPatternPicker && (
+            <div style={{ width: "100%", maxWidth: 320, marginBottom: 20 }}>
+              {BREATHING_PATTERNS.map(p => (
+                <button key={p.id} onClick={() => selectPattern(p.id)} style={{
+                  width: "100%", padding: "10px 14px", textAlign: "left", cursor: "pointer",
+                  background: p.id === patternId ? "var(--amber-glow)" : "var(--surface)",
+                  border: `1px solid ${p.id === patternId ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 8, marginBottom: 6, color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                }}>
+                  <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{p.name}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{p.desc}</div>
+                </button>
+              ))}
+            </div>
+          )}
           {!running ? (
             <button className="btn btn-primary" style={{ fontSize: 16, padding: "14px 40px" }} onClick={() => setRunning(true)}>
               Begin
@@ -2940,6 +2994,46 @@ export default function Stillform() {
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
+  // Journal state
+  const [journalEntries, setJournalEntries] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+  });
+  const [journalMode, setJournalMode] = useState("list");
+  const [journalViewIdx, setJournalViewIdx] = useState(null);
+  const [jTrigger, setJTrigger] = useState("");
+  const [jEmotion, setJEmotion] = useState([]);
+  const [jBody, setJBody] = useState("");
+  const [jOutcome, setJOutcome] = useState("");
+  const [jIntensity, setJIntensity] = useState(5);
+
+  const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt"];
+
+  const saveJournalEntry = () => {
+    const entry = {
+      id: Date.now(),
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+      trigger: jTrigger.trim(),
+      emotions: jEmotion,
+      intensity: jIntensity,
+      body: jBody.trim(),
+      outcome: jOutcome.trim()
+    };
+    const updated = [entry, ...journalEntries];
+    setJournalEntries(updated);
+    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
+    setJournalMode("list");
+    setJTrigger(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
+  };
+
+  const deleteJournalEntry = (id) => {
+    if (!window.confirm("Delete this entry?")) return;
+    const updated = journalEntries.filter(e => e.id !== id);
+    setJournalEntries(updated);
+    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
+    setJournalMode("list");
+  };
+
   // Scroll to top on every screen change
   useEffect(() => { window.scrollTo(0, 0); }, [screen]);
   const startTool = (tool) => {
@@ -2968,7 +3062,7 @@ export default function Stillform() {
           return;
         }
       }
-      setScreen("tools");
+      setScreen("home");
     }};
     switch (activeTool?.id) {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
@@ -2994,11 +3088,9 @@ export default function Stillform() {
             Still<span>form</span>
           </div>
           <div className="nav-actions">
-            {screen !== "tools" && (
-              <button className="btn btn-ghost" onClick={() => setScreen("tools")}>
-                Open App
-              </button>
-            )}
+            <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
+              ⚙
+            </button>
             <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
               Start Free Trial
             </button>
@@ -3034,195 +3126,133 @@ export default function Stillform() {
           }} />
         )}
 
-        {/* HOME */}
+        {/* HOME — IS the app. No "Open App" gate. */}
         {screen === "home" && (
-          <section className="home">
-            <div className="home-tag">
-              ◎ Composure Tool
+          <section style={{ maxWidth: 560, margin: "0 auto", padding: "32px 24px 24px", position: "relative", zIndex: 1 }}>
+
+            {/* PANIC — always first, always prominent */}
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <button
+                className="panic-btn"
+                onClick={() => setScreen("panic")}
+              >
+                <span className="panic-btn-text">I need help<br/>right now</span>
+              </button>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8, fontStyle: "italic" }}>
+                One tap. No decisions. Just follow the circle.
+              </div>
             </div>
-            <h1 className="home-title">
-              For when you<br />
-              can't <em>think straight.</em>
-            </h1>
-            <p className="home-sub">
-              Stillform helps you regain control in under 2 minutes when stress shuts down your ability to think.
+
+            {/* WHAT DO YOU NEED — two pathways */}
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.2, color: "var(--text)", marginBottom: 6 }}>
+              What do you need?
+            </h2>
+            <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 20 }}>
+              Tell us what's happening.
             </p>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24, letterSpacing: "0.04em" }}>
-              Built from lived experience.
-            </div>
 
-            {/* PANIC BUTTON — primary action */}
-            <button
-              className="panic-btn"
-              onClick={() => setScreen("panic")}
-            >
-              <span className="panic-btn-text">I need help<br/>right now</span>
-            </button>
-            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 40, fontStyle: "italic" }}>
-              One tap. No decisions. Just follow the circle.
-            </div>
+            {/* Repeat what worked — one-tap shortcut */}
+            {(() => {
+              try {
+                const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                if (sessions.length < 2) return null;
+                const last = sessions[sessions.length - 1];
+                const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
+                const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
+                const mainTool = (last.tools || [])[0];
+                if (!mainTool || !toolNames[mainTool]) return null;
+                return (
+                  <button
+                    onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
+                    style={{
+                      width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                      borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
+                      marginBottom: 16, transition: "all 0.2s"
+                    }}
+                  >
+                    <div style={{ fontSize: 13, color: "var(--amber)" }}>
+                      ↺ Last time: {toolNames[mainTool]} worked in {last.durationFormatted || "a few minutes"}
+                    </div>
+                  </button>
+                );
+              } catch { return null; }
+            })()}
 
-            <div className="home-cta">
-              <button className="btn btn-ghost" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("pricing")}>
-                Pricing
+            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 28 }}>
+              <button
+                onClick={() => startPathway("calm")}
+                style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
+                  padding: "20px 22px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 20, marginBottom: 8 }}>◎</div>
+                <div style={{ fontSize: 17, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
+                  I can't calm down
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                  Your body is flooded. Your mind is offline. Start here.
+                </div>
+              </button>
+
+              <button
+                onClick={() => startPathway("clarity")}
+                style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
+                  padding: "20px 22px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 20, marginBottom: 8 }}>✦</div>
+                <div style={{ fontSize: 17, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
+                  I need to think clearly
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                  Stuck in your head. Spiraling. Big moment coming. Cut through it.
+                </div>
               </button>
             </div>
 
-            {/* SKILL GROWTH — how composure develops */}
-            <div style={{ maxWidth: 480, margin: "32px auto 0", textAlign: "center" }}>
-              <div style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                Composure is a skill. This is how it grows.
+            {/* OTHER L1 TOOLS — direct access */}
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 12 }}>
+                Other tools
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 12, textAlign: "left" }}>
-                {[
-                  { icon: "◎", level: "Level 1", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work.", status: "Panic button free · Full tools with subscription →", active: true, action: () => setScreen("tools") },
-                  { icon: "◇", level: "Level 2", name: "Recognize", desc: "Learn your body's warning signals. Catch it before the spiral.", status: "Unlocks after 3 sessions", active: false },
-                  { icon: "◈", level: "Level 3", name: "See Patterns", desc: "Your data reveals what triggers you and what works. Learn the cognitive biases that shape your reactions.", status: "Unlocks after 8 sessions", active: false },
-                  { icon: "✦", level: "Level 4", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response.", status: "Unlocks after 12 sessions", active: false }
-                ].map((l, i) => (
-                  <div key={i} onClick={l.action || undefined} style={{
-                    background: l.active ? "var(--surface)" : "var(--bg)",
-                    border: `1px solid ${l.active ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 10, padding: "14px 18px",
-                    opacity: l.active ? 1 : 0.7,
-                    cursor: l.action ? "pointer" : "default",
-                    transition: "border-color 0.2s"
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-                      <span style={{ fontSize: 16 }}>{l.icon}</span>
-                      <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>{l.level}</span>
-                      <span style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{l.name}</span>
-                    </div>
-                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 4, paddingLeft: 26 }}>{l.desc}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", paddingLeft: 26 }}>{l.status}</div>
-                  </div>
-                ))}
+              <div style={{ display: "flex", gap: 10 }}>
+                <button
+                  style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                  onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 2 }}>◉ Body Scan</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Tension release</div>
+                </button>
+                <button
+                  style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                  onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }}
+                >
+                  <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Reframe</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Talk it through</div>
+                </button>
               </div>
             </div>
-          </section>
-        )}
 
-        {/* TOOLS — two pathways, not a menu */}
-        {screen === "tools" && (
-          <section className="tools">
-            <div style={{ maxWidth: 560, margin: "0 auto", padding: "48px 24px 24px" }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 300, lineHeight: 1.2, color: "var(--text)", marginBottom: 8 }}>
-                What do you need?
-              </h2>
-              <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 36 }}>
-                Tell us what's happening.
-              </p>
-
-              {/* Repeat what worked — one-tap shortcut */}
-              {(() => {
-                try {
-                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-                  if (sessions.length < 2) return null;
-                  const last = sessions[sessions.length - 1];
-                  const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
-                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
-                  const mainTool = (last.tools || [])[0];
-                  if (!mainTool || !toolNames[mainTool]) return null;
-                  return (
-                    <button
-                      onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
-                      style={{
-                        width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
-                        marginBottom: 20, transition: "all 0.2s"
-                      }}
-                    >
-                      <div style={{ fontSize: 13, color: "var(--amber)" }}>
-                        ↺ Last time: {toolNames[mainTool]} worked in {last.durationFormatted || "a few minutes"}
-                      </div>
-                    </button>
-                  );
-                } catch { return null; }
-              })()}
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 36 }}>
-                {/* Path 1 — overwhelmed */}
-                <button
-                  onClick={() => startPathway("calm")}
-                  style={{
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 14,
-                    padding: "22px 24px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    transition: "border-color 0.2s"
-                  }}
-                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-                >
-                  <div style={{ fontSize: 22, marginBottom: 10 }}>◎</div>
-                  <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>
-                    I can't calm down
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Your body is flooded. Your mind is offline. Start here.
-                  </div>
-                </button>
-
-                {/* Path 2 — spiraling thoughts */}
-                <button
-                  onClick={() => startPathway("clarity")}
-                  style={{
-                    background: "var(--surface)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 14,
-                    padding: "22px 24px",
-                    textAlign: "left",
-                    cursor: "pointer",
-                    transition: "border-color 0.2s"
-                  }}
-                  onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                  onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-                >
-                  <div style={{ fontSize: 22, marginBottom: 10 }}>✦</div>
-                  <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>
-                    I need to think clearly
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Stuck in your head. Spiraling. Big moment coming. Cut through it.
-                  </div>
-                </button>
-              </div>
-
-              {/* Other tools — small, secondary */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 16 }}>
-                  Other tools
-                </div>
-                <div style={{ display: "flex", gap: 10 }}>
-                  <button
-                    style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
-                    onClick={() => startTool(TOOLS.find(t => t.id === "scan"))}
-                  >
-                    <div style={{ fontSize: 14, marginBottom: 2 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Tension release</div>
-                  </button>
-                  <button
-                    style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
-                    onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }}
-                  >
-                    <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Talk it through</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* Level 2 — Build Awareness */}
-              {(() => {
-                let sessionCount = 0;
-                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                if (sessionCount < 3) return null; // Show after 3+ sessions (lower for UAT testing)
-                return (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                      Build awareness
+            {/* LEVEL 2 — Build Awareness */}
+            {(() => {
+              let sessionCount = 0;
+              try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+              const unlocked = sessionCount >= 3;
+              return (
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24, opacity: unlocked ? 1 : 0.5 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
+                      Level 2 · Build awareness
                     </div>
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{3 - sessionCount} sessions to unlock</div>}
+                  </div>
+                  {unlocked ? (
                     <div style={{ display: "flex", gap: 10 }}>
                       <button
                         style={{ flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
@@ -3239,48 +3269,68 @@ export default function Stillform() {
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 sec</div>
                       </button>
                     </div>
-                  </div>
-                );
-              })()}
-
-              {/* Level 3 — See Your Patterns */}
-              {(() => {
-                let sessionCount = 0;
-                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                if (sessionCount < 8) return null;
-                return (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                      See your patterns
+                  ) : (
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                      Learn your body's warning signals. Catch it before the spiral.
                     </div>
-                    <button
-                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)", marginBottom: 8 }}
-                      onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))}
-                    >
-                      <div style={{ fontSize: 14, marginBottom: 2 }}>◇ Your Patterns</div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate</div>
-                    </button>
-                    <button
-                      style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
-                      onClick={() => startTool(TOOLS.find(t => t.id === "bias"))}
-                    >
-                      <div style={{ fontSize: 14, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>The biases shaping how you think under pressure</div>
-                    </button>
-                  </div>
-                );
-              })()}
+                  )}
+                </div>
+              );
+            })()}
 
-              {/* Level 4 — Metacognition */}
-              {(() => {
-                let sessionCount = 0;
-                try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                if (sessionCount < 12) return null;
-                return (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 24, marginBottom: 24 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                      Think clearly under pressure
+            {/* LEVEL 3 — See Your Patterns */}
+            {(() => {
+              let sessionCount = 0;
+              try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+              const unlocked = sessionCount >= 8;
+              return (
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24, opacity: unlocked ? 1 : 0.5 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
+                      Level 3 · See your patterns
                     </div>
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{8 - sessionCount} sessions to unlock</div>}
+                  </div>
+                  {unlocked ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <button
+                        style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                        onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))}
+                      >
+                        <div style={{ fontSize: 14, marginBottom: 2 }}>◇ Your Patterns</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows</div>
+                      </button>
+                      <button
+                        style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
+                        onClick={() => startTool(TOOLS.find(t => t.id === "bias"))}
+                      >
+                        <div style={{ fontSize: 14, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Biases shaping your thinking</div>
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                      Your data reveals what triggers you and what works.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* LEVEL 4 — Watch & Choose */}
+            {(() => {
+              let sessionCount = 0;
+              try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+              const unlocked = sessionCount >= 12;
+              return (
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24, opacity: unlocked ? 1 : 0.5 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
+                      Level 4 · Think clearly under pressure
+                    </div>
+                    {!unlocked && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{12 - sessionCount} sessions to unlock</div>}
+                  </div>
+                  {unlocked ? (
                     <button
                       style={{ width: "100%", background: "none", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", textAlign: "left", cursor: "pointer", color: "var(--text)" }}
                       onClick={() => startTool(TOOLS.find(t => t.id === "meta"))}
@@ -3288,14 +3338,62 @@ export default function Stillform() {
                       <div style={{ fontSize: 14, marginBottom: 2 }}>✦ Watch & Choose</div>
                       <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it and choose differently</div>
                     </button>
+                  ) : (
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                      Watch your own mind in motion. Choose your response.
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* QUICK JOURNAL */}
+            <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 12 }}>
+                Journal
+              </div>
+              <button
+                onClick={() => setScreen("journal")}
+                style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", transition: "border-color 0.2s"
+                }}
+                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
+                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
+              >
+                <div style={{ fontSize: 14, marginBottom: 2 }}>✎ Log what happened</div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Triggers, emotions, outcomes — build your record</div>
+              </button>
+            </div>
+
+            {/* SESSION STATS — compact */}
+            {(() => {
+              try {
+                const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                if (sessions.length === 0) return null;
+                const avgMs = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length;
+                const avgSec = Math.round(avgMs / 1000);
+                const avgStr = avgSec >= 60 ? `${Math.floor(avgSec / 60)}m ${avgSec % 60}s` : `${avgSec}s`;
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 24 }}>
+                    <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 22, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 22, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{avgStr}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>avg regulation</div>
+                      </div>
+                    </div>
                   </div>
                 );
-              })()}
+              } catch { return null; }
+            })()}
 
-              <p style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, textAlign: "center" }}>
-                Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
-              </p>
-            </div>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, textAlign: "center" }}>
+              Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
+            </p>
           </section>
         )}
 
@@ -3303,7 +3401,7 @@ export default function Stillform() {
         {screen === "tool" && activeTool && (
           <section className="intervention">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <button className="intervention-back" onClick={() => setScreen("tools")} style={{ marginBottom: 0 }}>
+              <button className="intervention-back" onClick={() => setScreen("home")} style={{ marginBottom: 0 }}>
                 ← Back
               </button>
               <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
@@ -3318,6 +3416,186 @@ export default function Stillform() {
               </button>
             </div>
             {renderTool()}
+          </section>
+        )}
+
+        {/* JOURNAL — log triggers, emotions, outcomes */}
+        {screen === "journal" && (
+          <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+            <button className="intervention-back" onClick={() => journalMode === "list" ? setScreen("home") : setJournalMode("list")}>
+              ← {journalMode === "list" ? "Home" : "Back"}
+            </button>
+
+            {journalMode === "list" && (
+              <>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>Journal</h1>
+                <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
+                  Track what triggered you, how it felt, and what happened after.
+                </p>
+                <button
+                  onClick={() => setJournalMode("new")}
+                  style={{
+                    width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                    borderRadius: 10, padding: "14px 18px", cursor: "pointer", color: "var(--amber)",
+                    fontSize: 14, fontFamily: "'DM Sans', sans-serif", marginBottom: 24, textAlign: "left"
+                  }}
+                >
+                  + New entry
+                </button>
+                {journalEntries.length === 0 && (
+                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
+                    No entries yet. Your journal builds your record over time.
+                  </div>
+                )}
+                {journalEntries.map((e, i) => (
+                  <button key={e.id} onClick={() => { setJournalViewIdx(i); setJournalMode("view"); }} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", marginBottom: 8, color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>{e.trigger || "Untitled"}</div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{e.date}</div>
+                    </div>
+                    {e.emotions?.length > 0 && (
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>
+                    )}
+                  </button>
+                ))}
+              </>
+            )}
+
+            {journalMode === "new" && (
+              <>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 24 }}>New entry</h1>
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>What triggered this?</div>
+                  <textarea
+                    value={jTrigger}
+                    onChange={e => setJTrigger(e.target.value)}
+                    placeholder="What happened or what were you thinking about?"
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
+                      resize: "none", minHeight: 70, lineHeight: 1.6
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.04em" }}>What did you feel? <span style={{ color: "var(--text-muted)" }}>(tap all that apply)</span></div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {journalEmotions.map(em => (
+                      <button key={em} onClick={() => setJEmotion(prev => prev.includes(em) ? prev.filter(e => e !== em) : [...prev, em])}
+                        style={{
+                          padding: "6px 14px", borderRadius: 20, fontSize: 12, cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                          background: jEmotion.includes(em) ? "var(--amber-glow)" : "var(--surface)",
+                          border: `1px solid ${jEmotion.includes(em) ? "var(--amber-dim)" : "var(--border)"}`,
+                          color: jEmotion.includes(em) ? "var(--amber)" : "var(--text-dim)"
+                        }}
+                      >{em}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.04em" }}>Intensity: {jIntensity}/10</div>
+                  <input type="range" min="1" max="10" value={jIntensity} onChange={e => setJIntensity(Number(e.target.value))}
+                    style={{ width: "100%", accentColor: "var(--amber)" }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)" }}>
+                    <span>Mild</span><span>Severe</span>
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>Where did you feel it in your body?</div>
+                  <textarea
+                    value={jBody}
+                    onChange={e => setJBody(e.target.value)}
+                    placeholder="Jaw, chest, stomach, hands..."
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
+                      resize: "none", minHeight: 50, lineHeight: 1.6
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>What happened after? <span style={{ color: "var(--text-muted)" }}>(optional)</span></div>
+                  <textarea
+                    value={jOutcome}
+                    onChange={e => setJOutcome(e.target.value)}
+                    placeholder="Did you use a tool? Did you react? What did you do?"
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
+                      resize: "none", minHeight: 70, lineHeight: 1.6
+                    }}
+                  />
+                </div>
+
+                <button onClick={saveJournalEntry} disabled={!jTrigger.trim()} style={{
+                  width: "100%", padding: "14px", borderRadius: 8, fontSize: 14, fontWeight: 500,
+                  fontFamily: "'DM Sans', sans-serif", cursor: jTrigger.trim() ? "pointer" : "not-allowed",
+                  background: jTrigger.trim() ? "var(--amber)" : "var(--surface2)",
+                  color: jTrigger.trim() ? "#0e0f11" : "var(--text-muted)", border: "none",
+                  transition: "all 0.2s"
+                }}>
+                  Save entry
+                </button>
+              </>
+            )}
+
+            {journalMode === "view" && journalViewIdx !== null && journalEntries[journalViewIdx] && (() => {
+              const e = journalEntries[journalViewIdx];
+              return (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 12 }}>
+                    <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, lineHeight: 1.3 }}>{e.trigger || "Untitled"}</h1>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date} · {e.time}</div>
+                  </div>
+                  {e.emotions?.length > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>Emotions</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {e.emotions.map(em => (
+                          <span key={em} style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", color: "var(--amber)" }}>{em}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {e.intensity && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Intensity</div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>{e.intensity}/10</div>
+                    </div>
+                  )}
+                  {e.body && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Body</div>
+                      <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>{e.body}</div>
+                    </div>
+                  )}
+                  {e.outcome && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Outcome</div>
+                      <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>{e.outcome}</div>
+                    </div>
+                  )}
+                  <button onClick={() => deleteJournalEntry(e.id)} style={{
+                    marginTop: 24, background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 8,
+                    padding: "10px 16px", fontSize: 13, color: "rgba(200,80,80,0.8)", cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    Delete entry
+                  </button>
+                </>
+              );
+            })()}
           </section>
         )}
 
@@ -3439,6 +3717,28 @@ export default function Stillform() {
               </select>
             </div>
 
+            {/* Breathing Pattern */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Breathing Pattern</div>
+              {BREATHING_PATTERNS.map(p => {
+                const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
+                return (
+                  <button key={p.id} onClick={() => {
+                    try { localStorage.setItem("stillform_breath_pattern", p.id); window.location.reload(); } catch {}
+                  }} style={{
+                    width: "100%", padding: "12px 16px", textAlign: "left", cursor: "pointer",
+                    background: isSelected ? "var(--amber-glow)" : "var(--surface)",
+                    border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 8, marginBottom: 6, color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                  }}>
+                    <div style={{ fontSize: 14, marginBottom: 2 }}>{p.name}</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{p.desc}</div>
+                  </button>
+                );
+              })}
+            </div>
+
             {/* Audio */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Audio</div>
@@ -3520,6 +3820,12 @@ export default function Stillform() {
                 </div>
               </div>
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
+                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Journal entries</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries · stored on this device only
+                </div>
+              </div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Saved reframes</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
                   {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
@@ -3533,6 +3839,7 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_checkins");
                     localStorage.removeItem("stillform_saved_reframes");
                     localStorage.removeItem("stillform_reframe_session");
+                    localStorage.removeItem("stillform_journal");
                     window.location.reload();
                   } catch {}
                 }
@@ -3584,7 +3891,7 @@ export default function Stillform() {
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("tools")}>Open App</button>
+            <button onClick={() => setScreen("journal")}>Journal</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("privacy")}>Privacy</button>
