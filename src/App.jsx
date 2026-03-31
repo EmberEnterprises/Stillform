@@ -1232,6 +1232,7 @@ function PhysiologicalSighTool({ onComplete }) {
           I'm good
         </button>
         <FeedbackPrompt tool="sigh" />
+        <SessionNote />
       </div>
     );
   }
@@ -1387,6 +1388,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
           </button>
       </div>
       <FeedbackPrompt tool="breathe" />
+      <SessionNote />
     </div>
   );
   }
@@ -1610,6 +1612,7 @@ function BodyScanTool({ onComplete }) {
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {sessionCount} times.</div>}
         <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
         <FeedbackPrompt tool="bodyscan" />
+        <SessionNote />
       </div>
     );
   }
@@ -1952,6 +1955,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
             </button>
           </div>
           {messages.length > 2 && <FeedbackPrompt tool="reframe" />}
+          {messages.length > 2 && <SessionNote />}
         </div>
       )}
     </div>
@@ -2818,6 +2822,7 @@ function PanicMode({ onComplete }) {
             I'm okay now
           </button>
         </div>
+        <SessionNote />
       </div>
     );
   }
@@ -2876,6 +2881,7 @@ function PanicMode({ onComplete }) {
             I'm okay now
           </button>
         </div>
+        <SessionNote />
       </div>
     );
   }
@@ -2934,6 +2940,8 @@ export default function Stillform() {
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
+  // Scroll to top on every screen change
+  useEffect(() => { window.scrollTo(0, 0); }, [screen]);
   const startTool = (tool) => {
     setActiveTool(tool);
     setScreen("tool");
@@ -3000,7 +3008,7 @@ export default function Stillform() {
         {/* FLOATING PANIC — accessible from any screen */}
         {screen !== "home" && screen !== "panic" && (
           <button onClick={() => setScreen("panic")} style={{
-            position: "fixed", bottom: 24, right: 24, zIndex: 100,
+            position: "fixed", bottom: 80, right: 24, zIndex: 100,
             background: "var(--bg)", border: "1px solid rgba(200,60,60,0.3)",
             borderRadius: 28, padding: "10px 18px", fontSize: 12, letterSpacing: "0.06em",
             color: "rgba(200,80,80,0.9)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
@@ -3061,7 +3069,7 @@ export default function Stillform() {
             </div>
 
             {/* SKILL GROWTH — how composure develops */}
-            <div style={{ maxWidth: 480, margin: "48px auto 0", textAlign: "center" }}>
+            <div style={{ maxWidth: 480, margin: "32px auto 0", textAlign: "center" }}>
               <div style={{ fontSize: 12, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
                 Composure is a skill. This is how it grows.
               </div>
