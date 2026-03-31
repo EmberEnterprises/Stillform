@@ -3267,16 +3267,54 @@ export default function Stillform() {
                 </div>
               )}
 
-              <div style={{ display: "flex", gap: 12, marginTop: 32 }}>
-                {!isFirst && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 32, width: "100%", maxWidth: 320 }}>
+                {!isFirst && !isLast && (
                   <button className="btn btn-ghost" onClick={() => setOnboardStep(s => s - 1)}>
                     Back
                   </button>
                 )}
                 {isLast ? (
-                  <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={completeOnboarding}>
-                    Start using Stillform
-                  </button>
+                  <>
+                    <div style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4, textAlign: "center" }}>
+                      Start your first session
+                    </div>
+                    <button onClick={() => { completeOnboarding(); setScreen("panic"); }} style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    }}>
+                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I need help right now</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>One tap. Breathing starts immediately.</div>
+                    </button>
+                    <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    }}>
+                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I can't calm down</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                    </button>
+                    <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    }}>
+                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I need to think clearly</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                    </button>
+                    <button onClick={() => { completeOnboarding(); setScreen("explore"); }} style={{
+                      background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0"
+                    }}>
+                      Just explore the app →
+                    </button>
+                    <button onClick={() => setOnboardStep(s => s - 1)} style={{
+                      background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "4px 0"
+                    }}>
+                      ← Back
+                    </button>
+                  </>
                 ) : (
                   <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
                     {isFirst ? "See how it works" : "Next"}
@@ -3284,7 +3322,7 @@ export default function Stillform() {
                 )}
               </div>
 
-              {!isFirst && (
+              {!isFirst && !isLast && (
                 <button onClick={completeOnboarding} style={{
                   background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
                   cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 20
