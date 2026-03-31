@@ -857,6 +857,122 @@ const styles = `
     .footer-links { flex-wrap: wrap; justify-content: center; }
     .home-title { font-size: 42px; }
   }
+
+  /* PANIC BUTTON */
+  .panic-btn {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #1e1408, #0e0a04);
+    border: 2px solid var(--amber-dim);
+    color: var(--amber);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.4;
+    padding: 24px;
+    margin-bottom: 16px;
+    box-shadow: 0 0 40px rgba(201,147,58,0.08), inset 0 0 30px rgba(201,147,58,0.04);
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .panic-btn:hover {
+    box-shadow: 0 0 60px rgba(201,147,58,0.15), inset 0 0 40px rgba(201,147,58,0.06);
+    border-color: var(--amber);
+    transform: scale(1.03);
+  }
+
+  .panic-btn:active {
+    transform: scale(0.97);
+  }
+
+  .panic-btn-text {
+    letter-spacing: 0.04em;
+  }
+
+  /* PANIC MODE */
+  .panic-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 73px);
+    padding: 40px 24px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .panic-instruction {
+    font-size: 15px;
+    font-style: italic;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: panicFadeIn 1.5s ease 0.5s forwards;
+  }
+
+  @keyframes panicFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .panic-circle-wrap {
+    width: 220px;
+    height: 220px;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .panic-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,147,58,0.10) 0%, rgba(201,147,58,0.02) 60%, transparent 100%);
+    border: 1px solid var(--amber-dim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.8s ease-in-out, box-shadow 0.8s ease-in-out;
+  }
+
+  .panic-phase {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
+    color: var(--amber);
+    letter-spacing: 0.08em;
+  }
+
+  .panic-counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+  }
+
+  .panic-done {
+    animation: panicFadeIn 0.8s ease forwards;
+  }
+
+  .panic-done-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-dim);
+    max-width: 280px;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
 `;
 
 const TOOLS = [
@@ -1581,6 +1697,161 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   );
 }
 
+function PanicMode({ onComplete }) {
+  // Auto-starting breathing — no Begin button, no choices
+  // 4-4-6-2 pattern, 4 cycles, then gently offer next step
+  const breathPhases = [
+    { name: "Inhale", duration: 4, scale: 1.4 },
+    { name: "Hold", duration: 4, scale: 1.4 },
+    { name: "Exhale", duration: 6, scale: 1.0 },
+    { name: "Rest", duration: 2, scale: 1.0 }
+  ];
+  const totalCycles = 4;
+
+  const [phaseIdx, setPhaseIdx] = useState(0);
+  const [count, setCount] = useState(breathPhases[0].duration);
+  const [cycle, setCycle] = useState(1);
+  const [breathDone, setBreathDone] = useState(false);
+  const [running, setRunning] = useState(true); // auto-start
+
+  // Grounding
+  const groundSteps = [
+    { num: 5, prompt: "Name 5 things you can see." },
+    { num: 4, prompt: "Name 4 things you can feel." },
+    { num: 3, prompt: "Name 3 things you can hear." },
+    { num: 2, prompt: "Name 2 things you can smell." },
+    { num: 1, prompt: "Name 1 thing you can taste." }
+  ];
+  const [showGround, setShowGround] = useState(false);
+  const [groundStep, setGroundStep] = useState(0);
+  const [groundDone, setGroundDone] = useState(false);
+
+  useEffect(() => {
+    if (!running || breathDone) return;
+    if (count === 0) {
+      const next = (phaseIdx + 1) % breathPhases.length;
+      if (next === 0) {
+        if (cycle >= totalCycles) {
+          setBreathDone(true);
+          setRunning(false);
+          return;
+        }
+        setCycle(c => c + 1);
+      }
+      setPhaseIdx(next);
+      setCount(breathPhases[next].duration);
+    } else {
+      const t = setTimeout(() => setCount(c => c - 1), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [count, running, phaseIdx, cycle, breathDone]);
+
+  const currentPhase = breathPhases[phaseIdx];
+  const circleTransform = `scale(${currentPhase.scale})`;
+  const circleGlow = currentPhase.scale > 1.2
+    ? "0 0 60px rgba(201,147,58,0.12), 0 0 120px rgba(201,147,58,0.04)"
+    : "0 0 20px rgba(201,147,58,0.05)";
+
+  // GROUNDING DONE
+  if (groundDone) {
+    return (
+      <div className="panic-screen panic-done">
+        <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
+          You're here.
+        </div>
+        <div className="panic-done-text">
+          Present. Breathing. Grounded. That took less than 3 minutes.
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
+          <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
+            I need to talk through something
+          </button>
+          <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
+            I'm okay now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // GROUNDING ACTIVE
+  if (showGround) {
+    const step = groundSteps[groundStep];
+    return (
+      <div className="panic-screen">
+        <div style={{ fontSize: 48, fontWeight: 300, color: "var(--amber)", marginBottom: 16, fontFamily: "'Cormorant Garamond', serif" }}>
+          {step.num}
+        </div>
+        <div style={{ fontSize: 16, color: "var(--text-dim)", marginBottom: 32, maxWidth: 260, lineHeight: 1.6 }}>
+          {step.prompt}
+        </div>
+        <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
+          {groundSteps.map((_, i) => (
+            <div key={i} style={{
+              width: 8, height: 8, borderRadius: "50%",
+              background: i <= groundStep ? "var(--amber)" : "var(--border)",
+              transition: "all 0.3s ease"
+            }} />
+          ))}
+        </div>
+        <button className="btn btn-primary" onClick={() => {
+          if (groundStep < groundSteps.length - 1) setGroundStep(s => s + 1);
+          else setGroundDone(true);
+        }}>
+          {groundStep < groundSteps.length - 1 ? "Next →" : "Done"}
+        </button>
+      </div>
+    );
+  }
+
+  // BREATHING DONE — offer next step
+  if (breathDone) {
+    return (
+      <div className="panic-screen panic-done">
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: "var(--amber)", letterSpacing: "0.1em", marginBottom: 12 }}>
+          Breathing complete
+        </div>
+        <div className="panic-done-text">
+          You slowed your nervous system down. That's real.
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
+          <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => setShowGround(true)}>
+            Continue to grounding →
+          </button>
+          <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
+            I need to talk through something
+          </button>
+          <button className="btn btn-ghost" style={{ width: "100%", color: "var(--text-muted)", fontSize: 13 }} onClick={() => onComplete()}>
+            I'm okay now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // BREATHING ACTIVE — auto-started, one instruction only
+  return (
+    <div className="panic-screen">
+      <div className="panic-instruction">
+        Follow this circle
+      </div>
+
+      <div className="panic-circle-wrap">
+        <div className="panic-circle" style={{
+          transform: circleTransform,
+          boxShadow: circleGlow,
+          transitionDuration: `${currentPhase.duration}s`
+        }}>
+          <span className="panic-phase">{currentPhase.name}</span>
+        </div>
+      </div>
+
+      <div className="panic-counter">{cycle} of {totalCycles}</div>
+    </div>
+  );
+}
+
 export default function Stillform() {
   const [screen, setScreen] = useState("home");
   const [activeTool, setActiveTool] = useState(null);
@@ -1644,6 +1915,22 @@ export default function Stillform() {
           </div>
         </nav>
 
+        {/* PANIC MODE — zero decisions, auto-start breathing */}
+        {screen === "panic" && (
+          <PanicMode onComplete={(redirectTo) => {
+            if (redirectTo) {
+              const tool = TOOLS.find(t => t.id === redirectTo);
+              if (tool) { startTool(tool); return; }
+              if (redirectTo === "reframe-calm") {
+                setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+                setScreen("tool");
+                return;
+              }
+            }
+            setScreen("home");
+          }} />
+        )}
+
         {/* HOME */}
         {screen === "home" && (
           <section className="home">
@@ -1655,11 +1942,23 @@ export default function Stillform() {
               can't <em>think straight.</em>
             </h1>
             <p className="home-sub">
-              Not meditation. Not therapy. When you're overwhelmed, anxious, or spiraling — this brings you back.
+              Stillform helps you regain control in under 2 minutes when stress shuts down your ability to think.
             </p>
+
+            {/* PANIC BUTTON — primary action */}
+            <button
+              className="panic-btn"
+              onClick={() => setScreen("panic")}
+            >
+              <span className="panic-btn-text">I need help<br/>right now</span>
+            </button>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 40, fontStyle: "italic" }}>
+              One tap. No decisions. Just follow the circle.
+            </div>
+
             <div className="home-cta">
               <button className="btn btn-primary" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("tools")}>
-                Begin →
+                Explore tools →
               </button>
               <button className="btn btn-ghost" style={{ padding: "14px 32px", fontSize: "15px" }} onClick={() => setScreen("pricing")}>
                 Pricing
