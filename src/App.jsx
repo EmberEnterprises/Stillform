@@ -1803,7 +1803,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     : isClarity
     ? "What won't stop spinning? The thought, the decision, the thing you keep replaying. Say it — don't organize it."
     : "Say what you're feeling. Rage, anxiety, grief, shame, overwhelm — whatever it is. Don't filter it. The AI reads exactly what you wrote.";
-  const STORAGE_KEY = "stillform_reframe_session";
+  const STORAGE_KEY = `stillform_reframe_session_${mode}`;
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1837,14 +1837,14 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   const saveReframe = (msg, idx) => {
     try {
       const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
-      saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString() });
+      saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString(), mode });
       localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
       setSavedIds(prev => new Set([...prev, idx]));
     } catch {}
   };
 
   const getSavedReframes = () => {
-    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; }
+    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === mode); } catch { return []; }
   };
 
   // Persist every message change to localStorage
@@ -4319,7 +4319,9 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_signal_profile");
                     localStorage.removeItem("stillform_checkins");
                     localStorage.removeItem("stillform_saved_reframes");
-                    localStorage.removeItem("stillform_reframe_session");
+                    localStorage.removeItem("stillform_reframe_session_calm");
+                    localStorage.removeItem("stillform_reframe_session_clarity");
+                    localStorage.removeItem("stillform_reframe_session_hype");
                     localStorage.removeItem("stillform_journal");
                     localStorage.removeItem("stillform_onboarded");
                     window.location.reload();
