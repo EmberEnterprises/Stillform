@@ -1799,10 +1799,10 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   const isClarity = mode === "clarity";
   const isHype = mode === "hype";
   const openingText = isHype
-    ? "What are you about to walk into? Say it — the meeting, the pitch, the conversation, the performance. What do you need to show up as?"
+    ? "What are you about to walk into? A stage, a room, a conversation, a meeting — say what it is and what's making it hard."
     : isClarity
-    ? "What's spiraling? Say it plainly — the presentation, the decision, the thing you keep telling yourself. Don't organize it. Just say it."
-    : "Say what's happening. Don't filter it. Don't make it make sense. Just say it — whatever is in your head right now. The AI will read exactly what you wrote.";
+    ? "What won't stop spinning? The thought, the decision, the thing you keep replaying. Say it — don't organize it."
+    : "Say what you're feeling. Rage, anxiety, grief, shame, overwhelm — whatever it is. Don't filter it. The AI reads exactly what you wrote.";
   const STORAGE_KEY = "stillform_reframe_session";
 
   // TIME-TO-REGULATION
