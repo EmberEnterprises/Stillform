@@ -3307,34 +3307,50 @@ export default function Stillform() {
                       <span>Start your first session</span>
                       <span style={{ fontSize: 12 }}>▾</span>
                     </button>
-                    <div id="onboard-menu" style={{ display: "none", marginTop: 6, borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)", width: "100%" }}>
+                    <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
                       <button onClick={() => { completeOnboarding(); setScreen("panic"); }} style={{
-                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: 12
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>When any feeling is running too loud.</div>
+                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Instant reset</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Any feeling running too loud</div>
+                        </div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
-                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: 12
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Steady your system. 2 minutes.</div>
+                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Regulate</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Breathing + grounding · 2 min</div>
+                        </div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
-                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: 12
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>Get sharp</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Cut noise. Restore clarity.</div>
+                        <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Get sharp</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Cut noise · restore clarity</div>
+                        </div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("hype"); }} style={{
-                        width: "100%", background: "var(--surface)", border: "none",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        width: "100%", background: "transparent", border: "none",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                        display: "flex", alignItems: "center", gap: 12
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>Lock in</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Composure before the moment.</div>
+                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◌</span>
+                        <div>
+                          <div style={{ fontSize: 13, fontWeight: 500 }}>Lock in</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Composure before the moment</div>
+                        </div>
                       </button>
                     </div>
                     <button onClick={() => { completeOnboarding(); setScreen("explore"); }} style={{
@@ -3439,38 +3455,50 @@ export default function Stillform() {
                   <span>Start your first session</span>
                   <span style={{ fontSize: 12 }}>▾</span>
                 </button>
-                <div id="session-menu" style={{ display: "none", marginTop: 6, borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)" }}>
+                <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
                   <button onClick={() => setScreen("panic")} style={{
-                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>When any feeling is running too loud.</div>
+                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Instant reset</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Any feeling running too loud</div>
+                    </div>
                   </button>
                   <button onClick={() => startPathway("calm")} style={{
-                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>Regulate</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Steady your system. 2 minutes.</div>
+                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Regulate</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Breathing + grounding · 2 min</div>
+                    </div>
                   </button>
                   <button onClick={() => startPathway("clarity")} style={{
-                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
+                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>Get sharp</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Cut noise. Restore clarity.</div>
+                    <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Get sharp</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Cut noise · restore clarity</div>
+                    </div>
                   </button>
                   <button onClick={() => startPathway("hype")} style={{
-                    width: "100%", background: "var(--surface)", border: "none",
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                    width: "100%", background: "transparent", border: "none",
+                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>Lock in</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Composure before the moment.</div>
+                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◌</span>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500 }}>Lock in</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Composure before the moment</div>
+                    </div>
                   </button>
                 </div>
               </div>
