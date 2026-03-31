@@ -1740,6 +1740,61 @@ function BodyScanTool({ onComplete }) {
   );
 }
 
+// Speech-to-text hook — uses Web Speech API (free, built into browsers)
+function useSpeechToText(onResult) {
+  const [listening, setListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  const toggle = () => {
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+    recognition.onresult = (event) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) transcript += event.results[i][0].transcript;
+      }
+      if (transcript) onResult(transcript);
+    };
+    recognition.onerror = () => setListening(false);
+    recognition.onend = () => setListening(false);
+    recognitionRef.current = recognition;
+    recognition.start();
+    setListening(true);
+  };
+
+  useEffect(() => { return () => recognitionRef.current?.stop(); }, []);
+
+  const supported = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
+  return { listening, toggle, supported };
+}
+
+// Reusable mic button for any text field
+function MicButton({ onTranscript }) {
+  const speech = useSpeechToText(onTranscript);
+  if (!speech.supported) return null;
+  return (
+    <button onClick={speech.toggle} style={{
+      background: speech.listening ? "rgba(200,60,60,0.15)" : "var(--surface)",
+      border: `1px solid ${speech.listening ? "rgba(200,60,60,0.4)" : "var(--border)"}`,
+      borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 12,
+      color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
+      fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+      animation: speech.listening ? "pulse 1.5s ease-in-out infinite" : "none"
+    }}>
+      🎙 {speech.listening ? "Listening..." : "Speak"}
+    </button>
+  );
+}
+
 function ReframeTool({ onComplete, mode = "calm" }) {
   const isClarity = mode === "clarity";
   const openingText = isClarity
@@ -1770,6 +1825,11 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const [savedIds, setSavedIds] = useState(new Set());
+
+  // Voice input
+  const speech = useSpeechToText((transcript) => {
+    setInput(prev => prev + (prev ? " " : "") + transcript);
+  });
 
   const saveReframe = (msg, idx) => {
     try {
@@ -1968,11 +2028,24 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           ) : (
             <input
               className="ai-input"
-              placeholder="Say what's spinning..."
+              placeholder={speech.listening ? "Listening..." : "Say what's spinning..."}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
             />
+          )}
+          {!loading && speech.supported && (
+            <button onClick={speech.toggle} style={{
+              background: speech.listening ? "rgba(200,60,60,0.2)" : "var(--surface2)",
+              border: speech.listening ? "1px solid rgba(200,60,60,0.4)" : "1px solid var(--border)",
+              borderRadius: 8, width: 40, height: 40, cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 18, color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
+              transition: "all 0.2s", flexShrink: 0,
+              animation: speech.listening ? "pulse 1.5s ease-in-out infinite" : "none"
+            }}>
+              🎙
+            </button>
           )}
           {loading ? (
             <button className="btn-send" style={{ background: "var(--surface2)", color: "var(--text-dim)" }} onClick={() => {
@@ -3524,6 +3597,9 @@ export default function Stillform() {
                       resize: "none", minHeight: 70, lineHeight: 1.6
                     }}
                   />
+                  <div style={{ marginTop: 6 }}>
+                    <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: 20 }}>
@@ -3579,6 +3655,9 @@ export default function Stillform() {
                       resize: "none", minHeight: 70, lineHeight: 1.6
                     }}
                   />
+                  <div style={{ marginTop: 6 }}>
+                    <MicButton onTranscript={t => setJOutcome(prev => prev + (prev ? " " : "") + t)} />
+                  </div>
                 </div>
 
                 <button onClick={saveJournalEntry} disabled={!jTrigger.trim()} style={{
