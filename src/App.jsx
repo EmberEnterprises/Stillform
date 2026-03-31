@@ -1714,6 +1714,82 @@ function PanicMode({ onComplete }) {
   const [breathDone, setBreathDone] = useState(false);
   const [running, setRunning] = useState(true); // auto-start
 
+  // Audio — gentle tones that guide breathing without words
+  const audioCtx = useRef(null);
+  const activeOsc = useRef(null);
+  const activeGain = useRef(null);
+
+  useEffect(() => {
+    // Initialize audio context on mount (user already tapped the panic button)
+    try {
+      audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.current.state === "suspended") audioCtx.current.resume();
+    } catch {}
+    return () => {
+      // Cleanup on unmount
+      try {
+        if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; }
+        if (audioCtx.current) audioCtx.current.close();
+      } catch {}
+    };
+  }, []);
+
+  // Play tone when phase changes
+  useEffect(() => {
+    if (!running || breathDone || !audioCtx.current) return;
+    const ctx = audioCtx.current;
+    if (ctx.state === "suspended") ctx.resume();
+
+    // Stop previous tone
+    try {
+      if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; }
+    } catch {}
+
+    const phase = breathPhases[phaseIdx];
+    if (phase.name === "Rest") return; // silence during rest
+
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      const dur = phase.duration;
+
+      if (phase.name === "Inhale") {
+        // Ascending tone — 180Hz to 280Hz, gentle fade in
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(280, now + dur);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+        gain.gain.setValueAtTime(0.08, now + dur - 0.3);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      } else if (phase.name === "Hold") {
+        // Steady gentle tone at 280Hz
+        osc.frequency.setValueAtTime(280, now);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.05, now + 0.3);
+        gain.gain.setValueAtTime(0.05, now + dur - 0.3);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      } else if (phase.name === "Exhale") {
+        // Descending tone — 280Hz to 140Hz, longer fade out
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.linearRampToValueAtTime(140, now + dur);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.3);
+        gain.gain.linearRampToValueAtTime(0.02, now + dur - 0.5);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      }
+
+      osc.start(now);
+      osc.stop(now + dur);
+      activeOsc.current = osc;
+      activeGain.current = gain;
+    } catch {}
+  }, [phaseIdx, running, breathDone]);
+
   // Grounding
   const groundSteps = [
     { num: 5, prompt: "Name 5 things you can see." },
