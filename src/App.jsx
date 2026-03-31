@@ -1913,7 +1913,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
   return (
     <div>
       <div className="disclaimer">
-        This is not therapy. It is an AI-powered CBT tool. If you are in crisis, please contact your local emergency services or a mental health professional.
+        This is not therapy. It is an AI-powered CBT tool. If you are in crisis, see our Crisis Resources for international helplines.
       </div>
 
       {/* Error banner — always visible above input, never buried in scroll */}
@@ -2570,7 +2570,7 @@ function SignalMapTool({ onComplete }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What do you feel before it hits?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up before a spiral, panic, or explosion.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up before a spiral, shutdown, or overwhelm.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {sensations.map(s => {
             const selected = (signals.preSensations || []).includes(s);
@@ -3200,7 +3200,7 @@ export default function Stillform() {
               title: "Regulate",
               subtitle: "When you can't think.",
               body: "Breathing, grounding, body scan, and AI-powered reframing. The tools do the work — you just follow them.",
-              note: "Panic button is always free."
+              note: "Instant reset is always free."
             },
             {
               icon: "◇",
@@ -3296,7 +3296,7 @@ export default function Stillform() {
                         width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500 }}>Emergency reset</div>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
                       </button>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
@@ -3362,7 +3362,7 @@ export default function Stillform() {
             color: "rgba(200,80,80,0.9)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
             boxShadow: "0 2px 12px rgba(0,0,0,0.3)", transition: "all 0.2s"
           }}>
-            ◎ Panic
+            ◎ Reset
           </button>
         )}
 
@@ -3417,7 +3417,7 @@ export default function Stillform() {
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500 }}>Emergency reset</div>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>Instant reset</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Immediate nervous system override.</div>
                   </button>
                   <button onClick={() => startPathway("calm")} style={{
@@ -3735,7 +3735,7 @@ export default function Stillform() {
             })()}
 
             <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, textAlign: "center", marginTop: 28 }}>
-              Not therapy. Not crisis intervention. If you are in crisis, contact emergency services or a mental health professional.
+              Not therapy. Not crisis intervention. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </p>
           </section>
         )}
@@ -3755,7 +3755,7 @@ export default function Stillform() {
                 padding: "4px 10px", fontSize: 11, color: "rgba(200,80,80,0.8)", cursor: "pointer",
                 fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
               }}>
-                Panic
+                Reset
               </button>
             </div>
             {renderTool()}
@@ -3953,7 +3953,7 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Panic button is free forever. Full system requires a subscription.</p>
+              <p>Instant reset is free forever. Full system requires a subscription.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
@@ -3961,7 +3961,7 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>Panic mode — always free</li>
+                  <li>Instant reset — always free</li>
                   <li>Level 1: All regulation tools</li>
                   <li>Level 2: Signal recognition</li>
                   <li>Level 3: Pattern awareness</li>
@@ -3979,7 +3979,7 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
                 <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>Panic mode — always free</li>
+                  <li>Instant reset — always free</li>
                   <li>Level 1: All regulation tools</li>
                   <li>Level 2: Signal recognition</li>
                   <li>Level 3: Pattern awareness</li>
@@ -4009,7 +4009,7 @@ export default function Stillform() {
             <p>Stillform is a composure and self-awareness tool. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing to help users regulate their nervous system and develop awareness of their own mental and emotional patterns.</p>
 
             <h2>What Stillform Is Not</h2>
-            <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health emergency, contact your local emergency services or a licensed healthcare provider immediately.</p>
+            <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health crisis, please see our Crisis Resources page for international helplines.</p>
 
             <h2>Acupressure</h2>
             <p>The acupressure guidance in Stillform is for general wellness purposes only. It is not medical treatment. The pressure points referenced are based on traditional practices and are provided for informational and self-care purposes. Consult a healthcare provider before beginning any new wellness practice, especially if you are pregnant, have a medical condition, or are taking medication.</p>
@@ -4031,6 +4031,48 @@ export default function Stillform() {
             <h2>Contact</h2>
             <p>For questions: emberenterprises@proton.me</p>
             <p>Ember Enterprises LLC · New Jersey, United States</p>
+          </section>
+        )}
+
+        {/* CRISIS RESOURCES — international hotlines */}
+        {screen === "crisis" && (
+          <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
+            <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+              Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
+            </p>
+            {[
+              { region: "United States", lines: [{ name: "Suicide & Crisis Lifeline", number: "988", note: "Call or text" }, { name: "Crisis Text Line", number: "Text HOME to 741741", note: "Text-based support" }] },
+              { region: "Canada", lines: [{ name: "Suicide & Crisis Lifeline", number: "988", note: "Call or text" }, { name: "Crisis Services Canada", number: "1-833-456-4566", note: "24/7" }] },
+              { region: "United Kingdom", lines: [{ name: "Samaritans", number: "116 123", note: "24/7, free" }, { name: "Crisis Text Line", number: "Text SHOUT to 85258", note: "Text-based" }] },
+              { region: "Ireland", lines: [{ name: "Samaritans", number: "116 123", note: "24/7, free" }] },
+              { region: "Australia", lines: [{ name: "Lifeline", number: "13 11 14", note: "24/7" }, { name: "Beyond Blue", number: "1300 22 4636", note: "24/7" }] },
+              { region: "New Zealand", lines: [{ name: "Need to Talk?", number: "1737", note: "Call or text, 24/7" }] },
+              { region: "Germany", lines: [{ name: "Telefonseelsorge", number: "0800 111 0 111", note: "24/7, free" }] },
+              { region: "France", lines: [{ name: "Numéro National", number: "3114", note: "24/7" }] },
+              { region: "Spain", lines: [{ name: "Línea de Atención", number: "024", note: "24/7" }] },
+              { region: "Japan", lines: [{ name: "Yorisoi Hotline", number: "0120-279-338", note: "24/7, free" }] },
+              { region: "South Korea", lines: [{ name: "Crisis Line", number: "1393", note: "24/7" }] },
+              { region: "Turkey", lines: [{ name: "ALO Psikiyatri", number: "182", note: "" }] },
+              { region: "Armenia", lines: [{ name: "Trust Social Work", number: "+374 10 538194", note: "" }] },
+              { region: "International", lines: [{ name: "Find your country", number: "findahelpline.com", note: "Directory of crisis lines worldwide" }] }
+            ].map((country, i) => (
+              <div key={i} style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
+                {country.lines.map((line, j) => (
+                  <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 16px", marginBottom: 6 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{line.name}</div>
+                        {line.note && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{line.note}</div>}
+                      </div>
+                      <div style={{ fontSize: 15, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap" }}>{line.number}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
           </section>
         )}
 
@@ -4256,6 +4298,7 @@ export default function Stillform() {
             <button onClick={() => setScreen("journal")}>Journal</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
+            <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
           </div>
           <div className="footer-copy">© 2026 Ember Enterprises LLC</div>
         </footer>
