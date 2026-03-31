@@ -1797,7 +1797,10 @@ function MicButton({ onTranscript }) {
 
 function ReframeTool({ onComplete, mode = "calm" }) {
   const isClarity = mode === "clarity";
-  const openingText = isClarity
+  const isHype = mode === "hype";
+  const openingText = isHype
+    ? "What are you about to walk into? Say it — the meeting, the pitch, the conversation, the performance. What do you need to show up as?"
+    : isClarity
     ? "What's spiraling? Say it plainly — the presentation, the decision, the thing you keep telling yourself. Don't organize it. Just say it."
     : "Say what's happening. Don't filter it. Don't make it make sense. Just say it — whatever is in your head right now. The AI will read exactly what you wrote.";
   const STORAGE_KEY = "stillform_reframe_session";
@@ -3125,6 +3128,8 @@ export default function Stillform() {
     setPathway(p);
     if (p === "calm") {
       startTool(TOOLS.find(t => t.id === "breathe"));
+    } else if (p === "hype") {
+      startTool(TOOLS.find(t => t.id === "sigh"));
     } else {
       startTool(TOOLS.find(t => t.id === "sigh"));
     }
@@ -3136,8 +3141,8 @@ export default function Stillform() {
         const tool = TOOLS.find(t => t.id === redirectTo);
         if (tool) { startTool(tool); return; }
         // Special case: reframe with mode
-        if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity") {
-          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo === "reframe-calm" ? "calm" : "clarity" });
+        if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
+          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo.split("-")[1] });
           setScreen("tool");
           return;
         }
@@ -3148,7 +3153,7 @@ export default function Stillform() {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : "calm")} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} />;
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
       case "patterns": return <PatternsTool {...props} />;
@@ -3275,42 +3280,56 @@ export default function Stillform() {
                 )}
                 {isLast ? (
                   <>
-                    <div style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4, textAlign: "center" }}>
-                      Start your first session
+                    <button onClick={() => {
+                      const el = document.getElementById("onboard-menu");
+                      if (el) el.style.display = el.style.display === "none" ? "block" : "none";
+                    }} style={{
+                      width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 10,
+                      padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                    }}>
+                      <span>Start your first session</span>
+                      <span style={{ fontSize: 12 }}>▾</span>
+                    </button>
+                    <div id="onboard-menu" style={{ display: "none", marginTop: 6, borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)", width: "100%" }}>
+                      <button onClick={() => { completeOnboarding(); setScreen("panic"); }} style={{
+                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need help right now</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing starts immediately.</div>
+                      </button>
+                      <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
+                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>I can't calm down</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                      </button>
+                      <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
+                        width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need to think clearly</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                      </button>
+                      <button onClick={() => { completeOnboarding(); startPathway("hype"); }} style={{
+                        width: "100%", background: "var(--surface)", border: "none",
+                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500 }}>I need to lock in</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Pre-performance focus.</div>
+                      </button>
                     </div>
-                    <button onClick={() => { completeOnboarding(); setScreen("panic"); }} style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                    }}>
-                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I need help right now</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>One tap. Breathing starts immediately.</div>
-                    </button>
-                    <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                    }}>
-                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I can't calm down</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
-                    </button>
-                    <button onClick={() => { completeOnboarding(); startPathway("clarity"); }} style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                      padding: "16px 20px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                    }}>
-                      <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>I need to think clearly</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
-                    </button>
                     <button onClick={() => { completeOnboarding(); setScreen("explore"); }} style={{
                       background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0"
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 16
                     }}>
                       Just explore the app →
                     </button>
                     <button onClick={() => setOnboardStep(s => s - 1)} style={{
                       background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "4px 0"
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8
                     }}>
                       ← Back
                     </button>
@@ -3380,35 +3399,54 @@ export default function Stillform() {
               </p>
 
               <div style={{ width: "100%", maxWidth: 360 }}>
-                <div style={{ fontSize: 12, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12, textAlign: "center" }}>
-                  Start your first session
+                <button onClick={() => {
+                  const el = document.getElementById("session-menu");
+                  if (el) el.style.display = el.style.display === "none" ? "block" : "none";
+                }} style={{
+                  width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 10,
+                  padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span>Start your first session</span>
+                  <span style={{ fontSize: 12 }}>▾</span>
+                </button>
+                <div id="session-menu" style={{ display: "none", marginTop: 6, borderRadius: 10, overflow: "hidden", border: "1px solid var(--border)" }}>
+                  <button onClick={() => setScreen("panic")} style={{
+                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need help right now</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Breathing starts immediately. Free.</div>
+                  </button>
+                  <button onClick={() => startPathway("calm")} style={{
+                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>I can't calm down</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
+                  </button>
+                  <button onClick={() => startPathway("clarity")} style={{
+                    width: "100%", background: "var(--surface)", border: "none", borderBottom: "1px solid var(--border)",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need to think clearly</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
+                  </button>
+                  <button onClick={() => startPathway("hype")} style={{
+                    width: "100%", background: "var(--surface)", border: "none",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "background 0.15s"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500 }}>I need to lock in</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Pre-performance focus + confidence.</div>
+                  </button>
                 </div>
-                <button onClick={() => setScreen("panic")} style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
-                }}>
-                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I need help right now</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Breathing starts immediately. Free.</div>
-                </button>
-                <button onClick={() => startPathway("calm")} style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
-                }}>
-                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I can't calm down</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Guided breathing + grounding.</div>
-                </button>
-                <button onClick={() => startPathway("clarity")} style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                  fontFamily: "'DM Sans', sans-serif", marginBottom: 8, transition: "border-color 0.2s"
-                }}>
-                  <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 2 }}>I need to think clearly</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Quick reset + clarity reframe.</div>
-                </button>
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 56 }}>Free. Takes 2 minutes.</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>Free. Takes 2 minutes.</div>
 
               {/* FOUR LEVELS — what you're building toward */}
               <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
