@@ -1742,6 +1742,34 @@ function PanicMode({ onComplete }) {
   ];
   const totalCycles = 4;
 
+  // TIME-TO-REGULATION — silent timer starts on mount
+  const startTime = useRef(Date.now());
+  const [regulationTime, setRegulationTime] = useState(null);
+
+  const formatTime = (ms) => {
+    const totalSec = Math.round(ms / 1000);
+    const min = Math.floor(totalSec / 60);
+    const sec = totalSec % 60;
+    return min > 0 ? `${min}m ${sec}s` : `${sec}s`;
+  };
+
+  const saveSession = (exitPoint) => {
+    const elapsed = Date.now() - startTime.current;
+    setRegulationTime(elapsed);
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({
+        timestamp: new Date().toISOString(),
+        duration: elapsed,
+        durationFormatted: formatTime(elapsed),
+        tools: exitPoint === "grounding" ? ["breathe", "ground"] : ["breathe"],
+        exitPoint
+      });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+    return elapsed;
+  };
+
   const [phaseIdx, setPhaseIdx] = useState(0);
   const [count, setCount] = useState(breathPhases[0].duration);
   const [cycle, setCycle] = useState(1);
@@ -1879,6 +1907,7 @@ function PanicMode({ onComplete }) {
 
   // GROUNDING DONE
   if (groundDone) {
+    const elapsed = regulationTime || saveSession("grounding");
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
@@ -1886,8 +1915,22 @@ function PanicMode({ onComplete }) {
           You're here.
         </div>
         <div className="panic-done-text">
-          Present. Breathing. Grounded. That took less than 3 minutes.
+          Present. Breathing. Grounded.
         </div>
+        <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8, letterSpacing: "0.04em" }}>
+          Regulated in {formatTime(elapsed)}
+        </div>
+        {(() => {
+          try {
+            const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+            if (sessions.length > 1) {
+              return <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24 }}>
+                This has worked {sessions.length} times.
+              </div>;
+            }
+          } catch {}
+          return <div style={{ marginBottom: 24 }} />;
+        })()}
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
             I need to talk through something
@@ -1931,7 +1974,7 @@ function PanicMode({ onComplete }) {
   }
 
   // BREATHING DONE — offer next step
-  if (breathDone) {
+  if (breathDone && !showGround) {
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: "var(--amber)", letterSpacing: "0.1em", marginBottom: 12 }}>
@@ -1947,7 +1990,10 @@ function PanicMode({ onComplete }) {
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
             I need to talk through something
           </button>
-          <button className="btn btn-ghost" style={{ width: "100%", color: "var(--text-muted)", fontSize: 13 }} onClick={() => onComplete()}>
+          <button className="btn btn-ghost" style={{ width: "100%", color: "var(--text-muted)", fontSize: 13 }} onClick={() => {
+            saveSession("breathing-only");
+            onComplete();
+          }}>
             I'm okay now
           </button>
         </div>
