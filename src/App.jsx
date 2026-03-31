@@ -3185,7 +3185,7 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Think clearly under pressure.",
+              subtitle: "Composure mastery. Stay centered anywhere.",
               body: "This is a composure training system. Four levels that take you from crisis to clarity — at your own pace.",
               note: null
             },
@@ -3373,10 +3373,10 @@ export default function Stillform() {
             /* ── FIRST TIME: what is this, why should I care ── */
             <section className="home">
               <h1 className="home-title">
-                Think clearly<br />under <em>pressure.</em>
+                Composure<br /><em>Mastery.</em>
               </h1>
               <p className="home-sub">
-                Stillform trains your nervous system to catch the reaction before it happens — so you respond instead of react.
+                Stay centered anywhere. Stillform trains your nervous system to catch the reaction before it happens — so you respond instead of react.
               </p>
 
               <div style={{ width: "100%", maxWidth: 360 }}>
