@@ -3191,15 +3191,15 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "Composure mastery. Stay centered anywhere.",
-              body: "This is a composure training system. Four levels that take you from crisis to clarity — at your own pace.",
+              body: "Anxiety. Stage fright. Obsessive thinking. Rage. Overwhelm. Excitement you can't contain. Any feeling too big to hold — this system trains you to hold it.",
               note: null
             },
             {
               icon: "◎",
               label: "Level 1",
               title: "Regulate",
-              subtitle: "When you can't think.",
-              body: "Breathing, grounding, body scan, and AI-powered reframing. The tools do the work — you just follow them.",
+              subtitle: "Settle what's too loud.",
+              body: "Breathing, grounding, body scan, and AI-powered reframing. Whether it's a panic attack, pre-stage nerves, or a thought loop at 3am — the tools meet you where you are.",
               note: "Instant reset is always free."
             },
             {
@@ -3395,7 +3395,7 @@ export default function Stillform() {
                 Composure<br /><em>Mastery.</em>
               </h1>
               <p className="home-sub">
-                Stay centered anywhere. Stillform trains your nervous system to catch the reaction before it happens — so you respond instead of react.
+                Stay centered anywhere. Stillform trains your composure — whether it's anxiety, stage fright, obsessive thinking, rage, or any feeling too big to hold.
               </p>
 
               <div style={{ width: "100%", maxWidth: 360 }}>
@@ -3454,10 +3454,10 @@ export default function Stillform() {
                   The system.
                 </div>
                 {[
-                  { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. The tools do the work." },
-                  { icon: "◇", name: "Recognize", desc: "Learn your body's warning signals before the flood hits." },
-                  { icon: "◈", name: "See Patterns", desc: "Your data shows what triggers you and what works." },
-                  { icon: "✦", name: "Watch & Choose", desc: "See your mind in motion. Choose your response." }
+                  { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. For anxiety, stage fright, rage, overwhelm — any feeling running too loud." },
+                  { icon: "◇", name: "Recognize", desc: "Map your body's warning signals. Catch the wave before it hits." },
+                  { icon: "◈", name: "See Patterns", desc: "Your data reveals what triggers you, what works, and the biases shaping your reactions." },
+                  { icon: "✦", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response instead of reacting." }
                 ].map((l, i) => (
                   <div key={i} style={{
                     display: "flex", gap: 14, alignItems: "flex-start",
