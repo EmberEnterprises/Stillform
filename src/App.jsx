@@ -3078,8 +3078,9 @@ function PanicMode({ onComplete }) {
 }
 
 export default function Stillform() {
-  const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
+  // UAT MODE: always show onboarding. Change back to conditional for production.
+  const hasSeenOnboarding = false;
+  const [screen, setScreen] = useState("onboarding");
   const [onboardStep, setOnboardStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
@@ -3087,7 +3088,8 @@ export default function Stillform() {
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
   const completeOnboarding = () => {
-    try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
+    // try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setScreen("home");
   };
 
