@@ -1713,6 +1713,21 @@ function PanicMode({ onComplete }) {
   const [cycle, setCycle] = useState(1);
   const [breathDone, setBreathDone] = useState(false);
   const [running, setRunning] = useState(true); // auto-start
+  const [audioOn, setAudioOn] = useState(() => {
+    try { return localStorage.getItem("stillform_audio") !== "off"; } catch { return true; }
+  });
+
+  const toggleAudio = () => {
+    setAudioOn(prev => {
+      const next = !prev;
+      try { localStorage.setItem("stillform_audio", next ? "on" : "off"); } catch {}
+      if (!next) {
+        // Stop current tone immediately
+        try { if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; } } catch {}
+      }
+      return next;
+    });
+  };
 
   // Audio — gentle tones that guide breathing without words
   const audioCtx = useRef(null);
@@ -1736,7 +1751,7 @@ function PanicMode({ onComplete }) {
 
   // Play tone when phase changes
   useEffect(() => {
-    if (!running || breathDone || !audioCtx.current) return;
+    if (!running || breathDone || !audioCtx.current || !audioOn) return;
     const ctx = audioCtx.current;
     if (ctx.state === "suspended") ctx.resume();
 
@@ -1788,7 +1803,7 @@ function PanicMode({ onComplete }) {
       activeOsc.current = osc;
       activeGain.current = gain;
     } catch {}
-  }, [phaseIdx, running, breathDone]);
+  }, [phaseIdx, running, breathDone, audioOn]);
 
   // Grounding
   const groundSteps = [
@@ -1909,6 +1924,30 @@ function PanicMode({ onComplete }) {
   // BREATHING ACTIVE — auto-started, one instruction only
   return (
     <div className="panic-screen">
+      {/* Audio toggle — small, top-right, non-intrusive */}
+      <button
+        onClick={toggleAudio}
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          background: "none",
+          border: "1px solid var(--border)",
+          borderRadius: 8,
+          padding: "6px 10px",
+          fontSize: 16,
+          color: audioOn ? "var(--amber)" : "var(--text-muted)",
+          cursor: "pointer",
+          WebkitTapHighlightColor: "transparent",
+          transition: "all 0.2s ease",
+          zIndex: 10,
+          textDecoration: audioOn ? "none" : "line-through"
+        }}
+        aria-label={audioOn ? "Mute audio" : "Unmute audio"}
+      >
+        ♪
+      </button>
+
       <div className="panic-instruction">
         Follow this circle
       </div>
