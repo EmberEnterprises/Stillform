@@ -3577,9 +3577,9 @@ export default function Stillform() {
             </section>
           );
 
-          /* ── RETURNING USER: what do you need right now ── */
+          /* ── RETURNING USER: everything visible, organized by level ── */
           return (
-            <section style={{ maxWidth: 480, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "calc(100vh - 140px)" }}>
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
 
               {/* Repeat what worked */}
               {(() => {
@@ -3597,7 +3597,7 @@ export default function Stillform() {
                       style={{
                         width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
                         borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
-                        marginBottom: 16, transition: "all 0.2s"
+                        marginBottom: 20, transition: "all 0.2s"
                       }}
                     >
                       <div style={{ fontSize: 13, color: "var(--amber)" }}>
@@ -3608,56 +3608,176 @@ export default function Stillform() {
                 } catch { return null; }
               })()}
 
-              {/* TWO CHOICES */}
-              <button
-                onClick={() => startPathway("calm")}
-                style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
-                  padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
-                  marginBottom: 12
-                }}
-                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-              >
-                <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                  Regulate
+              {/* LEVEL 1 — REGULATE */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+                  Level 1 · Your tools
                 </div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                  Settle what.s too loud. Breathing + grounding.
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <button onClick={() => startPathway("calm")} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe & Ground</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Settle your nervous system. Breathing + sensory grounding.</div>
+                  </button>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Find tension. Release it with targeted acupressure.</div>
+                  </button>
+                  <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI reads what you say. Helps you see it differently.</div>
+                  </button>
+                  <button onClick={() => startPathway("clarity")} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3, color: "#7aadcf" }}>✦ Get Sharp</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Cut through mental noise. Restore clarity.</div>
+                  </button>
+                  <button onClick={() => startPathway("hype")} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                  }}>
+                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3, color: "#c9793a" }}>◌ Lock In</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Pre-performance composure. Stage fright. Big moments.</div>
+                  </button>
                 </div>
-              </button>
+              </div>
 
-              <button
-                onClick={() => startPathway("clarity")}
-                style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14,
-                  padding: "22px 24px", textAlign: "left", cursor: "pointer", transition: "border-color 0.2s",
-                  marginBottom: 32
-                }}
-                onMouseOver={e => e.currentTarget.style.borderColor = "var(--amber-dim)"}
-                onMouseOut={e => e.currentTarget.style.borderColor = "var(--border)"}
-              >
-                <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, marginBottom: 5 }}>
-                  Get sharp
+              {/* LEVEL 2 — RECOGNIZE */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+                  Level 2 · Know your signals
                 </div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                  Cut through noise. Restore clarity.
+                <div style={{ display: "flex", gap: 8 }}>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
+                    flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◇ Map Signals</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where tension hits first</div>
+                  </button>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
+                    flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◈ Check-In</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second body scan</div>
+                  </button>
                 </div>
-              </button>
+              </div>
 
-              {/* MORE */}
-              <button
-                onClick={() => setScreen("explore")}
-                style={{
-                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em",
-                  padding: "8px 0", transition: "color 0.2s"
-                }}
-                onMouseOver={e => e.currentTarget.style.color = "var(--amber)"}
-                onMouseOut={e => e.currentTarget.style.color = "var(--text-muted)"}
-              >
-                All tools & levels →
-              </button>
+              {/* LEVEL 3 — PATTERNS */}
+              {(() => {
+                let sc = 0;
+                try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+                const unlocked = sc >= 8;
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
+                        Level 3 · See patterns
+                      </div>
+                      {!unlocked && <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{8 - sc} more sessions</div>}
+                    </div>
+                    {unlocked ? (
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
+                          flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                          padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◇ Patterns</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows</div>
+                        </button>
+                        <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
+                          flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                          padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>⬡ Blind Spots</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Bias awareness</div>
+                        </button>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Needs real data to find real patterns.</div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* LEVEL 4 — WATCH & CHOOSE */}
+              {(() => {
+                let sc = 0;
+                try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+                const unlocked = sc >= 12;
+                return (
+                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
+                        Level 4 · Watch & Choose
+                      </div>
+                      {!unlocked && <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{12 - sc} more sessions</div>}
+                    </div>
+                    {unlocked ? (
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>✦ Watch & Choose</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it. Name it. Choose differently.</div>
+                      </button>
+                    ) : (
+                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Builds on everything before it.</div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* JOURNAL */}
+              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28 }}>
+                <button onClick={() => setScreen("journal")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>✎ Journal</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Log triggers, emotions, outcomes</div>
+                </button>
+              </div>
+
+              {/* STATS */}
+              {(() => {
+                try {
+                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  if (sessions.length === 0) return null;
+                  const avgMs = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length;
+                  const avgSec = Math.round(avgMs / 1000);
+                  const avgStr = avgSec >= 60 ? `${Math.floor(avgSec / 60)}m ${avgSec % 60}s` : `${avgSec}s`;
+                  return (
+                    <div style={{ display: "flex", gap: 24, justifyContent: "center", paddingTop: 12 }}>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
+                      </div>
+                      <div style={{ textAlign: "center" }}>
+                        <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{avgStr}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>avg regulation</div>
+                      </div>
+                    </div>
+                  );
+                } catch { return null; }
+              })()}
             </section>
           );
         })()}
@@ -4519,7 +4639,6 @@ export default function Stillform() {
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("explore")}>All Tools</button>
             <button onClick={() => setScreen("journal")}>Journal</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
