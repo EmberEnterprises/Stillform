@@ -3479,13 +3479,13 @@ export default function Stillform() {
               {/* FOUR LEVELS — what you're building toward */}
               <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16, textAlign: "center" }}>
-                  The system.
+                  Each level builds on the last. The app learns from your sessions — the more you use it, the more it can show you.
                 </div>
                 {[
                   { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. For anxiety, stage fright, rage, overwhelm — any feeling running too loud." },
-                  { icon: "◇", name: "Recognize", desc: "Map your body's warning signals. Catch the wave before it hits." },
-                  { icon: "◈", name: "See Patterns", desc: "Your data reveals what triggers you, what works, and the biases shaping your reactions." },
-                  { icon: "✦", name: "Watch & Choose", desc: "See your own mind in motion. Choose your response instead of reacting." }
+                  { icon: "◇", name: "Recognize", desc: "Map your body's warning signals. Catch the wave before it hits. Available immediately." },
+                  { icon: "◈", name: "See Patterns", desc: "Your session data reveals what triggers you and what works. Needs 8 sessions — real patterns require real data, not guesses." },
+                  { icon: "✦", name: "Watch & Choose", desc: "Watch your own thinking in real time and choose differently. Unlocks at 12 sessions — this skill builds on everything before it." }
                 ].map((l, i) => (
                   <div key={i} style={{
                     display: "flex", gap: 14, alignItems: "flex-start",
