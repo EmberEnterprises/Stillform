@@ -1391,10 +1391,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Steady myself", desc: "Intensity is high, need to come down", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
-    { id: "box", label: "Hold composure", desc: "High-stakes moment, need to stay even", why: "Equal rhythm stabilizes under sustained pressure" },
-    { id: "478", label: "Deep reset", desc: "Depleted, shutdown, or wired and can't stop", why: "Long hold + exhale is the deepest nervous system reset" },
-    { id: "quick", label: "60-second recalibrate", desc: "Between meetings, in public, no time", why: "Shortest pattern that actually shifts your state" }
+    { id: "calm", label: "Reduce mental noise", desc: "Too many inputs, head won't quiet", why: "Extended exhale downregulates your nervous system. Most people feel a shift in 90 seconds." },
+    { id: "box", label: "Stabilize under pressure", desc: "High-stakes, need to stay even", why: "Equal rhythm locks your baseline under sustained load" },
+    { id: "478", label: "Release physical tension", desc: "Clenched, exhausted, wired, or can't stop", why: "Long hold + exhale is the deepest physiological reset" },
+    { id: "quick", label: "Regain focus", desc: "60 seconds, between tasks, in public", why: "Shortest pattern that shifts your state" }
   ];
 
   const totalCycles = 3; // 3 cycles then check in — don't force more
@@ -3587,10 +3587,10 @@ function PanicMode({ onComplete }) {
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: "var(--amber)", letterSpacing: "0.1em", marginBottom: 12 }}>
-          Composure reset
+          Composure restored
         </div>
         <div className="panic-done-text">
-          You're steady. Continue.
+          Baseline reset. You're steady. Proceed.
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => setShowGround(true)}>
@@ -4325,7 +4325,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Reset composure in 90 seconds. The app matches the drill to your state.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Paced breathing matched to your state. Shift in 90 seconds.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4333,7 +4333,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension you're carrying. Release it with targeted acupressure.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension. Release it with timed acupressure at six points.</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4341,9 +4341,13 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Separate signal from noise. AI helps you think clearly when your head won't quiet.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI identifies the distortion, separates signal from noise. Talk or journal.</div>
                   </button>
                 </div>
+              </div>
+
+              <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center", marginBottom: 24, opacity: 0.7 }}>
+                For when you need control without stepping away.
               </div>
 
               {/* STATS */}
