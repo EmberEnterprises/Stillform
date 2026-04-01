@@ -3871,26 +3871,23 @@ export default function Stillform() {
             {
               icon: "◇",
               label: "Body awareness",
-              title: "Recognize",
-              subtitle: "Catch it earlier.",
-              body: "Map where tension shows first in your body. Build a personal signal profile so you catch the wave at a 3, not a 10.",
-              note: "Available immediately."
+              title: "Know your signals",
+              subtitle: "Where does stress show first?",
+              body: "In Settings, you can map where tension shows up in your body — jaw, shoulders, chest, gut, hands, legs. This builds a signal profile so you catch the wave earlier. You only need to do this once."
             },
             {
               icon: "◈",
               label: "Over time",
-              title: "See Patterns",
-              subtitle: "Understand your loops.",
-              body: "Your session data surfaces what triggers you, what works, and the cognitive biases shaping your reactions. This level needs real data from your sessions to show you something meaningful — not guesses.",
-              note: "Unlocks after 8 sessions — that's when the app has enough data to show you real patterns."
+              title: "The app learns you",
+              subtitle: "The more you use it, the smarter it gets.",
+              body: "After a few sessions, Stillform starts tracking your most effective tools and regulation speed. Over time, it recognizes your triggers and patterns. The AI adjusts its approach based on your history — without you explaining yourself twice."
             },
             {
               icon: "✦",
               label: "Mastery",
-              title: "Watch & Choose",
-              subtitle: "Think clearly in real time.",
-              body: "Notice what's happening in your body. Name the thought. Recognize the pattern. Choose your response instead of reacting. This is a skill that builds on everything before it — regulation, signal recognition, and pattern awareness.",
-              note: "Unlocks after 12 sessions — by then you've built the foundation this level requires."
+              title: "Composure on demand",
+              subtitle: "Regulate faster. Recognize sooner. Choose deliberately.",
+              body: "This is what Stillform trains: notice what's happening in your body, name what your mind is doing, and choose your response instead of reacting. The tools stay the same — but your relationship with them changes completely."
             }
           ];
           const step = steps[onboardStep];
