@@ -4045,6 +4045,14 @@ export default function Stillform() {
                   Skip — take me to the app
                 </button>
               )}
+              {isFirst && (
+                <button onClick={completeOnboarding} style={{
+                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12
+                }}>
+                  I don't need instructions
+                </button>
+              )}
             </section>
           );
         })()}
