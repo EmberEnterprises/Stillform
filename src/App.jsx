@@ -2260,7 +2260,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               return `Today: ${checkin.sleep}h sleep, energy ${checkin.energy}, mood "${checkin.mood}"${checkin.stressEvent ? `, stress event: ${checkin.stressEvent}` : ""}${checkin.notes ? `, notes: ${checkin.notes}` : ""}`;
             } catch { return null; }
           })(),
-          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()
+          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
+          priorModeContext: (() => {
+            try {
+              const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);
+              for (const m of otherModes) {
+                const data = JSON.parse(localStorage.getItem(`stillform_reframe_session_${m}`) || "[]");
+                if (data.length >= 2) {
+                  const recent = data.slice(-4).map(msg => `${msg.role === "ai" ? "Stillform" : "User"}: ${msg.text}`).join("\n");
+                  const modeLabel = { calm: "Calm", clarity: "Get Sharp", hype: "Lock In" }[m];
+                  return `USER'S PRIOR CONVERSATION (from ${modeLabel} mode, same session):\n${recent}\nThey switched modes. Use this context — don't make them repeat themselves.`;
+                }
+              }
+              return null;
+            } catch { return null; }
+          })()
         })
       });
       clearTimeout(timeout);
