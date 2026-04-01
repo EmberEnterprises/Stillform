@@ -1652,23 +1652,18 @@ function BreatheGroundTool({ onComplete, pathway }) {
   // Pre-rate: quick 1-5 tap
   if (phase === "pre-rate") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 20 }}>
         How steady are you?
       </h2>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
-        Quick check. Tap a number.
-      </p>
-      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+      {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>Last shift: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
+      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         {[1, 2, 3, 4, 5].map(n => (
           <button key={n} onClick={() => { setPreRating(n); setPhase("breathe"); }} style={{
             width: 48, height: 48, borderRadius: "50%", border: "1px solid var(--border)",
             background: "var(--surface)", color: "var(--text)", fontSize: 18,
-            cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+            cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
           }}>{n}</button>
         ))}
-      </div>
-      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 10, color: "var(--text-muted)", padding: "0 12px" }}>
-        <span>Unstable</span><span>Solid</span>
       </div>
     </div>
   );
@@ -1799,28 +1794,36 @@ function BreatheGroundTool({ onComplete, pathway }) {
       {/* POST-RATE */}
       {phase === "post-rate" && (
         <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 20 }}>
             Where are you now?
           </h2>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
             {[1, 2, 3, 4, 5].map(n => (
-              <button key={n} onClick={() => setPostRating(n)} style={{
+              <button key={n} onClick={() => {
+                setPostRating(n);
+                try { localStorage.setItem("stillform_last_shift", JSON.stringify(n - (preRating || n))); } catch {}
+              }} style={{
                 width: 48, height: 48, borderRadius: "50%",
                 border: `1px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
-                background: postRating === n ? "rgba(201,147,58,0.12)" : "var(--surface)",
+                background: postRating === n ? "rgba(201,147,58,0.15)" : "var(--surface)",
                 color: postRating === n ? "var(--amber)" : "var(--text)", fontSize: 18,
-                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
               }}>{n}</button>
             ))}
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)", padding: "0 12px", marginBottom: 24 }}>
-            <span>Unstable</span><span>Solid</span>
-          </div>
-          {postRating && preRating && (
-            <div style={{ fontSize: 13, color: postRating > preRating ? "var(--amber)" : "var(--text-dim)", marginBottom: 16 }}>
-              {postRating > preRating ? `+${postRating - preRating} shift. Composure restored.` : postRating === preRating ? "Holding steady." : "Still adjusting. That's data, not failure."}
-            </div>
-          )}
+          {postRating && preRating && (() => {
+            const delta = postRating - preRating;
+            return (
+              <div style={{ marginBottom: 24 }}>
+                <div style={{ fontSize: 32, fontFamily: "'Cormorant Garamond', serif", color: delta > 0 ? "var(--amber)" : "var(--text-dim)", marginBottom: 4 }}>
+                  {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                  {delta > 0 ? "Composure increased" : delta === 0 ? "Baseline held" : "Run again"}
+                </div>
+              </div>
+            );
+          })()}
           {postRating && (
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               <button className="btn btn-primary" onClick={onComplete}>Proceed</button>
