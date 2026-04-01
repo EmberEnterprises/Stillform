@@ -1819,7 +1819,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
                   {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                  {delta > 0 ? "Composure increased" : delta === 0 ? "Baseline held" : "Run again"}
+                  {delta >= 3 ? "Significant shift" : delta === 2 ? "Composure increased" : delta === 1 ? "Slight improvement" : delta === 0 ? "Baseline held" : delta === -1 ? "Still unstable" : "Run again"}
                 </div>
               </div>
             );
