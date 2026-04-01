@@ -1717,7 +1717,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
               Keep breathing
             </button>
             <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); onComplete(); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
-              Ready to stop
+              Stop here
             </button>
             <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
               display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
@@ -2921,7 +2921,7 @@ function MetacognitionTool({ onComplete }) {
       setStep(prompts.length);
     }},
     { label: "Talk it through", desc: "Use Reframe", action: () => onComplete("reframe-calm") },
-    { label: "Good to go", desc: "No tools needed", action: () => {
+    { label: "Move on", desc: "No tools needed", action: () => {
       try {
         const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
         sessions.push({
@@ -3242,7 +3242,7 @@ function BodyCheckInTool({ onComplete }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
               <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe</button>
-              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>All good</button>
+              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>Close</button>
             </div>
           </>
         ) : (
@@ -3495,7 +3495,7 @@ function PanicMode({ onComplete }) {
             Talk through something
           </button>
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
-            Okay now
+            Done — close
           </button>
           <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
             display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
@@ -3557,7 +3557,7 @@ function PanicMode({ onComplete }) {
             saveSession("breathing-only");
             onComplete();
           }}>
-            Okay now
+            Done — close
           </button>
         </div>
         <SessionNote />
