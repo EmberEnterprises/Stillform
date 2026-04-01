@@ -3768,6 +3768,8 @@ export default function Stillform() {
   const [jBody, setJBody] = useState("");
   const [jOutcome, setJOutcome] = useState("");
   const [jIntensity, setJIntensity] = useState(5);
+  const [uatRoadmapOpen, setUatRoadmapOpen] = useState(false);
+  const [uatTestAgain, setUatTestAgain] = useState(null);
 
   const completeOnboarding = () => {
     // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
@@ -4215,6 +4217,53 @@ export default function Stillform() {
           /* ── RETURNING USER: everything visible, organized by level ── */
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+
+              {/* UAT BANNER */}
+              <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+                <div style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, marginBottom: 6 }}>You're testing Stillform</div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+                  This is an early build. Your honest feedback shapes everything. Text us directly — what worked, what didn't, what felt off.
+                </div>
+                <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
+                  background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", padding: 0, marginBottom: uatRoadmapOpen ? 10 : 0
+                }}>
+                  {uatRoadmapOpen ? "▾ Hide roadmap" : "▸ What's coming in 30–60 days"}
+                </button>
+                {uatRoadmapOpen && (
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "8px 0 8px 12px", borderLeft: "2px solid var(--amber-dim)" }}>
+                    Biometric lock on conversations & journal<br/>
+                    Premium sound packs (singing bowl, rain, ocean, lo-fi)<br/>
+                    Apple Health / Google Health Connect / Samsung Health integration<br/>
+                    Proactive coaching — pattern detection + micro-adjustments<br/>
+                    Apple Watch — haptic breathing, no screen needed<br/>
+                    PDF/CSV export of your data<br/>
+                    Push notification reminders<br/>
+                    Premium themes & AI tone customization<br/>
+                    Shareable composure card
+                  </div>
+                )}
+                {uatTestAgain === null && (
+                  <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>Would you test a future version?</div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => setUatTestAgain(true)} style={{
+                        flex: 1, padding: "8px", background: "rgba(201,147,58,0.1)", border: "1px solid var(--amber-dim)",
+                        borderRadius: 6, color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                      }}>Yes</button>
+                      <button onClick={() => setUatTestAgain(false)} style={{
+                        flex: 1, padding: "8px", background: "var(--surface)", border: "1px solid var(--border)",
+                        borderRadius: 6, color: "var(--text-dim)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                      }}>No</button>
+                    </div>
+                  </div>
+                )}
+                {uatTestAgain !== null && (
+                  <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-muted)" }}>
+                    {uatTestAgain ? "Noted — we'll reach out for the next round." : "No problem. Thanks for testing this version."}
+                  </div>
+                )}
+              </div>
 
               {/* Repeat what worked */}
               {(() => {
