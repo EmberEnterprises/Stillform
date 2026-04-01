@@ -4560,13 +4560,13 @@ export default function Stillform() {
                 <div className="pricing-price">
                   {pricingCloud ? (
                     pricingPlan === "annual" ? (
-                      <><sup>$</sup>11<span style={{ fontSize: 28 }}>.24</span></>
+                      <><sup>$</sup>13<span style={{ fontSize: 28 }}>.49</span></>
                     ) : (
                       <><sup>$</sup>17<span style={{ fontSize: 28 }}>.99</span></>
                     )
                   ) : (
                     pricingPlan === "annual" ? (
-                      <><sup>$</sup>9<span style={{ fontSize: 28 }}>.33</span></>
+                      <><sup>$</sup>11<span style={{ fontSize: 28 }}>.24</span></>
                     ) : (
                       <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
                     )
@@ -4574,7 +4574,7 @@ export default function Stillform() {
                 </div>
                 <div className="pricing-save">
                   {pricingPlan === "annual"
-                    ? (pricingCloud ? "per month · $134.88/yr · Save 38%" : "per month · $112/yr · Save 38%")
+                    ? (pricingCloud ? "per month · $161.91/yr · Save 25%" : "per month · $134.91/yr · Save 25%")
                     : "per month"}
                 </div>
 
