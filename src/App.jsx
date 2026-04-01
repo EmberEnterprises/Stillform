@@ -4817,28 +4817,6 @@ export default function Stillform() {
                   {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
                 </div>
               </div>
-              <button onClick={() => {
-                if (window.confirm("This will permanently delete all your session history, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
-                  try {
-                    localStorage.removeItem("stillform_sessions");
-                    localStorage.removeItem("stillform_signal_profile");
-                    localStorage.removeItem("stillform_checkins");
-                    localStorage.removeItem("stillform_saved_reframes");
-                    localStorage.removeItem("stillform_reframe_session_calm");
-                    localStorage.removeItem("stillform_reframe_session_clarity");
-                    localStorage.removeItem("stillform_reframe_session_hype");
-                    localStorage.removeItem("stillform_journal");
-                    localStorage.removeItem("stillform_onboarded");
-                    window.location.reload();
-                  } catch {}
-                }
-              }} style={{
-                background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 8,
-                padding: "10px 16px", fontSize: 13, color: "rgba(200,80,80,0.8)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", width: "100%", marginTop: 4
-              }}>
-                Clear all data
-              </button>
             </div>
 
             {/* Links */}
@@ -5034,6 +5012,65 @@ export default function Stillform() {
 
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32 }}>
               Stillform · Ember Enterprises LLC · v1.0
+            </div>
+
+            {/* BACKUP & DATA — buried at very bottom */}
+            <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, opacity: 0.6 }}>Data management</div>
+
+              {/* Auto backup */}
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "12px 16px", marginBottom: 8,
+                display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Auto backup</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Weekly encrypted backup of all your data</div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
+              </div>
+
+              {/* Export */}
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "12px 16px", marginBottom: 8, opacity: 0.4,
+                display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Export your data</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download journal, sessions, insights as PDF or CSV</div>
+                </div>
+                <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Coming soon</div>
+              </div>
+
+              {/* Delete — small, understated, double confirm */}
+              <button onClick={() => {
+                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, journal, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
+                  const typed = window.prompt("To confirm deletion, type DELETE below:");
+                  if (typed === "DELETE") {
+                    try {
+                      localStorage.removeItem("stillform_sessions");
+                      localStorage.removeItem("stillform_signal_profile");
+                      localStorage.removeItem("stillform_checkins");
+                      localStorage.removeItem("stillform_saved_reframes");
+                      localStorage.removeItem("stillform_reframe_session_calm");
+                      localStorage.removeItem("stillform_reframe_session_clarity");
+                      localStorage.removeItem("stillform_reframe_session_hype");
+                      localStorage.removeItem("stillform_journal");
+                      localStorage.removeItem("stillform_checkin_today");
+                      localStorage.removeItem("stillform_onboarded");
+                      window.location.reload();
+                    } catch {}
+                  }
+                }
+              }} style={{
+                background: "none", border: "none", padding: "8px 0", fontSize: 11, 
+                color: "rgba(200,80,80,0.4)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                marginTop: 16, letterSpacing: "0.04em"
+              }}>
+                Delete all data
+              </button>
             </div>
           </section>
         )}
