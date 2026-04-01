@@ -27,7 +27,7 @@ const styles = `
     background: var(--bg);
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
+    font-weight: 400;
     position: relative;
     overflow-x: hidden;
   }
