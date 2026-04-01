@@ -4574,7 +4574,7 @@ export default function Stillform() {
                 </div>
                 <div className="pricing-save">
                   {pricingPlan === "annual"
-                    ? (pricingCloud ? "per month · $161.91/yr · Save 25%" : "per month · $134.91/yr · Save 25%")
+                    ? (pricingCloud ? "per month · $161.88/yr · Save 25%" : "per month · $134.88/yr · Save 25%")
                     : "per month"}
                 </div>
 
