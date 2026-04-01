@@ -1391,10 +1391,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Spiraling or flooded", desc: "Rage, panic, anxiety, sensory overload", why: "Extended exhale forces your nervous system down. Most people feel a shift in 90 seconds." },
-    { id: "box", label: "Need to hold steady", desc: "High-stakes moment, can't afford to crack", why: "Equal rhythm stabilizes under sustained pressure" },
-    { id: "478", label: "Shutdown or can't sleep", desc: "Frozen, numb, exhausted, or wired at 3am", why: "Long hold + exhale is the deepest nervous system reset" },
-    { id: "quick", label: "60-second reset", desc: "In public, between meetings, no time", why: "Shortest pattern that actually works" }
+    { id: "calm", label: "Steady myself", desc: "Intensity is high, need to come down", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+    { id: "box", label: "Hold composure", desc: "High-stakes moment, need to stay even", why: "Equal rhythm stabilizes under sustained pressure" },
+    { id: "478", label: "Deep reset", desc: "Depleted, shutdown, or wired and can't stop", why: "Long hold + exhale is the deepest nervous system reset" },
+    { id: "quick", label: "60-second recalibrate", desc: "Between meetings, in public, no time", why: "Shortest pattern that actually shifts your state" }
   ];
 
   const totalCycles = 3; // 3 cycles then check in — don't force more
@@ -3587,10 +3587,10 @@ function PanicMode({ onComplete }) {
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, color: "var(--amber)", letterSpacing: "0.1em", marginBottom: 12 }}>
-          Breathing complete
+          Composure reset
         </div>
         <div className="panic-done-text">
-          Your system is settling. That shift is real.
+          You're steady. Continue.
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => setShowGround(true)}>
@@ -3942,10 +3942,10 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Regulate your nervous system in under 3 minutes.",
-              body: "Stop spiraling. Get out of shutdown. Reduce intensity fast.\n\nThis is not meditation. Not therapy. Not journaling prompts.\n\nOne drill. One shift. Most people feel it in 90 seconds.",
+              subtitle: "Build composure in minutes, not hours.",
+              body: "Steady yourself. Clear your head. Regulate tension. Re-center.\n\nNot meditation. Not therapy. Not a crisis line.\n\nA composure system for high-functioning people who need to regulate without stepping out of their life.",
               note: null,
-              cta: "Start Stabilizing"
+              cta: "Reset Composure"
             },
             {
               icon: "◎",
@@ -4116,7 +4116,7 @@ export default function Stillform() {
                   {isFirst ? (
                     <>
                       <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
-                        Start Stabilizing
+                        Reset Composure
                       </button>
                       <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setOnboardStep(s => s + 1)}>
                         See how it works first
@@ -4325,7 +4325,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Stop spiraling. Reduce intensity. Most people feel a shift in 90 seconds.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Reset composure in 90 seconds. The app matches the drill to your state.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4333,7 +4333,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Most people hold stress without realizing it. Find it. Release it with acupressure.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension you're carrying. Release it with targeted acupressure.</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4341,7 +4341,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Cut through the noise. AI separates what's real from what your brain is adding.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Separate signal from noise. AI helps you think clearly when your head won't quiet.</div>
                   </button>
                 </div>
               </div>
