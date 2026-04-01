@@ -4016,7 +4016,7 @@ export default function Stillform() {
               title: "Regulate",
               subtitle: "Three tools. Each one different.",
               body: "Breathe — paced breathing matched to your state, plus sensory grounding. Sound on or off.\n\nBody Scan — locate tension in six body areas and release it with timed acupressure. Sound on or off.\n\nReframe — AI-powered. Three modes: Calm (reduce noise), Get Sharp (break loops), Lock In (pre-performance composure). Switch modes mid-session — the AI carries context with you. Talk tab for conversation, Journal tab for entries the AI remembers.",
-              note: "The floating reset button is always free. Full tools require a subscription."
+              note: "The Quick Breathe button is always free. Full tools require a subscription."
             },
             {
               icon: "◎",
@@ -4215,7 +4215,7 @@ export default function Stillform() {
             color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
             boxShadow: "0 2px 12px rgba(0,0,0,0.3)", transition: "all 0.2s"
           }}>
-            ◎ Reset
+            ◎ Quick Breathe
           </button>
         )}
 
