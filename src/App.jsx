@@ -1672,10 +1672,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
   if (!started && phase === "breathe") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
-        What's happening?
+        Select adjustment
       </h2>
       <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
-        The app picks the right breathing pattern for you.
+        Matched breathing pattern. Tap to start.
       </p>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {breathPrompts.map(bp => (
@@ -1768,7 +1768,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
         <div className="complete">
           <div className="complete-icon">✓</div>
           <h2>How do you feel?</h2>
-          <p style={{ marginBottom: 24 }}>Three rounds of extended exhale breathing. Your nervous system is beginning to settle.</p>
+          <p style={{ marginBottom: 24 }}>Three rounds complete. Your nervous system is recalibrating.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button className="btn btn-primary" onClick={() => setPhase("ground")}>
               Ground myself now →
@@ -2021,7 +2021,7 @@ function BodyScanTool({ onComplete }) {
     return (
       <div className="complete">
         <div className="complete-icon">✓</div>
-        <h2>Scan complete.</h2>
+        <h2>Tension released.</h2>
         <p>You've moved awareness and pressure through your body.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
@@ -2221,10 +2221,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
   const openingText = isHype
-    ? "What are you about to walk into? A stage, a room, a conversation, a meeting — say what it is and what's making it hard."
+    ? "What are you walking into? Name it and what's making it hard."
     : isClarity
-    ? "What won't stop spinning? The thought, the decision, the thing you keep replaying. Say it — don't organize it."
-    : "Say what you're feeling. Rage, anxiety, grief, shame, overwhelm — whatever it is. Don't filter it. The AI reads exactly what you wrote.";
+    ? "What's looping? The thought, decision, or conversation you keep replaying."
+    : "What's off? Describe what happened. The AI identifies the distortion.";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
   // Migrate old conversation from before mode-specific keys
@@ -2412,7 +2412,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
 
   const modeConfig = {
     calm: {
-      icon: "◎", title: "Reframe", subtitle: "Say what you're feeling. The AI reads exactly what you wrote.",
+      icon: "◎", title: "Reframe", subtitle: "Describe the situation. The AI identifies the distortion.",
       color: "#c9933a",
       bg: "linear-gradient(180deg, rgba(201,147,58,0.06) 0%, transparent 40%)",
       border: "rgba(201,147,58,0.2)",
@@ -2666,7 +2666,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             <input
               className="ai-input"
               style={{ borderColor: mc.border }}
-              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "Say what's happening..."}
+              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's off..."}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => e.key === "Enter" && handleSend()}
@@ -4015,7 +4015,7 @@ export default function Stillform() {
               label: "Your tools",
               title: "Regulate",
               subtitle: "Three tools. Each one different.",
-              body: "Breathe — smart breathing that picks the right pattern for what you're feeling, plus sensory grounding. Sound on or off.\n\nBody Scan — find tension in your body and release it with guided acupressure at six targeted points. Sound on or off.\n\nReframe — AI-powered. Three modes: Calm (settle overwhelm), Get Sharp (cut through loops), Lock In (pre-performance composure). Switch modes mid-conversation — the AI carries everything with you. Talk tab for real-time conversation, Journal tab to write entries the AI remembers next time.",
+              body: "Breathe — paced breathing matched to your state, plus sensory grounding. Sound on or off.\n\nBody Scan — locate tension in six body areas and release it with timed acupressure. Sound on or off.\n\nReframe — AI-powered. Three modes: Calm (reduce noise), Get Sharp (break loops), Lock In (pre-performance composure). Switch modes mid-session — the AI carries context with you. Talk tab for conversation, Journal tab for entries the AI remembers.",
               note: "The floating reset button is always free. Full tools require a subscription."
             },
             {
