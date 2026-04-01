@@ -3738,7 +3738,7 @@ function CheckInWidget({ onComplete }) {
 
 export default function Stillform() {
   const [appReady, setAppReady] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setAppReady(true), 1200); return () => clearTimeout(t); }, []);
+  useEffect(() => { const t = setTimeout(() => setAppReady(true), 2500); return () => clearTimeout(t); }, []);
 
   // UAT MODE: always show onboarding. Change back to conditional for production.
   const hasSeenOnboarding = false;
@@ -3754,6 +3754,18 @@ export default function Stillform() {
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
+  // Journal state — must be before any early return (React Rules of Hooks)
+  const [journalEntries, setJournalEntries] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+  });
+  const [journalMode, setJournalMode] = useState("list");
+  const [journalViewIdx, setJournalViewIdx] = useState(null);
+  const [jTrigger, setJTrigger] = useState("");
+  const [jEmotion, setJEmotion] = useState([]);
+  const [jBody, setJBody] = useState("");
+  const [jOutcome, setJOutcome] = useState("");
+  const [jIntensity, setJIntensity] = useState(5);
+
   if (!appReady) return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
@@ -3762,13 +3774,13 @@ export default function Stillform() {
       <div style={{
         fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
         color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8,
-        opacity: 0, animation: "splashFade 1s ease-out 0.2s forwards"
+        opacity: 0, animation: "splashFade 1.2s ease-out 0.3s forwards"
       }}>
         Stillform
       </div>
       <div style={{
         fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
-        opacity: 0, animation: "splashFade 1s ease-out 0.5s forwards"
+        opacity: 0, animation: "splashFade 1.2s ease-out 0.8s forwards"
       }}>
         Composure mastery
       </div>
@@ -3781,18 +3793,6 @@ export default function Stillform() {
     // try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setScreen("home");
   };
-
-  // Journal state
-  const [journalEntries, setJournalEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
-  });
-  const [journalMode, setJournalMode] = useState("list");
-  const [journalViewIdx, setJournalViewIdx] = useState(null);
-  const [jTrigger, setJTrigger] = useState("");
-  const [jEmotion, setJEmotion] = useState([]);
-  const [jBody, setJBody] = useState("");
-  const [jOutcome, setJOutcome] = useState("");
-  const [jIntensity, setJIntensity] = useState(5);
 
   const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
 
