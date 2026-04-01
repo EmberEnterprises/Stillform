@@ -2358,7 +2358,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       </div>
 
       <div className="disclaimer">
-        Not therapy or clinical treatment. Your data stays on this device. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+        Not therapy or clinical treatment. Your data is encrypted and synced securely. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
       </div>
 
       {/* ── JOURNAL TAB ── */}
@@ -3865,7 +3865,7 @@ export default function Stillform() {
               label: "Features",
               title: "Built for you",
               subtitle: "The more you use it, the smarter it gets.",
-              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nYour data stays on your device. Conversations and journal entries never touch our servers.",
+              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nCloud sync — your conversations, journal, and progress are encrypted and accessible from any device.",
               note: null
             },
             {
@@ -4617,7 +4617,7 @@ export default function Stillform() {
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
-            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using your browser's storage. This data is not transmitted to our servers. We do not have access to it. Clearing your browser data will permanently delete this information.</p>
+            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes with encrypted cloud sync so you can access your data from any device. Your data is encrypted in transit and at rest. You can delete your data at any time from Settings.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
 
             <h2>Assumption of Risk</h2>
@@ -4796,7 +4796,7 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Session history</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} completed sessions · stored on this device only
+                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} completed sessions · encrypted cloud sync
                 </div>
               </div>
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
@@ -4808,7 +4808,7 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Journal entries</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries · stored on this device only
+                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries · encrypted cloud sync
                 </div>
               </div>
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
