@@ -1817,6 +1817,71 @@ function BodyScanTool({ onComplete }) {
   const [done, setDone] = useState(false);
   const [showPointName, setShowPointName] = useState(false);
 
+  // Audio — low grounding tone during holds
+  const [audioOn, setAudioOn] = useState(() => {
+    try { return localStorage.getItem("stillform_audio") === "on"; } catch { return false; }
+  });
+  const audioCtx = useRef(null);
+  const activeOsc = useRef(null);
+
+  useEffect(() => {
+    try {
+      audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+    } catch {}
+    return () => {
+      try {
+        if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; }
+        if (audioCtx.current) audioCtx.current.close();
+      } catch {}
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    const next = !audioOn;
+    setAudioOn(next);
+    try { localStorage.setItem("stillform_audio", next ? "on" : "off"); } catch {}
+  };
+
+  // Play/stop tone when holding
+  useEffect(() => {
+    if (!audioOn || !audioCtx.current) return;
+    try { if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; } } catch {}
+
+    if (!holding) return;
+
+    try {
+      const ctx = audioCtx.current;
+      if (ctx.state === "suspended") ctx.resume();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(0, ctx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.06, ctx.currentTime + 1);
+      osc.start(ctx.currentTime);
+      activeOsc.current = osc;
+    } catch {}
+
+    return () => {
+      try {
+        if (activeOsc.current) {
+          const ctx = audioCtx.current;
+          if (ctx) {
+            const gain = ctx.createGain();
+            activeOsc.current.disconnect();
+            activeOsc.current.connect(gain);
+            gain.connect(ctx.destination);
+            gain.gain.setValueAtTime(0.06, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.5);
+          }
+          setTimeout(() => { try { activeOsc.current?.stop(); activeOsc.current = null; } catch {} }, 600);
+        }
+      } catch {}
+    };
+  }, [holding, audioOn]);
+
   useEffect(() => {
     if (!holding) return;
     const target = areas[currentArea].holdSeconds;
@@ -1897,10 +1962,20 @@ function BodyScanTool({ onComplete }) {
                 </button>
               </div>
               {!holding && holdCount === 0 && (
-                <button className="btn btn-primary" style={{ marginTop: 16, fontSize: 13 }}
-                  onClick={(e) => { e.stopPropagation(); startHold(); }}>
-                  Start {holdTarget}s hold
-                </button>
+                <div style={{ display: "flex", gap: 8, marginTop: 16, alignItems: "center" }}>
+                  <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }}
+                    onClick={(e) => { e.stopPropagation(); startHold(); }}>
+                    Start {holdTarget}s hold
+                  </button>
+                  <button onClick={(e) => { e.stopPropagation(); toggleAudio(); }} style={{
+                    background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+                    border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 8, padding: "8px 12px", fontSize: 11, cursor: "pointer",
+                    color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    {audioOn ? "♪" : "♪"}
+                  </button>
+                </div>
               )}
               {(holding || holdCount > 0) && (
                 <div style={{ marginTop: 16 }}>
