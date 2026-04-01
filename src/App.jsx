@@ -1499,54 +1499,107 @@ function BreatheGroundTool({ onComplete, pathway }) {
   );
   }
 
+  const [groundStepStart, setGroundStepStart] = useState(Date.now());
+  const [groundData, setGroundData] = useState([]);
+  const [showGroundWrite, setShowGroundWrite] = useState(false);
+
+  const confirmGroundStep = () => {
+    const timeOnStep = Date.now() - groundStepStart;
+    const entry = {
+      step: current + 1,
+      sense: steps[current].sense,
+      timeMs: timeOnStep,
+      wrote: !!(answers[current] || "").trim(),
+      text: (answers[current] || "").trim() || null
+    };
+    const updated = [...groundData, entry];
+    setGroundData(updated);
+    setShowGroundWrite(false);
+
+    if (current < steps.length - 1) {
+      setCurrent(c => c + 1);
+      setGroundStepStart(Date.now());
+    } else {
+      // Save grounding engagement data
+      try {
+        const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+        gd.push({ timestamp: new Date().toISOString(), steps: updated, skipped: false, totalMs: updated.reduce((s, e) => s + e.timeMs, 0) });
+        localStorage.setItem("stillform_grounding_data", JSON.stringify(gd));
+      } catch {}
+      setGroundDone(true);
+    }
+  };
+
+  const skipGrounding = () => {
+    const timeOnStep = Date.now() - groundStepStart;
+    try {
+      const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+      gd.push({ timestamp: new Date().toISOString(), steps: [...groundData, { step: current + 1, sense: steps[current].sense, timeMs: timeOnStep, wrote: false, text: null }], skipped: true, skippedAt: current + 1, totalMs: groundData.reduce((s, e) => s + e.timeMs, 0) + timeOnStep });
+      localStorage.setItem("stillform_grounding_data", JSON.stringify(gd));
+    } catch {}
+    setGroundDone(true);
+  };
+
   if (phase === "ground") return (
     <div>
       <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
         Grounding — step {current + 1} of 5
       </div>
-      <div style={{ background: "var(--surface)", borderRadius: 12, padding: "24px 20px", marginBottom: 20 }}>
-        <div style={{ fontSize: 28, color: "var(--amber)", marginBottom: 8, textAlign: "center" }}>{steps[current].num}</div>
-        <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, textAlign: "center", marginBottom: 8 }}>
+      <div style={{ background: "var(--surface)", borderRadius: 12, padding: "24px 20px", marginBottom: 20, textAlign: "center" }}>
+        <div style={{ fontSize: 36, color: "var(--amber)", marginBottom: 8 }}>{steps[current].num}</div>
+        <div style={{ fontSize: 20, color: "var(--text)", fontWeight: 500, marginBottom: 8 }}>
           {steps[current].label}
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", textAlign: "center", marginBottom: 16 }}>
+        <div style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20 }}>
           {steps[current].prompt}
         </div>
-        <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginBottom: 16 }}>
-          Name them in your head — or write them below if it helps.
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <textarea
-            className="ground-input"
-            rows={2}
-            placeholder="Optional — write or speak"
-            value={answers[current] || ""}
-            onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))}
-            style={{ flex: 1 }}
-          />
-          <MicButton onTranscript={t => setAnswers(a => ({ ...a, [current]: (a[current] || "") + (a[current] ? " " : "") + t }))} />
-        </div>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
+
         <button
           className="btn btn-primary"
-          style={{ flex: 1, fontSize: 15 }}
-          onClick={() => {
-            if (current < steps.length - 1) setCurrent(c => c + 1);
-            else setGroundDone(true);
-          }}
+          style={{ width: "100%", fontSize: 15, padding: "14px 0", marginBottom: 10 }}
+          onClick={confirmGroundStep}
         >
-          {current < steps.length - 1 ? "Next →" : "Done"}
+          {current < steps.length - 1 ? `I've got ${steps[current].num} ✓` : "Done ✓"}
         </button>
-        {current < steps.length - 1 && (
-          <button
-            className="btn btn-ghost"
-            style={{ fontSize: 13 }}
-            onClick={() => setGroundDone(true)}
-          >
-            Skip grounding
+
+        {!showGroundWrite ? (
+          <button onClick={() => setShowGroundWrite(true)} style={{
+            background: "none", border: "none", color: "var(--text-muted)", fontSize: 11,
+            cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+          }}>
+            I want to write them down
           </button>
+        ) : (
+          <div style={{ marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 6 }}>
+              <textarea
+                className="ground-input"
+                rows={2}
+                placeholder="Write or speak what you noticed..."
+                value={answers[current] || ""}
+                onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))}
+                style={{ flex: 1, fontSize: 13 }}
+                autoFocus
+              />
+              <MicButton onTranscript={t => setAnswers(a => ({ ...a, [current]: (a[current] || "") + (a[current] ? " " : "") + t }))} />
+            </div>
+          </div>
         )}
+      </div>
+
+      {current < steps.length - 1 && (
+        <button onClick={skipGrounding} style={{
+          background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
+          cursor: "pointer", fontFamily: "'DM Sans', sans-serif", width: "100%", textAlign: "center"
+        }}>
+          Skip grounding
+        </button>
+      )}
+
+      <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 16 }}>
+        {steps.map((_, i) => (
+          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+        ))}
       </div>
     </div>
   );
