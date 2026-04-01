@@ -3783,8 +3783,8 @@ function CheckInWidget({ onComplete }) {
 }
 
 export default function Stillform() {
-  const [appReady, setAppReady] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setAppReady(true), 2500); return () => clearTimeout(t); }, []);
+  const [splashDone, setSplashDone] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setSplashDone(true), 2500); return () => clearTimeout(t); }, []);
 
   // UAT MODE: always show onboarding. Change back to conditional for production.
   const hasSeenOnboarding = false;
@@ -3811,28 +3811,6 @@ export default function Stillform() {
   const [jBody, setJBody] = useState("");
   const [jOutcome, setJOutcome] = useState("");
   const [jIntensity, setJIntensity] = useState(5);
-
-  if (!appReady) return (
-    <div style={{
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      minHeight: "100vh", background: "#0e0f11"
-    }}>
-      <div style={{
-        fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
-        color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8,
-        opacity: 0, animation: "splashFade 1.2s ease-out 0.3s forwards"
-      }}>
-        Stillform
-      </div>
-      <div style={{
-        fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
-        opacity: 0, animation: "splashFade 1.2s ease-out 0.8s forwards"
-      }}>
-        Composure mastery
-      </div>
-      <style>{`@keyframes splashFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-    </div>
-  );
 
   const completeOnboarding = () => {
     // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
@@ -3922,6 +3900,25 @@ export default function Stillform() {
     <>
       <style>{styles}</style>
       <div className={appClasses}>
+        {/* SPLASH OVERLAY — fades out, never blocks hooks */}
+        {!splashDone && (
+          <div style={{
+            position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+            background: "#0e0f11", transition: "opacity 0.4s ease-out"
+          }}>
+            <div style={{
+              fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
+              color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8,
+              opacity: 0, animation: "splashIn 1.2s ease-out 0.3s forwards"
+            }}>Stillform</div>
+            <div style={{
+              fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
+              opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
+            }}>Composure mastery</div>
+            <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+          </div>
+        )}
         {/* NAV — hidden during onboarding */}
         {screen !== "onboarding" && (
         <nav className="nav">
