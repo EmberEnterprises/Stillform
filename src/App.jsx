@@ -1028,14 +1028,14 @@ const TOOLS = [
   {
     id: "checkin",
     icon: "◈",
-    name: "Quick Check-In",
+    name: "Tension Check",
     desc: "10-second body scan. Are you holding tension you haven't noticed?",
     time: "10 sec",
     level: 2
   },
   {
     id: "patterns",
-    icon: "◇",
+    icon: "◆",
     name: "Your Patterns",
     desc: "What the data shows about how you regulate.",
     time: "1 min",
@@ -1051,7 +1051,7 @@ const TOOLS = [
   },
   {
     id: "meta",
-    icon: "✦",
+    icon: "❖",
     name: "Watch & Choose",
     desc: "Catch the spiral in real time. Name it. Choose your next move.",
     time: "3 min",
@@ -2100,9 +2100,9 @@ function MicButton({ onTranscript }) {
   );
 }
 
-function ReframeTool({ onComplete, mode = "calm" }) {
+function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
-  const [tab, setTab] = useState("talk");
+  const [tab, setTab] = useState(defaultTab);
   const effectiveMode = activeMode || "calm";
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
@@ -3719,6 +3719,7 @@ export default function Stillform() {
   const [onboardStep, setOnboardStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
+  const [pricingPlan, setPricingPlan] = useState("annual");
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
@@ -3740,7 +3741,7 @@ export default function Stillform() {
   const [jOutcome, setJOutcome] = useState("");
   const [jIntensity, setJIntensity] = useState(5);
 
-  const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt"];
+  const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
 
   const saveJournalEntry = () => {
     const entry = {
@@ -3808,7 +3809,7 @@ export default function Stillform() {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} />;
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
       case "patterns": return <PatternsTool {...props} />;
@@ -4262,7 +4263,7 @@ export default function Stillform() {
                     flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
                     padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                   }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◈ Check-In</div>
+                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◈ Tension Check</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second body scan</div>
                   </button>
                 </div>
@@ -4287,7 +4288,7 @@ export default function Stillform() {
                           flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
                           padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                         }}>
-                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◇ Patterns</div>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◆ Patterns</div>
                           <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows</div>
                         </button>
                         <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
@@ -4323,7 +4324,7 @@ export default function Stillform() {
                         width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
                         padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>✦ Watch & Choose</div>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>❖ Watch & Choose</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it. Name it. Choose differently.</div>
                       </button>
                     ) : (
@@ -4335,7 +4336,7 @@ export default function Stillform() {
 
               {/* JOURNAL */}
               <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28 }}>
-                <button onClick={() => setScreen("journal")} style={{
+                <button onClick={() => { setPathway("calm"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm", defaultTab: "journal" }); setScreen("tool"); }} style={{
                   width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
                   padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -4378,7 +4379,15 @@ export default function Stillform() {
                 ← Back
               </button>
               <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
-                {activeTool.icon} {activeTool.name}
+                {activeTool.id === "reframe" ? (
+                  (() => {
+                    const m = activeTool.mode || pathway || "calm";
+                    const names = { calm: "✦ Reframe", clarity: "✦ Get Sharp", hype: "◌ Lock In" };
+                    return names[m] || "✦ Reframe";
+                  })()
+                ) : (
+                  <>{activeTool.icon} {activeTool.name}</>
+                )}
               </div>
               <button onClick={() => setScreen("panic")} style={{
                 background: "none", border: "1px solid var(--amber-dim)", borderRadius: 6,
@@ -4587,44 +4596,53 @@ export default function Stillform() {
         {/* PRICING */}
         {screen === "pricing" && (
           <section className="pricing">
+            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
               <p>Try everything free for 7 days. The one-tap reset button stays free forever.</p>
             </div>
             <div className="pricing-cards">
-              <div className="pricing-card">
-                <div className="pricing-period">Monthly</div>
-                <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
-                <div className="pricing-save">per month</div>
+              <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
+                {/* Toggle */}
+                <div style={{ display: "flex", background: "var(--surface)", borderRadius: 8, padding: 3, marginBottom: 20 }}>
+                  <button onClick={() => setPricingPlan("monthly")} style={{
+                    flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    fontSize: 13, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+                    background: pricingPlan === "monthly" ? "var(--amber)" : "transparent",
+                    color: pricingPlan === "monthly" ? "#0e0f11" : "var(--text-muted)"
+                  }}>Monthly</button>
+                  <button onClick={() => setPricingPlan("annual")} style={{
+                    flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    fontSize: 13, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
+                    background: pricingPlan === "annual" ? "var(--amber)" : "transparent",
+                    color: pricingPlan === "annual" ? "#0e0f11" : "var(--text-muted)"
+                  }}>Annual</button>
+                </div>
+
+                <div className="pricing-price">
+                  {pricingPlan === "annual" ? (
+                    <><sup>$</sup>9<span style={{ fontSize: 28 }}>.33</span></>
+                  ) : (
+                    <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
+                  )}
+                </div>
+                <div className="pricing-save">
+                  {pricingPlan === "annual" ? "per month · $112/yr · Save 38%" : "per month"}
+                </div>
+
                 <ul className="pricing-features">
                   <li>One-tap reset — always free</li>
-                  <li>Level 1: All regulation tools</li>
+                  <li>Level 1: Breathe, Body Scan, Reframe</li>
                   <li>Level 2: Signal recognition</li>
                   <li>Level 3: Pattern awareness</li>
                   <li>Level 4: Watch & Choose</li>
-                  <li>AI-powered Reframe</li>
-                  <li>7-day free trial</li>
-                </ul>
-                <button className="btn btn-secondary" style={{ width: "100%" }}>
-                  Start free trial →
-                </button>
-              </div>
-              <div className="pricing-card featured">
-                <div className="pricing-badge">Save 38%</div>
-                <div className="pricing-period">Annual</div>
-                <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
-                <div className="pricing-save">$9.33/mo · Best value</div>
-                <ul className="pricing-features">
-                  <li>One-tap reset — always free</li>
-                  <li>Level 1: All regulation tools</li>
-                  <li>Level 2: Signal recognition</li>
-                  <li>Level 3: Pattern awareness</li>
-                  <li>Level 4: Watch & Choose</li>
-                  <li>AI-powered Reframe</li>
-                  <li>7-day free trial</li>
+                  <li>3 AI modes: Calm, Get Sharp, Lock In</li>
+                  <li>Journal with AI memory</li>
+                  <li>Daily check-in</li>
+                  <li>Voice-to-text everywhere</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
-                  Start free trial →
+                  Start 7-day free trial →
                 </button>
               </div>
             </div>
@@ -5040,7 +5058,7 @@ export default function Stillform() {
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("journal")}>Journal</button>
+            <button onClick={() => { setPathway("calm"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm", defaultTab: "journal" }); setScreen("tool"); }}>Journal</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
