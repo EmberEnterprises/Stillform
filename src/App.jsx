@@ -1151,6 +1151,49 @@ function SessionNote() {
   );
 }
 
+function EmailCapture() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(() => {
+    try { return localStorage.getItem("stillform_email_captured") === "yes"; } catch { return false; }
+  });
+  const sessionCount = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })();
+
+  if (submitted || sessionCount > 3) return null;
+
+  const submit = async () => {
+    if (!email.trim() || !email.includes("@")) return;
+    try {
+      await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ "form-name": "waitlist", email: email.trim() }).toString()
+      });
+      localStorage.setItem("stillform_email_captured", "yes");
+      setSubmitted(true);
+    } catch { setSubmitted(true); }
+  };
+
+  return (
+    <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+      <div style={{ fontSize: 13, color: "var(--amber)", marginBottom: 8 }}>Want more drills like this?</div>
+      <div style={{ display: "flex", gap: 8 }}>
+        <input
+          type="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="Email" onKeyDown={e => e.key === "Enter" && submit()}
+          style={{
+            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6,
+            padding: "8px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
+          }}
+        />
+        <button onClick={submit} style={{
+          background: "var(--amber)", border: "none", borderRadius: 6, padding: "8px 14px",
+          fontSize: 12, color: "#0e0f11", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500
+        }}>Get access</button>
+      </div>
+    </div>
+  );
+}
+
 // Check display preferences
 function useDisplayPrefs() {
   const screenLight = (() => { try { return localStorage.getItem("stillform_screenlight") === "on"; } catch { return false; } })();
@@ -1348,10 +1391,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Overwhelmed right now", desc: "Rage, panic, anxiety, overwhelm", why: "Extended exhale forces your nervous system down" },
-    { id: "box", label: "Need to stay steady", desc: "Sustained pressure, staying composed", why: "Equal rhythm stabilizes over time" },
-    { id: "478", label: "Can't sleep / deep anxiety", desc: "Quiet moment, need deep calm", why: "Long hold + exhale is the deepest reset" },
-    { id: "quick", label: "Quick reset", desc: "Public, limited time, 60 seconds", why: "Shortest effective pattern" }
+    { id: "calm", label: "Spiraling or flooded", desc: "Rage, panic, anxiety, sensory overload", why: "Extended exhale forces your nervous system down. Most people feel a shift in 90 seconds." },
+    { id: "box", label: "Need to hold steady", desc: "High-stakes moment, can't afford to crack", why: "Equal rhythm stabilizes under sustained pressure" },
+    { id: "478", label: "Shutdown or can't sleep", desc: "Frozen, numb, exhausted, or wired at 3am", why: "Long hold + exhale is the deepest nervous system reset" },
+    { id: "quick", label: "60-second reset", desc: "In public, between meetings, no time", why: "Shortest pattern that actually works" }
   ];
 
   const totalCycles = 3; // 3 cycles then check in — don't force more
@@ -1722,6 +1765,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
               display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
             }}>How was that? Give feedback →</a>
+        <EmailCapture />
           </div>
         </div>
       )}
@@ -1922,6 +1966,7 @@ function BodyScanTool({ onComplete }) {
         <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
           display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
         }}>How was that? Give feedback →</a>
+        <EmailCapture />
         <FeedbackPrompt tool="bodyscan" />
         <SessionNote />
       </div>
@@ -3500,6 +3545,7 @@ function PanicMode({ onComplete }) {
           <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
             display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
           }}>How was that? Give feedback →</a>
+        <EmailCapture />
         </div>
         <SessionNote />
       </div>
@@ -3899,9 +3945,10 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Composure mastery. Stay centered anywhere.",
-              body: "Anxiety. Stage fright. Obsessive thinking. Rage. Overwhelm. Excitement you can't contain. Any feeling too big to hold — this system trains you to hold it.",
-              note: null
+              subtitle: "Regulate your nervous system in under 3 minutes.",
+              body: "Stop spiraling. Get out of shutdown. Reduce intensity fast.\n\nThis is not meditation. Not therapy. Not journaling prompts.\n\nOne drill. One shift. Most people feel it in 90 seconds.",
+              note: null,
+              cta: "Start Stabilizing"
             },
             {
               icon: "◎",
@@ -4068,9 +4115,22 @@ export default function Stillform() {
                     </div>
                   </>
                 ) : (
-                  <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
-                    {isFirst ? "See how it works" : "Next"}
-                  </button>
+                  <>
+                  {isFirst ? (
+                    <>
+                      <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
+                        Start Stabilizing
+                      </button>
+                      <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setOnboardStep(s => s + 1)}>
+                        See how it works first
+                      </button>
+                    </>
+                  ) : (
+                    <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
+                      Next
+                    </button>
+                  )}
+                  </>
                 )}
               </div>
 
@@ -4080,14 +4140,6 @@ export default function Stillform() {
                   cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 20
                 }}>
                   Skip — take me to the app
-                </button>
-              )}
-              {isFirst && (
-                <button onClick={completeOnboarding} style={{
-                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12
-                }}>
-                  Skip instructions
                 </button>
               )}
             </section>
@@ -4276,7 +4328,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Smart breathing + grounding. The app picks the right pattern for what you're feeling.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Stop spiraling. Reduce intensity. Most people feel a shift in 90 seconds.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4292,7 +4344,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Talk it through or journal it. AI learns from everything you share.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Cut through the noise. AI separates what's real from what your brain is adding.</div>
                   </button>
                 </div>
               </div>
