@@ -1719,6 +1719,9 @@ function BreatheGroundTool({ onComplete, pathway }) {
             <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); onComplete(); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               I'm ready to stop
             </button>
+            <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
+              display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
+            }}>How was that? Give feedback →</a>
           </div>
         </div>
       )}
@@ -1916,6 +1919,9 @@ function BodyScanTool({ onComplete }) {
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
         <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
+        <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
+          display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
+        }}>How was that? Give feedback →</a>
         <FeedbackPrompt tool="bodyscan" />
         <SessionNote />
       </div>
@@ -3491,6 +3497,9 @@ function PanicMode({ onComplete }) {
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
             I'm okay now
           </button>
+          <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
+            display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
+          }}>How was that? Give feedback →</a>
         </div>
         <SessionNote />
       </div>
@@ -4194,6 +4203,16 @@ export default function Stillform() {
           /* ── RETURNING USER: everything visible, organized by level ── */
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+
+              {/* UAT FEEDBACK BANNER */}
+              <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
+                display: "block", padding: "12px 16px", marginBottom: 20,
+                background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)",
+                borderRadius: 10, textDecoration: "none", textAlign: "center",
+                fontSize: 13, color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
+              }}>
+                You're testing Stillform. Tap here to give feedback when you're done.
+              </a>
 
               {/* Repeat what worked */}
               {(() => {
