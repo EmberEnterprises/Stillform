@@ -3755,16 +3755,16 @@ export default function Stillform() {
   if (!appReady) return (
     <div style={{
       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      minHeight: "100vh", background: "var(--bg)",
+      minHeight: "100vh", background: "#0e0f11",
       animation: "panicFadeIn 0.8s ease-out"
     }}>
       <div style={{
         fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
-        color: "var(--amber)", letterSpacing: "0.04em", marginBottom: 8
+        color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8
       }}>
         Stillform
       </div>
-      <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
         Composure mastery
       </div>
     </div>
