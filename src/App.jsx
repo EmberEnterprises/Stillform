@@ -1059,56 +1059,6 @@ const TOOLS = [
   }
 ];
 
-// Tally feedback form — replace TALLY_FORM_ID with your actual form ID from tally.so
-const TALLY_FORM_ID = "D45ljE";
-
-function FeedbackPrompt({ tool }) {
-  const [dismissed, setDismissed] = useState(false);
-  if (dismissed) return null;
-  return (
-    <div style={{
-      marginTop: 24,
-      padding: "16px 18px",
-      background: "var(--surface)",
-      border: "1px solid var(--border)",
-      borderRadius: 10,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      gap: 12
-    }}>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>
-        Did this help? 60 seconds of feedback makes it better.
-      </div>
-      <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
-        <a
-          href={`https://tally.so/r/${TALLY_FORM_ID}?tool=${tool}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            background: "var(--amber-glow)",
-            border: "1px solid var(--amber-dim)",
-            borderRadius: 6,
-            padding: "7px 14px",
-            fontSize: 12,
-            color: "var(--amber)",
-            textDecoration: "none",
-            whiteSpace: "nowrap"
-          }}
-        >
-          Give feedback
-        </a>
-        <button
-          onClick={() => setDismissed(true)}
-          style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 16, cursor: "pointer", padding: "0 4px" }}
-        >
-          ×
-        </button>
-      </div>
-    </div>
-  );
-}
-
 // Quick post-session journal note
 function SessionNote() {
   const [note, setNote] = useState("");
@@ -1146,49 +1096,6 @@ function SessionNote() {
             padding: "8px 12px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
           }}>Save</button>
         )}
-      </div>
-    </div>
-  );
-}
-
-function EmailCapture() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(() => {
-    try { return localStorage.getItem("stillform_email_captured") === "yes"; } catch { return false; }
-  });
-  const sessionCount = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })();
-
-  if (submitted || sessionCount > 3) return null;
-
-  const submit = async () => {
-    if (!email.trim() || !email.includes("@")) return;
-    try {
-      await fetch("/", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ "form-name": "waitlist", email: email.trim() }).toString()
-      });
-      localStorage.setItem("stillform_email_captured", "yes");
-      setSubmitted(true);
-    } catch { setSubmitted(true); }
-  };
-
-  return (
-    <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
-      <div style={{ fontSize: 13, color: "var(--amber)", marginBottom: 8 }}>Want more drills like this?</div>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
-          type="email" value={email} onChange={e => setEmail(e.target.value)}
-          placeholder="Email" onKeyDown={e => e.key === "Enter" && submit()}
-          style={{
-            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6,
-            padding: "8px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
-          }}
-        />
-        <button onClick={submit} style={{
-          background: "var(--amber)", border: "none", borderRadius: 6, padding: "8px 14px",
-          fontSize: 12, color: "#0e0f11", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500
-        }}>Get access</button>
       </div>
     </div>
   );
@@ -1268,7 +1175,6 @@ function PhysiologicalSighTool({ onComplete }) {
         <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
           Done
         </button>
-        <FeedbackPrompt tool="sigh" />
         <SessionNote />
       </div>
     );
@@ -1538,7 +1444,6 @@ function BreatheGroundTool({ onComplete, pathway }) {
             Done
           </button>
       </div>
-      <FeedbackPrompt tool="breathe" />
       <SessionNote />
     </div>
   );
@@ -1783,10 +1688,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); setPhase("post-rate"); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               Stop here
             </button>
-            <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
               display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
-            }}>How was that? Give feedback →</a>
-        <EmailCapture />
           </div>
         </div>
       )}
@@ -2026,11 +1928,7 @@ function BodyScanTool({ onComplete }) {
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
         <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-        <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
           display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
-        }}>How was that? Give feedback →</a>
-        <EmailCapture />
-        <FeedbackPrompt tool="bodyscan" />
         <SessionNote />
       </div>
     );
@@ -2719,7 +2617,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               Start fresh
             </button>
           </div>
-          {messages.length > 2 && <FeedbackPrompt tool="reframe" />}
           {messages.length > 2 && <SessionNote />}
         </div>
       )}
@@ -3605,10 +3502,7 @@ function PanicMode({ onComplete }) {
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
             Done — close
           </button>
-          <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
             display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
-          }}>How was that? Give feedback →</a>
-        <EmailCapture />
         </div>
         <SessionNote />
       </div>
@@ -4321,16 +4215,6 @@ export default function Stillform() {
           /* ── RETURNING USER: everything visible, organized by level ── */
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
-
-              {/* UAT FEEDBACK BANNER */}
-              <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
-                display: "block", padding: "12px 16px", marginBottom: 20,
-                background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)",
-                borderRadius: 10, textDecoration: "none", textAlign: "center",
-                fontSize: 13, color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
-              }}>
-                You're testing Stillform. Tap here to give feedback when you're done.
-              </a>
 
               {/* Repeat what worked */}
               {(() => {
@@ -5314,13 +5198,6 @@ export default function Stillform() {
                 }}>
                   Privacy & Disclaimers
                 </button>
-                <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Give feedback
-                </a>
                 <a href="mailto:emberenterprises@proton.me" style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
@@ -5344,15 +5221,6 @@ export default function Stillform() {
 
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32 }}>
               Stillform · Ember Enterprises LLC · v1.0
-            </div>
-
-            {/* UAT Notice */}
-            <div style={{ marginTop: 20, padding: "16px 20px", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Coming in live launch</div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                Biometric lock on conversations · Premium sound packs · Apple Health / Google Health Connect / Samsung Health integration · Proactive coaching · Premium themes · PDF/CSV export · Push notifications · Wearable integration · Shareable composure card
-              </div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>This is a UAT build. <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", textDecoration: "none" }}>Submit feedback here</a>.</div>
             </div>
 
             {/* BACKUP & DATA — buried at very bottom */}
