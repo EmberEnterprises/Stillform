@@ -999,16 +999,9 @@ const TOOLS = [
   {
     id: "breathe",
     icon: "◎",
-    name: "Breathe & Ground",
-    desc: "Regulate your nervous system, then anchor to the present moment.",
-    time: "8 min"
-  },
-  {
-    id: "sigh",
-    icon: "◌",
-    name: "Clear Your Head",
-    desc: "Physiological sigh to reset, then talk through what's spiraling.",
-    time: "2 min"
+    name: "Breathe",
+    desc: "Smart breathing — the app picks the right pattern for what you're feeling, then grounds you.",
+    time: "3 min"
   },
   {
     id: "scan",
@@ -1353,7 +1346,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Flooded right now", desc: "Rage, panic, anxiety, overwhelm", why: "Extended exhale forces your nervous system down" },
+    { id: "calm", label: "Overwhelmed right now", desc: "Rage, panic, anxiety, overwhelm", why: "Extended exhale forces your nervous system down" },
     { id: "box", label: "Need to stay steady", desc: "Sustained pressure, staying composed", why: "Equal rhythm stabilizes over time" },
     { id: "478", label: "Can't sleep / deep anxiety", desc: "Quiet moment, need deep calm", why: "Long hold + exhale is the deepest reset" },
     { id: "quick", label: "Quick reset", desc: "Public, limited time, 60 seconds", why: "Shortest effective pattern" }
@@ -2043,7 +2036,7 @@ function ReframeTool({ onComplete, mode = "calm" }) {
             </div>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("breathe")}>
-                ◎ Breathe & Ground
+                ◎ Breathe
               </button>
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("scan")}>
                 ◉ Body Scan
@@ -2351,7 +2344,7 @@ function PatternsTool({ onComplete }) {
     sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
     const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
     if (topTool) {
-      const names = { breathe: "Breathe & Ground", ground: "Grounding", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Physiological Sigh" };
+      const names = { breathe: "Breathe", ground: "Grounding", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe" };
       insights.push({ label: "Most effective tool", value: names[topTool[0]] || topTool[0], detail: `Used ${topTool[1]} times` });
     }
 
@@ -2647,7 +2640,7 @@ function SignalMapTool({ onComplete }) {
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
-          Your body warns you before a crisis hits. Most people never learn to read those warnings. This takes 2 minutes and teaches the app how YOUR nervous system works.
+          Your body sends signals before things escalate. Most people never learn to read them. This takes 2 minutes and teaches the app how YOUR nervous system works.
         </p>
         <button className="btn btn-primary" onClick={() => setStep(1)}>Start →</button>
       </div>
@@ -2745,7 +2738,7 @@ function SignalMapTool({ onComplete }) {
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Signal profile saved.</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
-          Now you know what to watch for. Over time, you'll start catching these signals before they become a crisis.
+          Now you know what to watch for. Over time, you'll start catching these signals before they escalate.
         </p>
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
           <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your signals</div>
@@ -2813,7 +2806,7 @@ function BodyCheckInTool({ onComplete }) {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
-              <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe & Ground</button>
+              <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe</button>
               <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>I'm fine</button>
             </div>
           </>
@@ -3255,7 +3248,7 @@ export default function Stillform() {
       setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
       setScreen("tool");
     } else {
-      startTool(TOOLS.find(t => t.id === "sigh"));
+      startTool(TOOLS.find(t => t.id === "breathe"));
     }
   };
 
@@ -3323,15 +3316,15 @@ export default function Stillform() {
               label: "Level 1",
               title: "Regulate",
               subtitle: "Settle what's too loud.",
-              body: "Breathing, grounding, body scan, and AI-powered reframing. Whether it's a panic attack, pre-stage nerves, or a thought loop at 3am — the tools meet you where you are.",
-              note: "Instant reset is always free."
+              body: "Three tools: Breathe (smart breathing + grounding), Body Scan (tension release + acupressure), and Reframe (AI-powered conversation or journal). Whether it's a panic attack, pre-stage nerves, or a thought loop at 3am — the tools meet you where you are.",
+              note: "The floating reset button is always free. Full tools require a subscription."
             },
             {
               icon: "◇",
               label: "Level 2",
               title: "Recognize",
               subtitle: "Catch it earlier.",
-              body: "Map where tension shows first in your body. Build a personal signal profile so you reach for help at a 3, not a 10.",
+              body: "Map where tension shows first in your body. Build a personal signal profile so you catch the wave at a 3, not a 10.",
               note: "Available immediately."
             },
             {
@@ -3494,13 +3487,13 @@ export default function Stillform() {
           );
         })()}
 
-        {/* FLOATING PANIC — accessible from any screen */}
+        {/* FLOATING RESET — accessible from any screen */}
         {screen !== "home" && screen !== "panic" && screen !== "onboarding" && (
           <button onClick={() => setScreen("panic")} style={{
             position: "fixed", bottom: 80, right: 24, zIndex: 100,
-            background: "var(--bg)", border: "1px solid rgba(200,60,60,0.3)",
+            background: "var(--bg)", border: "1px solid var(--amber-dim)",
             borderRadius: 28, padding: "10px 18px", fontSize: 12, letterSpacing: "0.06em",
-            color: "rgba(200,80,80,0.9)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+            color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
             boxShadow: "0 2px 12px rgba(0,0,0,0.3)", transition: "all 0.2s"
           }}>
             ◎ Reset
@@ -3588,7 +3581,7 @@ export default function Stillform() {
                   </button>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>Free. Takes 2 minutes.</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>7-day free trial. Most sessions take 2 minutes.</div>
 
               {/* FOUR LEVELS — what you're building toward */}
               <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
@@ -3596,7 +3589,7 @@ export default function Stillform() {
                   Each level builds on the last. The app learns from your sessions — the more you use it, the more it can show you.
                 </div>
                 {[
-                  { icon: "◎", name: "Regulate", desc: "Breathing, grounding, body scan, AI reframe. For anxiety, stage fright, rage, overwhelm — any feeling running too loud." },
+                  { icon: "◎", name: "Regulate", desc: "Breathe, body scan, and AI reframe. For anxiety, stage fright, rage, overwhelm — any feeling running too loud." },
                   { icon: "◇", name: "Recognize", desc: "Map your body's warning signals. Catch the wave before it hits. Available immediately." },
                   { icon: "◈", name: "See Patterns", desc: "Your session data reveals what triggers you and what works. Needs 8 sessions — real patterns require real data, not guesses." },
                   { icon: "✦", name: "Watch & Choose", desc: "Watch your own thinking in real time and choose differently. Unlocks at 12 sessions — this skill builds on everything before it." }
@@ -3630,8 +3623,8 @@ export default function Stillform() {
                   const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
                   if (sessions.length < 2) return null;
                   const last = sessions[sessions.length - 1];
-                  const toolNames = { breathe: "Breathe & Ground", ground: "Breathe & Ground", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Clear Your Head", metacognition: "Watch & Choose" };
-                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "sigh", metacognition: "meta" };
+                  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
+                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "breathe", metacognition: "meta" };
                   const mainTool = (last.tools || [])[0];
                   if (!mainTool || !toolNames[mainTool]) return null;
                   return (
@@ -4013,8 +4006,8 @@ export default function Stillform() {
                 {activeTool.icon} {activeTool.name}
               </div>
               <button onClick={() => setScreen("panic")} style={{
-                background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 6,
-                padding: "4px 10px", fontSize: 11, color: "rgba(200,80,80,0.8)", cursor: "pointer",
+                background: "none", border: "1px solid var(--amber-dim)", borderRadius: 6,
+                padding: "4px 10px", fontSize: 11, color: "var(--amber)", cursor: "pointer",
                 fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
               }}>
                 Reset
@@ -4215,7 +4208,7 @@ export default function Stillform() {
           <section className="pricing">
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Instant reset is free forever. Full system requires a subscription.</p>
+              <p>Try everything free for 7 days. The one-tap reset button stays free forever.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card">
@@ -4223,7 +4216,7 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></div>
                 <div className="pricing-save">per month</div>
                 <ul className="pricing-features">
-                  <li>Instant reset — always free</li>
+                  <li>One-tap reset — always free</li>
                   <li>Level 1: All regulation tools</li>
                   <li>Level 2: Signal recognition</li>
                   <li>Level 3: Pattern awareness</li>
@@ -4241,7 +4234,7 @@ export default function Stillform() {
                 <div className="pricing-price"><sup>$</sup>112<span style={{ fontSize: 22 }}>/yr</span></div>
                 <div className="pricing-save">$9.33/mo · Best value</div>
                 <ul className="pricing-features">
-                  <li>Instant reset — always free</li>
+                  <li>One-tap reset — always free</li>
                   <li>Level 1: All regulation tools</li>
                   <li>Level 2: Signal recognition</li>
                   <li>Level 3: Pattern awareness</li>
