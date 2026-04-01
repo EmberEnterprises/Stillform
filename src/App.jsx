@@ -1139,6 +1139,7 @@ function SessionNote() {
           onChange={e => setNote(e.target.value)}
           onKeyDown={e => e.key === "Enter" && save()}
         />
+        <MicButton onTranscript={t => setNote(prev => prev + (prev ? " " : "") + t)} />
         {note.trim() && (
           <button onClick={save} style={{
             background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 6,
@@ -1508,28 +1509,45 @@ function BreatheGroundTool({ onComplete, pathway }) {
         <div style={{ fontSize: 18, color: "var(--text)", fontWeight: 500, textAlign: "center", marginBottom: 8 }}>
           {steps[current].label}
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", textAlign: "center", marginBottom: 20 }}>
+        <div style={{ fontSize: 14, color: "var(--text-dim)", textAlign: "center", marginBottom: 16 }}>
           {steps[current].prompt}
         </div>
-        <textarea
-          className="ground-input"
-          rows={2}
-          placeholder="Write what you notice..."
-          value={answers[current] || ""}
-          onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))}
-          autoFocus
-        />
+        <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginBottom: 16 }}>
+          Name them in your head — or write them below if it helps.
+        </div>
+        <div style={{ display: "flex", gap: 6 }}>
+          <textarea
+            className="ground-input"
+            rows={2}
+            placeholder="Optional — write or speak"
+            value={answers[current] || ""}
+            onChange={e => setAnswers(a => ({ ...a, [current]: e.target.value }))}
+            style={{ flex: 1 }}
+          />
+          <MicButton onTranscript={t => setAnswers(a => ({ ...a, [current]: (a[current] || "") + (a[current] ? " " : "") + t }))} />
+        </div>
       </div>
-      <button
-        className="btn btn-primary"
-        style={{ width: "100%", fontSize: 15 }}
-        onClick={() => {
-          if (current < steps.length - 1) setCurrent(c => c + 1);
-          else setGroundDone(true);
-        }}
-      >
-        {current < steps.length - 1 ? "Next →" : "Done"}
-      </button>
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          className="btn btn-primary"
+          style={{ flex: 1, fontSize: 15 }}
+          onClick={() => {
+            if (current < steps.length - 1) setCurrent(c => c + 1);
+            else setGroundDone(true);
+          }}
+        >
+          {current < steps.length - 1 ? "Next →" : "Done"}
+        </button>
+        {current < steps.length - 1 && (
+          <button
+            className="btn btn-ghost"
+            style={{ fontSize: 13 }}
+            onClick={() => setGroundDone(true)}
+          >
+            Skip grounding
+          </button>
+        )}
+      </div>
     </div>
   );
 
@@ -2168,6 +2186,9 @@ function ReframeTool({ onComplete, mode = "calm" }) {
                 fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "vertical"
               }}
             />
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+              <MicButton onTranscript={t => setJournalText(prev => prev + (prev ? " " : "") + t)} />
+            </div>
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <button onClick={saveJournal} disabled={!journalText.trim()} style={{
                 flex: 1, background: mc.sendBg, color: "#fff", border: "none", borderRadius: 8,
@@ -2764,17 +2785,20 @@ function MetacognitionTool({ onComplete }) {
         </div>
       ) : (
         <>
-          <textarea
-            style={{
-              width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
-              padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-              lineHeight: 1.6, resize: "none", minHeight: 80
-            }}
-            placeholder={prompt.placeholder}
-            value={responses[step] || ""}
-            onChange={e => setResponses(r => ({ ...r, [step]: e.target.value }))}
-            autoFocus
-          />
+          <div style={{ display: "flex", gap: 6 }}>
+            <textarea
+              style={{
+                flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+                lineHeight: 1.6, resize: "none", minHeight: 80
+              }}
+              placeholder={prompt.placeholder}
+              value={responses[step] || ""}
+              onChange={e => setResponses(r => ({ ...r, [step]: e.target.value }))}
+              autoFocus
+            />
+            <MicButton onTranscript={t => setResponses(r => ({ ...r, [step]: (r[step] || "") + (r[step] ? " " : "") + t }))} />
+          </div>
           <button className="btn btn-primary" style={{ width: "100%", marginTop: 16 }}
             disabled={!(responses[step] || "").trim()}
             onClick={() => setStep(s => s + 1)}>
@@ -3448,11 +3472,14 @@ function CheckInWidget({ onComplete }) {
         ))}
       </div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Mood in a word?</div>
-      <input value={mood} onChange={e => setMood(e.target.value)} placeholder="calm, anxious, flat, wired..."
-        style={{
-          width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
-          padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-        }} />
+      <div style={{ display: "flex", gap: 6 }}>
+        <input value={mood} onChange={e => setMood(e.target.value)} placeholder="calm, anxious, flat, wired..."
+          style={{
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+          }} />
+        <MicButton onTranscript={t => setMood(t)} />
+      </div>
       <button onClick={() => setStep(3)} style={{
         width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 8,
         padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
@@ -3465,17 +3492,23 @@ function CheckInWidget({ onComplete }) {
     <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
       <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>3 of 3 · Context</div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Anything stressing you today?</div>
-      <input value={stressEvent} onChange={e => setStressEvent(e.target.value)} placeholder="Optional — one line"
-        style={{
-          width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
-          padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif", marginBottom: 12
-        }} />
+      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+        <input value={stressEvent} onChange={e => setStressEvent(e.target.value)} placeholder="Optional — one line"
+          style={{
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+          }} />
+        <MicButton onTranscript={t => setStressEvent(prev => prev + (prev ? " " : "") + t)} />
+      </div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Anything else? Caffeine, meals, pain level?</div>
-      <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional"
-        style={{
-          width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
-          padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-        }} />
+      <div style={{ display: "flex", gap: 6 }}>
+        <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional"
+          style={{
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+          }} />
+        <MicButton onTranscript={t => setNotes(prev => prev + (prev ? " " : "") + t)} />
+      </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <button onClick={save} style={{
           flex: 1, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 8,
@@ -4269,6 +4302,9 @@ export default function Stillform() {
                       resize: "none", minHeight: 50, lineHeight: 1.6
                     }}
                   />
+                  <div style={{ marginTop: 6 }}>
+                    <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
+                  </div>
                 </div>
 
                 <div style={{ marginBottom: 24 }}>
