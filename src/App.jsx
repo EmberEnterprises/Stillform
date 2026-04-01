@@ -3746,6 +3746,8 @@ export default function Stillform() {
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
   const [openLog, setOpenLog] = useState(null);
+  const [, forceUpdate] = useState(0);
+  const refreshSettings = () => forceUpdate(n => n + 1);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
@@ -4236,7 +4238,7 @@ export default function Stillform() {
                 );
 
                 return (
-                  <CheckInWidget onComplete={() => window.location.reload()} />
+                  <CheckInWidget onComplete={() => refreshSettings()} />
                 );
               })()}
 
@@ -4752,7 +4754,7 @@ export default function Stillform() {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
                 return (
                   <button key={p.id} onClick={() => {
-                    try { localStorage.setItem("stillform_breath_pattern", p.id); window.location.reload(); } catch {}
+                    try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
                   }} style={{
                     width: "100%", padding: "12px 16px", textAlign: "left", cursor: "pointer",
                     background: isSelected ? "var(--amber-glow)" : "var(--surface)",
@@ -4782,7 +4784,7 @@ export default function Stillform() {
                   try {
                     const current = localStorage.getItem("stillform_audio") === "on";
                     localStorage.setItem("stillform_audio", current ? "off" : "on");
-                    window.location.reload();
+                    refreshSettings();
                   } catch {}
                 }} style={{
                   background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
@@ -4816,7 +4818,7 @@ export default function Stillform() {
                       <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
                     </div>
                     <button onClick={() => {
-                      try { localStorage.setItem(opt.key, isOn ? "off" : "on"); window.location.reload(); } catch {}
+                      try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {}
                     }} style={{
                       background: isOn ? "var(--amber)" : "var(--border)",
                       border: "none", borderRadius: 12, width: 44, height: 24, cursor: "pointer",
@@ -4854,7 +4856,7 @@ export default function Stillform() {
                     {free.map(s => (
                       <button key={s.id} onClick={() => {
                         try { localStorage.setItem("stillform_sound_type", s.id); } catch {}
-                        window.location.reload();
+                        refreshSettings();
                       }} style={{
                         width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
                         border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
