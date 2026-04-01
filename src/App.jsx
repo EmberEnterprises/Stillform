@@ -1223,7 +1223,7 @@ function PhysiologicalSighTool({ onComplete }) {
           Talk through what's happening →
         </button>
         <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
-          I'm good
+          Done
         </button>
         <FeedbackPrompt tool="sigh" />
         <SessionNote />
@@ -1490,7 +1490,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             Talk it through →
           </button>
           <button className="btn btn-ghost" onClick={onComplete}>
-            I'm good
+            Done
           </button>
       </div>
       <FeedbackPrompt tool="breathe" />
@@ -1559,7 +1559,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
           style={{ width: "100%", fontSize: 15, padding: "14px 0", marginBottom: 10 }}
           onClick={confirmGroundStep}
         >
-          {current < steps.length - 1 ? `I've got ${steps[current].num} ✓` : "Done ✓"}
+          {current < steps.length - 1 ? `Found ${steps[current].num} ✓` : "Done ✓"}
         </button>
 
         {!showGroundWrite ? (
@@ -1717,7 +1717,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
               Keep breathing
             </button>
             <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); onComplete(); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
-              I'm ready to stop
+              Ready to stop
             </button>
             <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
               display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
@@ -2600,7 +2600,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
                 onComplete();
               }}>
-                I'm done for now
+                Done for now
               </button>
             )}
             <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-dim)" }} onClick={() => {
@@ -2892,7 +2892,7 @@ function MetacognitionTool({ onComplete }) {
       label: "Perspective",
       question: "What do you actually need right now?",
       sub: "Not what you think you should do. What does the part of you that's hurting actually need?",
-      placeholder: "I need to know it's going to be okay..."
+      placeholder: "Need to know it's going to be okay..."
     },
     {
       label: "Choose",
@@ -2921,7 +2921,7 @@ function MetacognitionTool({ onComplete }) {
       setStep(prompts.length);
     }},
     { label: "Talk it through", desc: "Use Reframe", action: () => onComplete("reframe-calm") },
-    { label: "I've got this", desc: "No tools needed", action: () => {
+    { label: "Good to go", desc: "No tools needed", action: () => {
       try {
         const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
         sessions.push({
@@ -3242,7 +3242,7 @@ function BodyCheckInTool({ onComplete }) {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
               <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe</button>
-              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>I'm fine</button>
+              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>All good</button>
             </div>
           </>
         ) : (
@@ -3492,10 +3492,10 @@ function PanicMode({ onComplete }) {
         })()}
         <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 280 }}>
           <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
-            I need to talk through something
+            Talk through something
           </button>
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
-            I'm okay now
+            Okay now
           </button>
           <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
             display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
@@ -3551,13 +3551,13 @@ function PanicMode({ onComplete }) {
             Continue to grounding →
           </button>
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete("reframe-calm")}>
-            I need to talk through something
+            Talk through something
           </button>
           <button className="btn btn-ghost" style={{ width: "100%", color: "var(--text-muted)", fontSize: 13 }} onClick={() => {
             saveSession("breathing-only");
             onComplete();
           }}>
-            I'm okay now
+            Okay now
           </button>
         </div>
         <SessionNote />
@@ -3737,6 +3737,9 @@ function CheckInWidget({ onComplete }) {
 }
 
 export default function Stillform() {
+  const [appReady, setAppReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setAppReady(true), 1200); return () => clearTimeout(t); }, []);
+
   // UAT MODE: always show onboarding. Change back to conditional for production.
   const hasSeenOnboarding = false;
   const [screen, setScreen] = useState("onboarding");
@@ -3750,6 +3753,28 @@ export default function Stillform() {
   const refreshSettings = () => forceUpdate(n => n + 1);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
+
+  if (!appReady) return (
+    <div style={{
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minHeight: "100vh", background: "#0e0f11"
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
+        color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8,
+        opacity: 0, animation: "splashFade 1s ease-out 0.2s forwards"
+      }}>
+        Stillform
+      </div>
+      <div style={{
+        fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
+        opacity: 0, animation: "splashFade 1s ease-out 0.5s forwards"
+      }}>
+        Composure mastery
+      </div>
+      <style>{`@keyframes splashFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+    </div>
+  );
 
   const completeOnboarding = () => {
     // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
@@ -4062,7 +4087,7 @@ export default function Stillform() {
                   background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
                   cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12
                 }}>
-                  I don't need instructions
+                  Skip instructions
                 </button>
               )}
             </section>
