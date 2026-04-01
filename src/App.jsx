@@ -1218,7 +1218,7 @@ function PhysiologicalSighTool({ onComplete }) {
         <div className="complete-icon">✓</div>
         <h2>Reset complete.</h2>
         <p style={{ marginBottom: 8 }}>Three physiological sighs. Your head is clearer than it was {fmt(elapsed)} ago.</p>
-        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {count} times.</div>}
+        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
         <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
           Talk through what's happening →
         </button>
@@ -1484,7 +1484,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
         <h2>You're here.</h2>
         <p>Nervous system regulated. Senses anchored.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
-        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {count} times.</div>}
+        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
           <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
             Talk it through →
@@ -1914,7 +1914,7 @@ function BodyScanTool({ onComplete }) {
         <h2>Scan complete.</h2>
         <p>You've moved awareness and pressure through your body.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
-        {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>This has worked {sessionCount} times.</div>}
+        {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
         <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
         <FeedbackPrompt tool="bodyscan" />
         <SessionNote />
@@ -3464,7 +3464,7 @@ function PanicMode({ onComplete }) {
             const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
             if (sessions.length > 1) {
               return <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24 }}>
-                This has worked {sessions.length} times.
+                Session #{sessions.length}.
               </div>;
             }
           } catch {}
