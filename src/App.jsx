@@ -4272,7 +4272,7 @@ export default function Stillform() {
               {(() => {
                 let sc = 0;
                 try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                const unlocked = sc >= 8;
+                const unlocked = true; // UAT MODE: was sc >= 8
                 return (
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
@@ -4309,7 +4309,7 @@ export default function Stillform() {
               {(() => {
                 let sc = 0;
                 try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                const unlocked = sc >= 12;
+                const unlocked = true; // UAT MODE: was sc >= 12
                 return (
                   <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
