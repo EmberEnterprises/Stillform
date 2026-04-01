@@ -4056,6 +4056,30 @@ export default function Stillform() {
           );
         })()}
 
+        {/* ACTIVE TOOL */}
+        {screen === "tool" && activeTool && (
+          <section className="intervention">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <button className="intervention-back" onClick={() => setScreen("home")} style={{ marginBottom: 0 }}>
+                ← Back
+              </button>
+              <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
+                {activeTool.icon} {activeTool.name}
+              </div>
+              <button onClick={() => setScreen("panic")} style={{
+                background: "none", border: "1px solid var(--amber-dim)", borderRadius: 6,
+                padding: "4px 10px", fontSize: 11, color: "var(--amber)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
+              }}>
+                Reset
+              </button>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
+              Not therapy. Not crisis intervention. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+            </div>
+            {renderTool()}
+          </section>
+        )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
         {screen === "journal" && (
