@@ -3728,6 +3728,9 @@ function CheckInWidget({ onComplete }) {
 }
 
 export default function Stillform() {
+  const [appReady, setAppReady] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setAppReady(true), 1200); return () => clearTimeout(t); }, []);
+
   // UAT MODE: always show onboarding. Change back to conditional for production.
   const hasSeenOnboarding = false;
   const [screen, setScreen] = useState("onboarding");
@@ -3738,6 +3741,24 @@ export default function Stillform() {
   const [pricingCloud, setPricingCloud] = useState(false);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
+
+  if (!appReady) return (
+    <div style={{
+      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minHeight: "100vh", background: "var(--bg)",
+      animation: "panicFadeIn 0.8s ease-out"
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
+        color: "var(--amber)", letterSpacing: "0.04em", marginBottom: 8
+      }}>
+        Stillform
+      </div>
+      <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+        Composure mastery
+      </div>
+    </div>
+  );
 
   const completeOnboarding = () => {
     // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
@@ -4812,6 +4833,58 @@ export default function Stillform() {
               })}
             </div>
 
+            {/* Sound */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Sound</div>
+              {(() => {
+                const current = (() => { try { return localStorage.getItem("stillform_sound_type") || "tone"; } catch { return "tone"; } })();
+                const free = [
+                  { id: "tone", label: "Tone", desc: "Oscillator tones that follow your breath" },
+                  { id: "rhythm", label: "Rhythm", desc: "Pulsing beat matched to breathing pattern" },
+                  { id: "silence", label: "Silence", desc: "No sound. Visual cues only." }
+                ];
+                const premium = [
+                  { id: "bowl", label: "Singing bowl" },
+                  { id: "rain", label: "Rain" },
+                  { id: "ocean", label: "Ocean waves" },
+                  { id: "lofi", label: "Lo-fi ambient" },
+                  { id: "white", label: "White noise" }
+                ];
+                return (
+                  <>
+                    {free.map(s => (
+                      <button key={s.id} onClick={() => {
+                        try { localStorage.setItem("stillform_sound_type", s.id); } catch {}
+                        window.location.reload();
+                      }} style={{
+                        width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
+                        border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: 8, padding: "12px 16px", marginBottom: 6, cursor: "pointer",
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        fontFamily: "'DM Sans', sans-serif", textAlign: "left"
+                      }}>
+                        <div>
+                          <div style={{ fontSize: 13, color: current === s.id ? "var(--amber)" : "var(--text)" }}>{s.label}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 1 }}>{s.desc}</div>
+                        </div>
+                        {current === s.id && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                      </button>
+                    ))}
+                    {premium.map(s => (
+                      <div key={s.id} style={{
+                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                        padding: "12px 16px", marginBottom: 6, opacity: 0.35,
+                        display: "flex", justifyContent: "space-between", alignItems: "center"
+                      }}>
+                        <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{s.label}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Coming soon</div>
+                      </div>
+                    ))}
+                  </>
+                );
+              })()}
+            </div>
+
             {/* Session Data */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your Data</div>
@@ -5036,6 +5109,15 @@ export default function Stillform() {
               Stillform · Ember Enterprises LLC · v1.0
             </div>
 
+            {/* UAT Notice */}
+            <div style={{ marginTop: 20, padding: "16px 20px", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Coming in live launch</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                Biometric lock on conversations · Premium sound packs · Apple Health / Google Health Connect / Samsung Health integration · Proactive coaching · Premium themes · PDF/CSV export · Push notifications · Wearable integration · Shareable composure card
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>This is a UAT build. <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", textDecoration: "none" }}>Submit feedback here</a>.</div>
+            </div>
+
             {/* BACKUP & DATA — buried at very bottom */}
             <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, opacity: 0.6 }}>Data management</div>
@@ -5102,7 +5184,6 @@ export default function Stillform() {
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => { setPathway("calm"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm", defaultTab: "journal" }); setScreen("tool"); }}>Journal</button>
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
