@@ -4544,7 +4544,7 @@ export default function Stillform() {
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
                 {/* Monthly / Annual toggle */}
-                <div style={{ display: "flex", background: "var(--surface)", borderRadius: 8, padding: 3, marginBottom: 16 }}>
+                <div style={{ display: "flex", background: "var(--surface)", borderRadius: 8, padding: 3, marginBottom: 20 }}>
                   <button onClick={() => setPricingPlan("monthly")} style={{
                     flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
                     fontSize: 13, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
@@ -4559,46 +4559,15 @@ export default function Stillform() {
                   }}>Annual</button>
                 </div>
 
-                {/* Cloud storage add-on */}
-                <button onClick={() => setPricingCloud(!pricingCloud)} style={{
-                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
-                  padding: "12px 16px", marginBottom: 20, cursor: "pointer",
-                  background: pricingCloud ? "rgba(201,147,58,0.08)" : "var(--surface)",
-                  border: `1px solid ${pricingCloud ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: 8, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
-                }}>
-                  <div style={{ textAlign: "left" }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, color: pricingCloud ? "var(--amber)" : "var(--text)" }}>
-                      + Cloud sync
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>
-                      Access from any device. Encrypted backup.
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 13, color: pricingCloud ? "var(--amber)" : "var(--text-dim)", fontWeight: 500 }}>
-                    +$3/mo
-                  </div>
-                </button>
-
                 <div className="pricing-price">
-                  {pricingCloud ? (
-                    pricingPlan === "annual" ? (
-                      <><sup>$</sup>13<span style={{ fontSize: 28 }}>.49</span></>
-                    ) : (
-                      <><sup>$</sup>17<span style={{ fontSize: 28 }}>.99</span></>
-                    )
+                  {pricingPlan === "annual" ? (
+                    <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
                   ) : (
-                    pricingPlan === "annual" ? (
-                      <><sup>$</sup>11<span style={{ fontSize: 28 }}>.24</span></>
-                    ) : (
-                      <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
-                    )
+                    <><sup>$</sup>19<span style={{ fontSize: 28 }}>.99</span></>
                   )}
                 </div>
                 <div className="pricing-save">
-                  {pricingPlan === "annual"
-                    ? (pricingCloud ? "per month · $161.88/yr · Save 25%" : "per month · $134.88/yr · Save 25%")
-                    : "per month"}
+                  {pricingPlan === "annual" ? "per month · $179.88/yr · Save 25%" : "per month"}
                 </div>
 
                 <ul className="pricing-features">
@@ -4607,11 +4576,11 @@ export default function Stillform() {
                   <li>3 AI modes: Calm, Get Sharp, Lock In</li>
                   <li>Journal with AI memory</li>
                   <li>Daily check-in</li>
+                  <li>Cloud sync — access from any device</li>
                   <li>Signal mapping + tension check</li>
                   <li>Pattern recognition (evolves with use)</li>
                   <li>Voice-to-text everywhere</li>
-                  {pricingCloud && <li style={{ color: "var(--amber)" }}>Cloud sync — access from any device</li>}
-                  {pricingCloud && <li style={{ color: "var(--amber)" }}>Encrypted cloud backup</li>}
+                  <li>Encrypted cloud backup</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
                   Start 7-day free trial →
@@ -4996,7 +4965,7 @@ export default function Stillform() {
                     <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Sync across devices</div>
                     <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Access conversations, journal, and progress from any device. Encrypted.</div>
                   </div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>+$3/mo</div>
+                  <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
                 </div>
               </div>
             </div>
