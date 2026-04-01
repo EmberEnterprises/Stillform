@@ -3871,7 +3871,7 @@ export default function Stillform() {
               label: "Your tools",
               title: "Regulate",
               subtitle: "Three tools. Each one different.",
-              body: "Breathe — smart breathing that picks the right pattern for what you're feeling, plus sensory grounding. Sound on or off.\n\nBody Scan — find tension in your body and release it with guided acupressure at six targeted points. Sound on or off.\n\nReframe — AI-powered. Switch between three modes: Calm (settle overwhelm), Get Sharp (cut through mental noise), Lock In (pre-performance composure). Each mode looks and feels different. Toggle between Talk (real-time conversation) and Journal (write entries the AI remembers next time).",
+              body: "Breathe — smart breathing that picks the right pattern for what you're feeling, plus sensory grounding. Sound on or off.\n\nBody Scan — find tension in your body and release it with guided acupressure at six targeted points. Sound on or off.\n\nReframe — AI-powered. Three modes: Calm (settle overwhelm), Get Sharp (cut through loops), Lock In (pre-performance composure). Switch modes mid-conversation — the AI carries everything with you. Talk tab for real-time conversation, Journal tab to write entries the AI remembers next time.",
               note: "The floating reset button is always free. Full tools require a subscription."
             },
             {
@@ -3879,7 +3879,7 @@ export default function Stillform() {
               label: "Features",
               title: "Built for you",
               subtitle: "The more you use it, the smarter it gets.",
-              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nCloud sync — your conversations, journal, and progress are encrypted and accessible from any device.",
+              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI remembers you: Your conversations, journal, and check-ins are stored in your encrypted cloud account. Every time you open Reframe, the AI reads your history fresh. It never stores anything on its own — your data is yours. Delete it anytime and it's gone.",
               note: null
             },
             {
@@ -3894,7 +3894,7 @@ export default function Stillform() {
               label: "Over time",
               title: "The app learns you",
               subtitle: "The more you use it, the smarter it gets.",
-              body: "After a few sessions, Stillform starts tracking your most effective tools and regulation speed. Over time, it recognizes your triggers and patterns. The AI adjusts its approach based on your history — without you explaining yourself twice."
+              body: "After a few sessions, your home page starts showing insights — your most effective tool, regulation speed, patterns. The AI stops being generic and starts being yours. It won't call out patterns too early. It builds trust first, then gets direct."
             },
             {
               icon: "✦",
