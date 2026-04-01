@@ -1949,7 +1949,51 @@ function BodyScanTool({ onComplete }) {
           )}
           {i === currentArea && phase === "pressure" && (
             <>
-              <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 8, padding: "16px 20px", marginTop: 16 }}>
+              {/* Acupressure point diagram */}
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 16, marginBottom: 8 }}>
+                <svg viewBox="0 0 120 120" width="100" height="100" style={{ opacity: 0.9 }}>
+                  {a.name === "Jaw & Face" && <>
+                    <ellipse cx="60" cy="55" rx="30" ry="38" fill="none" stroke="var(--amber)" strokeWidth="1.5" opacity="0.4" />
+                    <line x1="45" y1="42" x2="55" y2="42" stroke="var(--text-dim)" strokeWidth="1" />
+                    <line x1="65" y1="42" x2="75" y2="42" stroke="var(--text-dim)" strokeWidth="1" />
+                    <circle cx="60" cy="35" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">between eyebrows</text>
+                  </>}
+                  {a.name === "Shoulders & Neck" && <>
+                    <line x1="60" y1="20" x2="60" y2="45" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <path d="M60 45 Q60 55 30 65" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <path d="M60 45 Q60 55 90 65" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <circle cx="45" cy="55" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">top of shoulder muscle</text>
+                  </>}
+                  {a.name === "Chest & Breath" && <>
+                    <path d="M40 25 Q60 20 80 25 L85 80 Q60 90 35 80 Z" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <circle cx="60" cy="48" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">center of breastbone</text>
+                  </>}
+                  {a.name === "Hands & Arms" && <>
+                    <path d="M50 90 L50 50 Q50 35 45 25 M50 50 Q55 35 60 20 M50 50 Q58 38 65 25 M50 50 Q60 40 70 30 M50 50 Q50 40 40 30" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <circle cx="50" cy="42" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">web of thumb + index</text>
+                  </>}
+                  {a.name === "Gut & Core" && <>
+                    <rect x="35" y="20" width="50" height="15" rx="4" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <line x1="60" y1="35" x2="60" y2="85" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <line x1="35" y1="35" x2="35" y2="60" stroke="var(--text-dim)" strokeWidth="1" opacity="0.4" />
+                    <line x1="85" y1="35" x2="85" y2="60" stroke="var(--text-dim)" strokeWidth="1" opacity="0.4" />
+                    <circle cx="60" cy="52" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">inner wrist, 3 fingers down</text>
+                  </>}
+                  {a.name === "Legs & Feet" && <>
+                    <line x1="55" y1="15" x2="55" y2="95" stroke="var(--text-dim)" strokeWidth="2" />
+                    <ellipse cx="55" cy="35" rx="12" ry="8" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
+                    <circle cx="65" cy="55" r="5" fill="var(--amber)" opacity="0.8" />
+                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">4 fingers below kneecap</text>
+                  </>}
+                </svg>
+              </div>
+
+              <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 8, padding: "16px 20px" }}>
                 <div style={{ fontSize: 15, fontWeight: 500, color: "var(--amber)", marginBottom: 10 }}>{a.pointEffect}</div>
                 <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Where:</strong> {a.pointLocation}</div>
                 <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>How:</strong> {a.pointInstruction}</div>
@@ -3809,9 +3853,17 @@ export default function Stillform() {
               icon: "◎",
               label: "Level 1",
               title: "Regulate",
-              subtitle: "Settle what's too loud.",
-              body: "Three tools: Breathe (smart breathing + grounding), Body Scan (tension release + acupressure), and Reframe (AI-powered conversation or journal). Whether it's a panic attack, pre-stage nerves, or a thought loop at 3am — the tools meet you where you are.",
+              subtitle: "Three tools. Each one different.",
+              body: "Breathe — smart breathing that picks the right pattern for what you're feeling, plus sensory grounding. Sound on or off.\n\nBody Scan — find tension in your body and release it with guided acupressure at six targeted points. Sound on or off.\n\nReframe — AI-powered. Switch between three modes: Calm (settle overwhelm), Get Sharp (cut through mental noise), Lock In (pre-performance composure). Each mode looks and feels different. Toggle between Talk (real-time conversation) and Journal (write entries the AI remembers next time).",
               note: "The floating reset button is always free. Full tools require a subscription."
+            },
+            {
+              icon: "◎",
+              label: "Features",
+              title: "Built for you",
+              subtitle: "The more you use it, the smarter it gets.",
+              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nYour data stays on your device. Conversations and journal entries never touch our servers.",
+              note: null
             },
             {
               icon: "◇",
@@ -3874,9 +3926,11 @@ export default function Stillform() {
               <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 24 }}>
                 {step.subtitle}
               </div>
-              <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12 }}>
-                {step.body}
-              </p>
+              <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12, textAlign: "left" }}>
+                {step.body.split("\n\n").map((para, i) => (
+                  <p key={i} style={{ marginBottom: i < step.body.split("\n\n").length - 1 ? 12 : 0 }}>{para}</p>
+                ))}
+              </div>
               {step.note && (
                 <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
                   {step.note}
