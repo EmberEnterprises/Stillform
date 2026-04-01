@@ -2069,6 +2069,23 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     : "Say what you're feeling. Rage, anxiety, grief, shame, overwhelm — whatever it is. Don't filter it. The AI reads exactly what you wrote.";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
+  // Migrate old conversation from before mode-specific keys
+  useEffect(() => {
+    try {
+      const oldKey = "stillform_reframe_session";
+      const oldData = localStorage.getItem(oldKey);
+      if (oldData && !localStorage.getItem("stillform_reframe_session_calm")) {
+        localStorage.setItem("stillform_reframe_session_calm", oldData);
+        localStorage.removeItem(oldKey);
+      }
+      // Migrate saved reframes missing mode tag
+      const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+      let changed = false;
+      saved.forEach(r => { if (!r.mode) { r.mode = "calm"; changed = true; } });
+      if (changed) localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
+    } catch {}
+  }, []);
+
   // Journal state
   const [journalText, setJournalText] = useState("");
   const saveJournal = () => {
