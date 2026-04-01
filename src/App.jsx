@@ -1342,6 +1342,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
     try { localStorage.setItem("stillform_breath_pattern", id); } catch {}
     setShowPatternPicker(false);
     setStarted(true);
+    setRunning(true);
   };
 
   const [started, setStarted] = useState(false);
@@ -1359,6 +1360,78 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const [running, setRunning] = useState(false);
   const [breatheDone, setBreatheDone] = useState(false);
   const [keepGoing, setKeepGoing] = useState(false);
+
+  // Audio
+  const [audioOn, setAudioOn] = useState(() => {
+    try { return localStorage.getItem("stillform_audio") === "on"; } catch { return false; }
+  });
+  const audioCtx = useRef(null);
+  const activeOsc = useRef(null);
+
+  useEffect(() => {
+    try {
+      audioCtx.current = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.current.state === "suspended") audioCtx.current.resume();
+    } catch {}
+    return () => {
+      try {
+        if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; }
+        if (audioCtx.current) audioCtx.current.close();
+      } catch {}
+    };
+  }, []);
+
+  const toggleAudio = () => {
+    const next = !audioOn;
+    setAudioOn(next);
+    try { localStorage.setItem("stillform_audio", next ? "on" : "off"); } catch {}
+    if (next && audioCtx.current?.state === "suspended") audioCtx.current.resume();
+  };
+
+  useEffect(() => {
+    if (!running || breatheDone || !audioCtx.current || !audioOn) return;
+    const ctx = audioCtx.current;
+    if (ctx.state === "suspended") ctx.resume();
+    try { if (activeOsc.current) { activeOsc.current.stop(); activeOsc.current = null; } } catch {}
+
+    const p = phases[phaseIdx];
+    if (p.name === "Rest") return;
+
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      const dur = p.duration;
+
+      if (p.name === "Inhale") {
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.linearRampToValueAtTime(280, now + dur);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.5);
+        gain.gain.setValueAtTime(0.08, now + dur - 0.3);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      } else if (p.name === "Hold") {
+        osc.frequency.setValueAtTime(280, now);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.05, now + 0.3);
+        gain.gain.setValueAtTime(0.05, now + dur - 0.3);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      } else if (p.name === "Exhale") {
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.linearRampToValueAtTime(140, now + dur);
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.08, now + 0.3);
+        gain.gain.linearRampToValueAtTime(0.02, now + dur - 0.5);
+        gain.gain.linearRampToValueAtTime(0, now + dur);
+      }
+      osc.start(now);
+      osc.stop(now + dur);
+      activeOsc.current = osc;
+    } catch {}
+  }, [phaseIdx, running, breatheDone, audioOn]);
 
   useEffect(() => {
     if (!running) return;
@@ -1482,7 +1555,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
           </button>
         ))}
       </div>
-      <button onClick={() => setStarted(true)} style={{
+      <button onClick={() => { setStarted(true); setRunning(true); }} style={{
         background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
         cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 16
       }}>
@@ -1512,6 +1585,15 @@ function BreatheGroundTool({ onComplete, pathway }) {
           <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 12 }}>
             Round {cycle} of {totalCycles}
           </div>
+          <button onClick={toggleAudio} style={{
+            background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+            border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
+            borderRadius: 20, padding: "6px 14px", fontSize: 11, cursor: "pointer",
+            color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif",
+            marginBottom: 12, transition: "all 0.2s"
+          }}>
+            {audioOn ? "♪ Sound on" : "♪ Sound off"}
+          </button>
           {!running && !showPatternPicker && (
             <button onClick={() => setShowPatternPicker(true)} style={{
               background: "none", border: "none", color: "var(--text-muted)", fontSize: 11,
