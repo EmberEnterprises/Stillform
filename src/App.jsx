@@ -3739,6 +3739,7 @@ export default function Stillform() {
   const [pathway, setPathway] = useState(null);
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
+  const [openLog, setOpenLog] = useState(null);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
@@ -4885,31 +4886,126 @@ export default function Stillform() {
               })()}
             </div>
 
-            {/* Session Data */}
+            {/* Your Logs */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your Data</div>
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
-                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Session history</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} completed sessions · encrypted cloud sync
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your Logs</div>
+
+              {/* Session Log */}
+              <button onClick={() => setOpenLog(openLog === "sessions" ? null : "sessions")} style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} sessions
+                  </div>
                 </div>
-              </div>
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
+              </button>
+              {openLog === "sessions" && (() => {
+                try {
+                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").slice().reverse();
+                  if (sessions.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No sessions yet.</div>;
+                  const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
+                  return (
+                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                      {sessions.map((s, i) => {
+                        const d = s.timestamp ? new Date(s.timestamp) : null;
+                        const dur = s.duration ? Math.round(s.duration / 1000) : 0;
+                        const durStr = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
+                        return (
+                          <div key={i} style={{ padding: "8px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between" }}>
+                              <span style={{ color: "var(--text-dim)" }}>{d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
+                              <span style={{ color: "var(--text-muted)" }}>{d ? d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : ""}</span>
+                            </div>
+                            <div style={{ color: "var(--text)", marginTop: 2 }}>
+                              {(s.tools || []).map(t => toolLabel[t] || t).join(", ") || "Session"} · {durStr}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                } catch { return null; }
+              })()}
+
+              {/* Journal Log */}
+              <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Journal entries</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries
+                  </div>
+                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
+              </button>
+              {openLog === "journal" && (() => {
+                try {
+                  const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+                  if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No journal entries yet.</div>;
+                  return (
+                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                      {entries.map((e, i) => (
+                        <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                          <div style={{ color: "var(--text-dim)", marginBottom: 4 }}>{e.date || "—"}</div>
+                          {e.emotions?.length > 0 && <div style={{ color: "var(--amber)", marginBottom: 4 }}>{e.emotions.join(", ")}</div>}
+                          <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{e.text || e.trigger || "—"}</div>
+                          {e.body && <div style={{ color: "var(--text-dim)", marginTop: 4, fontStyle: "italic" }}>Body: {e.body}</div>}
+                          {e.outcome && <div style={{ color: "var(--text-dim)", marginTop: 2, fontStyle: "italic" }}>Outcome: {e.outcome}</div>}
+                        </div>
+                      ))}
+                    </div>
+                  );
+                } catch { return null; }
+              })()}
+
+              {/* Saved Reframes Log */}
+              <button onClick={() => setOpenLog(openLog === "reframes" ? null : "reframes")} style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
+                  </div>
+                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
+              </button>
+              {openLog === "reframes" && (() => {
+                try {
+                  const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+                  if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
+                  const modeLabel = { calm: "Calm", clarity: "Get Sharp", hype: "Lock In" };
+                  return (
+                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                      {saved.map((r, i) => (
+                        <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                            <span style={{ color: "var(--amber)" }}>{modeLabel[r.mode] || "Reframe"}</span>
+                            {r.distortion && <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>{r.distortion}</span>}
+                          </div>
+                          <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{r.text || r.reframe || "—"}</div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                } catch { return null; }
+              })()}
+
+              {/* Signal Profile */}
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 6 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet"; } catch { return "Not set up yet"; } })()}
-                </div>
-              </div>
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
-                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Journal entries</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries · encrypted cloud sync
-                </div>
-              </div>
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 8 }}>
-                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Saved reframes</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
+                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — go to Know Your Body above"; } catch { return "Not set up yet"; } })()}
                 </div>
               </div>
             </div>
