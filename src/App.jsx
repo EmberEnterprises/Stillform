@@ -3854,7 +3854,7 @@ export default function Stillform() {
             },
             {
               icon: "◎",
-              label: "Level 1",
+              label: "Your tools",
               title: "Regulate",
               subtitle: "Three tools. Each one different.",
               body: "Breathe — smart breathing that picks the right pattern for what you're feeling, plus sensory grounding. Sound on or off.\n\nBody Scan — find tension in your body and release it with guided acupressure at six targeted points. Sound on or off.\n\nReframe — AI-powered. Switch between three modes: Calm (settle overwhelm), Get Sharp (cut through mental noise), Lock In (pre-performance composure). Each mode looks and feels different. Toggle between Talk (real-time conversation) and Journal (write entries the AI remembers next time).",
@@ -3870,7 +3870,7 @@ export default function Stillform() {
             },
             {
               icon: "◇",
-              label: "Level 2",
+              label: "Body awareness",
               title: "Recognize",
               subtitle: "Catch it earlier.",
               body: "Map where tension shows first in your body. Build a personal signal profile so you catch the wave at a 3, not a 10.",
@@ -3878,7 +3878,7 @@ export default function Stillform() {
             },
             {
               icon: "◈",
-              label: "Level 3",
+              label: "Over time",
               title: "See Patterns",
               subtitle: "Understand your loops.",
               body: "Your session data surfaces what triggers you, what works, and the cognitive biases shaping your reactions. This level needs real data from your sessions to show you something meaningful — not guesses.",
@@ -3886,7 +3886,7 @@ export default function Stillform() {
             },
             {
               icon: "✦",
-              label: "Level 4",
+              label: "Mastery",
               title: "Watch & Choose",
               subtitle: "Think clearly in real time.",
               body: "Notice what's happening in your body. Name the thought. Recognize the pattern. Choose your response instead of reacting. This is a skill that builds on everything before it — regulation, signal recognition, and pattern awareness.",
@@ -4134,28 +4134,14 @@ export default function Stillform() {
               </div>
               <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>7-day free trial. Most sessions take 2 minutes.</div>
 
-              {/* FOUR LEVELS — what you're building toward */}
-              <div style={{ maxWidth: 440, width: "100%", textAlign: "left" }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16, textAlign: "center" }}>
-                  Each level builds on the last. The app learns from your sessions — the more you use it, the more it can show you.
+              {/* HOW IT GETS SMARTER */}
+              <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
+                  The more you use it, the smarter it gets.
                 </div>
-                {[
-                  { icon: "◎", name: "Regulate", desc: "Breathe, body scan, and AI reframe. For anxiety, stage fright, rage, overwhelm — any feeling running too loud." },
-                  { icon: "◇", name: "Recognize", desc: "Map your body's warning signals. Catch the wave before it hits. Available immediately." },
-                  { icon: "◈", name: "See Patterns", desc: "Your session data reveals what triggers you and what works. Needs 8 sessions — real patterns require real data, not guesses." },
-                  { icon: "✦", name: "Watch & Choose", desc: "Watch your own thinking in real time and choose differently. Unlocks at 12 sessions — this skill builds on everything before it." }
-                ].map((l, i) => (
-                  <div key={i} style={{
-                    display: "flex", gap: 14, alignItems: "flex-start",
-                    padding: "12px 0", borderBottom: i < 3 ? "1px solid var(--border)" : "none"
-                  }}>
-                    <span style={{ fontSize: 18, color: "var(--amber)", flexShrink: 0, marginTop: 2 }}>{l.icon}</span>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>{l.name}</div>
-                      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>{l.desc}</div>
-                    </div>
-                  </div>
-                ))}
+                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                  Stillform learns from your sessions, your journal, and your daily check-ins. Over time, it recognizes your triggers, knows your patterns, and gives you sharper, more personalized guidance — without you having to explain yourself twice.
+                </div>
               </div>
 
               <div style={{ marginTop: 40, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.04em" }}>
@@ -4215,11 +4201,8 @@ export default function Stillform() {
                 );
               })()}
 
-              {/* LEVEL 1 — REGULATE */}
+              {/* YOUR TOOLS */}
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-                  Level 1 · Your tools
-                </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4246,105 +4229,6 @@ export default function Stillform() {
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Talk it through or journal it. AI learns from everything you share.</div>
                   </button>
                 </div>
-              </div>
-
-              {/* LEVEL 2 — RECOGNIZE */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-                  Level 2 · Know your signals
-                </div>
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                    flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◇ Map Signals</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where tension hits first</div>
-                  </button>
-                  <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                    flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◈ Tension Check</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second body scan</div>
-                  </button>
-                </div>
-              </div>
-
-              {/* LEVEL 3 — PATTERNS */}
-              {(() => {
-                let sc = 0;
-                try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                const unlocked = true; // UAT MODE: was sc >= 8
-                return (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
-                        Level 3 · See patterns
-                      </div>
-                      {!unlocked && <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{8 - sc} more sessions</div>}
-                    </div>
-                    {unlocked ? (
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
-                          flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                          padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                        }}>
-                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>◆ Patterns</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows</div>
-                        </button>
-                        <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
-                          flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                          padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                        }}>
-                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>⬡ Blind Spots</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Bias awareness</div>
-                        </button>
-                      </div>
-                    ) : (
-                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Needs real data to find real patterns.</div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* LEVEL 4 — WATCH & CHOOSE */}
-              {(() => {
-                let sc = 0;
-                try { sc = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-                const unlocked = true; // UAT MODE: was sc >= 12
-                return (
-                  <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28, opacity: unlocked ? 1 : 0.4 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: unlocked ? "var(--amber)" : "var(--text-muted)" }}>
-                        Level 4 · Watch & Choose
-                      </div>
-                      {!unlocked && <div style={{ fontSize: 10, color: "var(--text-muted)" }}>{12 - sc} more sessions</div>}
-                    </div>
-                    {unlocked ? (
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                        padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>❖ Watch & Choose</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch it. Name it. Choose differently.</div>
-                      </button>
-                    ) : (
-                      <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Builds on everything before it.</div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* JOURNAL */}
-              <div style={{ borderTop: "1px solid var(--border)", paddingTop: 20, marginBottom: 28 }}>
-                <button onClick={() => { setPathway("calm"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm", defaultTab: "journal" }); setScreen("tool"); }} style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                  padding: "14px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 3 }}>✎ Journal</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Log triggers, emotions, outcomes</div>
-                </button>
               </div>
 
               {/* STATS */}
@@ -4696,13 +4580,12 @@ export default function Stillform() {
 
                 <ul className="pricing-features">
                   <li>One-tap reset — always free</li>
-                  <li>Level 1: Breathe, Body Scan, Reframe</li>
-                  <li>Level 2: Signal recognition</li>
-                  <li>Level 3: Pattern awareness</li>
-                  <li>Level 4: Watch & Choose</li>
+                  <li>Breathe, Body Scan, Reframe</li>
                   <li>3 AI modes: Calm, Get Sharp, Lock In</li>
                   <li>Journal with AI memory</li>
                   <li>Daily check-in</li>
+                  <li>Signal mapping + tension check</li>
+                  <li>Pattern recognition (evolves with use)</li>
                   <li>Voice-to-text everywhere</li>
                   {pricingCloud && <li style={{ color: "var(--amber)" }}>Cloud sync — access from any device</li>}
                   {pricingCloud && <li style={{ color: "var(--amber)" }}>Encrypted cloud backup</li>}
