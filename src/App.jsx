@@ -3737,9 +3737,6 @@ function CheckInWidget({ onComplete }) {
 }
 
 export default function Stillform() {
-  const [appReady, setAppReady] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setAppReady(true), 1200); return () => clearTimeout(t); }, []);
-
   // UAT MODE: always show onboarding. Change back to conditional for production.
   const hasSeenOnboarding = false;
   const [screen, setScreen] = useState("onboarding");
@@ -3751,24 +3748,6 @@ export default function Stillform() {
   const [openLog, setOpenLog] = useState(null);
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
-
-  if (!appReady) return (
-    <div style={{
-      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-      minHeight: "100vh", background: "#0e0f11",
-      animation: "panicFadeIn 0.8s ease-out"
-    }}>
-      <div style={{
-        fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
-        color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8
-      }}>
-        Stillform
-      </div>
-      <div style={{ fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-        Composure mastery
-      </div>
-    </div>
-  );
 
   const completeOnboarding = () => {
     // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
