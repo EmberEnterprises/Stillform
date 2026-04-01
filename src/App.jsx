@@ -1353,7 +1353,9 @@ const BREATHING_PATTERNS = [
 ];
 
 function BreatheGroundTool({ onComplete, pathway }) {
-  const [phase, setPhase] = useState("breathe"); // breathe | ground | done
+  const [phase, setPhase] = useState("pre-rate"); // pre-rate | breathe | ground | post-rate | done
+  const [preRating, setPreRating] = useState(null);
+  const [postRating, setPostRating] = useState(null);
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1647,6 +1649,30 @@ function BreatheGroundTool({ onComplete, pathway }) {
     </div>
   );
 
+  // Pre-rate: quick 1-5 tap
+  if (phase === "pre-rate") return (
+    <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+        How steady are you?
+      </h2>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
+        Quick check. Tap a number.
+      </p>
+      <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+        {[1, 2, 3, 4, 5].map(n => (
+          <button key={n} onClick={() => { setPreRating(n); setPhase("breathe"); }} style={{
+            width: 48, height: 48, borderRadius: "50%", border: "1px solid var(--border)",
+            background: "var(--surface)", color: "var(--text)", fontSize: 18,
+            cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+          }}>{n}</button>
+        ))}
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 10, color: "var(--text-muted)", padding: "0 12px" }}>
+        <span>Unstable</span><span>Solid</span>
+      </div>
+    </div>
+  );
+
   // Breathe phase
   if (!started && phase === "breathe") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
@@ -1759,7 +1785,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             }}>
               Keep breathing
             </button>
-            <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); onComplete(); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
+            <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); setPhase("post-rate"); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               Stop here
             </button>
             <a href="https://tally.so/r/D45ljE" target="_blank" rel="noopener noreferrer" style={{
@@ -1767,6 +1793,40 @@ function BreatheGroundTool({ onComplete, pathway }) {
             }}>How was that? Give feedback →</a>
         <EmailCapture />
           </div>
+        </div>
+      )}
+
+      {/* POST-RATE */}
+      {phase === "post-rate" && (
+        <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+            Where are you now?
+          </h2>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 16 }}>
+            {[1, 2, 3, 4, 5].map(n => (
+              <button key={n} onClick={() => setPostRating(n)} style={{
+                width: 48, height: 48, borderRadius: "50%",
+                border: `1px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
+                background: postRating === n ? "rgba(201,147,58,0.12)" : "var(--surface)",
+                color: postRating === n ? "var(--amber)" : "var(--text)", fontSize: 18,
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+              }}>{n}</button>
+            ))}
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)", padding: "0 12px", marginBottom: 24 }}>
+            <span>Unstable</span><span>Solid</span>
+          </div>
+          {postRating && preRating && (
+            <div style={{ fontSize: 13, color: postRating > preRating ? "var(--amber)" : "var(--text-dim)", marginBottom: 16 }}>
+              {postRating > preRating ? `+${postRating - preRating} shift. Composure restored.` : postRating === preRating ? "Holding steady." : "Still adjusting. That's data, not failure."}
+            </div>
+          )}
+          {postRating && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <button className="btn btn-primary" onClick={onComplete}>Proceed</button>
+              <button className="btn btn-ghost" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Repeat</button>
+            </div>
+          )}
         </div>
       )}
     </div>
