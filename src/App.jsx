@@ -1912,6 +1912,16 @@ function ReframeTool({ onComplete, mode = "calm" }) {
     } catch {}
   }, [messages]);
 
+  // Reload messages when mode changes
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      setMessages(saved ? JSON.parse(saved) : []);
+    } catch { setMessages([]); }
+    setSavedIds(new Set());
+    setError(null);
+  }, [effectiveMode]);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -1946,7 +1956,21 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           history: prevMessages.map(m => ({
             role: m.role === "ai" ? "assistant" : "user",
             content: m.text
-          }))
+          })),
+          journalContext: (() => {
+            try {
+              const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]").slice(0, 5);
+              if (entries.length === 0) return null;
+              return entries.map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}`).join("\n");
+            } catch { return null; }
+          })(),
+          checkinContext: (() => {
+            try {
+              const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+              if (!checkin) return null;
+              return `Today: ${checkin.sleep}h sleep, energy ${checkin.energy}, mood "${checkin.mood}"${checkin.stressEvent ? `, stress event: ${checkin.stressEvent}` : ""}${checkin.notes ? `, notes: ${checkin.notes}` : ""}`;
+            } catch { return null; }
+          })()
         })
       });
       clearTimeout(timeout);
@@ -2001,18 +2025,111 @@ function ReframeTool({ onComplete, mode = "calm" }) {
 
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
-      {/* MODE HEADER — visually distinct per effectiveMode */}
-      <div style={{ textAlign: "center", marginBottom: 16, padding: "20px 0 16px", borderBottom: `1px solid ${mc.border}` }}>
-        <div style={{ fontSize: 32, marginBottom: 8, color: mc.color }}>{mc.icon}</div>
-        <div style={{ fontSize: 22, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300, color: mc.color, marginBottom: 6 }}>{mc.title}</div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5 }}>{mc.subtitle}</div>
+      {/* MODE PICKER — three tones */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
+        {[
+          { id: "calm", label: "Calm", icon: "◎", color: "#c9933a" },
+          { id: "clarity", label: "Get Sharp", icon: "✦", color: "#7aadcf" },
+          { id: "hype", label: "Lock In", icon: "◌", color: "#c9793a" }
+        ].map(m => {
+          const active = effectiveMode === m.id;
+          return (
+            <button key={m.id} onClick={() => setActiveMode(m.id)} style={{
+              flex: 1, background: active ? `${m.color}18` : "transparent",
+              border: `1px solid ${active ? m.color : "var(--border)"}`,
+              borderRadius: 8, padding: "10px 8px", cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s", textAlign: "center"
+            }}>
+              <div style={{ fontSize: 14, color: active ? m.color : "var(--text-muted)", marginBottom: 2 }}>{m.icon}</div>
+              <div style={{ fontSize: 10, color: active ? m.color : "var(--text-muted)", letterSpacing: "0.06em" }}>{m.label}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* TALK / JOURNAL TABS */}
+      <div style={{ display: "flex", marginBottom: 16, borderBottom: `1px solid ${mc.border}` }}>
+        <button onClick={() => setTab("talk")} style={{
+          flex: 1, background: "none", border: "none", borderBottom: tab === "talk" ? `2px solid ${mc.color}` : "2px solid transparent",
+          padding: "10px 0", fontSize: 13, fontWeight: tab === "talk" ? 500 : 400,
+          color: tab === "talk" ? mc.color : "var(--text-muted)",
+          cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+        }}>
+          Talk
+        </button>
+        <button onClick={() => setTab("journal")} style={{
+          flex: 1, background: "none", border: "none", borderBottom: tab === "journal" ? `2px solid ${mc.color}` : "2px solid transparent",
+          padding: "10px 0", fontSize: 13, fontWeight: tab === "journal" ? 500 : 400,
+          color: tab === "journal" ? mc.color : "var(--text-muted)",
+          cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
+        }}>
+          Journal
+        </button>
       </div>
 
       <div className="disclaimer">
         This is not therapy or clinical treatment. It is an AI-powered composure tool. If you are in crisis, see our Crisis Resources for international helplines.
       </div>
 
-      {/* Error banner — always visible above input, never buried in scroll */}
+      {/* ── JOURNAL TAB ── */}
+      {tab === "journal" && (
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <textarea
+              value={journalText}
+              onChange={e => setJournalText(e.target.value)}
+              placeholder="What happened? How are you feeling? Write freely — the AI uses this as context next time you talk."
+              style={{
+                width: "100%", minHeight: 120, background: mc.inputBg || "var(--surface)",
+                border: `1px solid ${mc.border}`, borderRadius: 10,
+                padding: "14px 16px", color: "var(--text)", fontSize: 14,
+                fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "vertical"
+              }}
+            />
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <button onClick={saveJournal} disabled={!journalText.trim()} style={{
+                flex: 1, background: mc.sendBg, color: "#fff", border: "none", borderRadius: 8,
+                padding: "10px", fontSize: 13, fontWeight: 500, cursor: journalText.trim() ? "pointer" : "default",
+                fontFamily: "'DM Sans', sans-serif", opacity: journalText.trim() ? 1 : 0.4, transition: "opacity 0.2s"
+              }}>
+                Save entry
+              </button>
+            </div>
+          </div>
+
+          <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 10 }}>
+            Past entries
+          </div>
+          {(() => {
+            try {
+              const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+              if (entries.length === 0) return (
+                <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, padding: "8px 0" }}>
+                  No entries yet. Write your first one above — the AI will use it as context next time you talk.
+                </div>
+              );
+              return entries.slice(0, 10).map((e, i) => (
+                <div key={e.id || i} style={{
+                  padding: "12px 14px", background: mc.aiBubble || "var(--surface)",
+                  border: `1px solid ${mc.border || "var(--border)"}`, borderRadius: 10, marginBottom: 8
+                }}>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>{e.date} · {e.time}</div>
+                  <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{e.trigger}</div>
+                  {e.emotions && e.emotions.length > 0 && (
+                    <div style={{ fontSize: 11, color: mc.color, marginTop: 6 }}>{e.emotions.join(" · ")}</div>
+                  )}
+                </div>
+              ));
+            } catch { return null; }
+          })()}
+        </div>
+      )}
+
+      {/* ── TALK TAB ── */}
+      {tab === "talk" && (
+      <>
+
+      {/* Error banner */}
       {error && (
         <div style={{
           background: "rgba(200,0,50,0.08)",
@@ -2184,6 +2301,8 @@ function ReframeTool({ onComplete, mode = "calm" }) {
           {messages.length > 2 && <FeedbackPrompt tool="reframe" />}
           {messages.length > 2 && <SessionNote />}
         </div>
+      )}
+      </>
       )}
     </div>
   );

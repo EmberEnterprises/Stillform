@@ -146,7 +146,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm" } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -157,7 +157,13 @@ exports.handler = async function(event) {
     }
 
     const messages = [...history.slice(-10), { role: "user", content: input }]; // Cap history at 10 messages
-    const systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM;
+    let systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM;
+
+    // Inject user context if available
+    const contextParts = [];
+    if (checkinContext) contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
+    if (journalContext) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
+    if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
