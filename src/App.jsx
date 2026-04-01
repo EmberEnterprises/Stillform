@@ -2259,7 +2259,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               if (!checkin) return null;
               return `Today: ${checkin.sleep}h sleep, energy ${checkin.energy}, mood "${checkin.mood}"${checkin.stressEvent ? `, stress event: ${checkin.stressEvent}` : ""}${checkin.notes ? `, notes: ${checkin.notes}` : ""}`;
             } catch { return null; }
-          })()
+          })(),
+          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()
         })
       });
       clearTimeout(timeout);
@@ -2344,7 +2345,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           color: tab === "talk" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Talk
+          Talk · get guidance
         </button>
         <button onClick={() => setTab("journal")} style={{
           flex: 1, background: "none", border: "none", borderBottom: tab === "journal" ? `2px solid ${mc.color}` : "2px solid transparent",
@@ -2352,12 +2353,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           color: tab === "journal" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Journal
+          Journal · get it out
         </button>
       </div>
 
       <div className="disclaimer">
-        This is not therapy or clinical treatment. It is an AI-powered composure tool. If you are in crisis, see our Crisis Resources for international helplines.
+        Not therapy or clinical treatment. Your data stays on this device. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
       </div>
 
       {/* ── JOURNAL TAB ── */}
@@ -4233,7 +4234,7 @@ export default function Stillform() {
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Find tension. Release it with targeted acupressure.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Most people hold stress without realizing it. Find it. Release it with acupressure.</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,

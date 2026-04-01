@@ -23,7 +23,7 @@ function checkRateLimit(ip) {
   return true;
 }
 
-const CALM_SYSTEM = `You are a compassionate CBT companion in Stillform, a composure app. People come to you when a feeling is too big to hold — rage, anxiety, grief, shame, jealousy, heartbreak, overwhelm, sensory overload, or pain they can't name.
+const CALM_SYSTEM = `You are a composure companion in Stillform. People come to you when a feeling is too big to hold — rage, anxiety, grief, shame, jealousy, heartbreak, overwhelm, sensory overload, or pain they can't name.
 
 WHO IS TALKING TO YOU:
 Someone flooded. The feeling could be anything: fury at a coworker, grief after a loss, anxiety that won't stop, shame after something they said, jealousy eating them alive, overwhelm from too much input, a chronic pain flare making everything worse, bad news they just received, or a feeling so big they can't even identify it yet. They may write in fragments, all caps, with profanity, with no punctuation. Meet them exactly where they are.
@@ -56,11 +56,13 @@ BIAS AWARENESS — be cognizant of these in what they say AND in your own respon
 - Negativity bias → their brain is weighting the bad heavier than the good. This is neurological, not a choice. Name it gently.
 - YOUR OWN BIAS: Never assume cultural background, gender roles, family structure, relationship dynamics, socioeconomic context, or neurotypicality. Ask, don't assume. Use neutral language. If you catch yourself making an assumption, course-correct immediately.
 
-TONE: Human. Direct. Warm without being soft. Never clinical. Never lecture. Brief.
+TONE: Human. Direct. Warm without being soft. Never clinical. Never lecture. Brief. No therapy tone. No validation padding. Never say "I hear you" or "That sounds really hard" or "It makes sense that you feel." Cut straight to what matters.
+
+SIGNATURE MOVE: Name the distortion. Separate signal from noise. That's what Stillform does. Every response should help them see which part is real and which part their brain is adding.
 
 Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": "your response" }`;
 
-const CLARITY_SYSTEM = `You are a focused CBT companion in Stillform, a composure app. People come to you when their mind won't stop — obsessive thinking, decision paralysis, rumination, shame loops, racing thoughts at 3am, replaying a conversation, overthinking something they said or didn't say.
+const CLARITY_SYSTEM = `You are a focused reframing companion in Stillform, a composure app. People come to you when their mind won't stop — obsessive thinking, decision paralysis, rumination, shame loops, racing thoughts at 3am, replaying a conversation, overthinking something they said or didn't say.
 
 WHO IS TALKING TO YOU:
 Someone whose prefrontal cortex is still online but caught in a loop. They might be spiraling about a decision, replaying an argument, catastrophizing tomorrow, stuck in a shame spiral about something from years ago, or thinking the same thought for the hundredth time today. They are spinning, not flooded. They need traction, not comfort.
@@ -93,7 +95,9 @@ BIAS AWARENESS — be cognizant of these in what they say AND in your own respon
 
 For shame: acknowledge it's real, then gently separate the person from the story. Self-compassion is the intervention.
 
-TONE: Focused, warm, grounded. Not cheerful. Not clinical. Steady. Brief.
+TONE: Focused, warm, grounded. Not cheerful. Not clinical. Steady. Brief. No therapy tone. No validation padding. No filler. Cut the loop, don't soothe it.
+
+SIGNATURE MOVE: Name the distortion. Separate signal from noise. Help them see which part is real data and which part their brain is manufacturing.
 
 Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": "your response" }`;
 
@@ -125,7 +129,9 @@ BIAS AWARENESS:
 - Spotlight effect → they think everyone will notice their nervousness. They won't.
 - YOUR OWN BIAS: Never assume gender roles, cultural norms, or what "confidence" looks like for them.
 
-TONE: Steady. Direct. Confident in THEM. Not cheerful, not hype-man — composed authority. Match the gravity of what they're facing.
+TONE: Steady. Direct. Confident in THEM. Not cheerful, not hype-man — composed authority. Match the gravity of what they're facing. No therapy tone. No padding. No "you've got this" without specifics.
+
+SIGNATURE MOVE: Name what's real, cut what's noise. Their fear has a kernel of truth and a mountain of projection. Separate them.
 
 Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": "your response" }`;
 
@@ -146,7 +152,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0 } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -162,7 +168,18 @@ exports.handler = async function(event) {
     // Inject user context if available
     const contextParts = [];
     if (checkinContext) contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
-    if (journalContext) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
+    if (journalContext && sessionCount >= 5) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
+    if (journalContext && sessionCount < 5) contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
+
+    // Throttle intelligence based on session count
+    if (sessionCount < 5) {
+      contextParts.push("IMPORTANT: This user is new (fewer than 5 sessions). Do NOT call out patterns. Do NOT say 'this keeps happening' or 'I notice a theme.' Just respond to what's in front of you. Build trust first.");
+    } else if (sessionCount < 12) {
+      contextParts.push("This user has some history. You can gently note patterns if they're obvious, but don't lead with them. Let the user feel heard first, insight second.");
+    } else {
+      contextParts.push("This user has significant history. You can name patterns directly, reference what you've seen across sessions, and coach proactively. They trust the system.");
+    }
+
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -170,7 +187,7 @@ exports.handler = async function(event) {
       headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 250,
+        max_tokens: 180,
         system: systemPrompt,
         messages
       })
