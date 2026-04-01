@@ -4354,16 +4354,47 @@ export default function Stillform() {
                   const avgMs = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length;
                   const avgSec = Math.round(avgMs / 1000);
                   const avgStr = avgSec >= 60 ? `${Math.floor(avgSec / 60)}m ${avgSec % 60}s` : `${avgSec}s`;
+
+                  // Streak: consecutive days with sessions
+                  const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
+                  let streak = 0;
+                  const today = new Date();
+                  for (let i = 0; i < 365; i++) {
+                    const d = new Date(today);
+                    d.setDate(d.getDate() - i);
+                    const key = d.toISOString().slice(0, 10);
+                    if (daySet.has(key)) streak++;
+                    else break;
+                  }
+
+                  // Fastest regulation
+                  const durations = sessions.map(s => s.duration).filter(d => d > 0);
+                  const fastest = durations.length > 0 ? Math.min(...durations) : null;
+                  const fastSec = fastest ? Math.round(fastest / 1000) : null;
+                  const fastStr = fastSec ? (fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`) : null;
+
                   return (
-                    <div style={{ display: "flex", gap: 24, justifyContent: "center", paddingTop: 12 }}>
-                      <div style={{ textAlign: "center" }}>
+                    <div style={{ display: "flex", gap: 20, justifyContent: "center", paddingTop: 12, flexWrap: "wrap" }}>
+                      <div style={{ textAlign: "center", minWidth: 60 }}>
                         <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
                         <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
                       </div>
-                      <div style={{ textAlign: "center" }}>
+                      <div style={{ textAlign: "center", minWidth: 60 }}>
                         <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{avgStr}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>avg regulation</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>avg time</div>
                       </div>
+                      {streak > 1 && (
+                        <div style={{ textAlign: "center", minWidth: 60 }}>
+                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
+                        </div>
+                      )}
+                      {fastStr && (
+                        <div style={{ textAlign: "center", minWidth: 60 }}>
+                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{fastStr}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>fastest</div>
+                        </div>
+                      )}
                     </div>
                   );
                 } catch { return null; }
