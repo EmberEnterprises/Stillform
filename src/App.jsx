@@ -4259,6 +4259,7 @@ export default function Stillform() {
                   const fastStr = fastSec ? (fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`) : null;
 
                   return (
+                    <>
                     <div style={{ display: "flex", gap: 20, justifyContent: "center", paddingTop: 12, flexWrap: "wrap" }}>
                       <div style={{ textAlign: "center", minWidth: 60 }}>
                         <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
@@ -4281,6 +4282,31 @@ export default function Stillform() {
                         </div>
                       )}
                     </div>
+
+                    {sessions.length >= 5 && (() => {
+                      // Most used tool
+                      const toolCounts = {};
+                      sessions.forEach(s => { const t = (s.tools || [])[0]; if (t) toolCounts[t] = (toolCounts[t] || 0) + 1; });
+                      const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
+                      const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
+
+                      // Time trend (first 5 vs last 5)
+                      const recentDurations = sessions.slice(-5).map(s => s.duration).filter(d => d > 0);
+                      const earlyDurations = sessions.slice(0, 5).map(s => s.duration).filter(d => d > 0);
+                      const recentAvg = recentDurations.length ? recentDurations.reduce((a, b) => a + b, 0) / recentDurations.length : 0;
+                      const earlyAvg = earlyDurations.length ? earlyDurations.reduce((a, b) => a + b, 0) / earlyDurations.length : 0;
+                      const improving = recentAvg < earlyAvg && earlyAvg > 0;
+
+                      return (
+                        <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                          {topTool && <div>Most used: <span style={{ color: "var(--amber)" }}>{toolLabel[topTool[0]] || topTool[0]}</span></div>}
+                          {sessions.length >= 8 && improving && <div style={{ marginTop: 4 }}>Your regulation time is trending faster.</div>}
+                          {sessions.length >= 8 && !improving && recentAvg > 0 && <div style={{ marginTop: 4 }}>Your regulation time is holding steady.</div>}
+                          {sessions.length >= 12 && <div style={{ marginTop: 4, color: "var(--amber)" }}>The AI is using your full history to personalize guidance.</div>}
+                        </div>
+                      );
+                    })()}
+                    </>
                   );
                 } catch { return null; }
               })()}
@@ -4975,6 +5001,29 @@ export default function Stillform() {
                   </div>
                   <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>+$3/mo</div>
                 </div>
+              </div>
+            </div>
+
+            {/* Know Your Body */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Know Your Body</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does tension show first? Build your body profile.</div>
+                </button>
+                <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Tension check</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second body scan. Are you holding something you haven't noticed?</div>
+                </button>
               </div>
             </div>
 
