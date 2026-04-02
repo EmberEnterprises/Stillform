@@ -4424,6 +4424,7 @@ export default function Stillform() {
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
   const [onboardStep, setOnboardStep] = useState(0);
+  const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [pricingPlan, setPricingPlan] = useState("annual");
@@ -4782,8 +4783,124 @@ export default function Stillform() {
           );
         })()}
 
+        {/* SETUP — guided calibration for proactive users */}
+        {screen === "setup" && (() => {
+          const setupSteps = [
+            {
+              step: 1,
+              label: "Signal Mapping",
+              title: "Where does it activate?",
+              subtitle: "The first thing to know about your system.",
+              body: "Before a session can be personalized, the AI needs to know where intensity shows up in your body first — jaw, shoulders, chest, gut, hands, legs.\n\nThis is a one-time calibration. Takes 60 seconds.",
+              cta: "Map my signals →",
+              action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
+            },
+            {
+              step: 2,
+              label: "Blind Spots",
+              title: "What does your brain add?",
+              subtitle: "The patterns the AI will watch for.",
+              body: "Everyone has cognitive patterns that amplify intensity — catastrophizing, all-or-nothing thinking, mind reading. Identifying yours means the AI can name them in Reframe before they take over.\n\nTakes 2 minutes.",
+              cta: "Identify my blind spots →",
+              action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
+            },
+            {
+              step: 3,
+              label: "Default Protocol",
+              title: "Which breath fits you?",
+              subtitle: "Your sessions start instantly with this.",
+              body: "Calm (4-4-8-2) — longer exhale, activates parasympathetic response. Best for anxiety and overwhelm.\n\nBox (4-4-4-4) — equal phases, high-focus. Best for performance states.\n\n4-7-8 — deep reset. Best for physical tension.\n\nChange anytime in Settings.",
+              cta: null,
+              patterns: ["calm", "box", "478", "quick"]
+            }
+          ];
+
+          const current = setupSteps[setupStep];
+          const isLast = setupStep === setupSteps.length - 1;
+          const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
+
+          const patternLabels = {
+            calm: { name: "Calm", detail: "4-4-8-2 · Overwhelm & anxiety" },
+            box: { name: "Box", detail: "4-4-4-4 · Focus & performance" },
+            "478": { name: "4-7-8", detail: "Deep physical reset" },
+            quick: { name: "Quick Reset", detail: "2-2-4-1 · 60 seconds" }
+          };
+
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+
+              {/* Progress */}
+              <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
+                {setupSteps.map((_, i) => (
+                  <div key={i} style={{
+                    height: 2, flex: 1, borderRadius: 1,
+                    background: i <= setupStep ? "var(--amber)" : "var(--border)",
+                    transition: "background 0.3s"
+                  }} />
+                ))}
+              </div>
+
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+                {current.step} / {setupSteps.length} · {current.label}
+              </div>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8, lineHeight: 1.15 }}>
+                {current.title}
+              </h1>
+              <div style={{ fontSize: 14, color: "var(--text-dim)", fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", marginBottom: 28 }}>
+                {current.subtitle}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.8, marginBottom: 36 }}>
+                {current.body.split("\n\n").map((para, i) => (
+                  <p key={i} style={{ marginBottom: 12 }}>{para}</p>
+                ))}
+              </div>
+
+              {/* Step 3 — pattern picker */}
+              {isLast && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 28 }}>
+                  {Object.entries(patternLabels).map(([id, p]) => (
+                    <button key={id} onClick={() => {
+                      try { localStorage.setItem("stillform_breath_pattern", id); refreshSettings(); } catch {}
+                    }} style={{
+                      width: "100%", background: savedPattern === id ? "var(--amber-glow)" : "var(--surface)",
+                      border: `0.5px solid ${savedPattern === id ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r)", padding: "14px 18px", cursor: "pointer",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                      WebkitTapHighlightColor: "transparent"
+                    }}>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: savedPattern === id ? "var(--amber)" : "var(--text)", fontWeight: savedPattern === id ? 500 : 400 }}>{p.name}</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em" }}>{p.detail}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* CTA */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {current.cta && (
+                  <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}
+                    onClick={() => { current.action(); }}>
+                    {current.cta}
+                  </button>
+                )}
+                <button onClick={() => {
+                  if (isLast) { setScreen("home"); } else { setSetupStep(s => s + 1); }
+                }} style={{
+                  background: "none", border: "none", cursor: "pointer",
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
+                  textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
+                }}>
+                  {isLast ? "Done — take me to the app →" : "Skip this step →"}
+                </button>
+              </div>
+            </section>
+          );
+        })()}
+
         {/* FLOATING RESET — accessible from any screen except active tool sessions */}
-        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "tool" && (
+        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "setup" && screen !== "tool" && (
           <button onClick={() => setScreen("panic")} style={{
             position: "fixed", bottom: 80, right: 24, zIndex: 100,
             background: "var(--bg)", border: "1px solid var(--amber-dim)",
@@ -4870,7 +4987,16 @@ export default function Stillform() {
                 </div>
               </div>
 
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginTop: 12, marginBottom: 56, letterSpacing: "0.1em" }}>7-DAY FREE TRIAL · ~90 SECONDS PER SESSION</div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginTop: 12, letterSpacing: "0.1em" }}>7-DAY FREE TRIAL · ~90 SECONDS PER SESSION</div>
+
+              {/* Set Up link */}
+              <button onClick={() => { setSetupStep(0); setScreen("setup"); }} style={{
+                background: "none", border: "none", cursor: "pointer", marginTop: 16, marginBottom: 40,
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
+                textTransform: "uppercase", color: "var(--amber)", opacity: 0.7
+              }}>
+                ◇ Set up your profile first →
+              </button>
 
               <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
