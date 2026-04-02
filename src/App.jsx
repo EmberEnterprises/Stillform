@@ -593,6 +593,18 @@ const styles = `
     50% { opacity: 0.3; }
   }
 
+  @keyframes deltaFlash {
+    0% { opacity: 0; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1.08); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes deltaGlow {
+    0% { text-shadow: 0 0 0 rgba(201,147,58,0); }
+    50% { text-shadow: 0 0 28px rgba(201,147,58,0.5); }
+    100% { text-shadow: 0 0 12px rgba(201,147,58,0.2); }
+  }
+
   /* BODY SCAN */
   .scan-body {
     display: flex;
@@ -1726,12 +1738,12 @@ function BreatheGroundTool({ onComplete, pathway }) {
           {postRating && preRating && (() => {
             const delta = postRating - preRating;
             return (
-              <div style={{ marginBottom: 24, animation: delta > 0 ? "fadeIn 0.4s ease" : "none" }}>
+              <div style={{ marginBottom: 24, animation: delta > 0 ? "deltaFlash 0.5s ease-out" : "none" }}>
                 <div style={{
                   fontSize: 48, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
                   color: delta > 0 ? "var(--amber)" : delta === 0 ? "var(--text-dim)" : "var(--text-muted)",
                   marginBottom: 4, lineHeight: 1,
-                  textShadow: delta >= 2 ? "0 0 20px rgba(201,147,58,0.3)" : "none"
+                  animation: delta > 0 ? "deltaGlow 0.8s ease-out forwards" : "none"
                 }}>
                   {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
                 </div>
