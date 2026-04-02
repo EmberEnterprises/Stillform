@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Stillform</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0A0A0C;
+  --amber: #C8922A;
+  --amber-dim: rgba(200,146,42,0.20);
+  --text: #E8EAF0;
+  --text-dim: #9496A1;
+  --text-muted: #4A4C54;
+  --border: rgba(255,255,255,0.07);
+  --surface: #141418;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.stage {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  background: var(--bg);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+}
+
+/* Ambient glow */
+.glow {
+  position: absolute;
+  width: 60vw;
+  height: 60vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,146,42,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  transition: all 1.5s ease;
+}
+
+/* Slide */
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 14vw 12vw;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0s;
+}
+
+.slide.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Logo mark */
+.logo-mark {
+  position: absolute;
+  top: 7vw;
+  left: 12vw;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.8vw;
+  letter-spacing: 0.2em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  opacity: 0;
+}
+
+.slide-num {
+  position: absolute;
+  top: 7vw;
+  right: 12vw;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.5vw;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  opacity: 0;
+}
+
+.slide-url {
+  position: absolute;
+  bottom: 7vw;
+  left: 12vw;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.5vw;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  opacity: 0;
+  text-transform: uppercase;
+}
+
+/* Typography */
+.eyebrow {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.8vw;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--amber);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  margin-bottom: 4vw;
+}
+
+.headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  line-height: 1.05;
+  color: var(--text);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.headline em {
+  font-style: italic;
+  color: var(--amber);
+}
+
+.subhead {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-dim);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  line-height: 1.6;
+  margin-top: 4vw;
+}
+
+.body-text {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.8;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  margin-top: 3vw;
+}
+
+.divider {
+  width: 8vw;
+  height: 0.5px;
+  background: var(--amber-dim);
+  opacity: 0;
+  transition: opacity 0.8s ease, width 1s ease;
+  margin-top: 5vw;
+}
+
+/* Protocol rows */
+.protocol-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5vw;
+  width: 100%;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  margin-top: 2vw;
+}
+
+.protocol-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 4vw;
+  border-left: 0.5px solid var(--amber-dim);
+  padding-left: 4vw;
+}
+
+.protocol-icon {
+  font-size: 4vw;
+  color: var(--amber);
+  margin-top: 0.5vw;
+  flex-shrink: 0;
+}
+
+.protocol-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.6vw;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 1vw;
+}
+
+.protocol-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4.2vw;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+/* Stat row for slide 4 */
+.stat-row {
+  display: flex;
+  gap: 8vw;
+  margin-top: 6vw;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 1vw;
+}
+
+.stat-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 7vw;
+  font-weight: 300;
+  color: var(--amber);
+  line-height: 1;
+}
+
+.stat-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.2vw;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* Breathing ring on slide 1 */
+.ring-wrap {
+  position: absolute;
+  right: -5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 55vw;
+  height: 55vw;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+}
+
+.ring-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+  animation: ring-spin 12s linear infinite;
+}
+
+@keyframes ring-spin {
+  from { transform: rotate(-90deg); }
+  to { transform: rotate(270deg); }
+}
+
+.ring-arc {
+  fill: none;
+  stroke: var(--amber);
+  stroke-width: 1;
+  stroke-linecap: butt;
+  stroke-dasharray: 628;
+  stroke-dashoffset: 157;
+  animation: arc-breathe 4s ease-in-out infinite;
+}
+
+@keyframes arc-breathe {
+  0%, 100% { stroke-dashoffset: 470; opacity: 0.6; }
+  40% { stroke-dashoffset: 157; opacity: 1; }
+  60% { stroke-dashoffset: 157; opacity: 1; }
+}
+
+.ring-track {
+  fill: none;
+  stroke: rgba(255,255,255,0.04);
+  stroke-width: 1;
+}
+
+.ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10vw;
+  font-weight: 300;
+  color: var(--amber);
+  line-height: 1;
+  animation: count-pulse 4s ease-in-out infinite;
+}
+
+@keyframes count-pulse {
+  0%, 100% { opacity: 0.5; }
+  40% { opacity: 1; }
+  60% { opacity: 1; }
+}
+
+/* Amber line decoration */
+.amber-line {
+  position: absolute;
+  right: 12vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0.5px;
+  background: linear-gradient(to bottom, transparent, var(--amber-dim), transparent);
+  height: 40vh;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+/* Slide progress dots */
+.dots {
+  position: fixed;
+  bottom: 5vw;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.4s ease, transform 0.4s ease;
+}
+
+.dot.active {
+  background: var(--amber);
+  transform: scale(1.3);
+}
+
+/* Tap to advance */
+.tap-hint {
+  position: fixed;
+  bottom: 12vw;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.2vw;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0;
+  animation: hint-fade 3s ease 3s forwards;
+  white-space: nowrap;
+}
+
+@keyframes hint-fade {
+  0% { opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Animated elements becoming visible */
+.revealed { opacity: 1 !important; transform: none !important; }
+.revealed-slow { opacity: 1 !important; }
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+  <!-- Ambient glow -->
+  <div class="glow" id="glow" style="top:-10%;left:-10%;"></div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- SLIDE 1 — OPENING              -->
+  <!-- ═══════════════════════════════ -->
+  <div class="slide active" id="slide-0">
+    <div class="logo-mark" id="s0-logo">Stillform</div>
+    <div class="slide-num" id="s0-num">01 / 04</div>
+
+    <!-- Breathing ring -->
+    <div class="ring-wrap" id="s0-ring">
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="ring-track" cx="100" cy="100" r="95"/>
+        <circle class="ring-arc" cx="100" cy="100" r="95"/>
+        <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.5"/>
+        <!-- Tick marks -->
+        <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
+          <line x1="100" y1="5" x2="100" y2="16"/>
+          <line x1="195" y1="100" x2="184" y2="100"/>
+          <line x1="100" y1="195" x2="100" y2="184"/>
+          <line x1="5" y1="100" x2="16" y2="100"/>
+        </g>
+      </svg>
+      <div class="ring-center">
+        <div class="ring-count" id="ring-count">4</div>
+      </div>
+    </div>
+
+    <div class="slide-inner" style="justify-content:center;">
+      <div class="eyebrow" id="s0-eye">A composure system</div>
+      <div class="headline" id="s0-h" style="font-size:15vw;">
+        Composure.<br><em>On demand.</em>
+      </div>
+      <div class="subhead" id="s0-sub" style="font-size:4.8vw;">
+        Stabilize. Then think clearly.
+      </div>
+    </div>
+
+    <div class="slide-url" id="s0-url">stillformapp.com</div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- SLIDE 2 — THE REALITY          -->
+  <!-- ═══════════════════════════════ -->
+  <div class="slide" id="slide-1">
+    <div class="logo-mark" id="s1-logo">Stillform</div>
+    <div class="slide-num" id="s1-num">02 / 04</div>
+    <div class="amber-line" id="s1-line"></div>
+
+    <div class="slide-inner" style="justify-content:center; max-width:72%;">
+      <div class="eyebrow" id="s1-eye">Not just crisis</div>
+      <div class="headline" id="s1-h" style="font-size:9.5vw; line-height:1.15;">
+        You don't need to be<br>falling apart to be<br><em>overwhelmed.</em>
+      </div>
+      <div class="divider" id="s1-div"></div>
+      <div class="body-text" id="s1-body" style="font-size:4vw;">
+        Rage in a meeting.<br>
+        Excitement before a first date.<br>
+        Joy so big it makes you spiral.<br>
+        Dread for no reason at all.<br><br>
+        The goal isn't to flatten it.<br>
+        It's to stay <strong style="color:var(--text); font-weight:500;">functional inside it.</strong>
+      </div>
+    </div>
+
+    <div class="slide-url" id="s1-url">stillformapp.com</div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- SLIDE 3 — HOW IT WORKS         -->
+  <!-- ═══════════════════════════════ -->
+  <div class="slide" id="slide-2">
+    <div class="logo-mark" id="s2-logo">Stillform</div>
+    <div class="slide-num" id="s2-num">03 / 04</div>
+
+    <div class="slide-inner" style="justify-content:center;">
+      <div class="eyebrow" id="s2-eye">Three protocols</div>
+      <div class="headline" id="s2-h" style="font-size:9vw; margin-bottom:6vw;">
+        Body.<br><em>Then thought.</em>
+      </div>
+      <div class="protocol-row" id="s2-rows">
+        <div class="protocol-item">
+          <div class="protocol-icon">◎</div>
+          <div>
+            <div class="protocol-label">Breathe</div>
+            <div class="protocol-desc">Paced breathing. Stabilize the body first.</div>
+          </div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-icon">◉</div>
+          <div>
+            <div class="protocol-label">Scan</div>
+            <div class="protocol-desc">Six acupressure points. Locate tension. Release it.</div>
+          </div>
+        </div>
+        <div class="protocol-item">
+          <div class="protocol-icon">✦</div>
+          <div>
+            <div class="protocol-label">Reframe</div>
+            <div class="protocol-desc">AI cognitive reset. Regulate. Get Sharp. Lock In.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-url" id="s2-url">stillformapp.com</div>
+  </div>
+
+  <!-- ═══════════════════════════════ -->
+  <!-- SLIDE 4 — CTA                  -->
+  <!-- ═══════════════════════════════ -->
+  <div class="slide" id="slide-3">
+    <div class="logo-mark" id="s3-logo">Stillform</div>
+    <div class="slide-num" id="s3-num">04 / 04</div>
+
+    <div class="slide-inner" style="justify-content:center;">
+      <div class="eyebrow" id="s3-eye">Not meditation. Not therapy.</div>
+      <div class="headline" id="s3-h" style="font-size:11vw; line-height:1.1;">
+        A precision<br>composure<br><em>system.</em>
+      </div>
+      <div class="stat-row" id="s3-stats">
+        <div class="stat">
+          <div class="stat-val">90s</div>
+          <div class="stat-label">Per session</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">3</div>
+          <div class="stat-label">Protocols</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">∞</div>
+          <div class="stat-label">Intensity</div>
+        </div>
+      </div>
+      <div class="subhead" id="s3-sub" style="font-size:4.5vw; margin-top:6vw;">
+        7-day free trial. stillformapp.com
+      </div>
+    </div>
+  </div>
+
+  <!-- Dots -->
+  <div class="dots" id="dots">
+    <div class="dot active"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+    <div class="dot"></div>
+  </div>
+
+  <div class="tap-hint">Tap to advance</div>
+
+</div>
+
+<script>
+  let current = 0;
+  let animating = false;
+  const total = 4;
+
+  // Ring counter
+  let ringVal = 4;
+  const ringPhases = [4,4,8,2];
+  let phaseIdx = 0;
+  let phaseCount = 0;
+  const ringEl = document.getElementById('ring-count');
+
+  setInterval(() => {
+    phaseCount--;
+    if (phaseCount <= 0) {
+      phaseIdx = (phaseIdx + 1) % ringPhases.length;
+      phaseCount = ringPhases[phaseIdx];
+    }
+    ringEl.textContent = phaseCount;
+  }, 1000);
+  // init
+  phaseCount = ringPhases[0];
+
+  const slideConfigs = [
+    {
+      glow: 'top:-10%;left:-10%;',
+      reveals: [
+        { id: 's0-ring', cls: 'revealed-slow', delay: 200 },
+        { id: 's0-logo', cls: 'revealed-slow', delay: 300 },
+        { id: 's0-num', cls: 'revealed-slow', delay: 300 },
+        { id: 's0-url', cls: 'revealed-slow', delay: 300 },
+        { id: 's0-eye', cls: 'revealed', delay: 500 },
+        { id: 's0-h', cls: 'revealed', delay: 800 },
+        { id: 's0-sub', cls: 'revealed', delay: 1400 },
+      ]
+    },
+    {
+      glow: 'top:20%;left:40%;',
+      reveals: [
+        { id: 's1-logo', cls: 'revealed-slow', delay: 100 },
+        { id: 's1-num', cls: 'revealed-slow', delay: 100 },
+        { id: 's1-url', cls: 'revealed-slow', delay: 100 },
+        { id: 's1-line', cls: 'revealed-slow', delay: 200 },
+        { id: 's1-eye', cls: 'revealed', delay: 300 },
+        { id: 's1-h', cls: 'revealed', delay: 600 },
+        { id: 's1-div', cls: 'revealed-slow', delay: 1000 },
+        { id: 's1-body', cls: 'revealed', delay: 1200 },
+      ]
+    },
+    {
+      glow: 'top:30%;left:-20%;',
+      reveals: [
+        { id: 's2-logo', cls: 'revealed-slow', delay: 100 },
+        { id: 's2-num', cls: 'revealed-slow', delay: 100 },
+        { id: 's2-url', cls: 'revealed-slow', delay: 100 },
+        { id: 's2-eye', cls: 'revealed', delay: 300 },
+        { id: 's2-h', cls: 'revealed', delay: 600 },
+        { id: 's2-rows', cls: 'revealed', delay: 1000 },
+      ]
+    },
+    {
+      glow: 'top:-5%;left:30%;',
+      reveals: [
+        { id: 's3-logo', cls: 'revealed-slow', delay: 100 },
+        { id: 's3-num', cls: 'revealed-slow', delay: 100 },
+        { id: 's3-eye', cls: 'revealed', delay: 300 },
+        { id: 's3-h', cls: 'revealed', delay: 600 },
+        { id: 's3-stats', cls: 'revealed', delay: 1100 },
+        { id: 's3-sub', cls: 'revealed', delay: 1600 },
+      ]
+    }
+  ];
+
+  function goTo(idx) {
+    if (animating) return;
+    animating = true;
+
+    // Hide current
+    const prev = document.getElementById(`slide-${current}`);
+    prev.style.opacity = '0';
+    prev.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => {
+      prev.classList.remove('active');
+      prev.style.transition = '';
+      prev.style.opacity = '';
+    }, 400);
+
+    current = idx;
+
+    // Reset elements on new slide
+    const config = slideConfigs[current];
+    config.reveals.forEach(r => {
+      const el = document.getElementById(r.id);
+      if (el) {
+        el.classList.remove('revealed', 'revealed-slow');
+      }
+    });
+
+    // Move glow
+    const glow = document.getElementById('glow');
+    glow.style.cssText = `width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle, rgba(200,146,42,0.06) 0%, transparent 70%);pointer-events:none;transition:all 1.5s ease;position:absolute;${config.glow}`;
+
+    // Update dots
+    document.querySelectorAll('.dot').forEach((d, i) => {
+      d.classList.toggle('active', i === current);
+    });
+
+    // Show new slide
+    setTimeout(() => {
+      const next = document.getElementById(`slide-${current}`);
+      next.style.opacity = '0';
+      next.classList.add('active');
+      next.style.transition = 'opacity 0.5s ease';
+      next.style.opacity = '1';
+      setTimeout(() => {
+        next.style.transition = '';
+        next.style.opacity = '';
+      }, 500);
+
+      // Staggered reveals
+      config.reveals.forEach(r => {
+        setTimeout(() => {
+          const el = document.getElementById(r.id);
+          if (el) el.classList.add(r.cls);
+        }, r.delay);
+      });
+
+      setTimeout(() => { animating = false; }, 600);
+    }, 350);
+  }
+
+  // Tap / click to advance
+  document.getElementById('stage').addEventListener('click', () => {
+    goTo((current + 1) % total);
+  });
+
+  // Auto-advance every 6 seconds
+  let autoTimer = setInterval(() => {
+    goTo((current + 1) % total);
+  }, 6000);
+
+  // Reset auto timer on tap
+  document.getElementById('stage').addEventListener('click', () => {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => {
+      goTo((current + 1) % total);
+    }, 6000);
+  });
+
+  // Start slide 0 reveals
+  setTimeout(() => {
+    slideConfigs[0].reveals.forEach(r => {
+      setTimeout(() => {
+        const el = document.getElementById(r.id);
+        if (el) el.classList.add(r.cls);
+      }, r.delay);
+    });
+  }, 300);
+</script>
+</body>
+</html>
