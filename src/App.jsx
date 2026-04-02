@@ -4824,80 +4824,64 @@ export default function Stillform() {
           const isNew = sessionCount === 0;
 
           if (isNew) return (
-            /* ── FIRST TIME: what is this, why should I care ── */
             <section className="home">
               <h1 className="home-title">
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                Stillform is a composure system for people who feel everything at full intensity — excitement, rage, anxiety, passion, dread, joy. The goal isn't to flatten it. It's to stay functional inside it.
+                For people who feel everything at full intensity. Rage, excitement, anxiety, dread, joy. The goal isn't to flatten it. It's to stay functional inside it.
               </p>
-              <div style={{ fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.04em", marginBottom: 32, marginTop: -16 }}>
-                No content. No noise. Just execution.
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
+                Stabilize. Then think clearly.
               </div>
 
-              <div style={{ width: "100%", maxWidth: 360 }}>
-                <button onClick={() => {
-                  const el = document.getElementById("session-menu");
-                  if (el) el.style.display = el.style.display === "none" ? "block" : "none";
-                }} style={{
-                  width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
-                  padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
+              <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: 6 }}>
+                <button onClick={() => startPathway("calm")} style={{
+                  width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                  borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
                 }}>
-                  <span>Initiate Session</span>
-                  <span style={{ fontSize: 12 }}>▾</span>
+                  <div>
+                    <div>Initiate Session</div>
+                    <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, marginTop: 2 }}>Stabilize now</div>
+                  </div>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", opacity: 0.7 }}>◎ REGULATE</span>
                 </button>
-                <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
-                  <button onClick={() => startPathway("calm")} style={{
-                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
-                  }}>
-                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Breathe</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Paced breathing protocol. Immediate downshift.</div>
-                    </div>
-                  </button>
+                <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                    width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer", textAlign: "center",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Locate tension. Release with targeted pressure.</div>
-                    </div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Body</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
-                    width: "100%", background: "transparent", border: "none",
-                    padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", gap: 12
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer", textAlign: "center",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Guided cognitive reset. Structured, not open-ended.</div>
-                    </div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Thought</div>
                   </button>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>7-day free trial. Most sessions take ~90 seconds.</div>
 
-              {/* ADAPTS */}
-              <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                  Adapts to your patterns. Reduces time to control.
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginTop: 12, marginBottom: 56, letterSpacing: "0.1em" }}>7-DAY FREE TRIAL · ~90 SECONDS PER SESSION</div>
+
+              <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                  Builds with every session
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                  Stillform builds a signal profile from your sessions, journal, and daily check-ins. It learns what states you move through, what works for each one, and tightens its guidance over time — without you having to explain yourself every time.
+                  Stillform builds a signal profile from your sessions, signal log, and check-ins. It learns what states you move through, what works for each one, and gets more precise over time.
                 </div>
               </div>
 
-              <div style={{ marginTop: 40, fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.04em" }}>
+              <div style={{ marginTop: 40, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
                 Built from lived experience.
               </div>
             </section>
