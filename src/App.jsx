@@ -4436,12 +4436,17 @@ export default function Stillform() {
                 );
 
                 return (
-                  <CheckInWidget onComplete={() => refreshSettings()} />
+                  <div style={{ marginBottom: 4 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily check-in</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>30 seconds. The AI uses this to personalize your sessions.</div>
+                    <CheckInWidget onComplete={() => refreshSettings()} />
+                  </div>
                 );
               })()}
 
               {/* YOUR TOOLS */}
-              <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 8 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your protocols</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
@@ -4473,9 +4478,78 @@ export default function Stillform() {
                 </div>
               </div>
 
-              <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center", marginBottom: 24, opacity: 0.7 }}>
-                For when you need control without stepping away.
-              </div>
+              {/* JOURNAL LINK */}
+              <button onClick={() => setScreen("journal")} style={{
+                width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: 10,
+                padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text-dim)",
+                fontFamily: "'DM Sans', sans-serif", marginTop: 8, marginBottom: 28,
+                display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <span style={{ fontSize: 13 }}>◈ Session Journal</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
+              </button>
+
+              {/* DEEPER TOOLS — unlocked progressively */}
+              {(() => {
+                const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
+                const count = sessions.length;
+                if (count < 3) return null;
+                return (
+                  <div style={{ marginBottom: 28 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                      Go deeper
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◇ Map Your Signals</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does intensity activate first? Build your body profile.</div>
+                      </button>
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◈ Tension Check</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 seconds. Are you holding something you haven't noticed?</div>
+                      </button>
+                      {count >= 8 && (
+                        <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                          padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◆ Your Patterns</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate.</div>
+                        </button>
+                      )}
+                      {count >= 8 && (
+                        <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                          padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>The cognitive biases that shape how you think under pressure.</div>
+                        </button>
+                      )}
+                      {count >= 12 && (
+                        <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                          padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>❖ Watch & Choose</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch the spiral in real time. Name it. Choose your next move.</div>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* STATS */}
               {(() => {
@@ -4583,7 +4657,7 @@ export default function Stillform() {
                 padding: "4px 10px", fontSize: 11, color: "var(--amber)", cursor: "pointer",
                 fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
               }}>
-                Reset
+                Quick Reset
               </button>
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
