@@ -4193,11 +4193,16 @@ export default function Stillform() {
             /* ── FIRST TIME: what is this, why should I care ── */
             <section className="home">
               <h1 className="home-title">
-                Composure<br /><em>Mastery.</em>
+                Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                Stay centered anywhere. Stillform trains your composure — whether it's anxiety, stage fright, obsessive thinking, rage, or any feeling too big to hold.
+                Stillform is a composure system.<br />
+                Regulate your state in under two minutes — under pressure, in public, or mid-escalation.<br />
+                Designed for moments where composure is required.
               </p>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.04em", marginBottom: 32, marginTop: -16 }}>
+                No content. No noise. Just execution.
+              </div>
 
               <div style={{ width: "100%", maxWidth: 360 }}>
                 <button onClick={() => {
@@ -4209,7 +4214,7 @@ export default function Stillform() {
                   fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
-                  <span>Start your first session</span>
+                  <span>Run a session</span>
                   <span style={{ fontSize: 12 }}>▾</span>
                 </button>
                 <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
@@ -4221,7 +4226,7 @@ export default function Stillform() {
                     <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500 }}>Breathe</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Smart breathing + grounding</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Paced breathing protocol. Immediate downshift.</div>
                     </div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
@@ -4232,7 +4237,7 @@ export default function Stillform() {
                     <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Find tension · acupressure release</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Locate tension. Release with targeted pressure.</div>
                     </div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
@@ -4243,20 +4248,20 @@ export default function Stillform() {
                     <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk it through or journal it</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Guided cognitive reset. Structured, not open-ended.</div>
                     </div>
                   </button>
                 </div>
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>7-day free trial. Most sessions take 2 minutes.</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12, marginBottom: 56 }}>7-day free trial. Most sessions take ~90 seconds.</div>
 
-              {/* HOW IT GETS SMARTER */}
+              {/* ADAPTS */}
               <div style={{ maxWidth: 440, width: "100%", textAlign: "center" }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>
-                  The more you use it, the smarter it gets.
+                  Adapts to your patterns. Reduces time to control.
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                  Stillform learns from your sessions, your journal, and your daily check-ins. Over time, it recognizes your triggers, knows your patterns, and gives you sharper, more personalized guidance — without you having to explain yourself twice.
+                  Stillform builds a signal profile from your sessions, journal, and daily check-ins. It recognizes your triggers, tracks what works, and tightens its guidance over time — without you having to explain yourself twice.
                 </div>
               </div>
 
@@ -5398,6 +5403,9 @@ export default function Stillform() {
             <button onClick={() => setScreen("pricing")}>Pricing</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center" }}>
+            Private. No data sold. No noise.
           </div>
           <div className="footer-copy">© 2026 ARA Embers LLC</div>
         </footer>
