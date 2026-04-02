@@ -4403,7 +4403,7 @@ export default function Stillform() {
                       padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
-                      <span>Start your first session</span>
+                      <span>Run a session</span>
                       <span style={{ fontSize: 12 }}>▾</span>
                     </button>
                     <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
@@ -4471,7 +4471,7 @@ export default function Stillform() {
                   {isFirst ? (
                     <>
                       <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
-                        Reset Composure
+                        Run a Session
                       </button>
                       <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setOnboardStep(s => s + 1)}>
                         See how it works first
