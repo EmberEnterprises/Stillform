@@ -1536,6 +1536,9 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState({});
   const [groundDone, setGroundDone] = useState(false);
+  const [groundStepStart, setGroundStepStart] = useState(Date.now());
+  const [groundData, setGroundData] = useState([]);
+  const [showGroundWrite, setShowGroundWrite] = useState(false);
 
   const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
   const progress = ((cycle - 1) * phases.length + phaseIdx) / (totalCycles * phases.length);
@@ -1591,10 +1594,6 @@ function BreatheGroundTool({ onComplete, pathway }) {
       </div>
     );
   }
-
-  const [groundStepStart, setGroundStepStart] = useState(Date.now());
-  const [groundData, setGroundData] = useState([]);
-  const [showGroundWrite, setShowGroundWrite] = useState(false);
 
   const confirmGroundStep = () => {
     const timeOnStep = Date.now() - groundStepStart;
