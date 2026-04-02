@@ -1694,6 +1694,28 @@ function BreatheGroundTool({ onComplete, pathway }) {
               Stop here
             </button>
           </div>
+          {(() => {
+            const tipSeen = (() => { try { return localStorage.getItem("stillform_breath_tip_seen") === "yes"; } catch { return true; } })();
+            if (tipSeen) return null;
+            return (
+              <div style={{
+                marginTop: 24, padding: "12px 16px", background: "var(--surface)",
+                border: "1px solid var(--border)", borderRadius: 8,
+                display: "flex", alignItems: "flex-start", gap: 10
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4, letterSpacing: "0.04em" }}>Tip</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Different states need different patterns. Change your default breathing type anytime in Settings.
+                  </div>
+                </div>
+                <button onClick={() => { try { localStorage.setItem("stillform_breath_tip_seen", "yes"); } catch {} }} style={{
+                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 16,
+                  cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0
+                }}>×</button>
+              </div>
+            );
+          })()}
         </div>
       )}
 
@@ -2186,7 +2208,20 @@ function MicButton({ onTranscript }) {
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [tab, setTab] = useState(defaultTab);
-  const [feelState, setFeelState] = useState(null); // null = neutral default
+  const [feelState, setFeelState] = useState(() => {
+    // Infer from today's check-in if available — user can always override
+    try {
+      const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+      if (!checkin) return null;
+      const mood = (checkin.mood || "").toLowerCase();
+      const stress = checkin.stressEvent;
+      if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
+      if (mood.match(/angry|rage|furious|frustrated|irritat/)) return "angry";
+      if (mood.match(/excit|hyped|pumped|happy|joy|great|amazing|wired/)) return "excited";
+      if (stress && mood && mood !== "not set") return "mixed";
+      return null;
+    } catch { return null; }
+  });
   const effectiveMode = activeMode || "calm";
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
