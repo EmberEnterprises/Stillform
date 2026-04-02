@@ -4661,13 +4661,16 @@ export default function Stillform() {
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
         // Handle bare "reframe" — default to calm mode
         if (redirectTo === "reframe") {
-          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+          const tool = { ...TOOLS.find(t => t.id === "reframe"), mode: "calm" };
+          setActiveTool(tool);
           setScreen("tool");
           return;
         }
         // Handle reframe with mode
         if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
-          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo.split("-")[1] });
+          const mode = redirectTo.split("-")[1];
+          const tool = { ...TOOLS.find(t => t.id === "reframe"), mode };
+          setActiveTool(tool);
           setScreen("tool");
           return;
         }
@@ -4688,8 +4691,10 @@ export default function Stillform() {
       case "bias": return <MicroBiasTool {...props} />;
       case "meta": return <MetacognitionTool {...props} />;
       default:
-        // Safety net — unknown tool, go back home instead of white screen
-        setTimeout(() => setScreen("home"), 0);
+        // Safety net — unknown tool or activeTool not yet flushed, go home
+        if (activeTool?.id) {
+          setTimeout(() => setScreen("home"), 0);
+        }
         return null;
     }
   };
@@ -5060,12 +5065,15 @@ export default function Stillform() {
             if (redirectTo) {
               if (redirectTo === "crisis") { setScreen("crisis"); return; }
               if (redirectTo === "reframe" || redirectTo === "reframe-calm") {
-                setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+                const tool = { ...TOOLS.find(t => t.id === "reframe"), mode: "calm" };
+                setActiveTool(tool);
                 setScreen("tool");
                 return;
               }
               if (redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
-                setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo.split("-")[1] });
+                const mode = redirectTo.split("-")[1];
+                const tool = { ...TOOLS.find(t => t.id === "reframe"), mode };
+                setActiveTool(tool);
                 setScreen("tool");
                 return;
               }
