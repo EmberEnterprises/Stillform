@@ -4129,8 +4129,8 @@ export default function Stillform() {
           );
         })()}
 
-        {/* FLOATING RESET — accessible from any screen */}
-        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && (
+        {/* FLOATING RESET — accessible from any screen except active tool sessions */}
+        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "tool" && (
           <button onClick={() => setScreen("panic")} style={{
             position: "fixed", bottom: 80, right: 24, zIndex: 100,
             background: "var(--bg)", border: "1px solid var(--amber-dim)",
