@@ -1171,8 +1171,11 @@ function PhysiologicalSighTool({ onComplete }) {
     }
   }, [count, running, phase, rep]);
 
+  const sighSavedRef = useRef(false);
+  const sighElapsedRef = useRef(0);
   if (phase === "done") {
-    const elapsed = saveSession();
+    if (!sighSavedRef.current) { sighSavedRef.current = true; sighElapsedRef.current = saveSession(); }
+    const elapsed = sighElapsedRef.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     const count = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })();
     return (
@@ -1438,8 +1441,14 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
   const progress = ((cycle - 1) * phases.length + phaseIdx) / (totalCycles * phases.length);
 
+  const groundSavedRef = useRef(false);
+  const groundElapsedRef = useRef(0);
   if (groundDone) {
-    const elapsed = saveSession(["breathe", "ground"], "grounding-complete");
+    if (!groundSavedRef.current) {
+      groundSavedRef.current = true;
+      groundElapsedRef.current = saveSession(["breathe", "ground"], "grounding-complete");
+    }
+    const elapsed = groundElapsedRef.current;
     const count = getSessionCount();
     return (
       <div className="complete">
@@ -1452,13 +1461,13 @@ function BreatheGroundTool({ onComplete, pathway }) {
           <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
             Talk it through →
           </button>
-          <button className="btn btn-ghost" onClick={onComplete}>
+          <button className="btn btn-ghost" onClick={() => onComplete()}>
             Done
           </button>
+        </div>
+        <SessionNote />
       </div>
-      <SessionNote />
-    </div>
-  );
+    );
   }
 
   const [groundStepStart, setGroundStepStart] = useState(Date.now());
@@ -1956,8 +1965,11 @@ function BodyScanTool({ onComplete }) {
   const holdTarget = area.holdSeconds;
   const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
 
+  const scanSavedRef = useRef(false);
+  const scanElapsedRef = useRef(0);
   if (done) {
-    const elapsed = saveSession();
+    if (!scanSavedRef.current) { scanSavedRef.current = true; scanElapsedRef.current = saveSession(); }
+    const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
     return (
       <div className="complete">
@@ -1966,8 +1978,7 @@ function BodyScanTool({ onComplete }) {
         <p>You've moved awareness and pressure through your body.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
-        <button className="btn btn-primary" onClick={onComplete}>Return to tools</button>
-          display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
+        <button className="btn btn-primary" onClick={() => onComplete()}>Return to tools</button>
         <SessionNote />
       </div>
     );
@@ -3889,7 +3900,10 @@ export default function Stillform() {
       case "patterns": return <PatternsTool {...props} />;
       case "bias": return <MicroBiasTool {...props} />;
       case "meta": return <MetacognitionTool {...props} />;
-      default: return null;
+      default:
+        // Safety net — unknown tool, go back home instead of white screen
+        setTimeout(() => setScreen("home"), 0);
+        return null;
     }
   };
 
