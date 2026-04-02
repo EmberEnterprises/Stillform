@@ -4662,16 +4662,14 @@ export default function Stillform() {
         // Handle bare "reframe" — default to calm mode
         if (redirectTo === "reframe") {
           const tool = { ...TOOLS.find(t => t.id === "reframe"), mode: "calm" };
-          setActiveTool(tool);
-          setScreen("tool");
+          setTimeout(() => { setActiveTool(tool); setScreen("tool"); }, 50);
           return;
         }
         // Handle reframe with mode
         if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
           const mode = redirectTo.split("-")[1];
           const tool = { ...TOOLS.find(t => t.id === "reframe"), mode };
-          setActiveTool(tool);
-          setScreen("tool");
+          setTimeout(() => { setActiveTool(tool); setScreen("tool"); }, 50);
           return;
         }
         // Handle tool id direct
@@ -5313,6 +5311,9 @@ export default function Stillform() {
         })()}
 
         {/* ACTIVE TOOL */}
+        {screen === "tool" && !activeTool && (
+          <div style={{ position: "fixed", inset: 0, background: "var(--bg)" }} />
+        )}
         {screen === "tool" && activeTool && (
           <section className="intervention">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
