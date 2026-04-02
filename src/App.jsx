@@ -1537,9 +1537,9 @@ function BreatheGroundTool({ onComplete, pathway }) {
     return (
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
-        <h2>State shifted.</h2>
+        <h2>Composure restored.</h2>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-          Protocol complete · {formatTime(elapsed)}
+          System calibrated · {formatTime(elapsed)}
         </div>
         {signalProfile?.firstAreas?.length > 0 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 16px", marginBottom: 16, textAlign: "left" }}>
@@ -2018,6 +2018,13 @@ function BodyScanTool({ onComplete }) {
   const [phase, setPhase] = useState("scan");
   const [holdCount, setHoldCount] = useState(0);
   const [holding, setHolding] = useState(false);
+
+  // Scan pace multiplier from Settings
+  const paceMultiplier = (() => {
+    const p = localStorage.getItem("stillform_scan_pace") || "standard";
+    return p === "fast" ? 0.5 : p === "slow" ? 1.75 : 1;
+  })();
+  const scaledAreas = areas.map(a => ({ ...a, holdSeconds: Math.round(a.holdSeconds * paceMultiplier) }));
   const [done, setDone] = useState(false);
   const [showPointName, setShowPointName] = useState(false);
 
@@ -2088,7 +2095,7 @@ function BodyScanTool({ onComplete }) {
 
   useEffect(() => {
     if (!holding) return;
-    const target = areas[currentArea].holdSeconds;
+    const target = scaledAreas[currentArea].holdSeconds;
     if (holdCount >= target) { setHolding(false); return; }
     const t = setTimeout(() => setHoldCount(c => c + 1), 1000);
     return () => clearTimeout(t);
@@ -2110,7 +2117,7 @@ function BodyScanTool({ onComplete }) {
     }
   };
 
-  const area = areas[currentArea];
+  const area = scaledAreas[currentArea];
   const holdTarget = area.holdSeconds;
   const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
 
@@ -2126,9 +2133,9 @@ function BodyScanTool({ onComplete }) {
     return (
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
-        <h2>Activation cleared.</h2>
+        <h2>Signal cleared.</h2>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-          Scan complete · {formatTime(elapsed)}
+          System calibrated · {formatTime(elapsed)}
         </div>
         {signalProfile?.firstAreas?.length > 0 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 16px", marginBottom: 16, textAlign: "left" }}>
@@ -2153,7 +2160,7 @@ function BodyScanTool({ onComplete }) {
 
   return (
     <div className="scan-body">
-      {areas.map((a, i) => (
+      {scaledAreas.map((a, i) => (
         <div key={i} className={`scan-area ${i === currentArea ? "active" : i < currentArea ? "done" : ""}`}
           onClick={() => i <= currentArea && setCurrentArea(i)}>
           <div className="scan-area-name">{a.name}</div>
@@ -5647,6 +5654,34 @@ export default function Stillform() {
                     transition: "left 0.2s"
                   }} />
                 </button>
+              </div>
+            </div>
+
+            {/* Body Scan Pace */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Body Scan Pace</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
+              <div style={{ display: "flex", gap: 6 }}>
+                {[
+                  { id: "fast", label: "Fast", desc: "~25s / point" },
+                  { id: "standard", label: "Standard", desc: "~50s / point" },
+                  { id: "slow", label: "Slow", desc: "~90s / point" }
+                ].map(opt => {
+                  const current = (() => { try { return localStorage.getItem("stillform_scan_pace") || "standard"; } catch { return "standard"; } })();
+                  const active = current === opt.id;
+                  return (
+                    <button key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
+                      flex: 1, background: active ? "var(--amber-glow)" : "var(--surface)",
+                      border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer",
+                      textAlign: "center", transition: "all 0.15s",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)"
+                    }}>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: active ? "var(--amber)" : "var(--text-dim)", fontWeight: active ? 500 : 400 }}>{opt.label}</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em", marginTop: 3 }}>{opt.desc}</div>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
