@@ -4926,6 +4926,11 @@ export default function Stillform() {
 
               {/* DOMINANT CTA */}
               <div style={{ marginBottom: 48 }}>
+                {/* Identity line */}
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em" }}>
+                  Stabilize. Then think clearly.
+                </div>
+
                 <button onClick={() => startPathway("calm")} style={{
                   width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
                   borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
@@ -4934,26 +4939,33 @@ export default function Stillform() {
                   display: "flex", justifyContent: "space-between", alignItems: "center",
                   WebkitTapHighlightColor: "transparent"
                 }}>
-                  <span>Initiate Session</span>
+                  <div>
+                    <div>Initiate Session</div>
+                    <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, marginTop: 2, letterSpacing: "0.01em" }}>Stabilize now</div>
+                  </div>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", opacity: 0.7 }}>◎ REGULATE</span>
                 </button>
 
-                {/* Secondary protocols — minimal, below the fold visually */}
+                {/* Secondary protocols — 1-word anchors */}
                 <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "12px", cursor: "pointer", color: "var(--text-dim)",
-                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
-                    textTransform: "uppercase", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
-                    WebkitTapHighlightColor: "transparent"
-                  }}>◉ Scan</button>
+                    borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Body</div>
+                  </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "12px", cursor: "pointer", color: "var(--text-dim)",
-                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
-                    textTransform: "uppercase", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
-                    WebkitTapHighlightColor: "transparent"
-                  }}>✦ Reframe</button>
+                    borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Thought</div>
+                  </button>
                 </div>
               </div>
 
@@ -4999,7 +5011,10 @@ export default function Stillform() {
                 const signalDone = (() => { try { const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); return p?.firstAreas?.length > 0; } catch { return false; } })();
                 return (
                   <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>Go Deeper</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)" }}>Go Deeper</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", opacity: 0.5 }}>After session</div>
+                    </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                       {[
                         { id: "signals", label: "Map Signals", done: signalDone, rec: !signalDone },
