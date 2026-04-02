@@ -4047,7 +4047,7 @@ export default function Stillform() {
               label: "Your tools",
               title: "Execute",
               subtitle: "Three protocols. Any state.",
-              body: "Breathe — paced breathing matched to your intensity level, plus sensory grounding. Works for rage, excitement, dread, or overload. Sound on or off.\n\nBody Scan — locate where the feeling is living in your body and release it with timed acupressure. Works for any high-activation state. Sound on or off.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise and distortion), Get Sharp (cut through loops), Lock In (channel intensity before high-stakes moments). Switch modes mid-session — the AI carries context. Talk tab for conversation, Journal tab for entries the AI retains.",
+              body: "Breathe — sessions start instantly with your default pattern. Four patterns available: Calm (4-4-8-2) for overwhelm and anxiety, Box (4-4-4-4) for high-stakes focus, 4-7-8 for deep physical reset, Quick Reset when you have 60 seconds. Change your default anytime in Settings.\n\nBody Scan — locate where the feeling is living in your body and release it with timed acupressure. Six points. Auto-advances. Skip ahead if you're fast.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise), Get Sharp (cut through loops), Lock In (channel intensity). Switch modes mid-session. Talk tab for live guidance, Journal tab for entries the AI remembers.",
               note: "The Quick Breathe protocol is always free. Full access requires a subscription."
             },
             {
@@ -4055,7 +4055,7 @@ export default function Stillform() {
               label: "Built in",
               title: "No friction",
               subtitle: "Designed for how you actually think.",
-              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI uses this data when you run Reframe.\n\nVoice-to-text — every text field has a mic. Think out loud instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI retains context: Your sessions, journal, and check-ins are stored in your encrypted account. Every Reframe session starts with your full history. Your data is yours — delete it anytime.",
+              body: "Sessions auto-advance — Breathe flows into Body Scan flows into Reframe. No tapping between steps. Skip ahead anytime if you move fast.\n\nWhat's present — optional one-tap in Reframe to tell the AI your state: excited, anxious, angry, or mixed. The AI adapts its approach. Leave it blank for neutral.\n\nVoice-to-text — every text field has a mic. Think out loud instead of type.\n\nDaily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI factors this in automatically.\n\nEverything customizable — breathing pattern, audio, signal profile, themes — all in Settings.",
               note: null
             },
             {
@@ -4071,6 +4071,13 @@ export default function Stillform() {
               title: "It sharpens",
               subtitle: "Learns your signals. Tightens your response.",
               body: "After a few sessions, your home screen shows data — most effective protocol, regulation speed, pattern trends. The AI stops being generic and starts being precise about you specifically. It doesn't push early. It earns it, then gets direct."
+            },
+            {
+              icon: "◎",
+              label: "Your data",
+              title: "Private by design",
+              subtitle: "Your data is yours. Full stop.",
+              body: "Your sessions, journal, and check-ins are stored in your encrypted account. The AI reads your history fresh every session — it never stores anything independently. Delete everything anytime from Settings.\n\nNot therapy. Not a crisis line. If you're in crisis, tap Crisis Resources in the footer — it's always there.\n\nReplay this tutorial anytime from Settings."
             },
             {
               icon: "✦",
