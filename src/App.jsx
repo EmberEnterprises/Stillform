@@ -4545,97 +4545,56 @@ export default function Stillform() {
                 <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
               </button>
 
-              {/* DEEPER TOOLS — unlocked progressively */}
+              {/* DEEPER TOOLS — all visible for UAT */}
               {(() => {
-                const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
-                const count = sessions.length;
                 const signalDone = (() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0; } catch { return false; } })();
                 const biasDone = (() => { try { const b = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); return b?.length > 0; } catch { return false; } })();
-
                 return (
                   <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
                       Go deeper
                     </div>
-                    {count < 3 && (
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8 }}>
-                        More tools unlock after 3 sessions — signal mapping, tension check, pattern recognition, blind spot analysis. Run a session to start building your profile.
-                      </div>
-                    )}
-                    {count >= 1 && !signalDone && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                        width: "100%", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10,
-                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                        fontFamily: "'DM Sans', sans-serif", marginBottom: 8
+                        width: "100%", background: !signalDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
+                        border: `1px solid ${!signalDone ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4, letterSpacing: "0.04em" }}>Recommended — do this once</div>
+                        {!signalDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◇ Map Your Signals</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Teaches the AI how your nervous system works. Makes every session smarter.</div>
                       </button>
-                    )}
-                    {count >= 1 && !biasDone && (
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
-                        width: "100%", background: "rgba(201,147,58,0.06)", border: "1px solid var(--amber-dim)", borderRadius: 10,
-                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                        fontFamily: "'DM Sans', sans-serif", marginBottom: 8
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
-                        <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4, letterSpacing: "0.04em" }}>Recommended — do this once</div>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◈ Tension Check</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 seconds. Are you holding something you haven't noticed?</div>
+                      </button>
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◆ Your Patterns</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate.</div>
+                      </button>
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
+                        width: "100%", background: !biasDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
+                        border: `1px solid ${!biasDone ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {!biasDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Identifies your cognitive patterns. The AI watches for them in Reframe.</div>
                       </button>
-                    )}
-                    {count >= 3 && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {signalDone && (
-                          <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◇ Map Your Signals</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Update your body signal profile.</div>
-                          </button>
-                        )}
-                        <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                          padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                          fontFamily: "'DM Sans', sans-serif"
-                        }}>
-                          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◈ Tension Check</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 seconds. Are you holding something you haven't noticed?</div>
-                        </button>
-                        {count >= 8 && (
-                          <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
-                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◆ Your Patterns</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate.</div>
-                          </button>
-                        )}
-                        {biasDone && count >= 8 && (
-                          <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
-                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Review your cognitive patterns.</div>
-                          </button>
-                        )}
-                        {count >= 12 && (
-                          <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
-                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>❖ Watch & Choose</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch the spiral in real time. Name it. Choose your next move.</div>
-                          </button>
-                        )}
-                      </div>
-                    )}
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>❖ Watch & Choose</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch the spiral in real time. Name it. Choose your next move.</div>
+                      </button>
+                    </div>
                   </div>
                 );
               })()}
