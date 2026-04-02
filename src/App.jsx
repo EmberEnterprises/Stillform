@@ -3782,9 +3782,9 @@ export default function Stillform() {
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => { const t = setTimeout(() => setSplashDone(true), 2500); return () => clearTimeout(t); }, []);
 
-  // UAT MODE: always show onboarding. Change back to conditional for production.
-  const hasSeenOnboarding = false;
-  const [screen, setScreen] = useState("onboarding");
+  // Production: show onboarding only once, unless user replays from Settings.
+  const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
+  const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
   const [onboardStep, setOnboardStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
@@ -3811,8 +3811,7 @@ export default function Stillform() {
   const [uatTestAgain, setUatTestAgain] = useState(null);
 
   const completeOnboarding = () => {
-    // UAT MODE: tutorial shows every visit. Re-enable the line below when ready for production.
-    // try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setScreen("home");
   };
 
