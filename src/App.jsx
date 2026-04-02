@@ -1443,28 +1443,31 @@ function BreatheGroundTool({ onComplete, pathway }) {
 
   const groundSavedRef = useRef(false);
   const groundElapsedRef = useRef(0);
+  const groundAutoRef = useRef(false);
   if (groundDone) {
     if (!groundSavedRef.current) {
       groundSavedRef.current = true;
       groundElapsedRef.current = saveSession(["breathe", "ground"], "grounding-complete");
     }
+    if (!groundAutoRef.current) {
+      groundAutoRef.current = true;
+      setTimeout(() => onComplete("reframe-calm"), 2000);
+    }
     const elapsed = groundElapsedRef.current;
     const count = getSessionCount();
     return (
       <div className="complete">
-        <div className="complete-icon">✓</div>
+        <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>State shifted.</h2>
         <p>Nervous system regulated. You're functional again.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
         {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
-        <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
-          <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
-            Talk it through →
-          </button>
-          <button className="btn btn-ghost" onClick={() => onComplete()}>
-            Done
-          </button>
+        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
+          Moving to Reframe…
         </div>
+        <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>
+          Exit session
+        </button>
         <SessionNote />
       </div>
     );
@@ -1739,6 +1742,10 @@ function BreatheGroundTool({ onComplete, pathway }) {
           })()}
           {postRating && (() => {
             const delta = postRating - preRating;
+            // Auto-advance to ground after 1.5s if positive shift
+            if (delta > 0) {
+              setTimeout(() => setPhase("ground"), 1500);
+            }
             return (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {delta <= 0 ? (
@@ -1748,8 +1755,11 @@ function BreatheGroundTool({ onComplete, pathway }) {
                   </>
                 ) : (
                   <>
-                    <button className="btn btn-primary" onClick={onComplete}>Proceed</button>
-                    <button className="btn btn-ghost" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Run another</button>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
+                      Moving to grounding…
+                    </div>
+                    <button className="btn btn-ghost" onClick={() => onComplete("reframe-calm")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
+                    <button className="btn btn-ghost" onClick={onComplete} style={{ color: "var(--text-muted)", fontSize: 12 }}>Exit session</button>
                   </>
                 )}
               </div>
@@ -2922,7 +2932,7 @@ function MetacognitionTool({ onComplete }) {
       label: "Perspective",
       question: "What do you actually need right now?",
       sub: "Not what you think you should do. What does the part of you that's hurting actually need?",
-      placeholder: "Need to know it's going to be okay..."
+      placeholder: "What do you need right now?"
     },
     {
       label: "Choose",
@@ -4858,7 +4868,10 @@ export default function Stillform() {
 
             {/* Breathing Pattern */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Breathing Pattern</div>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Breathing Pattern</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                Your selected pattern starts automatically every session. Change it anytime here.
+              </div>
               {BREATHING_PATTERNS.map(p => {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
                 return (
