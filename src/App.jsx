@@ -2558,7 +2558,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return (
                 <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, padding: "8px 0" }}>
-                  No entries yet. Write your first one above — the AI will use it as context next time you talk.
+                  No entries yet. Write your first one — the AI will use it as context every session.
                 </div>
               );
               return entries.slice(0, 10).map((e, i) => (
@@ -4361,7 +4361,7 @@ export default function Stillform() {
               <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
                 <div style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, marginBottom: 6 }}>You're testing Stillform</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
-                  This is an early build. Your honest feedback shapes everything. Text us directly — what worked, what didn't, what felt off.
+                  This is an early build. Your honest feedback shapes everything — what worked, what didn't, what felt off.
                 </div>
                 <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
                   background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer",
@@ -5207,7 +5207,7 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 6 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — scroll down to Signal Mapping below"; } catch { return "Not set up yet"; } })()}
+                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Settings"; } catch { return "Not set up yet"; } })()}
                 </div>
               </div>
             </div>
