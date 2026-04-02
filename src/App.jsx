@@ -4597,31 +4597,31 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "A composure system. Not an app.",
-              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A composure system.",
+              subtitle: "Stabilize. Then think clearly.",
+              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A precision composure system.",
               note: null
             },
             {
               icon: "◎",
-              label: "Your tools",
-              title: "Three protocols",
+              label: "Three protocols",
+              title: "Body. Then thought.",
               subtitle: "Any state. Under two minutes.",
-              body: "Breathe — starts instantly with your default pattern. Four options: Calm (4-4-8-2), Box (4-4-4-4), 4-7-8, Quick Reset.\n\nBody Scan — locate tension, release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
+              body: "Breathe — paced breathing matched to your state. Stabilize the body first. Starts instantly.\n\nBody Scan — locate where intensity is held. Release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered cognitive reset. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
               note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
               icon: "◈",
               label: "Over time",
-              title: "It sharpens",
+              title: "It sharpens.",
               subtitle: "Learns your signals. Tightens your response.",
-              body: "After a few sessions your Signal Profile builds — where intensity activates in your body, what your blind spots are, how you move through states.\n\nThe AI stops being generic and starts being precise about you specifically."
+              body: "After a few sessions your Signal Profile builds — where intensity activates first, what your blind spots are, how you move through states.\n\nLog signal events in the Signal Log. The AI cross-references sessions, patterns, and your profile. It stops being generic and starts being precise about you."
             },
             {
               icon: "◎",
               label: "Your data",
-              title: "Private by design",
+              title: "Private by design.",
               subtitle: "Your data is yours. Full stop.",
-              body: "Sessions, journal, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nNot therapy. Not a crisis line. Crisis resources are always in the footer.\n\nReplay this tutorial anytime from Settings."
+              body: "Sessions, Signal Log, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nNot therapy. Not a crisis line. Crisis resources are always in the footer.\n\nReplay this anytime from Settings."
             }
           ];
           const step = steps[onboardStep];
@@ -4687,7 +4687,7 @@ export default function Stillform() {
                       padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
-                      <span>Run a session</span>
+                      <span>Initiate Session</span>
                       <span style={{ fontSize: 12 }}>▾</span>
                     </button>
                     <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
@@ -4846,7 +4846,7 @@ export default function Stillform() {
                   fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
-                  <span>Run a session</span>
+                  <span>Initiate Session</span>
                   <span style={{ fontSize: 12 }}>▾</span>
                 </button>
                 <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
