@@ -4903,252 +4903,136 @@ export default function Stillform() {
             </section>
           );
 
-          /* ── RETURNING USER: everything visible, organized by level ── */
+          /* ── RETURNING USER: clean, one dominant action ── */
           return (
-            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+            <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
-              {/* UAT BANNER */}
-              <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                <div style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, marginBottom: 6 }}>You're testing Stillform</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
-                  This is an early build. Your honest feedback shapes everything — what worked, what didn't, what felt off.
-                </div>
+              {/* UAT BANNER — collapsed by default */}
+              <div style={{ marginBottom: 32 }}>
                 <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
-                  background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", padding: 0, marginBottom: uatRoadmapOpen ? 10 : 0
+                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 10,
+                  cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.12em",
+                  padding: 0, textTransform: "uppercase"
                 }}>
-                  {uatRoadmapOpen ? "▾ Hide roadmap" : "▸ What's coming in 30–60 days"}
+                  {uatRoadmapOpen ? "▾ UAT Build" : "▸ UAT Build"}
                 </button>
                 {uatRoadmapOpen && (
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "8px 0 8px 12px", borderLeft: "2px solid var(--amber-dim)" }}>
-                    Biometric lock on conversations & signal log<br/>
-                    Premium sound packs (singing bowl, rain, ocean, lo-fi)<br/>
-                    Apple Health / Google Health Connect / Samsung Health integration<br/>
-                    Proactive coaching — pattern detection + micro-adjustments<br/>
-                    Apple Watch — haptic breathing, no screen needed<br/>
-                    PDF/CSV export of your data<br/>
-                    Push notification reminders<br/>
-                    Premium themes & AI tone customization<br/>
-                    Shareable composure card
+                  <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.8, padding: "10px 14px", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                    Early build. Feedback shapes everything.<br/>
+                    <span style={{ color: "var(--amber)" }}>Coming:</span> Apple Watch · biometric lock · health integration · push notifications · sound packs · PDF export
                   </div>
                 )}
-
               </div>
 
-              {/* Repeat what worked */}
-              {(() => {
-                try {
-                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-                  if (sessions.length < 2) return null;
-                  const last = sessions[sessions.length - 1];
-                  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
-                  const toolIds = { breathe: "breathe", ground: "breathe", "body-scan": "scan", reframe: "reframe", sigh: "breathe", metacognition: "meta" };
-                  const mainTool = (last.tools || [])[0];
-                  if (!mainTool || !toolNames[mainTool]) return null;
-                  return (
-                    <button
-                      onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
-                      style={{
-                        width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer",
-                        marginBottom: 20, transition: "all 0.2s", WebkitTapHighlightColor: "transparent"
-                      }}
-                    >
-                      <div style={{ fontSize: 14, color: "var(--amber)", fontWeight: 500 }}>
-                        ↺ Repeat: {toolNames[mainTool]} {last.durationFormatted ? `· ${last.durationFormatted}` : ""}
-                      </div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>One tap. Same drill that worked last time.</div>
-                    </button>
-                  );
-                } catch { return null; }
-              })()}
+              {/* DOMINANT CTA */}
+              <div style={{ marginBottom: 48 }}>
+                <button onClick={() => startPathway("calm")} style={{
+                  width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                  borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
+                }}>
+                  <span>Initiate Session</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", opacity: 0.7 }}>◎ REGULATE</span>
+                </button>
 
-              {/* DAILY CHECK-IN — optional, 30 seconds, makes AI smarter */}
-              {(() => {
-                const today = new Date().toISOString().slice(0, 10);
-                let checkin = null;
-                try { checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch {}
-                const isDoneToday = checkin && checkin.date === today;
-
-                if (isDoneToday) return (
-                  <div style={{ marginBottom: 20, padding: "10px 16px", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                    <div style={{ fontSize: 12, color: "var(--amber)" }}>
-                      Checked in · {checkin.sleep}h sleep · Energy {checkin.energy} · Mood: {checkin.mood}
-                    </div>
-                  </div>
-                );
-
-                return (
-                  <div style={{ marginBottom: 4 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily check-in</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>30 seconds. The AI uses this to personalize your sessions.</div>
-                    <CheckInWidget onComplete={() => refreshSettings()} />
-                  </div>
-                );
-              })()}
-
-              {/* YOUR TOOLS */}
-              <div style={{ marginBottom: 8 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your protocols</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  <button onClick={() => startPathway("calm")} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
-                    WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Paced breathing matched to your state. Shift in 90 seconds.</div>
-                  </button>
+                {/* Secondary protocols — minimal, below the fold visually */}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "12px", cursor: "pointer", color: "var(--text-dim)",
+                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
+                    textTransform: "uppercase", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
                     WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension. Release it with timed acupressure at six points.</div>
-                  </button>
+                  }}>◉ Scan</button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "12px", cursor: "pointer", color: "var(--text-dim)",
+                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em",
+                    textTransform: "uppercase", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
                     WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI identifies the distortion, separates signal from noise. Log the signal.</div>
-                  </button>
+                  }}>✦ Reframe</button>
                 </div>
               </div>
 
-              {/* PROGRESS + JOURNAL LINKS */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8, marginBottom: 28 }}>
-                <button onClick={() => setScreen("progress")} style={{
-                  width: "100%", background: "transparent", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)",
-                  padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                  fontFamily: "'DM Sans', sans-serif",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <span style={{ fontSize: 13, color: "var(--amber)" }}>✦ My Progress</span>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sessions · shifts · patterns →</span>
-                </button>
-                <button onClick={() => setScreen("journal")} style={{
-                  width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text-dim)",
-                  fontFamily: "'DM Sans', sans-serif",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <span style={{ fontSize: 13 }}>◈ Signal Log</span>
-                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
-                </button>
-              </div>
-
-              {/* DEEPER TOOLS — all visible for UAT */}
-              {(() => {
-                const signalDone = (() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0; } catch { return false; } })();
-                const biasDone = (() => { try { const b = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); return b?.length > 0; } catch { return false; } })();
-                return (
-                  <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                      Go deeper
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                        width: "100%", background: !signalDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
-                        border: `1px solid ${!signalDone ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        {!signalDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◇ Map Your Signals</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Teaches the AI how your nervous system works. Makes every session smarter.</div>
-                      </button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◈ Tension Check</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 seconds. Are you holding something you haven't noticed?</div>
-                      </button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◆ Your Patterns</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>What the data shows about how you regulate.</div>
-                      </button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
-                        width: "100%", background: !biasDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
-                        border: `1px solid ${!biasDone ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        {!biasDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Identifies your cognitive patterns. The AI watches for them in Reframe.</div>
-                      </button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>❖ Watch & Choose</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Catch the spiral in real time. Name it. Choose your next move.</div>
-                      </button>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* STATS — streak + session count + trend insight. Full breakdown in My Progress. */}
+              {/* STREAK — only if exists */}
               {(() => {
                 try {
                   const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
                   if (sessions.length === 0) return null;
-
                   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
                   let streak = 0;
-                  const today = new Date();
                   for (let i = 0; i < 365; i++) {
-                    const d = new Date(today);
-                    d.setDate(d.getDate() - i);
+                    const d = new Date(); d.setDate(d.getDate() - i);
                     if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
                   }
-
                   const improving = (() => {
-                    if (sessions.length < 8) return false;
-                    const early = sessions.slice(0, 5).map(s => s.duration).filter(d => d > 0);
-                    const recent = sessions.slice(-5).map(s => s.duration).filter(d => d > 0);
+                    const rated = sessions.filter(s => s.preRating && s.postRating);
+                    if (rated.length < 8) return false;
+                    const early = rated.slice(0, 5).map(s => s.duration).filter(d => d > 0);
+                    const recent = rated.slice(-5).map(s => s.duration).filter(d => d > 0);
                     const earlyAvg = early.length ? early.reduce((a, b) => a + b, 0) / early.length : 0;
                     const recentAvg = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
                     return recentAvg < earlyAvg * 0.85 && earlyAvg > 0;
                   })();
-
                   return (
-                    <div style={{ paddingTop: 12 }}>
-                      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
-                        <div style={{ textAlign: "center", minWidth: 60 }}>
-                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
-                        </div>
-                        {streak > 1 && (
-                          <div style={{ textAlign: "center", minWidth: 60 }}>
-                            <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
-                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
-                          </div>
-                        )}
+                    <div style={{ marginBottom: 40, display: "flex", alignItems: "center", gap: 24 }}>
+                      <div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{sessions.length}</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Sessions</div>
                       </div>
-                      {improving && (
-                        <div style={{ fontSize: 12, color: "var(--amber)", textAlign: "center" }}>
-                          Your regulation time is trending faster.
-                        </div>
-                      )}
-                      {sessions.length >= 12 && (
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 4 }}>
-                          The AI is using your full history.
-                        </div>
-                      )}
+                      {streak > 1 && <div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{streak}</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Day streak</div>
+                      </div>}
+                      {improving && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: "0.1em" }}>↑ Trending faster</div>}
                     </div>
                   );
                 } catch { return null; }
               })()}
+
+              {/* GO DEEPER — secondary, below the line */}
+              {(() => {
+                const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
+                const signalDone = (() => { try { const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); return p?.firstAreas?.length > 0; } catch { return false; } })();
+                return (
+                  <div style={{ marginBottom: 24 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>Go Deeper</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                      {[
+                        { id: "signals", label: "Map Signals", done: signalDone, rec: !signalDone },
+                        { id: "bias", label: "Blind Spots", done: !!biasDone, rec: !biasDone },
+                        { id: "checkin", label: "Check-In", done: false, rec: false },
+                        { id: "patterns", label: "Your Patterns", done: false, rec: false },
+                        { id: "meta", label: "Watch & Choose", done: false, rec: false },
+                      ].map(item => (
+                        <button key={item.id} onClick={() => startTool(TOOLS.find(t => t.id === item.id))} style={{
+                          width: "100%", background: item.rec ? "rgba(200,146,42,0.05)" : "var(--surface)",
+                          border: `0.5px solid ${item.rec ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: "var(--r)", padding: "11px 14px", textAlign: "left", cursor: "pointer",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
+                          WebkitTapHighlightColor: "transparent"
+                        }}>
+                          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: item.done ? "var(--text-muted)" : "var(--text)" }}>{item.label}</span>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: item.done ? "var(--text-muted)" : item.rec ? "var(--amber)" : "var(--text-muted)", letterSpacing: "0.1em" }}>
+                            {item.done ? "DONE" : item.rec ? "REC" : "→"}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* BOTTOM LINKS — minimal */}
+              <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Signal Log</button>
+                <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
+              </div>
+
             </section>
           );
         })()}
