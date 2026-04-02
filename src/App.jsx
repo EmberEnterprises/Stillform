@@ -1639,11 +1639,11 @@ function BreatheGroundTool({ onComplete, pathway }) {
           }}>
             {audioOn ? "♪ Sound on" : "♪ Sound off"}
           </button>
-          {!running && !showPatternPicker && (
-            <button onClick={() => setShowPatternPicker(true)} style={{
+          {!showPatternPicker && (
+            <button onClick={() => { setRunning(false); setShowPatternPicker(true); }} style={{
               background: "none", border: "none", color: "var(--text-muted)", fontSize: 11,
               cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginBottom: 16,
-              letterSpacing: "0.04em"
+              letterSpacing: "0.04em", opacity: running ? 0.5 : 1
             }}>
               {pattern.name} · change pattern
             </button>
@@ -3029,10 +3029,19 @@ function PatternsTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>◇</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Not enough data yet.</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
-          Keep using the tools and doing check-ins. Patterns emerge after about 10 sessions.
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Building your profile.</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
+          This tool reads your session history, check-ins, and signal profile to show you real patterns — regulation speed, most effective tools, tension trends.
         </p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, lineHeight: 1.7, marginBottom: 24 }}>
+          Run a few sessions and do the daily check-in. Data appears here automatically.
+        </p>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px", textAlign: "left", marginBottom: 24 }}>
+          <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>What you'll see here</div>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.8 }}>
+            Most effective protocol · Average regulation speed · Whether you're getting faster · Highest tension areas · Total session count
+          </div>
+        </div>
         <button className="btn btn-ghost" onClick={onComplete}>Back</button>
       </div>
     );
