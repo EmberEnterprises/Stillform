@@ -1,4 +1,26 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Component } from "react";
+
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error, info) { console.error("Stillform render error:", error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 32, minHeight: "100vh", fontFamily: "monospace", fontSize: 12 }}>
+          <div style={{ color: "#C8922A", marginBottom: 16, fontSize: 14 }}>Render error — send this to the dev:</div>
+          <pre style={{ whiteSpace: "pre-wrap", color: "#9496A1", lineHeight: 1.6 }}>{this.state.error.toString()}</pre>
+          <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
+            style={{ marginTop: 24, background: "#C8922A", color: "#000", border: "none", padding: "10px 20px", cursor: "pointer", borderRadius: 3 }}>
+            Reset app
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap');
@@ -4697,6 +4719,7 @@ export default function Stillform() {
   };
 
   return (
+    <ErrorBoundary>
     <>
       <style>{styles}</style>
       <div className={appClasses}>
@@ -6323,5 +6346,6 @@ export default function Stillform() {
         </footer>
       </div>
     </>
+    </ErrorBoundary>
   );
 }
