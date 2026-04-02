@@ -862,7 +862,7 @@ const styles = `
     .nav { padding: 20px 24px; }
     .home { padding: 40px 24px; }
     .tools { padding: 32px 24px 60px; }
-    .intervention { padding: 32px 24px 60px; }
+    .intervention { padding: 32px 28px 60px; }
     .pricing { padding: 40px 24px 60px; }
     .privacy { padding: 40px 24px 60px; }
     .footer { padding: 24px; flex-direction: column; gap: 16px; text-align: center; }
@@ -1581,7 +1581,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
   // Pre-rate: quick 1-5 tap
   if (phase === "pre-rate") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
         How steady are you?
       </h2>
       {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 13, color: s > 0 ? "var(--amber)" : "var(--text-muted)", marginBottom: 16, fontWeight: s > 0 ? 500 : 400 }}>Last session: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
@@ -1722,7 +1722,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
       {/* POST-RATE */}
       {phase === "post-rate" && (
         <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
             Where are you now?
           </h2>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
@@ -2487,28 +2487,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
     calm: {
       icon: "◎", title: "Regulate", subtitle: rotatingSubtitle,
       color: "#c9933a",
-      bg: "linear-gradient(180deg, rgba(201,147,58,0.06) 0%, transparent 40%)",
-      border: "rgba(201,147,58,0.2)",
-      inputBg: "rgba(201,147,58,0.05)",
-      aiBubble: "rgba(201,147,58,0.08)",
+      bg: "linear-gradient(180deg, rgba(201,147,58,0.10) 0%, transparent 50%)",
+      border: "rgba(201,147,58,0.25)",
+      inputBg: "rgba(201,147,58,0.07)",
+      aiBubble: "rgba(201,147,58,0.10)",
       sendBg: "#c9933a"
     },
     clarity: {
       icon: "✦", title: "Get Sharp", subtitle: rotatingSubtitle,
       color: "#7aadcf",
-      bg: "linear-gradient(180deg, rgba(122,173,207,0.08) 0%, transparent 40%)",
-      border: "rgba(122,173,207,0.2)",
-      inputBg: "rgba(122,173,207,0.05)",
-      aiBubble: "rgba(122,173,207,0.08)",
+      bg: "linear-gradient(180deg, rgba(122,173,207,0.12) 0%, transparent 50%)",
+      border: "rgba(122,173,207,0.28)",
+      inputBg: "rgba(122,173,207,0.07)",
+      aiBubble: "rgba(122,173,207,0.10)",
       sendBg: "#7aadcf"
     },
     hype: {
       icon: "◌", title: "Lock In", subtitle: rotatingSubtitle,
       color: "#c9793a",
-      bg: "linear-gradient(180deg, rgba(201,121,58,0.08) 0%, transparent 40%)",
-      border: "rgba(201,121,58,0.25)",
-      inputBg: "rgba(201,121,58,0.06)",
-      aiBubble: "rgba(201,121,58,0.1)",
+      bg: "linear-gradient(180deg, rgba(201,121,58,0.12) 0%, transparent 50%)",
+      border: "rgba(201,121,58,0.30)",
+      inputBg: "rgba(201,121,58,0.08)",
+      aiBubble: "rgba(201,121,58,0.12)",
       sendBg: "#c9793a"
     }
   };
@@ -2902,7 +2902,7 @@ function MicroBiasTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
           Awareness is the intervention.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
@@ -2931,7 +2931,7 @@ function MicroBiasTool({ onComplete }) {
         {current + 1} of {biases.length}
       </div>
 
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 16 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>
         {bias.name}
       </h2>
 
@@ -3040,7 +3040,7 @@ function PatternsTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>◇</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Building your profile.</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Building your profile.</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
           This tool reads your session history, check-ins, and signal profile to show you real patterns — regulation speed, most effective tools, tension trends.
         </p>
@@ -3061,7 +3061,7 @@ function PatternsTool({ onComplete }) {
   return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
       <div style={{ fontSize: 28, marginBottom: 12, textAlign: "center" }}>◇</div>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8, textAlign: "center" }}>Your Patterns</h2>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8, textAlign: "center" }}>Your Patterns</h2>
       <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 28, textAlign: "center" }}>What the data shows. One insight at a time.</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -3164,7 +3164,7 @@ function MetacognitionTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
           You watched it. You named it. You chose.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
@@ -3189,7 +3189,7 @@ function MetacognitionTool({ onComplete }) {
         {prompt.label} — {step + 1} of {prompts.length}
       </div>
 
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
         {prompt.question}
       </h2>
       <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
@@ -3288,7 +3288,7 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
           Your body sends signals before things escalate. Most people never learn to read them. This takes 2 minutes and teaches the app how YOUR nervous system works.
         </p>
@@ -3299,7 +3299,7 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>Where does tension show up first?</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where does tension show up first?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that react first when stress is building. Select all that apply.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
@@ -3329,7 +3329,7 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What do you feel before it hits?</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What do you feel before it hits?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up before a spiral, shutdown, or overwhelm.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {sensations.map(s => {
@@ -3357,7 +3357,7 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Most people don't recognize half their triggers. Scroll through — tap any that feel familiar, even slightly. You might be surprised.</p>
         <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 24, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -3386,7 +3386,7 @@ function SignalMapTool({ onComplete }) {
     () => (
       <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 12 }}>Signal profile saved.</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Signal profile saved.</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
           Now you know what to watch for. Over time, you'll start catching these signals before they escalate.
         </p>
@@ -3448,7 +3448,7 @@ function BodyCheckInTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, marginBottom: 12 }}>Checked in.</h2>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Checked in.</h2>
         {needsHelp ? (
           <>
             <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>
@@ -3685,7 +3685,7 @@ function PanicMode({ onComplete }) {
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
           You're here.
         </div>
         <div className="panic-done-text">
@@ -4916,7 +4916,7 @@ export default function Stillform() {
 
             {journalMode === "list" && (
               <>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>Journal</h1>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Journal</h1>
                 <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
                   Track what triggered you, how it felt, and what happened after.
                 </p>
@@ -4955,7 +4955,7 @@ export default function Stillform() {
 
             {journalMode === "new" && (
               <>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 24 }}>New entry</h1>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 24 }}>New entry</h1>
 
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>What triggered this?</div>
@@ -5052,7 +5052,7 @@ export default function Stillform() {
               return (
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 12 }}>
-                    <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, lineHeight: 1.3 }}>{e.trigger || "Untitled"}</h1>
+                    <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, lineHeight: 1.3 }}>{e.trigger || "Untitled"}</h1>
                     <div style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date} · {e.time}</div>
                   </div>
                   {e.emotions?.length > 0 && (
@@ -5197,7 +5197,7 @@ export default function Stillform() {
         {screen === "crisis" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
             <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
@@ -5239,7 +5239,7 @@ export default function Stillform() {
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
             {/* Language */}
             <div style={{ marginBottom: 28 }}>
