@@ -3962,13 +3962,13 @@ function MyProgress({ onBack, onJournal }) {
   const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
   const toolCounts = {};
   sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
-  const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
+  const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
 
   const sessionsWithRatings = sessions.filter(s => s.preRating && s.postRating);
   const avgDelta = sessionsWithRatings.length > 0
     ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
     : null;
-  const positiveShifts = sessionsWithRatings.filter(s => s.delta > 0).length;
+  const positiveShifts = sessionsWithRatings.filter(s => (s.delta || 0) > 0).length;
 
   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
   let streak = 0;
@@ -3979,7 +3979,7 @@ function MyProgress({ onBack, onJournal }) {
 
   const emotionFreq = {};
   journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
-  const topEmotion = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0];
+  const topEmotionEntry = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
   const cardStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" };
   const rowStyle = { width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center" };
@@ -4010,8 +4010,8 @@ function MyProgress({ onBack, onJournal }) {
             <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
           </div>}
-          {topTool && <div style={cardStyle}>
-            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topTool[0]] || topTool[0]}</div>
+          {topToolEntry && <div style={cardStyle}>
+            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topToolEntry[0]] || topToolEntry[0]}</div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
           </div>}
         </div>
@@ -4088,7 +4088,7 @@ function MyProgress({ onBack, onJournal }) {
         {journalEntries.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("journal")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotion ? ` · most logged: ${topEmotion[0]}` : ""}</div></div>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.journal ? "▾" : "▸"}</span>
             </button>
             {openSections.journal && (
