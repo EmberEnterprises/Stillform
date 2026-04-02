@@ -4806,82 +4806,25 @@ export default function Stillform() {
                 );
               })()}
 
-              {/* STATS */}
+              {/* STREAK — stays on home. Full stats in My Progress. */}
               {(() => {
                 try {
                   const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
                   if (sessions.length === 0) return null;
-                  const avgMs = sessions.reduce((sum, s) => sum + (s.duration || 0), 0) / sessions.length;
-                  const avgSec = Math.round(avgMs / 1000);
-                  const avgStr = avgSec >= 60 ? `${Math.floor(avgSec / 60)}m ${avgSec % 60}s` : `${avgSec}s`;
-
-                  // Streak: consecutive days with sessions
                   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
                   let streak = 0;
                   const today = new Date();
                   for (let i = 0; i < 365; i++) {
                     const d = new Date(today);
                     d.setDate(d.getDate() - i);
-                    const key = d.toISOString().slice(0, 10);
-                    if (daySet.has(key)) streak++;
-                    else break;
+                    if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
                   }
-
-                  // Fastest regulation
-                  const durations = sessions.map(s => s.duration).filter(d => d > 0);
-                  const fastest = durations.length > 0 ? Math.min(...durations) : null;
-                  const fastSec = fastest ? Math.round(fastest / 1000) : null;
-                  const fastStr = fastSec ? (fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`) : null;
-
+                  if (streak < 2) return null;
                   return (
-                    <>
-                    <div style={{ display: "flex", gap: 20, justifyContent: "center", paddingTop: 12, flexWrap: "wrap" }}>
-                      <div style={{ textAlign: "center", minWidth: 60 }}>
-                        <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
-                      </div>
-                      <div style={{ textAlign: "center", minWidth: 60 }}>
-                        <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{avgStr}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>avg time</div>
-                      </div>
-                      {streak > 1 && (
-                        <div style={{ textAlign: "center", minWidth: 60 }}>
-                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
-                        </div>
-                      )}
-                      {fastStr && (
-                        <div style={{ textAlign: "center", minWidth: 60 }}>
-                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{fastStr}</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>fastest</div>
-                        </div>
-                      )}
+                    <div style={{ textAlign: "center", paddingTop: 12 }}>
+                      <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
                     </div>
-
-                    {sessions.length >= 5 && (() => {
-                      // Most used tool
-                      const toolCounts = {};
-                      sessions.forEach(s => { const t = (s.tools || [])[0]; if (t) toolCounts[t] = (toolCounts[t] || 0) + 1; });
-                      const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
-                      const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
-
-                      // Time trend (first 5 vs last 5)
-                      const recentDurations = sessions.slice(-5).map(s => s.duration).filter(d => d > 0);
-                      const earlyDurations = sessions.slice(0, 5).map(s => s.duration).filter(d => d > 0);
-                      const recentAvg = recentDurations.length ? recentDurations.reduce((a, b) => a + b, 0) / recentDurations.length : 0;
-                      const earlyAvg = earlyDurations.length ? earlyDurations.reduce((a, b) => a + b, 0) / earlyDurations.length : 0;
-                      const improving = recentAvg < earlyAvg && earlyAvg > 0;
-
-                      return (
-                        <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                          {topTool && <div>Most used: <span style={{ color: "var(--amber)" }}>{toolLabel[topTool[0]] || topTool[0]}</span></div>}
-                          {sessions.length >= 8 && improving && <div style={{ marginTop: 4 }}>Your regulation time is trending faster.</div>}
-                          {sessions.length >= 8 && !improving && recentAvg > 0 && <div style={{ marginTop: 4 }}>Your regulation time is holding steady.</div>}
-                          {sessions.length >= 12 && <div style={{ marginTop: 4, color: "var(--amber)" }}>The AI is using your full history to personalize guidance.</div>}
-                        </div>
-                      );
-                    })()}
-                    </>
                   );
                 } catch { return null; }
               })()}
