@@ -1952,18 +1952,23 @@ function BodyScanTool({ onComplete }) {
 
   const scanSavedRef = useRef(false);
   const scanElapsedRef = useRef(0);
+  const scanAutoRef = useRef(false);
   if (done) {
     if (!scanSavedRef.current) { scanSavedRef.current = true; scanElapsedRef.current = saveSession(); }
+    if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => onComplete("reframe-calm"), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
     return (
       <div className="complete">
-        <div className="complete-icon">✓</div>
+        <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>Activation cleared.</h2>
-        <p>Pressure applied. Intensity reduced where it was held. Move on.</p>
+        <p>Pressure applied. Intensity reduced where it was held.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
-        <button className="btn btn-primary" onClick={() => onComplete()}>Return to tools</button>
+        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
+          Moving to Reframe…
+        </div>
+        <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>Exit session</button>
         <SessionNote />
       </div>
     );
@@ -1986,10 +1991,17 @@ function BodyScanTool({ onComplete }) {
                     onClick={(e) => { e.stopPropagation(); setTension(t => ({ ...t, [i]: n })); }} />
                 ))}
               </div>
-              <div style={{ marginTop: 20 }}>
-                <button className="btn btn-primary" style={{ fontSize: 13 }}
+              <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
+                <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }}
                   onClick={(e) => { e.stopPropagation(); setPhase("pressure"); }}>
                   Apply pressure here →
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
+                  background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                  padding: "8px 12px", fontSize: 11, cursor: "pointer",
+                  color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Skip →
                 </button>
               </div>
             </>
@@ -2066,6 +2078,13 @@ function BodyScanTool({ onComplete }) {
                   }}>
                     {audioOn ? "♪" : "♪"}
                   </button>
+                  <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
+                    background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                    padding: "8px 12px", fontSize: 11, cursor: "pointer",
+                    color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    Skip →
+                  </button>
                 </div>
               )}
               {(holding || holdCount > 0) && (
@@ -2076,12 +2095,29 @@ function BodyScanTool({ onComplete }) {
                   <div style={{ background: "var(--border)", borderRadius: 4, height: 4, overflow: "hidden" }}>
                     <div style={{ width: `${holdProgress}%`, height: "100%", background: holdProgress >= 100 ? "var(--green)" : "var(--amber)", transition: "width 1s linear" }} />
                   </div>
-                  {!holding && holdCount >= holdTarget && (
-                    <button className="btn btn-primary" style={{ marginTop: 16, fontSize: 13 }}
-                      onClick={(e) => { e.stopPropagation(); handleNext(); }}>
-                      {currentArea < areas.length - 1 ? "Next area →" : "Complete scan"}
+                  {holding && (
+                    <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
+                      background: "none", border: "none", fontSize: 11, color: "var(--text-muted)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12,
+                      letterSpacing: "0.06em"
+                    }}>
+                      Skip →
                     </button>
                   )}
+                  {!holding && holdCount >= holdTarget && (() => {
+                    setTimeout(() => handleNext(), 1500);
+                    return (
+                      <div style={{ marginTop: 16 }}>
+                        <div style={{ fontSize: 11, color: "var(--text-muted)", animation: "pulse 1s ease-in-out infinite", marginBottom: 8 }}>
+                          {currentArea < areas.length - 1 ? "Moving to next area…" : "Scan complete…"}
+                        </div>
+                        <button className="btn btn-ghost" style={{ fontSize: 12 }}
+                          onClick={(e) => { e.stopPropagation(); handleNext(); }}>
+                          Skip ahead →
+                        </button>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
             </>
