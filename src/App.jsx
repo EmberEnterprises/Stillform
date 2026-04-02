@@ -1733,7 +1733,18 @@ function BreatheGroundTool({ onComplete, pathway }) {
             {[1, 2, 3, 4, 5].map(n => (
               <button key={n} onClick={() => {
                 setPostRating(n);
-                try { localStorage.setItem("stillform_last_shift", JSON.stringify(n - (preRating || n))); } catch {}
+                const delta = n - (preRating || n);
+                try {
+                  localStorage.setItem("stillform_last_shift", JSON.stringify(delta));
+                  // Save ratings back into the most recent session record
+                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  if (sessions.length > 0) {
+                    sessions[sessions.length - 1].preRating = preRating || null;
+                    sessions[sessions.length - 1].postRating = n;
+                    sessions[sessions.length - 1].delta = delta;
+                    localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+                  }
+                } catch {}
               }} style={{
                 width: 56, height: 56, borderRadius: "50%",
                 border: `2px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
@@ -4558,16 +4569,27 @@ export default function Stillform() {
                 </div>
               </div>
 
-              {/* JOURNAL LINK */}
-              <button onClick={() => setScreen("journal")} style={{
-                width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: 10,
-                padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text-dim)",
-                fontFamily: "'DM Sans', sans-serif", marginTop: 8, marginBottom: 28,
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <span style={{ fontSize: 13 }}>◈ Session Journal</span>
-                <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
-              </button>
+              {/* PROGRESS + JOURNAL LINKS */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8, marginBottom: 28 }}>
+                <button onClick={() => setScreen("progress")} style={{
+                  width: "100%", background: "transparent", border: "1px solid var(--amber-dim)", borderRadius: 10,
+                  padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--amber)" }}>✦ My Progress</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sessions · shifts · patterns →</span>
+                </button>
+                <button onClick={() => setScreen("journal")} style={{
+                  width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: 10,
+                  padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text-dim)",
+                  fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13 }}>◈ Session Journal</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
+                </button>
+              </div>
 
               {/* DEEPER TOOLS — all visible for UAT */}
               {(() => {
@@ -4738,6 +4760,164 @@ export default function Stillform() {
             {renderTool()}
           </section>
         )}
+
+        {/* MY PROGRESS */}
+        {screen === "progress" && (() => {
+          const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
+          const journalEntries = (() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; } })();
+          const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
+          const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
+          const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+
+          const sessionsWithRatings = sessions.filter(s => s.preRating && s.postRating);
+          const avgDelta = sessionsWithRatings.length > 0
+            ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
+            : null;
+
+          const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
+          const toolCounts = {};
+          sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
+          const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
+
+          const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
+          let streak = 0;
+          for (let i = 0; i < 365; i++) {
+            const d = new Date(); d.setDate(d.getDate() - i);
+            if (daySet.has(d.toISOString().slice(0, 10))) streak++;
+            else break;
+          }
+
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
+              <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>Everything you've built. Every session counted.</p>
+
+              {sessions.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
+                  Your progress appears here after your first session.
+                </div>
+              ) : (
+                <>
+                  {/* HEADLINE STATS */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
+                    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                      <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{sessions.length}</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Total sessions</div>
+                    </div>
+                    {streak > 0 && (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                        <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} this streak</div>
+                      </div>
+                    )}
+                    {avgDelta && (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                        <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
+                      </div>
+                    )}
+                    {topTool && (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
+                        <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topTool[0]] || topTool[0]}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most effective</div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* WHAT YOU'VE BUILT */}
+                  {(biasProfile?.length > 0 || signalProfile) && (
+                    <div style={{ marginBottom: 28 }}>
+                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>What you know about yourself</div>
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "18px 20px" }}>
+                        {signalProfile?.firstAreas?.length > 0 && (
+                          <div style={{ marginBottom: 12 }}>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Where intensity activates first</div>
+                            <div style={{ fontSize: 13, color: "var(--text)" }}>{signalProfile.firstAreas.join(" · ")}</div>
+                          </div>
+                        )}
+                        {signalProfile?.triggers?.length > 0 && (
+                          <div style={{ marginBottom: 12 }}>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Known triggers</div>
+                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{signalProfile.triggers.slice(0, 5).join(" · ")}{signalProfile.triggers.length > 5 ? ` +${signalProfile.triggers.length - 5} more` : ""}</div>
+                          </div>
+                        )}
+                        {biasProfile?.length > 0 && (
+                          <div>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Blind spots you're aware of</div>
+                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{biasProfile.join(" · ")}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* SESSION HISTORY */}
+                  <div style={{ marginBottom: 28 }}>
+                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Session history</div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                      {[...sessions].reverse().slice(0, 20).map((s, i) => {
+                        const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+                        const time = s.timestamp ? new Date(s.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
+                        const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, i, a) => a.indexOf(v) === i).join(" → ");
+                        const hasRating = s.preRating && s.postRating;
+                        const delta = s.delta || 0;
+                        return (
+                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
+                              <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{date} · {time}</div>
+                              {hasRating && (
+                                <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : delta === 0 ? "var(--text-muted)" : "var(--text-muted)" }}>
+                                  {s.preRating} → {s.postRating} {delta > 0 ? `(+${delta})` : delta < 0 ? `(${delta})` : ""}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{tool || "Session"}</div>
+                            {s.durationFormatted && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{s.durationFormatted}</div>}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* SAVED REFRAMES */}
+                  {savedReframes.length > 0 && (
+                    <div style={{ marginBottom: 28 }}>
+                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Reframes that landed</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {savedReframes.slice(-5).reverse().map((r, i) => (
+                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
+                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
+                            {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* JOURNAL PREVIEW */}
+                  {journalEntries.length > 0 && (
+                    <div style={{ marginBottom: 28 }}>
+                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Recent journal</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                        {journalEntries.slice(-3).reverse().map((e, i) => (
+                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
+                            <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4 }}>{e.date}</div>
+                            {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{e.trigger}</div>}
+                            {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
+                          </div>
+                        ))}
+                      </div>
+                      <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: 0 }}>
+                        View all journal entries →
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          );
+        })()}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
         {screen === "journal" && (
