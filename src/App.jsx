@@ -1125,6 +1125,12 @@ const TOOLS = [
 ];
 
 // Quick post-session journal note
+// Haptic feedback utility — sharp click for phase changes, heavy thud for completion
+const haptic = {
+  tick:     () => { try { navigator.vibrate?.([8]); } catch {} },
+  complete: () => { try { navigator.vibrate?.([30, 20, 60]); } catch {} },
+};
+
 function SessionNote() {
   const [note, setNote] = useState("");
   const [saved, setSaved] = useState(false);
@@ -1477,15 +1483,18 @@ function BreatheGroundTool({ onComplete, pathway }) {
         if (!keepGoing && newCycle > totalCycles) {
           setBreatheDone(true);
           setRunning(false);
+          haptic.complete();
           return;
         }
         if (keepGoing && newCycle > totalCycles + 3) {
           setBreatheDone(true);
           setRunning(false);
+          haptic.complete();
           return;
         }
         setCycle(newCycle);
       }
+      haptic.tick();
       setPhaseIdx(next);
       setCount(phases[next].duration);
     } else {
@@ -1868,6 +1877,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
           </div>
           {postRating && preRating && (() => {
             const delta = postRating - preRating;
+            const driftPct = preRating > 0 ? Math.round((delta / preRating) * 100) : 0;
             return (
               <div style={{ marginBottom: 24, animation: delta > 0 ? "deltaFlash 0.5s ease-out" : "none" }}>
                 <div style={{
@@ -1878,9 +1888,14 @@ function BreatheGroundTool({ onComplete, pathway }) {
                 }}>
                   {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: delta > 0 ? 8 : 0 }}>
                   {delta >= 3 ? "Significant shift" : delta === 2 ? "Composure increased" : delta === 1 ? "Slight improvement" : delta === 0 ? "Baseline held" : delta === -1 ? "Still unstable" : "Run again"}
                 </div>
+                {delta > 0 && (
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--amber)", letterSpacing: "0.14em" }}>
+                    SIGNAL DRIFT: -{driftPct}%
+                  </div>
+                )}
               </div>
             );
           })()}
@@ -2086,8 +2101,13 @@ function BodyScanTool({ onComplete }) {
     setHolding(false);
     setHoldCount(0);
     setShowPointName(false);
-    if (currentArea < areas.length - 1) setCurrentArea(a => a + 1);
-    else setDone(true);
+    if (currentArea < areas.length - 1) {
+      haptic.tick();
+      setCurrentArea(a => a + 1);
+    } else {
+      haptic.complete();
+      setDone(true);
+    }
   };
 
   const area = areas[currentArea];
@@ -3524,7 +3544,10 @@ function SignalMapTool({ onComplete }) {
           Now you know what to watch for. Over time, you'll start catching these signals before they escalate.
         </p>
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
-          <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your signals</div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Your signals</div>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", color: "var(--text-muted)", textTransform: "uppercase" }}>Telemetry Source: Manual</div>
+          </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>First to react:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
           </div>
