@@ -4937,23 +4937,29 @@ export default function Stillform() {
             {/* Breathing Pattern */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Breathing Pattern</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                Your selected pattern starts automatically every session. Change it anytime here.
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
-              {BREATHING_PATTERNS.map(p => {
+              {[
+                { id: "calm", name: "Calm (4-4-8-2)", use: "Overwhelm, anxiety, too many inputs", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+                { id: "box", name: "Box (4-4-4-4)", use: "High-stakes moments, need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
+                { id: "478", name: "4-7-8", use: "Physically wired, clenched, can't stop", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
+                { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds, in public, between tasks", why: "Shortest pattern that produces a measurable state shift." }
+              ].map(p => {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
                 return (
                   <button key={p.id} onClick={() => {
                     try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
                   }} style={{
-                    width: "100%", padding: "12px 16px", textAlign: "left", cursor: "pointer",
+                    width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                     background: isSelected ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
                     borderRadius: 8, marginBottom: 6, color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                   }}>
-                    <div style={{ fontSize: 14, marginBottom: 2 }}>{p.name}</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{p.desc}</div>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4, fontStyle: "italic" }}>{p.use}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{p.why}</div>
                   </button>
                 );
               })}
