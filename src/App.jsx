@@ -4028,14 +4028,23 @@ export default function Stillform() {
   const renderTool = () => {
     const props = { onComplete: (redirectTo) => {
       if (redirectTo) {
-        const tool = TOOLS.find(t => t.id === redirectTo);
-        if (tool) { startTool(tool); return; }
-        // Special case: reframe with mode
+        // Handle crisis
+        if (redirectTo === "crisis") { setScreen("crisis"); return; }
+        // Handle bare "reframe" — default to calm mode
+        if (redirectTo === "reframe") {
+          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+          setScreen("tool");
+          return;
+        }
+        // Handle reframe with mode
         if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
           setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo.split("-")[1] });
           setScreen("tool");
           return;
         }
+        // Handle tool id direct
+        const tool = TOOLS.find(t => t.id === redirectTo);
+        if (tool) { startTool(tool); return; }
       }
       setScreen("home");
     }};
@@ -4327,13 +4336,19 @@ export default function Stillform() {
         {screen === "panic" && (
           <PanicMode onComplete={(redirectTo) => {
             if (redirectTo) {
-              const tool = TOOLS.find(t => t.id === redirectTo);
-              if (tool) { startTool(tool); return; }
-              if (redirectTo === "reframe-calm") {
+              if (redirectTo === "crisis") { setScreen("crisis"); return; }
+              if (redirectTo === "reframe" || redirectTo === "reframe-calm") {
                 setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
                 setScreen("tool");
                 return;
               }
+              if (redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
+                setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: redirectTo.split("-")[1] });
+                setScreen("tool");
+                return;
+              }
+              const tool = TOOLS.find(t => t.id === redirectTo);
+              if (tool) { startTool(tool); return; }
             }
             setScreen("home");
           }} />
