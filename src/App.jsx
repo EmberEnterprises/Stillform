@@ -2186,6 +2186,7 @@ function MicButton({ onTranscript }) {
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [tab, setTab] = useState(defaultTab);
+  const [feelState, setFeelState] = useState(null); // null = neutral default
   const effectiveMode = activeMode || "calm";
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
@@ -2344,6 +2345,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             } catch { return null; }
           })(),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
+          feelState: feelState,
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);
@@ -2412,6 +2414,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
 
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
+
+      {/* FEEL STATE — optional single-tap, neutral by default */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+          I feel — <span style={{ color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>optional</span>
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[
+            { id: "excited", label: "Excited" },
+            { id: "anxious", label: "Anxious" },
+            { id: "angry", label: "Angry" },
+            { id: "mixed", label: "Mixed" }
+          ].map(f => (
+            <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
+              background: feelState === f.id ? "var(--amber-glow)" : "transparent",
+              border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+              borderRadius: 20, padding: "5px 14px", fontSize: 12,
+              color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
+              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* MODE PICKER — three tones */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
         {[

@@ -232,7 +232,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -247,6 +247,15 @@ exports.handler = async function(event) {
 
     // Inject user context if available
     const contextParts = [];
+    if (feelState) {
+      const feelMap = {
+        excited: "USER'S SELF-REPORTED STATE: Excited. High positive arousal. Do NOT try to calm them down or reduce intensity. Help them direct and channel the energy toward a functional outcome. Ask where they want it to go.",
+        anxious: "USER'S SELF-REPORTED STATE: Anxious. Threat response active. Acknowledge first. Regulate tone and interpretation of ambiguous signals. Separate what is real from what the brain is adding.",
+        angry: "USER'S SELF-REPORTED STATE: Angry. Do not minimize or redirect too fast. Acknowledge the anger fully first. Then help them separate the feeling from any action they might be considering. Slow the decision-making.",
+        mixed: "USER'S SELF-REPORTED STATE: Mixed — multiple emotional states active simultaneously. Don't try to resolve it. Acknowledge the complexity. Help them identify which feeling is loudest right now."
+      };
+      if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
+    }
     if (checkinContext) contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 5) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
