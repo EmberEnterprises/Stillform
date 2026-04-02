@@ -4017,7 +4017,9 @@ function PanicMode({ onComplete }) {
           <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => onComplete()}>
             Done — close
           </button>
-            display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
+          <a onClick={() => onComplete("crisis")} style={{ display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", cursor: "pointer" }}>
+            Crisis resources →
+          </a>
         </div>
         <SessionNote />
       </div>
