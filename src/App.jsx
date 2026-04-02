@@ -3954,7 +3954,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "A composure system. Not an app.",
-              body: "Regulate your state in under two minutes — under pressure, in public, or mid-escalation.\n\nNot meditation. Not therapy. Not a crisis line.\n\nA composure system for anyone who needs to stabilize without stepping out of their life.",
+              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral. Dread for no reason at all.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. Not a crisis line. A composure system.",
               note: null,
               cta: "Run a Session"
             },
@@ -4196,9 +4196,7 @@ export default function Stillform() {
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                Stillform is a composure system.<br />
-                Regulate your state in under two minutes — under pressure, in public, or mid-escalation.<br />
-                Designed for moments where composure is required.
+                Stillform is a composure system for people who feel everything at full intensity — excitement, rage, anxiety, passion, dread, joy. The goal isn't to flatten it. It's to stay functional inside it.
               </p>
               <div style={{ fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.04em", marginBottom: 32, marginTop: -16 }}>
                 No content. No noise. Just execution.
