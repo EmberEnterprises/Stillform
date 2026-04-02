@@ -2194,44 +2194,117 @@ function BodyScanTool({ onComplete }) {
             <>
               {/* Acupressure point diagram */}
               <div style={{ display: "flex", justifyContent: "center", marginTop: 16, marginBottom: 8 }}>
-                <svg viewBox="0 0 120 120" width="100" height="100" style={{ opacity: 0.9 }}>
+                <svg viewBox="0 0 160 160" width="140" height="140" style={{ overflow: "visible" }}>
                   {a.name === "Jaw & Face" && <>
-                    <ellipse cx="60" cy="55" rx="30" ry="38" fill="none" stroke="var(--amber)" strokeWidth="1.5" opacity="0.4" />
-                    <line x1="45" y1="42" x2="55" y2="42" stroke="var(--text-dim)" strokeWidth="1" />
-                    <line x1="65" y1="42" x2="75" y2="42" stroke="var(--text-dim)" strokeWidth="1" />
-                    <circle cx="60" cy="35" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">between eyebrows</text>
+                    {/* Head */}
+                    <ellipse cx="80" cy="54" rx="28" ry="34" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    {/* Neck */}
+                    <line x1="72" y1="86" x2="70" y2="102" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    <line x1="88" y1="86" x2="90" y2="102" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    {/* Jaw line */}
+                    <path d="M55 68 Q80 82 105 68" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+                    {/* Pressure point — between eyebrows */}
+                    <circle cx="80" cy="43" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="80" cy="43" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* Label */}
+                    <text x="80" y="128" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GV24.5 · between eyebrows</text>
                   </>}
+
                   {a.name === "Shoulders & Neck" && <>
-                    <line x1="60" y1="20" x2="60" y2="45" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <path d="M60 45 Q60 55 30 65" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <path d="M60 45 Q60 55 90 65" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <circle cx="45" cy="55" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">top of shoulder muscle</text>
+                    {/* Head */}
+                    <circle cx="80" cy="28" r="14" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    {/* Neck */}
+                    <line x1="75" y1="41" x2="74" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <line x1="85" y1="41" x2="86" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    {/* Shoulders */}
+                    <path d="M74 54 Q60 56 38 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2"/>
+                    <path d="M86 54 Q100 56 122 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2"/>
+                    {/* Torso top */}
+                    <line x1="38" y1="70" x2="42" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                    <line x1="122" y1="70" x2="118" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                    {/* Pressure point — GB21 left shoulder */}
+                    <circle cx="56" cy="62" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="56" cy="62" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* Label */}
+                    <text x="80" y="136" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GB21 · shoulder well</text>
                   </>}
+
                   {a.name === "Chest & Breath" && <>
-                    <path d="M40 25 Q60 20 80 25 L85 80 Q60 90 35 80 Z" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <circle cx="60" cy="48" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">center of breastbone</text>
+                    {/* Head */}
+                    <circle cx="80" cy="18" r="11" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    {/* Neck */}
+                    <line x1="76" y1="28" x2="75" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    <line x1="84" y1="28" x2="85" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    {/* Shoulders */}
+                    <path d="M75 36 Q62 38 48 48" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    <path d="M85 36 Q98 38 112 48" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    {/* Torso / chest */}
+                    <path d="M48 48 L44 110 L116 110 L112 48 Z" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    {/* Sternum center line */}
+                    <line x1="80" y1="48" x2="80" y2="110" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" strokeDasharray="3,3"/>
+                    {/* Pressure point — CV17 center sternum */}
+                    <circle cx="80" cy="66" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="80" cy="66" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* Label */}
+                    <text x="80" y="138" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">CV17 · center sternum</text>
                   </>}
+
                   {a.name === "Hands & Arms" && <>
-                    <path d="M50 90 L50 50 Q50 35 45 25 M50 50 Q55 35 60 20 M50 50 Q58 38 65 25 M50 50 Q60 40 70 30 M50 50 Q50 40 40 30" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <circle cx="50" cy="42" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">web of thumb + index</text>
+                    {/* Hand outline — palm facing up */}
+                    <path d="M60 110 L60 65 Q60 58 56 50 M60 65 Q62 56 64 44 M60 65 Q65 55 70 43 M60 65 Q67 57 75 48 M60 65 Q58 57 52 52" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    {/* Palm base */}
+                    <path d="M52 52 Q48 70 50 85 Q54 100 60 110 Q66 100 70 85 Q72 70 75 48" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    {/* Thumb */}
+                    <path d="M52 52 Q44 48 40 56 Q38 64 46 68" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    {/* Pressure point — LI4 webbing */}
+                    <circle cx="52" cy="57" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="52" cy="57" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* Label */}
+                    <text x="80" y="140" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">LI4 · thumb–index web</text>
                   </>}
+
                   {a.name === "Gut & Core" && <>
-                    <rect x="35" y="20" width="50" height="15" rx="4" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <line x1="60" y1="35" x2="60" y2="85" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <line x1="35" y1="35" x2="35" y2="60" stroke="var(--text-dim)" strokeWidth="1" opacity="0.4" />
-                    <line x1="85" y1="35" x2="85" y2="60" stroke="var(--text-dim)" strokeWidth="1" opacity="0.4" />
-                    <circle cx="60" cy="52" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">inner wrist, 3 fingers down</text>
+                    {/* Arm outline — inner wrist */}
+                    <path d="M55 20 L55 100 Q55 112 65 118 Q75 124 85 118 Q95 112 95 100 L95 20" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    {/* Wrist crease */}
+                    <line x1="52" y1="95" x2="98" y2="95" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
+                    <line x1="52" y1="100" x2="98" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
+                    {/* Two tendons */}
+                    <line x1="72" y1="20" x2="72" y2="92" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="2,3"/>
+                    <line x1="78" y1="20" x2="78" y2="92" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="2,3"/>
+                    {/* Pressure point — PC6, 3 fingers below wrist */}
+                    <circle cx="75" cy="78" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="75" cy="78" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* 3-finger measurement indicator */}
+                    <line x1="104" y1="78" x2="104" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="101" y1="78" x2="107" y2="78" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="101" y1="95" x2="107" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <text x="112" y="88" fill="rgba(255,255,255,0.25)" fontSize="7" fontFamily="'IBM Plex Mono', monospace">3 fin</text>
+                    {/* Label */}
+                    <text x="80" y="150" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">PC6 · inner wrist</text>
                   </>}
+
                   {a.name === "Legs & Feet" && <>
-                    <line x1="55" y1="15" x2="55" y2="95" stroke="var(--text-dim)" strokeWidth="2" />
-                    <ellipse cx="55" cy="35" rx="12" ry="8" fill="none" stroke="var(--text-dim)" strokeWidth="1.5" />
-                    <circle cx="65" cy="55" r="5" fill="var(--amber)" opacity="0.8" />
-                    <text x="60" y="108" textAnchor="middle" fill="var(--text-muted)" fontSize="8" fontFamily="DM Sans">4 fingers below kneecap</text>
+                    {/* Knee outline */}
+                    <ellipse cx="80" cy="42" rx="22" ry="18" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    {/* Thigh */}
+                    <line x1="64" y1="36" x2="58" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2"/>
+                    <line x1="96" y1="36" x2="102" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2"/>
+                    {/* Shin */}
+                    <line x1="66" y1="58" x2="62" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    <line x1="94" y1="58" x2="98" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    {/* Shin bone — tibia */}
+                    <line x1="74" y1="58" x2="72" y2="118" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="3,3"/>
+                    {/* 4-finger measurement */}
+                    <line x1="108" y1="62" x2="108" y2="94" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="105" y1="62" x2="111" y2="62" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="105" y1="94" x2="111" y2="94" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <text x="115" y="80" fill="rgba(255,255,255,0.25)" fontSize="7" fontFamily="'IBM Plex Mono', monospace">4 fin</text>
+                    {/* Pressure point — ST36, 4 fingers below kneecap */}
+                    <circle cx="80" cy="94" r="5" fill="var(--amber)" opacity="0.9"/>
+                    <circle cx="80" cy="94" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
+                    {/* Label */}
+                    <text x="80" y="148" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">ST36 · below kneecap</text>
                   </>}
                 </svg>
               </div>
