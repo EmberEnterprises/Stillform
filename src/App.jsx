@@ -1600,35 +1600,11 @@ function BreatheGroundTool({ onComplete, pathway }) {
   );
 
   // Breathe phase
-  if (!started && phase === "breathe") return (
-    <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
-        Select adjustment
-      </h2>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
-        Matched breathing pattern. Tap to start.
-      </p>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {breathPrompts.map(bp => (
-          <button key={bp.id} onClick={() => selectPattern(bp.id)} style={{
-            width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-            padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-            fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-          }}>
-            <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>{bp.label}</div>
-            <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 4 }}>{bp.desc}</div>
-            <div style={{ fontSize: 10, color: "var(--amber)", fontStyle: "italic" }}>{bp.why}</div>
-          </button>
-        ))}
-      </div>
-      <button onClick={() => { setStarted(true); setRunning(true); }} style={{
-        background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
-        cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 16
-      }}>
-        Skip — use {pattern.name}
-      </button>
-    </div>
-  );
+  if (!started && phase === "breathe") {
+    setStarted(true);
+    setRunning(true);
+    return null;
+  }
 
   return (
     <div>
@@ -1698,23 +1674,22 @@ function BreatheGroundTool({ onComplete, pathway }) {
       ) : (
         <div className="complete">
           <div className="complete-icon">✓</div>
-          <h2>How do you feel?</h2>
-          <p style={{ marginBottom: 24 }}>Three rounds complete. Your nervous system is recalibrating.</p>
+          <h2>Three rounds done.</h2>
+          <p style={{ marginBottom: 24 }}>Nervous system recalibrating. Continue or move on.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             <button className="btn btn-primary" onClick={() => setPhase("ground")}>
-              Ground myself now →
+              Ground now →
             </button>
             <button className="btn btn-ghost" onClick={() => {
               setKeepGoing(true);
               setBreatheDone(false);
               setRunning(true);
             }}>
-              Keep breathing
+              Keep going
             </button>
             <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); setPhase("post-rate"); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               Stop here
             </button>
-              display: "block", marginTop: 12, fontSize: 12, color: "var(--text-muted)", textAlign: "center", textDecoration: "none"
           </div>
         </div>
       )}
