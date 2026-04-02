@@ -1454,7 +1454,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
       <div className="complete">
         <div className="complete-icon">✓</div>
         <h2>State shifted.</h2>
-        <p>Nervous system regulated. Sensory anchors engaged.</p>
+        <p>Nervous system regulated. You're functional again.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
         {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
@@ -1974,8 +1974,8 @@ function BodyScanTool({ onComplete }) {
     return (
       <div className="complete">
         <div className="complete-icon">✓</div>
-        <h2>Tension cleared.</h2>
-        <p>Pressure applied. Activation reduced. Move on.</p>
+        <h2>Activation cleared.</h2>
+        <p>Pressure applied. Intensity reduced where it was held. Move on.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
         <button className="btn btn-primary" onClick={() => onComplete()}>Return to tools</button>
@@ -2360,7 +2360,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
 
   const modeConfig = {
     calm: {
-      icon: "◎", title: "Regulate", subtitle: "Describe the situation. The AI identifies the distortion.",
+      icon: "◎", title: "Regulate", subtitle: "Name what's happening. The AI cuts through the distortion.",
       color: "#c9933a",
       bg: "linear-gradient(180deg, rgba(201,147,58,0.06) 0%, transparent 40%)",
       border: "rgba(201,147,58,0.2)",
@@ -2444,7 +2444,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             <textarea
               value={journalText}
               onChange={e => setJournalText(e.target.value)}
-              placeholder="What happened? How are you feeling? Write freely — the AI uses this as context next time you talk."
+              placeholder="What's happening? Any state counts — excitement, rage, dread, joy. Write freely — the AI uses this every session."
               style={{
                 width: "100%", minHeight: 120, background: mc.inputBg || "var(--surface)",
                 border: `1px solid ${mc.border}`, borderRadius: 10,
@@ -3962,38 +3962,38 @@ export default function Stillform() {
               icon: "◎",
               label: "Your tools",
               title: "Execute",
-              subtitle: "Three protocols. Each one precise.",
-              body: "Breathe — paced breathing matched to your state, plus sensory grounding. Sound on or off.\n\nBody Scan — locate tension in six body areas and release it with timed acupressure. Sound on or off.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise), Get Sharp (break loops), Lock In (pre-performance). Switch modes mid-session — the AI carries context. Talk tab for conversation, Journal tab for entries the AI retains.",
+              subtitle: "Three protocols. Any state.",
+              body: "Breathe — paced breathing matched to your intensity level, plus sensory grounding. Works for rage, excitement, dread, or overload. Sound on or off.\n\nBody Scan — locate where the feeling is living in your body and release it with timed acupressure. Works for any high-activation state. Sound on or off.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise and distortion), Get Sharp (cut through loops), Lock In (channel intensity before high-stakes moments). Switch modes mid-session — the AI carries context. Talk tab for conversation, Journal tab for entries the AI retains.",
               note: "The Quick Breathe protocol is always free. Full access requires a subscription."
             },
             {
               icon: "◎",
               label: "Built in",
               title: "No friction",
-              subtitle: "Every input has a shortcut.",
-              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI uses this data when you run Reframe.\n\nVoice-to-text — every text field has a mic. Speak instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI retains context: Your sessions, journal, and check-ins are stored in your encrypted account. Every Reframe session starts with your full history. Your data is yours — delete it anytime.",
+              subtitle: "Designed for how you actually think.",
+              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI uses this data when you run Reframe.\n\nVoice-to-text — every text field has a mic. Think out loud instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI retains context: Your sessions, journal, and check-ins are stored in your encrypted account. Every Reframe session starts with your full history. Your data is yours — delete it anytime.",
               note: null
             },
             {
               icon: "◇",
               label: "Signal mapping",
               title: "Know your pattern",
-              subtitle: "Where does it hit first?",
-              body: "In Settings, map where tension activates — jaw, shoulders, chest, gut, hands, legs. This builds your signal profile so you intercept the state earlier. One-time setup."
+              subtitle: "Where does it land in your body?",
+              body: "Intensity doesn't just live in your head. In Settings, map where it activates — jaw, shoulders, chest, gut, hands, legs. This builds your signal profile so you intercept the state before it controls you. One-time setup."
             },
             {
               icon: "◈",
               label: "Over time",
               title: "It sharpens",
-              subtitle: "Adapts to your patterns. Reduces time to control.",
-              body: "After a few sessions, your home screen shows data — most effective protocol, regulation speed, pattern trends. The AI moves from generic to precise. It doesn't push early. It earns it, then gets direct."
+              subtitle: "Learns your signals. Tightens your response.",
+              body: "After a few sessions, your home screen shows data — most effective protocol, regulation speed, pattern trends. The AI stops being generic and starts being precise about you specifically. It doesn't push early. It earns it, then gets direct."
             },
             {
               icon: "✦",
               label: "The outcome",
-              title: "Composure on demand",
-              subtitle: "Regulate faster. Recognize sooner. Choose deliberately.",
-              body: "This is what Stillform builds: intercept the state before it controls you, identify what your mind is doing, and execute a deliberate response. The protocols stay the same — your speed with them doesn't."
+              title: "Functional at full volume",
+              subtitle: "Feel everything. Lose nothing.",
+              body: "Stillform doesn't ask you to turn it down. It builds the capacity to stay functional inside whatever you're feeling — joy, rage, dread, excitement, or all of it at once.\n\nThe protocols stay the same. Your speed, precision, and self-knowledge grow with every session."
             }
           ];
           const step = steps[onboardStep];
@@ -4259,7 +4259,7 @@ export default function Stillform() {
                   Adapts to your patterns. Reduces time to control.
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                  Stillform builds a signal profile from your sessions, journal, and daily check-ins. It recognizes your triggers, tracks what works, and tightens its guidance over time — without you having to explain yourself twice.
+                  Stillform builds a signal profile from your sessions, journal, and daily check-ins. It learns what states you move through, what works for each one, and tightens its guidance over time — without you having to explain yourself every time.
                 </div>
               </div>
 
@@ -4576,7 +4576,7 @@ export default function Stillform() {
                   <textarea
                     value={jTrigger}
                     onChange={e => setJTrigger(e.target.value)}
-                    placeholder="What happened or what were you thinking about?"
+                    placeholder="What's happening? Any state — excitement, rage, dread, overwhelm, joy. Say it."
                     style={{
                       width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
                       padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
@@ -4716,7 +4716,7 @@ export default function Stillform() {
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Try everything free for 7 days. The one-tap reset button stays free forever.</p>
+              <p>Try everything free for 7 days. Built for people who feel at full intensity — and need to stay functional inside it.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
