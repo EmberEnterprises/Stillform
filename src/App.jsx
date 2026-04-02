@@ -3998,22 +3998,29 @@ function MyProgress({ onBack, onJournal }) {
       ) : (<>
         {/* STATS GRID */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
-          <div style={cardStyle}>
-            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{sessions.length}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Total sessions</div>
-          </div>
-          {streak > 0 && <div style={cardStyle}>
-            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} this streak</div>
-          </div>}
           {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
             <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
+          </div>}
+          {streak > 0 && <div style={cardStyle}>
+            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} streak</div>
           </div>}
           {topToolEntry && <div style={cardStyle}>
             <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topToolEntry[0]] || topToolEntry[0]}</div>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
           </div>}
+          {(() => {
+            const durations = sessions.map(s => s.duration).filter(d => d > 0);
+            if (durations.length < 2) return null;
+            const fastest = Math.min(...durations);
+            const fastSec = Math.round(fastest / 1000);
+            const fastStr = fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`;
+            return <div style={cardStyle}>
+              <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{fastStr}</div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Fastest session</div>
+            </div>;
+          })()}
         </div>
 
         {/* SELF KNOWLEDGE */}
@@ -4806,11 +4813,12 @@ export default function Stillform() {
                 );
               })()}
 
-              {/* STREAK — stays on home. Full stats in My Progress. */}
+              {/* STATS — streak + session count + trend insight. Full breakdown in My Progress. */}
               {(() => {
                 try {
                   const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
                   if (sessions.length === 0) return null;
+
                   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
                   let streak = 0;
                   const today = new Date();
@@ -4819,11 +4827,40 @@ export default function Stillform() {
                     d.setDate(d.getDate() - i);
                     if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
                   }
-                  if (streak < 2) return null;
+
+                  const improving = (() => {
+                    if (sessions.length < 8) return false;
+                    const early = sessions.slice(0, 5).map(s => s.duration).filter(d => d > 0);
+                    const recent = sessions.slice(-5).map(s => s.duration).filter(d => d > 0);
+                    const earlyAvg = early.length ? early.reduce((a, b) => a + b, 0) / early.length : 0;
+                    const recentAvg = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
+                    return recentAvg < earlyAvg * 0.85 && earlyAvg > 0;
+                  })();
+
                   return (
-                    <div style={{ textAlign: "center", paddingTop: 12 }}>
-                      <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
+                    <div style={{ paddingTop: 12 }}>
+                      <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
+                        <div style={{ textAlign: "center", minWidth: 60 }}>
+                          <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{sessions.length}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>sessions</div>
+                        </div>
+                        {streak > 1 && (
+                          <div style={{ textAlign: "center", minWidth: 60 }}>
+                            <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif" }}>{streak}</div>
+                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>consecutive days</div>
+                          </div>
+                        )}
+                      </div>
+                      {improving && (
+                        <div style={{ fontSize: 12, color: "var(--amber)", textAlign: "center" }}>
+                          Your regulation time is trending faster.
+                        </div>
+                      )}
+                      {sessions.length >= 12 && (
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 4 }}>
+                          The AI is using your full history.
+                        </div>
+                      )}
                     </div>
                   );
                 } catch { return null; }
