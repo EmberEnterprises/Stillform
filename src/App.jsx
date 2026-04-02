@@ -3,16 +3,16 @@ import { useState, useEffect, useRef, Component } from "react";
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error("Stillform render error:", error, info); }
+  componentDidCatch(error, info) { console.error("Stillform error:", error, info); }
   render() {
     if (this.state.error) {
       return (
-        <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 32, minHeight: "100vh", fontFamily: "monospace", fontSize: 12 }}>
-          <div style={{ color: "#C8922A", marginBottom: 16, fontSize: 14 }}>Render error — send this to the dev:</div>
-          <pre style={{ whiteSpace: "pre-wrap", color: "#9496A1", lineHeight: 1.6 }}>{this.state.error.toString()}</pre>
+        <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "#C8922A", marginBottom: 12 }}>Something went wrong.</div>
+          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 32, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
           <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
-            style={{ marginTop: 24, background: "#C8922A", color: "#000", border: "none", padding: "10px 20px", cursor: "pointer", borderRadius: 3 }}>
-            Reset app
+            style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
+            Restart Stillform
           </button>
         </div>
       );
