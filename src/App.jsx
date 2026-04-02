@@ -4852,67 +4852,121 @@ export default function Stillform() {
                     </div>
                   )}
 
-                  {/* SESSION HISTORY */}
-                  <div style={{ marginBottom: 28 }}>
-                    <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Session history</div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                      {[...sessions].reverse().slice(0, 20).map((s, i) => {
-                        const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
-                        const time = s.timestamp ? new Date(s.timestamp).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : "";
-                        const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, i, a) => a.indexOf(v) === i).join(" → ");
-                        const hasRating = s.preRating && s.postRating;
-                        const delta = s.delta || 0;
-                        return (
-                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 }}>
-                              <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{date} · {time}</div>
-                              {hasRating && (
-                                <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : delta === 0 ? "var(--text-muted)" : "var(--text-muted)" }}>
-                                  {s.preRating} → {s.postRating} {delta > 0 ? `(+${delta})` : delta < 0 ? `(${delta})` : ""}
-                                </div>
-                              )}
+                  {/* SESSION HISTORY — summary + dropdown */}
+                  {(() => {
+                    const [open, setOpen] = React.useState(false);
+                    const recent = [...sessions].reverse().slice(0, 20);
+                    const rated = sessions.filter(s => s.preRating && s.postRating);
+                    const positiveShifts = rated.filter(s => s.delta > 0).length;
+                    return (
+                      <div style={{ marginBottom: 12 }}>
+                        <button onClick={() => setOpen(!open)} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Sessions</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                              {sessions.length} total{positiveShifts > 0 ? ` · ${positiveShifts} positive shifts recorded` : ""}
                             </div>
-                            <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{tool || "Session"}</div>
-                            {s.durationFormatted && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{s.durationFormatted}</div>}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* SAVED REFRAMES */}
-                  {savedReframes.length > 0 && (
-                    <div style={{ marginBottom: 28 }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Reframes that landed</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {savedReframes.slice(-5).reverse().map((r, i) => (
-                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
-                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
-                            {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
+                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
+                        </button>
+                        {open && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                            {recent.map((s, i) => {
+                              const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+                              const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, idx, a) => a.indexOf(v) === idx).join(" → ");
+                              const delta = s.delta || 0;
+                              return (
+                                <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                  <div>
+                                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 2 }}>{date}</div>
+                                    <div style={{ fontSize: 13, color: "var(--text)" }}>{tool || "Session"}{s.durationFormatted ? ` · ${s.durationFormatted}` : ""}</div>
+                                  </div>
+                                  {s.preRating && s.postRating && (
+                                    <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>
+                                      {s.preRating}→{s.postRating}{delta > 0 ? ` +${delta}` : ""}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        ))}
+                        )}
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
-                  {/* JOURNAL PREVIEW */}
-                  {journalEntries.length > 0 && (
-                    <div style={{ marginBottom: 28 }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Recent journal</div>
-                      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {journalEntries.slice(-3).reverse().map((e, i) => (
-                          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px" }}>
-                            <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4 }}>{e.date}</div>
-                            {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{e.trigger}</div>}
-                            {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
+                  {/* REFRAMES — summary + dropdown */}
+                  {savedReframes.length > 0 && (() => {
+                    const [open, setOpen] = React.useState(false);
+                    return (
+                      <div style={{ marginBottom: 12 }}>
+                        <button onClick={() => setOpen(!open)} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Reframes that landed</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{savedReframes.length} saved</div>
                           </div>
-                        ))}
+                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
+                        </button>
+                        {open && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                            {[...savedReframes].reverse().map((r, i) => (
+                              <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px" }}>
+                                <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
+                                {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: 0 }}>
-                        View all journal entries →
-                      </button>
-                    </div>
-                  )}
+                    );
+                  })()}
+
+                  {/* JOURNAL — summary + dropdown */}
+                  {journalEntries.length > 0 && (() => {
+                    const [open, setOpen] = React.useState(false);
+                    const emotionFreq = {};
+                    journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
+                    const topEmotion = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0];
+                    return (
+                      <div style={{ marginBottom: 12 }}>
+                        <button onClick={() => setOpen(!open)} style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                              {journalEntries.length} entries{topEmotion ? ` · most logged: ${topEmotion[0]}` : ""}
+                            </div>
+                          </div>
+                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
+                        </button>
+                        {open && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
+                            {[...journalEntries].reverse().slice(0, 10).map((e, i) => (
+                              <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px" }}>
+                                <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{e.date}</div>
+                                {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{e.trigger}</div>}
+                                {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
+                              </div>
+                            ))}
+                            <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>
+                              View all journal entries →
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </>
               )}
             </section>
