@@ -2743,55 +2743,124 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       {/* ── JOURNAL TAB ── */}
       {tab === "journal" && (
         <div>
+          {/* EMOTION CHIPS */}
           <div style={{ marginBottom: 16 }}>
-            <textarea
-              value={journalText}
-              onChange={e => setJournalText(e.target.value)}
-              placeholder="What's happening? Any state counts — excitement, rage, dread, joy. Write freely — the AI uses this every session."
-              style={{
-                width: "100%", minHeight: 120, background: mc.inputBg || "var(--surface)",
-                border: `1px solid ${mc.border}`, borderRadius: "var(--r-lg)",
-                padding: "14px 16px", color: "var(--text)", fontSize: 14,
-                fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "vertical"
-              }}
-            />
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
-              <MicButton onTranscript={t => setJournalText(prev => prev + (prev ? " " : "") + t)} />
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+              What's present
             </div>
-            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-              <button onClick={saveJournal} disabled={!journalText.trim()} style={{
-                flex: 1, background: mc.sendBg, color: "#fff", border: "none", borderRadius: "var(--r-lg)",
-                padding: "10px", fontSize: 13, fontWeight: 500, cursor: journalText.trim() ? "pointer" : "default",
-                fontFamily: "'DM Sans', sans-serif", opacity: journalText.trim() ? 1 : 0.4, transition: "opacity 0.2s"
-              }}>
-                Save entry
-              </button>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+              {["Rage", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Excitement", "Numbness", "Grief", "Fear", "Confusion", "Mixed"].map(em => {
+                const selected = (journalText || "").includes(em);
+                return (
+                  <button key={em} onClick={() => {
+                    setJournalText(prev => {
+                      const has = prev.includes(em);
+                      if (has) return prev.replace(em, "").replace(/^,\s*|,\s*$|,\s*,/g, "").trim();
+                      return prev ? `${prev}, ${em}` : em;
+                    });
+                  }} style={{
+                    padding: "5px 11px", borderRadius: "var(--r-sm)", fontSize: 11, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                    background: selected ? mc.aiBubble : "var(--surface)",
+                    border: `0.5px solid ${selected ? mc.color : "var(--border)"}`,
+                    color: selected ? mc.color : "var(--text-muted)",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
+                  }}>{em}</button>
+                );
+              })}
             </div>
           </div>
 
-          <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 10 }}>
-            Past entries
+          {/* FREE TEXT */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+              Notes — optional
+            </div>
+            <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+              <textarea
+                value={journalText.replace(/^(Rage|Anxiety|Dread|Overwhelm|Shame|Frustration|Excitement|Numbness|Grief|Fear|Confusion|Mixed)(,\s*)*/g, "").trim()}
+                onChange={e => {
+                  const chips = ["Rage","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                    .filter(em => journalText.includes(em)).join(", ");
+                  setJournalText(chips ? `${chips}, ${e.target.value}` : e.target.value);
+                }}
+                placeholder="Add context..."
+                style={{
+                  flex: 1, minHeight: 60, background: mc.inputBg || "var(--surface)",
+                  border: `0.5px solid ${mc.border}`, borderRadius: "var(--r)",
+                  padding: "10px 12px", color: "var(--text)", fontSize: 13,
+                  fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "none"
+                }}
+              />
+              <MicButton onTranscript={t => setJournalText(prev => prev + (prev ? " " : "") + t)} />
+            </div>
           </div>
+
+          <button onClick={saveJournal} disabled={!journalText.trim()} style={{
+            width: "100%", background: journalText.trim() ? mc.sendBg : "var(--surface2)",
+            color: journalText.trim() ? "#0A0A0C" : "var(--text-muted)",
+            border: "none", borderRadius: "var(--r)", padding: "12px",
+            fontSize: 13, fontWeight: 500, cursor: journalText.trim() ? "pointer" : "default",
+            fontFamily: "'DM Sans', sans-serif", transition: "opacity 0.2s",
+            boxShadow: journalText.trim() ? "inset 0 1px 0 rgba(255,255,255,0.12)" : "none",
+            marginBottom: 20
+          }}>
+            Log signal
+          </button>
+
+          {/* RECENT + FREQUENT */}
           {(() => {
             try {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return (
-                <div style={{ fontSize: 13, color: "var(--text-muted)", lineHeight: 1.6, padding: "8px 0" }}>
-                  No entries yet. Write your first one — the AI will use it as context every session.
+                <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, fontStyle: "italic" }}>
+                  No entries yet. The AI uses these every session.
                 </div>
               );
-              return entries.slice(0, 10).map((e, i) => (
-                <div key={e.id || i} style={{
-                  padding: "12px 14px", background: mc.aiBubble || "var(--surface)",
-                  border: `1px solid ${mc.border || "var(--border)"}`, borderRadius: "var(--r-lg)", marginBottom: 8
-                }}>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>{e.date} · {e.time}</div>
-                  <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{e.trigger}</div>
-                  {e.emotions && e.emotions.length > 0 && (
-                    <div style={{ fontSize: 11, color: mc.color, marginTop: 6 }}>{e.emotions.join(" · ")}</div>
+
+              // Emotion frequency
+              const freq = {};
+              entries.forEach(e => (e.emotions || []).forEach(em => { freq[em] = (freq[em] || 0) + 1; }));
+              // Also count from trigger text for old entries
+              entries.forEach(e => {
+                ["Rage","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                  .forEach(em => { if ((e.trigger || "").includes(em)) freq[em] = (freq[em] || 0) + 0.5; });
+              });
+              const topEmotions = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 4);
+
+              return (
+                <>
+                  {topEmotions.length > 0 && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Most frequent</div>
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                        {topEmotions.map(([em]) => (
+                          <span key={em} style={{
+                            padding: "3px 9px", borderRadius: "var(--r-sm)", fontSize: 10,
+                            background: mc.aiBubble, border: `0.5px solid ${mc.border}`,
+                            color: mc.color, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em"
+                          }}>{em}</span>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                </div>
-              ));
+
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Recent</div>
+                  {entries.slice(0, 3).map((e, i) => (
+                    <div key={e.id || i} style={{
+                      padding: "10px 12px", background: mc.aiBubble || "var(--surface)",
+                      border: `0.5px solid ${mc.border || "var(--border)"}`,
+                      borderRadius: "var(--r)", marginBottom: 6
+                    }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.06em" }}>{e.date}</div>
+                      <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
+                        {e.triggerType || (e.trigger || "").slice(0, 60)}{(e.trigger || "").length > 60 ? "…" : ""}
+                      </div>
+                      {e.outcome && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: mc.color, marginTop: 4, letterSpacing: "0.06em", textTransform: "uppercase" }}>{e.outcome}</div>}
+                    </div>
+                  ))}
+                </>
+              );
             } catch { return null; }
           })()}
         </div>
