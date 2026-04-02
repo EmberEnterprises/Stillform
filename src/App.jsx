@@ -1523,15 +1523,34 @@ function BreatheGroundTool({ onComplete, pathway }) {
     }
     const elapsed = groundElapsedRef.current;
     const count = getSessionCount();
+    const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+    const lastShift = (() => { try { return JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); } catch { return null; } })();
     return (
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>State shifted.</h2>
-        <p>Nervous system regulated. You're functional again.</p>
-        <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
-        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
-        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
-          Moving to Reframe…
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+          Protocol complete · {formatTime(elapsed)}
+        </div>
+        {signalProfile?.firstAreas?.length > 0 && (
+          <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 16px", marginBottom: 16, textAlign: "left" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Signal Shift</div>
+            {signalProfile.firstAreas.slice(0, 3).map(area => (
+              <div key={area} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{area}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)" }}>Protocol complete</span>
+              </div>
+            ))}
+            {lastShift !== null && lastShift > 0 && (
+              <div style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid var(--border)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--amber)", letterSpacing: "0.1em" }}>
+                STATE SHIFT +{lastShift} · FUNCTIONAL
+              </div>
+            )}
+          </div>
+        )}
+        {count > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
+        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", fontSize: 9 }}>
+          MOVING TO REFRAME…
         </div>
         <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>
           Exit session
@@ -2083,15 +2102,28 @@ function BodyScanTool({ onComplete }) {
     if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => onComplete("reframe-calm"), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
+    const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
     return (
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>Activation cleared.</h2>
-        <p>Pressure applied. Intensity reduced where it was held.</p>
-        <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
-        {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
-        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
-          Moving to Reframe…
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+          Scan complete · {formatTime(elapsed)}
+        </div>
+        {signalProfile?.firstAreas?.length > 0 && (
+          <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 16px", marginBottom: 16, textAlign: "left" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Signal Shift</div>
+            {signalProfile.firstAreas.slice(0, 3).map(area => (
+              <div key={area} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{area}</span>
+                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)" }}>Pressure released</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {sessionCount > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {sessionCount}</div>}
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
+          MOVING TO REFRAME…
         </div>
         <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>Exit session</button>
         <SessionNote />
@@ -2805,7 +2837,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
                     {msg.distortion}
                   </div>
                 )}
-                {msg.text}
+                {msg.role === "ai" ? (
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300, lineHeight: 1.65, letterSpacing: "0.01em" }}>
+                    {msg.text.split(/(\*[^*]+\*)/).map((part, j) =>
+                      part.startsWith("*") && part.endsWith("*")
+                        ? <em key={j} style={{ fontStyle: "italic", color: mc.color }}>{part.slice(1, -1)}</em>
+                        : <span key={j}>{part}</span>
+                    )}
+                  </div>
+                ) : msg.text}
                 {msg.role === "ai" && (
                   <button onClick={() => saveReframe(msg, i)} style={{
                     display: "block", marginTop: 8, background: "none", border: "none",
