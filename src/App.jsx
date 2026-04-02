@@ -2418,7 +2418,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       {/* FEEL STATE — optional single-tap, neutral by default */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
-          I feel — <span style={{ color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>optional</span>
+          What's present — <span style={{ color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>optional</span>
         </div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {[
