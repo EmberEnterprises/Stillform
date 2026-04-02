@@ -4922,28 +4922,16 @@ export default function Stillform() {
 
             {/* Language */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Language</div>
-              <select
-                value={(() => { try { return localStorage.getItem("stillform_lang") || "en"; } catch { return "en"; } })()}
-                onChange={e => { try { localStorage.setItem("stillform_lang", e.target.value); } catch {} }}
-                style={{
-                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
-                  borderRadius: 8, padding: "12px 14px", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif", appearance: "none", cursor: "pointer"
-                }}
-              >
-                <option value="en">English</option>
-                <option value="hy" disabled>Հայերեն — Armenian (coming soon)</option>
-                <option value="es" disabled>Español (coming soon)</option>
-                <option value="fr" disabled>Français (coming soon)</option>
-                <option value="de" disabled>Deutsch (coming soon)</option>
-                <option value="pt" disabled>Português (coming soon)</option>
-                <option value="ja" disabled>日本語 (coming soon)</option>
-                <option value="ko" disabled>한국어 (coming soon)</option>
-                <option value="zh" disabled>中文 (coming soon)</option>
-                <option value="ar" disabled>العربية (coming soon)</option>
-                <option value="tr" disabled>Türkçe (coming soon)</option>
-              </select>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Language</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                Additional languages coming soon.
+              </div>
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+              }}>
+                English
+              </div>
             </div>
 
             {/* Breathing Pattern */}
@@ -5341,25 +5329,28 @@ export default function Stillform() {
               </div>
             </div>
 
-            {/* Know Your Body */}
+            {/* Signal Mapping */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Signal Mapping</div>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Signal Mapping</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                Map where intensity shows up in your body — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
+              </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
-                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does tension show first? Build your body profile.</div>
+                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals →</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
                 </button>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
-                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Tension check</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second body scan. Are you holding something you haven't noticed?</div>
+                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Tension check →</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second scan. Are you holding something you haven't noticed?</div>
                 </button>
               </div>
             </div>
