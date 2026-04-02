@@ -4137,9 +4137,50 @@ function MyProgress({ onBack, onJournal }) {
   journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
   const topEmotionEntry = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
-  const cardStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center" };
-  const rowStyle = { width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center" };
-  const subRowStyle = { background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "10px 14px" };
+  // --- TREND ANALYSIS ---
+  // Day-of-week trigger clustering from journal
+  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const dayTriggerCounts = {};
+  journalEntries.forEach(e => {
+    if (!e.id) return;
+    const d = new Date(e.id);
+    if (isNaN(d)) return;
+    const day = dayNames[d.getDay()];
+    dayTriggerCounts[day] = (dayTriggerCounts[day] || 0) + 1;
+  });
+  const topDayEntry = Object.entries(dayTriggerCounts).sort((a, b) => b[1] - a[1])[0] || null;
+  const topDayCount = topDayEntry?.[1] || 0;
+
+  // Signal area frequency from journal
+  const signalFreq = {};
+  journalEntries.forEach(e => (e.signal || []).forEach(s => { signalFreq[s] = (signalFreq[s] || 0) + 1; }));
+  const topSignalEntry = Object.entries(signalFreq).sort((a, b) => b[1] - a[1])[0] || null;
+
+  // Trigger type frequency
+  const triggerFreq = {};
+  journalEntries.forEach(e => { if (e.triggerType) triggerFreq[e.triggerType] = (triggerFreq[e.triggerType] || 0) + 1; });
+  const topTriggerEntry = Object.entries(triggerFreq).sort((a, b) => b[1] - a[1])[0] || null;
+
+  // Outcome distribution
+  const outcomeFreq = {};
+  journalEntries.forEach(e => { if (e.outcome) outcomeFreq[e.outcome] = (outcomeFreq[e.outcome] || 0) + 1; });
+  const topOutcomeEntry = Object.entries(outcomeFreq).sort((a, b) => b[1] - a[1])[0] || null;
+
+  // Session improvement trend — compare first half vs second half avg delta
+  const halfLen = Math.floor(sessionsWithRatings.length / 2);
+  const firstHalf = sessionsWithRatings.slice(0, halfLen);
+  const secondHalf = sessionsWithRatings.slice(halfLen);
+  const firstAvg = firstHalf.length ? firstHalf.reduce((s, e) => s + (e.delta || 0), 0) / firstHalf.length : null;
+  const secondAvg = secondHalf.length ? secondHalf.reduce((s, e) => s + (e.delta || 0), 0) / secondHalf.length : null;
+  const improving = firstAvg !== null && secondAvg !== null && secondAvg > firstAvg;
+  const trendDiff = firstAvg !== null && secondAvg !== null ? (secondAvg - firstAvg).toFixed(1) : null;
+
+  const hasPatterns = journalEntries.length >= 3 || sessionsWithRatings.length >= 5;
+
+  const cardStyle = { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
+  const rowStyle = { width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
+  const subRowStyle = { background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px" };
+  const monoLabel = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 };
 
   return (
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
@@ -4178,6 +4219,101 @@ function MyProgress({ onBack, onJournal }) {
             </div>;
           })()}
         </div>
+
+        {/* PATTERNS — trend view */}
+        {hasPatterns && (
+          <div style={{ marginBottom: 8 }}>
+            <button onClick={() => toggle("patterns")} style={rowStyle}>
+              <div>
+                <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Pattern Analysis</div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                  {[
+                    topSignalEntry && `${topSignalEntry[0]} activating most`,
+                    improving && "regulation improving"
+                  ].filter(Boolean).join(" · ") || "System notes from your data"}
+                </div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.patterns ? "▾" : "▸"}</span>
+            </button>
+            {openSections.patterns && (
+              <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+
+                {/* Day-of-week spike */}
+                {topDayEntry && topDayCount >= 2 && (
+                  <div>
+                    <div style={monoLabel}>Temporal Pattern</div>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
+                      Signal events cluster on <span style={{ color: "var(--amber)" }}>{topDayEntry[0]}s</span> — {topDayCount} of {journalEntries.length} logged events.
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                      System note: Is this a recurring environmental trigger?
+                    </div>
+                  </div>
+                )}
+
+                {/* Primary activation zone */}
+                {topSignalEntry && (
+                  <div>
+                    <div style={monoLabel}>Primary Activation Zone</div>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
+                      <span style={{ color: "var(--amber)" }}>{topSignalEntry[0]}</span> activates in {topSignalEntry[1]} of {journalEntries.length} logged events ({Math.round((topSignalEntry[1] / journalEntries.length) * 100)}%).
+                    </div>
+                  </div>
+                )}
+
+                {/* Trigger type pattern */}
+                {topTriggerEntry && topTriggerEntry[1] >= 2 && (
+                  <div>
+                    <div style={monoLabel}>Trigger Profile</div>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
+                      Most frequent trigger: <span style={{ color: "var(--amber)" }}>{topTriggerEntry[0]}</span> ({topTriggerEntry[1]}x logged).
+                    </div>
+                  </div>
+                )}
+
+                {/* Outcome distribution */}
+                {topOutcomeEntry && (
+                  <div>
+                    <div style={monoLabel}>Outcome Distribution</div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                      {Object.entries(outcomeFreq).sort((a, b) => b[1] - a[1]).map(([outcome, count]) => (
+                        <div key={outcome} style={{
+                          padding: "4px 10px", borderRadius: "var(--r-sm)",
+                          background: outcome === topOutcomeEntry[0] ? "var(--amber-glow)" : "var(--surface)",
+                          border: `0.5px solid ${outcome === topOutcomeEntry[0] ? "var(--amber-dim)" : "var(--border)"}`,
+                          fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.08em",
+                          color: outcome === topOutcomeEntry[0] ? "var(--amber)" : "var(--text-muted)",
+                          textTransform: "uppercase"
+                        }}>
+                          {outcome} · {count}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Session improvement trend */}
+                {trendDiff !== null && sessionsWithRatings.length >= 6 && (
+                  <div>
+                    <div style={monoLabel}>Regulation Trend</div>
+                    <div style={{ fontSize: 13, color: improving ? "var(--amber)" : "var(--text-dim)", lineHeight: 1.6 }}>
+                      {improving
+                        ? `Avg shift up +${trendDiff} pts comparing first vs recent sessions. Regulation is improving.`
+                        : `Avg shift holding steady across sessions. Baseline consistent.`
+                      }
+                    </div>
+                  </div>
+                )}
+
+                {journalEntries.length < 3 && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
+                    Log more signal events to unlock deeper pattern analysis.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* SELF KNOWLEDGE */}
         {(biasProfile?.length > 0 || signalProfile?.firstAreas?.length > 0) && (
