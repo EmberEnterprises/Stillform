@@ -5270,7 +5270,7 @@ export default function Stillform() {
             </div>
 
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32 }}>
-              Stillform · Ember Enterprises LLC · v1.0
+              Stillform · ARA Embers LLC · v1.0
             </div>
 
             {/* BACKUP & DATA — buried at very bottom */}
@@ -5343,7 +5343,7 @@ export default function Stillform() {
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
           </div>
-          <div className="footer-copy">© 2026 Ember Enterprises LLC</div>
+          <div className="footer-copy">© 2026 ARA Embers LLC</div>
         </footer>
       </div>
     </>
