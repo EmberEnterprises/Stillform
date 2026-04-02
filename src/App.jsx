@@ -1528,7 +1528,6 @@ function BreatheGroundTool({ onComplete, pathway }) {
     }
     if (!groundAutoRef.current) {
       groundAutoRef.current = true;
-      setTimeout(() => onComplete("reframe-calm"), 2000);
     }
     const elapsed = groundElapsedRef.current;
     const count = getSessionCount();
@@ -1558,12 +1557,14 @@ function BreatheGroundTool({ onComplete, pathway }) {
           </div>
         )}
         {count > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
-        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", fontSize: 9 }}>
-          MOVING TO REFRAME…
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
+          <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
+            Continue to Reframe →
+          </button>
+          <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>
+            Exit session
+          </button>
         </div>
-        <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>
-          Exit session
-        </button>
         <SessionNote />
       </div>
     );
@@ -4659,22 +4660,18 @@ export default function Stillform() {
   const renderTool = () => {
     const props = { onComplete: (redirectTo) => {
       if (redirectTo) {
-        // Handle crisis
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
-        // Handle bare "reframe" — default to calm mode
         if (redirectTo === "reframe") {
-          const tool = { ...TOOLS.find(t => t.id === "reframe"), mode: "calm" };
-          setTimeout(() => { setActiveTool(tool); setScreen("tool"); }, 50);
+          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+          setScreen("tool");
           return;
         }
-        // Handle reframe with mode
         if (redirectTo === "reframe-calm" || redirectTo === "reframe-clarity" || redirectTo === "reframe-hype") {
           const mode = redirectTo.split("-")[1];
-          const tool = { ...TOOLS.find(t => t.id === "reframe"), mode };
-          setTimeout(() => { setActiveTool(tool); setScreen("tool"); }, 50);
+          setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode });
+          setScreen("tool");
           return;
         }
-        // Handle tool id direct
         const tool = TOOLS.find(t => t.id === redirectTo);
         if (tool) { startTool(tool); return; }
       }
