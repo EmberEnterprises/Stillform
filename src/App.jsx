@@ -1,23 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 
 const styles = `
-  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap');
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0e0f11;
-    --surface: #161819;
-    --surface2: #1e2022;
-    --border: #2a2d30;
-    --amber: #c9933a;
-    --amber-dim: #8a6228;
-    --amber-glow: rgba(201,147,58,0.12);
-    --text: #e8e4dc;
-    --text-dim: #a09c97;
-    --text-muted: #6a6662;
-    --green: #4a8c6a;
-    --green-glow: rgba(74,140,106,0.12);
+    --bg:         #0A0A0C;
+    --surface:    #141418;
+    --surface2:   #1A1A1F;
+    --border:     rgba(255,255,255,0.07);
+    --border-hi:  rgba(255,255,255,0.12);
+    --amber:      #C8922A;
+    --amber-dim:  rgba(200,146,42,0.25);
+    --amber-glow: rgba(200,146,42,0.07);
+    --amber-20:   rgba(200,146,42,0.20);
+    --text:       #E8EAF0;
+    --text-dim:   #9496A1;
+    --text-muted: #55575F;
+    --green:      #4a8c6a;
+    --green-glow: rgba(74,140,106,0.08);
+    --r-sm: 2px;
+    --r:    3px;
+    --r-lg: 6px;
   }
 
   html, body, #root { height: 100%; background: var(--bg); }
@@ -30,6 +35,8 @@ const styles = `
     font-weight: 400;
     position: relative;
     overflow-x: hidden;
+    /* Grain texture — prestige signal */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
   }
 
   .app::before {
@@ -39,7 +46,7 @@ const styles = `
     left: -20%;
     width: 60%;
     height: 60%;
-    background: radial-gradient(ellipse, rgba(201,147,58,0.04) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(200,146,42,0.03) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
@@ -49,18 +56,17 @@ const styles = `
     align-items: center;
     justify-content: space-between;
     padding: 24px 40px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 0.5px solid var(--border);
     position: relative;
     z-index: 10;
   }
 
   .nav-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 400;
-    letter-spacing: 0.05em;
-    font-size: 22px;
+    font-family: 'Cormorant Garamond', serif;
     font-weight: 300;
-    letter-spacing: 0.12em;
+    font-size: 18px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
     color: var(--text);
   }
 
@@ -70,7 +76,7 @@ const styles = `
 
   .btn {
     padding: 10px 22px;
-    border-radius: 4px;
+    border-radius: var(--r);
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 400;
@@ -83,23 +89,24 @@ const styles = `
   .btn-ghost {
     background: transparent;
     color: var(--text-dim);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border-hi);
   }
 
   .btn-ghost:hover { border-color: var(--amber-dim); color: var(--amber); }
 
   .btn-primary {
     background: var(--amber);
-    color: #0e0f11;
+    color: #0A0A0C;
     font-weight: 500;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2);
   }
 
-  .btn-primary:hover { background: #d9a34a; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(201,147,58,0.3); }
+  .btn-primary:hover { opacity: 0.9; }
 
   .btn-secondary {
     background: var(--surface2);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 0.5px solid var(--border-hi);
   }
 
   .btn-secondary:hover { border-color: var(--amber-dim); }
@@ -298,33 +305,46 @@ const styles = `
     position: relative;
     width: 280px;
     height: 280px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
+  .breath-svg-ring {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+    position: absolute;
+    inset: 0;
+  }
+
+  .breath-ring-track {
+    fill: none;
+    stroke: rgba(255,255,255,0.05);
+    stroke-width: 1;
+  }
+
+  .breath-ring-arc {
+    fill: none;
+    stroke: var(--amber);
+    stroke-width: 1.5;
+    stroke-linecap: butt;
+    transition: stroke-dashoffset var(--breath-duration, 4s) linear;
+  }
+
+  /* Legacy circle — kept for sigh tool */
   .breath-circle {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,147,58,0.15) 0%, rgba(201,147,58,0.04) 60%, transparent 100%);
-    border: 1px solid var(--amber-dim);
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform var(--breath-duration, 4s) ease-in-out, box-shadow var(--breath-duration, 4s) ease-in-out;
+    transition: transform var(--breath-duration, 4s) ease-in-out;
   }
 
-  .breath-circle.expand {
-    transform: scale(1.3);
-    box-shadow: 0 0 80px rgba(201,147,58,0.20), 0 0 160px rgba(201,147,58,0.08);
-  }
-  .breath-circle.hold {
-    transform: scale(1.3);
-    box-shadow: 0 0 60px rgba(201,147,58,0.15), 0 0 120px rgba(201,147,58,0.06);
-  }
-  .breath-circle.contract {
-    transform: scale(1);
-    box-shadow: 0 0 30px rgba(201,147,58,0.07);
-  }
+  .breath-circle.expand { transform: scale(1.05); }
+  .breath-circle.hold   { transform: scale(1.05); }
+  .breath-circle.contract { transform: scale(1); }
 
   @keyframes breathe-ring {
     0%, 100% { opacity: 0.3; transform: scale(1); }
@@ -332,38 +352,40 @@ const styles = `
   }
 
   .breath-inner {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: var(--amber-glow);
-    border: 1px solid var(--amber);
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    gap: 4px;
   }
 
   .breath-count {
-    font-family: 'Cormorant Garamond', serif;
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 52px;
     font-weight: 300;
     color: var(--amber);
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
   .breath-phase {
-    font-size: 13px;
-    letter-spacing: 0.18em;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--text-dim);
+    color: var(--text-muted);
     margin-bottom: 12px;
     text-align: center;
   }
 
   .breath-instruction {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 32px;
+    font-size: 22px;
     font-style: italic;
     font-weight: 300;
-    color: var(--text);
+    color: var(--text-dim);
     text-align: center;
     margin-bottom: 8px;
     line-height: 1.3;
@@ -614,34 +636,47 @@ const styles = `
 
   .scan-area {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px 24px;
-    transition: all 0.3s;
+    border: 0.5px solid var(--border);
+    border-radius: var(--r);
+    padding: 12px 16px;
+    transition: all 0.25s ease-out;
     cursor: pointer;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.025);
   }
 
   .scan-area.active {
     border-color: var(--amber);
-    background: rgba(201,147,58,0.08);
-    box-shadow: 0 0 24px rgba(201,147,58,0.08);
+    background: var(--amber-glow);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim);
+  }
+
+  .scan-area.done {
+    border-color: var(--amber-dim);
+    opacity: 0.45;
   }
 
   .scan-area-name {
-    font-family: 'Cormorant Garamond', serif;
-    font-size: 20px;
-    font-weight: 300;
-    margin-bottom: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-dim);
+    transition: color 0.25s;
+    margin-bottom: 3px;
   }
 
   .scan-area.active .scan-area-name {
     color: var(--amber);
+    font-weight: 500;
+  }
+
+  .scan-area.done .scan-area-name {
+    color: var(--text-muted);
   }
 
   .scan-area-prompt {
-    font-size: 13px;
-    color: var(--text-dim);
-    line-height: 1.6;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
   }
 
   .tension-bar {
@@ -668,32 +703,43 @@ const styles = `
   }
 
   .complete-icon {
-    width: 88px;
-    height: 88px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    background: var(--green-glow);
-    border: 1px solid var(--green);
+    background: var(--amber-glow);
+    border: 0.5px solid var(--amber);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 36px;
-    margin: 0 auto 32px;
-    box-shadow: 0 0 40px rgba(74,140,106,0.12);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 20px;
+    color: var(--amber);
+    margin: 0 auto 28px;
+    box-shadow: 0 0 24px rgba(200,146,42,0.08);
   }
 
   .complete h2 {
     font-family: 'Cormorant Garamond', serif;
     font-size: 42px;
     font-weight: 300;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .complete p {
     color: var(--text-dim);
-    font-size: 15px;
+    font-size: 14px;
     line-height: 1.7;
     max-width: 400px;
-    margin: 0 auto 36px;
+    margin: 0 auto 8px;
+  }
+
+  .complete-data {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
   }
 
   /* PRICING */
@@ -1100,7 +1146,7 @@ function SessionNote() {
       <div style={{ display: "flex", gap: 8 }}>
         <input
           style={{
-            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6,
+            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
             padding: "8px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
           }}
           placeholder="What triggered this? (optional)"
@@ -1111,7 +1157,7 @@ function SessionNote() {
         <MicButton onTranscript={t => setNote(prev => prev + (prev ? " " : "") + t)} />
         {note.trim() && (
           <button onClick={save} style={{
-            background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 6,
+            background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r)",
             padding: "8px 12px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
           }}>Save</button>
         )}
@@ -1215,29 +1261,44 @@ function PhysiologicalSighTool({ onComplete }) {
 
       <div className="breath-container">
         <div className="breath-circle-wrap">
-          <div
-            className={`breath-circle ${phase === "exhale" ? "contract" : phase === "rest" ? "hold" : "expand"}`}
-            style={{ '--breath-duration': `${phases[phase]?.duration || 2}s` }}
-          >
-            <div className="breath-inner">
-              <span className="breath-count">{count}</span>
-            </div>
+          <svg className="breath-svg-ring" viewBox="0 0 280 280">
+            <g stroke="rgba(255,255,255,0.06)" strokeWidth="1" transform="rotate(90 140 140)">
+              <line x1="140" y1="5" x2="140" y2="18"/>
+              <line x1="275" y1="140" x2="262" y2="140"/>
+              <line x1="140" y1="275" x2="140" y2="262"/>
+              <line x1="5" y1="140" x2="18" y2="140"/>
+            </g>
+            <g stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" transform="rotate(90 140 140)">
+              {[30,60,120,150,210,240,300,330].map(deg => {
+                const rad = (deg * Math.PI) / 180;
+                return <line key={deg} x1={140 + 131*Math.cos(rad)} y1={140 + 131*Math.sin(rad)} x2={140 + 122*Math.cos(rad)} y2={140 + 122*Math.sin(rad)}/>;
+              })}
+            </g>
+            <circle className="breath-ring-track" cx="140" cy="140" r="125"/>
+            <circle
+              className="breath-ring-arc"
+              cx="140" cy="140" r="125"
+              style={{
+                strokeDasharray: 785,
+                strokeDashoffset: phase === "exhale" ? 785 : phase === "rest" ? 196 : 0,
+                '--breath-duration': `${phases[phase]?.duration || 2}s`
+              }}
+            />
+            <circle cx="140" cy="140" r="106" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5"/>
+          </svg>
+          <div className="breath-inner">
+            <span className="breath-count">{count}</span>
+            <span className="breath-phase">{phases[phase]?.label}</span>
           </div>
         </div>
 
         {running && phase !== "done" ? (
           <>
-            <div className="breath-phase" style={{ fontSize: 22, marginBottom: 6 }}>
-              {phases[phase]?.label}
-            </div>
             <div className="breath-instruction">{phases[phase]?.sub}</div>
             <div style={{ height: 32 }} />
           </>
         ) : (
           <>
-            <div className="breath-phase" style={{ fontSize: 18, marginBottom: 8 }}>
-              Double inhale, long exhale.
-            </div>
             <div className="breath-instruction" style={{ marginBottom: 24 }}>
               The fastest way to reset your nervous system. Three times.
             </div>
@@ -1526,7 +1587,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
       <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
         Grounding — step {current + 1} of 5
       </div>
-      <div style={{ background: "var(--surface)", borderRadius: 12, padding: "24px 20px", marginBottom: 20, textAlign: "center" }}>
+      <div style={{ background: "var(--surface)", borderRadius: "var(--r-lg)", padding: "24px 20px", marginBottom: 20, textAlign: "center" }}>
         <div style={{ fontSize: 36, color: "var(--amber)", marginBottom: 8 }}>{steps[current].num}</div>
         <div style={{ fontSize: 20, color: "var(--text)", fontWeight: 500, marginBottom: 8 }}>
           {steps[current].label}
@@ -1621,19 +1682,43 @@ function BreatheGroundTool({ onComplete, pathway }) {
       {!breatheDone ? (
         <div className="breath-container">
           <div className="breath-circle-wrap">
-            <div
-              className={circleClass}
-              style={{ '--breath-duration': `${phases[phaseIdx].duration}s` }}
-            >
-              <div className="breath-inner">
-                <span className="breath-count">{count}</span>
-              </div>
+            <svg className="breath-svg-ring" viewBox="0 0 280 280">
+              {/* Tick marks — cardinal */}
+              <g stroke="rgba(255,255,255,0.06)" strokeWidth="1" transform="rotate(90 140 140)">
+                <line x1="140" y1="5" x2="140" y2="18"/>
+                <line x1="275" y1="140" x2="262" y2="140"/>
+                <line x1="140" y1="275" x2="140" y2="262"/>
+                <line x1="5" y1="140" x2="18" y2="140"/>
+              </g>
+              {/* Micro ticks every 30deg */}
+              <g stroke="rgba(255,255,255,0.03)" strokeWidth="0.5" transform="rotate(90 140 140)">
+                {[30,60,120,150,210,240,300,330].map(deg => {
+                  const rad = (deg * Math.PI) / 180;
+                  const x1 = 140 + 131 * Math.cos(rad);
+                  const y1 = 140 + 131 * Math.sin(rad);
+                  const x2 = 140 + 122 * Math.cos(rad);
+                  const y2 = 140 + 122 * Math.sin(rad);
+                  return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2}/>;
+                })}
+              </g>
+              <circle className="breath-ring-track" cx="140" cy="140" r="125"/>
+              <circle
+                className="breath-ring-arc"
+                cx="140" cy="140" r="125"
+                style={{
+                  strokeDasharray: 785,
+                  strokeDashoffset: phase === "exhale" ? 785 : phase === "rest" ? 196 : 0,
+                  '--breath-duration': `${phases[phase]?.duration || 4}s`
+                }}
+              />
+              <circle cx="140" cy="140" r="106" fill="none" stroke="rgba(255,255,255,0.025)" strokeWidth="0.5"/>
+            </svg>
+            <div className="breath-inner">
+              <span className="breath-count">{count}</span>
+              <span className="breath-phase">{phases[phase]?.label}</span>
             </div>
           </div>
-          <div className="breath-phase" style={{ fontSize: 20, marginBottom: 4 }}>
-            {phases[phaseIdx].name}
-          </div>
-          <div className="breath-instruction">{phases[phaseIdx].instruction}</div>
+          <div className="breath-instruction" style={{ marginTop: 8 }}>{phases[phaseIdx].instruction}</div>
           <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 12 }}>
             Round {cycle} of {totalCycles}
           </div>
@@ -1662,7 +1747,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
                   width: "100%", padding: "10px 14px", textAlign: "left", cursor: "pointer",
                   background: p.id === patternId ? "var(--amber-glow)" : "var(--surface)",
                   border: `1px solid ${p.id === patternId ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: 8, marginBottom: 6, color: "var(--text)",
+                  borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
                   fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                 }}>
                   <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{p.name}</div>
@@ -1707,7 +1792,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
             return (
               <div style={{
                 marginTop: 24, padding: "12px 16px", background: "var(--surface)",
-                border: "1px solid var(--border)", borderRadius: 8,
+                border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 display: "flex", alignItems: "flex-start", gap: 10
               }}>
                 <div style={{ flex: 1 }}>
@@ -2037,7 +2122,7 @@ function BodyScanTool({ onComplete }) {
                   Apply pressure here →
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
-                  background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "8px 12px", fontSize: 11, cursor: "pointer",
                   color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -2092,7 +2177,7 @@ function BodyScanTool({ onComplete }) {
                 </svg>
               </div>
 
-              <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 8, padding: "16px 20px" }}>
+              <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "16px 20px" }}>
                 <div style={{ fontSize: 15, fontWeight: 500, color: "var(--amber)", marginBottom: 10 }}>{a.pointEffect}</div>
                 <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Where:</strong> {a.pointLocation}</div>
                 <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>How:</strong> {a.pointInstruction}</div>
@@ -2113,13 +2198,13 @@ function BodyScanTool({ onComplete }) {
                   <button onClick={(e) => { e.stopPropagation(); toggleAudio(); }} style={{
                     background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
                     border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 8, padding: "8px 12px", fontSize: 11, cursor: "pointer",
+                    borderRadius: "var(--r-lg)", padding: "8px 12px", fontSize: 11, cursor: "pointer",
                     color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif"
                   }}>
                     {audioOn ? "♪" : "♪"}
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
-                    background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                    background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "8px 12px", fontSize: 11, cursor: "pointer",
                     color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
                   }}>
@@ -2132,7 +2217,7 @@ function BodyScanTool({ onComplete }) {
                   <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.08em" }}>
                     {holding ? `HOLDING — ${holdTarget - holdCount}s remaining` : "HOLD COMPLETE"}
                   </div>
-                  <div style={{ background: "var(--border)", borderRadius: 4, height: 4, overflow: "hidden" }}>
+                  <div style={{ background: "var(--border)", borderRadius: "var(--r)", height: 4, overflow: "hidden" }}>
                     <div style={{ width: `${holdProgress}%`, height: "100%", background: holdProgress >= 100 ? "var(--green)" : "var(--amber)", transition: "width 1s linear" }} />
                   </div>
                   {holding && (
@@ -2213,7 +2298,7 @@ function MicButton({ onTranscript }) {
     <button onClick={speech.toggle} style={{
       background: speech.listening ? "rgba(200,60,60,0.15)" : "var(--surface)",
       border: `1px solid ${speech.listening ? "rgba(200,60,60,0.4)" : "var(--border)"}`,
-      borderRadius: 8, padding: "6px 12px", cursor: "pointer", fontSize: 12,
+      borderRadius: "var(--r-lg)", padding: "6px 12px", cursor: "pointer", fontSize: 12,
       color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
       fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
       animation: speech.listening ? "pulse 1.5s ease-in-out infinite" : "none"
@@ -2225,6 +2310,7 @@ function MicButton({ onTranscript }) {
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
+  const [exitAnchor, setExitAnchor] = useState(false);
   const [tab, setTab] = useState(defaultTab);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
@@ -2561,7 +2647,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             <button key={m.id} onClick={() => setActiveMode(m.id)} style={{
               flex: 1, background: active ? `${m.color}18` : "transparent",
               border: `1px solid ${active ? m.color : "var(--border)"}`,
-              borderRadius: 8, padding: "10px 8px", cursor: "pointer",
+              borderRadius: "var(--r-lg)", padding: "10px 8px", cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s", textAlign: "center"
             }}>
               <div style={{ fontSize: 14, color: active ? m.color : "var(--text-muted)", marginBottom: 2 }}>{m.icon}</div>
@@ -2587,7 +2673,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           color: tab === "journal" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Journal · get it out
+          Signal Log
         </button>
       </div>
 
@@ -2605,7 +2691,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               placeholder="What's happening? Any state counts — excitement, rage, dread, joy. Write freely — the AI uses this every session."
               style={{
                 width: "100%", minHeight: 120, background: mc.inputBg || "var(--surface)",
-                border: `1px solid ${mc.border}`, borderRadius: 10,
+                border: `1px solid ${mc.border}`, borderRadius: "var(--r-lg)",
                 padding: "14px 16px", color: "var(--text)", fontSize: 14,
                 fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "vertical"
               }}
@@ -2615,7 +2701,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             </div>
             <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
               <button onClick={saveJournal} disabled={!journalText.trim()} style={{
-                flex: 1, background: mc.sendBg, color: "#fff", border: "none", borderRadius: 8,
+                flex: 1, background: mc.sendBg, color: "#fff", border: "none", borderRadius: "var(--r-lg)",
                 padding: "10px", fontSize: 13, fontWeight: 500, cursor: journalText.trim() ? "pointer" : "default",
                 fontFamily: "'DM Sans', sans-serif", opacity: journalText.trim() ? 1 : 0.4, transition: "opacity 0.2s"
               }}>
@@ -2638,7 +2724,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               return entries.slice(0, 10).map((e, i) => (
                 <div key={e.id || i} style={{
                   padding: "12px 14px", background: mc.aiBubble || "var(--surface)",
-                  border: `1px solid ${mc.border || "var(--border)"}`, borderRadius: 10, marginBottom: 8
+                  border: `1px solid ${mc.border || "var(--border)"}`, borderRadius: "var(--r-lg)", marginBottom: 8
                 }}>
                   <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>{e.date} · {e.time}</div>
                   <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{e.trigger}</div>
@@ -2661,7 +2747,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
         <div style={{
           background: "rgba(200,0,50,0.08)",
           border: "1px solid rgba(200,0,50,0.25)",
-          borderRadius: 10,
+          borderRadius: "var(--r-lg)",
           padding: "14px 16px",
           marginBottom: 12
         }}>
@@ -2695,7 +2781,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           {messages.length === 0 && (
             <>
               {getSavedReframes().length > 0 && (
-                <div style={{ marginBottom: 16, padding: "12px 14px", background: mc.aiBubble, border: `1px solid ${mc.border}`, borderRadius: 10 }}>
+                <div style={{ marginBottom: 16, padding: "12px 14px", background: mc.aiBubble, border: `1px solid ${mc.border}`, borderRadius: "var(--r-lg)" }}>
                   <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>What helped before</div>
                   {getSavedReframes().slice(-2).map((r, i) => (
                     <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: i < 1 ? 8 : 0, paddingBottom: i < 1 ? 8 : 0, borderBottom: i < 1 ? "1px solid var(--border)" : "none" }}>
@@ -2782,7 +2868,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             <button onClick={speech.toggle} style={{
               background: speech.listening ? "rgba(200,60,60,0.2)" : "var(--surface2)",
               border: speech.listening ? "1px solid rgba(200,60,60,0.4)" : "1px solid var(--border)",
-              borderRadius: 8, width: 40, height: 40, cursor: "pointer",
+              borderRadius: "var(--r-lg)", width: 40, height: 40, cursor: "pointer",
               display: "flex", alignItems: "center", justifyContent: "center",
               fontSize: 18, color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
               transition: "all 0.2s", flexShrink: 0,
@@ -2812,7 +2898,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
                 saveSession();
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
-                onComplete();
+                setExitAnchor(true);
               }}>
                 Done for now
               </button>
@@ -2916,7 +3002,7 @@ function MicroBiasTool({ onComplete }) {
           You don't need to fix these. Just knowing they're there changes how you respond to them. The AI in Reframe is also watching for these patterns in your conversations.
         </p>
         {identified.length > 0 && (
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
             <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized</div>
             {identified.map((b, i) => (
               <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
@@ -2942,7 +3028,7 @@ function MicroBiasTool({ onComplete }) {
         {bias.name}
       </h2>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", marginBottom: 16 }}>
+      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
         <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>{bias.what}</div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, fontStyle: "italic" }}>{bias.example}</div>
       </div>
@@ -3054,7 +3140,7 @@ function PatternsTool({ onComplete }) {
         <p style={{ color: "var(--text-dim)", fontSize: 13, lineHeight: 1.7, marginBottom: 24 }}>
           Run a few sessions and do the daily check-in. Data appears here automatically.
         </p>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px", textAlign: "left", marginBottom: 24 }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", marginBottom: 24 }}>
           <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>What you'll see here</div>
           <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.8 }}>
             Most effective protocol · Average regulation speed · Whether you're getting faster · Highest tension areas · Total session count
@@ -3073,7 +3159,7 @@ function PatternsTool({ onComplete }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {insights.map((ins, i) => (
-          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px" }}>
+          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px" }}>
             <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>{ins.label}</div>
             <div style={{ fontSize: 20, fontWeight: 500, color: "var(--amber)", marginBottom: 4 }}>{ins.value}</div>
             <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{ins.detail}</div>
@@ -3207,7 +3293,7 @@ function MetacognitionTool({ onComplete }) {
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {choices.map((c, i) => (
             <button key={i} onClick={c.action} style={{
-              background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+              background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
               padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
             }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.label}</div>
@@ -3220,7 +3306,7 @@ function MetacognitionTool({ onComplete }) {
           <div style={{ display: "flex", gap: 6 }}>
             <textarea
               style={{
-                flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+                flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
                 lineHeight: 1.6, resize: "none", minHeight: 80
               }}
@@ -3319,7 +3405,7 @@ function SignalMapTool({ onComplete }) {
               }} style={{
                 background: selected ? "var(--amber-glow)" : "var(--surface)",
                 border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
-                borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
+                borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
               }}>
                 <div style={{ fontSize: 14, fontWeight: 500, color: selected ? "var(--amber)" : "var(--text)" }}>{area.label}</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{area.desc}</div>
@@ -3349,7 +3435,7 @@ function SignalMapTool({ onComplete }) {
               }} style={{
                 background: selected ? "var(--amber-glow)" : "var(--surface)",
                 border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
-                borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer",
+                borderRadius: "var(--r-lg)", padding: "8px 16px", fontSize: 13, cursor: "pointer",
                 color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
               }}>{s}</button>
             );
@@ -3378,7 +3464,7 @@ function SignalMapTool({ onComplete }) {
               }} style={{
                 background: selected ? "var(--amber-glow)" : "var(--surface)",
                 border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
-                borderRadius: 8, padding: "8px 16px", fontSize: 13, cursor: "pointer",
+                borderRadius: "var(--r-lg)", padding: "8px 16px", fontSize: 13, cursor: "pointer",
                 color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
               }}>{t}</button>
             );
@@ -3397,7 +3483,7 @@ function SignalMapTool({ onComplete }) {
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
           Now you know what to watch for. Over time, you'll start catching these signals before they escalate.
         </p>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
           <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your signals</div>
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>First to react:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
@@ -3496,7 +3582,7 @@ function BodyCheckInTool({ onComplete }) {
           <button key={opt.level} onClick={() => handleTap(area.id, opt.level)} style={{
             background: levels[area.id] === opt.level ? "var(--surface2)" : "var(--surface)",
             border: `1px solid ${levels[area.id] === opt.level ? opt.color : "var(--border)"}`,
-            borderRadius: 10, padding: "14px 6px", flex: 1, cursor: "pointer", transition: "all 0.2s",
+            borderRadius: "var(--r-lg)", padding: "14px 6px", flex: 1, cursor: "pointer", transition: "all 0.2s",
             textAlign: "center"
           }}>
             <div style={{ fontSize: 13, color: levels[area.id] === opt.level ? opt.color : "var(--text-dim)" }}>{opt.label}</div>
@@ -3797,7 +3883,7 @@ function PanicMode({ onComplete }) {
           right: 16,
           background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
           border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
-          borderRadius: 8,
+          borderRadius: "var(--r-lg)",
           padding: "8px 14px",
           fontSize: 12,
           color: audioOn ? "var(--amber)" : "var(--text-dim)",
@@ -3852,7 +3938,7 @@ function CheckInWidget({ onComplete }) {
 
   // Step 0: prompt
   if (step === 0) return (
-    <div style={{ marginBottom: 20, padding: "14px 18px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10 }}>
+    <div style={{ marginBottom: 20, padding: "14px 18px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)", marginBottom: 2 }}>Quick check-in</div>
@@ -3860,11 +3946,11 @@ function CheckInWidget({ onComplete }) {
         </div>
         <div style={{ display: "flex", gap: 6 }}>
           <button onClick={() => setStep(1)} style={{
-            background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 6,
+            background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r)",
             padding: "6px 14px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
           }}>Start</button>
           <button onClick={() => setDismissed(true)} style={{
-            background: "none", border: "1px solid var(--border)", borderRadius: 6,
+            background: "none", border: "1px solid var(--border)", borderRadius: "var(--r)",
             padding: "6px 10px", fontSize: 11, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
           }}>Skip</button>
         </div>
@@ -3874,7 +3960,7 @@ function CheckInWidget({ onComplete }) {
 
   // Step 1: Sleep
   if (step === 1) return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>1 of 3 · Sleep</div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 12 }}>How many hours did you sleep?</div>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -3883,7 +3969,7 @@ function CheckInWidget({ onComplete }) {
         <div style={{ fontSize: 18, color: "var(--amber)", fontWeight: 500, minWidth: 40, textAlign: "center" }}>{sleep}h</div>
       </div>
       <button onClick={() => setStep(2)} style={{
-        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 8,
+        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
         padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
       }}>Next</button>
     </div>
@@ -3891,13 +3977,13 @@ function CheckInWidget({ onComplete }) {
 
   // Step 2: Energy + Mood
   if (step === 2) return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>2 of 3 · Energy & mood</div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 10 }}>Energy right now?</div>
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
         {["low", "ok", "high"].map(e => (
           <button key={e} onClick={() => setEnergy(e)} style={{
-            flex: 1, padding: "8px", borderRadius: 8, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+            flex: 1, padding: "8px", borderRadius: "var(--r-lg)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
             fontSize: 13, border: `1px solid ${energy === e ? "var(--amber)" : "var(--border)"}`,
             background: energy === e ? "var(--amber-glow)" : "transparent",
             color: energy === e ? "var(--amber)" : "var(--text-dim)", transition: "all 0.15s"
@@ -3908,13 +3994,13 @@ function CheckInWidget({ onComplete }) {
       <div style={{ display: "flex", gap: 6 }}>
         <input value={mood} onChange={e => setMood(e.target.value)} placeholder="calm, anxious, flat, wired..."
           style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
             padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
           }} />
         <MicButton onTranscript={t => setMood(t)} />
       </div>
       <button onClick={() => setStep(3)} style={{
-        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 8,
+        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
         padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
       }}>Next</button>
     </div>
@@ -3922,13 +4008,13 @@ function CheckInWidget({ onComplete }) {
 
   // Step 3: Stress + save
   return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>3 of 3 · Context</div>
       <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Anything stressing you today?</div>
       <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
         <input value={stressEvent} onChange={e => setStressEvent(e.target.value)} placeholder="Optional — one line"
           style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
             padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
           }} />
         <MicButton onTranscript={t => setStressEvent(prev => prev + (prev ? " " : "") + t)} />
@@ -3937,18 +4023,18 @@ function CheckInWidget({ onComplete }) {
       <div style={{ display: "flex", gap: 6 }}>
         <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional"
           style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: 8,
+            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
             padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
           }} />
         <MicButton onTranscript={t => setNotes(prev => prev + (prev ? " " : "") + t)} />
       </div>
       <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
         <button onClick={save} style={{
-          flex: 1, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 8,
+          flex: 1, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
           padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
         }}>Save check-in</button>
         <button onClick={() => { setStep(0); setDismissed(true); }} style={{
-          background: "none", border: "1px solid var(--border)", borderRadius: 8,
+          background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
           padding: "10px 14px", fontSize: 12, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
         }}>Skip</button>
       </div>
@@ -3988,9 +4074,9 @@ function MyProgress({ onBack, onJournal }) {
   journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
   const topEmotionEntry = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
-  const cardStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" };
-  const rowStyle = { width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center" };
-  const subRowStyle = { background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px" };
+  const cardStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center" };
+  const rowStyle = { width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center" };
+  const subRowStyle = { background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "10px 14px" };
 
   return (
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
@@ -4102,7 +4188,7 @@ function MyProgress({ onBack, onJournal }) {
         {journalEntries.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("journal")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Signal Log</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.journal ? "▾" : "▸"}</span>
             </button>
             {openSections.journal && (
@@ -4114,7 +4200,7 @@ function MyProgress({ onBack, onJournal }) {
                     {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
                   </div>
                 ))}
-                <button onClick={onJournal} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>View all journal entries →</button>
+                <button onClick={onJournal} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>View all signal entries →</button>
               </div>
             )}
           </div>
@@ -4148,6 +4234,8 @@ export default function Stillform() {
   });
   const [journalMode, setJournalMode] = useState("list");
   const [journalViewIdx, setJournalViewIdx] = useState(null);
+  const [jSignal, setJSignal] = useState([]);
+  const [jTriggerType, setJTriggerType] = useState("");
   const [jTrigger, setJTrigger] = useState("");
   const [jEmotion, setJEmotion] = useState([]);
   const [jBody, setJBody] = useState("");
@@ -4162,23 +4250,29 @@ export default function Stillform() {
   };
 
   const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
+  const signalAreas = ["Jaw", "Shoulders", "Chest", "Gut", "Hands", "Legs", "Head", "Throat"];
+  const triggerTypes = ["Social demand", "Performance pressure", "Conflict", "Uncertainty", "Sensory overload", "Transition", "Rejection", "Fatigue", "Physical pain", "Other"];
+  const outcomeTypes = ["Regulated", "Locked In", "Got Sharp", "Incomplete", "Reacted", "Still processing"];
 
   const saveJournalEntry = () => {
     const entry = {
       id: Date.now(),
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+      signal: jSignal,
       trigger: jTrigger.trim(),
+      triggerType: jTriggerType,
       emotions: jEmotion,
       intensity: jIntensity,
       body: jBody.trim(),
-      outcome: jOutcome.trim()
+      outcome: jOutcome,
+      notes: jBody.trim()
     };
     const updated = [entry, ...journalEntries];
     setJournalEntries(updated);
     try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
     setJournalMode("list");
-    setJTrigger(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
+    setJSignal([]); setJTrigger(""); setJTriggerType(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
   };
 
   const deleteJournalEntry = (id) => {
@@ -4298,53 +4392,30 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "A composure system. Not an app.",
-              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral. Dread for no reason at all.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. Not a crisis line. A composure system.",
-              note: null,
-              cta: "Run a Session"
+              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A composure system.",
+              note: null
             },
             {
               icon: "◎",
               label: "Your tools",
-              title: "Execute",
-              subtitle: "Three protocols. Any state.",
-              body: "Breathe — sessions start instantly with your default pattern. Four patterns available: Calm (4-4-8-2) for overwhelm and anxiety, Box (4-4-4-4) for high-stakes focus, 4-7-8 for deep physical reset, Quick Reset when you have 60 seconds. Change your default anytime in Settings.\n\nBody Scan — locate where the feeling is living in your body and release it with timed acupressure. Six points. Auto-advances. Skip ahead if you're fast.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise), Get Sharp (cut through loops), Lock In (channel intensity). Switch modes mid-session. Talk tab for live guidance, Journal tab for entries the AI remembers.",
-              note: "The Quick Breathe protocol is always free. Full access requires a subscription."
-            },
-            {
-              icon: "◎",
-              label: "Built in",
-              title: "No friction",
-              subtitle: "Designed for how you actually think.",
-              body: "Sessions auto-advance — Breathe flows into Body Scan flows into Reframe. No tapping between steps. Skip ahead anytime if you move fast.\n\nWhat's present — optional one-tap in Reframe to tell the AI your state: excited, anxious, angry, or mixed. The AI adapts its approach. Leave it blank for neutral.\n\nVoice-to-text — every text field has a mic. Think out loud instead of type.\n\nDaily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI factors this in automatically.\n\nEverything customizable — breathing pattern, audio, signal profile, themes — all in Settings.",
-              note: null
-            },
-            {
-              icon: "◇",
-              label: "Signal mapping",
-              title: "Know your pattern",
-              subtitle: "Where does it land in your body?",
-              body: "Intensity doesn't just live in your head. In Settings, map where it activates — jaw, shoulders, chest, gut, hands, legs. This builds your signal profile so you intercept the state before it controls you. One-time setup."
+              title: "Three protocols",
+              subtitle: "Any state. Under two minutes.",
+              body: "Breathe — starts instantly with your default pattern. Four options: Calm (4-4-8-2), Box (4-4-4-4), 4-7-8, Quick Reset.\n\nBody Scan — locate tension, release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
+              note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
               icon: "◈",
               label: "Over time",
               title: "It sharpens",
               subtitle: "Learns your signals. Tightens your response.",
-              body: "After a few sessions, your home screen shows data — most effective protocol, regulation speed, pattern trends. The AI stops being generic and starts being precise about you specifically. It doesn't push early. It earns it, then gets direct."
+              body: "After a few sessions your Signal Profile builds — where intensity activates in your body, what your blind spots are, how you move through states.\n\nThe AI stops being generic and starts being precise about you specifically."
             },
             {
               icon: "◎",
               label: "Your data",
               title: "Private by design",
               subtitle: "Your data is yours. Full stop.",
-              body: "Your sessions, journal, and check-ins are stored in your encrypted account. The AI reads your history fresh every session — it never stores anything independently. Delete everything anytime from Settings.\n\nNot therapy. Not a crisis line. If you're in crisis, tap Crisis Resources in the footer — it's always there.\n\nReplay this tutorial anytime from Settings."
-            },
-            {
-              icon: "✦",
-              label: "The outcome",
-              title: "Functional at full volume",
-              subtitle: "Feel everything. Lose nothing.",
-              body: "Stillform doesn't ask you to turn it down. It builds the capacity to stay functional inside whatever you're feeling — joy, rage, dread, excitement, or all of it at once.\n\nThe protocols stay the same. Your speed, precision, and self-knowledge grow with every session."
+              body: "Sessions, journal, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nNot therapy. Not a crisis line. Crisis resources are always in the footer.\n\nReplay this tutorial anytime from Settings."
             }
           ];
           const step = steps[onboardStep];
@@ -4406,14 +4477,14 @@ export default function Stillform() {
                       const el = document.getElementById("onboard-menu");
                       if (el) el.style.display = el.style.display === "none" ? "block" : "none";
                     }} style={{
-                      width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 10,
+                      width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
                       padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
                       <span>Run a session</span>
                       <span style={{ fontSize: 12 }}>▾</span>
                     </button>
-                    <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
+                    <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
                       <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
                         width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
                         padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
@@ -4444,7 +4515,7 @@ export default function Stillform() {
                         <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk it through or journal it</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk through it or log the signal</div>
                         </div>
                       </button>
                     </div>
@@ -4465,7 +4536,7 @@ export default function Stillform() {
                         Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis:
                       </p>
                       <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
-                        background: "none", border: "1px solid var(--border)", borderRadius: 8,
+                        background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                         padding: "8px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
                         fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
                       }}>
@@ -4480,8 +4551,8 @@ export default function Stillform() {
                       <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
                         Run a Session
                       </button>
-                      <button className="btn btn-ghost" style={{ marginTop: 8 }} onClick={() => setOnboardStep(s => s + 1)}>
-                        See how it works first
+                      <button className="btn btn-ghost" style={{ marginTop: 8, fontSize: 13 }} onClick={() => setOnboardStep(s => s + 1)}>
+                        How does it work? →
                       </button>
                     </>
                   ) : (
@@ -4564,7 +4635,7 @@ export default function Stillform() {
                   const el = document.getElementById("session-menu");
                   if (el) el.style.display = el.style.display === "none" ? "block" : "none";
                 }} style={{
-                  width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: 10,
+                  width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
                   padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
                   fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
@@ -4572,7 +4643,7 @@ export default function Stillform() {
                   <span>Run a session</span>
                   <span style={{ fontSize: 12 }}>▾</span>
                 </button>
-                <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: 10, overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
+                <div id="session-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)" }}>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
                     padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
@@ -4631,7 +4702,7 @@ export default function Stillform() {
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
 
               {/* UAT BANNER */}
-              <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+              <div style={{ marginBottom: 20, padding: "14px 16px", background: "rgba(201,147,58,0.08)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
                 <div style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, marginBottom: 6 }}>You're testing Stillform</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
                   This is an early build. Your honest feedback shapes everything — what worked, what didn't, what felt off.
@@ -4644,7 +4715,7 @@ export default function Stillform() {
                 </button>
                 {uatRoadmapOpen && (
                   <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "8px 0 8px 12px", borderLeft: "2px solid var(--amber-dim)" }}>
-                    Biometric lock on conversations & journal<br/>
+                    Biometric lock on conversations & signal log<br/>
                     Premium sound packs (singing bowl, rain, ocean, lo-fi)<br/>
                     Apple Health / Google Health Connect / Samsung Health integration<br/>
                     Proactive coaching — pattern detection + micro-adjustments<br/>
@@ -4673,7 +4744,7 @@ export default function Stillform() {
                       onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
                       style={{
                         width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer",
                         marginBottom: 20, transition: "all 0.2s", WebkitTapHighlightColor: "transparent"
                       }}
                     >
@@ -4694,7 +4765,7 @@ export default function Stillform() {
                 const isDoneToday = checkin && checkin.date === today;
 
                 if (isDoneToday) return (
-                  <div style={{ marginBottom: 20, padding: "10px 16px", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: 10 }}>
+                  <div style={{ marginBottom: 20, padding: "10px 16px", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
                     <div style={{ fontSize: 12, color: "var(--amber)" }}>
                       Checked in · {checkin.sleep}h sleep · Energy {checkin.energy} · Mood: {checkin.mood}
                     </div>
@@ -4715,7 +4786,7 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your protocols</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <button onClick={() => startPathway("calm")} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
                     WebkitTapHighlightColor: "transparent"
@@ -4724,7 +4795,7 @@ export default function Stillform() {
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Paced breathing matched to your state. Shift in 90 seconds.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
                     WebkitTapHighlightColor: "transparent"
@@ -4733,13 +4804,13 @@ export default function Stillform() {
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension. Release it with timed acupressure at six points.</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
                     WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI identifies the distortion, separates signal from noise. Talk or journal.</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI identifies the distortion, separates signal from noise. Log the signal.</div>
                   </button>
                 </div>
               </div>
@@ -4747,7 +4818,7 @@ export default function Stillform() {
               {/* PROGRESS + JOURNAL LINKS */}
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8, marginBottom: 28 }}>
                 <button onClick={() => setScreen("progress")} style={{
-                  width: "100%", background: "transparent", border: "1px solid var(--amber-dim)", borderRadius: 10,
+                  width: "100%", background: "transparent", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)",
                   padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
                   fontFamily: "'DM Sans', sans-serif",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
@@ -4756,12 +4827,12 @@ export default function Stillform() {
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Sessions · shifts · patterns →</span>
                 </button>
                 <button onClick={() => setScreen("journal")} style={{
-                  width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: 10,
+                  width: "100%", background: "transparent", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text-dim)",
                   fontFamily: "'DM Sans', sans-serif",
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
-                  <span style={{ fontSize: 13 }}>◈ Session Journal</span>
+                  <span style={{ fontSize: 13 }}>◈ Signal Log</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Log triggers · track patterns →</span>
                 </button>
               </div>
@@ -4779,21 +4850,21 @@ export default function Stillform() {
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
                         width: "100%", background: !signalDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
                         border: `1px solid ${!signalDone ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         {!signalDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◇ Map Your Signals</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Teaches the AI how your nervous system works. Makes every session smarter.</div>
                       </button>
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                         padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◈ Tension Check</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10 seconds. Are you holding something you haven't noticed?</div>
                       </button>
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "patterns"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                         padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>◆ Your Patterns</div>
@@ -4802,14 +4873,14 @@ export default function Stillform() {
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "bias"))} style={{
                         width: "100%", background: !biasDone ? "rgba(201,147,58,0.06)" : "var(--surface)",
                         border: `1px solid ${!biasDone ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
+                        borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         {!biasDone && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>Recommended — do this once</div>}
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>⬡ Know Your Blind Spots</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Identifies your cognitive patterns. The AI watches for them in Reframe.</div>
                       </button>
                       <button onClick={() => startTool(TOOLS.find(t => t.id === "meta"))} style={{
-                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
+                        width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                         padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif"
                       }}>
                         <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 2 }}>❖ Watch & Choose</div>
@@ -4895,7 +4966,7 @@ export default function Stillform() {
                 )}
               </div>
               <button onClick={() => setScreen("panic")} style={{
-                background: "none", border: "1px solid var(--amber-dim)", borderRadius: 6,
+                background: "none", border: "1px solid var(--amber-dim)", borderRadius: "var(--r)",
                 padding: "4px 10px", fontSize: 11, color: "var(--amber)", cursor: "pointer",
                 fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
               }}>
@@ -4923,38 +4994,53 @@ export default function Stillform() {
 
             {journalMode === "list" && (
               <>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Journal</h1>
-                <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24 }}>
-                  Track what triggered you, how it felt, and what happened after.
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Signal Log</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>After-Action Record</h1>
+                <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
+                  Log a high-intensity event in 15 seconds. Signal, trigger, outcome. The AI uses this to identify your blind spots over time.
                 </p>
-                <button
-                  onClick={() => setJournalMode("new")}
-                  style={{
-                    width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                    borderRadius: 10, padding: "14px 18px", cursor: "pointer", color: "var(--amber)",
-                    fontSize: 14, fontFamily: "'DM Sans', sans-serif", marginBottom: 24, textAlign: "left"
-                  }}
-                >
-                  + New entry
+                <button onClick={() => setJournalMode("new")} style={{
+                  width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r)", padding: "14px 18px", cursor: "pointer", color: "var(--amber)",
+                  fontSize: 13, fontFamily: "'DM Sans', sans-serif", marginBottom: 24, textAlign: "left",
+                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)"
+                }}>
+                  <span>+ Log a signal event</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", opacity: 0.7 }}>~15 SEC</span>
                 </button>
+
                 {journalEntries.length === 0 && (
                   <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-                    No entries yet. Your journal builds your record over time.
+                    No entries yet. Log your first signal event above.
                   </div>
                 )}
+
                 {journalEntries.map((e, i) => (
                   <button key={e.id} onClick={() => { setJournalViewIdx(i); setJournalMode("view"); }} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", marginBottom: 8, color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                    marginBottom: 6, color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", transition: "border-color 0.2s"
                   }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500 }}>{e.trigger || "Untitled"}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{e.date}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "flex-start" }}>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>
+                        {e.triggerType || e.trigger?.slice(0, 40) || "Signal event"}
+                      </div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em", flexShrink: 0, marginLeft: 12 }}>{e.date}</div>
                     </div>
-                    {e.emotions?.length > 0 && (
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>
-                    )}
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {e.signal?.length > 0 && (
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--amber)", textTransform: "uppercase" }}>
+                          {e.signal.join(" · ")}
+                        </span>
+                      )}
+                      {e.outcome && (
+                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", textTransform: "uppercase" }}>
+                          → {e.outcome}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 ))}
               </>
@@ -4962,138 +5048,180 @@ export default function Stillform() {
 
             {journalMode === "new" && (
               <>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 24 }}>New entry</h1>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>New Entry</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 28 }}>Log the event</h1>
 
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>What triggered this?</div>
-                  <textarea
-                    value={jTrigger}
-                    onChange={e => setJTrigger(e.target.value)}
-                    placeholder="What's happening? Any state — excitement, rage, dread, overwhelm, joy. Say it."
-                    style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
-                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
-                      resize: "none", minHeight: 70, lineHeight: 1.6
-                    }}
-                  />
-                  <div style={{ marginTop: 6 }}>
-                    <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
+                {/* SIGNAL — where did it activate */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                    01 · Signal — where did it activate?
                   </div>
-                </div>
-
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.04em" }}>What did you feel? <span style={{ color: "var(--text-muted)" }}>(tap all that apply)</span></div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                    {journalEmotions.map(em => (
-                      <button key={em} onClick={() => setJEmotion(prev => prev.includes(em) ? prev.filter(e => e !== em) : [...prev, em])}
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                    {signalAreas.map(area => (
+                      <button key={area} onClick={() => setJSignal(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area])}
                         style={{
-                          padding: "6px 14px", borderRadius: 20, fontSize: 12, cursor: "pointer",
+                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
                           fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
-                          background: jEmotion.includes(em) ? "var(--amber-glow)" : "var(--surface)",
-                          border: `1px solid ${jEmotion.includes(em) ? "var(--amber-dim)" : "var(--border)"}`,
-                          color: jEmotion.includes(em) ? "var(--amber)" : "var(--text-dim)"
+                          background: jSignal.includes(area) ? "var(--amber-glow)" : "var(--surface)",
+                          border: `0.5px solid ${jSignal.includes(area) ? "var(--amber-dim)" : "var(--border)"}`,
+                          color: jSignal.includes(area) ? "var(--amber)" : "var(--text-dim)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
                         }}
-                      >{em}</button>
+                      >{area}</button>
                     ))}
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.04em" }}>Intensity: {jIntensity}/10</div>
-                  <input type="range" min="1" max="10" value={jIntensity} onChange={e => setJIntensity(Number(e.target.value))}
-                    style={{ width: "100%", accentColor: "var(--amber)" }}
-                  />
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-muted)" }}>
-                    <span>Mild</span><span>Severe</span>
+                {/* TRIGGER — what caused it */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                    02 · Trigger — what caused it?
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
+                    {triggerTypes.map(t => (
+                      <button key={t} onClick={() => setJTriggerType(prev => prev === t ? "" : t)}
+                        style={{
+                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                          background: jTriggerType === t ? "var(--amber-glow)" : "var(--surface)",
+                          border: `0.5px solid ${jTriggerType === t ? "var(--amber-dim)" : "var(--border)"}`,
+                          color: jTriggerType === t ? "var(--amber)" : "var(--text-dim)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
+                        }}
+                      >{t}</button>
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                    <textarea
+                      value={jTrigger}
+                      onChange={e => setJTrigger(e.target.value)}
+                      placeholder="Add detail if needed..."
+                      style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        padding: "10px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        resize: "none", minHeight: 52, lineHeight: 1.6
+                      }}
+                    />
+                    <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 20 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>Where did you feel it in your body?</div>
-                  <textarea
-                    value={jBody}
-                    onChange={e => setJBody(e.target.value)}
-                    placeholder="Jaw, chest, stomach, hands..."
-                    style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
-                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
-                      resize: "none", minHeight: 50, lineHeight: 1.6
-                    }}
-                  />
-                  <div style={{ marginTop: 6 }}>
+                {/* OUTCOME — what happened */}
+                <div style={{ marginBottom: 24 }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                    03 · Outcome — what happened?
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                    {outcomeTypes.map(o => (
+                      <button key={o} onClick={() => setJOutcome(prev => prev === o ? "" : o)}
+                        style={{
+                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                          background: jOutcome === o ? "var(--amber-glow)" : "var(--surface)",
+                          border: `0.5px solid ${jOutcome === o ? "var(--amber-dim)" : "var(--border)"}`,
+                          color: jOutcome === o ? "var(--amber)" : "var(--text-dim)",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
+                        }}
+                      >{o}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* NOTES — optional */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                    04 · Notes <span style={{ opacity: 0.5 }}>— optional</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                    <textarea
+                      value={jBody}
+                      onChange={e => setJBody(e.target.value)}
+                      placeholder="Any additional context..."
+                      style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        padding: "10px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        resize: "none", minHeight: 52, lineHeight: 1.6
+                      }}
+                    />
                     <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
                   </div>
                 </div>
 
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 6, letterSpacing: "0.04em" }}>What happened after? <span style={{ color: "var(--text-muted)" }}>(optional)</span></div>
-                  <textarea
-                    value={jOutcome}
-                    onChange={e => setJOutcome(e.target.value)}
-                    placeholder="Did you use a tool? Did you react? What did you do?"
-                    style={{
-                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
-                      padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif",
-                      resize: "none", minHeight: 70, lineHeight: 1.6
-                    }}
-                  />
-                  <div style={{ marginTop: 6 }}>
-                    <MicButton onTranscript={t => setJOutcome(prev => prev + (prev ? " " : "") + t)} />
-                  </div>
-                </div>
-
-                <button onClick={saveJournalEntry} disabled={!jTrigger.trim()} style={{
-                  width: "100%", padding: "14px", borderRadius: 8, fontSize: 14, fontWeight: 500,
-                  fontFamily: "'DM Sans', sans-serif", cursor: jTrigger.trim() ? "pointer" : "not-allowed",
-                  background: jTrigger.trim() ? "var(--amber)" : "var(--surface2)",
-                  color: jTrigger.trim() ? "#0e0f11" : "var(--text-muted)", border: "none",
-                  transition: "all 0.2s"
+                <button onClick={saveJournalEntry} disabled={!jSignal.length && !jTriggerType && !jTrigger.trim()} style={{
+                  width: "100%", padding: "14px", borderRadius: "var(--r)", fontSize: 14, fontWeight: 500,
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: (jSignal.length || jTriggerType || jTrigger.trim()) ? "pointer" : "not-allowed",
+                  background: (jSignal.length || jTriggerType || jTrigger.trim()) ? "var(--amber)" : "var(--surface2)",
+                  color: (jSignal.length || jTriggerType || jTrigger.trim()) ? "#0A0A0C" : "var(--text-muted)",
+                  border: "none", transition: "all 0.2s",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)"
                 }}>
-                  Save entry
+                  Log entry
                 </button>
               </>
             )}
 
             {journalMode === "view" && journalViewIdx !== null && journalEntries[journalViewIdx] && (() => {
               const e = journalEntries[journalViewIdx];
+              const labelStyle = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.16em", textTransform: "uppercase" };
+              const valueStyle = { fontSize: 14, color: "var(--text)", lineHeight: 1.6 };
               return (
                 <>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24, gap: 12 }}>
-                    <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, lineHeight: 1.3 }}>{e.trigger || "Untitled"}</h1>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date} · {e.time}</div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, gap: 12 }}>
+                    <div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Signal Log Entry</div>
+                      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 300, lineHeight: 1.3 }}>{e.triggerType || e.trigger || "Signal event"}</h1>
+                    </div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date}<br/>{e.time}</div>
                   </div>
-                  {e.emotions?.length > 0 && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.08em", textTransform: "uppercase" }}>Emotions</div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {e.emotions.map(em => (
-                          <span key={em} style={{ padding: "4px 12px", borderRadius: 20, fontSize: 12, background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", color: "var(--amber)" }}>{em}</span>
+
+                  {e.signal?.length > 0 && (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={labelStyle}>Signal</div>
+                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                        {e.signal.map(s => (
+                          <span key={s} style={{ padding: "4px 10px", borderRadius: "var(--r-sm)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em" }}>{s}</span>
                         ))}
                       </div>
                     </div>
                   )}
-                  {e.intensity && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Intensity</div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>{e.intensity}/10</div>
+
+                  {(e.triggerType || e.trigger) && (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={labelStyle}>Trigger</div>
+                      <div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div>
                     </div>
                   )}
-                  {e.body && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Body</div>
-                      <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>{e.body}</div>
-                    </div>
-                  )}
+
                   {e.outcome && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.08em", textTransform: "uppercase" }}>Outcome</div>
-                      <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>{e.outcome}</div>
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={labelStyle}>Outcome</div>
+                      <div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div>
                     </div>
                   )}
+
+                  {e.notes && (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={labelStyle}>Notes</div>
+                      <div style={valueStyle}>{e.notes}</div>
+                    </div>
+                  )}
+
+                  {e.emotions?.length > 0 && (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={labelStyle}>Emotions logged</div>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                        {e.emotions.map(em => (
+                          <span key={em} style={{ padding: "4px 10px", borderRadius: "var(--r-sm)", fontSize: 11, background: "var(--surface2)", border: "0.5px solid var(--border)", color: "var(--text-dim)" }}>{em}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <button onClick={() => deleteJournalEntry(e.id)} style={{
-                    marginTop: 24, background: "none", border: "1px solid rgba(200,60,60,0.3)", borderRadius: 8,
-                    padding: "10px 16px", fontSize: 13, color: "rgba(200,80,80,0.8)", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif"
+                    marginTop: 24, background: "none", border: "0.5px solid rgba(200,60,60,0.3)", borderRadius: "var(--r)",
+                    padding: "10px 16px", fontSize: 12, color: "rgba(200,80,80,0.7)", cursor: "pointer",
+                    fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em"
                   }}>
                     Delete entry
                   </button>
@@ -5114,15 +5242,15 @@ export default function Stillform() {
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
                 {/* Monthly / Annual toggle */}
-                <div style={{ display: "flex", background: "var(--surface)", borderRadius: 8, padding: 3, marginBottom: 20 }}>
+                <div style={{ display: "flex", background: "var(--surface)", borderRadius: "var(--r-lg)", padding: 3, marginBottom: 20 }}>
                   <button onClick={() => setPricingPlan("monthly")} style={{
-                    flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    flex: 1, padding: "8px 0", borderRadius: "var(--r)", border: "none", cursor: "pointer",
                     fontSize: 13, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
                     background: pricingPlan === "monthly" ? "var(--amber)" : "transparent",
                     color: pricingPlan === "monthly" ? "#0e0f11" : "var(--text-muted)"
                   }}>Monthly</button>
                   <button onClick={() => setPricingPlan("annual")} style={{
-                    flex: 1, padding: "8px 0", borderRadius: 6, border: "none", cursor: "pointer",
+                    flex: 1, padding: "8px 0", borderRadius: "var(--r)", border: "none", cursor: "pointer",
                     fontSize: 13, fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s",
                     background: pricingPlan === "annual" ? "var(--amber)" : "transparent",
                     color: pricingPlan === "annual" ? "#0e0f11" : "var(--text-muted)"
@@ -5227,7 +5355,7 @@ export default function Stillform() {
               <div key={i} style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
                 {country.lines.map((line, j) => (
-                  <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 16px", marginBottom: 6 }}>
+                  <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{line.name}</div>
@@ -5255,7 +5383,7 @@ export default function Stillform() {
                 Additional languages coming soon.
               </div>
               <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
               }}>
                 English
@@ -5282,7 +5410,7 @@ export default function Stillform() {
                     width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                     background: isSelected ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 8, marginBottom: 6, color: "var(--text)",
+                    borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
                     fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                   }}>
                     <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
@@ -5297,7 +5425,7 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Audio</div>
               <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
                 <div>
@@ -5312,7 +5440,7 @@ export default function Stillform() {
                   } catch {}
                 }} style={{
                   background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
-                  border: "none", borderRadius: 12, width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
+                  border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
                 }}>
                   <div style={{
                     width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
@@ -5333,7 +5461,7 @@ export default function Stillform() {
                 const isOn = (() => { try { return localStorage.getItem(opt.key) === "on"; } catch { return false; } })();
                 return (
                   <div key={opt.key} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
                     marginBottom: 8
                   }}>
@@ -5345,7 +5473,7 @@ export default function Stillform() {
                       try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {}
                     }} style={{
                       background: isOn ? "var(--amber)" : "var(--border)",
-                      border: "none", borderRadius: 12, width: 44, height: 24, cursor: "pointer",
+                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
                       position: "relative", transition: "background 0.2s", flexShrink: 0
                     }}>
                       <div style={{
@@ -5384,7 +5512,7 @@ export default function Stillform() {
                       }} style={{
                         width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
                         border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: 8, padding: "12px 16px", marginBottom: 6, cursor: "pointer",
+                        borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6, cursor: "pointer",
                         display: "flex", justifyContent: "space-between", alignItems: "center",
                         fontFamily: "'DM Sans', sans-serif", textAlign: "left"
                       }}>
@@ -5397,7 +5525,7 @@ export default function Stillform() {
                     ))}
                     {premium.map(s => (
                       <div key={s.id} style={{
-                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                         padding: "12px 16px", marginBottom: 6, opacity: 0.35,
                         display: "flex", justifyContent: "space-between", alignItems: "center"
                       }}>
@@ -5416,7 +5544,7 @@ export default function Stillform() {
 
               {/* Session Log */}
               <button onClick={() => setOpenLog(openLog === "sessions" ? null : "sessions")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
@@ -5458,7 +5586,7 @@ export default function Stillform() {
 
               {/* Journal Log */}
               <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
@@ -5492,7 +5620,7 @@ export default function Stillform() {
 
               {/* Saved Reframes Log */}
               <button onClick={() => setOpenLog(openLog === "reframes" ? null : "reframes")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
@@ -5526,7 +5654,7 @@ export default function Stillform() {
               })()}
 
               {/* Signal Profile */}
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 6 }}>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 6 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
                   {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Settings"; } catch { return "Not set up yet"; } })()}
@@ -5554,7 +5682,7 @@ export default function Stillform() {
                   <div key={t.id} style={{
                     background: t.id === "dark" ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${t.id === "dark" ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 8, padding: "12px 16px", marginBottom: 4,
+                    borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     opacity: t.free ? 1 : 0.4
                   }}>
@@ -5577,7 +5705,7 @@ export default function Stillform() {
                   <div key={t.id} style={{
                     background: t.id === "default" ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${t.id === "default" ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 8, padding: "12px 16px", marginBottom: 4,
+                    borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
                     display: "flex", justifyContent: "space-between", alignItems: "center",
                     opacity: t.free ? 1 : 0.4
                   }}>
@@ -5595,7 +5723,7 @@ export default function Stillform() {
                   { label: "Export session history (CSV)", desc: "Your regulation data for personal records or a provider" }
                 ].map((item, i) => (
                   <div key={i} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", marginBottom: 4, opacity: 0.4,
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
@@ -5616,7 +5744,7 @@ export default function Stillform() {
                   { label: "Micro-nudges", desc: "Brief composure prompts throughout the day" }
                 ].map((item, i) => (
                   <div key={i} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", marginBottom: 4, opacity: 0.3,
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
@@ -5633,7 +5761,7 @@ export default function Stillform() {
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Wearable Integration</div>
                 <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "12px 16px", opacity: 0.3,
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
@@ -5650,7 +5778,7 @@ export default function Stillform() {
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Cloud Sync</div>
                 <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "12px 16px", opacity: 0.4,
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
@@ -5671,7 +5799,7 @@ export default function Stillform() {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -5679,7 +5807,7 @@ export default function Stillform() {
                   <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
                 </button>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -5694,14 +5822,14 @@ export default function Stillform() {
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => setScreen("privacy")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
                   Privacy & Disclaimers
                 </button>
                 <a href="mailto:emberenterprises@proton.me" style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -5712,7 +5840,7 @@ export default function Stillform() {
                   setOnboardStep(0);
                   setScreen("onboarding");
                 }} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
@@ -5731,7 +5859,7 @@ export default function Stillform() {
 
               {/* Auto backup */}
               <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "12px 16px", marginBottom: 8,
                 display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
@@ -5744,7 +5872,7 @@ export default function Stillform() {
 
               {/* Export */}
               <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "12px 16px", marginBottom: 8, opacity: 0.4,
                 display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
