@@ -5207,7 +5207,7 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8, padding: "14px 18px", marginBottom: 6 }}>
                 <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — go to Know Your Body above"; } catch { return "Not set up yet"; } })()}
+                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — scroll down to Signal Mapping below"; } catch { return "Not set up yet"; } })()}
                 </div>
               </div>
             </div>
@@ -5343,7 +5343,7 @@ export default function Stillform() {
 
             {/* Know Your Body */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Know Your Body</div>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Signal Mapping</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 8,
