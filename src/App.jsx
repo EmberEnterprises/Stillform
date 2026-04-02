@@ -296,16 +296,16 @@ const styles = `
 
   .breath-circle-wrap {
     position: relative;
-    width: 240px;
-    height: 240px;
-    margin-bottom: 40px;
+    width: 280px;
+    height: 280px;
+    margin-bottom: 32px;
   }
 
   .breath-circle {
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(201,147,58,0.12) 0%, rgba(201,147,58,0.03) 60%, transparent 100%);
+    background: radial-gradient(circle, rgba(201,147,58,0.15) 0%, rgba(201,147,58,0.04) 60%, transparent 100%);
     border: 1px solid var(--amber-dim);
     display: flex;
     align-items: center;
@@ -314,16 +314,16 @@ const styles = `
   }
 
   .breath-circle.expand {
-    transform: scale(1.35);
-    box-shadow: 0 0 60px rgba(201,147,58,0.15), 0 0 120px rgba(201,147,58,0.06);
+    transform: scale(1.3);
+    box-shadow: 0 0 80px rgba(201,147,58,0.20), 0 0 160px rgba(201,147,58,0.08);
   }
   .breath-circle.hold {
-    transform: scale(1.35);
-    box-shadow: 0 0 40px rgba(201,147,58,0.1), 0 0 80px rgba(201,147,58,0.04);
+    transform: scale(1.3);
+    box-shadow: 0 0 60px rgba(201,147,58,0.15), 0 0 120px rgba(201,147,58,0.06);
   }
   .breath-circle.contract {
     transform: scale(1);
-    box-shadow: 0 0 20px rgba(201,147,58,0.05);
+    box-shadow: 0 0 30px rgba(201,147,58,0.07);
   }
 
   @keyframes breathe-ring {
@@ -332,8 +332,8 @@ const styles = `
   }
 
   .breath-inner {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
     background: var(--amber-glow);
     border: 1px solid var(--amber);
@@ -344,13 +344,13 @@ const styles = `
 
   .breath-count {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 36px;
+    font-size: 52px;
     font-weight: 300;
     color: var(--amber);
   }
 
   .breath-phase {
-    font-size: 11px;
+    font-size: 13px;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--text-dim);
@@ -360,7 +360,7 @@ const styles = `
 
   .breath-instruction {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 28px;
+    font-size: 32px;
     font-style: italic;
     font-weight: 300;
     color: var(--text);
@@ -623,13 +623,19 @@ const styles = `
 
   .scan-area.active {
     border-color: var(--amber);
-    background: var(--amber-glow);
+    background: rgba(201,147,58,0.08);
+    box-shadow: 0 0 24px rgba(201,147,58,0.08);
   }
 
   .scan-area-name {
-    font-size: 14px;
-    font-weight: 500;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 300;
     margin-bottom: 4px;
+  }
+
+  .scan-area.active .scan-area-name {
+    color: var(--amber);
   }
 
   .scan-area-prompt {
@@ -658,25 +664,26 @@ const styles = `
   /* PROGRESS / COMPLETE */
   .complete {
     text-align: center;
-    padding: 60px 20px;
+    padding: 48px 20px;
   }
 
   .complete-icon {
-    width: 72px;
-    height: 72px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
     background: var(--green-glow);
     border: 1px solid var(--green);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    margin: 0 auto 28px;
+    font-size: 36px;
+    margin: 0 auto 32px;
+    box-shadow: 0 0 40px rgba(74,140,106,0.12);
   }
 
   .complete h2 {
     font-family: 'Cormorant Garamond', serif;
-    font-size: 38px;
+    font-size: 42px;
     font-weight: 300;
     margin-bottom: 12px;
   }
