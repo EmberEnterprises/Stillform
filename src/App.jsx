@@ -4382,26 +4382,7 @@ export default function Stillform() {
                     Shareable composure card
                   </div>
                 )}
-                {uatTestAgain === null && (
-                  <div style={{ marginTop: 12, borderTop: "1px solid var(--border)", paddingTop: 12 }}>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8 }}>Would you test a future version?</div>
-                    <div style={{ display: "flex", gap: 8 }}>
-                      <button onClick={() => setUatTestAgain(true)} style={{
-                        flex: 1, padding: "8px", background: "rgba(201,147,58,0.1)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 6, color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-                      }}>Yes</button>
-                      <button onClick={() => setUatTestAgain(false)} style={{
-                        flex: 1, padding: "8px", background: "var(--surface)", border: "1px solid var(--border)",
-                        borderRadius: 6, color: "var(--text-dim)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-                      }}>No</button>
-                    </div>
-                  </div>
-                )}
-                {uatTestAgain !== null && (
-                  <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-muted)" }}>
-                    {uatTestAgain ? "Noted — we'll reach out for the next round." : "No problem. Thanks for testing this version."}
-                  </div>
-                )}
+
               </div>
 
               {/* Repeat what worked */}
