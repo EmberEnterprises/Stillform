@@ -3949,6 +3949,167 @@ function CheckInWidget({ onComplete }) {
   );
 }
 
+function MyProgress({ onBack, onJournal }) {
+  const [openSections, setOpenSections] = useState({});
+  const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+
+  const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
+  const journalEntries = (() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; } })();
+  const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
+  const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
+  const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+
+  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
+  const toolCounts = {};
+  sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
+  const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
+
+  const sessionsWithRatings = sessions.filter(s => s.preRating && s.postRating);
+  const avgDelta = sessionsWithRatings.length > 0
+    ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
+    : null;
+  const positiveShifts = sessionsWithRatings.filter(s => s.delta > 0).length;
+
+  const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
+  let streak = 0;
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
+  }
+
+  const emotionFreq = {};
+  journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
+  const topEmotion = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0];
+
+  const cardStyle = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" };
+  const rowStyle = { width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center" };
+  const subRowStyle = { background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px" };
+
+  return (
+    <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+      <button className="intervention-back" onClick={onBack}>← Back</button>
+      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>Everything you've built. Every session counted.</p>
+
+      {sessions.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
+          Your progress appears here after your first session.
+        </div>
+      ) : (<>
+        {/* STATS GRID */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
+          <div style={cardStyle}>
+            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{sessions.length}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Total sessions</div>
+          </div>
+          {streak > 0 && <div style={cardStyle}>
+            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} this streak</div>
+          </div>}
+          {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
+            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
+          </div>}
+          {topTool && <div style={cardStyle}>
+            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topTool[0]] || topTool[0]}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
+          </div>}
+        </div>
+
+        {/* SELF KNOWLEDGE */}
+        {(biasProfile?.length > 0 || signalProfile?.firstAreas?.length > 0) && (
+          <div style={{ marginBottom: 8 }}>
+            <button onClick={() => toggle("self")} style={rowStyle}>
+              <div>
+                <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What you know about yourself</div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                  {[signalProfile?.firstAreas?.length > 0 && "signals mapped", biasProfile?.length > 0 && `${biasProfile.length} blind spots`].filter(Boolean).join(" · ")}
+                </div>
+              </div>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.self ? "▾" : "▸"}</span>
+            </button>
+            {openSections.self && (
+              <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 10px 10px", padding: "14px 18px" }}>
+                {signalProfile?.firstAreas?.length > 0 && <div style={{ marginBottom: 10 }}><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Activates first in</div><div style={{ fontSize: 13, color: "var(--text)" }}>{signalProfile.firstAreas.join(" · ")}</div></div>}
+                {signalProfile?.triggers?.length > 0 && <div style={{ marginBottom: 10 }}><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Known triggers</div><div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{signalProfile.triggers.join(" · ")}</div></div>}
+                {biasProfile?.length > 0 && <div><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Blind spots</div><div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{biasProfile.join(" · ")}</div></div>}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* SESSIONS */}
+        <div style={{ marginBottom: 8 }}>
+          <button onClick={() => toggle("sessions")} style={rowStyle}>
+            <div>
+              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Sessions</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{sessions.length} total{positiveShifts > 0 ? ` · ${positiveShifts} positive shifts` : ""}</div>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.sessions ? "▾" : "▸"}</span>
+          </button>
+          {openSections.sessions && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+              {[...sessions].reverse().slice(0, 20).map((s, i) => {
+                const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
+                const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, idx, a) => a.indexOf(v) === idx).join(" → ");
+                const delta = s.delta || 0;
+                return (
+                  <div key={i} style={{ ...subRowStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <div><div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>{date}</div><div style={{ fontSize: 13, color: "var(--text)" }}>{tool || "Session"}{s.durationFormatted ? ` · ${s.durationFormatted}` : ""}</div></div>
+                    {s.preRating && s.postRating && <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>{s.preRating}→{s.postRating}{delta > 0 ? ` +${delta}` : ""}</div>}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* REFRAMES */}
+        {savedReframes.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <button onClick={() => toggle("reframes")} style={rowStyle}>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Reframes that landed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{savedReframes.length} saved</div></div>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.reframes ? "▾" : "▸"}</span>
+            </button>
+            {openSections.reframes && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+                {[...savedReframes].reverse().map((r, i) => (
+                  <div key={i} style={subRowStyle}>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
+                    {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* JOURNAL */}
+        {journalEntries.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <button onClick={() => toggle("journal")} style={rowStyle}>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotion ? ` · most logged: ${topEmotion[0]}` : ""}</div></div>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.journal ? "▾" : "▸"}</span>
+            </button>
+            {openSections.journal && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+                {[...journalEntries].reverse().slice(0, 10).map((e, i) => (
+                  <div key={i} style={subRowStyle}>
+                    <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 3 }}>{e.date}</div>
+                    {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 3 }}>{e.trigger}</div>}
+                    {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
+                  </div>
+                ))}
+                <button onClick={onJournal} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>View all journal entries →</button>
+              </div>
+            )}
+          </div>
+        )}
+      </>)}
+    </section>
+  );
+}
+
 export default function Stillform() {
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => { const t = setTimeout(() => setSplashDone(true), 2500); return () => clearTimeout(t); }, []);
@@ -4762,216 +4923,9 @@ export default function Stillform() {
         )}
 
         {/* MY PROGRESS */}
-        {screen === "progress" && (() => {
-          const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
-          const journalEntries = (() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; } })();
-          const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
-          const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
-          const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
-
-          const sessionsWithRatings = sessions.filter(s => s.preRating && s.postRating);
-          const avgDelta = sessionsWithRatings.length > 0
-            ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
-            : null;
-
-          const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
-          const toolCounts = {};
-          sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
-          const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
-
-          const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
-          let streak = 0;
-          for (let i = 0; i < 365; i++) {
-            const d = new Date(); d.setDate(d.getDate() - i);
-            if (daySet.has(d.toISOString().slice(0, 10))) streak++;
-            else break;
-          }
-
-          return (
-            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
-              <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>Everything you've built. Every session counted.</p>
-
-              {sessions.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-                  Your progress appears here after your first session.
-                </div>
-              ) : (
-                <>
-                  {/* HEADLINE STATS */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
-                    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                      <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{sessions.length}</div>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Total sessions</div>
-                    </div>
-                    {streak > 0 && (
-                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                        <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} this streak</div>
-                      </div>
-                    )}
-                    {avgDelta && (
-                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                        <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
-                      </div>
-                    )}
-                    {topTool && (
-                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "20px 16px", textAlign: "center" }}>
-                        <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topTool[0]] || topTool[0]}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most effective</div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* WHAT YOU'VE BUILT */}
-                  {(biasProfile?.length > 0 || signalProfile) && (
-                    <div style={{ marginBottom: 28 }}>
-                      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>What you know about yourself</div>
-                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "18px 20px" }}>
-                        {signalProfile?.firstAreas?.length > 0 && (
-                          <div style={{ marginBottom: 12 }}>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Where intensity activates first</div>
-                            <div style={{ fontSize: 13, color: "var(--text)" }}>{signalProfile.firstAreas.join(" · ")}</div>
-                          </div>
-                        )}
-                        {signalProfile?.triggers?.length > 0 && (
-                          <div style={{ marginBottom: 12 }}>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Known triggers</div>
-                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{signalProfile.triggers.slice(0, 5).join(" · ")}{signalProfile.triggers.length > 5 ? ` +${signalProfile.triggers.length - 5} more` : ""}</div>
-                          </div>
-                        )}
-                        {biasProfile?.length > 0 && (
-                          <div>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Blind spots you're aware of</div>
-                            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{biasProfile.join(" · ")}</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SESSION HISTORY — summary + dropdown */}
-                  {(() => {
-                    const [open, setOpen] = React.useState(false);
-                    const recent = [...sessions].reverse().slice(0, 20);
-                    const rated = sessions.filter(s => s.preRating && s.postRating);
-                    const positiveShifts = rated.filter(s => s.delta > 0).length;
-                    return (
-                      <div style={{ marginBottom: 12 }}>
-                        <button onClick={() => setOpen(!open)} style={{
-                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
-                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-                        }}>
-                          <div>
-                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Sessions</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                              {sessions.length} total{positiveShifts > 0 ? ` · ${positiveShifts} positive shifts recorded` : ""}
-                            </div>
-                          </div>
-                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
-                        </button>
-                        {open && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
-                            {recent.map((s, i) => {
-                              const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
-                              const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, idx, a) => a.indexOf(v) === idx).join(" → ");
-                              const delta = s.delta || 0;
-                              return (
-                                <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                  <div>
-                                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 2 }}>{date}</div>
-                                    <div style={{ fontSize: 13, color: "var(--text)" }}>{tool || "Session"}{s.durationFormatted ? ` · ${s.durationFormatted}` : ""}</div>
-                                  </div>
-                                  {s.preRating && s.postRating && (
-                                    <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>
-                                      {s.preRating}→{s.postRating}{delta > 0 ? ` +${delta}` : ""}
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {/* REFRAMES — summary + dropdown */}
-                  {savedReframes.length > 0 && (() => {
-                    const [open, setOpen] = React.useState(false);
-                    return (
-                      <div style={{ marginBottom: 12 }}>
-                        <button onClick={() => setOpen(!open)} style={{
-                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
-                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-                        }}>
-                          <div>
-                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Reframes that landed</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{savedReframes.length} saved</div>
-                          </div>
-                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
-                        </button>
-                        {open && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
-                            {[...savedReframes].reverse().map((r, i) => (
-                              <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "12px 14px" }}>
-                                <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
-                                {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {/* JOURNAL — summary + dropdown */}
-                  {journalEntries.length > 0 && (() => {
-                    const [open, setOpen] = React.useState(false);
-                    const emotionFreq = {};
-                    journalEntries.forEach(e => (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; }));
-                    const topEmotion = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0];
-                    return (
-                      <div style={{ marginBottom: 12 }}>
-                        <button onClick={() => setOpen(!open)} style={{
-                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
-                          borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-                        }}>
-                          <div>
-                            <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Journal</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                              {journalEntries.length} entries{topEmotion ? ` · most logged: ${topEmotion[0]}` : ""}
-                            </div>
-                          </div>
-                          <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{open ? "▾" : "▸"}</span>
-                        </button>
-                        {open && (
-                          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 6 }}>
-                            {[...journalEntries].reverse().slice(0, 10).map((e, i) => (
-                              <div key={i} style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "10px 14px" }}>
-                                <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{e.date}</div>
-                                {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>{e.trigger}</div>}
-                                {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
-                              </div>
-                            ))}
-                            <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>
-                              View all journal entries →
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-            </section>
-          );
-        })()}
+        {screen === "progress" && (
+          <MyProgress onBack={() => setScreen("home")} onJournal={() => setScreen("journal")} />
+        )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
         {screen === "journal" && (
