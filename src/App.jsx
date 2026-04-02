@@ -1557,16 +1557,21 @@ function BreatheGroundTool({ onComplete, pathway }) {
   // Pre-rate: quick 1-5 tap
   if (phase === "pre-rate") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 20 }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
         How steady are you?
       </h2>
-      {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>Last shift: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
+      {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 13, color: s > 0 ? "var(--amber)" : "var(--text-muted)", marginBottom: 16, fontWeight: s > 0 ? 500 : 400 }}>Last session: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
+        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Scattered</span>
+        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Steady</span>
+      </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         {[1, 2, 3, 4, 5].map(n => (
           <button key={n} onClick={() => { setPreRating(n); setPhase("breathe"); }} style={{
-            width: 48, height: 48, borderRadius: "50%", border: "1px solid var(--border)",
-            background: "var(--surface)", color: "var(--text)", fontSize: 18,
-            cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+            width: 56, height: 56, borderRadius: "50%", border: "1px solid var(--border)",
+            background: "var(--surface)", color: "var(--text)", fontSize: 20, fontWeight: 500,
+            cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+            WebkitTapHighlightColor: "transparent"
           }}>{n}</button>
         ))}
       </div>
@@ -1696,28 +1701,38 @@ function BreatheGroundTool({ onComplete, pathway }) {
       {/* POST-RATE */}
       {phase === "post-rate" && (
         <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 20 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300, marginBottom: 8 }}>
             Where are you now?
           </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Scattered</span>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Steady</span>
+          </div>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
             {[1, 2, 3, 4, 5].map(n => (
               <button key={n} onClick={() => {
                 setPostRating(n);
                 try { localStorage.setItem("stillform_last_shift", JSON.stringify(n - (preRating || n))); } catch {}
               }} style={{
-                width: 48, height: 48, borderRadius: "50%",
-                border: `1px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
+                width: 56, height: 56, borderRadius: "50%",
+                border: `2px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
                 background: postRating === n ? "rgba(201,147,58,0.15)" : "var(--surface)",
-                color: postRating === n ? "var(--amber)" : "var(--text)", fontSize: 18,
-                cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                color: postRating === n ? "var(--amber)" : "var(--text)", fontSize: 20, fontWeight: 500,
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                WebkitTapHighlightColor: "transparent"
               }}>{n}</button>
             ))}
           </div>
           {postRating && preRating && (() => {
             const delta = postRating - preRating;
             return (
-              <div style={{ marginBottom: 24 }}>
-                <div style={{ fontSize: 32, fontFamily: "'Cormorant Garamond', serif", color: delta > 0 ? "var(--amber)" : "var(--text-dim)", marginBottom: 4 }}>
+              <div style={{ marginBottom: 24, animation: delta > 0 ? "fadeIn 0.4s ease" : "none" }}>
+                <div style={{
+                  fontSize: 48, fontFamily: "'Cormorant Garamond', serif", fontWeight: 300,
+                  color: delta > 0 ? "var(--amber)" : delta === 0 ? "var(--text-dim)" : "var(--text-muted)",
+                  marginBottom: 4, lineHeight: 1,
+                  textShadow: delta >= 2 ? "0 0 20px rgba(201,147,58,0.3)" : "none"
+                }}>
                   {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
@@ -1726,12 +1741,24 @@ function BreatheGroundTool({ onComplete, pathway }) {
               </div>
             );
           })()}
-          {postRating && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <button className="btn btn-primary" onClick={onComplete}>Proceed</button>
-              <button className="btn btn-ghost" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Repeat</button>
-            </div>
-          )}
+          {postRating && (() => {
+            const delta = postRating - preRating;
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {delta <= 0 ? (
+                  <>
+                    <button className="btn btn-primary" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Try again</button>
+                    <button className="btn btn-ghost" onClick={onComplete}>Done for now</button>
+                  </>
+                ) : (
+                  <>
+                    <button className="btn btn-primary" onClick={onComplete}>Proceed</button>
+                    <button className="btn btn-ghost" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Run another</button>
+                  </>
+                )}
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>
@@ -4280,13 +4307,14 @@ export default function Stillform() {
                       onClick={() => startTool(TOOLS.find(t => t.id === (toolIds[mainTool] || "breathe")))}
                       style={{
                         width: "100%", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 10, padding: "12px 16px", textAlign: "left", cursor: "pointer",
-                        marginBottom: 20, transition: "all 0.2s"
+                        borderRadius: 10, padding: "14px 18px", textAlign: "left", cursor: "pointer",
+                        marginBottom: 20, transition: "all 0.2s", WebkitTapHighlightColor: "transparent"
                       }}
                     >
-                      <div style={{ fontSize: 13, color: "var(--amber)" }}>
-                        ↺ {toolNames[mainTool]} worked last time · {last.durationFormatted || "tap to repeat"}
+                      <div style={{ fontSize: 14, color: "var(--amber)", fontWeight: 500 }}>
+                        ↺ Repeat: {toolNames[mainTool]} {last.durationFormatted ? `· ${last.durationFormatted}` : ""}
                       </div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>One tap. Same drill that worked last time.</div>
                     </button>
                   );
                 } catch { return null; }
@@ -4317,24 +4345,27 @@ export default function Stillform() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   <button onClick={() => startPathway("calm")} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
+                    WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◎ Breathe</div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Paced breathing matched to your state. Shift in 90 seconds.</div>
                   </button>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
+                    WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>◉ Body Scan</div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Locate tension. Release it with timed acupressure at six points.</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10,
-                    padding: "16px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
+                    padding: "18px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s",
+                    WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 3 }}>✦ Reframe</div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)" }}>AI identifies the distortion, separates signal from noise. Talk or journal.</div>
