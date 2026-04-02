@@ -2381,6 +2381,36 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           })(),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
           feelState: feelState,
+          signalProfile: (() => {
+            try {
+              const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+              if (!p) return null;
+              const parts = [];
+              if (p.firstAreas?.length) parts.push(`Body signals first in: ${p.firstAreas.join(", ")}`);
+              if (p.preSensations?.length) parts.push(`Pre-escalation sensations: ${p.preSensations.join(", ")}`);
+              if (p.triggers?.length) parts.push(`Known triggers: ${p.triggers.join(", ")}`);
+              return parts.length ? parts.join(". ") : null;
+            } catch { return null; }
+          })(),
+          biasProfile: (() => {
+            try {
+              const biases = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null");
+              if (!biases?.length) return null;
+              return `User's identified cognitive blind spots: ${biases.join(", ")}`;
+            } catch { return null; }
+          })(),
+          priorToolContext: (() => {
+            try {
+              const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+              if (sessions.length === 0) return null;
+              const last = sessions[sessions.length - 1];
+              if (!last?.tools?.length) return null;
+              const toolNames = { breathe: "Breathe (breathing + grounding)", "body-scan": "Body Scan (acupressure)", reframe: "Reframe", sigh: "Physiological Sigh" };
+              const used = last.tools.map(t => toolNames[t] || t).filter(Boolean);
+              if (!used.length) return null;
+              return `The user just completed: ${used.join(" → ")} before opening Reframe. They've already done physical regulation. You don't need to suggest breathing or grounding — move directly to cognitive work.`;
+            } catch { return null; }
+          })(),
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);

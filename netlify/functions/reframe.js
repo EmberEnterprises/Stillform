@@ -232,7 +232,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -257,6 +257,9 @@ exports.handler = async function(event) {
       if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
     }
     if (checkinContext) contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
+    if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
+    if (biasProfile) contextParts.push(`USER'S IDENTIFIED COGNITIVE BLIND SPOTS: ${biasProfile}. Watch for these patterns in what they write. If you see one activating, name it clearly but without judgment: "This looks like [bias name] — your brain is doing the thing you've already learned to watch for." Only flag it when you're confident it's present. Don't force it.`);
+    if (priorToolContext) contextParts.push(priorToolContext);
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 5) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
     if (journalContext && sessionCount < 5) contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
