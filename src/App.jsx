@@ -1261,7 +1261,7 @@ const BREATHING_PATTERNS = [
     { name: "Exhale", duration: 4, instruction: "Out through your mouth." },
     { name: "Hold", duration: 4, instruction: "Hold." }
   ]},
-  { id: "478", name: "4-7-8", desc: "Deep calm. Best when you have a quiet moment", phases: [
+  { id: "478", name: "4-7-8", desc: "Maximum downregulation. Best when fully stopped.", phases: [
     { name: "Inhale", duration: 4, instruction: "In through your nose." },
     { name: "Hold", duration: 7, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." }
@@ -1453,8 +1453,8 @@ function BreatheGroundTool({ onComplete, pathway }) {
     return (
       <div className="complete">
         <div className="complete-icon">✓</div>
-        <h2>You're here.</h2>
-        <p>Nervous system regulated. Senses anchored.</p>
+        <h2>State shifted.</h2>
+        <p>Nervous system regulated. Sensory anchors engaged.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Regulated in {formatTime(elapsed)}</div>
         {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center", marginTop: 8 }}>
@@ -1810,12 +1810,12 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Jaw & Face",
       prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes.",
-      pointEffect: "Calm racing thoughts",
+      pointEffect: "Interrupt racing thoughts",
       pointName: "GV24.5 — Third Eye Point",
       pointLocation: "Place two fingers between your eyebrows, just above the bridge of your nose.",
       pointInstruction: "Apply firm, steady pressure. Close your eyes. Hold.",
       holdSeconds: 60,
-      benefit: "Reduces tension headaches and quiets mental noise."
+      benefit: "Reduces tension headaches. Interrupts mental overload."
     },
     {
       name: "Shoulders & Neck",
@@ -1830,32 +1830,32 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Chest & Breath",
       prompt: "Is your breath shallow? Take one slow, full breath down to your belly.",
-      pointEffect: "Ease emotional distress",
+      pointEffect: "Interrupt emotional escalation",
       pointName: "CV17 — Sea of Tranquility",
       pointLocation: "Find the center of your breastbone, level with your heart. Place your flat palm here.",
-      pointInstruction: "Apply gentle but firm pressure with your palm. Breathe into it. Hold.",
+      pointInstruction: "Apply firm, steady pressure with your palm. Breathe into it. Hold.",
       holdSeconds: 60,
-      benefit: "Eases emotional heaviness and regulates the breath."
+      benefit: "Interrupts emotional escalation. Regulates the breath."
     },
     {
       name: "Hands & Arms",
       prompt: "Are your hands gripping anything? Open them fully. Let your arms go heavy.",
-      pointEffect: "Reduce stress and anxiety",
+      pointEffect: "Reduce stress load",
       pointName: "LI4 — Union Valley",
       pointLocation: "Find the webbing between your thumb and index finger. Pinch the highest point of the muscle there.",
       pointInstruction: "Squeeze firmly — this point is often tender. Switch hands halfway. Hold.",
       holdSeconds: 45,
-      benefit: "One of the most powerful points for anxiety and tension."
+      benefit: "One of the most effective points for stress and tension overload."
     },
     {
       name: "Gut & Core",
       prompt: "Scan your stomach and core. Notice tightness without trying to fix it.",
-      pointEffect: "Calm nausea and racing heart",
+      pointEffect: "Stabilize racing heart and nausea",
       pointName: "PC6 — Inner Gate",
       pointLocation: "Turn your wrist palm-up. Measure three finger-widths down from your wrist crease, between the two tendons.",
       pointInstruction: "Press firmly with your thumb. Switch wrists halfway. Hold.",
       holdSeconds: 60,
-      benefit: "Directly calms the nervous system. Relieves anxiety and nausea."
+      benefit: "Regulates the nervous system. Stabilizes heart rate and nausea."
     },
     {
       name: "Legs & Feet",
@@ -1974,8 +1974,8 @@ function BodyScanTool({ onComplete }) {
     return (
       <div className="complete">
         <div className="complete-icon">✓</div>
-        <h2>Tension released.</h2>
-        <p>You've moved awareness and pressure through your body.</p>
+        <h2>Tension cleared.</h2>
+        <p>Pressure applied. Activation reduced. Move on.</p>
         <div style={{ fontSize: 14, color: "var(--amber)", marginBottom: 8 }}>Completed in {formatTime(elapsed)}</div>
         {sessionCount > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{sessionCount}.</div>}
         <button className="btn btn-primary" onClick={() => onComplete()}>Return to tools</button>
@@ -2330,7 +2330,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
                 const data = JSON.parse(localStorage.getItem(`stillform_reframe_session_${m}`) || "[]");
                 if (data.length >= 2) {
                   const recent = data.slice(-4).map(msg => `${msg.role === "ai" ? "Stillform" : "User"}: ${msg.text}`).join("\n");
-                  const modeLabel = { calm: "Calm", clarity: "Get Sharp", hype: "Lock In" }[m];
+                  const modeLabel = { calm: "Regulate", clarity: "Get Sharp", hype: "Lock In" }[m];
                   return `USER'S PRIOR CONVERSATION (from ${modeLabel} mode, same session):\n${recent}\nThey switched modes. Use this context — don't make them repeat themselves.`;
                 }
               }
@@ -2360,7 +2360,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
 
   const modeConfig = {
     calm: {
-      icon: "◎", title: "Reframe", subtitle: "Describe the situation. The AI identifies the distortion.",
+      icon: "◎", title: "Regulate", subtitle: "Describe the situation. The AI identifies the distortion.",
       color: "#c9933a",
       bg: "linear-gradient(180deg, rgba(201,147,58,0.06) 0%, transparent 40%)",
       border: "rgba(201,147,58,0.2)",
@@ -2394,7 +2394,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       {/* MODE PICKER — three tones */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
         {[
-          { id: "calm", label: "Calm", icon: "◎", color: "#c9933a" },
+          { id: "calm", label: "Regulate", icon: "◎", color: "#c9933a" },
           { id: "clarity", label: "Get Sharp", icon: "✦", color: "#7aadcf" },
           { id: "hype", label: "Lock In", icon: "◌", color: "#c9793a" }
         ].map(m => {
@@ -3953,47 +3953,47 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Build composure in minutes, not hours.",
-              body: "Steady yourself. Clear your head. Regulate tension. Re-center.\n\nNot meditation. Not therapy. Not a crisis line.\n\nA composure system for high-functioning people who need to regulate without stepping out of their life.",
+              subtitle: "A composure system. Not an app.",
+              body: "Regulate your state in under two minutes — under pressure, in public, or mid-escalation.\n\nNot meditation. Not therapy. Not a crisis line.\n\nA composure system for anyone who needs to stabilize without stepping out of their life.",
               note: null,
-              cta: "Reset Composure"
+              cta: "Run a Session"
             },
             {
               icon: "◎",
               label: "Your tools",
-              title: "Regulate",
-              subtitle: "Three tools. Each one different.",
-              body: "Breathe — paced breathing matched to your state, plus sensory grounding. Sound on or off.\n\nBody Scan — locate tension in six body areas and release it with timed acupressure. Sound on or off.\n\nReframe — AI-powered. Three modes: Calm (reduce noise), Get Sharp (break loops), Lock In (pre-performance composure). Switch modes mid-session — the AI carries context with you. Talk tab for conversation, Journal tab for entries the AI remembers.",
-              note: "The Quick Breathe button is always free. Full tools require a subscription."
+              title: "Execute",
+              subtitle: "Three protocols. Each one precise.",
+              body: "Breathe — paced breathing matched to your state, plus sensory grounding. Sound on or off.\n\nBody Scan — locate tension in six body areas and release it with timed acupressure. Sound on or off.\n\nReframe — AI-powered. Three modes: Regulate (reduce noise), Get Sharp (break loops), Lock In (pre-performance). Switch modes mid-session — the AI carries context. Talk tab for conversation, Journal tab for entries the AI retains.",
+              note: "The Quick Breathe protocol is always free. Full access requires a subscription."
             },
             {
               icon: "◎",
-              label: "Features",
-              title: "Built for you",
-              subtitle: "The more you use it, the smarter it gets.",
-              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress. The AI factors this in when you talk to it.\n\nVoice-to-text — every text field has a mic button. Speak instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI remembers you: Your conversations, journal, and check-ins are stored in your encrypted cloud account. Every time you open Reframe, the AI reads your history fresh. It never stores anything on its own — your data is yours. Delete it anytime and it's gone.",
+              label: "Built in",
+              title: "No friction",
+              subtitle: "Every input has a shortcut.",
+              body: "Daily check-in — 30 seconds, optional. Sleep, energy, mood, stress events. The AI uses this data when you run Reframe.\n\nVoice-to-text — every text field has a mic. Speak instead of type.\n\nCloud sync — encrypted, accessible from any device.\n\nHow the AI retains context: Your sessions, journal, and check-ins are stored in your encrypted account. Every Reframe session starts with your full history. Your data is yours — delete it anytime.",
               note: null
             },
             {
               icon: "◇",
-              label: "Body awareness",
-              title: "Know your signals",
-              subtitle: "Where does stress show first?",
-              body: "In Settings, you can map where tension shows up in your body — jaw, shoulders, chest, gut, hands, legs. This builds a signal profile so you catch the wave earlier. You only need to do this once."
+              label: "Signal mapping",
+              title: "Know your pattern",
+              subtitle: "Where does it hit first?",
+              body: "In Settings, map where tension activates — jaw, shoulders, chest, gut, hands, legs. This builds your signal profile so you intercept the state earlier. One-time setup."
             },
             {
               icon: "◈",
               label: "Over time",
-              title: "The app learns you",
-              subtitle: "The more you use it, the smarter it gets.",
-              body: "After a few sessions, your home page starts showing insights — your most effective tool, regulation speed, patterns. The AI stops being generic and starts being yours. It won't call out patterns too early. It builds trust first, then gets direct."
+              title: "It sharpens",
+              subtitle: "Adapts to your patterns. Reduces time to control.",
+              body: "After a few sessions, your home screen shows data — most effective protocol, regulation speed, pattern trends. The AI moves from generic to precise. It doesn't push early. It earns it, then gets direct."
             },
             {
               icon: "✦",
-              label: "Mastery",
+              label: "The outcome",
               title: "Composure on demand",
               subtitle: "Regulate faster. Recognize sooner. Choose deliberately.",
-              body: "This is what Stillform trains: notice what's happening in your body, name what your mind is doing, and choose your response instead of reacting. The tools stay the same — but your relationship with them changes completely."
+              body: "This is what Stillform builds: intercept the state before it controls you, identify what your mind is doing, and execute a deliberate response. The protocols stay the same — your speed with them doesn't."
             }
           ];
           const step = steps[onboardStep];
@@ -4501,7 +4501,7 @@ export default function Stillform() {
                 {activeTool.id === "reframe" ? (
                   (() => {
                     const m = activeTool.mode || pathway || "calm";
-                    const names = { calm: "✦ Reframe", clarity: "✦ Get Sharp", hype: "◌ Lock In" };
+                    const names = { calm: "✦ Regulate", clarity: "✦ Get Sharp", hype: "◌ Lock In" };
                     return names[m] || "✦ Reframe";
                   })()
                 ) : (
@@ -4752,7 +4752,7 @@ export default function Stillform() {
                 <ul className="pricing-features">
                   <li>One-tap reset — always free</li>
                   <li>Breathe, Body Scan, Reframe</li>
-                  <li>3 AI modes: Calm, Get Sharp, Lock In</li>
+                  <li>3 AI modes: Regulate, Get Sharp, Lock In</li>
                   <li>Journal with AI memory</li>
                   <li>Daily check-in</li>
                   <li>Cloud sync — access from any device</li>
@@ -5120,7 +5120,7 @@ export default function Stillform() {
                 try {
                   const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
                   if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
-                  const modeLabel = { calm: "Calm", clarity: "Get Sharp", hype: "Lock In" };
+                  const modeLabel = { calm: "Regulate", clarity: "Get Sharp", hype: "Lock In" };
                   return (
                     <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
                       {saved.map((r, i) => (
