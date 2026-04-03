@@ -2513,6 +2513,82 @@ function MicButton({ onTranscript }) {
   );
 }
 
+// ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
+// Device-local AES-GCM encryption for sensitive conversation data.
+// Key is generated once per device and stored in IndexedDB.
+// Data is encrypted at rest in localStorage — not readable by other services.
+const CryptoStore = (() => {
+  const DB_NAME = "stillform_keys";
+  const KEY_NAME = "device_key";
+
+  const getDB = () => new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore("keys");
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+
+  const getOrCreateKey = async () => {
+    try {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction("keys", "readwrite");
+        const store = tx.objectStore("keys");
+        const getReq = store.get(KEY_NAME);
+        getReq.onsuccess = async () => {
+          if (getReq.result) { resolve(getReq.result); return; }
+          const key = await crypto.subtle.generateKey({ name: "AES-GCM", length: 256 }, true, ["encrypt", "decrypt"]);
+          store.put(key, KEY_NAME);
+          resolve(key);
+        };
+        getReq.onerror = () => reject(getReq.error);
+      });
+    } catch { return null; }
+  };
+
+  const encrypt = async (data) => {
+    try {
+      const key = await getOrCreateKey();
+      if (!key) return data; // fallback to plain if crypto unavailable
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encoded = new TextEncoder().encode(JSON.stringify(data));
+      const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, encoded);
+      return { __enc: true, iv: Array.from(iv), data: Array.from(new Uint8Array(encrypted)) };
+    } catch { return data; }
+  };
+
+  const decrypt = async (stored) => {
+    try {
+      if (!stored?.__enc) return stored;
+      const key = await getOrCreateKey();
+      if (!key) return null;
+      const iv = new Uint8Array(stored.iv);
+      const data = new Uint8Array(stored.data);
+      const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, data);
+      return JSON.parse(new TextDecoder().decode(decrypted));
+    } catch { return null; }
+  };
+
+  return { encrypt, decrypt };
+})();
+
+// Encrypted get/set for sensitive keys
+async function secureGet(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed?.__enc) return await CryptoStore.decrypt(parsed);
+    return parsed;
+  } catch { return null; }
+}
+async function secureSet(key, value) {
+  try {
+    const encrypted = await CryptoStore.encrypt(value);
+    localStorage.setItem(key, JSON.stringify(encrypted));
+  } catch {}
+}
+
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
@@ -2592,17 +2668,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
     } catch {}
   };
 
-  const [messages, setMessages] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : [];
-    } catch { return []; }
-  });
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const [savedIds, setSavedIds] = useState(new Set());
+
+  // Load encrypted messages on mount and mode change
+  useEffect(() => {
+    secureGet(STORAGE_KEY).then(saved => {
+      setMessages(Array.isArray(saved) ? saved : []);
+    }).catch(() => setMessages([]));
+    setSavedIds(new Set());
+    setError(null);
+  }, [effectiveMode]);
 
   // Voice input
   const speech = useSpeechToText((transcript) => {
@@ -2622,22 +2702,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
     try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === effectiveMode); } catch { return []; }
   };
 
-  // Persist every message change to localStorage
+  // Persist encrypted messages on every change
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-    } catch {}
+    if (messages.length > 0) {
+      secureSet(STORAGE_KEY, messages).catch(() => {});
+    }
   }, [messages]);
-
-  // Reload messages when mode changes
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      setMessages(saved ? JSON.parse(saved) : []);
-    } catch { setMessages([]); }
-    setSavedIds(new Set());
-    setError(null);
-  }, [effectiveMode]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
