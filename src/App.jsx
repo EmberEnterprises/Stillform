@@ -1373,6 +1373,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
   const [phase, setPhase] = useState("pre-rate"); // pre-rate | breathe | ground | post-rate | done
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
+  const [bioFilter, setBioFilter] = useState(null);
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1709,7 +1710,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
       </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         {[1, 2, 3, 4, 5].map(n => (
-          <button key={n} onClick={() => { setPreRating(n); setPhase("breathe"); }} style={{
+          <button key={n} onClick={() => { setPreRating(n); setPhase("bio-filter"); }} style={{
             width: 56, height: 56, borderRadius: "50%", border: "1px solid var(--border)",
             background: "var(--surface)", color: "var(--text)", fontSize: 20, fontWeight: 500,
             cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
@@ -1717,6 +1718,56 @@ function BreatheGroundTool({ onComplete, pathway }) {
           }}>{n}</button>
         ))}
       </div>
+    </div>
+  );
+
+  // Bio-filter — physical state check before session
+  if (phase === "bio-filter") return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6 }}>
+        System check.
+      </h2>
+      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+        Bio-filter · What is your hardware doing right now?
+      </div>
+      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
+        Physical state colors perception. The AI filters your observations through this — so "I feel overwhelmed" gets read correctly instead of misidentified as a character flaw.
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
+        {[
+          { id: "clear", label: "All clear", desc: "System is running normally", icon: "◎" },
+          { id: "depleted", label: "Physically depleted", desc: "Fatigue, low energy, heavy body", icon: "◌" },
+          { id: "gut", label: "Gut signal active", desc: "Digestive distress, gut-brain noise", icon: "◉" },
+          { id: "sleep", label: "Sleep deprived", desc: "Under-rested, reduced cognitive baseline", icon: "◐" },
+          { id: "hormonal", label: "Hormonal shift", desc: "Cycle, inflammation, or hormonal fluctuation", icon: "◑" },
+          { id: "pain", label: "Pain present", desc: "Chronic or acute pain affecting state", icon: "⚡" },
+        ].map(opt => (
+          <button key={opt.id} onClick={() => {
+            setBioFilter(opt.id);
+            try { localStorage.setItem("stillform_bio_filter", opt.id); } catch {}
+            setPhase("breathe");
+          }} style={{
+            width: "100%", background: bioFilter === opt.id ? "var(--amber-glow)" : "var(--surface)",
+            border: `0.5px solid ${bioFilter === opt.id ? "var(--amber-dim)" : "var(--border)"}`,
+            borderRadius: "var(--r)", padding: "12px 16px", cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 12, textAlign: "left",
+            boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+            WebkitTapHighlightColor: "transparent"
+          }}>
+            <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 14, color: "var(--amber)", flexShrink: 0 }}>{opt.icon}</span>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)", marginBottom: 2 }}>{opt.label}</div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em" }}>{opt.desc}</div>
+            </div>
+          </button>
+        ))}
+      </div>
+      <button onClick={() => { setBioFilter("clear"); setPhase("breathe"); }} style={{
+        background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer",
+        fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase"
+      }}>
+        Skip →
+      </button>
     </div>
   );
 
@@ -2639,6 +2690,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           })(),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
           feelState: feelState,
+          bioFilter: (() => {
+            try {
+              const bf = localStorage.getItem("stillform_bio_filter");
+              if (!bf || bf === "clear") return null;
+              const labels = {
+                depleted: "physically depleted — fatigue, low energy, heavy body",
+                gut: "gut signal active — digestive distress affecting state",
+                sleep: "sleep deprived — under-rested, reduced cognitive baseline",
+                hormonal: "hormonal shift — cycle, inflammation, or hormonal fluctuation",
+                pain: "pain present — chronic or acute pain affecting perception"
+              };
+              return labels[bf] || null;
+            } catch { return null; }
+          })(),
           signalProfile: (() => {
             try {
               const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
