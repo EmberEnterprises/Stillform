@@ -4765,7 +4765,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "Stabilize. Then think clearly.",
-              body: "Feelings don't need to be dangerous to overwhelm you. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A precision composure system.",
+              body: "You don't have to be in crisis to be overwhelmed. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A precision composure system.",
               note: null
             },
             {
@@ -4922,7 +4922,7 @@ export default function Stillform() {
                   {isFirst ? (
                     <>
                       <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
-                        Run a Session
+                        Initiate Session
                       </button>
                       <button className="btn btn-ghost" style={{ marginTop: 8, fontSize: 13 }} onClick={() => setOnboardStep(s => s + 1)}>
                         How does it work? →
