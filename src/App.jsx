@@ -5202,9 +5202,9 @@ export default function Stillform() {
                 }}>
                   <div>
                     <div>Initiate Session</div>
-                    <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, marginTop: 2 }}>Stabilize now</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, opacity: 1, marginTop: 2, color: "rgba(10,10,12,0.75)" }}>Stabilize now</div>
                   </div>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", opacity: 0.7 }}>◎ REGULATE</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 1, color: "rgba(10,10,12,0.65)" }}>◎ REGULATE</span>
                 </button>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
@@ -5213,7 +5213,7 @@ export default function Stillform() {
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Body</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -5221,7 +5221,7 @@ export default function Stillform() {
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Thought</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Thought</div>
                   </button>
                 </div>
               </div>
@@ -5290,9 +5290,9 @@ export default function Stillform() {
                 }}>
                   <div>
                     <div>Initiate Session</div>
-                    <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, marginTop: 2, letterSpacing: "0.01em" }}>Stabilize now</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, opacity: 1, marginTop: 2, letterSpacing: "0.01em", color: "rgba(10,10,12,0.75)" }}>Stabilize now</div>
                   </div>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", opacity: 0.7 }}>◎ REGULATE</span>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 1, color: "rgba(10,10,12,0.65)" }}>◎ REGULATE</span>
                 </button>
 
                 {/* Secondary protocols — 1-word anchors */}
@@ -5304,7 +5304,7 @@ export default function Stillform() {
                     WebkitTapHighlightColor: "transparent", textAlign: "center"
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Body</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
                   </button>
                   <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -5313,7 +5313,7 @@ export default function Stillform() {
                     WebkitTapHighlightColor: "transparent", textAlign: "center"
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 3 }}>Thought</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Thought</div>
                   </button>
                 </div>
               </div>
