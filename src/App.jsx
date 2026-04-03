@@ -4949,33 +4949,33 @@ export default function Stillform() {
           );
         })()}
 
-        {/* SETUP — guided calibration for proactive users */}
+        {/* SETUP — System Initialization */}
         {screen === "setup" && (() => {
           const setupSteps = [
             {
               step: 1,
-              label: "Signal Mapping",
-              title: "Where does it activate?",
-              subtitle: "The first thing to know about your system.",
-              body: "Before a session can be personalized, the AI needs to know where intensity shows up in your body first — jaw, shoulders, chest, gut, hands, legs.\n\nThis is a one-time calibration. Takes 60 seconds.",
-              cta: "Map my signals →",
+              label: "Initialization · 1 of 3",
+              title: "Signal Mapping",
+              subtitle: "Where does intensity activate first?",
+              body: "The system needs to know your physical response pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
+              cta: "Run signal mapping →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
             },
             {
               step: 2,
-              label: "Blind Spots",
-              title: "What does your brain add?",
-              subtitle: "The patterns the AI will watch for.",
-              body: "Everyone has cognitive patterns that amplify intensity — catastrophizing, all-or-nothing thinking, mind reading. Identifying yours means the AI can name them in Reframe before they take over.\n\nTakes 2 minutes.",
-              cta: "Identify my blind spots →",
+              label: "Initialization · 2 of 3",
+              title: "Blind Spot Profile",
+              subtitle: "What distortions does your brain run?",
+              body: "Catastrophizing. All-or-nothing. Mind reading. Everyone has cognitive patterns that amplify intensity before they're even aware of it.\n\nIdentifying yours means the AI can flag them in real time — before they take over.",
+              cta: "Profile my blind spots →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
             {
               step: 3,
-              label: "Default Protocol",
-              title: "Which breath fits you?",
-              subtitle: "Your sessions start instantly with this.",
-              body: "Calm (4-4-8-2) — longer exhale, activates parasympathetic response. Best for anxiety and overwhelm.\n\nBox (4-4-4-4) — equal phases, high-focus. Best for performance states.\n\n4-7-8 — deep reset. Best for physical tension.\n\nChange anytime in Settings.",
+              label: "Initialization · 3 of 3",
+              title: "Default Protocol",
+              subtitle: "Select your baseline breathing pattern.",
+              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. Overwhelm and anxiety.\n\nBox (4-4-4-4) — equal phases. High-focus, performance states.\n\n4-7-8 — maximum reset. Physical tension and exhaustion.\n\nQuick Reset — 60 seconds. Works anywhere.",
               cta: null,
               patterns: ["calm", "box", "478", "quick"]
             }
@@ -4996,8 +4996,13 @@ export default function Stillform() {
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
 
+              {/* System init header */}
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+                ◎ SYSTEM INITIALIZATION
+              </div>
+
               {/* Progress */}
-              <div style={{ display: "flex", gap: 6, marginBottom: 32 }}>
+              <div style={{ display: "flex", gap: 6, marginBottom: 24 }}>
                 {setupSteps.map((_, i) => (
                   <div key={i} style={{
                     height: 2, flex: 1, borderRadius: 1,
@@ -5008,7 +5013,7 @@ export default function Stillform() {
               </div>
 
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-                {current.step} / {setupSteps.length} · {current.label}
+                {current.label}
               </div>
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8, lineHeight: 1.15 }}>
                 {current.title}
@@ -5058,7 +5063,7 @@ export default function Stillform() {
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
                   textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
                 }}>
-                  {isLast ? "Done — take me to the app →" : "Skip this step →"}
+                  {isLast ? "Initialization complete → Enter system" : "Skip this step →"}
                 </button>
               </div>
             </section>
@@ -5164,7 +5169,7 @@ export default function Stillform() {
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
                 textTransform: "uppercase", color: "var(--amber)", opacity: 0.7
               }}>
-                ◇ Set up your profile first →
+                ◎ Initialize system first →
               </button>
 
               <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
