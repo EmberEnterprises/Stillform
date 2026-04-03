@@ -39,7 +39,7 @@ const styles = `
     --amber-20:   rgba(200,146,42,0.20);
     --text:       #E8EAF0;
     --text-dim:   #9496A1;
-    --text-muted: #55575F;
+    --text-muted: #95979f;
     --green:      #4a8c6a;
     --green-glow: rgba(74,140,106,0.08);
     --r-sm: 2px;
@@ -540,7 +540,7 @@ const styles = `
   .ai-container {
     display: flex;
     flex-direction: column;
-    height: 480px;
+    max-height: 480px;
   }
 
   .ai-messages {
@@ -3190,7 +3190,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       {messages.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
-            {messages.length > 2 && (
+            {messages.length > 1 && (
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
                 saveSession();
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
