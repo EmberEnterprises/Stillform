@@ -4765,7 +4765,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "Stabilize. Then think clearly.",
-              body: "You don't have to be in crisis to be overwhelmed. Excitement before a first date. Rage in a meeting. Joy so big it makes you spiral.\n\nStillform doesn't ask you to turn it down. It helps you stay functional at full volume.\n\nNot meditation. Not therapy. A precision composure system.",
+              body: "You don't have to be in crisis to be overwhelmed. A hard conversation. A decision you can't think through. A feeling that showed up and won't leave.\n\nStillform helps you get back to yourself — fast.\n\nNot meditation. Not therapy. A precision composure system.",
               note: null
             },
             {
