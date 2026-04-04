@@ -23,10 +23,10 @@ public class MainActivity extends BridgeActivity {
 
     private void handleWidgetIntent(Intent intent) {
         if (intent != null && "breathe".equals(intent.getStringExtra("stillform_action"))) {
-            // Inject JavaScript to trigger breathing
+            // Set localStorage flag that React reads synchronously on mount
             getBridge().getWebView().post(() -> {
                 getBridge().getWebView().evaluateJavascript(
-                    "window.__stillform_widget_action = 'breathe';", null
+                    "try { localStorage.setItem('stillform_widget_breathe', 'true'); } catch(e) {}", null
                 );
             });
         }

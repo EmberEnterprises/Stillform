@@ -4892,94 +4892,72 @@ export default function Stillform() {
 
   // Production: show onboarding only once, unless user replays from Settings.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  const [screen, setScreen] = useState(null);
-  const [screenReady, setScreenReady] = useState(false);
+  
+  // Check widget launch flag synchronously
+  const widgetLaunch = (() => {
+    try {
+      if (localStorage.getItem("stillform_widget_breathe") === "true") {
+        localStorage.removeItem("stillform_widget_breathe");
+        return true;
+      }
+    } catch {}
+    return false;
+  })();
+
+  const [screen, setScreen] = useState(
+    !hasSeenOnboarding ? "onboarding" : widgetLaunch ? "tool" : "home"
+  );
+  const [screenReady, setScreenReady] = useState(true);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
-  const [activeTool, setActiveTool] = useState(null);
-  const [pathway, setPathway] = useState(null);
+  const [activeTool, setActiveTool] = useState(widgetLaunch ? { id: "breathe", name: "Breathe" } : null);
+  const [pathway, setPathway] = useState(widgetLaunch ? "calm" : null);
   const [sharedText, setSharedText] = useState(null);
 
-  // Deep link handling — widget tap and share extension
+  // Deep link handling — share extension
   useEffect(() => {
-    let handled = false;
     try {
-      // Web: check URL params
+      // Web: check URL params for share
       const params = new URLSearchParams(window.location.search);
-      const action = params.get("action");
       const share = params.get("share");
-      if (action === "breathe" && hasSeenOnboarding) {
-        setActiveTool({ id: "breathe", name: "Breathe" });
-        setScreen("tool");
-        setPathway("calm");
-        handled = true;
-      }
       if (share && hasSeenOnboarding) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
-        handled = true;
       }
-      if (action || share) {
+      if (share) {
         window.history.replaceState({}, "", "/");
       }
-    } catch {}
 
-    // Native: check widget launch via injected global variable
-    if (!handled && isNative()) {
-      const checkWidgetFlag = () => {
-        if (window.__stillform_widget_action === "breathe" && hasSeenOnboarding) {
-          window.__stillform_widget_action = null;
-          setActiveTool({ id: "breathe", name: "Breathe" });
-          setScreen("tool");
-          setPathway("calm");
-          setScreenReady(true);
-          return true;
-        }
-        return false;
-      };
-
-      // Check immediately, then poll a few times during splash
-      if (!checkWidgetFlag()) {
-        let checks = 0;
-        const interval = setInterval(() => {
-          checks++;
-          if (checkWidgetFlag() || checks >= 10) {
-            clearInterval(interval);
-            if (!screenReady) {
-              setScreen(hasSeenOnboarding ? "home" : "onboarding");
-              setScreenReady(true);
+      // Native: listen for app resume widget tap + share extension
+      if (isNative()) {
+        import('@capacitor/app').then(({ App }) => {
+          App.addListener("appStateChange", (state) => {
+            if (state.isActive) {
+              try {
+                if (localStorage.getItem("stillform_widget_breathe") === "true") {
+                  localStorage.removeItem("stillform_widget_breathe");
+                  setActiveTool({ id: "breathe", name: "Breathe" });
+                  setScreen("tool");
+                  setPathway("calm");
+                }
+              } catch {}
             }
-          }
-        }, 200);
+          });
+          App.addListener("appUrlOpen", (data) => {
+            try {
+              const url = new URL(data.url);
+              const s = url.searchParams.get("share");
+              if (s && hasSeenOnboarding) {
+                setSharedText(decodeURIComponent(s));
+                setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+                setScreen("tool");
+              }
+            } catch {}
+          });
+        }).catch(() => {});
       }
-
-      // Listen for app resume
-      import('@capacitor/app').then(({ App }) => {
-        App.addListener("appStateChange", (state) => {
-          if (state.isActive) {
-            setTimeout(() => checkWidgetFlag(), 300);
-          }
-        });
-        App.addListener("appUrlOpen", (data) => {
-          try {
-            const url = new URL(data.url);
-            const s = url.searchParams.get("share");
-            if (s && hasSeenOnboarding) {
-              setSharedText(decodeURIComponent(s));
-              setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-              setScreen("tool");
-            }
-          } catch {}
-        });
-      }).catch(() => {});
-    } else if (!handled) {
-      // Web — set default screen immediately
-      setScreen(hasSeenOnboarding ? "home" : "onboarding");
-      setScreenReady(true);
-    } else {
-      setScreenReady(true);
-    }
+    } catch {}
   }, []);
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
