@@ -1466,7 +1466,7 @@ function PhysiologicalSighTool({ onComplete }) {
 }
 
 const BREATHING_PATTERNS = [
-  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale activates parasympathetic response", phases: [
+  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale activates parasympathetic system", phases: [
     { name: "Inhale", duration: 4, instruction: "In through your nose." },
     { name: "Hold", duration: 4, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
@@ -2973,7 +2973,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       "What's the loudest thing right now? Say it.",
       "Something is activated. What is it?",
       "Where are you and what set it off?",
-      "What are you actually reacting to?",
+      "What's actually driving this?",
       "What's running in the background right now?"
     ],
     clarity: [
@@ -3507,7 +3507,7 @@ function MicroBiasTool({ onComplete }) {
           Awareness is the intervention.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
-          You don't need to fix these. Just knowing they're there changes how you respond to them. The AI in Reframe is also watching for these patterns in your conversations.
+          You don't need to fix these. Just knowing they're there changes how you act on them. The AI in Reframe is also watching for these patterns in your conversations.
         </p>
         {identified.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
@@ -5073,7 +5073,7 @@ export default function Stillform() {
               icon: "◈",
               label: "Over time",
               title: "It sharpens.",
-              subtitle: "Learns your signals. Tightens your response.",
+              subtitle: "Learns your signals. Sharpens every session.",
               body: "After a few sessions your Signal Profile builds — where your body responds first, what your blind spots are, how you move through states.\n\nLog signal events in the Signal Log. The AI cross-references sessions, patterns, and your profile. It stops being generic and starts being precise about you."
             },
             {
@@ -5250,7 +5250,7 @@ export default function Stillform() {
               label: "Initialization · 1 of 3",
               title: "Signal Mapping",
               subtitle: "Where does your body respond first?",
-              body: "The system needs to know your physical response pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
+              body: "The system needs to know your physical signal pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
               cta: "Run signal mapping →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
             },
@@ -6034,7 +6034,7 @@ export default function Stillform() {
               },
               {
                 q: "What does the AI actually do?",
-                a: "It helps you see what's driving your reaction. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of reacting on autopilot. It sharpens over time based on your journal and session history."
+                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your journal and session history."
               },
               {
                 q: "What are the three Reframe modes?",
