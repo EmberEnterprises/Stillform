@@ -390,7 +390,7 @@ Wear OS companion. Watch vibrates in sync with breathing pattern. No screen need
 WatchKit extension. Same concept as Samsung — haptic-only breathing companion. Blocked on DUNS number and Apple Developer Program.
 
 **8. Health Integration**
-HealthKit (iOS) / Health Connect (Android). Pull HRV, sleep quality, heart rate. Bio-filter auto-populates from biometric data instead of self-report. Strengthens FSA eligibility case.
+HealthKit (iOS) / Health Connect (Android). Pull HRV, sleep quality, heart rate. Sleep data feeds directly into morning check-in — system already knows how you slept before you tell it. Bio-filter auto-populates from biometric data instead of self-report. Strengthens FSA eligibility case.
 
 **9. Cloud Sync**
 Encrypted cloud backup and multi-device sync. Pre-update auto-backup before any app update touches user data. Version check on app load. Non-negotiable for production.
