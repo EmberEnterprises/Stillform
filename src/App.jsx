@@ -5485,7 +5485,7 @@ export default function Stillform() {
               title: "Signal Mapping",
               subtitle: "Where does your body respond first?",
               body: "The system needs to know your physical signal pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
-              cta: "Run signal mapping →",
+              cta: "Begin →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
             },
             {
@@ -5494,7 +5494,7 @@ export default function Stillform() {
               title: "Blind Spot Profile",
               subtitle: "What distortions does your brain run?",
               body: "Catastrophizing. All-or-nothing. Mind reading. Everyone has cognitive patterns that shape how they read situations.\n\nIdentifying yours means the AI can flag them in real time — so you see them before they drive the decision.",
-              cta: "Profile my blind spots →",
+              cta: "Begin →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
             {
