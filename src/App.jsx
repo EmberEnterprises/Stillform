@@ -3150,9 +3150,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {/* MODE PICKER — three tones */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
         {[
-          { id: "calm", label: "Talk it through", desc: "I'm in something right now", icon: "◎", color: "#c9933a" },
-          { id: "clarity", label: "Break the loop", desc: "I can't stop thinking", icon: "✦", color: "#7aadcf" },
-          { id: "hype", label: "Get ready", desc: "Something's coming up", icon: "◌", color: "#c9793a" }
+          { id: "calm", label: "Talk it through", desc: "AI processes with you and reframes", icon: "◎", color: "#c9933a" },
+          { id: "clarity", label: "Break the loop", desc: "AI cuts the spiral with one question", icon: "✦", color: "#7aadcf" },
+          { id: "hype", label: "Get ready", desc: "AI gives you one anchor to carry in", icon: "◌", color: "#c9793a" }
         ].map(m => {
           const active = effectiveMode === m.id;
           return (
@@ -6395,7 +6395,7 @@ export default function Stillform() {
               },
               {
                 q: "What are the three Reframe modes?",
-                a: "Talk it through — process what's happening right now. Break the loop — stop a thought spiral or indecision. Get ready — compose yourself before a moment that matters."
+                a: "Talk it through — the AI processes with you and reframes what's happening. Break the loop — the AI cuts a thought spiral with one sharp question. Get ready — the AI gives you one anchor thought to carry into the moment."
               },
               {
                 q: "Does the AI learn about me?",
