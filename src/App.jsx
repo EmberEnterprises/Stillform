@@ -5948,13 +5948,13 @@ export default function Stillform() {
 
                 <div className="pricing-price">
                   {pricingPlan === "annual" ? (
-                    <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
+                    <><sup>$</sup>9<span style={{ fontSize: 28 }}>.99</span></>
                   ) : (
-                    <><sup>$</sup>19<span style={{ fontSize: 28 }}>.99</span></>
+                    <><sup>$</sup>14<span style={{ fontSize: 28 }}>.99</span></>
                   )}
                 </div>
                 <div className="pricing-save">
-                  {pricingPlan === "annual" ? "per month · $179.88/yr · Save 25%" : "per month"}
+                  {pricingPlan === "annual" ? "per month · $119.88/yr · Save 33%" : "per month"}
                 </div>
 
                 <ul className="pricing-features">
@@ -6046,7 +6046,7 @@ export default function Stillform() {
               },
               {
                 q: "Is my data private?",
-                a: "Your data is stored on your device in encrypted localStorage. Journal entries and conversations are not sent to any server for storage. The AI receives your context for each session to generate a response, but nothing is retained on the AI side after the response is delivered."
+                a: "Your data is encrypted and stored securely. The AI receives your context for each session to generate a response, but nothing is retained on the AI side after the response is delivered. You can delete all your data anytime from Settings."
               },
               {
                 q: "Can I delete my data?",
@@ -6070,7 +6070,7 @@ export default function Stillform() {
               },
               {
                 q: "How much does it cost?",
-                a: "$19.99/month or $14.99/month on the annual plan ($179.88/year). 7-day free trial. One price — everything included. No add-ons."
+                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). 7-day free trial. One price — everything included. No add-ons."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
