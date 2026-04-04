@@ -4892,83 +4892,85 @@ export default function Stillform() {
 
   // Production: show onboarding only once, unless user replays from Settings.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
+  const [screen, setScreen] = useState(null); // Start as null until we determine what to show
+  const [screenReady, setScreenReady] = useState(false); // Flag to track if we've decided what screen to show
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
 
-  // Deep link handling — widget tap and share extension
+  // Deep link handling — widget tap and share extension  
   useEffect(() => {
-    try {
-      // Web: check URL params
-      const params = new URLSearchParams(window.location.search);
-      const action = params.get("action");
-      const share = params.get("share");
-      
-      if (action === "breathe" && hasSeenOnboarding) {
-        setActiveTool({ id: "breathe", name: "Breathe" });
-        setScreen("tool");
-        setPathway("calm");
-      }
-      
-      if (share) {
-        console.log("[Share] Received shared text, launching Reframe");
-        setSharedText(decodeURIComponent(share));
-        setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-        setScreen(hasSeenOnboarding ? "tool" : "onboarding");
-      }
-      
-      if (action || share) {
-        window.history.replaceState({}, "", "/");
-      }
+    let screenSetByDeepLink = false;
 
-      // Native: check widget launch flag
-      if (isNative()) {
-        const checkWidgetFlag = async () => {
+    const initializeScreen = async () => {
+      try {
+        // Web: check URL params for action or share
+        const params = new URLSearchParams(window.location.search);
+        const action = params.get("action");
+        const share = params.get("share");
+        
+        if (action === "breathe" && hasSeenOnboarding) {
+          console.log("[DeepLink] Action breathe from URL params");
+          setActiveTool({ id: "breathe", name: "Breathe" });
+          setScreen("tool");
+          setPathway("calm");
+          screenSetByDeepLink = true;
+        }
+        
+        if (share) {
+          console.log("[DeepLink] Share text from URL params");
+          setSharedText(decodeURIComponent(share));
+          setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+          setScreen(hasSeenOnboarding ? "tool" : "onboarding");
+          window.history.replaceState({}, "", "/");
+          screenSetByDeepLink = true;
+        }
+
+        // Native: check widget launch flag BEFORE defaulting to home screen
+        // This is crucial because the widget flag takes priority
+        if (isNative() && !screenSetByDeepLink) {
           try {
             const { Capacitor } = await import('@capacitor/core');
             const WidgetBridge = Capacitor.Plugins.WidgetBridge;
-            if (WidgetBridge) {
+            
+            if (WidgetBridge && typeof WidgetBridge.checkLaunchAction === 'function') {
               const result = await WidgetBridge.checkLaunchAction();
               console.log("[Widget] checkLaunchAction result:", result);
+              
               if (result?.action === "breathe") {
-                console.log("[Widget] Launching breathe tool");
-                // Widget action takes priority — show breathe even if not yet onboarded
-                // (user will see onboarding first, then breathe)
+                console.log("[Widget] Widget tap detected - launching breathe tool");
                 setActiveTool({ id: "breathe", name: "Breathe" });
                 setScreen(hasSeenOnboarding ? "tool" : "onboarding");
                 setPathway("calm");
+                screenSetByDeepLink = true;
               }
             }
           } catch (e) {
             console.log("[Widget] Error checking launch action:", e);
           }
-        };
-        checkWidgetFlag();
+        }
 
-        // Also check when app resumes from background
-        import('@capacitor/app').then(({ App }) => {
-          App.addListener("appStateChange", (state) => {
-            if (state.isActive) checkWidgetFlag();
-          });
-          // Handle share extension deep links
-          App.addListener("appUrlOpen", (data) => {
-            try {
-              const url = new URL(data.url);
-              const s = url.searchParams.get("share");
-              if (s && hasSeenOnboarding) {
-                setSharedText(decodeURIComponent(s));
-                setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-                setScreen("tool");
-              }
-            } catch {}
-          });
-        }).catch(() => {});
+        // If no deeplink action or widget tap, show default screen
+        if (!screenSetByDeepLink) {
+          console.log("[DeepLink] No action detected, showing default screen");
+          setScreen(hasSeenOnboarding ? "home" : "onboarding");
+        }
+        
+        // Mark that we're ready to render
+        setScreenReady(true);
+      } catch (e) {
+        console.log("[DeepLink] Unexpected error:", e);
+        setScreen(hasSeenOnboarding ? "home" : "onboarding");
+        setScreenReady(true);
       }
-    } catch {}
+    };
+
+    // Run initialization immediately
+    initializeScreen();
   }, []);
+
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
   const [openLog, setOpenLog] = useState(null);
@@ -5109,8 +5111,8 @@ export default function Stillform() {
     <>
       <style>{styles}</style>
       <div className={appClasses}>
-        {/* SPLASH OVERLAY — fades out, never blocks hooks */}
-        {!splashDone && (
+        {/* SPLASH OVERLAY — shows during initial load or while checking widget flag */}
+        {(!splashDone || !screenReady) && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
@@ -5128,8 +5130,8 @@ export default function Stillform() {
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
-        {/* NAV — hidden during onboarding */}
-        {screen !== "onboarding" && (
+        {/* NAV — hidden during onboarding and initial load */}
+        {screen !== "onboarding" && screen !== null && (
         <nav className="nav">
           <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => setScreen("home")}>
             Still<span>form</span>
