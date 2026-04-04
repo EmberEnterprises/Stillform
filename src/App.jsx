@@ -1466,7 +1466,7 @@ function PhysiologicalSighTool({ onComplete }) {
 }
 
 const BREATHING_PATTERNS = [
-  { id: "calm", name: "Calm (4-4-8-2)", desc: "Longer exhale activates parasympathetic response", phases: [
+  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale activates parasympathetic response", phases: [
     { name: "Inhale", duration: 4, instruction: "In through your nose." },
     { name: "Hold", duration: 4, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
@@ -4084,7 +4084,7 @@ function BodyCheckInTool({ onComplete }) {
       </h2>
       <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         {[
-          { level: 0, label: "Calm", color: "var(--green)" },
+          { level: 0, label: "Composed", color: "var(--green)" },
           { level: 1, label: "Mild", color: "var(--amber-dim)" },
           { level: 2, label: "Tense", color: "var(--amber)" },
           { level: 3, label: "High", color: "#c05040" }
@@ -5268,7 +5268,7 @@ export default function Stillform() {
           const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
 
           const patternLabels = {
-            calm: { name: "Calm", detail: "4-4-8-2 · When the signal is too loud" },
+            calm: { name: "Regulate", detail: "4-4-8-2 · When the signal is too loud" },
             box: { name: "Box", detail: "4-4-4-4 · When you need to stay even" },
             "478": { name: "4-7-8", detail: "When the body won't let go" },
             quick: { name: "Quick Reset", detail: "2-2-4-1 · 60 seconds" }
@@ -5950,7 +5950,7 @@ export default function Stillform() {
                   <li>One-tap reset — always free</li>
                   <li>Breathe, Body Scan, Reframe</li>
                   <li>3 AI modes: Regulate, Get Sharp, Lock In</li>
-                  <li>Journal with AI memory</li>
+                  <li>Signal Log with AI memory</li>
                   <li>Daily check-in</li>
                   <li>Cloud sync — access from any device</li>
                   <li>Signal mapping + tension check</li>
@@ -6075,7 +6075,7 @@ export default function Stillform() {
                 Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
               {[
-                { id: "calm", name: "Calm (4-4-8-2)", use: "When the signal is too loud", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is too loud", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
                 { id: "box", name: "Box (4-4-4-4)", use: "When you need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
                 { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
                 { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds between tasks", why: "Shortest pattern that produces a measurable state shift." }
@@ -6384,14 +6384,14 @@ export default function Stillform() {
                 } catch { return null; }
               })()}
 
-              {/* Journal Log */}
+              {/* Signal Log */}
               <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Journal entries</div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Signal Log</div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
                     {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries
                   </div>
@@ -6401,7 +6401,7 @@ export default function Stillform() {
               {openLog === "journal" && (() => {
                 try {
                   const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-                  if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No journal entries yet.</div>;
+                  if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No signal entries yet.</div>;
                   return (
                     <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
                       {entries.map((e, i) => (
@@ -6519,7 +6519,7 @@ export default function Stillform() {
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Export</div>
                 {[
-                  { label: "Export journal entries (PDF)", desc: "Download your full journal" },
+                  { label: "Export signal log (PDF)", desc: "Download your full signal log" },
                   { label: "Export session history (CSV)", desc: "Your regulation data for personal records or a provider" }
                 ].map((item, i) => (
                   <div key={i} style={{
@@ -6579,7 +6579,7 @@ export default function Stillform() {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Sync across devices</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Access conversations, journal, and progress from any device. Encrypted.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Access conversations, signal log, and progress from any device. Encrypted.</div>
                   </div>
                   <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
                 </div>
@@ -6673,14 +6673,14 @@ export default function Stillform() {
               }}>
                 <div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Export your data</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download journal, sessions, insights as PDF or CSV</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download signal log, sessions, insights as PDF or CSV</div>
                 </div>
                 <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Coming soon</div>
               </div>
 
               {/* Delete — small, understated, double confirm */}
               <button onClick={() => {
-                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, journal, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
+                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, signal log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
                   const typed = window.prompt("To confirm deletion, type DELETE below:");
                   if (typed === "DELETE") {
                     try {
