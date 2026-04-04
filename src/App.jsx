@@ -5425,12 +5425,13 @@ export default function Stillform() {
                 </button>
                 <div style={{ display: "flex", gap: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer", textAlign: "center",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◉ Scan</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Locate and release tension</div>
                   </button>
                   <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -5439,6 +5440,7 @@ export default function Stillform() {
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Thought</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>AI cognitive reset</div>
                   </button>
                 </div>
               </div>
@@ -5515,13 +5517,14 @@ export default function Stillform() {
                 {/* Secondary protocols — 1-word anchors */}
                 <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
                     WebkitTapHighlightColor: "transparent", textAlign: "center"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◉ Scan</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Locate and release tension</div>
                   </button>
                   <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -5531,6 +5534,7 @@ export default function Stillform() {
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>✦ Reframe</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Thought</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>AI cognitive reset</div>
                   </button>
                 </div>
               </div>
