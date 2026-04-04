@@ -4906,16 +4906,20 @@ export default function Stillform() {
       const params = new URLSearchParams(window.location.search);
       const action = params.get("action");
       const share = params.get("share");
+      
       if (action === "breathe" && hasSeenOnboarding) {
         setActiveTool({ id: "breathe", name: "Breathe" });
         setScreen("tool");
         setPathway("calm");
       }
-      if (share && hasSeenOnboarding) {
+      
+      if (share) {
+        console.log("[Share] Received shared text, launching Reframe");
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-        setScreen("tool");
+        setScreen(hasSeenOnboarding ? "tool" : "onboarding");
       }
+      
       if (action || share) {
         window.history.replaceState({}, "", "/");
       }
