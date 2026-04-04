@@ -601,6 +601,7 @@ const styles = `
     gap: 10px;
     padding-top: 16px;
     border-top: 1px solid var(--border);
+    align-items: flex-end;
   }
 
   .ai-input {
@@ -613,6 +614,10 @@ const styles = `
     font-family: 'DM Sans', sans-serif;
     font-size: 14px;
     transition: border-color 0.2s;
+    min-height: 80px;
+    max-height: 160px;
+    resize: none;
+    line-height: 1.5;
   }
 
   .ai-input:focus { outline: none; border-color: var(--amber); }
@@ -3419,13 +3424,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Reading what you wrote<span style={{ animation: "pulse 1.5s ease-in-out infinite" }}>...</span>
             </div>
           ) : (
-            <input
+            <textarea
               className="ai-input"
               style={{ borderColor: mc.border }}
-              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's off..."}
+              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's on your mind..."}
               value={input}
               onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && handleSend()}
+              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+              rows={3}
             />
           )}
           {!loading && speech.supported && (
