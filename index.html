@@ -13,9 +13,79 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
     <link rel="manifest" href="/manifest.json" />
-    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="icon" type="image/png" href="/icon-192.png" id="favicon" />
     <link rel="shortcut icon" href="/icon-192.png" />
     <link rel="apple-touch-icon" href="/icon-192.png" />
+    <script>
+      // Breathing favicon — the S exhales
+      (function() {
+        var canvas = document.createElement('canvas');
+        canvas.width = 64;
+        canvas.height = 64;
+        var ctx = canvas.getContext('2d');
+        var favicon = document.getElementById('favicon');
+        if (!ctx || !favicon) return;
+
+        var frame = 0;
+        var totalFrames = 120; // ~4s at 30fps
+        var interval = 1000 / 30;
+
+        function draw() {
+          var t = frame / totalFrames;
+          // Sine wave: 0→1→0 over the cycle
+          // First half = exhale (shrink + fade), second half = inhale (grow + restore)
+          var breath = Math.sin(t * Math.PI * 2);
+          // Scale: 1.0 at peak, 0.85 at trough
+          var scale = 1.0 - (breath * 0.075);
+          // Opacity: 1.0 at peak, 0.6 at trough
+          var opacity = 1.0 - (breath * 0.2);
+
+          ctx.clearRect(0, 0, 64, 64);
+
+          // Background circle
+          ctx.fillStyle = '#0A0A0C';
+          ctx.fillRect(0, 0, 64, 64);
+
+          ctx.save();
+          ctx.translate(32, 32);
+          ctx.scale(scale, scale);
+
+          // Outer ring
+          ctx.beginPath();
+          ctx.arc(0, 0, 28, 0, Math.PI * 2);
+          ctx.fillStyle = '#1A1A1F';
+          ctx.fill();
+
+          // Inner circle
+          ctx.beginPath();
+          ctx.arc(0, 0, 25, 0, Math.PI * 2);
+          ctx.fillStyle = '#141418';
+          ctx.fill();
+
+          // The S
+          ctx.globalAlpha = opacity;
+          ctx.font = "600 32px 'Georgia', serif";
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillStyle = '#C8922A';
+          ctx.fillText('S', 0, 1);
+          ctx.globalAlpha = 1;
+
+          ctx.restore();
+
+          favicon.href = canvas.toDataURL('image/png');
+          frame = (frame + 1) % totalFrames;
+        }
+
+        // Only run on desktop browsers that support it
+        if (window.innerWidth > 768 && !navigator.userAgent.match(/Safari/) || navigator.userAgent.match(/Chrome/)) {
+          // Start after page loads to not block rendering
+          window.addEventListener('load', function() {
+            setInterval(draw, interval);
+          });
+        }
+      })();
+    </script>
     <!-- Privacy-friendly analytics by Plausible -->
     <script async src="https://plausible.io/js/pa-IHuJRyHrr5FleW5dE8AtB.js"></script>
     <script>
