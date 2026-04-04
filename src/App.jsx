@@ -4912,32 +4912,33 @@ export default function Stillform() {
         setScreenReady(true);
         return;
       }
-      console.log("WIDGET: isNative =", isNative());
-      if (isNative()) {
+
+      // Try to read widget action from native plugin (SharedPreferences)
+      const tryPlugin = async (attempt) => {
         try {
-          const cap = window.Capacitor;
-          console.log("WIDGET: Capacitor exists =", !!cap);
-          console.log("WIDGET: Plugins =", cap?.Plugins ? Object.keys(cap.Plugins) : "none");
-          const WidgetBridge = cap?.Plugins?.WidgetBridge;
-          console.log("WIDGET: WidgetBridge =", !!WidgetBridge);
-          if (WidgetBridge) {
-            console.log("WIDGET: calling getWidgetAction...");
-            const result = await WidgetBridge.getWidgetAction();
-            console.log("WIDGET: result =", JSON.stringify(result));
+          const wb = window?.Capacitor?.Plugins?.WidgetBridge;
+          if (wb) {
+            const result = await wb.getWidgetAction();
             if (result?.action === "breathe") {
-              console.log("WIDGET: → BREATHING!");
               setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
               setPathway("calm");
               setScreen("tool");
               setScreenReady(true);
-              return;
+              return true;
             }
+          } else if (attempt < 5) {
+            await new Promise(r => setTimeout(r, 200));
+            return tryPlugin(attempt + 1);
           }
-        } catch (e) { console.log("WIDGET: ERROR:", e?.message || e); }
+        } catch (e) {}
+        return false;
+      };
+
+      const handled = await tryPlugin(0);
+      if (!handled) {
+        setScreen("home");
+        setScreenReady(true);
       }
-      console.log("WIDGET: → home screen");
-      setScreen("home");
-      setScreenReady(true);
     };
     init();
   }, []);
