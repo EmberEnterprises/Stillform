@@ -5574,8 +5574,63 @@ export default function Stillform() {
           );
 
           /* ── RETURNING USER: clean, one dominant action ── */
+          // Calculate milestones
+          let sessions = [];
+          try { sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch {}
+          const lastSession = sessions.length > 0 ? new Date(sessions[sessions.length - 1].timestamp) : null;
+          const daysSinceLastSession = lastSession ? Math.floor((Date.now() - lastSession.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          const milestone7 = sessionCount === 7 && !localStorage.getItem("stillform_milestone_7_seen");
+          const isAbsent = daysSinceLastSession >= 14 && sessionCount > 0;
+
+          // Check 7-day streak
+          let hasStreak = false;
+          if (sessions.length >= 7) {
+            const last7 = sessions.slice(-7);
+            const days = last7.map(s => new Date(s.timestamp).toDateString());
+            const uniqueDays = [...new Set(days)];
+            if (uniqueDays.length >= 7) {
+              const sorted = uniqueDays.map(d => new Date(d).getTime()).sort((a, b) => a - b);
+              const span = (sorted[sorted.length - 1] - sorted[0]) / (1000 * 60 * 60 * 24);
+              hasStreak = span <= 8;
+            }
+          }
+
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+
+              {/* ABSENCE DETECTION — operator tone, no guilt */}
+              {isAbsent && (
+                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
+                </div>
+              )}
+
+              {/* 7-SESSION MILESTONE — type review */}
+              {milestone7 && !isAbsent && (
+                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    {hasStreak ? "7 days straight" : "7 sessions"}
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                    {hasStreak
+                      ? "You've been here every day this week. You're building something. How's it feeling?"
+                      : "You've been here 7 times. Are the tools you're reaching for working, or do you want to try a different approach?"}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); setScreen("home"); }} style={{
+                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
+                      borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>Working well</button>
+                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); setScreen("home"); }} style={{
+                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>Let me try different</button>
+                  </div>
+                </div>
+              )}
 
               {/* UAT BANNER — collapsed by default */}
               <div style={{ marginBottom: 32 }}>
