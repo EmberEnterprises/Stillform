@@ -4914,31 +4914,21 @@ export default function Stillform() {
       }
 
       // Try to read widget action from native plugin (SharedPreferences)
-      const tryPlugin = async (attempt) => {
-        try {
-          const wb = window?.Capacitor?.Plugins?.WidgetBridge;
-          if (wb) {
-            const result = await wb.getWidgetAction();
-            if (result?.action === "breathe") {
-              setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
-              setPathway("calm");
-              setScreen("tool");
-              setScreenReady(true);
-              return true;
-            }
-          } else if (attempt < 5) {
-            await new Promise(r => setTimeout(r, 200));
-            return tryPlugin(attempt + 1);
-          }
-        } catch (e) {}
-        return false;
-      };
+      try {
+        const { registerPlugin } = await import('@capacitor/core');
+        const WidgetBridge = registerPlugin('WidgetBridge');
+        const result = await WidgetBridge.getWidgetAction();
+        if (result?.action === "breathe") {
+          setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
+          setPathway("calm");
+          setScreen("tool");
+          setScreenReady(true);
+          return;
+        }
+      } catch (e) {}
 
-      const handled = await tryPlugin(0);
-      if (!handled) {
-        setScreen("home");
-        setScreenReady(true);
-      }
+      setScreen("home");
+      setScreenReady(true);
     };
     init();
   }, []);
