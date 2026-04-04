@@ -4912,13 +4912,20 @@ export default function Stillform() {
         setScreenReady(true);
         return;
       }
+      console.log("WIDGET: isNative =", isNative());
       if (isNative()) {
         try {
-          const { Capacitor } = await import('@capacitor/core');
-          const WidgetBridge = Capacitor.Plugins.WidgetBridge;
+          const cap = window.Capacitor;
+          console.log("WIDGET: Capacitor exists =", !!cap);
+          console.log("WIDGET: Plugins =", cap?.Plugins ? Object.keys(cap.Plugins) : "none");
+          const WidgetBridge = cap?.Plugins?.WidgetBridge;
+          console.log("WIDGET: WidgetBridge =", !!WidgetBridge);
           if (WidgetBridge) {
+            console.log("WIDGET: calling getWidgetAction...");
             const result = await WidgetBridge.getWidgetAction();
+            console.log("WIDGET: result =", JSON.stringify(result));
             if (result?.action === "breathe") {
+              console.log("WIDGET: → BREATHING!");
               setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
               setPathway("calm");
               setScreen("tool");
@@ -4926,8 +4933,9 @@ export default function Stillform() {
               return;
             }
           }
-        } catch {}
+        } catch (e) { console.log("WIDGET: ERROR:", e?.message || e); }
       }
+      console.log("WIDGET: → home screen");
       setScreen("home");
       setScreenReady(true);
     };
