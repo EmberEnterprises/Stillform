@@ -5,7 +5,6 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.widget.RemoteViews;
 
 public class StillformWidget extends AppWidgetProvider {
@@ -13,11 +12,14 @@ public class StillformWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-            Intent intent = new Intent(context, StillformWidgetReceiver.class);
-            intent.setAction("com.araembers.stillform.WIDGET_BREATHE");
+            Intent intent = new Intent(context, MainActivity.class);
+            intent.putExtra("stillform_action", "breathe");
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            // Unique data to prevent PendingIntent reuse
+            intent.setAction("com.araembers.stillform.BREATHE_" + System.currentTimeMillis());
 
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
+            PendingIntent pendingIntent = PendingIntent.getActivity(
+                context, appWidgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
             );
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_stillform);
