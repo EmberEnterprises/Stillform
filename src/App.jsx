@@ -4896,15 +4896,18 @@ export default function Stillform() {
   // Check widget launch flag synchronously (works on web only)
   const widgetLaunch = (() => {
     try {
-      // Check localStorage flag (set by Java injection on reload)
+      // Check native Java interface (injected by MainActivity via addJavascriptInterface)
+      if (window.StillformWidget && window.StillformWidget.getAction() === "breathe") {
+        return true;
+      }
+      // Fallback: check localStorage
       if (localStorage.getItem("stillform_widget_breathe") === "true") {
         localStorage.removeItem("stillform_widget_breathe");
         return true;
       }
-      // Check URL query param (set by widget intent directly)
+      // Fallback: check URL params (web)
       const params = new URLSearchParams(window.location.search);
       if (params.get("action") === "breathe") {
-        // Clean URL
         try { window.history.replaceState({}, "", "/"); } catch {}
         return true;
       }
@@ -4913,72 +4916,30 @@ export default function Stillform() {
   })();
 
   const [screen, setScreen] = useState(
-    !hasSeenOnboarding ? "onboarding" : widgetLaunch ? "tool" : (isNative() ? null : "home")
+    !hasSeenOnboarding ? "onboarding" : widgetLaunch ? "tool" : "home"
   );
-  const [screenReady, setScreenReady] = useState(!isNative() || widgetLaunch);
+  const [screenReady, setScreenReady] = useState(true);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(widgetLaunch ? { id: "breathe", name: "Breathe", quickStart: true } : null);
   const [pathway, setPathway] = useState(widgetLaunch ? "calm" : null);
   const [sharedText, setSharedText] = useState(null);
 
-  // Deep link handling — share extension + native widget check
+  // Deep link handling — share extension
   useEffect(() => {
     try {
-      // Web: check URL params for share
       const params = new URLSearchParams(window.location.search);
       const share = params.get("share");
       if (share && hasSeenOnboarding) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
-      }
-      if (share) {
         window.history.replaceState({}, "", "/");
       }
 
-      // Native: check widget flag via plugin, then set screen
-      if (isNative() && !widgetLaunch) {
-        (async () => {
-          try {
-            const { Capacitor } = await import('@capacitor/core');
-            const WidgetBridge = Capacitor.Plugins.WidgetBridge;
-            console.log("[WIDGET] WidgetBridge available:", !!WidgetBridge);
-            if (WidgetBridge) {
-              const result = await WidgetBridge.checkLaunchAction();
-              console.log("[WIDGET] checkLaunchAction result:", JSON.stringify(result));
-              if (result?.action === "breathe" && hasSeenOnboarding) {
-                console.log("[WIDGET] → Starting breathing!");
-                setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
-                setScreen("tool");
-                setPathway("calm");
-                setScreenReady(true);
-                return;
-              }
-            }
-          } catch (e) { console.log("[WIDGET] Error:", e); }
-          // No widget action — show default screen
-          console.log("[WIDGET] → No widget action, showing home");
-          setScreen(hasSeenOnboarding ? "home" : "onboarding");
-          setScreenReady(true);
-        })();
-
-        // Listen for app resume + share
+      // Native: listen for share extension
+      if (isNative()) {
         import('@capacitor/app').then(({ App }) => {
-          App.addListener("appStateChange", (state) => {
-            if (state.isActive) {
-              import('@capacitor/core').then(({ Capacitor }) => {
-                const WB = Capacitor.Plugins.WidgetBridge;
-                if (WB) WB.checkLaunchAction().then(r => {
-                  if (r?.action === "breathe" && hasSeenOnboarding) {
-                    setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
-                    setScreen("tool");
-                    setPathway("calm");
-                  }
-                }).catch(() => {});
-              }).catch(() => {});
-            }
-          });
           App.addListener("appUrlOpen", (data) => {
             try {
               const url = new URL(data.url);
