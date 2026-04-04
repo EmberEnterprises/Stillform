@@ -5944,20 +5944,30 @@ export default function Stillform() {
               {(() => {
                 const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
                 const signalDone = (() => { try { const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); return p?.firstAreas?.length > 0; } catch { return false; } })();
+                const calibrationComplete = signalDone && !!biasDone;
+
+                const tools = [
+                  // Only show signals/bias if not done
+                  ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
+                  ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
+                  { id: "checkin", label: "Check-In", rec: false },
+                  { id: "patterns", label: "Your Patterns", rec: false },
+                  { id: "meta", label: "Watch & Choose", rec: false },
+                ];
+
                 return (
                   <div style={{ marginBottom: 24 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)" }}>Go Deeper</div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", opacity: 0.5 }}>After session</div>
                     </div>
+                    {calibrationComplete && (
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, fontStyle: "italic" }}>
+                        Signal mapping and blind spots calibrated. Update anytime in Settings.
+                      </div>
+                    )}
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                      {[
-                        { id: "signals", label: "Map Signals", done: signalDone, rec: !signalDone },
-                        { id: "bias", label: "Blind Spots", done: !!biasDone, rec: !biasDone },
-                        { id: "checkin", label: "Check-In", done: false, rec: false },
-                        { id: "patterns", label: "Your Patterns", done: false, rec: false },
-                        { id: "meta", label: "Watch & Choose", done: false, rec: false },
-                      ].map(item => (
+                      {tools.map(item => (
                         <button key={item.id} onClick={() => startTool(TOOLS.find(t => t.id === item.id))} style={{
                           width: "100%", background: item.rec ? "rgba(200,146,42,0.05)" : "var(--surface)",
                           border: `0.5px solid ${item.rec ? "var(--amber-dim)" : "var(--border)"}`,
@@ -5966,9 +5976,9 @@ export default function Stillform() {
                           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
                           WebkitTapHighlightColor: "transparent"
                         }}>
-                          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: item.done ? "var(--text-muted)" : "var(--text)" }}>{item.label}</span>
-                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: item.done ? "var(--text-muted)" : item.rec ? "var(--amber)" : "var(--text-muted)", letterSpacing: "0.1em" }}>
-                            {item.done ? "DONE" : item.rec ? "REC" : "→"}
+                          <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text)" }}>{item.label}</span>
+                          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: item.rec ? "var(--amber)" : "var(--text-muted)", letterSpacing: "0.1em" }}>
+                            {item.rec ? "REC" : "→"}
                           </span>
                         </button>
                       ))}
