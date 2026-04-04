@@ -3090,7 +3090,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
           color: tab === "journal" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Signal Log
+          Journal
         </button>
       </div>
 
@@ -3144,7 +3144,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
                 }}
                 placeholder="Add context..."
                 style={{
-                  flex: 1, minHeight: 60, background: mc.inputBg || "var(--surface)",
+                  flex: 1, minHeight: 120, background: mc.inputBg || "var(--surface)",
                   border: `0.5px solid ${mc.border}`, borderRadius: "var(--r)",
                   padding: "10px 12px", color: "var(--text)", fontSize: 13,
                   fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "none"
