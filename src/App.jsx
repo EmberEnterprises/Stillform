@@ -4935,9 +4935,12 @@ export default function Stillform() {
           try {
             const { Capacitor } = await import('@capacitor/core');
             const WidgetBridge = Capacitor.Plugins.WidgetBridge;
+            console.log("[WIDGET] WidgetBridge available:", !!WidgetBridge);
             if (WidgetBridge) {
               const result = await WidgetBridge.checkLaunchAction();
+              console.log("[WIDGET] checkLaunchAction result:", JSON.stringify(result));
               if (result?.action === "breathe" && hasSeenOnboarding) {
+                console.log("[WIDGET] → Starting breathing!");
                 setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
                 setScreen("tool");
                 setPathway("calm");
@@ -4945,8 +4948,9 @@ export default function Stillform() {
                 return;
               }
             }
-          } catch {}
+          } catch (e) { console.log("[WIDGET] Error:", e); }
           // No widget action — show default screen
+          console.log("[WIDGET] → No widget action, showing home");
           setScreen(hasSeenOnboarding ? "home" : "onboarding");
           setScreenReady(true);
         })();
