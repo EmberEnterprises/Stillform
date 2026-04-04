@@ -1857,11 +1857,13 @@ function BreatheGroundTool({ onComplete, pathway }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
         {[
           { id: "clear", label: "All clear", desc: "System is running normally", icon: "◎" },
+          { id: "activated", label: "Physically activated", desc: "Butterflies, adrenaline, energy surging", icon: "⚡" },
           { id: "depleted", label: "Physically depleted", desc: "Fatigue, low energy, heavy body", icon: "◌" },
           { id: "gut", label: "Gut signal active", desc: "Digestive distress, gut-brain noise", icon: "◉" },
           { id: "sleep", label: "Sleep deprived", desc: "Under-rested, reduced cognitive baseline", icon: "◐" },
           { id: "hormonal", label: "Hormonal shift", desc: "Cycle, inflammation, or hormonal fluctuation", icon: "◑" },
-          { id: "pain", label: "Pain present", desc: "Chronic or acute pain affecting state", icon: "⚡" },
+          { id: "pain", label: "Pain present", desc: "Chronic or acute pain affecting state", icon: "◈" },
+          { id: "medicated", label: "Medicated or substance", desc: "Caffeine, meds, alcohol, or other substance active", icon: "◇" },
         ].map(opt => (
           <button key={opt.id} onClick={() => {
             setBioFilter(opt.id);
@@ -2886,11 +2888,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               const bf = localStorage.getItem("stillform_bio_filter");
               if (!bf || bf === "clear") return null;
               const labels = {
+                activated: "physically activated — adrenaline, butterflies, energy surging through the body",
                 depleted: "physically depleted — fatigue, low energy, heavy body",
                 gut: "gut signal active — digestive distress affecting state",
                 sleep: "sleep deprived — under-rested, reduced cognitive baseline",
                 hormonal: "hormonal shift — cycle, inflammation, or hormonal fluctuation",
-                pain: "pain present — chronic or acute pain affecting perception"
+                pain: "pain present — chronic or acute pain affecting perception",
+                medicated: "medicated or substance active — caffeine, meds, alcohol, or other substance influencing state"
               };
               return labels[bf] || null;
             } catch { return null; }
