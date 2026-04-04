@@ -5,13 +5,31 @@
     android:background="@drawable/widget_background"
     android:gravity="center">
 
-    <TextView
+    <LinearLayout
         android:id="@+id/widget_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="◎"
-        android:textColor="#C8922A"
-        android:textSize="32sp" />
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_centerInParent="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="◎"
+            android:textColor="#C8922A"
+            android:textSize="40sp"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Breathe"
+            android:textColor="#E8EAF0"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.05" />
+
+    </LinearLayout>
 
 </RelativeLayout>
