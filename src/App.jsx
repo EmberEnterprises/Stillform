@@ -2864,6 +2864,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
   const [savedIds, setSavedIds] = useState(new Set());
+  const loadingTimeout = useRef(null);
+
+  // Reset loading on mount (fixes stuck state after app background)
+  useEffect(() => {
+    setLoading(false);
+    return () => { if (loadingTimeout.current) clearTimeout(loadingTimeout.current); };
+  }, []);
+
+  // Safety timeout: if loading > 30s, auto-reset
+  useEffect(() => {
+    if (loading) {
+      loadingTimeout.current = setTimeout(() => {
+        setLoading(false);
+        setError("Connection timed out. Your message is saved — tap Retry to send it again.");
+      }, 30000);
+    } else {
+      if (loadingTimeout.current) clearTimeout(loadingTimeout.current);
+    }
+  }, [loading]);
 
   // Load encrypted messages on mount and mode change
   useEffect(() => {
@@ -3477,12 +3496,23 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               try { localStorage.removeItem(STORAGE_KEY); } catch {}
               setMessages([]);
               setError(null);
+              setLoading(false);
+              setInput("");
             }}>
               Start fresh
             </button>
           </div>
           {messages.length > 2 && <SessionNote />}
         </div>
+      )}
+      {messages.length === 0 && loading && (
+        <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-dim)", marginTop: 16 }} onClick={() => {
+          setLoading(false);
+          setError(null);
+          setInput("");
+        }}>
+          Reset
+        </button>
       )}
       </>
       )}
