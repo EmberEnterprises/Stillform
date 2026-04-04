@@ -3024,7 +3024,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 const data = JSON.parse(localStorage.getItem(`stillform_reframe_session_${m}`) || "[]");
                 if (data.length >= 2) {
                   const recent = data.slice(-4).map(msg => `${msg.role === "ai" ? "Stillform" : "User"}: ${msg.text}`).join("\n");
-                  const modeLabel = { calm: "Regulate", clarity: "Get Sharp", hype: "Lock In" }[m];
+                  const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" }[m];
                   return `USER'S PRIOR CONVERSATION (from ${modeLabel} mode, same session):\n${recent}\nThey switched modes. Use this context — don't make them repeat themselves.`;
                 }
               }
@@ -3088,7 +3088,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const modeConfig = {
     calm: {
-      icon: "◎", title: "Regulate", subtitle: rotatingSubtitle,
+      icon: "◎", title: "Talk it through", subtitle: rotatingSubtitle,
       color: "#c9933a",
       bg: "linear-gradient(180deg, rgba(201,147,58,0.10) 0%, transparent 50%)",
       border: "rgba(201,147,58,0.25)",
@@ -3097,7 +3097,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "#c9933a"
     },
     clarity: {
-      icon: "✦", title: "Get Sharp", subtitle: rotatingSubtitle,
+      icon: "✦", title: "Break the loop", subtitle: rotatingSubtitle,
       color: "#7aadcf",
       bg: "linear-gradient(180deg, rgba(122,173,207,0.12) 0%, transparent 50%)",
       border: "rgba(122,173,207,0.28)",
@@ -3106,7 +3106,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "#7aadcf"
     },
     hype: {
-      icon: "◌", title: "Lock In", subtitle: rotatingSubtitle,
+      icon: "◌", title: "Get ready", subtitle: rotatingSubtitle,
       color: "#c9793a",
       bg: "linear-gradient(180deg, rgba(201,121,58,0.12) 0%, transparent 50%)",
       border: "rgba(201,121,58,0.30)",
@@ -3150,9 +3150,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {/* MODE PICKER — three tones */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
         {[
-          { id: "calm", label: "Regulate", desc: "Process what's here", icon: "◎", color: "#c9933a" },
-          { id: "clarity", label: "Get Sharp", desc: "Break a thought loop", icon: "✦", color: "#7aadcf" },
-          { id: "hype", label: "Lock In", desc: "Compose before a moment", icon: "◌", color: "#c9793a" }
+          { id: "calm", label: "Talk it through", desc: "I'm in something right now", icon: "◎", color: "#c9933a" },
+          { id: "clarity", label: "Break the loop", desc: "I can't stop thinking", icon: "✦", color: "#7aadcf" },
+          { id: "hype", label: "Get ready", desc: "Something's coming up", icon: "◌", color: "#c9793a" }
         ].map(m => {
           const active = effectiveMode === m.id;
           return (
@@ -5097,7 +5097,7 @@ export default function Stillform() {
   const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
   const signalAreas = ["Jaw", "Shoulders", "Chest", "Gut", "Hands", "Legs", "Head", "Throat"];
   const triggerTypes = ["Social demand", "Performance pressure", "Conflict", "Uncertainty", "Sensory overload", "Transition", "Rejection", "Fatigue", "Physical pain", "Other"];
-  const outcomeTypes = ["Regulated", "Locked In", "Got Sharp", "Incomplete", "Reacted", "Still processing"];
+  const outcomeTypes = ["Composed", "Talked through", "Loop broken", "Ready", "Incomplete", "Reacted", "Still processing"];
 
   const saveJournalEntry = () => {
     const entry = {
@@ -5291,7 +5291,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "We don't track mood. We track Signal Awareness — how fast you notice your state before it drives an action. That could be anger, excitement, anxiety, or even joy. The speed of that recognition improving is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "We don't track mood. We track Signal Awareness — how fast you notice your state before it drives an action. That could be anger, excitement, anxiety, or even joy. The speed of that recognition improving is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
@@ -6395,7 +6395,7 @@ export default function Stillform() {
               },
               {
                 q: "What are the three Reframe modes?",
-                a: "Regulate — process what's happening right now. Get Sharp — break a thought loop or indecision. Lock In — compose yourself before a moment that matters."
+                a: "Talk it through — process what's happening right now. Break the loop — stop a thought spiral or indecision. Get ready — compose yourself before a moment that matters."
               },
               {
                 q: "Does the AI learn about me?",
@@ -6889,7 +6889,7 @@ export default function Stillform() {
                 try {
                   const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
                   if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
-                  const modeLabel = { calm: "Regulate", clarity: "Get Sharp", hype: "Lock In" };
+                  const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" };
                   return (
                     <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
                       {saved.map((r, i) => (
