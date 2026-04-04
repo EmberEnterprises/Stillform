@@ -2042,8 +2042,8 @@ function BreatheGroundTool({ onComplete, pathway }) {
             Where are you now?
           </h2>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
-            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Scattered</span>
-            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Steady</span>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Reactive</span>
+            <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Composed</span>
           </div>
           <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
             {[1, 2, 3, 4, 5].map(n => (
@@ -2085,7 +2085,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
                   {delta > 0 ? `+${delta}` : delta === 0 ? "0" : `${delta}`}
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: delta > 0 ? 8 : 0 }}>
-                  {delta >= 3 ? "Significant shift" : delta === 2 ? "Composure increased" : delta === 1 ? "Slight improvement" : delta === 0 ? "Baseline held" : delta === -1 ? "Still unstable" : "Run again"}
+                  {delta >= 3 ? "Significant shift" : delta === 2 ? "Composure increased" : delta === 1 ? "Slight improvement" : delta === 0 ? "Baseline held" : delta === -1 ? "Holding" : "Run again"}
                 </div>
                 {delta > 0 && (
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--amber)", letterSpacing: "0.14em" }}>
@@ -2110,6 +2110,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
                   </>
                 ) : (
                   <>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Stabilized</div>
                     <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
                       Moving to grounding…
                     </div>
