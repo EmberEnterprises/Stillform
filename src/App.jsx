@@ -1154,6 +1154,18 @@ const isNative = () => {
   try { return !!(window?.Capacitor?.isNativePlatform?.()); } catch { return false; }
 };
 
+// Watch bridge — send breathing pattern to connected Wear OS watch
+const watchBridge = {
+  async startBreathing(pattern = "calm") {
+    if (!isNative()) return;
+    try {
+      const { Capacitor } = await import('@capacitor/core');
+      const WatchBridge = Capacitor.Plugins.WatchBridge;
+      if (WatchBridge) await WatchBridge.startBreathing({ pattern });
+    } catch {}
+  }
+};
+
 const haptic = {
   tick: async () => {
     try {
@@ -1528,6 +1540,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
     setShowPatternPicker(false);
     setStarted(true);
     setRunning(true);
+    watchBridge.startBreathing(id);
   };
 
   const [started, setStarted] = useState(false);
@@ -1898,6 +1911,7 @@ function BreatheGroundTool({ onComplete, pathway }) {
   if (!started && phase === "breathe") {
     setStarted(true);
     setRunning(true);
+    watchBridge.startBreathing(patternId);
     return null;
   }
 
@@ -2713,7 +2727,7 @@ async function secureSet(key, value) {
   } catch {}
 }
 
-function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
+function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
   const [tab, setTab] = useState(defaultTab);
@@ -2795,6 +2809,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
+  // Pre-fill from share extension
+  useEffect(() => {
+    if (sharedText) {
+      setInput(sharedText);
+      if (onSharedTextConsumed) onSharedTextConsumed();
+    }
+  }, [sharedText]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
@@ -4875,6 +4897,30 @@ export default function Stillform() {
   const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
+  const [sharedText, setSharedText] = useState(null);
+
+  // Deep link handling — widget tap and share extension
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const action = params.get("action");
+      const share = params.get("share");
+      if (action === "breathe" && hasSeenOnboarding) {
+        setActiveTool({ id: "breathe", name: "Breathe" });
+        setScreen("tool");
+        setPathway("calm");
+      }
+      if (share && hasSeenOnboarding) {
+        setSharedText(decodeURIComponent(share));
+        setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+        setScreen("tool");
+      }
+      // Clean up URL params
+      if (action || share) {
+        window.history.replaceState({}, "", "/");
+      }
+    } catch {}
+  }, []);
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
   const [openLog, setOpenLog] = useState(null);
@@ -4995,7 +5041,7 @@ export default function Stillform() {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
       case "patterns": return <PatternsTool {...props} />;

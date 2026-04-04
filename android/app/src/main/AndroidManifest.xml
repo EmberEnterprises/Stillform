@@ -33,6 +33,31 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Home screen widget -->
+        <receiver
+            android:name=".StillformWidget"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stillform_info" />
+        </receiver>
+
+        <!-- Share target — receive text from other apps -->
+        <activity
+            android:name=".ShareReceiverActivity"
+            android:label="Stillform · Reframe"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+        </activity>
     </application>
 
     <!-- Permissions -->
