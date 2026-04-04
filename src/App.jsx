@@ -5255,7 +5255,11 @@ export default function Stillform() {
               title: "Two pathways. Yours is different.",
               subtitle: "Peer-reviewed neuroscience. Applied.",
               body: "Your brain regulates through two distinct pathways. Thought-first — your mind fires first. Replaying, analyzing, building a response. Body-first — tension hits first. Jaw, chest, shoulders.\n\nResearch confirms: matching the right tool to your pathway is what makes regulation work. Forcing the wrong one makes it worse. During setup, five quick scenarios determine your default. The system adapts from there.",
-              note: null
+              note: null,
+              research: [
+                { label: "Bottom-up and top-down emotion generation", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC2858766/" },
+                { label: "Cognitive reappraisal neuroimaging meta-analysis", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4193464/" }
+              ]
             },
             {
               icon: "◎",
@@ -5263,7 +5267,11 @@ export default function Stillform() {
               title: "Talk. Breathe. Scan.",
               subtitle: "Each one backed by clinical research.",
               body: "Reframe — AI-powered cognitive reappraisal. Talk through what's happening. The AI identifies distortions, separates signal from noise, and learns your patterns over time.\n\nBreathe — paced breathing derived from autonomic nervous system research. Extended exhale activates your parasympathetic system. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points. Locate tension, release it, clear the signal. Auto-advances.\n\nThe Bio-Filter checks your physical state first — because biology gets misread as emotion more often than you'd think.",
-              note: "Quick Breathe is always free. Full access requires a subscription."
+              note: "Quick Breathe is always free. Full access requires a subscription.",
+              research: [
+                { label: "Cognitive reappraisal: effects on emotion and physiology", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6188704/" },
+                { label: "Interoceptive awareness for emotion regulation", url: "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2018.00798/full" }
+              ]
             },
             {
               icon: "◈",
@@ -5271,7 +5279,11 @@ export default function Stillform() {
               title: "The AI gets sharper.",
               subtitle: "Nine categories of context. Every session.",
               body: "The AI tracks what matters — your triggers, your values, your growth, what's happening in your life right now. After each session it writes its own notes. Not transcripts — just what mattered.\n\nIt never says 'I understand how you feel.' It proves it heard you by remembering. After 7 sessions, the system checks in and adjusts based on how you actually use it.",
-              note: null
+              note: null,
+              research: [
+                { label: "Feeling understood in relationships", url: "https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12308" },
+                { label: "Validation reduces sympathetic activation", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9614309/" }
+              ]
             },
             {
               icon: "◎",
@@ -5279,7 +5291,11 @@ export default function Stillform() {
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
               body: "We don't track mood. We track Signal Awareness Latency — how fast you notice you're off-composure. That number dropping is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
-              note: null
+              note: null,
+              research: [
+                { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
+                { label: "Flexible emotion regulation strategies", url: "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00072/full" }
+              ]
             }
           ];
           const step = steps[onboardStep];
@@ -5346,6 +5362,19 @@ export default function Stillform() {
               {step.note && (
                 <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
                   {step.note}
+                </div>
+              )}
+              {step.research && (
+                <div style={{ marginBottom: 12, textAlign: "left", maxWidth: 360, width: "100%" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>Research</div>
+                  {step.research.map((r, i) => (
+                    <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={{
+                      display: "block", fontSize: 11, color: "var(--amber)", opacity: 0.7,
+                      textDecoration: "none", marginBottom: 4, lineHeight: 1.4
+                    }}>
+                      {r.label} ↗
+                    </a>
+                  ))}
                 </div>
               )}
 
