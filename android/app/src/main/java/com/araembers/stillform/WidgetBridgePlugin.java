@@ -1,6 +1,7 @@
 package com.araembers.stillform;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -14,8 +15,8 @@ public class WidgetBridgePlugin extends Plugin {
     public void getWidgetAction(PluginCall call) {
         SharedPreferences prefs = getContext().getSharedPreferences("stillform", android.content.Context.MODE_PRIVATE);
         String action = prefs.getString("widget_action", null);
+        Log.d("STILLFORM", "WidgetBridgePlugin.getWidgetAction: " + action);
 
-        // Clear after reading
         if (action != null) {
             prefs.edit().remove("widget_action").apply();
         }
