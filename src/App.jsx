@@ -2812,6 +2812,31 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
+
+    // Post-session AI summary — background call, non-blocking
+    if (messages.length >= 2) {
+      const convo = messages.map(m => `${m.role === "ai" ? "Stillform" : "User"}: ${m.text}`).join("\n");
+      fetch("/.netlify/functions/reframe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          input: `INTERNAL — SESSION SUMMARY REQUEST. This is not a user message. Write 2-3 sentences capturing what mattered in this session. Focus on: what they confided, any growth or patterns you noticed, what their current concern is, and what made them feel understood (if anything). Do NOT use clinical labels. Write like a friend's mental note, not a chart entry. Return JSON: { "distortion": null, "reframe": "your session note" }`,
+          mode: effectiveMode,
+          history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
+          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()
+        })
+      }).then(r => r.json()).then(data => {
+        if (data?.reframe) {
+          try {
+            const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+            notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: data.reframe });
+            // Keep last 20 notes
+            if (notes.length > 20) notes.splice(0, notes.length - 20);
+            localStorage.setItem("stillform_ai_session_notes", JSON.stringify(notes));
+          } catch {}
+        }
+      }).catch(() => {});
+    }
   };
 
   const [messages, setMessages] = useState([]);
@@ -2975,7 +3000,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return null;
             } catch { return null; }
           })(),
-          regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })()
+          regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })(),
+          sessionNotes: (() => {
+            try {
+              const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+              if (notes.length === 0) return null;
+              return notes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
+            } catch { return null; }
+          })()
         })
       });
       clearTimeout(timeout);

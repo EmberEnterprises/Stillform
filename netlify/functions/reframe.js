@@ -310,7 +310,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -352,6 +352,9 @@ exports.handler = async function(event) {
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 3) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
     if (journalContext && sessionCount < 3) contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
+
+    // AI session notes — compressed history from previous sessions
+    if (sessionNotes && sessionCount >= 3) contextParts.push(`YOUR PREVIOUS SESSION NOTES (written by you after past sessions):\n${sessionNotes}\nThese are your own observations. Use them to show continuity — reference growth, recurring themes, or context from previous conversations. Never say "my notes show" — just demonstrate that you remember.`);
 
     // Throttle intelligence based on session count
     if (sessionCount < 3) {
