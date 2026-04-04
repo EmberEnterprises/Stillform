@@ -107,6 +107,16 @@ Current flow being replaced with scenario-based assessment. New flow:
 - "Help me figure it out" path: guided session through both tools
 - Signal mapping and bias profiling happen naturally through AI over first sessions, not as gates before starting
 
+## 7-Session Review Milestone (NEW)
+
+After the 7th session (regardless of frequency), the system reviews tool usage vs assessed type:
+
+- **Mismatch detected:** "You've been here 7 times. Based on how you've been using the tools, you tend to reach for talking first — but you were set up as body-first. Is what you're using now working, or do you want to try leading with Reframe?"
+- **No mismatch:** "7 sessions. You're building something. How's it feeling?"
+- **7-day streak variant:** If 7 consecutive days, use "You've been here 7 days straight" instead
+- No pressure, no "you were wrong" — data + their call
+- First pattern note moved from session 5 to session 3 (if user doesn't feel seen in 48 hours, they leave)
+
 ## Morning Practice (NEW CONCEPT)
 
 Stillform becomes a daily morning practice, not just an emergency tool:
