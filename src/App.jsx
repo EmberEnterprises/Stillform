@@ -5003,6 +5003,14 @@ export default function Stillform() {
   const [ciEnergy, setCiEnergy] = useState(null);
   const [ciBio, setCiBio] = useState(null);
   const [ciSaved, setCiSaved] = useState(false);
+  const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+
+  // Sync regulation type when navigating screens (catches Settings changes)
+  useEffect(() => {
+    if (screen === "home") {
+      try { setRegType(localStorage.getItem("stillform_regulation_type") || null); } catch {}
+    }
+  }, [screen]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -5669,7 +5677,9 @@ export default function Stillform() {
                 {current.isAssessment && assessmentComplete && (
                   <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}
                     onClick={() => {
-                      try { localStorage.setItem("stillform_regulation_type", scoreAssessment()); } catch {}
+                      const type = scoreAssessment();
+                      try { localStorage.setItem("stillform_regulation_type", type); } catch {}
+                      setRegType(type);
                       setAssessmentAnswers([]);
                       setSetupStep(s => s + 1);
                     }}>
@@ -5680,6 +5690,7 @@ export default function Stillform() {
                 {current.isAssessment && !assessmentComplete && (
                   <button onClick={() => {
                     try { localStorage.setItem("stillform_regulation_type", "balanced"); } catch {}
+                    setRegType("balanced");
                     setAssessmentAnswers([]);
                     setSetupStep(s => s + 1);
                   }} style={{
@@ -5749,7 +5760,6 @@ export default function Stillform() {
         {screen === "home" && (() => {
           let sessionCount = 0;
           try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-          const regType = (() => { try { return localStorage.getItem("stillform_regulation_type"); } catch { return null; } })();
 
           // No regulation type set? Route to calibration
           if (!regType) {
@@ -5910,7 +5920,7 @@ export default function Stillform() {
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Low", "Steady", "High", "Wired"].map(e => (
+                      {["Low", "Steady", "High", "Ready", "Wired"].map(e => (
                         <button key={e} onClick={() => setCiEnergy(e.toLowerCase())} style={{
                           background: ciEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${ciEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
@@ -6627,7 +6637,7 @@ export default function Stillform() {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
                 return (
                   <button key={t.id} onClick={() => {
-                    try { localStorage.setItem("stillform_regulation_type", t.id); refreshSettings(); } catch {}
+                    try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {}
                   }} style={{
                     width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                     background: isSelected ? "var(--amber-glow)" : "var(--surface)",
