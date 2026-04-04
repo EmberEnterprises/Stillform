@@ -11,17 +11,17 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 public class WidgetBridgePlugin extends Plugin {
 
     @PluginMethod()
-    public void checkLaunchAction(PluginCall call) {
-        SharedPreferences prefs = getContext().getSharedPreferences("stillform_widget", android.content.Context.MODE_PRIVATE);
-        boolean launchBreathe = prefs.getBoolean("launch_breathe", false);
+    public void getWidgetAction(PluginCall call) {
+        SharedPreferences prefs = getContext().getSharedPreferences("stillform", android.content.Context.MODE_PRIVATE);
+        String action = prefs.getString("widget_action", null);
 
-        // Clear the flag after reading
-        if (launchBreathe) {
-            prefs.edit().putBoolean("launch_breathe", false).apply();
+        // Clear after reading
+        if (action != null) {
+            prefs.edit().remove("widget_action").apply();
         }
 
-        JSObject result = new JSObject();
-        result.put("action", launchBreathe ? "breathe" : "none");
-        call.resolve(result);
+        JSObject ret = new JSObject();
+        ret.put("action", action != null ? action : "none");
+        call.resolve(ret);
     }
 }

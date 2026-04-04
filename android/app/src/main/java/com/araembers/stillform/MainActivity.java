@@ -10,8 +10,8 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(WatchBridgePlugin.class);
         registerPlugin(WidgetBridgePlugin.class);
-        super.onCreate(savedInstanceState);
         handleWidgetAction(getIntent());
+        super.onCreate(savedInstanceState);
     }
 
     @Override
@@ -21,21 +21,13 @@ public class MainActivity extends BridgeActivity {
         handleWidgetAction(intent);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        handleWidgetAction(getIntent());
-    }
-
     private void handleWidgetAction(Intent intent) {
         if (intent != null && intent.hasExtra("stillform_action")) {
             String action = intent.getStringExtra("stillform_action");
-            getBridge().getWebView().post(() -> {
-                getBridge().getWebView().evaluateJavascript(
-                    "window.WIDGET_ACTION = '" + action.replace("'", "\\'") + "';",
-                    null
-                );
-            });
+            getSharedPreferences("stillform", MODE_PRIVATE)
+                .edit()
+                .putString("widget_action", action)
+                .commit();
         }
     }
 }

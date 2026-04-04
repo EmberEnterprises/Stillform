@@ -4894,45 +4894,44 @@ export default function Stillform() {
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Check widget launch flag synchronously (works on web only)
-  const widgetLaunch = false; // handled async via useEffect below
+  const widgetLaunch = false;
 
-  const [screen, setScreen] = useState(
-    !hasSeenOnboarding ? "onboarding" : "home"
-  );
-  const [screenReady, setScreenReady] = useState(true);
+  const [screen, setScreen] = useState(null);
+  const [screenReady, setScreenReady] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
 
-  // Widget action check — runs during splash screen
+  // Widget action check — calls native plugin, routes before splash ends
   useEffect(() => {
-    if (!hasSeenOnboarding) return;
-
-    const checkWidgetAction = () => {
-      if (window.WIDGET_ACTION === "breathe") {
-        window.WIDGET_ACTION = null;
-        setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
-        setScreen("tool");
-        setPathway("calm");
-        return true;
+    const init = async () => {
+      if (!hasSeenOnboarding) {
+        setScreen("onboarding");
+        setScreenReady(true);
+        return;
       }
-      return false;
+      if (isNative()) {
+        try {
+          const { Capacitor } = await import('@capacitor/core');
+          const WidgetBridge = Capacitor.Plugins.WidgetBridge;
+          if (WidgetBridge) {
+            const result = await WidgetBridge.getWidgetAction();
+            if (result?.action === "breathe") {
+              setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
+              setPathway("calm");
+              setScreen("tool");
+              setScreenReady(true);
+              return;
+            }
+          }
+        } catch {}
+      }
+      setScreen("home");
+      setScreenReady(true);
     };
-
-    // Check immediately
-    if (!checkWidgetAction()) {
-      // Check again after 150ms in case Java injection hasn't fired yet
-      const t1 = setTimeout(() => {
-        if (!checkWidgetAction()) {
-          // One more check at 500ms
-          const t2 = setTimeout(checkWidgetAction, 350);
-          return () => clearTimeout(t2);
-        }
-      }, 150);
-      return () => clearTimeout(t1);
-    }
+    init();
   }, []);
 
   // Deep link handling — share extension
