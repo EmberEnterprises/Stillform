@@ -4928,13 +4928,19 @@ export default function Stillform() {
             const WidgetBridge = Capacitor.Plugins.WidgetBridge;
             if (WidgetBridge) {
               const result = await WidgetBridge.checkLaunchAction();
-              if (result?.action === "breathe" && hasSeenOnboarding) {
+              console.log("[Widget] checkLaunchAction result:", result);
+              if (result?.action === "breathe") {
+                console.log("[Widget] Launching breathe tool");
+                // Widget action takes priority — show breathe even if not yet onboarded
+                // (user will see onboarding first, then breathe)
                 setActiveTool({ id: "breathe", name: "Breathe" });
-                setScreen("tool");
+                setScreen(hasSeenOnboarding ? "tool" : "onboarding");
                 setPathway("calm");
               }
             }
-          } catch {}
+          } catch (e) {
+            console.log("[Widget] Error checking launch action:", e);
+          }
         };
         checkWidgetFlag();
 
