@@ -329,12 +329,12 @@ exports.handler = async function(event) {
     if (biasProfile) contextParts.push(`USER'S IDENTIFIED COGNITIVE BLIND SPOTS: ${biasProfile}. Watch for these patterns in what they write. If you see one activating, name it clearly but without judgment: "This looks like [bias name] — your brain is doing the thing you've already learned to watch for." Only flag it when you're confident it's present. Don't force it.`);
     if (priorToolContext) contextParts.push(priorToolContext);
     if (priorModeContext) contextParts.push(priorModeContext);
-    if (journalContext && sessionCount >= 5) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
-    if (journalContext && sessionCount < 5) contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
+    if (journalContext && sessionCount >= 3) contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
+    if (journalContext && sessionCount < 3) contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
 
     // Throttle intelligence based on session count
-    if (sessionCount < 5) {
-      contextParts.push("IMPORTANT: This user is new (fewer than 5 sessions). Do NOT call out patterns. Do NOT say 'this keeps happening' or 'I notice a theme.' Just respond to what's in front of you. Build trust first.");
+    if (sessionCount < 3) {
+      contextParts.push("IMPORTANT: This user is new (fewer than 3 sessions). Do NOT call out patterns. Do NOT say 'this keeps happening' or 'I notice a theme.' Just respond to what's in front of you. Build trust first.");
     } else if (sessionCount < 12) {
       contextParts.push("This user has some history. You can gently note patterns if they're obvious, but don't lead with them. Let the user feel heard first, insight second.");
     } else {
