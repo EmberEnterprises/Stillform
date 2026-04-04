@@ -24,7 +24,7 @@ public class MainActivity extends BridgeActivity {
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         // Inject after bridge is fully initialized
         Log.d("StillformWidget", "onStart injecting interface with action: " + widgetAction);
