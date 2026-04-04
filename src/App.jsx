@@ -5245,39 +5245,41 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "How you carry yourself. Every day.",
-              body: "Your morning calibration and your in-the-moment reset. Set your tone before the day starts, then use it whenever a moment demands composure.\n\nNot meditation. Not therapy. A precision composure system that learns how you operate.",
+              subtitle: "Built from research. Shaped by lived experience.",
+              body: "Composure isn't something you find in a crisis — it's how you carry yourself every day. How you walk into a room, how you handle good news and bad, how you show up when it matters.\n\nStillform was built by someone who lives with a neurological disability and needed a system that actually works — not another meditation app that tells you to breathe. Every feature traces back to published research in neuroscience, emotional regulation, and cognitive behavioral science.\n\nThis is a precision composure system. Your morning calibration and your in-the-moment reset.",
               note: null
             },
             {
               icon: "◎",
-              label: "Two pathways",
-              title: "Your brain has a default.",
-              subtitle: "Neuroscience shows two regulation pathways.",
-              body: "Thought-first — your mind fires first. Replaying, analyzing, building a response. The AI helps you think it through, then your body follows.\n\nBody-first — tension hits first. Jaw, chest, shoulders. Breathing settles the hardware, then your thinking clears.\n\nResearch confirms: matching the right tool to your pathway is what makes regulation work. We'll help you find yours during setup.",
+              label: "The science",
+              title: "Your brain has a default pathway.",
+              subtitle: "Backed by peer-reviewed neuroscience.",
+              body: "Research from Columbia and NYU shows your brain regulates emotion through two distinct pathways — top-down (cognitive) and bottom-up (somatic). Some people process through thoughts first. Others feel it in the body first.\n\nThe critical finding: matching the right intervention to your pathway is what makes regulation work. Top-down emotions respond to cognitive strategies. Bottom-up emotions respond to body-based strategies. Forcing the wrong one makes it worse.\n\nStillform detects your pathway and adapts. No other composure tool does this.",
+              note: null
+            },
+            {
+              icon: "◎",
+              label: "The AI",
+              title: "It remembers what matters.",
+              subtitle: "Nine categories of what makes you, you.",
+              body: "The AI tracks what you confide, your growth trajectory, your triggers, your values, who you're becoming, and what's happening in your life right now. After each session, it writes its own notes — not transcripts, just what mattered.\n\nResearch on perceived responsiveness shows that feeling understood activates the brain's reward system and predicts relationship quality better than actually being understood. The AI is designed to make you feel known — through precision, not performance.\n\nIt never says 'I understand.' It proves it by remembering.",
               note: null
             },
             {
               icon: "◎",
               label: "Three tools",
               title: "Talk. Breathe. Scan.",
-              subtitle: "Each one meets you where you are.",
-              body: "Reframe — AI-powered. Talk through what's happening. The AI learns your patterns, your triggers, and how you process. Gets sharper every session.\n\nBreathe — paced breathing matched to your state. Four patterns. Settles the nervous system in under 90 seconds.\n\nBody Scan — six acupressure points. Find where you're holding tension and release it. Auto-advances.",
+              subtitle: "Each one grounded in clinical research.",
+              body: "Reframe — cognitive reappraisal, the most-studied strategy in emotional regulation research. Talk through what's happening. The AI identifies distortions, separates signal from noise, and helps you think clearly.\n\nBreathe — paced breathing patterns derived from autonomic nervous system research. Extended exhale activates the parasympathetic system. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points based on somatic experiencing research. Locate tension, release it, clear the signal.\n\nThe Bio-Filter checks your physical state first — because research shows we misidentify biological signals as emotional ones.",
               note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
               icon: "◈",
-              label: "Over time",
-              title: "It sharpens.",
-              subtitle: "The system learns you. Not the other way around.",
-              body: "Every session builds your profile — how you process, what triggers you, what works. The AI stops being generic and starts being precise about you.\n\nAfter 7 sessions, the system checks in. It tracks which tools you actually reach for and adjusts. Your composure practice evolves with you."
-            },
-            {
-              icon: "◎",
-              label: "Your data",
-              title: "Private by design.",
-              subtitle: "Your data is yours. Full stop.",
-              body: "Sessions, Signal Log, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nSee the FAQ in Settings for how the AI works and what to expect.\n\nReplay this anytime from Settings."
+              label: "You change",
+              title: "Neuroplasticity is real.",
+              subtitle: "The system evolves because you do.",
+              body: "Stanford research confirms: your brain rewires throughout your entire life. The patterns you have today are not permanent. Stillform tracks how fast you catch your signals, notices when old triggers stop firing, and updates its model of you.\n\nAfter 7 sessions, the system checks in. It measures your growth — not your mood. We don't track happiness. We track Signal Awareness Latency — how fast you notice you're off-composure. That number dropping is neuroplasticity happening in real time.\n\nYour data is encrypted, stored on your device, and deletable anytime from Settings. Replay this tutorial anytime.",
+              note: null
             }
           ];
           const step = steps[onboardStep];
