@@ -4907,6 +4907,7 @@ export default function Stillform() {
   const [screenReady, setScreenReady] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
+  const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -5338,10 +5339,42 @@ export default function Stillform() {
 
         {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
+          const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
+
           const setupSteps = [
             {
               step: 1,
-              label: "Initialization · 1 of 3",
+              label: "Calibration · 1 of 4",
+              title: "How You Process",
+              subtitle: "When a moment hits, what fires first — your thoughts or your body?",
+              body: "Research in neuroscience shows two distinct regulation pathways. Some people process through thoughts first — analyzing, replaying, building a response. Others feel it in the body first — tension, heat, restlessness.\n\nNeither is better. Knowing yours means the system starts with the right tool.\n\nAnswer instinctively. There are no wrong answers.",
+              isAssessment: true,
+              scenarios: [
+                {
+                  q: "You're about to walk into a job interview. What do you notice first?",
+                  a: { T: "My mind is racing through what I might be asked", B: "My hands are shaking and my chest feels tight" }
+                },
+                {
+                  q: "Someone you respect challenges your idea in front of the room.",
+                  a: { T: "I'm already building a counter-argument in my head", B: "I feel heat in my face and tension in my shoulders" }
+                },
+                {
+                  q: "You just got incredible news you weren't expecting.",
+                  a: { T: "I can't stop thinking about what this means", B: "My heart is pounding and I feel energy everywhere" }
+                },
+                {
+                  q: "You're tired but someone close to you is testing your patience.",
+                  a: { T: "I'm telling myself 'stay calm, this isn't worth it'", B: "I feel the tension building in my jaw" }
+                },
+                {
+                  q: "A quiet moment. Nothing is wrong. Just you.",
+                  a: { T: "My mind is reviewing the day and planning tomorrow", B: "I notice where I'm holding tension" }
+                }
+              ]
+            },
+            {
+              step: 2,
+              label: "Calibration · 2 of 4",
               title: "Signal Mapping",
               subtitle: "Where does your body respond first?",
               body: "The system needs to know your physical signal pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
@@ -5349,8 +5382,8 @@ export default function Stillform() {
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
             },
             {
-              step: 2,
-              label: "Initialization · 2 of 3",
+              step: 3,
+              label: "Calibration · 3 of 4",
               title: "Blind Spot Profile",
               subtitle: "What distortions does your brain run?",
               body: "Catastrophizing. All-or-nothing. Mind reading. Everyone has cognitive patterns that shape how they read situations.\n\nIdentifying yours means the AI can flag them in real time — so you see them before they drive the decision.",
@@ -5358,8 +5391,8 @@ export default function Stillform() {
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
             {
-              step: 3,
-              label: "Initialization · 3 of 3",
+              step: 4,
+              label: "Calibration · 4 of 4",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
               body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. When the signal is too loud.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
@@ -5371,6 +5404,25 @@ export default function Stillform() {
           const current = setupSteps[setupStep];
           const isLast = setupStep === setupSteps.length - 1;
           const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
+
+          // Assessment state (uses component-level assessmentAnswers)
+          const currentScenario = current.isAssessment ? (current.scenarios[assessmentAnswers.length] || null) : null;
+          const assessmentComplete = current.isAssessment && assessmentAnswers.length >= current.scenarios.length;
+
+          // Score assessment
+          const scoreAssessment = () => {
+            const tCount = assessmentAnswers.filter(a => a === "T").length;
+            const bCount = assessmentAnswers.filter(a => a === "B").length;
+            if (tCount > bCount) return "thought-first";
+            if (bCount > tCount) return "body-first";
+            return "balanced";
+          };
+
+          const typeLabels = {
+            "thought-first": { name: "Thought-first", desc: "You tend to process through your mind first. Reframe will be your primary tool." },
+            "body-first": { name: "Body-first", desc: "You tend to feel it in the body first. Breathe will be your primary tool." },
+            "balanced": { name: "Balanced", desc: "You process through both equally. We'll start with both available and learn which you reach for." }
+          };
 
           const patternLabels = {
             calm: { name: "Regulate", detail: "4-4-8-2 · When the signal is too loud" },
@@ -5414,6 +5466,56 @@ export default function Stillform() {
                 ))}
               </div>
 
+              {/* Assessment scenarios */}
+              {current.isAssessment && !assessmentComplete && currentScenario && (
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
+                    Scenario {assessmentAnswers.length + 1} of {current.scenarios.length}
+                  </div>
+                  <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 20, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}>
+                    {currentScenario.q}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <button onClick={() => setAssessmentAnswers(prev => [...prev, "T"])} style={{
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "16px 18px", cursor: "pointer", textAlign: "left",
+                      fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5,
+                      fontFamily: "'DM Sans', sans-serif", WebkitTapHighlightColor: "transparent"
+                    }}>
+                      {currentScenario.a.T}
+                    </button>
+                    <button onClick={() => setAssessmentAnswers(prev => [...prev, "B"])} style={{
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "16px 18px", cursor: "pointer", textAlign: "left",
+                      fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5,
+                      fontFamily: "'DM Sans', sans-serif", WebkitTapHighlightColor: "transparent"
+                    }}>
+                      {currentScenario.a.B}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Assessment result */}
+              {current.isAssessment && assessmentComplete && (
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "20px", textAlign: "center" }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                      Your processing type
+                    </div>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
+                      {typeLabels[scoreAssessment()].name}
+                    </div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 16 }}>
+                      {typeLabels[scoreAssessment()].desc}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>
+                      This isn't permanent. The system learns from how you actually use it and will check in after 7 sessions.
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Step 3 — pattern picker */}
               {isLast && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 28 }}>
@@ -5443,15 +5545,43 @@ export default function Stillform() {
                     {current.cta}
                   </button>
                 )}
-                <button onClick={() => {
-                  if (isLast) { setScreen("home"); } else { setSetupStep(s => s + 1); }
-                }} style={{
-                  background: "none", border: "none", cursor: "pointer",
-                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
-                  textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
-                }}>
-                  {isLast ? "Calibration complete → Enter system" : "Skip this step →"}
-                </button>
+                {/* Assessment: only show next when complete */}
+                {current.isAssessment && assessmentComplete && (
+                  <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}
+                    onClick={() => {
+                      try { localStorage.setItem("stillform_regulation_type", scoreAssessment()); } catch {}
+                      setAssessmentAnswers([]);
+                      setSetupStep(s => s + 1);
+                    }}>
+                    Continue →
+                  </button>
+                )}
+                {/* Assessment: skip option */}
+                {current.isAssessment && !assessmentComplete && (
+                  <button onClick={() => {
+                    try { localStorage.setItem("stillform_regulation_type", "balanced"); } catch {}
+                    setAssessmentAnswers([]);
+                    setSetupStep(s => s + 1);
+                  }} style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
+                    textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
+                  }}>
+                    Help me figure it out →
+                  </button>
+                )}
+                {/* Non-assessment steps */}
+                {!current.isAssessment && (
+                  <button onClick={() => {
+                    if (isLast) { setScreen("home"); } else { setSetupStep(s => s + 1); }
+                  }} style={{
+                    background: "none", border: "none", cursor: "pointer",
+                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
+                    textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
+                  }}>
+                    {isLast ? "Calibration complete → Enter system" : "Skip this step →"}
+                  </button>
+                )}
               </div>
             </section>
           );
@@ -6287,6 +6417,35 @@ export default function Stillform() {
               }}>
                 English
               </div>
+            </div>
+
+            {/* Regulation Type */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Processing Type</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                How you naturally process intensity — through thoughts or through your body. This determines which tool appears first. The system checks in after 7 sessions to see if it still fits.
+              </div>
+              {[
+                { id: "thought-first", name: "Thought-first", desc: "I process through my mind — analyzing, replaying, building responses" },
+                { id: "body-first", name: "Body-first", desc: "I feel it physically first — tension, heat, restlessness, then thoughts follow" },
+                { id: "balanced", name: "Balanced", desc: "I use both equally — depends on the moment" }
+              ].map(t => {
+                const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
+                return (
+                  <button key={t.id} onClick={() => {
+                    try { localStorage.setItem("stillform_regulation_type", t.id); refreshSettings(); } catch {}
+                  }} style={{
+                    width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
+                    background: isSelected ? "var(--amber-glow)" : "var(--surface)",
+                    border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
+                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                  }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{t.name}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{t.desc}</div>
+                  </button>
+                );
+              })}
             </div>
 
             {/* Breathing Pattern */}

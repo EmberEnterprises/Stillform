@@ -278,6 +278,7 @@ Hybrid approach:
 - No one has done a real user session yet — Ava's feedback was from the home screen, Bobby hasn't used it, Jonny did a technical audit not a user session
 - Reddit launch is a one-shot moment — don't post without paywall + real testimonials
 - Before any live update that touches user data: auto-backup to encrypted cloud sync BEFORE update. Non-negotiable for production.
+- **PENDING: Privacy policy (stillformapp.com/privacy.html) needs update to reflect:** regulation type assessment data collection, calendar integration (local processing only), AI summarization system, 7-session review milestone, processing type storage in localStorage, and any new data flows from cloud sync architecture.
 
 ---
 
