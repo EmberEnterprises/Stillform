@@ -531,6 +531,9 @@ git remote set-url origin https://x-access-token:[TOKEN]@github.com/EmberEnterpr
 **Metacognition as Signal Calibration**
 Distinguishes between a "vague feeling" and a "verified observation." Prevents spiraling into unverified assumptions. The Blind Spot Profiler and Watch & Choose tool serve this function.
 
+**Pattern Awareness — Not Pattern Rejection**
+Humans are pattern-seeking. Every pattern was learned from real experience — it served a purpose. The problem isn't that patterns exist. The problem is assuming A=A again without checking. Past experience informs but doesn't dictate. The AI's job is not to tell users their patterns are wrong — it's to create a pause between recognizing a pattern and acting on it. "This feels familiar. Is it the same, or just similar?"
+
 **EQ as Operational Intelligence**
 Not about being nice — about managing the energy of the room. Helps users navigate high-stakes interactions. The Reframe AI translates intense internal experience into functional external action.
 
