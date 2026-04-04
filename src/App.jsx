@@ -4894,26 +4894,46 @@ export default function Stillform() {
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Check widget launch flag synchronously (works on web only)
-  const widgetLaunch = (() => {
-    try {
-      const action = localStorage.getItem("widget_action");
-      if (action === "breathe") {
-        localStorage.removeItem("widget_action");
-        return true;
-      }
-    } catch {}
-    return false;
-  })();
+  const widgetLaunch = false; // handled async via useEffect below
 
   const [screen, setScreen] = useState(
-    !hasSeenOnboarding ? "onboarding" : widgetLaunch ? "tool" : "home"
+    !hasSeenOnboarding ? "onboarding" : "home"
   );
   const [screenReady, setScreenReady] = useState(true);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
-  const [activeTool, setActiveTool] = useState(widgetLaunch ? { id: "breathe", name: "Breathe", quickStart: true } : null);
-  const [pathway, setPathway] = useState(widgetLaunch ? "calm" : null);
+  const [activeTool, setActiveTool] = useState(null);
+  const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
+
+  // Widget action check — runs during splash screen
+  useEffect(() => {
+    if (!hasSeenOnboarding) return;
+
+    const checkWidgetAction = () => {
+      if (window.WIDGET_ACTION === "breathe") {
+        window.WIDGET_ACTION = null;
+        setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
+        setScreen("tool");
+        setPathway("calm");
+        return true;
+      }
+      return false;
+    };
+
+    // Check immediately
+    if (!checkWidgetAction()) {
+      // Check again after 150ms in case Java injection hasn't fired yet
+      const t1 = setTimeout(() => {
+        if (!checkWidgetAction()) {
+          // One more check at 500ms
+          const t2 = setTimeout(checkWidgetAction, 350);
+          return () => clearTimeout(t2);
+        }
+      }, 150);
+      return () => clearTimeout(t1);
+    }
+  }, []);
 
   // Deep link handling — share extension
   useEffect(() => {

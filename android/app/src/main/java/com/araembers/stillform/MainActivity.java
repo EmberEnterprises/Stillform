@@ -11,31 +11,31 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(WatchBridgePlugin.class);
         registerPlugin(WidgetBridgePlugin.class);
         super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        if (getIntent() != null && getIntent().hasExtra("stillform_action")) {
-            String action = getIntent().getStringExtra("stillform_action");
-            String safeAction = action.replace("'", "\\'");
-
-            getBridge().getWebView().post(() -> {
-                getBridge().getWebView().evaluateJavascript(
-                    "localStorage.setItem('widget_action', '" + safeAction + "'); window.location.reload();",
-                    null
-                );
-            });
-
-            // Clear extras to prevent duplicate triggers
-            setIntent(new Intent());
-        }
+        handleWidgetAction(getIntent());
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        handleWidgetAction(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        handleWidgetAction(getIntent());
+    }
+
+    private void handleWidgetAction(Intent intent) {
+        if (intent != null && intent.hasExtra("stillform_action")) {
+            String action = intent.getStringExtra("stillform_action");
+            getBridge().getWebView().post(() -> {
+                getBridge().getWebView().evaluateJavascript(
+                    "window.WIDGET_ACTION = '" + action.replace("'", "\\'") + "';",
+                    null
+                );
+            });
+        }
     }
 }
