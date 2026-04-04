@@ -5152,24 +5152,32 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Stabilize. Then think clearly.",
-              body: "A big presentation. A conversation you can't stop replaying. Excitement that's buzzing too loud to focus. A decision that won't resolve.\n\nStillform helps you master the pause between feeling and action. Any state. Under two minutes.",
+              subtitle: "How you carry yourself. Every day.",
+              body: "Your morning calibration and your in-the-moment reset. Set your tone before the day starts, then use it whenever a moment demands composure.\n\nNot meditation. Not therapy. A precision composure system that learns how you operate.",
               note: null
             },
             {
               icon: "◎",
-              label: "Three protocols",
-              title: "Body. Then thought.",
-              subtitle: "Any state. Under two minutes.",
-              body: "Breathe — paced breathing matched to your state. Stabilize the body first. Starts instantly.\n\nBody Scan — find where you're holding tension. Release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered cognitive reset. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
+              label: "Two pathways",
+              title: "Your brain has a default.",
+              subtitle: "Neuroscience shows two regulation pathways.",
+              body: "Thought-first — your mind fires first. Replaying, analyzing, building a response. The AI helps you think it through, then your body follows.\n\nBody-first — tension hits first. Jaw, chest, shoulders. Breathing settles the hardware, then your thinking clears.\n\nResearch confirms: matching the right tool to your pathway is what makes regulation work. We'll help you find yours during setup.",
+              note: null
+            },
+            {
+              icon: "◎",
+              label: "Three tools",
+              title: "Talk. Breathe. Scan.",
+              subtitle: "Each one meets you where you are.",
+              body: "Reframe — AI-powered. Talk through what's happening. The AI learns your patterns, your triggers, and how you process. Gets sharper every session.\n\nBreathe — paced breathing matched to your state. Four patterns. Settles the nervous system in under 90 seconds.\n\nBody Scan — six acupressure points. Find where you're holding tension and release it. Auto-advances.",
               note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
               icon: "◈",
               label: "Over time",
               title: "It sharpens.",
-              subtitle: "Learns your signals. Sharpens every session.",
-              body: "After a few sessions your Signal Profile builds — where your body responds first, what your blind spots are, how you move through states.\n\nLog signal events in the Signal Log. The AI cross-references sessions, patterns, and your profile. It stops being generic and starts being precise about you."
+              subtitle: "The system learns you. Not the other way around.",
+              body: "Every session builds your profile — how you process, what triggers you, what works. The AI stops being generic and starts being precise about you.\n\nAfter 7 sessions, the system checks in. It tracks which tools you actually reach for and adjusts. Your composure practice evolves with you."
             },
             {
               icon: "◎",
