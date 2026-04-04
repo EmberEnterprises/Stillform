@@ -3150,9 +3150,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {/* MODE PICKER — three tones */}
       <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
         {[
-          { id: "calm", label: "Regulate", icon: "◎", color: "#c9933a" },
-          { id: "clarity", label: "Get Sharp", icon: "✦", color: "#7aadcf" },
-          { id: "hype", label: "Lock In", icon: "◌", color: "#c9793a" }
+          { id: "calm", label: "Regulate", desc: "Process what's here", icon: "◎", color: "#c9933a" },
+          { id: "clarity", label: "Get Sharp", desc: "Break a thought loop", icon: "✦", color: "#7aadcf" },
+          { id: "hype", label: "Lock In", desc: "Compose before a moment", icon: "◌", color: "#c9793a" }
         ].map(m => {
           const active = effectiveMode === m.id;
           return (
@@ -3163,7 +3163,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s", textAlign: "center"
             }}>
               <div style={{ fontSize: 14, color: active ? m.color : "var(--text-muted)", marginBottom: 2 }}>{m.icon}</div>
-              <div style={{ fontSize: 10, color: active ? m.color : "var(--text-muted)", letterSpacing: "0.06em" }}>{m.label}</div>
+              <div style={{ fontSize: 10, color: active ? m.color : "var(--text-muted)", letterSpacing: "0.06em", fontWeight: 500 }}>{m.label}</div>
+              <div style={{ fontSize: 8, color: active ? m.color : "var(--text-dim)", marginTop: 2, opacity: 0.7 }}>{m.desc}</div>
             </button>
           );
         })}
@@ -6394,7 +6395,7 @@ export default function Stillform() {
               },
               {
                 q: "What are the three Reframe modes?",
-                a: "Regulate — settle the system and think clearly. Get Sharp — cut through a thought loop or indecision. Lock In — compose yourself before something that matters."
+                a: "Regulate — process what's happening right now. Get Sharp — break a thought loop or indecision. Lock In — compose yourself before a moment that matters."
               },
               {
                 q: "Does the AI learn about me?",
