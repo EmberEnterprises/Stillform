@@ -1188,6 +1188,45 @@ const haptic = {
 };
 
 // Push notification setup — runs once on app load in native context
+// Biometric lock — Face ID / fingerprint gate for Reframe & Signal Log
+const biometric = {
+  async isAvailable() {
+    if (!isNative()) return false;
+    try {
+      const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
+      const result = await BiometricAuth.checkBiometry();
+      return result.isAvailable;
+    } catch { return false; }
+  },
+  async getLabel() {
+    if (!isNative()) return 'Biometric Lock';
+    try {
+      const { BiometricAuth, BiometryType } = await import('@aparajita/capacitor-biometric-auth');
+      const result = await BiometricAuth.checkBiometry();
+      const labels = {
+        [BiometryType.touchId]: 'Touch ID', [BiometryType.faceId]: 'Face ID',
+        [BiometryType.fingerprintAuthentication]: 'Fingerprint', [BiometryType.faceAuthentication]: 'Face Unlock',
+        [BiometryType.irisAuthentication]: 'Iris'
+      };
+      return labels[result.biometryType] || 'Biometric Lock';
+    } catch { return 'Biometric Lock'; }
+  },
+  async authenticate() {
+    try {
+      const { BiometricAuth } = await import('@aparajita/capacitor-biometric-auth');
+      await BiometricAuth.authenticate({
+        reason: 'Unlock to access protected data',
+        cancelTitle: 'Cancel',
+        allowDeviceCredential: true,
+      });
+      return true;
+    } catch { return false; }
+  },
+  isEnabled() { try { return localStorage.getItem('stillform_biometric_enabled') === 'yes'; } catch { return false; } },
+  setEnabled(v) { try { localStorage.setItem('stillform_biometric_enabled', v ? 'yes' : 'no'); } catch {} },
+  async gate() { if (!this.isEnabled()) return true; return this.authenticate(); },
+};
+
 const setupPushNotifications = async () => {
   if (!isNative()) return;
   try {
@@ -4884,14 +4923,16 @@ export default function Stillform() {
     setScreen("tool");
   };
 
-  const startPathway = (p) => {
+  const startPathway = async (p) => {
     setPathway(p);
     if (p === "calm") {
       startTool(TOOLS.find(t => t.id === "breathe"));
     } else if (p === "hype") {
+      if (!(await biometric.gate())) return;
       setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" });
       setScreen("tool");
     } else if (p === "clarity") {
+      if (!(await biometric.gate())) return;
       setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
       setScreen("tool");
     } else {
@@ -5371,7 +5412,7 @@ export default function Stillform() {
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
                   </button>
-                  <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                  <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
                     borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer", textAlign: "center",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", WebkitTapHighlightColor: "transparent"
@@ -5424,7 +5465,7 @@ export default function Stillform() {
                 {uatRoadmapOpen && (
                   <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.8, padding: "10px 14px", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
                     Early build. Feedback shapes everything.<br/>
-                    <span style={{ color: "var(--amber)" }}>Coming:</span> Apple Watch · biometric lock · health integration · push notifications · sound packs · PDF export
+                    <span style={{ color: "var(--amber)" }}>Coming:</span> Apple Watch · health integration · push notifications · sound packs · PDF export
                   </div>
                 )}
               </div>
@@ -5462,7 +5503,7 @@ export default function Stillform() {
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--text-dim)", marginTop: 3 }}>Body</div>
                   </button>
-                  <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                  <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
                     flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
                     borderRadius: "var(--r)", padding: "12px 10px", cursor: "pointer",
                     boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
@@ -5549,7 +5590,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                <button onClick={() => setScreen("journal")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Signal Log</button>
+                <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Signal Log</button>
                 <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -5595,7 +5636,7 @@ export default function Stillform() {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => setScreen("home")} onJournal={() => setScreen("journal")} />
+          <MyProgress onBack={() => setScreen("home")} onJournal={async () => { if (await biometric.gate()) setScreen("journal"); }} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
@@ -6186,6 +6227,45 @@ export default function Stillform() {
                 );
               })}
             </div>
+
+            {/* Security */}
+            {(() => {
+              const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
+              const [bioAvailable, setBioAvailable] = useState(false);
+              const [bioLabel, setBioLabel] = useState("Biometric Lock");
+              useEffect(() => {
+                biometric.isAvailable().then(setBioAvailable);
+                biometric.getLabel().then(setBioLabel);
+              }, []);
+              if (!bioAvailable) return null;
+              return (
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Security</div>
+                  <div style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Lock with {bioLabel}</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require {bioLabel} for Reframe and Signal Log</div>
+                    </div>
+                    <button onClick={() => {
+                      biometric.setEnabled(!bioOn);
+                      refreshSettings();
+                    }} style={{
+                      background: bioOn ? "var(--amber)" : "var(--border)",
+                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: bioOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Sound */}
             <div style={{ marginBottom: 28 }}>
