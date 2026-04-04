@@ -1502,8 +1502,8 @@ const BREATHING_PATTERNS = [
   ]}
 ];
 
-function BreatheGroundTool({ onComplete, pathway }) {
-  const [phase, setPhase] = useState("pre-rate"); // pre-rate | breathe | ground | post-rate | done
+function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
+  const [phase, setPhase] = useState(quickStart ? "breathe" : "pre-rate"); // pre-rate | breathe | ground | post-rate | done
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
   const [bioFilter, setBioFilter] = useState(null);
@@ -4910,7 +4910,7 @@ export default function Stillform() {
   const [screenReady, setScreenReady] = useState(true);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
-  const [activeTool, setActiveTool] = useState(widgetLaunch ? { id: "breathe", name: "Breathe" } : null);
+  const [activeTool, setActiveTool] = useState(widgetLaunch ? { id: "breathe", name: "Breathe", quickStart: true } : null);
   const [pathway, setPathway] = useState(widgetLaunch ? "calm" : null);
   const [sharedText, setSharedText] = useState(null);
 
@@ -4937,7 +4937,7 @@ export default function Stillform() {
               try {
                 if (localStorage.getItem("stillform_widget_breathe") === "true") {
                   localStorage.removeItem("stillform_widget_breathe");
-                  setActiveTool({ id: "breathe", name: "Breathe" });
+                  setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
                   setScreen("tool");
                   setPathway("calm");
                 }
@@ -5076,7 +5076,7 @@ export default function Stillform() {
       setScreen("home");
     }};
     switch (activeTool?.id) {
-      case "breathe": return <BreatheGroundTool {...props} pathway={pathway} />;
+      case "breathe": return <BreatheGroundTool {...props} pathway={pathway} quickStart={activeTool?.quickStart} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
