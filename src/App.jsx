@@ -4902,6 +4902,7 @@ export default function Stillform() {
   // Deep link handling — widget tap and share extension
   useEffect(() => {
     try {
+      // Web: check URL params
       const params = new URLSearchParams(window.location.search);
       const action = params.get("action");
       const share = params.get("share");
@@ -4915,9 +4916,49 @@ export default function Stillform() {
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
       }
-      // Clean up URL params
       if (action || share) {
         window.history.replaceState({}, "", "/");
+      }
+
+      // Native: check Capacitor App launch URL
+      if (isNative()) {
+        import('@capacitor/app').then(({ App }) => {
+          App.getLaunchUrl().then(result => {
+            if (result?.url) {
+              const url = new URL(result.url);
+              const nativeAction = url.searchParams.get("action");
+              const nativeShare = url.searchParams.get("share");
+              if (nativeAction === "breathe" && hasSeenOnboarding) {
+                setActiveTool({ id: "breathe", name: "Breathe" });
+                setScreen("tool");
+                setPathway("calm");
+              }
+              if (nativeShare && hasSeenOnboarding) {
+                setSharedText(decodeURIComponent(nativeShare));
+                setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+                setScreen("tool");
+              }
+            }
+          }).catch(() => {});
+          // Also listen for app opened via deep link while running
+          App.addListener("appUrlOpen", (data) => {
+            try {
+              const url = new URL(data.url);
+              const a = url.searchParams.get("action");
+              const s = url.searchParams.get("share");
+              if (a === "breathe" && hasSeenOnboarding) {
+                setActiveTool({ id: "breathe", name: "Breathe" });
+                setScreen("tool");
+                setPathway("calm");
+              }
+              if (s && hasSeenOnboarding) {
+                setSharedText(decodeURIComponent(s));
+                setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+                setScreen("tool");
+              }
+            } catch {}
+          });
+        }).catch(() => {});
       }
     } catch {}
   }, []);
