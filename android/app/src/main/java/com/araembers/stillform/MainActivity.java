@@ -1,7 +1,7 @@
 package com.araembers.stillform;
 
 import android.os.Bundle;
-import android.content.Intent;
+import android.content.SharedPreferences;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
@@ -9,24 +9,24 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(WatchBridgePlugin.class);
         registerPlugin(WidgetBridgePlugin.class);
+
+        // Check widget flag BEFORE super.onCreate loads the WebView
+        SharedPreferences prefs = getSharedPreferences("stillform_widget", MODE_PRIVATE);
+        boolean widgetBreathe = prefs.getBoolean("launch_breathe", false);
+        if (widgetBreathe) {
+            prefs.edit().putBoolean("launch_breathe", false).commit();
+            // Override the server URL to include the action parameter
+            getIntent().putExtra("STILLFORM_WIDGET", true);
+        }
+
         super.onCreate(savedInstanceState);
 
-        // Check if launched from widget
-        handleWidgetIntent(getIntent());
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        handleWidgetIntent(intent);
-    }
-
-    private void handleWidgetIntent(Intent intent) {
-        if (intent != null && "breathe".equals(intent.getStringExtra("stillform_action"))) {
-            // Set localStorage flag that React reads synchronously on mount
+        // After WebView is ready, inject the flag into localStorage
+        if (widgetBreathe) {
             getBridge().getWebView().post(() -> {
                 getBridge().getWebView().evaluateJavascript(
-                    "try { localStorage.setItem('stillform_widget_breathe', 'true'); } catch(e) {}", null
+                    "localStorage.setItem('stillform_widget_breathe','true');window.location.reload();",
+                    null
                 );
             });
         }

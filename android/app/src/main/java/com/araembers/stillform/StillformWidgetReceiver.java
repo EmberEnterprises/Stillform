@@ -10,9 +10,9 @@ public class StillformWidgetReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if ("com.araembers.stillform.WIDGET_BREATHE".equals(intent.getAction())) {
-            // Set flag that the app reads on launch
+            // Set flag BEFORE launching — so it exists when the app reads it
             SharedPreferences prefs = context.getSharedPreferences("stillform_widget", Context.MODE_PRIVATE);
-            prefs.edit().putBoolean("launch_breathe", true).apply();
+            prefs.edit().putBoolean("launch_breathe", true).commit(); // commit(), not apply() — synchronous
 
             // Launch the app
             Intent launchIntent = new Intent(context, MainActivity.class);
