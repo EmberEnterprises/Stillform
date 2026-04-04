@@ -602,6 +602,7 @@ const styles = `
     padding-top: 16px;
     border-top: 1px solid var(--border);
     align-items: flex-end;
+    position: relative;
   }
 
   .ai-input {
@@ -3443,6 +3444,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Reading what you wrote<span style={{ animation: "pulse 1.5s ease-in-out infinite" }}>...</span>
             </div>
           ) : (
+            <>
             <textarea
               className="ai-input"
               style={{ borderColor: mc.border }}
@@ -3452,6 +3454,19 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               rows={3}
             />
+            {/* Continue button — when returning to a conversation with no input typed */}
+            {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !input.trim() && (
+              <button onClick={() => handleSend("I need to continue where we left off")} style={{
+                position: "absolute", top: -36, right: 0,
+                background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                borderRadius: "var(--r)", padding: "6px 14px", fontSize: 11,
+                color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+              }}>
+                ↺ Continue
+              </button>
+            )}
+            </>
+          )}
           )}
           {!loading && speech.supported && (
             <button onClick={speech.toggle} style={{
