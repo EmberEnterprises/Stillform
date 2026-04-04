@@ -5950,9 +5950,8 @@ export default function Stillform() {
                   // Only show signals/bias if not done
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
                   ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
-                  { id: "checkin", label: "Check-In", rec: false },
                   { id: "patterns", label: "Your Patterns", rec: false },
-                  { id: "meta", label: "Watch & Choose", rec: false },
+                  { id: "checkin", label: "State Check", rec: false },
                 ];
 
                 return (
@@ -5963,7 +5962,7 @@ export default function Stillform() {
                     </div>
                     {calibrationComplete && (
                       <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, fontStyle: "italic" }}>
-                        Signal mapping and blind spots calibrated. Update anytime in Settings.
+                        Calibration complete. Update signal mapping, blind spots, or processing type anytime in Settings.
                       </div>
                     )}
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
