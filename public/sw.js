@@ -1,5 +1,5 @@
-const CACHE = 'stillform-v1';
-const PRECACHE = ['/', '/index.html'];
+const CACHE = 'stillform-v2-apr4';
+const PRECACHE = ['/'];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
@@ -17,11 +17,17 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-  // Network first for API calls, cache first for assets
+  // Skip caching for API calls
   if (event.request.url.includes('/api/') || event.request.url.includes('netlify/functions')) {
     return;
   }
+  // Network first, cache fallback (offline only)
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request).then(response => {
+      // Update cache with fresh response
+      const clone = response.clone();
+      caches.open(CACHE).then(cache => cache.put(event.request, clone));
+      return response;
+    }).catch(() => caches.match(event.request))
   );
 });
