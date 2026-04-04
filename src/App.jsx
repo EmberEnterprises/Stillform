@@ -3979,7 +3979,7 @@ function SignalMapTool({ onComplete }) {
 
   const sensations = [
     "Tightness", "Heat", "Numbness", "Racing heart", "Shallow breath", "Nausea", "Trembling", "Brain fog",
-    "Surge of energy", "Clarity spike", "Restless focus", "Lightness"
+    "Surge of energy", "Rush of certainty", "Restless focus", "Lightness"
   ];
 
   const triggers = [
@@ -6001,7 +6001,7 @@ export default function Stillform() {
                 {activeTool.id === "reframe" ? (
                   (() => {
                     const m = activeTool.mode || pathway || "calm";
-                    const names = { calm: "✦ Regulate", clarity: "✦ Get Sharp", hype: "◌ Lock In" };
+                    const names = { calm: "◎ Talk it through", clarity: "✦ Break the loop", hype: "◌ Get ready" };
                     return names[m] || "✦ Reframe";
                   })()
                 ) : (
