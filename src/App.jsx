@@ -6026,7 +6026,7 @@ export default function Stillform() {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure system. Breathing, body scan, and AI-powered reframing — built to help you pause, read the situation clearly, and respond on your terms. Under two minutes."
+                a: "A composure system. Breathing, body scan, and AI-powered reframing — built to help you pause, read the situation clearly, and act on your own terms. Under two minutes."
               },
               {
                 q: "Who is this for?",
