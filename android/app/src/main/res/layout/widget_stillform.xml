@@ -3,41 +3,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_background"
-    android:padding="8dp">
+    android:gravity="center">
 
     <TextView
         android:id="@+id/widget_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
+        android:layout_centerInParent="true"
         android:text="◎"
         android:textColor="#C8922A"
-        android:textSize="28sp" />
-
-    <TextView
-        android:id="@+id/widget_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/widget_icon"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="4dp"
-        android:text="Stillform"
-        android:textColor="#E8EAF0"
-        android:textSize="11sp"
-        android:letterSpacing="0.12"
-        android:textAllCaps="true" />
-
-    <TextView
-        android:id="@+id/widget_sublabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/widget_label"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="2dp"
-        android:text="Breathe"
-        android:textColor="#95979f"
-        android:textSize="9sp"
-        android:letterSpacing="0.08" />
+        android:textSize="32sp" />
 
 </RelativeLayout>

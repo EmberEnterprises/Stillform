@@ -13,8 +13,7 @@ public class StillformWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-            // Create intent that opens the app with a deep link to start breathing
-            Intent intent = new Intent(Intent.ACTION_VIEW);
+            Intent intent = new Intent(context, MainActivity.class);
             intent.setData(Uri.parse("https://stillformapp.com/?action=breathe"));
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
@@ -24,8 +23,6 @@ public class StillformWidget extends AppWidgetProvider {
 
             RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_stillform);
             views.setOnClickPendingIntent(R.id.widget_icon, pendingIntent);
-            views.setOnClickPendingIntent(R.id.widget_label, pendingIntent);
-            views.setOnClickPendingIntent(R.id.widget_sublabel, pendingIntent);
 
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
