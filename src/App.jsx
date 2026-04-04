@@ -5336,7 +5336,7 @@ export default function Stillform() {
           );
         })()}
 
-        {/* SETUP — System Initialization */}
+        {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
           const setupSteps = [
             {
@@ -5383,9 +5383,9 @@ export default function Stillform() {
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
 
-              {/* System init header */}
+              {/* System calibration header */}
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-                ◎ SYSTEM INITIALIZATION
+                ◎ SYSTEM CALIBRATION
               </div>
 
               {/* Progress */}
@@ -5450,7 +5450,7 @@ export default function Stillform() {
                   fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
                   textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
                 }}>
-                  {isLast ? "Initialization complete → Enter system" : "Skip this step →"}
+                  {isLast ? "Calibration complete → Enter system" : "Skip this step →"}
                 </button>
               </div>
             </section>
@@ -5561,7 +5561,7 @@ export default function Stillform() {
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
                 textTransform: "uppercase", color: "var(--amber)", opacity: 0.7
               }}>
-                ◎ Initialize system first →
+                ◎ Calibrate system first →
               </button>
 
               <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
