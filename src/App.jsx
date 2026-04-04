@@ -3436,6 +3436,12 @@ function MicroBiasTool({ onComplete }) {
       question: "Does one negative thing tend to overshadow multiple positive things?"
     },
     {
+      name: "Optimism Bias",
+      what: "Your brain underestimates risk and overestimates how well things will go. You skip preparation because it 'feels fine.'",
+      example: "You don't study for the interview because you're confident. You don't have the hard conversation because you assume it'll work itself out. It doesn't.",
+      question: "Do you sometimes skip preparation or avoid hard steps because you assume things will just work out?"
+    },
+    {
       name: "Sunk Cost Fallacy",
       what: "You keep investing in something — a relationship, a job, a decision — because of what you've already put in, not because it's still right.",
       example: "You stay in a situation that's hurting you because 'I've already given it three years.'",
@@ -3454,16 +3460,22 @@ function MicroBiasTool({ onComplete }) {
       question: "Is there an old belief or early experience that still shapes how you see yourself — even though everything has changed since then?"
     },
     {
-      name: "In-Group Bias",
-      what: "You naturally favor people who are like you and view outsiders with more suspicion.",
-      example: "You trust someone's opinion more because they share your background, not because their reasoning is stronger.",
-      question: "Do you find it easier to empathize with people who share your experience than people who don't?"
-    },
-    {
       name: "Spotlight Effect",
       what: "You overestimate how much other people notice or care about your mistakes.",
       example: "You said something awkward in a meeting. You replay it for days. Nobody else remembers.",
       question: "Do you assume people are thinking about your mistakes as much as you are?"
+    },
+    {
+      name: "Planning Fallacy",
+      what: "You consistently underestimate how long things take, how much energy they'll require, or how many things can go wrong.",
+      example: "You say yes to five things this week because each one 'only takes an hour.' By Wednesday you're drowning.",
+      question: "Do you regularly underestimate how long things take or overcommit because each thing seems small on its own?"
+    },
+    {
+      name: "Halo Effect",
+      what: "One positive impression about a person colors everything else. You trust their judgment, overlook red flags, or defer to them because they got one thing right.",
+      example: "Your new manager seems sharp and confident, so you assume their plan is solid. You don't push back. The plan was wrong.",
+      question: "Do you sometimes give people too much credit across the board because of one strong impression?"
     }
   ];
 
