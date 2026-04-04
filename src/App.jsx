@@ -4892,7 +4892,8 @@ export default function Stillform() {
 
   // Production: show onboarding only once, unless user replays from Settings.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  const [screen, setScreen] = useState(hasSeenOnboarding ? "home" : "onboarding");
+  const [screen, setScreen] = useState(null);
+  const [screenReady, setScreenReady] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [activeTool, setActiveTool] = useState(null);
@@ -4901,6 +4902,7 @@ export default function Stillform() {
 
   // Deep link handling — widget tap and share extension
   useEffect(() => {
+    let handled = false;
     try {
       // Web: check URL params
       const params = new URLSearchParams(window.location.search);
@@ -4910,54 +4912,77 @@ export default function Stillform() {
         setActiveTool({ id: "breathe", name: "Breathe" });
         setScreen("tool");
         setPathway("calm");
+        handled = true;
       }
       if (share && hasSeenOnboarding) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
+        handled = true;
       }
       if (action || share) {
         window.history.replaceState({}, "", "/");
       }
+    } catch {}
 
-      // Native: check widget launch flag
-      if (isNative()) {
-        const checkWidgetFlag = async () => {
+    // Native: check widget launch flag
+    if (!handled && isNative()) {
+      const checkWidgetFlag = async () => {
+        try {
+          const { Capacitor } = await import('@capacitor/core');
+          const WidgetBridge = Capacitor.Plugins.WidgetBridge;
+          if (WidgetBridge) {
+            const result = await WidgetBridge.checkLaunchAction();
+            if (result?.action === "breathe" && hasSeenOnboarding) {
+              setActiveTool({ id: "breathe", name: "Breathe" });
+              setScreen("tool");
+              setPathway("calm");
+              setScreenReady(true);
+              return;
+            }
+          }
+        } catch {}
+        // No widget action — go to default screen
+        setScreen(hasSeenOnboarding ? "home" : "onboarding");
+        setScreenReady(true);
+      };
+      checkWidgetFlag();
+
+      // Listen for app resume and share extension
+      import('@capacitor/app').then(({ App }) => {
+        App.addListener("appStateChange", (state) => {
+          if (state.isActive) {
+            import('@capacitor/core').then(({ Capacitor }) => {
+              const WB = Capacitor.Plugins.WidgetBridge;
+              if (WB) WB.checkLaunchAction().then(r => {
+                if (r?.action === "breathe" && hasSeenOnboarding) {
+                  setActiveTool({ id: "breathe", name: "Breathe" });
+                  setScreen("tool");
+                  setPathway("calm");
+                }
+              }).catch(() => {});
+            }).catch(() => {});
+          }
+        });
+        App.addListener("appUrlOpen", (data) => {
           try {
-            const { Capacitor } = await import('@capacitor/core');
-            const WidgetBridge = Capacitor.Plugins.WidgetBridge;
-            if (WidgetBridge) {
-              const result = await WidgetBridge.checkLaunchAction();
-              if (result?.action === "breathe" && hasSeenOnboarding) {
-                setActiveTool({ id: "breathe", name: "Breathe" });
-                setScreen("tool");
-                setPathway("calm");
-              }
+            const url = new URL(data.url);
+            const s = url.searchParams.get("share");
+            if (s && hasSeenOnboarding) {
+              setSharedText(decodeURIComponent(s));
+              setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+              setScreen("tool");
             }
           } catch {}
-        };
-        checkWidgetFlag();
-
-        // Also check when app resumes from background
-        import('@capacitor/app').then(({ App }) => {
-          App.addListener("appStateChange", (state) => {
-            if (state.isActive) checkWidgetFlag();
-          });
-          // Handle share extension deep links
-          App.addListener("appUrlOpen", (data) => {
-            try {
-              const url = new URL(data.url);
-              const s = url.searchParams.get("share");
-              if (s && hasSeenOnboarding) {
-                setSharedText(decodeURIComponent(s));
-                setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-                setScreen("tool");
-              }
-            } catch {}
-          });
-        }).catch(() => {});
-      }
-    } catch {}
+        });
+      }).catch(() => {});
+    } else if (!handled) {
+      // Web — set default screen immediately
+      setScreen(hasSeenOnboarding ? "home" : "onboarding");
+      setScreenReady(true);
+    } else {
+      setScreenReady(true);
+    }
   }, []);
   const [pricingPlan, setPricingPlan] = useState("annual");
   const [pricingCloud, setPricingCloud] = useState(false);
@@ -5100,7 +5125,7 @@ export default function Stillform() {
       <style>{styles}</style>
       <div className={appClasses}>
         {/* SPLASH OVERLAY — fades out, never blocks hooks */}
-        {!splashDone && (
+        {(!splashDone || !screenReady) && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
