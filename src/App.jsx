@@ -4999,6 +4999,10 @@ export default function Stillform() {
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
+  const [ciOpen, setCiOpen] = useState(true);
+  const [ciEnergy, setCiEnergy] = useState(null);
+  const [ciBio, setCiBio] = useState(null);
+  const [ciSaved, setCiSaved] = useState(false);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -5838,6 +5842,93 @@ export default function Stillform() {
                 )}
               </div>
 
+              {/* MORNING CHECK-IN — appears if not checked in today */}
+              {(() => {
+                const today = new Date().toISOString().split("T")[0];
+                const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
+                const isCheckedIn = ciSaved || checkedIn;
+
+                const saveCheckin = () => {
+                  try {
+                    localStorage.setItem("stillform_checkin_today", JSON.stringify({
+                      date: today, energy: ciEnergy || "steady", bio: ciBio || "clear"
+                    }));
+                    if (ciBio && ciBio !== "clear") localStorage.setItem("stillform_bio_filter", ciBio);
+                  } catch {}
+                  setCiSaved(true);
+                  setCiOpen(false);
+                };
+
+                if (isCheckedIn) return (
+                  <div style={{ marginBottom: 20 }}>
+                    <button onClick={() => { setCiSaved(false); setCiOpen(true); }} style={{
+                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer", padding: 0
+                    }}>
+                      ✓ Checked in · tap to update
+                    </button>
+                  </div>
+                );
+
+                if (!ciOpen) return (
+                  <button onClick={() => setCiOpen(true)} style={{
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    textAlign: "left", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Set your tone for today</div>
+                  </button>
+                );
+
+                return (
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>Morning check-in</div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How's your energy?</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {["Low", "Steady", "High", "Wired"].map(e => (
+                        <button key={e} onClick={() => setCiEnergy(e.toLowerCase())} style={{
+                          background: ciEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          color: ciEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{e}</button>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Hardware check</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[
+                        { id: "clear", label: "All clear" },
+                        { id: "depleted", label: "Depleted" },
+                        { id: "sleep", label: "Under-rested" },
+                        { id: "pain", label: "Pain present" },
+                        { id: "activated", label: "Activated" },
+                        { id: "medicated", label: "Medicated" }
+                      ].map(b => (
+                        <button key={b.id} onClick={() => setCiBio(b.id)} style={{
+                          background: ciBio === b.id ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciBio === b.id ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "5px 14px", fontSize: 11, cursor: "pointer",
+                          color: ciBio === b.id ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{b.label}</button>
+                      ))}
+                    </div>
+
+                    <button onClick={saveCheckin} style={{
+                      width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                      borderRadius: "var(--r)", padding: "12px", fontSize: 14, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      Set my tone →
+                    </button>
+                  </div>
+                );
+              })()}
+
               {/* DOMINANT CTA — Adaptive to regulation type */}
               <div style={{ marginBottom: 48 }}>
                 {/* Identity line */}
@@ -5947,11 +6038,9 @@ export default function Stillform() {
                 const calibrationComplete = signalDone && !!biasDone;
 
                 const tools = [
-                  // Only show signals/bias if not done
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
                   ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
                   { id: "patterns", label: "Your Patterns", rec: false },
-                  { id: "checkin", label: "State Check", rec: false },
                 ];
 
                 return (
