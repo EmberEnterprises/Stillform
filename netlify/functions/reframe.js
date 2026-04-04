@@ -308,23 +308,21 @@ exports.handler = async function(event) {
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+      headers: { "Content-Type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 180,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages
-        ]
+        system: systemPrompt,
+        messages
       })
     });
 
     const data = await response.json();
     if (!response.ok) { console.error("API error:", JSON.stringify(data)); throw new Error(data.error?.message || "API error " + response.status); }
 
-    const text = data.choices?.[0]?.message?.content || "";
+    const text = data.content?.[0]?.text || "";
     const clean = text.replace(/```json|```/g, "").trim();
     const parsed = JSON.parse(clean);
 
