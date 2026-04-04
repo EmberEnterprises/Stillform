@@ -5402,7 +5402,7 @@ export default function Stillform() {
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                Composure when you need it. Before a conversation, after a bad meeting, in the middle of a decision. Regain it or keep it — under two minutes.
+                Composure when you need it. Before a conversation, after a bad meeting, in the middle of a decision. Stabilize in under two minutes — then go handle your day.
               </p>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                 Stabilize. Then think clearly.
