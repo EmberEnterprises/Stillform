@@ -3998,7 +3998,7 @@ function SignalMapTool({ onComplete }) {
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", color: "var(--text-muted)", textTransform: "uppercase" }}>Telemetry Source: Manual</div>
           </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
-            <strong style={{ color: "var(--text)" }}>First to react:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
+            <strong style={{ color: "var(--text)" }}>First to respond:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>State-shift signals:</strong> {(signals.preSensations || []).join(", ")}
