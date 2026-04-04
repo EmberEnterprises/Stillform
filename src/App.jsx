@@ -5284,11 +5284,31 @@ export default function Stillform() {
           const isLast = onboardStep === steps.length - 1;
           const isFirst = onboardStep === 0;
 
+          // Swipe handling
+          let touchStartX = null;
+          const handleTouchStart = (e) => { touchStartX = e.touches[0].clientX; };
+          const handleTouchEnd = (e) => {
+            if (touchStartX === null) return;
+            const diff = touchStartX - e.changedTouches[0].clientX;
+            touchStartX = null;
+            if (Math.abs(diff) < 50) return;
+            if (diff > 0) {
+              if (isLast) { completeOnboarding(); }
+              else { setOnboardStep(s => s + 1); }
+            } else {
+              if (!isFirst) { setOnboardStep(s => s - 1); }
+            }
+          };
+
           return (
-            <section style={{
+            <section
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              style={{
               maxWidth: 480, margin: "0 auto", padding: "0 24px",
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1
+              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1,
+              touchAction: "pan-y"
             }}>
               {/* Progress dots */}
               <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
