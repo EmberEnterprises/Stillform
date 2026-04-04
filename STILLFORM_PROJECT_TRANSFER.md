@@ -12,7 +12,7 @@ ARA Embers LLC · April 2026 · For Stillform Project in Claude
 
 > *One sentence: "Stillform is a composure system for people who feel everything at full intensity — and need to stay functional inside it."*
 
-**Stillform is NOT a meditation app. NOT therapy. NOT a self-improvement program. NOT crisis management. NOT damage control.**
+**Stillform is NOT positioned as a meditation app, therapy, or crisis hotline — even though it contains elements of all of these. It's a composure system. The framing matters: the target audience would never download a meditation app or book a therapy session, but they'll use a system that makes them sharper.**
 
 Stillform IS a daily composure practice AND a fast intervention system. Morning calibration and in-the-moment reset. Both.
 
