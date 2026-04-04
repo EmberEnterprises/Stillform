@@ -5245,40 +5245,40 @@ export default function Stillform() {
             {
               icon: "◎",
               title: "Stillform",
-              subtitle: "Built from research. Shaped by lived experience.",
-              body: "Composure isn't something you find in a crisis — it's how you carry yourself every day. How you walk into a room, how you handle good news and bad, how you show up when it matters.\n\nStillform was built by someone who lives with a neurological disability and needed a system that actually works — not another meditation app that tells you to breathe. Every feature traces back to published research in neuroscience, emotional regulation, and cognitive behavioral science.\n\nThis is a precision composure system. Your morning calibration and your in-the-moment reset.",
+              subtitle: "A precision composure system.",
+              body: "Your morning calibration and your in-the-moment reset. Set your tone before the day starts, then use it whenever a moment demands composure.\n\nEvery feature is grounded in published neuroscience and cognitive behavioral research. Not meditation. Not therapy. A system that learns how you operate and gets sharper every time you use it.",
               note: null
             },
             {
               icon: "◎",
               label: "The science",
-              title: "Your brain has a default pathway.",
-              subtitle: "Backed by peer-reviewed neuroscience.",
-              body: "Research from Columbia and NYU shows your brain regulates emotion through two distinct pathways — top-down (cognitive) and bottom-up (somatic). Some people process through thoughts first. Others feel it in the body first.\n\nThe critical finding: matching the right intervention to your pathway is what makes regulation work. Top-down emotions respond to cognitive strategies. Bottom-up emotions respond to body-based strategies. Forcing the wrong one makes it worse.\n\nStillform detects your pathway and adapts. No other composure tool does this.",
-              note: null
-            },
-            {
-              icon: "◎",
-              label: "The AI",
-              title: "It remembers what matters.",
-              subtitle: "Nine categories of what makes you, you.",
-              body: "The AI tracks what you confide, your growth trajectory, your triggers, your values, who you're becoming, and what's happening in your life right now. After each session, it writes its own notes — not transcripts, just what mattered.\n\nResearch on perceived responsiveness shows that feeling understood activates the brain's reward system and predicts relationship quality better than actually being understood. The AI is designed to make you feel known — through precision, not performance.\n\nIt never says 'I understand.' It proves it by remembering.",
+              title: "Two pathways. Yours is different.",
+              subtitle: "Peer-reviewed neuroscience. Applied.",
+              body: "Your brain regulates through two distinct pathways. Thought-first — your mind fires first. Replaying, analyzing, building a response. Body-first — tension hits first. Jaw, chest, shoulders.\n\nResearch confirms: matching the right tool to your pathway is what makes regulation work. Forcing the wrong one makes it worse. During setup, five quick scenarios determine your default. The system adapts from there.",
               note: null
             },
             {
               icon: "◎",
               label: "Three tools",
               title: "Talk. Breathe. Scan.",
-              subtitle: "Each one grounded in clinical research.",
-              body: "Reframe — cognitive reappraisal, the most-studied strategy in emotional regulation research. Talk through what's happening. The AI identifies distortions, separates signal from noise, and helps you think clearly.\n\nBreathe — paced breathing patterns derived from autonomic nervous system research. Extended exhale activates the parasympathetic system. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points based on somatic experiencing research. Locate tension, release it, clear the signal.\n\nThe Bio-Filter checks your physical state first — because research shows we misidentify biological signals as emotional ones.",
+              subtitle: "Each one backed by clinical research.",
+              body: "Reframe — AI-powered cognitive reappraisal. Talk through what's happening. The AI identifies distortions, separates signal from noise, and learns your patterns over time.\n\nBreathe — paced breathing derived from autonomic nervous system research. Extended exhale activates your parasympathetic system. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points. Locate tension, release it, clear the signal. Auto-advances.\n\nThe Bio-Filter checks your physical state first — because biology gets misread as emotion more often than you'd think.",
               note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
               icon: "◈",
-              label: "You change",
-              title: "Neuroplasticity is real.",
-              subtitle: "The system evolves because you do.",
-              body: "Stanford research confirms: your brain rewires throughout your entire life. The patterns you have today are not permanent. Stillform tracks how fast you catch your signals, notices when old triggers stop firing, and updates its model of you.\n\nAfter 7 sessions, the system checks in. It measures your growth — not your mood. We don't track happiness. We track Signal Awareness Latency — how fast you notice you're off-composure. That number dropping is neuroplasticity happening in real time.\n\nYour data is encrypted, stored on your device, and deletable anytime from Settings. Replay this tutorial anytime.",
+              label: "It learns you",
+              title: "The AI gets sharper.",
+              subtitle: "Nine categories of context. Every session.",
+              body: "The AI tracks what matters — your triggers, your values, your growth, what's happening in your life right now. After each session it writes its own notes. Not transcripts — just what mattered.\n\nIt never says 'I understand how you feel.' It proves it heard you by remembering. After 7 sessions, the system checks in and adjusts based on how you actually use it.",
+              note: null
+            },
+            {
+              icon: "◎",
+              label: "Your growth",
+              title: "People change. We measure it.",
+              subtitle: "Neuroplasticity tracked, not assumed.",
+              body: "We don't track mood. We track Signal Awareness Latency — how fast you notice you're off-composure. That number dropping is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null
             }
           ];
