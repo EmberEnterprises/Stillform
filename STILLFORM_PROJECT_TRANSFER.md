@@ -10,7 +10,7 @@ ARA Embers LLC · April 2026 · For Stillform Project in Claude
 
 # 1 — What Stillform Is
 
-> *One sentence: "Stillform is a composure system for people who feel everything at full intensity — and need to stay functional inside it."*
+> *One sentence: "Stillform is a composure system — how you carry yourself, every day, in every moment that matters."*
 
 **Stillform is NOT positioned as a meditation app, therapy, or crisis hotline — even though it contains elements of all of these. It's a composure system. The framing matters: the target audience would never download a meditation app or book a therapy session, but they'll use a system that makes them sharper.**
 
@@ -21,7 +21,7 @@ Stillform IS a daily composure practice AND a fast intervention system. Morning 
 ## Positioning
 
 - You are selling Composure as a Competitive Advantage
-- Target: high-intensity, neurodivergent, high-performance people who hate meditation
+- Target: anyone who wants more control over how they show up — professionals, parents, creatives, athletes, neurodivergent individuals, anyone who cares about composure
 - They want a dashboard, not a hug. An operator, not a patient.
 - People don't want to be better. They want to be functional.
 
