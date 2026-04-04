@@ -2872,29 +2872,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             try {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return null;
-              // Recent 5: full detail
-              const recent = entries.slice(0, 5).map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
-              // Older entries: compress into pattern summary
-              const older = entries.slice(5);
-              let patternSummary = "";
-              if (older.length > 0) {
-                const emotionFreq = {};
-                const triggerFreq = {};
-                const outcomeFreq = {};
-                older.forEach(e => {
-                  (e.emotions || []).forEach(em => { emotionFreq[em] = (emotionFreq[em] || 0) + 1; });
-                  if (e.triggerType) triggerFreq[e.triggerType] = (triggerFreq[e.triggerType] || 0) + 1;
-                  if (e.outcome) outcomeFreq[e.outcome] = (outcomeFreq[e.outcome] || 0) + 1;
-                });
-                const topEmotions = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([k, v]) => `${k} (${v}x)`);
-                const topTriggers = Object.entries(triggerFreq).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k, v]) => `${k} (${v}x)`);
-                const topOutcomes = Object.entries(outcomeFreq).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([k, v]) => `${k} (${v}x)`);
-                patternSummary = `\n\nPATTERN SUMMARY (${older.length} older entries):`;
-                if (topEmotions.length) patternSummary += `\nMost logged: ${topEmotions.join(", ")}`;
-                if (topTriggers.length) patternSummary += `\nTop triggers: ${topTriggers.join(", ")}`;
-                if (topOutcomes.length) patternSummary += `\nOutcomes: ${topOutcomes.join(", ")}`;
-              }
-              return `RECENT ENTRIES:\n${recent}${patternSummary}`;
+              return entries.map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
             } catch { return null; }
           })(),
           checkinContext: (() => {
