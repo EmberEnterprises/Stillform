@@ -5055,7 +5055,7 @@ export default function Stillform() {
               label: "Three protocols",
               title: "Body. Then thought.",
               subtitle: "Any state. Under two minutes.",
-              body: "Breathe — paced breathing matched to your state. Stabilize the body first. Starts instantly.\n\nBody Scan — locate where intensity is held. Release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered cognitive reset. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
+              body: "Breathe — paced breathing matched to your state. Stabilize the body first. Starts instantly.\n\nBody Scan — find where you're holding tension. Release it with timed acupressure. Six points. Auto-advances.\n\nReframe — AI-powered cognitive reset. Three modes: Regulate, Get Sharp, Lock In. Learns you over time.",
               note: "Quick Breathe is always free. Full access requires a subscription."
             },
             {
@@ -5248,7 +5248,7 @@ export default function Stillform() {
               label: "Initialization · 2 of 3",
               title: "Blind Spot Profile",
               subtitle: "What distortions does your brain run?",
-              body: "Catastrophizing. All-or-nothing. Mind reading. Everyone has cognitive patterns that amplify intensity before they're even aware of it.\n\nIdentifying yours means the AI can flag them in real time — before they take over.",
+              body: "Catastrophizing. All-or-nothing. Mind reading. Everyone has cognitive patterns that shape how they read situations.\n\nIdentifying yours means the AI can flag them in real time — so you see them before they drive the decision.",
               cta: "Profile my blind spots →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
@@ -5257,7 +5257,7 @@ export default function Stillform() {
               label: "Initialization · 3 of 3",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
-              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. Overwhelm and anxiety.\n\nBox (4-4-4-4) — equal phases. High-focus, performance states.\n\n4-7-8 — maximum reset. Physical tension and exhaustion.\n\nQuick Reset — 60 seconds. Works anywhere.",
+              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. When the signal is too loud.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
               cta: null,
               patterns: ["calm", "box", "478", "quick"]
             }
@@ -5268,9 +5268,9 @@ export default function Stillform() {
           const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
 
           const patternLabels = {
-            calm: { name: "Calm", detail: "4-4-8-2 · Overwhelm & anxiety" },
-            box: { name: "Box", detail: "4-4-4-4 · Focus & performance" },
-            "478": { name: "4-7-8", detail: "Deep physical reset" },
+            calm: { name: "Calm", detail: "4-4-8-2 · When the signal is too loud" },
+            box: { name: "Box", detail: "4-4-4-4 · When you need to stay even" },
+            "478": { name: "4-7-8", detail: "When the body won't let go" },
             quick: { name: "Quick Reset", detail: "2-2-4-1 · 60 seconds" }
           };
 
@@ -5461,7 +5461,7 @@ export default function Stillform() {
                   Builds with every session
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                  Stillform builds a signal profile from your sessions, signal log, and check-ins. It learns what states you move through, what works for each one, and gets more precise over time.
+                  Stillform builds a profile from your sessions, logs, and check-ins. It learns what states you move through, what works for each one, and gets more precise over time.
                 </div>
               </div>
 
@@ -5675,7 +5675,7 @@ export default function Stillform() {
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Signal Log</div>
                 <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>After-Action Record</h1>
                 <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
-                  Log a high-intensity event in 15 seconds. Signal, trigger, outcome. The AI uses this to identify your blind spots over time.
+                  Log a signal event in 15 seconds. What happened, what you felt, how it landed. The AI uses this to sharpen over time.
                 </p>
                 <button onClick={() => setJournalMode("new")} style={{
                   width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
@@ -6001,7 +6001,7 @@ export default function Stillform() {
             <p>By using Stillform, you acknowledge that you use the app at your own risk. ARA Embers LLC is not liable for any outcomes resulting from the use of this app, including but not limited to decisions made based on AI-generated content, acupressure techniques, or pattern insights.</p>
 
             <h2>Contact</h2>
-            <p>For questions: emberenterprises@proton.me</p>
+            <p>For questions: ARAembersllc@proton.me</p>
             <p>ARA Embers LLC · New Jersey, United States</p>
           </section>
         )}
@@ -6536,25 +6536,20 @@ export default function Stillform() {
                 ))}
               </div>
 
-              {/* Notifications — grayed, needs native */}
+              {/* Notifications — micro-nudges, needs native */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Notifications</div>
-                {[
-                  { label: "Daily check-in reminder", desc: "Configurable time" },
-                  { label: "Micro-nudges", desc: "Brief composure prompts throughout the day" }
-                ].map((item, i) => (
-                  <div key={i} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", marginBottom: 4, opacity: 0.3,
-                    display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 14, color: "var(--text-muted)" }}>{item.label}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
-                    </div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
+                <div style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "12px 16px", marginBottom: 4, opacity: 0.3,
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Micro-nudges</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Brief composure prompts throughout the day</div>
                   </div>
-                ))}
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
+                </div>
               </div>
 
               {/* Wearable — grayed, needs native */}
@@ -6628,7 +6623,7 @@ export default function Stillform() {
                 }}>
                   Privacy & Disclaimers
                 </button>
-                <a href="mailto:emberenterprises@proton.me" style={{
+                <a href="mailto:ARAembersllc@proton.me" style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
