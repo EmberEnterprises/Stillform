@@ -5860,10 +5860,14 @@ export default function Stillform() {
                 {uatRoadmapOpen && (
                   <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Coming soon</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing companion</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Apple Watch — haptic breathing companion</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Health integration — HRV, sleep, heart rate</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Apple Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Health integration — HRV, sleep, heart rate, cycle data</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Auto-populated morning check-in from biometrics</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Calendar-aware morning practice</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Screen time awareness — context without self-report</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Weather + barometric pressure context</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Signal Awareness speed tracking</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Cloud sync across devices</div>

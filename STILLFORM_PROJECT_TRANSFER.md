@@ -87,7 +87,7 @@ Top-down emotions are more successfully regulated by top-down strategies. Bottom
 
 **3. Reframe (AI)**
 
-- Three modes: Regulate (calm), Get Sharp (clarity), Lock In (hype/performance)
+- Three modes: Talk it through (process + reframe), Break the loop (cut thought spirals), Get ready (pre-moment anchor)
 - GPT-4o Mini via Netlify function — rate limited 10 req/IP/min
 - Conversation persistence via AES-GCM encrypted localStorage (device key in IndexedDB)
 - History capped at 10 messages
@@ -135,15 +135,18 @@ Stillform becomes a daily morning practice, not just an emergency tool:
 
 ## AI Context Stack (what goes into every Reframe call)
 
+- Regulation Type: thought-first, body-first, or balanced (from assessment)
 - Signal Profile: body areas where intensity activates first
 - Bias Profile: identified cognitive blind spots (10 distortions)
 - Feel State: excited / focused / anxious / angry / flat / mixed
-- Bio-Filter: physical state selected at session start
-- Check-in context: sleep, energy, mood from daily check-in
-- Session count: determines AI coaching intensity
+- Bio-Filter: physical state from morning check-in (depleted, under-rested, pain, activated, medicated)
+- Morning energy: low / steady / high / ready / wired
+- Session count: determines AI coaching intensity (<3 no patterns, 3-12 gentle, 12+ direct)
 - Prior tool context: what they did before Reframe this session
 - Prior mode context: if they switched modes mid-session
-- Journal context: recent entries (used from session 5+)
+- Journal context: recent Signal Log entries (used from session 3+)
+- AI session notes: last 5 post-session summaries written by AI (from session 3+)
+- Check-in context: daily check-in data
 
 ## AI Memory & Summarization Architecture (NEW)
 
@@ -603,43 +606,70 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 
 - ✅ Guided assessment (5 scenarios, full composure spectrum)
 - ✅ Adaptive home screen (primary button matches regulation type)
-- ✅ Updated onboarding tutorial (science-backed two pathways)
+- ✅ Home screen rebalances immediately when processing type changes in Settings
+- ✅ Morning check-in card on home screen (energy + hardware, daily)
+- ✅ Updated onboarding tutorial (6 slides, science-backed, research links, swipe navigation)
 - ✅ Processing Type in Settings (changeable anytime)
 - ✅ Re-run Calibration in Settings
 - ✅ AI response principles in all 3 system prompts
 - ✅ 80/20 cadence rule in AI prompt
 - ✅ 9-category awareness in AI prompt
 - ✅ Regulation type sent to AI and used in responses
-- ✅ Post-session AI summary (background call, stores notes)
+- ✅ Post-session AI summary (background call, stores last 20 notes)
 - ✅ Session notes fed into future API calls (last 5 notes)
 - ✅ First pattern note at session 3 (moved from 5)
 - ✅ 7-session review milestone with type mismatch detection
 - ✅ Absence detection (14+ days, operator tone)
-- ✅ First-session quick win on all completion screens
+- ✅ First-session quick win on all completion screens (breathing + body scan)
 - ✅ Service worker cache bust (network-first strategy)
-- ✅ Bigger textarea for Reframe input
+- ✅ Bigger textarea for Reframe input (3 rows, Shift+Enter for newlines)
+- ✅ Reframe loading state auto-resets on mount + 30s safety timeout
+- ✅ Continue button when returning to Reframe conversation
+- ✅ Reframe modes renamed: Talk it through / Break the loop / Get ready
+- ✅ Mode descriptors show what AI does differently
+- ✅ Neutral signal language throughout (no negative-only framing)
+- ✅ Completed calibration tools hidden from home screen
+- ✅ UAT early access dropdown with full roadmap (14 planned features)
 - ✅ Positioning copy updated throughout
 - ✅ Widget working (Android, SharedPreferences → Capacitor plugin)
 - ✅ All Jonny audit fixes intact
+- ✅ "Sudden urgency" replaces "clarity spike" in sensations
+- ✅ "Ready" added to morning check-in energy options
 
 ## Needs Mac (Native Rebuild)
 
-- ❌ Native APK with all changes (pull + build + install)
+- ❌ Native APK with all changes (pull + build + install + clear SW cache)
 - ❌ Test widget with new code on device
 - ❌ Watch haptics testing
 - ❌ Share extension testing
 
 ## Not Yet Built
 
-- ❌ Morning practice view (calendar integration)
+- ❌ Calendar-aware morning practice (reads device calendar)
+- ❌ Health integration (HRV, sleep, heart rate, cycle data auto-populating)
+- ❌ Screen time awareness context
+- ❌ Location-aware AI responses
+- ❌ Weather/barometric pressure context
 - ❌ Anticipatory regulation (post-event cool-down checks)
 - ❌ State-to-Statement translation
-- ❌ Signal Clearance Speed visualization
+- ❌ Signal Awareness speed visualization
 - ❌ Composure Gate (system-level app interceptor)
 - ❌ Cloud sync infrastructure
+- ❌ Premium sound packs
+- ❌ PDF/CSV export
+- ❌ Shareable composure card
 - ❌ Privacy policy update (stillformapp.com/privacy.html)
 - ❌ Lemon Squeezy paywall (waiting on Bobby)
 - ❌ DUNS number application
+
+## Known Issues / Gaps for Next AI
+
+- **Reframe API "Couldn't connect" error** — OpenAI billing confirmed OK. Likely service worker caching old JS. Try incognito. If persists, check Netlify function logs for runtime errors.
+- **Privacy policy outdated** — needs update for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
+- **No real user sessions yet** — Ava's feedback was from home screen only, Bobby hasn't used it, Jonny did technical audit not user session. Need 3+ real user sessions with testimonials before Reddit launch.
+- **Pricing not finalized in paywall** — doc says $14.99/mo or $9.99/mo annual but Lemon Squeezy not live yet. Confirm with Bobby before launch.
+- **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
+- **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. `adb shell pm clear com.araembers.stillform` on native, incognito on web.
 
 ---
 
