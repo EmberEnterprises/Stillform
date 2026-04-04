@@ -4925,43 +4925,40 @@ export default function Stillform() {
       }
     } catch {}
 
-    // Native: check widget launch flag
+    // Native: check widget launch via injected global variable
     if (!handled && isNative()) {
-      const checkWidgetFlag = async () => {
-        try {
-          const { Capacitor } = await import('@capacitor/core');
-          const WidgetBridge = Capacitor.Plugins.WidgetBridge;
-          if (WidgetBridge) {
-            const result = await WidgetBridge.checkLaunchAction();
-            if (result?.action === "breathe" && hasSeenOnboarding) {
-              setActiveTool({ id: "breathe", name: "Breathe" });
-              setScreen("tool");
-              setPathway("calm");
+      const checkWidgetFlag = () => {
+        if (window.__stillform_widget_action === "breathe" && hasSeenOnboarding) {
+          window.__stillform_widget_action = null;
+          setActiveTool({ id: "breathe", name: "Breathe" });
+          setScreen("tool");
+          setPathway("calm");
+          setScreenReady(true);
+          return true;
+        }
+        return false;
+      };
+
+      // Check immediately, then poll a few times during splash
+      if (!checkWidgetFlag()) {
+        let checks = 0;
+        const interval = setInterval(() => {
+          checks++;
+          if (checkWidgetFlag() || checks >= 10) {
+            clearInterval(interval);
+            if (!screenReady) {
+              setScreen(hasSeenOnboarding ? "home" : "onboarding");
               setScreenReady(true);
-              return;
             }
           }
-        } catch {}
-        // No widget action — go to default screen
-        setScreen(hasSeenOnboarding ? "home" : "onboarding");
-        setScreenReady(true);
-      };
-      checkWidgetFlag();
+        }, 200);
+      }
 
-      // Listen for app resume and share extension
+      // Listen for app resume
       import('@capacitor/app').then(({ App }) => {
         App.addListener("appStateChange", (state) => {
           if (state.isActive) {
-            import('@capacitor/core').then(({ Capacitor }) => {
-              const WB = Capacitor.Plugins.WidgetBridge;
-              if (WB) WB.checkLaunchAction().then(r => {
-                if (r?.action === "breathe" && hasSeenOnboarding) {
-                  setActiveTool({ id: "breathe", name: "Breathe" });
-                  setScreen("tool");
-                  setPathway("calm");
-                }
-              }).catch(() => {});
-            }).catch(() => {});
+            setTimeout(() => checkWidgetFlag(), 300);
           }
         });
         App.addListener("appUrlOpen", (data) => {
