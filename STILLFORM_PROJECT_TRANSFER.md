@@ -667,7 +667,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 - **Reframe API "Couldn't connect" error** — OpenAI billing confirmed OK. Likely service worker caching old JS. Try incognito. If persists, check Netlify function logs for runtime errors.
 - **Privacy policy outdated** — needs update for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
 - **No real user sessions yet** — Ava's feedback was from home screen only, Bobby hasn't used it, Jonny did technical audit not user session. Need 3+ real user sessions with testimonials before Reddit launch.
-- **Pricing not finalized in paywall** — doc says $14.99/mo or $9.99/mo annual but Lemon Squeezy not live yet. Confirm with Bobby before launch.
+- **Lemon Squeezy paywall not live** — Bobby's ID verification pending. Pricing is locked: $14.99/mo or $9.99/mo annual. Do not launch Reddit without paywall.
 - **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
 - **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. `adb shell pm clear com.araembers.stillform` on native, incognito on web.
 
