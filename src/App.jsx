@@ -1,4 +1,9 @@
 import { useState, useEffect, useRef, Component } from "react";
+import { registerPlugin } from "@capacitor/core";
+
+// Register native WidgetBridge plugin at module level (Capacitor 8 requirement)
+let WidgetBridge;
+try { WidgetBridge = registerPlugin("WidgetBridge"); } catch (e) { WidgetBridge = null; }
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -4913,19 +4918,20 @@ export default function Stillform() {
         return;
       }
 
-      // Try to read widget action from native plugin (SharedPreferences)
-      try {
-        const { registerPlugin } = await import('@capacitor/core');
-        const WidgetBridge = registerPlugin('WidgetBridge');
-        const result = await WidgetBridge.getWidgetAction();
-        if (result?.action === "breathe") {
-          setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
-          setPathway("calm");
-          setScreen("tool");
-          setScreenReady(true);
-          return;
+      if (WidgetBridge) {
+        try {
+          const result = await WidgetBridge.getWidgetAction();
+          if (result?.action === "breathe") {
+            setActiveTool({ id: "breathe", name: "Breathe", quickStart: true });
+            setPathway("calm");
+            setScreen("tool");
+            setScreenReady(true);
+            return;
+          }
+        } catch (e) {
+          console.error("WidgetBridge error:", e);
         }
-      } catch (e) {}
+      }
 
       setScreen("home");
       setScreenReady(true);
