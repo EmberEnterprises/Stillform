@@ -1826,8 +1826,8 @@ function BreatheGroundTool({ onComplete, pathway }) {
       </h2>
       {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 13, color: s > 0 ? "var(--amber)" : "var(--text-muted)", marginBottom: 16, fontWeight: s > 0 ? 500 : 400 }}>Last session: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
-        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Scattered</span>
-        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Steady</span>
+        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Reactive</span>
+        <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Composed</span>
       </div>
       <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
         {[1, 2, 3, 4, 5].map(n => (
@@ -3032,8 +3032,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {[
             { id: "excited", label: "Excited" },
+            { id: "focused", label: "Focused" },
             { id: "anxious", label: "Anxious" },
             { id: "angry", label: "Angry" },
+            { id: "flat", label: "Flat" },
             { id: "mixed", label: "Mixed" }
           ].map(f => (
             <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
@@ -5044,7 +5046,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "Stabilize. Then think clearly.",
-              body: "You don't have to be in crisis to be overwhelmed. A hard conversation. A decision you can't think through. A feeling that showed up and won't leave.\n\nStillform helps you get back to yourself — fast.\n\nNot meditation. Not therapy. A precision composure system.",
+              body: "A big presentation. A conversation you can't stop replaying. Excitement that's buzzing too loud to focus. A decision that won't resolve.\n\nStillform helps you get composure back — fast. Any state. Under two minutes.\n\nNot meditation. Not therapy. A precision composure system.",
               note: null
             },
             {
@@ -6068,10 +6070,10 @@ export default function Stillform() {
                 Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
               {[
-                { id: "calm", name: "Calm (4-4-8-2)", use: "Overwhelm, anxiety, too many inputs", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
-                { id: "box", name: "Box (4-4-4-4)", use: "High-stakes moments, need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
-                { id: "478", name: "4-7-8", use: "Physically wired, clenched, can't stop", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
-                { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds, in public, between tasks", why: "Shortest pattern that produces a measurable state shift." }
+                { id: "calm", name: "Calm (4-4-8-2)", use: "When the signal is too loud", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+                { id: "box", name: "Box (4-4-4-4)", use: "When you need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
+                { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
+                { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds between tasks", why: "Shortest pattern that produces a measurable state shift." }
               ].map(p => {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
                 return (

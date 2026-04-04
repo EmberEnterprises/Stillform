@@ -280,8 +280,10 @@ exports.handler = async function(event) {
     if (feelState) {
       const feelMap = {
         excited: "USER'S SELF-REPORTED STATE: Excited. High positive arousal. Do NOT try to calm them down or reduce intensity. Help them direct and channel the energy toward a functional outcome. Ask where they want it to go.",
+        focused: "USER'S SELF-REPORTED STATE: Focused. They're already locked in. Don't disrupt the state. Keep responses tight and operational. If they came here focused, they want to sharpen — not regulate.",
         anxious: "USER'S SELF-REPORTED STATE: Anxious. Threat response active. Acknowledge first. Regulate tone and interpretation of ambiguous signals. Separate what is real from what the brain is adding.",
         angry: "USER'S SELF-REPORTED STATE: Angry. Do not minimize or redirect too fast. Acknowledge the anger fully first. Then help them separate the feeling from any action they might be considering. Slow the decision-making.",
+        flat: "USER'S SELF-REPORTED STATE: Flat. Low energy, low motivation, disconnected. Don't push. Don't cheerload. Help them find one small thing that matters right now. Activation, not inspiration.",
         mixed: "USER'S SELF-REPORTED STATE: Mixed — multiple emotional states active simultaneously. Don't try to resolve it. Acknowledge the complexity. Help them identify which feeling is loudest right now."
       };
       if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
