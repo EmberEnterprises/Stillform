@@ -298,7 +298,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -313,6 +313,14 @@ exports.handler = async function(event) {
 
     // Inject user context if available
     const contextParts = [];
+    if (regulationType) {
+      const typeMap = {
+        "thought-first": "USER'S REGULATION TYPE: Thought-first. This person processes through cognition first — analyzing, replaying, building responses. Their body signals come AFTER cognitive processing. Lead with cognitive engagement. Don't push breathing or body work until they've had space to think it through. If they're here talking, that IS their regulation — let it work.",
+        "body-first": "USER'S REGULATION TYPE: Body-first. This person feels it physically first — tension, heat, restlessness. Their thoughts clarify AFTER the body settles. If they describe physical sensations, validate and suggest grounding. Cognitive reframing works better after they've regulated physically.",
+        "balanced": "USER'S REGULATION TYPE: Balanced. This person uses both pathways. Follow their lead — if they start with thoughts, stay cognitive. If they describe body sensations, go somatic. Don't default to either."
+      };
+      if (typeMap[regulationType]) contextParts.push(typeMap[regulationType]);
+    }
     if (feelState) {
       const feelMap = {
         excited: "USER'S SELF-REPORTED STATE: Excited. High positive arousal. Do NOT try to calm them down or reduce intensity. Help them direct and channel the energy toward a functional outcome. Ask where they want it to go.",

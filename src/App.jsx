@@ -2974,7 +2974,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               }
               return null;
             } catch { return null; }
-          })()
+          })(),
+          regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })()
         })
       });
       clearTimeout(timeout);
@@ -5245,57 +5246,12 @@ export default function Stillform() {
                 )}
                 {isLast ? (
                   <>
-                    <button onClick={() => {
-                      const el = document.getElementById("onboard-menu");
-                      if (el) el.style.display = el.style.display === "none" ? "block" : "none";
-                    }} style={{
+                    <button onClick={() => completeOnboarding()} style={{
                       width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
                       padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                      fontFamily: "'DM Sans', sans-serif", textAlign: "center"
                     }}>
-                      <span>Initiate Session</span>
-                      <span style={{ fontSize: 12 }}>▾</span>
-                    </button>
-                    <div id="onboard-menu" style={{ display: "none", marginTop: 2, borderRadius: "var(--r-lg)", overflow: "hidden", border: "1px solid var(--amber-dim)", background: "var(--surface2)", boxShadow: "0 8px 32px rgba(0,0,0,0.5)", width: "100%" }}>
-                      <button onClick={() => { completeOnboarding(); startPathway("calm"); }} style={{
-                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                        display: "flex", alignItems: "center", gap: 12
-                      }}>
-                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◎</span>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Breathe</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Smart breathing + grounding</div>
-                        </div>
-                      </button>
-                      <button onClick={() => { completeOnboarding(); startTool(TOOLS.find(t => t.id === "scan")); }} style={{
-                        width: "100%", background: "transparent", border: "none", borderBottom: "1px solid rgba(255,255,255,0.06)",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                        display: "flex", alignItems: "center", gap: 12
-                      }}>
-                        <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Read the body · acupressure release</div>
-                        </div>
-                      </button>
-                      <button onClick={() => { completeOnboarding(); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
-                        width: "100%", background: "transparent", border: "none",
-                        padding: "12px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                        display: "flex", alignItems: "center", gap: 12
-                      }}>
-                        <span style={{ color: "var(--amber)", fontSize: 14 }}>✦</span>
-                        <div>
-                          <div style={{ fontSize: 13, fontWeight: 500 }}>Reframe</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Talk through it or log the signal</div>
-                        </div>
-                      </button>
-                    </div>
-                    <button onClick={() => { completeOnboarding(); setScreen("home"); }} style={{
-                      background: "none", border: "none", color: "var(--text-muted)", fontSize: 13,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 16
-                    }}>
-                      Just explore the app →
+                      Begin Calibration →
                     </button>
                     <button onClick={() => setOnboardStep(s => s - 1)} style={{
                       background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
@@ -5320,8 +5276,8 @@ export default function Stillform() {
                   <>
                   {isFirst ? (
                     <>
-                      <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => { completeOnboarding(); startPathway("calm"); }}>
-                        Initiate Session
+                      <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
+                        Begin Calibration
                       </button>
                       <button className="btn btn-ghost" style={{ marginTop: 8, fontSize: 13 }} onClick={() => setOnboardStep(s => s + 1)}>
                         How does it work? →
