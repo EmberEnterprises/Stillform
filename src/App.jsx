@@ -3097,7 +3097,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
       </div>
 
       <div className="disclaimer">
-        Not therapy or clinical treatment. Your data is encrypted and synced securely. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+        Your data is encrypted and synced securely. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
       </div>
 
       {/* ── JOURNAL TAB ── */}
@@ -3902,7 +3902,7 @@ function SignalMapTool({ onComplete }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where do you activate first?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that respond first — whether stress, excitement, or intensity. Select all that apply.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that respond first — whether stress, excitement, or anything in between. Select all that apply.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
             const selected = (signals.firstAreas || []).includes(area.id);
@@ -5058,7 +5058,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "Stabilize. Then think clearly.",
-              body: "A big presentation. A conversation you can't stop replaying. Excitement that's buzzing too loud to focus. A decision that won't resolve.\n\nStillform helps you get composure back — fast. Any state. Under two minutes.\n\nNot meditation. Not therapy. A precision composure system.",
+              body: "A big presentation. A conversation you can't stop replaying. Excitement that's buzzing too loud to focus. A decision that won't resolve.\n\nStillform helps you master the pause between feeling and action. Any state. Under two minutes.",
               note: null
             },
             {
@@ -5074,14 +5074,14 @@ export default function Stillform() {
               label: "Over time",
               title: "It sharpens.",
               subtitle: "Learns your signals. Tightens your response.",
-              body: "After a few sessions your Signal Profile builds — where intensity activates first, what your blind spots are, how you move through states.\n\nLog signal events in the Signal Log. The AI cross-references sessions, patterns, and your profile. It stops being generic and starts being precise about you."
+              body: "After a few sessions your Signal Profile builds — where your body responds first, what your blind spots are, how you move through states.\n\nLog signal events in the Signal Log. The AI cross-references sessions, patterns, and your profile. It stops being generic and starts being precise about you."
             },
             {
               icon: "◎",
               label: "Your data",
               title: "Private by design.",
               subtitle: "Your data is yours. Full stop.",
-              body: "Sessions, Signal Log, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nThe AI is a composure tool — not a therapist, not a crisis line. See the FAQ in Settings for what it can and can't do.\n\nReplay this anytime from Settings."
+              body: "Sessions, Signal Log, and check-ins stored in your encrypted account. Delete everything anytime from Settings.\n\nSee the FAQ in Settings for how the AI works and what to expect.\n\nReplay this anytime from Settings."
             }
           ];
           const step = steps[onboardStep];
@@ -5249,7 +5249,7 @@ export default function Stillform() {
               step: 1,
               label: "Initialization · 1 of 3",
               title: "Signal Mapping",
-              subtitle: "Where does intensity activate first?",
+              subtitle: "Where does your body respond first?",
               body: "The system needs to know your physical response pattern before it can personalize sessions. Jaw, shoulders, chest, gut, hands, legs — everyone's sequence is different.\n\nThis is a one-time calibration. The AI references it in every Reframe session from here on.",
               cta: "Run signal mapping →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
@@ -5663,7 +5663,7 @@ export default function Stillform() {
               </button>
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
-              Not therapy. Not crisis intervention. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+              Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </div>
             {renderTool()}
           </section>
@@ -6030,7 +6030,7 @@ export default function Stillform() {
               },
               {
                 q: "Who is this for?",
-                a: "Anyone who wants more control over how they react. Before a meeting, after a tough conversation, in the middle of a decision. Stillform helps you master the pause between feeling and reaction."
+                a: "Anyone who wants more control over the space between feeling and action. Before a meeting, after a tough conversation, in the middle of a decision. Stillform helps you master the pause."
               },
               {
                 q: "What does the AI actually do?",
@@ -6657,7 +6657,7 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Signal Mapping</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Map where intensity shows up in your body — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
+                Map where your body responds first — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
