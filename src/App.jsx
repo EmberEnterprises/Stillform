@@ -6021,7 +6021,10 @@ export default function Stillform() {
         {screen === "faq" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
             <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>FAQ</h1>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
+            <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 32, fontFamily: "'Cormorant Garamond', serif" }}>
+              Composure is being in control of how you show up — in any moment that matters.
+            </div>
 
             {[
               {
