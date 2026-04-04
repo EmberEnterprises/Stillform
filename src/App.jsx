@@ -6026,47 +6026,39 @@ export default function Stillform() {
             {[
               {
                 q: "What is Stillform?",
-                a: "A precision composure system. Breathing protocols, body scan, and AI-powered cognitive reframing — designed to help you stabilize in under two minutes. Not meditation. Not therapy."
+                a: "A composure system. Breathing, body scan, and AI-powered reframing — built to help you pause, read the situation clearly, and respond on your terms. Under two minutes."
               },
               {
-                q: "Is the AI a therapist?",
-                a: "No. The AI uses evidence-based CBT techniques to help you identify distortions and reframe in the moment. It is not a licensed therapist, cannot diagnose conditions, and should not replace professional mental health care."
+                q: "Who is this for?",
+                a: "Anyone who wants more control over how they react. Before a meeting, after a tough conversation, in the middle of a decision. Stillform helps you master the pause between feeling and reaction."
               },
               {
-                q: "What can the AI do?",
-                a: "Name cognitive distortions. Help you separate signal from noise. Regulate tone interpretation on messages and emails. Slow you down before high-stakes decisions. It gets sharper over time by referencing your journal and session history."
-              },
-              {
-                q: "What can't the AI do?",
-                a: "It cannot diagnose you. It cannot give medical, legal, or financial advice. It cannot handle crisis situations — use the Crisis Resources page for that. It may occasionally misread context or give a response that doesn't land. It's a tool, not a person."
-              },
-              {
-                q: "Does the AI remember me?",
-                a: "Within a session, yes — it holds your conversation. Across sessions, it reads your journal entries, signal profile, bias profile, and check-in data to personalize responses. The more you use it, the more precise it gets."
-              },
-              {
-                q: "Is my data private?",
-                a: "Your data is encrypted and stored securely. The AI receives your context for each session to generate a response, but nothing is retained on the AI side after the response is delivered. You can delete all your data anytime from Settings."
-              },
-              {
-                q: "Can I delete my data?",
-                a: "Yes. Settings → Delete All Data. This permanently removes everything — sessions, journal, conversations, signal profile, check-ins, saved reframes. It cannot be undone."
+                q: "What does the AI actually do?",
+                a: "It helps you see what's driving your reaction. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of reacting on autopilot. It sharpens over time based on your journal and session history."
               },
               {
                 q: "What are the three Reframe modes?",
-                a: "Regulate — when you need to calm down and think clearly. Get Sharp — when your mind is looping and you need to cut through it. Lock In — when you're about to walk into something that requires composure."
+                a: "Regulate — settle the noise and think clearly. Get Sharp — cut through a thought loop or indecision. Lock In — compose yourself before something that matters."
+              },
+              {
+                q: "Does the AI learn about me?",
+                a: "Yes. It reads your journal, signal profile, blind spots, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
+              },
+              {
+                q: "What's the AI's limitation?",
+                a: "It's a tool, not a person. It may occasionally miss context or give a response that doesn't land. It can't give medical, legal, or financial advice. If something it says doesn't fit — tell it. It adjusts."
               },
               {
                 q: "What is the Signal Log?",
-                a: "A structured after-action record. Log what happened, what you felt, and how it landed — in about 15 seconds. The AI uses these entries to recognize patterns and get more precise over time."
+                a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
-                q: "What is the Journal tab in Reframe?",
-                a: "A freeform space to write and process. No structure required. Vent, think out loud, dump what happened. The AI reads your journal entries in every future session."
+                q: "What's the Journal tab in Reframe?",
+                a: "A space to write freely. Process, think out loud, work through something. No structure required. The AI references your entries in every future session."
               },
               {
-                q: "Is this for people in crisis?",
-                a: "No. Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger, please use the Crisis Resources page for helplines in your region."
+                q: "Is my data private?",
+                a: "Your data is encrypted and stored securely. The AI receives your context to generate a response, then forgets it. You can delete everything anytime from Settings."
               },
               {
                 q: "How much does it cost?",
