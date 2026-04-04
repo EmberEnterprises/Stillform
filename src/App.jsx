@@ -2776,6 +2776,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
         mode: effectiveMode
       });
       localStorage.setItem("stillform_journal", JSON.stringify(entries));
+      try { window.plausible("Journal Entry", { props: { mode: effectiveMode } }); } catch {}
     } catch {}
     setJournalText("");
   };
@@ -2852,6 +2853,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
     if (!retryText) setInput("");
     setLoading(true);
     setError(null);
+    try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
 
     try {
       const controller = new AbortController();
@@ -4899,6 +4901,7 @@ export default function Stillform() {
 
   const completeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    try { window.plausible("Onboarding Complete"); } catch {}
     setScreen("home");
   };
 
@@ -4925,6 +4928,7 @@ export default function Stillform() {
     setJournalEntries(updated);
     try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
     setJournalMode("list");
+    try { window.plausible("Signal Log Entry"); } catch {}
     setJSignal([]); setJTrigger(""); setJTriggerType(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
   };
 
@@ -4936,14 +4940,21 @@ export default function Stillform() {
     setJournalMode("list");
   };
 
-  // Scroll to top on every screen change
-  useEffect(() => { window.scrollTo(0, 0); }, [screen]);
+  // Scroll to top on every screen change + analytics
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    if (screen !== "home" && screen !== "onboarding") {
+      try { window.plausible("Screen View", { props: { screen } }); } catch {}
+    }
+  }, [screen]);
   const startTool = (tool) => {
+    try { window.plausible("Tool Started", { props: { tool: tool?.id || "unknown" } }); } catch {}
     setActiveTool(tool);
     setScreen("tool");
   };
 
   const startPathway = async (p) => {
+    try { window.plausible("Session Initiated", { props: { pathway: p } }); } catch {}
     setPathway(p);
     if (p === "calm") {
       startTool(TOOLS.find(t => t.id === "breathe"));
