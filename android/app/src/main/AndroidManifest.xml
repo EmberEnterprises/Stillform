@@ -53,6 +53,15 @@
                 android:resource="@xml/widget_stillform_info" />
         </receiver>
 
+        <!-- Widget tap receiver -->
+        <receiver
+            android:name=".StillformWidgetReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.araembers.stillform.WIDGET_BREATHE" />
+            </intent-filter>
+        </receiver>
+
         <!-- Share target — receive text from other apps -->
         <activity
             android:name=".ShareReceiverActivity"
