@@ -389,8 +389,43 @@ Wear OS companion. Watch vibrates in sync with breathing pattern. No screen need
 **7. Apple Watch Haptic Breathing**
 WatchKit extension. Same concept as Samsung — haptic-only breathing companion. Blocked on DUNS number and Apple Developer Program.
 
-**8. Health Integration**
-HealthKit (iOS) / Health Connect (Android). Pull HRV, sleep quality, heart rate. Sleep data feeds directly into morning check-in — system already knows how you slept before you tell it. Bio-filter auto-populates from biometric data instead of self-report. Strengthens FSA eligibility case.
+**8. Health Integration + Contextual Data Sources**
+Goal: morning check-in becomes one tap because the system already knows. Pull from every available source on the device:
+
+*Health app (HealthKit / Health Connect):*
+- Sleep quality and duration — feeds morning check-in, system knows before you tell it
+- HRV (heart rate variability) — real-time stress indicator. Dropping HRV triggers proactive nudge
+- Resting heart rate — baseline comparison, detects elevated state
+- Blood oxygen — fatigue indicator
+- Exercise/activity minutes — sedentary all day vs just worked out = different baselines
+- Menstrual cycle data — auto-sets hormonal bio-filter without asking
+
+*Calendar:*
+- What's ahead today — enables anticipatory regulation
+- What just ended — enables cool-down checks
+- Gap between meetings — finds composure windows
+- High-stakes events flagged for pre-game mode
+
+*Screen time API:*
+- Knows if user has been on social media for 2 hours straight
+- Context for AI without user having to say it
+- Doom-scrolling detection as implicit state signal
+
+*Watch sensors (Wear OS / WatchKit):*
+- Ambient noise levels — sensory overload detection
+- Skin temperature changes — physiological state shifts
+- Real-time heart rate during session — measures actual shift, not self-reported shift
+
+*Location:*
+- Work vs home vs gym vs commute — AI adjusts response tone and recommendations
+- Travel detection — jet lag and disrupted routine awareness
+
+*Weather / barometric pressure:*
+- Affects mood and pain sensitivity
+- Auto-context for bio-filter without self-report
+- Grey day + low HRV + 5hr sleep = system already understands the starting point
+
+*The vision:* User opens Stillform in the morning. System already knows they slept 5 hours, HRV is low, performance review at 2pm, grey day, haven't exercised in 3 days. Morning check-in becomes one confirming tap instead of a questionnaire. Every data source strengthens the FSA case — all biometric, all research-backed, all health-related.
 
 **9. Cloud Sync**
 Encrypted cloud backup and multi-device sync. Pre-update auto-backup before any app update touches user data. Version check on app load. Non-negotiable for production.
