@@ -1148,10 +1148,92 @@ const TOOLS = [
 
 // Quick post-session journal note
 // Haptic feedback utility — sharp click for phase changes, heavy thud for completion
-const haptic = {
-  tick:     () => { try { navigator.vibrate?.([8]); } catch {} },
-  complete: () => { try { navigator.vibrate?.([30, 20, 60]); } catch {} },
+// ─── NATIVE INTEGRATIONS ─────────────────────────────────────────────────────
+// Capacitor plugins — gracefully fall back to web APIs if not in native context
+const isNative = () => {
+  try { return !!(window?.Capacitor?.isNativePlatform?.()); } catch { return false; }
 };
+
+const haptic = {
+  tick: async () => {
+    try {
+      if (isNative()) {
+        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+        await Haptics.impact({ style: ImpactStyle.Light });
+      } else {
+        navigator.vibrate?.([8]);
+      }
+    } catch { try { navigator.vibrate?.([8]); } catch {} }
+  },
+  complete: async () => {
+    try {
+      if (isNative()) {
+        const { Haptics, NotificationType } = await import('@capacitor/haptics');
+        await Haptics.notification({ type: NotificationType.Success });
+      } else {
+        navigator.vibrate?.([30, 20, 60]);
+      }
+    } catch { try { navigator.vibrate?.([30, 20, 60]); } catch {} }
+  },
+  heavy: async () => {
+    try {
+      if (isNative()) {
+        const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+        await Haptics.impact({ style: ImpactStyle.Heavy });
+      } else {
+        navigator.vibrate?.([60]);
+      }
+    } catch {}
+  }
+};
+
+// Push notification setup — runs once on app load in native context
+const setupPushNotifications = async () => {
+  if (!isNative()) return;
+  try {
+    const { PushNotifications } = await import('@capacitor/push-notifications');
+    const permission = await PushNotifications.requestPermissions();
+    if (permission.receive === 'granted') {
+      await PushNotifications.register();
+      PushNotifications.addListener('registration', token => {
+        try { localStorage.setItem('stillform_push_token', token.value); } catch {}
+      });
+      PushNotifications.addListener('pushNotificationReceived', notification => {
+        console.log('Push received:', notification);
+      });
+      PushNotifications.addListener('pushNotificationActionPerformed', action => {
+        console.log('Push action:', action);
+      });
+    }
+  } catch {}
+};
+
+// Local notification scheduler — for user-configured reminders
+const scheduleReminder = async (title, body, hour, minute) => {
+  try {
+    if (isNative()) {
+      const { LocalNotifications } = await import('@capacitor/local-notifications');
+      const perm = await LocalNotifications.requestPermissions();
+      if (perm.display === 'granted') {
+        const now = new Date();
+        const scheduled = new Date();
+        scheduled.setHours(hour, minute, 0, 0);
+        if (scheduled <= now) scheduled.setDate(scheduled.getDate() + 1);
+        await LocalNotifications.schedule({
+          notifications: [{
+            id: Date.now(),
+            title,
+            body,
+            schedule: { at: scheduled, repeats: true, every: 'day' },
+            sound: undefined,
+            smallIcon: 'ic_stat_icon_config_sample',
+          }]
+        });
+      }
+    }
+  } catch {}
+};
+
 
 function SessionNote() {
   const [note, setNote] = useState("");
@@ -4719,7 +4801,11 @@ function MyProgress({ onBack, onJournal }) {
 
 export default function Stillform() {
   const [splashDone, setSplashDone] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setSplashDone(true), 2500); return () => clearTimeout(t); }, []);
+  useEffect(() => {
+    const t = setTimeout(() => setSplashDone(true), 2500);
+    setupPushNotifications(); // init push notifications in native context
+    return () => clearTimeout(t);
+  }, []);
 
   // Production: show onboarding only once, unless user replays from Settings.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
@@ -5946,6 +6032,66 @@ export default function Stillform() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Daily Reminder */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily Reminder</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                A daily nudge to check in. Delivered as a push notification on iOS and Android.
+              </div>
+              {(() => {
+                const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
+                const reminderTime = (() => { try { return localStorage.getItem("stillform_reminder_time") || "08:00"; } catch { return "08:00"; } })();
+                const [rHour, rMin] = reminderTime.split(":").map(Number);
+                return (
+                  <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
+                    <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div>
+                        <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                          {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
+                        </div>
+                      </div>
+                      <button onClick={() => {
+                        try {
+                          const current = localStorage.getItem("stillform_reminder") === "on";
+                          localStorage.setItem("stillform_reminder", current ? "off" : "on");
+                          if (!current) scheduleReminder("Stillform", "Time to check in. How steady are you?", rHour, rMin);
+                          refreshSettings();
+                        } catch {}
+                      }} style={{
+                        background: reminderOn ? "var(--amber)" : "var(--border)",
+                        border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24,
+                        cursor: "pointer", position: "relative", transition: "background 0.2s",
+                        flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: 18, height: 18, borderRadius: "50%", background: "white",
+                          position: "absolute", top: 3, left: reminderOn ? 23 : 3, transition: "left 0.2s"
+                        }} />
+                      </button>
+                    </div>
+                    {reminderOn && (
+                      <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Time</div>
+                        <input type="time" defaultValue={reminderTime} onChange={e => {
+                          try {
+                            localStorage.setItem("stillform_reminder_time", e.target.value);
+                            const [h, m] = e.target.value.split(":").map(Number);
+                            scheduleReminder("Stillform", "Time to check in. How steady are you?", h, m);
+                            refreshSettings();
+                          } catch {}
+                        }} style={{
+                          background: "var(--surface2)", border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)",
+                          fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none"
+                        }} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Audio */}
