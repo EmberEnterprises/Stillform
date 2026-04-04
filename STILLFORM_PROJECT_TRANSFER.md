@@ -374,11 +374,35 @@ Post-event cool-down checks. If calendar shows high-stakes meeting at 2pm, AI ch
 **2. State-to-Statement Translation**
 After reframing, AI helps user formulate what they want to communicate externally. Not a script — a guided "What do you need them to hear?" Moves from "feeling better" to "functional output." Must respect "let them drive" principle.
 
-**3. Signal Clearance Speed (Calibration Recovery Velocity)**
-Track how fast user catches their hardware signals over time. "Last month, 15 minutes of chest tightness before you opened the app. This week, 3 minutes. Your hardware-to-software latency is dropping." Only surface when positive. Proves neuroplasticity without wellness jargon.
+**3. Signal Awareness Speed (Calibration Recovery Velocity)**
+Track how fast user catches their state before it drives an action over time. "Last month, 15 minutes of chest tightness before you opened the app. This week, 3 minutes. Your awareness latency is dropping." Only surface when positive. Proves neuroplasticity without wellness jargon.
 
 **4. Composure Gate (Friction-Based Intervention)**
 System-level interceptor. When user tries to open a trigger app (work Slack, social media) during high bio-filter load, Stillform sends: "Hardware signal: High Activation. Perform 30s Quick Reset before entering this environment?" Positions app as "System Firewall" for composure. Most ambitious feature — needs deep OS permissions. Under active discussion.
+
+**5. Calendar-Aware Morning Practice**
+Reads device calendar. AI knows what's ahead. Morning check-in includes: "You have [event] at [time]. How do you want to carry yourself?" Enables anticipatory regulation and tone-setting for specific events.
+
+**6. Samsung Galaxy Watch Haptic Breathing**
+Wear OS companion. Watch vibrates in sync with breathing pattern. No screen needed — user learns the rhythm through haptics alone. Priority before launch. Needs Android Studio on Mac.
+
+**7. Apple Watch Haptic Breathing**
+WatchKit extension. Same concept as Samsung — haptic-only breathing companion. Blocked on DUNS number and Apple Developer Program.
+
+**8. Health Integration**
+HealthKit (iOS) / Health Connect (Android). Pull HRV, sleep quality, heart rate. Bio-filter auto-populates from biometric data instead of self-report. Strengthens FSA eligibility case.
+
+**9. Cloud Sync**
+Encrypted cloud backup and multi-device sync. Pre-update auto-backup before any app update touches user data. Version check on app load. Non-negotiable for production.
+
+**10. Premium Sound Packs**
+Ambient soundscapes for breathing sessions. No upsell — included in subscription.
+
+**11. PDF/CSV Export**
+Export full session history, signal log, and patterns data. Supports clinical use case and FSA documentation.
+
+**12. Shareable Composure Card**
+Visual card showing composure stats. Shareable to social media. Growth visualization.
 
 ---
 

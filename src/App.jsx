@@ -5292,6 +5292,14 @@ export default function Stillform() {
             },
             {
               icon: "◎",
+              label: "Daily practice",
+              title: "Morning calibration. In-the-moment reset.",
+              subtitle: "Two habits. That's it.",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nSignal Log — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
+              note: null
+            },
+            {
+              icon: "◎",
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
@@ -5825,19 +5833,34 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* UAT BANNER — collapsed by default */}
+              {/* UAT BANNER — visible dropdown with roadmap */}
               <div style={{ marginBottom: 32 }}>
                 <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
-                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 10,
-                  cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.12em",
-                  padding: 0, textTransform: "uppercase"
+                  width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)", padding: "12px 16px", cursor: "pointer",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
                 }}>
-                  {uatRoadmapOpen ? "▾ UAT Build" : "▸ UAT Build"}
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", padding: "2px 8px", borderRadius: 4 }}>EARLY ACCESS</span>
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>Your feedback shapes this</span>
+                  </div>
+                  <span style={{ fontSize: 10, color: "var(--text-muted)", transition: "transform 0.2s", transform: uatRoadmapOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
                 </button>
                 {uatRoadmapOpen && (
-                  <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.8, padding: "10px 14px", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
-                    Early build. Feedback shapes everything.<br/>
-                    <span style={{ color: "var(--amber)" }}>Coming:</span> Apple Watch · health integration · push notifications · sound packs · PDF export
+                  <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Coming soon</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing companion</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Apple Watch — haptic breathing companion</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Health integration — HRV, sleep, heart rate</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Calendar-aware morning practice</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Signal Awareness speed tracking</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Cloud sync across devices</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Premium sound packs</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> PDF/CSV export of session data</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Shareable composure card</div>
+                    <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Send feedback: ARAembersllc@proton.me</div>
                   </div>
                 )}
               </div>
