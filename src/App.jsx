@@ -4896,8 +4896,16 @@ export default function Stillform() {
   // Check widget launch flag synchronously (works on web only)
   const widgetLaunch = (() => {
     try {
+      // Check localStorage flag (set by Java injection on reload)
       if (localStorage.getItem("stillform_widget_breathe") === "true") {
         localStorage.removeItem("stillform_widget_breathe");
+        return true;
+      }
+      // Check URL query param (set by widget intent directly)
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("action") === "breathe") {
+        // Clean URL
+        try { window.history.replaceState({}, "", "/"); } catch {}
         return true;
       }
     } catch {}
