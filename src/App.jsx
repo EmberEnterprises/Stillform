@@ -5915,7 +5915,7 @@ export default function Stillform() {
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <div className="pricing-header">
               <h2>Start free. Stay only if it works.</h2>
-              <p>Try everything free for 7 days. Built for people who feel at full intensity — and need to stay functional inside it.</p>
+              <p>Try everything free for 7 days. Composure when you need it — under two minutes.</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
