@@ -2,19 +2,34 @@ package com.araembers.stillform;
 
 import android.os.Bundle;
 import android.content.Intent;
+import android.util.Log;
 import com.getcapacitor.BridgeActivity;
 
 public class MainActivity extends BridgeActivity {
+
+    private String widgetAction = null;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(WatchBridgePlugin.class);
         registerPlugin(WidgetBridgePlugin.class);
-        super.onCreate(savedInstanceState);
 
-        // Inject widget action into WebView's global scope
-        String action = getIntent() != null ? getIntent().getStringExtra("stillform_action") : null;
+        // Read intent BEFORE super.onCreate loads WebView
+        if (getIntent() != null) {
+            widgetAction = getIntent().getStringExtra("stillform_action");
+            Log.d("StillformWidget", "onCreate intent extra: " + widgetAction);
+        }
+
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Inject after bridge is fully initialized
+        Log.d("StillformWidget", "onStart injecting interface with action: " + widgetAction);
         getBridge().getWebView().addJavascriptInterface(
-            new WidgetDataInterface(action), "StillformWidget"
+            new WidgetDataInterface(widgetAction), "StillformWidget"
         );
     }
 
@@ -22,11 +37,12 @@ public class MainActivity extends BridgeActivity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         String action = intent != null ? intent.getStringExtra("stillform_action") : null;
+        Log.d("StillformWidget", "onNewIntent action: " + action);
         if ("breathe".equals(action)) {
+            widgetAction = action;
             getBridge().getWebView().addJavascriptInterface(
                 new WidgetDataInterface(action), "StillformWidget"
             );
-            // Reload to pick up the new action
             getBridge().getWebView().post(() -> {
                 getBridge().getWebView().evaluateJavascript(
                     "window.location.reload();", null
