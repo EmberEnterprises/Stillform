@@ -5501,7 +5501,7 @@ export default function Stillform() {
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                Master the pause between feeling and action. Before a conversation, after a bad meeting, in the middle of a decision. Stabilize in under two minutes — then go handle your day.
+                Master how you carry yourself — every morning and every moment that matters. Set your tone for the day, reset when you need to, and build composure that compounds over time.
               </p>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                 Stabilize. Then think clearly.
@@ -6117,11 +6117,11 @@ export default function Stillform() {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure system. Breathing, body scan, and AI-powered reframing — built to help you pause, read the situation clearly, and act on your own terms. Under two minutes."
+                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for your morning practice and for the moments that test you. Set your tone, stay sharp, reset when you need to."
               },
               {
                 q: "Who is this for?",
-                a: "Anyone who wants more control over the space between feeling and action. Before a meeting, after a tough conversation, in the middle of a decision. Stillform helps you master the pause."
+                a: "Anyone who wants more control over how they show up. Not just in hard moments — every day. The person who wants to walk into any room composed, handle whatever comes, and know they're getting better at it over time."
               },
               {
                 q: "What does the AI actually do?",
