@@ -401,6 +401,7 @@ System-level interceptor. When user tries to open a trigger app (work Slack, soc
 ## Key localStorage Keys
 
 - stillform_onboarded — "yes" if completed onboarding
+- stillform_regulation_type — "thought-first", "body-first", or "balanced"
 - stillform_signal_profile — body signal mapping JSON
 - stillform_bias_profile — cognitive blind spots array
 - stillform_breath_pattern — default breathing pattern
@@ -410,6 +411,10 @@ System-level interceptor. When user tries to open a trigger app (work Slack, soc
 - stillform_bio_filter — last selected physical state
 - stillform_reminder / stillform_reminder_time — push notification settings
 - stillform_audio / stillform_scan_pace — settings
+- stillform_ai_session_notes — AI-written post-session summaries (last 20)
+- stillform_milestone_7_seen — "yes" if 7-session check-in dismissed
+- stillform_notes — user-written session notes
+- stillform_saved_reframes — saved AI reframe responses
 
 ## Build Commands
 
@@ -511,6 +516,71 @@ Top-down (thought-first) emotions are more successfully regulated by cognitive s
 - Living summary: updated after each session, sent to API
 - Coded profile: categorical data, sent to API
 - Calendar context: processed locally, only short string sent to API
+
+---
+
+# 11 — Strategic Goals
+
+## FSA/HSA Eligibility
+Goal: Get Stillform approved as an FSA/HSA eligible purchase. Requires all features to be science-backed, research-cited, and psychologically validated. Every tool, every AI response principle, every assessment scenario must trace back to published research. This strengthens positioning as a health tool, not a wellness app.
+
+## Press Target: Wired Magazine
+Position Stillform for a Wired feature. Differentiators: operator framing, two-pathway neuroscience-backed assessment, AI summarization architecture, Composure Gate concept, Signal Awareness Latency as a metric. The science-backed approach and the "composure system not meditation app" angle is the hook.
+
+## Everything Must Be Research-Backed
+Every decision in the product traces to psychology, neuroscience, or behavioral research:
+- Two regulation pathways → Ochsner et al., bottom-up vs top-down emotion generation
+- Ego threat avoidance → Baumeister, self-affirmation theory, self-concept threat research
+- Feeling understood → Reis et al., perceived responsiveness research
+- Validation approach → Linehan, Rogers unconditional positive regard
+- Neuroplasticity → Sapolsky, Dweck growth mindset
+- AI response bias guards → Kahneman heuristics, CBT therapist bias research
+
+---
+
+# 12 — Implementation Status (April 4, 2026)
+
+## Built & Live on Web
+
+- ✅ Guided assessment (5 scenarios, full composure spectrum)
+- ✅ Adaptive home screen (primary button matches regulation type)
+- ✅ Updated onboarding tutorial (science-backed two pathways)
+- ✅ Processing Type in Settings (changeable anytime)
+- ✅ Re-run Calibration in Settings
+- ✅ AI response principles in all 3 system prompts
+- ✅ 80/20 cadence rule in AI prompt
+- ✅ 9-category awareness in AI prompt
+- ✅ Regulation type sent to AI and used in responses
+- ✅ Post-session AI summary (background call, stores notes)
+- ✅ Session notes fed into future API calls (last 5 notes)
+- ✅ First pattern note at session 3 (moved from 5)
+- ✅ 7-session review milestone with type mismatch detection
+- ✅ Absence detection (14+ days, operator tone)
+- ✅ First-session quick win on all completion screens
+- ✅ Service worker cache bust (network-first strategy)
+- ✅ Bigger textarea for Reframe input
+- ✅ Positioning copy updated throughout
+- ✅ Widget working (Android, SharedPreferences → Capacitor plugin)
+- ✅ All Jonny audit fixes intact
+
+## Needs Mac (Native Rebuild)
+
+- ❌ Native APK with all changes (pull + build + install)
+- ❌ Test widget with new code on device
+- ❌ Watch haptics testing
+- ❌ Share extension testing
+
+## Not Yet Built
+
+- ❌ Morning practice view (calendar integration)
+- ❌ Anticipatory regulation (post-event cool-down checks)
+- ❌ State-to-Statement translation
+- ❌ Signal Clearance Speed visualization
+- ❌ Composure Gate (system-level app interceptor)
+- ❌ Cloud sync infrastructure
+- ❌ Privacy policy update (stillformapp.com/privacy.html)
+- ❌ Lemon Squeezy paywall (waiting on Bobby)
+- ❌ DUNS number application
 
 ---
 
