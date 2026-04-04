@@ -3107,7 +3107,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               What's present
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {["Rage", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Excitement", "Numbness", "Grief", "Fear", "Confusion", "Mixed"].map(em => {
+              {["Anger", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Excitement", "Numbness", "Grief", "Fear", "Confusion", "Mixed"].map(em => {
                 const selected = (journalText || "").includes(em);
                 return (
                   <button key={em} onClick={() => {
@@ -3136,9 +3136,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
             </div>
             <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
               <textarea
-                value={journalText.replace(/^(Rage|Anxiety|Dread|Overwhelm|Shame|Frustration|Excitement|Numbness|Grief|Fear|Confusion|Mixed)(,\s*)*/g, "").trim()}
+                value={journalText.replace(/^(Anger|Anxiety|Dread|Overwhelm|Shame|Frustration|Excitement|Numbness|Grief|Fear|Confusion|Mixed)(,\s*)*/g, "").trim()}
                 onChange={e => {
-                  const chips = ["Rage","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                  const chips = ["Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
                     .filter(em => journalText.includes(em)).join(", ");
                   setJournalText(chips ? `${chips}, ${e.target.value}` : e.target.value);
                 }}
@@ -3181,7 +3181,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               entries.forEach(e => (e.emotions || []).forEach(em => { freq[em] = (freq[em] || 0) + 1; }));
               // Also count from trigger text for old entries
               entries.forEach(e => {
-                ["Rage","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                ["Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
                   .forEach(em => { if ((e.trigger || "").includes(em)) freq[em] = (freq[em] || 0) + 0.5; });
               });
               const topEmotions = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 4);
@@ -5402,7 +5402,7 @@ export default function Stillform() {
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                For people who feel everything at full intensity. Rage, excitement, anxiety, dread, joy. Sometimes you need to regain composure. Sometimes you need to keep it. Either way — under two minutes.
+                Composure when you need it. Before a conversation, after a bad meeting, in the middle of a decision. Regain it or keep it — under two minutes.
               </p>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                 Stabilize. Then think clearly.
