@@ -4896,19 +4896,9 @@ export default function Stillform() {
   // Check widget launch flag synchronously (works on web only)
   const widgetLaunch = (() => {
     try {
-      // Check native Java interface (injected by MainActivity via addJavascriptInterface)
-      if (window.StillformWidget && window.StillformWidget.getAction() === "breathe") {
-        return true;
-      }
-      // Fallback: check localStorage
-      if (localStorage.getItem("stillform_widget_breathe") === "true") {
-        localStorage.removeItem("stillform_widget_breathe");
-        return true;
-      }
-      // Fallback: check URL params (web)
-      const params = new URLSearchParams(window.location.search);
-      if (params.get("action") === "breathe") {
-        try { window.history.replaceState({}, "", "/"); } catch {}
+      const action = localStorage.getItem("widget_action");
+      if (action === "breathe") {
+        localStorage.removeItem("widget_action");
         return true;
       }
     } catch {}
