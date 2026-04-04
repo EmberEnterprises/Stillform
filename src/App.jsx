@@ -5402,7 +5402,7 @@ export default function Stillform() {
                 Composure.<br /><em>On demand.</em>
               </h1>
               <p className="home-sub">
-                For people who feel everything at full intensity. Rage, excitement, anxiety, dread, joy. The goal isn't to flatten it. It's to stay functional inside it.
+                For people who feel everything at full intensity. Rage, excitement, anxiety, dread, joy. Sometimes you need to regain composure. Sometimes you need to keep it. Either way — under two minutes.
               </p>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                 Stabilize. Then think clearly.
