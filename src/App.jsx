@@ -1718,6 +1718,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
           </div>
         )}
         {count > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
+        {count === 1 && (
+          <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
+          </div>
+        )}
         <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
           <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
             Continue to Reframe →
