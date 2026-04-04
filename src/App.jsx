@@ -4997,7 +4997,10 @@ export default function Stillform() {
   const completeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
-    setScreen("home");
+    // Route to calibration assessment, not home
+    setSetupStep(0);
+    setAssessmentAnswers([]);
+    setScreen("setup");
   };
 
   const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
@@ -5637,85 +5640,30 @@ export default function Stillform() {
         {screen === "home" && (() => {
           let sessionCount = 0;
           try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
-          const isNew = sessionCount === 0;
+          const regType = (() => { try { return localStorage.getItem("stillform_regulation_type"); } catch { return null; } })();
 
-          if (isNew) return (
-            <section className="home">
-              <h1 className="home-title">
-                Composure.<br /><em>On demand.</em>
-              </h1>
-              <p className="home-sub">
-                Master how you carry yourself — every morning and every moment that matters. Set your tone for the day, reset when you need to, and build composure that compounds over time.
-              </p>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
-                Stabilize. Then think clearly.
-              </div>
-
-              <div style={{ width: "100%", maxWidth: 360, display: "flex", flexDirection: "column", gap: 8 }}>
-                {/* Two primary pathways */}
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
-                    flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
-                    borderRadius: "var(--r)", padding: "24px 16px", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                    textAlign: "center", WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7, marginBottom: 8 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>Talk it out</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.3 }}>Think through what's happening</div>
-                  </button>
-                  <button onClick={() => startPathway("calm")} style={{
-                    flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
-                    borderRadius: "var(--r)", padding: "24px 16px", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                    textAlign: "center", WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7, marginBottom: 8 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>Calm my body</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.3 }}>Settle the nervous system</div>
-                  </button>
+          // No regulation type set? Route to calibration
+          if (!regType) {
+            return (
+              <section className="home">
+                <h1 className="home-title">
+                  Composure.<br /><em>On demand.</em>
+                </h1>
+                <p className="home-sub">
+                  Master how you carry yourself — every morning and every moment that matters. Set your tone for the day, reset when you need to, and build composure that compounds over time.
+                </p>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
+                  Let's calibrate your system first.
                 </div>
-
-                {/* Third tool — smaller, beneath */}
-                <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                  width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r)", padding: "14px 16px", cursor: "pointer",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
-                  WebkitTapHighlightColor: "transparent", textAlign: "center",
-                  display: "flex", justifyContent: "center", alignItems: "center", gap: 12
-                }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◉ Body Scan</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text-muted)" }}>Locate and release tension</div>
+                <button onClick={() => { setSetupStep(0); setAssessmentAnswers([]); setScreen("setup"); }} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
+                  Begin Calibration →
                 </button>
-              </div>
+              </section>
+            );
+          }
 
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginTop: 12, letterSpacing: "0.1em" }}>7-DAY FREE TRIAL · ~90 SECONDS PER SESSION</div>
-
-              {/* Set Up link */}
-              <button onClick={() => { setSetupStep(0); setScreen("setup"); }} style={{
-                background: "none", border: "none", cursor: "pointer", marginTop: 16, marginBottom: 40,
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em",
-                textTransform: "uppercase", color: "var(--amber)", opacity: 0.7
-              }}>
-                ◎ Calibrate system first →
-              </button>
-
-              <div style={{ maxWidth: 360, width: "100%", textAlign: "center" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
-                  Builds with every session
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>
-                  Stillform builds a profile from your sessions, logs, and check-ins. It learns what states you move through, what works for each one, and gets more precise over time.
-                </div>
-              </div>
-
-              <div style={{ marginTop: 40, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
-                Built from lived experience.
-              </div>
-            </section>
-          );
+          const isThoughtFirst = regType === "thought-first";
+          const isBodyFirst = regType === "body-first";
 
           /* ── RETURNING USER: clean, one dominant action ── */
           // Calculate milestones
@@ -5793,50 +5741,70 @@ export default function Stillform() {
                 )}
               </div>
 
-              {/* DOMINANT CTA — Two pathways side by side */}
+              {/* DOMINANT CTA — Adaptive to regulation type */}
               <div style={{ marginBottom: 48 }}>
                 {/* Identity line */}
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em" }}>
-                  Stabilize. Then think clearly.
+                  {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Stabilize. Then think clearly."}
                 </div>
 
-                {/* Two primary pathways */}
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button onClick={async () => { if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } }} style={{
-                    flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
-                    borderRadius: "var(--r)", padding: "24px 16px", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                    textAlign: "center", WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7, marginBottom: 8 }}>✦ Reframe</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>Talk it out</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.3 }}>Think through what's happening</div>
-                  </button>
-                  <button onClick={() => startPathway("calm")} style={{
-                    flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
-                    borderRadius: "var(--r)", padding: "24px 16px", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                    textAlign: "center", WebkitTapHighlightColor: "transparent"
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", opacity: 0.7, marginBottom: 8 }}>◎ Breathe</div>
-                    <div style={{ fontSize: 15, fontWeight: 500, marginBottom: 4 }}>Calm my body</div>
-                    <div style={{ fontSize: 11, opacity: 0.7, lineHeight: 1.3 }}>Settle the nervous system</div>
-                  </button>
-                </div>
-
-                {/* Third tool — smaller, beneath */}
-                <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                  width: "100%", marginTop: 8, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r)", padding: "14px 16px", cursor: "pointer",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
-                  WebkitTapHighlightColor: "transparent", textAlign: "center",
-                  display: "flex", justifyContent: "center", alignItems: "center", gap: 12
+                {/* Primary tool — determined by regulation type */}
+                <button onClick={async () => {
+                  if (isThoughtFirst || (!isThoughtFirst && !isBodyFirst)) {
+                    if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                  } else {
+                    startPathway("calm");
+                  }
+                }} style={{
+                  width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                  borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
                 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◉ Body Scan</div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text-muted)" }}>Locate and release tension</div>
+                  <div>
+                    <div>{isBodyFirst ? "Calm my body" : "Talk it out"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, opacity: 1, marginTop: 2, color: "rgba(10,10,12,0.75)" }}>
+                      {isBodyFirst ? "Settle the nervous system" : "Think through what's happening"}
+                    </div>
+                  </div>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 1, color: "rgba(10,10,12,0.65)" }}>
+                    {isBodyFirst ? "◎ BREATHE" : "✦ REFRAME"}
+                  </span>
                 </button>
+
+                {/* Secondary tool + Body Scan */}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  <button onClick={async () => {
+                    if (isBodyFirst) {
+                      if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                    } else {
+                      startPathway("calm");
+                    }
+                  }} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      {isBodyFirst ? "✦ Reframe" : "◎ Breathe"}
+                    </div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>
+                      {isBodyFirst ? "Talk it out" : "Calm my body"}
+                    </div>
+                  </button>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Release tension</div>
+                  </button>
+                </div>
               </div>
 
               {/* STREAK — only if exists */}
