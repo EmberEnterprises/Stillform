@@ -362,6 +362,23 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - AI response: never use love language, never claim to understand, show don't tell.
 - People change — summary must be a living document, never lock someone into old patterns.
 - Assessment covers full composure spectrum — not just crisis/anger scenarios.
+- Outcome over Emotion — we don't measure happiness, we measure Signal Awareness Latency (how fast the user notices they're off-composure).
+- Signal Clearance data only surfaces when positive. Digression handled by AI adjusting, not by dashboard showing failure.
+- No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.
+
+## Roadmap Concepts (From Research — Not Yet Built)
+
+**1. Anticipatory Regulation ("Signal Delay")**
+Post-event cool-down checks. If calendar shows high-stakes meeting at 2pm, AI checks in at 4:30pm: "System check. High-intensity signal detected 2 hours ago. Hardware check." Treats user like a machine that needs cool-down. Requires calendar integration.
+
+**2. State-to-Statement Translation**
+After reframing, AI helps user formulate what they want to communicate externally. Not a script — a guided "What do you need them to hear?" Moves from "feeling better" to "functional output." Must respect "let them drive" principle.
+
+**3. Signal Clearance Speed (Calibration Recovery Velocity)**
+Track how fast user catches their hardware signals over time. "Last month, 15 minutes of chest tightness before you opened the app. This week, 3 minutes. Your hardware-to-software latency is dropping." Only surface when positive. Proves neuroplasticity without wellness jargon.
+
+**4. Composure Gate (Friction-Based Intervention)**
+System-level interceptor. When user tries to open a trigger app (work Slack, social media) during high bio-filter load, Stillform sends: "Hardware signal: High Activation. Perform 30s Quick Reset before entering this environment?" Positions app as "System Firewall" for composure. Most ambitious feature — needs deep OS permissions. Under active discussion.
 
 ---
 
