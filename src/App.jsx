@@ -1094,7 +1094,7 @@ const TOOLS = [
     id: "scan",
     icon: "◉",
     name: "Body Scan",
-    desc: "Locate tension and release it with targeted acupressure.",
+    desc: "Locate activation and release it with targeted acupressure.",
     time: "10 min"
   },
   {
@@ -1846,24 +1846,24 @@ function BreatheGroundTool({ onComplete, pathway }) {
   if (phase === "bio-filter") return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6 }}>
-        System check.
+        State read.
       </h2>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-        Bio-filter · What is your hardware doing right now?
+        Bio-filter · What is your hardware running right now?
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
-        Physical state colors perception. The AI filters your observations through this — so "I feel overwhelmed" gets read correctly instead of misidentified as a character flaw.
+        Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
         {[
-          { id: "clear", label: "All clear", desc: "System is running normally", icon: "◎" },
-          { id: "activated", label: "Physically activated", desc: "Butterflies, adrenaline, energy surging", icon: "⚡" },
-          { id: "depleted", label: "Physically depleted", desc: "Fatigue, low energy, heavy body", icon: "◌" },
-          { id: "gut", label: "Gut signal active", desc: "Digestive distress, gut-brain noise", icon: "◉" },
-          { id: "sleep", label: "Sleep deprived", desc: "Under-rested, reduced cognitive baseline", icon: "◐" },
+          { id: "clear", label: "Baseline", desc: "System nominal — no flags", icon: "◎" },
+          { id: "activated", label: "Activated", desc: "Adrenaline, butterflies, energy surging", icon: "⚡" },
+          { id: "depleted", label: "Low capacity", desc: "Fatigue, low energy, heavy body", icon: "◌" },
+          { id: "gut", label: "Gut signal", desc: "Digestive noise — gut-brain axis active", icon: "◉" },
+          { id: "sleep", label: "Under-rested", desc: "Reduced cognitive baseline", icon: "◐" },
           { id: "hormonal", label: "Hormonal shift", desc: "Cycle, inflammation, or hormonal fluctuation", icon: "◑" },
-          { id: "pain", label: "Pain present", desc: "Chronic or acute pain affecting state", icon: "◈" },
-          { id: "medicated", label: "Medicated or substance", desc: "Caffeine, meds, alcohol, or other substance active", icon: "◇" },
+          { id: "pain", label: "Pain active", desc: "Chronic or acute — affecting state", icon: "◈" },
+          { id: "medicated", label: "Substance active", desc: "Caffeine, meds, alcohol, or other input", icon: "◇" },
         ].map(opt => (
           <button key={opt.id} onClick={() => {
             setBioFilter(opt.id);
@@ -2888,13 +2888,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk" }) {
               const bf = localStorage.getItem("stillform_bio_filter");
               if (!bf || bf === "clear") return null;
               const labels = {
-                activated: "physically activated — adrenaline, butterflies, energy surging through the body",
-                depleted: "physically depleted — fatigue, low energy, heavy body",
-                gut: "gut signal active — digestive distress affecting state",
-                sleep: "sleep deprived — under-rested, reduced cognitive baseline",
+                activated: "activated — adrenaline, butterflies, energy surging through the body",
+                depleted: "low capacity — fatigue, low energy, reduced bandwidth",
+                gut: "gut signal active — digestive noise, gut-brain axis engaged",
+                sleep: "under-rested — reduced cognitive baseline",
                 hormonal: "hormonal shift — cycle, inflammation, or hormonal fluctuation",
-                pain: "pain present — chronic or acute pain affecting perception",
-                medicated: "medicated or substance active — caffeine, meds, alcohol, or other substance influencing state"
+                pain: "pain active — chronic or acute, affecting state",
+                medicated: "substance active — caffeine, meds, alcohol, or other input influencing state"
               };
               return labels[bf] || null;
             } catch { return null; }
@@ -3832,16 +3832,17 @@ function SignalMapTool({ onComplete }) {
   });
 
   const bodyAreas = [
-    { id: "jaw", label: "Jaw & Face", desc: "Clenching, tightness, grinding" },
-    { id: "shoulders", label: "Shoulders & Neck", desc: "Rising, stiffness, pain" },
-    { id: "chest", label: "Chest", desc: "Tightness, pressure, shallow breath" },
-    { id: "hands", label: "Hands & Arms", desc: "Gripping, tingling, fists" },
-    { id: "gut", label: "Stomach & Core", desc: "Knots, nausea, heaviness" },
-    { id: "legs", label: "Legs & Feet", desc: "Restlessness, numbness, pacing urge" }
+    { id: "jaw", label: "Jaw & Face", desc: "Clenching, tightness, or set expression" },
+    { id: "shoulders", label: "Shoulders & Neck", desc: "Rising, bracing, or locked posture" },
+    { id: "chest", label: "Chest", desc: "Tightness, expansion, or shallow breath" },
+    { id: "hands", label: "Hands & Arms", desc: "Gripping, tingling, or restless energy" },
+    { id: "gut", label: "Stomach & Core", desc: "Knots, butterflies, or heat" },
+    { id: "legs", label: "Legs & Feet", desc: "Restlessness, heaviness, or pacing urge" }
   ];
 
   const sensations = [
-    "Tightness", "Heat", "Numbness", "Racing heart", "Shallow breath", "Nausea", "Trembling", "Brain fog"
+    "Tightness", "Heat", "Numbness", "Racing heart", "Shallow breath", "Nausea", "Trembling", "Brain fog",
+    "Surge of energy", "Clarity spike", "Restless focus", "Lightness"
   ];
 
   const triggers = [
@@ -3874,17 +3875,17 @@ function SignalMapTool({ onComplete }) {
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
-          Your body sends signals before things escalate. Most people never learn to read them. This takes 2 minutes and teaches the app how YOUR nervous system works.
+          Your body broadcasts state before your mind catches up. Most people never learn to read the signal. This takes 2 minutes and teaches the app how YOUR system operates.
         </p>
         <button className="btn btn-primary" onClick={() => setStep(1)}>Start →</button>
       </div>
     ),
-    // Step 1: Where tension shows first
+    // Step 1: Where the body activates first
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where does tension show up first?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that react first when stress is building. Select all that apply.</p>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where do you activate first?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that respond first — whether stress, excitement, or intensity. Select all that apply.</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
             const selected = (signals.firstAreas || []).includes(area.id);
@@ -3909,12 +3910,12 @@ function SignalMapTool({ onComplete }) {
           onClick={() => setStep(2)}>Next →</button>
       </div>
     ),
-    // Step 2: What sensations come before crisis
+    // Step 2: What sensations signal a state shift
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What do you feel before it hits?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up before a spiral, shutdown, or overwhelm.</p>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What signals a state shift?</h2>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up when your system is changing gears — up or down.</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {sensations.map(s => {
             const selected = (signals.preSensations || []).includes(s);
@@ -3983,7 +3984,7 @@ function SignalMapTool({ onComplete }) {
             <strong style={{ color: "var(--text)" }}>First to react:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
-            <strong style={{ color: "var(--text)" }}>Warning sensations:</strong> {(signals.preSensations || []).join(", ")}
+            <strong style={{ color: "var(--text)" }}>State-shift signals:</strong> {(signals.preSensations || []).join(", ")}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
             <strong style={{ color: "var(--text)" }}>Common triggers:</strong> {(signals.triggers || []).join(", ")}
@@ -4039,7 +4040,7 @@ function BodyCheckInTool({ onComplete }) {
         {needsHelp ? (
           <>
             <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>
-              Your {highArea.label.toLowerCase()} is carrying tension. Want to address it?
+              Your {highArea.label.toLowerCase()} is holding activation. Want to address it?
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
@@ -4049,7 +4050,7 @@ function BodyCheckInTool({ onComplete }) {
           </>
         ) : (
           <>
-            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>Low tension across the board. You're regulated.</p>
+            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>Low activation across the board. System baseline.</p>
             <button className="btn btn-ghost" onClick={onComplete}>Done</button>
           </>
         )}
@@ -5143,7 +5144,7 @@ export default function Stillform() {
                         <span style={{ color: "var(--amber)", fontSize: 14 }}>◉</span>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 500 }}>Body Scan</div>
-                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Find tension · acupressure release</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)" }}>Read the body · acupressure release</div>
                         </div>
                       </button>
                       <button onClick={() => { completeOnboarding(); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
@@ -6232,44 +6233,39 @@ export default function Stillform() {
               })}
             </div>
 
-            {/* Security */}
-            {(() => {
-              const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
-              const [bioAvailable, setBioAvailable] = useState(false);
-              const [bioLabel, setBioLabel] = useState("Biometric Lock");
-              useEffect(() => {
-                biometric.isAvailable().then(setBioAvailable);
-                biometric.getLabel().then(setBioLabel);
-              }, []);
-              if (!bioAvailable) return null;
-              return (
-                <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Security</div>
-                  <div style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Lock with {bioLabel}</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require {bioLabel} for Reframe and Signal Log</div>
-                    </div>
-                    <button onClick={() => {
-                      biometric.setEnabled(!bioOn);
-                      refreshSettings();
-                    }} style={{
-                      background: bioOn ? "var(--amber)" : "var(--border)",
-                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
-                      position: "relative", transition: "background 0.2s", flexShrink: 0
+            {/* Security — only visible in native shell (Face ID / fingerprint) */}
+            {isNative() && (
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Security</div>
+                {(() => {
+                  const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
+                  return (
+                    <div style={{
+                      background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                      padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
-                      <div style={{
-                        width: 18, height: 18, borderRadius: "50%", background: "white",
-                        position: "absolute", top: 3, left: bioOn ? 23 : 3, transition: "left 0.2s"
-                      }} />
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
+                      <div>
+                        <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and Signal Log</div>
+                      </div>
+                      <button onClick={() => {
+                        biometric.setEnabled(!bioOn);
+                        refreshSettings();
+                      }} style={{
+                        background: bioOn ? "var(--amber)" : "var(--border)",
+                        border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                        position: "relative", transition: "background 0.2s", flexShrink: 0
+                      }}>
+                        <div style={{
+                          width: 18, height: 18, borderRadius: "50%", background: "white",
+                          position: "absolute", top: 3, left: bioOn ? 23 : 3, transition: "left 0.2s"
+                        }} />
+                      </button>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
 
             {/* Sound */}
             <div style={{ marginBottom: 28 }}>
