@@ -1552,7 +1552,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Reduce mental noise", desc: "Too many inputs, head won't quiet", why: "Extended exhale downregulates your nervous system. Most people feel a shift in 90 seconds." },
+    { id: "calm", label: "Settle the system", desc: "Thoughts or energy running fast", why: "Extended exhale downregulates your nervous system. Most people feel a shift in 90 seconds." },
     { id: "box", label: "Stabilize under pressure", desc: "High-stakes, need to stay even", why: "Equal rhythm locks your baseline under sustained load" },
     { id: "478", label: "Release physical tension", desc: "Clenched, exhausted, wired, or can't stop", why: "Long hold + exhale is the deepest physiological reset" },
     { id: "quick", label: "Regain focus", desc: "60 seconds, between tasks, in public", why: "Shortest pattern that shifts your state" }
@@ -2771,7 +2771,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     ? "What are you walking into? Name it and what's making it hard."
     : isClarity
     ? "What's looping? The thought, decision, or conversation you keep replaying."
-    : "What's off? Describe what happened. The AI identifies the distortion.";
+    : "What's happening? Describe the situation. The AI helps you see it clearly.";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
   // Migrate old conversation from before mode-specific keys
@@ -3062,10 +3062,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const reframePrompts = {
     calm: [
-      "Name what's happening. The AI cuts through the distortion.",
+      "Name what's happening. The AI helps you see it clearly.",
       "What's the loudest thing right now? Say it.",
       "Something is activated. What is it?",
-      "Where are you and what set it off?",
+      "What's on your mind right now?",
       "What's actually driving this?",
       "What's running in the background right now?"
     ],
@@ -5290,7 +5290,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "We don't track mood. We track Signal Awareness Latency — how fast you notice you're off-composure. That number dropping is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "We don't track mood. We track Signal Awareness — how fast you notice your state before it drives an action. That could be anger, excitement, anxiety, or even joy. The speed of that recognition improving is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
@@ -5502,7 +5502,7 @@ export default function Stillform() {
               label: "Calibration · 4 of 4",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
-              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. When the signal is too loud.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
+              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. When the signal is running high.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
               cta: null,
               patterns: ["calm", "box", "478", "quick"]
             }
@@ -5532,7 +5532,7 @@ export default function Stillform() {
           };
 
           const patternLabels = {
-            calm: { name: "Regulate", detail: "4-4-8-2 · When the signal is too loud" },
+            calm: { name: "Regulate", detail: "4-4-8-2 · When the signal is running high" },
             box: { name: "Box", detail: "4-4-4-4 · When you need to stay even" },
             "478": { name: "4-7-8", detail: "When the body won't let go" },
             quick: { name: "Quick Reset", detail: "2-2-4-1 · 60 seconds" }
@@ -6394,7 +6394,7 @@ export default function Stillform() {
               },
               {
                 q: "What are the three Reframe modes?",
-                a: "Regulate — settle the noise and think clearly. Get Sharp — cut through a thought loop or indecision. Lock In — compose yourself before something that matters."
+                a: "Regulate — settle the system and think clearly. Get Sharp — cut through a thought loop or indecision. Lock In — compose yourself before something that matters."
               },
               {
                 q: "Does the AI learn about me?",
@@ -6527,7 +6527,7 @@ export default function Stillform() {
                 Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
               {[
-                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is too loud", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is running high", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
                 { id: "box", name: "Box (4-4-4-4)", use: "When you need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
                 { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
                 { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds between tasks", why: "Shortest pattern that produces a measurable state shift." }

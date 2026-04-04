@@ -362,7 +362,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - AI response: never use love language, never claim to understand, show don't tell.
 - People change — summary must be a living document, never lock someone into old patterns.
 - Assessment covers full composure spectrum — not just crisis/anger scenarios.
-- Outcome over Emotion — we don't measure happiness, we measure Signal Awareness Latency (how fast the user notices they're off-composure).
+- Outcome over Emotion — we don't measure happiness, we measure Signal Awareness Latency (how fast the user notices they're about to act from state instead of decision).
 - Signal Clearance data only surfaces when positive. Digression handled by AI adjusting, not by dashboard showing failure.
 - No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.
 
