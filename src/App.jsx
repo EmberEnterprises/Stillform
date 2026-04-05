@@ -5970,12 +5970,46 @@ export default function Stillform() {
               <div style={{ marginBottom: 48 }}>
                 {/* Identity line */}
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em" }}>
-                  {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Stabilize. Then think clearly."}
+                  {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Choose your entry point."}
                 </div>
 
+                {/* Balanced: three equal buttons */}
+                {!isThoughtFirst && !isBodyFirst ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={async () => {
+                        if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                      }} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
+                      }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>✦ Reframe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Talk it out</div>
+                      </button>
+                      <button onClick={() => startPathway("calm")} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
+                      }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◎ Breathe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Calm my body</div>
+                      </button>
+                    </div>
+                    <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "16px 10px", cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent", textAlign: "center"
+                    }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>Release tension</div>
+                    </button>
+                  </div>
+                ) : (
+                <>
                 {/* Primary tool — determined by regulation type */}
                 <button onClick={async () => {
-                  if (isThoughtFirst || (!isThoughtFirst && !isBodyFirst)) {
+                  if (isThoughtFirst) {
                     if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
                   } else {
                     startPathway("calm");
@@ -6030,6 +6064,8 @@ export default function Stillform() {
                     <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Release tension</div>
                   </button>
                 </div>
+                </>
+                )}
               </div>
 
               {/* STREAK — only if exists */}
