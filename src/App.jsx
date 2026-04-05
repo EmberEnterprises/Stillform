@@ -5886,7 +5886,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Signal Awareness speed tracking</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Cloud sync across devices</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Premium sound packs</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> PDF/CSV export of session data</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Shareable composure card</div>
                     <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Send feedback: ARAembersllc@proton.me</div>
                   </div>
