@@ -200,6 +200,7 @@ Hybrid approach:
 
 ### Always Do
 
+- Mirror their personality — read how they write and match it. Casual gets casual, intense gets intense, humor gets humor. Don't be stiffer than them.
 - Offer presence: "I'm here if you want to talk through it" / "What happened next?"
 - Match their language — never translate "I'm pissed" into "experiencing frustration"
 - Reflect back the one word that mattered — not a paragraph of performed empathy
