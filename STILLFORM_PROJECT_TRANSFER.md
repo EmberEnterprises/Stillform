@@ -594,6 +594,9 @@ Not about being nice — about managing the energy of the room. Helps users navi
 **Two Regulation Pathways (from research)**
 Top-down (thought-first) emotions are more successfully regulated by cognitive strategies. Bottom-up (body-first) emotions are more successfully regulated by somatic strategies. Stillform detects and adapts to both.
 
+**Composure as the Foundation of Courage and Confidence**
+Stillform doesn't teach courage or confidence directly. It builds the foundation both require. Courage isn't the absence of fear — it's acting clearly while the signal is running high. Confidence isn't believing you'll succeed — it's trusting yourself to stay steady regardless. Signal Awareness compounding over time is the mechanism that produces both. You stop being afraid of your own reactions. That's where real confidence comes from.
+
 > *The framework: Rate your state → Filter for hardware → Regulate → Reframe. That is the composure system. Not wellness. Diagnostics.*
 
 ---
