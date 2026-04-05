@@ -398,6 +398,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - Assessment covers full composure spectrum — not just crisis/anger scenarios.
 - Outcome over Emotion — we don't measure happiness, we measure Signal Awareness Latency (how fast the user notices they're about to act from state instead of decision).
 - Signal Clearance data only surfaces when positive. Digression handled by AI adjusting, not by dashboard showing failure.
+- The app never punishes you for not using it. Living without your phone IS composure. Metrics track what you brought here, not what you missed. No coverage scores, no "you only logged 60% of your signals." Depth over frequency.
 - No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.
 
 ## Roadmap Concepts (From Research — Not Yet Built)
@@ -478,6 +479,12 @@ Proactive intervention throughout the day — not just morning and crisis. Sched
 
 **14. Session Frequency Awareness**
 AI detects when user opens Stillform 3+ times in a day. Instead of treating each session as independent: "You've been here three times today. Your system is running hot — not broken. This might be a body day, not a mind day. Want to try a body scan instead of talking?" Prevents the rebuilder from using cognitive tools to outrun physical burnout.
+
+**15. Composure Index (Single Prestige Metric)**
+One elegant number visible on home screen. Not gamification — mastery tracking. Derived from data that already exists: session depth, tool variety, Signal Awareness speed over time. Prestige performance framing: "Your composure practice deepened this month" not "You logged 80% of your emotions." Never punishes for NOT using the app — only reflects what you brought here when you did.
+
+**16. Monthly Composure Summary**
+End-of-month summary of what you worked through — from sessions, AI notes, and signal log entries that already exist. Not surveillance of missed signals. Framing: "You came here 14 times. Here's what shifted." Celebrates depth, not coverage. Living without your phone is composure. The app should never make you feel like you need it for every feeling.
 
 ---
 
