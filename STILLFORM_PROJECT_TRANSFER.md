@@ -608,7 +608,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 ## Built & Live on Web
 
 - ✅ Guided assessment (5 scenarios, full composure spectrum)
-- ✅ Adaptive home screen (primary button matches regulation type)
+- ✅ Adaptive home screen (thought-first: Reframe dominant. Body-first: Breathe dominant. Balanced: all tools equal weight, no hierarchy)
 - ✅ Home screen rebalances immediately when processing type changes in Settings
 - ✅ Morning check-in card on home screen (energy + hardware, daily)
 - ✅ Updated onboarding tutorial (6 slides, science-backed, research links, swipe navigation)
