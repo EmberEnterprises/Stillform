@@ -25,6 +25,22 @@ Stillform IS a daily composure practice AND a fast intervention system. Morning 
 - They want a dashboard, not a hug. An operator, not a patient.
 - People don't want to be better. They want to be functional.
 
+## Core Use Case: The Rebuilder's Burnout
+
+The brain runs hot. The body pays the tax. The mind doesn't need to slow down — the body needs a cooling system so the mind CAN keep running at full speed.
+
+This is Stillform's exact user: high-speed mental processing with no physical cooling system. They don't burn out because they're doing too much — they burn out because the body has no way to shed the heat the mind generates. By the time they notice, the system is already shutting down.
+
+**How Stillform maps to this:**
+- Morning check-in = pre-flight check on the hardware before the engine starts
+- Bio-filter = real-time temperature gauge ("running on depleted, not your mind")
+- Breathe = active cooling — 90 seconds, parasympathetic reset, engine keeps running
+- Body Scan = finding where heat is building before it becomes a shutdown
+- Reframe = the mind processes at full speed WITH a cooling system online
+- Signal Awareness = noticing the heat before the shutdown — the skill that compounds
+
+**What's needed:** proactive intervention. The rebuilder doesn't notice the heat until the system shuts down. Watch haptics, timed micro-resets, and AI frequency awareness close this gap.
+
 ## Identity Lines (locked)
 
 - Stabilize. Then think clearly.
@@ -456,6 +472,12 @@ Export full session history, signal log, and patterns data. Supports clinical us
 
 **12. Shareable Composure Card**
 Visual card showing composure stats. Shareable to social media. Growth visualization.
+
+**13. Timed Micro-Resets (Cooling System)**
+Proactive intervention throughout the day — not just morning and crisis. Scheduled 60-second breathing or body check notifications. Based on calendar density, HRV trends, and session frequency. The rebuilder doesn't notice the heat until shutdown — micro-resets shed heat before it accumulates. Watch tap: "Quick Reset. 60 seconds. Your system has been running for 4 hours."
+
+**14. Session Frequency Awareness**
+AI detects when user opens Stillform 3+ times in a day. Instead of treating each session as independent: "You've been here three times today. Your system is running hot — not broken. This might be a body day, not a mind day. Want to try a body scan instead of talking?" Prevents the rebuilder from using cognitive tools to outrun physical burnout.
 
 ---
 
