@@ -269,7 +269,7 @@ Hybrid approach:
 - 7-day free trial
 - Reddit launch post — don't post without paywall
 
-## What's Waiting on DUNS (~30 business days from April 4)
+## What's Waiting on DUNS (applied, pending approval)
 
 - Apple Developer Program ($99/yr) — requires DUNS for org account
 - App Store submission
@@ -676,7 +676,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 - ❌ Shareable composure card
 - ❌ Privacy policy update (stillformapp.com/privacy.html)
 - ❌ Lemon Squeezy paywall (waiting on Lemon Squeezy approval)
-- ❌ DUNS number application
+- ❌ DUNS number (applied, waiting on approval)
 
 ## Known Issues / Gaps for Next AI
 
