@@ -3042,7 +3042,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         })
       });
       clearTimeout(timeout);
-      if (!response.ok) throw new Error("Server error");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || "Server error");
+      }
       const parsed = await response.json();
       setMessages(prev => [...prev, {
         role: "ai",
@@ -3054,7 +3057,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (err.name === "AbortError") {
         setError("This is taking longer than usual. Check your connection and try again.");
       } else {
-        setError("Couldn't connect. Your message is saved — tap Retry to send it again.");
+        setError(`Couldn't connect: ${err.message}. Your message is saved — tap Retry or Resend.`);
       }
     }
     setLoading(false);

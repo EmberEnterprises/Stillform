@@ -367,9 +367,13 @@ exports.handler = async function(event) {
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
+    const controller = new AbortController();
+    const apiTimeout = setTimeout(() => controller.abort(), 20000);
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+      signal: controller.signal,
       body: JSON.stringify({
         model: "gpt-4o-mini",
         max_tokens: 180,
@@ -379,17 +383,26 @@ exports.handler = async function(event) {
         ]
       })
     });
+    clearTimeout(apiTimeout);
 
     const data = await response.json();
     if (!response.ok) { console.error("API error:", JSON.stringify(data)); throw new Error(data.error?.message || "API error " + response.status); }
 
     const text = data.choices?.[0]?.message?.content || "";
     const clean = text.replace(/```json|```/g, "").trim();
-    const parsed = JSON.parse(clean);
+
+    let parsed;
+    try {
+      parsed = JSON.parse(clean);
+    } catch {
+      // GPT didn't return valid JSON — wrap plain text as reframe
+      parsed = { distortion: null, reframe: clean };
+    }
 
     return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(parsed) };
   } catch (err) {
     console.error("Error:", err.message);
-    return { statusCode: 500, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: err.message }) };
+    const msg = err.name === "AbortError" ? "Request timed out. Try again." : (err.message || "Something went wrong.");
+    return { statusCode: 500, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: msg }) };
   }
 };
