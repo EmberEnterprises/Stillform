@@ -680,7 +680,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 
 ## Known Issues / Gaps for Next AI
 
-- **Reframe API "Couldn't connect" error** — OpenAI billing confirmed OK. Likely service worker caching old JS. Try incognito. If persists, check Netlify function logs for runtime errors.
+- **Reframe API "Couldn't connect" error** — Root cause was service worker caching old JS bundles. SW rewritten (v3) to never cache JS/CSS. If error persists after deploy, try incognito once to let new SW activate.
 - **Privacy policy outdated** — needs update for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
 - **No real user sessions yet** — Ava's feedback was from home screen only, Bobby hasn't used it, Jonny did technical audit not user session. Need 3+ real user sessions with testimonials before Reddit launch.
 - **Lemon Squeezy paywall not live** — Bobby completed ID verification. Waiting on Lemon Squeezy approval. Pricing is locked: $14.99/mo or $9.99/mo annual. Do not launch Reddit without paywall.
