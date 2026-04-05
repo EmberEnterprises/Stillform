@@ -541,7 +541,8 @@ const styles = `
   .ai-container {
     display: flex;
     flex-direction: column;
-    max-height: 480px;
+    height: calc(100vh - 280px);
+    min-height: 300px;
   }
 
   .ai-messages {
@@ -553,6 +554,7 @@ const styles = `
     padding: 4px 0 20px;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    -webkit-overflow-scrolling: touch;
   }
 
   .message {
@@ -2920,7 +2922,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   }, [messages]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    }, 100);
   }, [messages]);
 
   const [lastInput, setLastInput] = useState("");
