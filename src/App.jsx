@@ -2921,9 +2921,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }
   }, [messages]);
 
+  const lastAiRef = useRef(null);
+
   useEffect(() => {
     setTimeout(() => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      // Scroll so the latest AI message is visible at the top
+      if (lastAiRef.current) {
+        lastAiRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+      }
     }, 100);
   }, [messages]);
 
@@ -3385,8 +3392,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </div>
             </>
           )}
-          {messages.map((msg, i) => (
-            <div key={i} className={`message ${msg.role}`}>
+          {messages.map((msg, i) => {
+            const isLastAi = msg.role === "ai" && !messages.slice(i + 1).some(m => m.role === "ai");
+            return (
+            <div key={i} className={`message ${msg.role}`} ref={isLastAi ? lastAiRef : null}>
               <div className="message-avatar" style={msg.role === "ai" ? { color: mc.color } : {}}>{msg.role === "ai" ? mc.icon : "●"}</div>
               <div className="message-bubble" style={msg.role === "ai" ? { background: mc.aiBubble, borderColor: mc.border } : {}}>
                 {msg.distortion && (
@@ -3415,7 +3424,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
           {/* Escape route — shows after AI response, not during loading */}
           {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
             <div style={{ padding: "8px 0 4px 44px" }}>
