@@ -28,9 +28,8 @@ Stillform IS a daily composure practice AND a fast intervention system. Morning 
 ## Identity Lines (locked)
 
 - Stabilize. Then think clearly.
-- Body. Then thought. (for body-first users) / Think. Then settle. (for thought-first users)
+- Think clearly. Then settle. (thought-first) / Settle the body. Then think. (body-first) / Choose your entry point. (balanced)
 - Not meditation. Not therapy. A precision composure system.
-- Initiate Session / Stabilize now — primary CTA
 - ◉ Scan·Body / ✶ Reframe·Thought — secondary anchors
 
 ---
@@ -63,15 +62,15 @@ Research confirms two neurologically distinct regulation pathways:
 - **Top-down (thought-first):** Emotions start as thoughts — spiraling, replaying, analyzing. Reframe/AI is the primary tool. Breathing comes AFTER cognitive processing.
 - **Bottom-up (body-first):** Emotions start as body tension — jaw, chest, fists. Breathing/body scan is the primary tool. Reframing comes AFTER the body settles.
 
-Top-down emotions are more successfully regulated by top-down strategies. Bottom-up by bottom-up. Stillform's core target audience (analytical, neurodivergent) is likely thought-first.
+Top-down emotions are more successfully regulated by top-down strategies. Bottom-up by bottom-up. The guided assessment determines each user's default pathway.
 
-**Guided assessment at onboarding determines user's type through scenarios, not self-labeling. Three outcomes: thought-first (default to Reframe), body-first (default to Breathe), or "help me figure it out" (guided session through both).**
+**Guided assessment at onboarding determines user's type through 5 scenarios covering the full composure spectrum — not just crisis/anger. Three outcomes: thought-first (Reframe dominant), body-first (Breathe dominant), balanced (equal weight). "Help me figure it out" option sets balanced.**
 
 ## Three Core Tools
 
 **1. Breathe & Ground (merged tool)**
 
-- Two-pathway entry: "I can't calm down" (body overwhelm) and "I need to think clearly" (spiraling/decision paralysis)
+- Two-pathway entry: "Settle the system" (body overwhelm, thoughts or energy running fast) and "I need to think clearly" (spiraling/decision paralysis)
 - Calm path: 4-4-8-2 breathing → sensory grounding → Reframe calm mode
 - Clarity path: physiological sigh → Reframe clarity mode
 - Four breathing patterns selectable: Calm (4-4-8-2), Box (4-4-4-4), 4-7-8, Quick Reset
@@ -91,21 +90,19 @@ Top-down emotions are more successfully regulated by top-down strategies. Bottom
 - GPT-4o Mini via Netlify function — rate limited 10 req/IP/min
 - Conversation persistence via AES-GCM encrypted localStorage (device key in IndexedDB)
 - History capped at 10 messages
-- AI gets smarter by session count: <5 no patterns, 5-12 gentle, 12+ direct coaching
+- AI gets smarter by session count: <3 no patterns, 3-12 gentle, 12+ direct coaching
 
-## System Initialization → Guided Assessment (REDESIGN PENDING)
+## System Calibration (BUILT — April 4)
 
-Current flow being replaced with scenario-based assessment. New flow:
+Guided 5-scenario assessment determines regulation type. Followed by signal mapping and blind spot profiling. Flow:
 
-- Scenario questions that cover FULL composure spectrum (not just crisis/anger):
-  - "You're about to walk into a job interview"
-  - "Someone just complimented you out of nowhere"
-  - "You're tired but people are counting on you"
-  - "You're telling a story and everyone's listening"
-  - "Your kid is testing your patience over something small"
-- Scoring determines: thought-first, body-first, or unknown
-- "Help me figure it out" path: guided session through both tools
-- Signal mapping and bias profiling happen naturally through AI over first sessions, not as gates before starting
+- 5 scenarios covering full composure spectrum (interview, compliment, fatigue, attention, patience)
+- Each scenario: "What happens first?" → Body response / Thought response / Both equally
+- Scoring determines: thought-first, body-first, or balanced
+- "Help me figure it out" skip option → sets balanced
+- After assessment: signal mapping → blind spot profiler → breathing pattern → done
+- Completed tools hide from home screen. "Calibration complete. Update anytime in Settings."
+- Re-run calibration button in Settings
 
 ## 7-Session Review Milestone (NEW)
 
@@ -117,20 +114,22 @@ After the 7th session (regardless of frequency), the system reviews tool usage v
 - No pressure, no "you were wrong" — data + their call
 - First pattern note moved from session 5 to session 3 (if user doesn't feel seen in 48 hours, they leave)
 
-## Morning Practice (NEW CONCEPT)
+## Morning Check-In (BUILT — April 4, calendar integration pending)
 
-Stillform becomes a daily morning practice, not just an emergency tool:
+Daily check-in card at top of home screen. Two quick taps:
 
-- App reads device calendar
-- AI knows what's ahead: "Full day. You've got this. Want to set your tone for today?"
-- Brief check-in: how do you want to carry yourself today
-- AI adjusts tone based on day weight (heavy Tuesday vs light Friday)
-- Building daily relationship = user reaches for app naturally when something happens mid-day
+- Energy: Low / Steady / High / Ready / Wired
+- Hardware check: All clear / Depleted / Under-rested / Pain present / Activated / Medicated
+- "Set my tone →" saves and collapses to "✓ Checked in · tap to update"
+- Bio-filter auto-sets from hardware selection — feeds into every Reframe call that day
+- PENDING: Calendar integration — reads device calendar so system knows what's ahead before you tell it
 
 ## Bio-Filter (Physical State Check)
 
-- Options: All clear, Physically depleted, Gut signal active, Sleep deprived, Hormonal shift, Pain present, Physically activated, Medicated
-- Saves to localStorage, wired into Reframe API call
+- Now integrated into morning check-in (not a separate step)
+- Options: All clear, Depleted, Under-rested, Pain present, Activated, Medicated
+- Auto-sets from morning check-in hardware selection
+- Wired into every Reframe API call
 - AI instruction: "Some of what you're reading as [emotion] may be your system running on [filter] right now — not a permanent signal"
 
 ## AI Context Stack (what goes into every Reframe call)
@@ -230,9 +229,9 @@ Hybrid approach:
 
 ## Additional Screens & Features
 
+- Morning Check-In: daily energy + hardware check at top of home screen
 - My Progress: sessions, streak, avg shift, most used tool, signal profile trends
 - Signal Log: emotion chips, frequent + recent entries, optional notes
-- Tension Check: daily body check-in in Settings
 - Daily Reminder: push notification toggle + time picker in Settings
 - Audio toggle: breathing guidance on/off
 - Screen-light mode: dims screen during exercises
@@ -308,15 +307,27 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 
 # 5 — Next Steps to Launch
 
-## Immediate (code ready or in progress)
+## Immediate (next session — needs Mac)
 
-1. Smooth widget flash (extend splash until screenReady)
-2. Test widget when app is already open (background resume via onNewIntent)
-3. Disable or update service worker so future builds aren't cached
-4. Guided assessment flow — replace System Initialization
-5. Morning practice view — calendar integration, daily check-in
-6. AI summarization system — implement 9-category architecture
-7. Encode AI response principles and bias guards into system prompt (DONE — pushed April 4)
+1. Native APK rebuild with all April 4 web changes (dozens of commits)
+2. Test widget with new code on device
+3. `adb shell pm clear com.araembers.stillform` after install (SW cache)
+4. Test morning check-in, assessment, adaptive home screen on native
+5. Watch haptics testing on Galaxy Watch Ultra
+6. Share extension testing
+
+## Completed (April 4 — all live on web)
+
+1. ✅ Guided assessment flow — replaces old System Initialization
+2. ✅ Morning check-in card — energy + hardware, daily
+3. ✅ AI summarization system — post-session notes, 9-category awareness
+4. ✅ AI response principles and bias guards in all 3 system prompts
+5. ✅ Regulation type wired into AI
+6. ✅ Tutorial rewritten — 6 slides, science-backed, research links, swipe
+7. ✅ Reframe modes renamed with distinct AI behavior descriptions
+8. ✅ Neutral signal language throughout
+9. ✅ UAT early access dropdown with full roadmap
+10. ✅ Service worker cache bust
 
 ## Native Integrations
 
