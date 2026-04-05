@@ -5287,7 +5287,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "A precision composure system.",
-              body: "Your morning calibration and your in-the-moment reset. Set your tone before the day starts, then use it whenever a moment demands composure.\n\nEvery feature is grounded in published neuroscience and cognitive behavioral research. Not meditation. Not therapy. A system that learns how you operate and gets sharper every time you use it.",
+              body: "A channel to self-awareness — and a tool to act on it. Regulate your body first. Reset your thinking. Then approach whatever you're dealing with more clearly.\n\nBad sleep, a trigger, excitement, physical pain — the system reads all of it, because physical and environmental state shapes how you feel more than most people realize. Once you understand why you feel what you feel, that knowledge becomes the thing that stabilizes you.\n\nBuilt from lived experience and grounded in proven neuroscience and cognitive research.",
               note: null
             },
             {
@@ -5339,7 +5339,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "We don't track mood. We track Signal Awareness — how fast you notice your state before it drives an action. That could be anger, excitement, anxiety, or even joy. The speed of that recognition improving is your brain rewiring in real time.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
