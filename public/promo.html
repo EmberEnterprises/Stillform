@@ -7,595 +7,434 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&family=IBM+Plex+Mono:wght@300;400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-
 :root {
-  --bg: #0A0A0C;
-  --amber: #C8922A;
-  --amber-dim: rgba(200,146,42,0.20);
-  --amber-faint: rgba(200,146,42,0.08);
-  --text: #E8EAF0;
-  --text-dim: #9496A1;
-  --text-muted: #4A4C54;
-  --border: rgba(255,255,255,0.07);
-  --surface: #141418;
+  --bg: #0A0A0C; --amber: #C8922A;
+  --amber-dim: rgba(200,146,42,0.20); --amber-faint: rgba(200,146,42,0.08);
+  --text: #E8EAF0; --text-dim: #9496A1; --text-muted: #4A4C54;
+  --border: rgba(255,255,255,0.07); --surface: #141418;
 }
-
-html, body {
-  width: 100%; height: 100%;
-  background: #000;
-  overflow: hidden;
-  font-family: 'DM Sans', sans-serif;
-}
-
+html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:'DM Sans',sans-serif; }
 .stage {
-  width: 100vw; height: 100vh;
-  position: relative;
-  background: var(--bg);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
+  width:100vw; height:100vh; position:relative; background:var(--bg);
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.028'/%3E%3C/svg%3E");
 }
-
-.glow {
-  position: absolute;
-  width: 60vw; height: 60vw;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(200,146,42,0.06) 0%, transparent 70%);
-  pointer-events: none;
-  transition: all 1.5s ease;
-}
-
-.slide {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  justify-content: center; align-items: flex-start;
-  padding: 12vw 11vw;
-  opacity: 0; pointer-events: none;
-}
-
-.slide.active { opacity: 1; pointer-events: auto; }
-
-.logo-mark {
-  position: absolute; top: 6vw; left: 11vw;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 2.6vw; letter-spacing: 0.2em;
-  color: var(--text-muted); text-transform: uppercase; opacity: 0;
-}
-
-.slide-num {
-  position: absolute; top: 6vw; right: 11vw;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 2.4vw; letter-spacing: 0.14em;
-  color: var(--text-muted); opacity: 0;
-}
-
-.slide-url {
-  position: absolute; bottom: 6vw; left: 11vw;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 2.4vw; letter-spacing: 0.14em;
-  color: var(--text-muted); opacity: 0; text-transform: uppercase;
-}
-
-.eyebrow {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 2.6vw; letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--amber); opacity: 0; transform: translateY(8px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-  margin-bottom: 3.5vw;
-}
-
-.headline {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300; line-height: 1.05; color: var(--text);
-  opacity: 0; transform: translateY(12px);
-  transition: opacity 1s ease, transform 1s ease;
-}
-
-.headline em { font-style: italic; color: var(--amber); }
-
-.subhead {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic; font-weight: 300; color: var(--text-dim);
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-  line-height: 1.6; margin-top: 4vw;
-}
-
-.body-text {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 300; color: var(--text-dim); line-height: 1.85;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-  margin-top: 3vw;
-}
-
-.divider {
-  width: 8vw; height: 0.5px; background: var(--amber-dim);
-  opacity: 0; transition: opacity 0.8s ease; margin-top: 5vw;
-}
-
-.amber-line {
-  position: absolute; right: 11vw; top: 50%; transform: translateY(-50%);
-  width: 0.5px;
-  background: linear-gradient(to bottom, transparent, var(--amber-dim), transparent);
-  height: 40vh; opacity: 0; transition: opacity 1s ease;
-}
-
-/* ── Breathing ring ── */
-.ring-wrap {
-  position: absolute; right: -5vw; top: 50%; transform: translateY(-50%);
-  width: 52vw; height: 52vw; opacity: 0; transition: opacity 1.2s ease;
-}
-
-.ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); animation: ring-spin 12s linear infinite; }
-@keyframes ring-spin { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
-
-.ring-arc {
-  fill: none; stroke: var(--amber); stroke-width: 1; stroke-linecap: butt;
-  stroke-dasharray: 628; stroke-dashoffset: 157;
-  animation: arc-breathe 4s ease-in-out infinite;
-}
-@keyframes arc-breathe {
-  0%, 100% { stroke-dashoffset: 470; opacity: 0.6; }
-  40% { stroke-dashoffset: 157; opacity: 1; }
-  60% { stroke-dashoffset: 157; opacity: 1; }
-}
-
-.ring-track { fill: none; stroke: rgba(255,255,255,0.04); stroke-width: 1; }
-
-.ring-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
-.ring-count {
-  font-family: 'IBM Plex Mono', monospace; font-size: 10vw; font-weight: 300;
-  color: var(--amber); line-height: 1; animation: count-pulse 4s ease-in-out infinite;
-}
-@keyframes count-pulse { 0%, 100% { opacity: 0.5; } 40% { opacity: 1; } 60% { opacity: 1; } }
-
-/* ── Chips ── */
-.chip-row {
-  display: flex; flex-wrap: wrap; gap: 2vw; margin-top: 3.5vw;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.chip {
-  font-family: 'IBM Plex Mono', monospace; font-size: 2.2vw;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--text-dim); border: 0.5px solid var(--border);
-  background: var(--surface); padding: 1.2vw 2.4vw; border-radius: 100px;
-}
-
-.chip.active { color: var(--amber); border-color: var(--amber-dim); background: var(--amber-faint); }
-
-/* ── Mode cards ── */
-.mode-row {
-  display: flex; gap: 3vw; margin-top: 4vw;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.mode-card {
-  flex: 1; background: var(--surface); border: 0.5px solid var(--border);
-  padding: 3vw 3.5vw; display: flex; flex-direction: column; gap: 1.2vw;
-}
-
-.mode-card.lit { border-color: var(--amber-dim); background: var(--amber-faint); }
-.mode-name { font-family: 'IBM Plex Mono', monospace; font-size: 2.2vw; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); }
-.mode-desc { font-family: 'DM Sans', sans-serif; font-size: 2.8vw; font-weight: 300; color: var(--text-dim); line-height: 1.5; }
-
-/* ── Path cards ── */
-.path-row {
-  display: flex; gap: 4vw; margin-top: 4vw; width: 90%;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.path-card { flex: 1; border: 0.5px solid var(--border); background: var(--surface); padding: 3.5vw; }
-.path-card.lit { border-color: var(--amber-dim); background: var(--amber-faint); }
-.path-label { font-family: 'IBM Plex Mono', monospace; font-size: 2.2vw; letter-spacing: 0.12em; text-transform: uppercase; color: var(--amber); margin-bottom: 1.5vw; }
-.path-desc { font-family: 'Cormorant Garamond', serif; font-size: 3.8vw; font-style: italic; font-weight: 300; color: var(--text-dim); line-height: 1.4; margin-bottom: 2vw; }
-.path-detail { font-family: 'IBM Plex Mono', monospace; font-size: 2vw; letter-spacing: 0.1em; color: var(--text-muted); text-transform: uppercase; }
-
-/* ── Point grid ── */
-.point-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5vw; margin-top: 4vw;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.point-item { border: 0.5px solid var(--border); background: var(--surface); padding: 2.2vw 2.5vw; display: flex; flex-direction: column; gap: 0.8vw; }
-.point-item.lit { border-color: var(--amber-dim); background: var(--amber-faint); }
-.point-num { font-family: 'IBM Plex Mono', monospace; font-size: 2vw; letter-spacing: 0.12em; color: var(--amber); }
-.point-name { font-family: 'DM Sans', sans-serif; font-size: 2.6vw; font-weight: 300; color: var(--text-dim); }
-
-/* ── Bias tags ── */
-.bias-grid {
-  display: flex; flex-wrap: wrap; gap: 2vw; margin-top: 3.5vw; width: 85%;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.bias-tag {
-  font-family: 'IBM Plex Mono', monospace; font-size: 2vw;
-  letter-spacing: 0.09em; text-transform: uppercase;
-  color: var(--text-muted); border: 0.5px solid rgba(255,255,255,0.05);
-  padding: 1vw 2vw; border-radius: 2px;
-}
-
-.bias-tag.lit { color: var(--amber); border-color: var(--amber-dim); }
-
-/* ── Progress bars ── */
-.progress-stack {
-  display: flex; flex-direction: column; gap: 3vw; margin-top: 4vw; width: 80%;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.progress-row { display: flex; flex-direction: column; gap: 1.2vw; }
-.progress-label-row { display: flex; justify-content: space-between; align-items: baseline; }
-.progress-label { font-family: 'IBM Plex Mono', monospace; font-size: 2.2vw; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); }
-.progress-val { font-family: 'IBM Plex Mono', monospace; font-size: 2.8vw; color: var(--amber); }
-.progress-track { width: 100%; height: 1px; background: rgba(255,255,255,0.06); position: relative; overflow: hidden; }
-.progress-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--amber); opacity: 0.6; width: 0; transition: width 1.2s ease 0.3s; }
-.progress-fill.go { width: var(--w); }
-
-/* ── Stat row ── */
-.stat-row {
-  display: flex; gap: 7vw; margin-top: 5vw;
-  opacity: 0; transform: translateY(8px);
-  transition: opacity 0.9s ease, transform 0.9s ease;
-}
-
-.stat { display: flex; flex-direction: column; gap: 1vw; }
-.stat-val { font-family: 'IBM Plex Mono', monospace; font-size: 6.5vw; font-weight: 300; color: var(--amber); line-height: 1; }
-.stat-label { font-family: 'IBM Plex Mono', monospace; font-size: 2vw; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-muted); }
-
-/* ── Dots ── */
-.dots {
-  position: fixed; bottom: 4.5vw; left: 50%; transform: translateX(-50%);
-  display: flex; gap: 7px; z-index: 100;
-}
-
-.dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.15); transition: background 0.4s ease, transform 0.4s ease; }
-.dot.active { background: var(--amber); transform: scale(1.3); }
-
-.tap-hint {
-  position: fixed; bottom: 10vw; left: 50%; transform: translateX(-50%);
-  font-family: 'IBM Plex Mono', monospace; font-size: 2.2vw; letter-spacing: 0.18em;
-  text-transform: uppercase; color: var(--text-muted); opacity: 0;
-  animation: hint-fade 3s ease 3s forwards; white-space: nowrap;
-}
-
-@keyframes hint-fade { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
-
-.revealed { opacity: 1 !important; transform: none !important; }
-.revealed-slow { opacity: 1 !important; }
+.glow { position:absolute; width:60vw; height:60vw; border-radius:50%; background:radial-gradient(circle,rgba(200,146,42,0.06) 0%,transparent 70%); pointer-events:none; transition:all 1.5s ease; }
+.slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:12vw 11vw; opacity:0; pointer-events:none; }
+.slide.active { opacity:1; pointer-events:auto; }
+.logo-mark { position:absolute; top:6vw; left:11vw; font-family:'IBM Plex Mono',monospace; font-size:2.6vw; letter-spacing:0.2em; color:var(--text-muted); text-transform:uppercase; opacity:0; }
+.slide-num { position:absolute; top:6vw; right:11vw; font-family:'IBM Plex Mono',monospace; font-size:2.4vw; letter-spacing:0.14em; color:var(--text-muted); opacity:0; }
+.slide-url { position:absolute; bottom:6vw; left:11vw; font-family:'IBM Plex Mono',monospace; font-size:2.4vw; letter-spacing:0.14em; color:var(--text-muted); opacity:0; text-transform:uppercase; }
+.eyebrow { font-family:'IBM Plex Mono',monospace; font-size:2.6vw; letter-spacing:0.22em; text-transform:uppercase; color:var(--amber); opacity:0; transform:translateY(8px); transition:opacity 0.8s ease,transform 0.8s ease; margin-bottom:3.5vw; }
+.headline { font-family:'Cormorant Garamond',serif; font-weight:300; line-height:1.05; color:var(--text); opacity:0; transform:translateY(12px); transition:opacity 1s ease,transform 1s ease; }
+.headline em { font-style:italic; color:var(--amber); }
+.subhead { font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:300; color:var(--text-dim); opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; line-height:1.6; margin-top:4vw; }
+.body-text { font-family:'DM Sans',sans-serif; font-weight:300; color:var(--text-dim); line-height:1.85; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; margin-top:3vw; }
+.divider { width:8vw; height:0.5px; background:var(--amber-dim); opacity:0; transition:opacity 0.8s ease; margin-top:5vw; }
+.amber-line { position:absolute; right:11vw; top:50%; transform:translateY(-50%); width:0.5px; background:linear-gradient(to bottom,transparent,var(--amber-dim),transparent); height:40vh; opacity:0; transition:opacity 1s ease; }
+.ring-wrap { position:absolute; right:-5vw; top:50%; transform:translateY(-50%); width:52vw; height:52vw; opacity:0; transition:opacity 1.2s ease; }
+.ring-svg { width:100%; height:100%; transform:rotate(-90deg); animation:ring-spin 12s linear infinite; }
+@keyframes ring-spin { from{transform:rotate(-90deg);}to{transform:rotate(270deg);} }
+.ring-arc { fill:none; stroke:var(--amber); stroke-width:1; stroke-linecap:butt; stroke-dasharray:628; stroke-dashoffset:157; animation:arc-breathe 4s ease-in-out infinite; }
+@keyframes arc-breathe { 0%,100%{stroke-dashoffset:470;opacity:0.6;}40%{stroke-dashoffset:157;opacity:1;}60%{stroke-dashoffset:157;opacity:1;} }
+.ring-track { fill:none; stroke:rgba(255,255,255,0.04); stroke-width:1; }
+.ring-center { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.ring-count { font-family:'IBM Plex Mono',monospace; font-size:10vw; font-weight:300; color:var(--amber); line-height:1; animation:count-pulse 4s ease-in-out infinite; }
+@keyframes count-pulse { 0%,100%{opacity:0.5;}40%{opacity:1;}60%{opacity:1;} }
+.chip-row { display:flex; flex-wrap:wrap; gap:2vw; margin-top:3.5vw; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.chip { font-family:'IBM Plex Mono',monospace; font-size:2.2vw; letter-spacing:0.1em; text-transform:uppercase; color:var(--text-dim); border:0.5px solid var(--border); background:var(--surface); padding:1.2vw 2.4vw; border-radius:100px; }
+.chip.active { color:var(--amber); border-color:var(--amber-dim); background:var(--amber-faint); }
+.mode-row { display:flex; gap:3vw; margin-top:4vw; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.mode-card { flex:1; background:var(--surface); border:0.5px solid var(--border); padding:3vw 3.5vw; display:flex; flex-direction:column; gap:1.2vw; }
+.mode-card.lit { border-color:var(--amber-dim); background:var(--amber-faint); }
+.mode-name { font-family:'IBM Plex Mono',monospace; font-size:2.2vw; letter-spacing:0.14em; text-transform:uppercase; color:var(--amber); }
+.mode-desc { font-family:'DM Sans',sans-serif; font-size:2.8vw; font-weight:300; color:var(--text-dim); line-height:1.5; }
+.path-row { display:flex; gap:4vw; margin-top:4vw; width:90%; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.path-card { flex:1; border:0.5px solid var(--border); background:var(--surface); padding:3.5vw; }
+.path-card.lit { border-color:var(--amber-dim); background:var(--amber-faint); }
+.path-label { font-family:'IBM Plex Mono',monospace; font-size:2.2vw; letter-spacing:0.12em; text-transform:uppercase; color:var(--amber); margin-bottom:1.5vw; }
+.path-desc { font-family:'Cormorant Garamond',serif; font-size:3.8vw; font-style:italic; font-weight:300; color:var(--text-dim); line-height:1.4; margin-bottom:2vw; }
+.path-detail { font-family:'IBM Plex Mono',monospace; font-size:2vw; letter-spacing:0.1em; color:var(--text-muted); text-transform:uppercase; }
+.point-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2.5vw; margin-top:4vw; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.point-item { border:0.5px solid var(--border); background:var(--surface); padding:2.2vw 2.5vw; display:flex; flex-direction:column; gap:0.8vw; }
+.point-item.lit { border-color:var(--amber-dim); background:var(--amber-faint); }
+.point-num { font-family:'IBM Plex Mono',monospace; font-size:2vw; letter-spacing:0.12em; color:var(--amber); }
+.point-name { font-family:'DM Sans',sans-serif; font-size:2.6vw; font-weight:300; color:var(--text-dim); }
+.bias-grid { display:flex; flex-wrap:wrap; gap:2vw; margin-top:3.5vw; width:85%; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.bias-tag { font-family:'IBM Plex Mono',monospace; font-size:2vw; letter-spacing:0.09em; text-transform:uppercase; color:var(--text-muted); border:0.5px solid rgba(255,255,255,0.05); padding:1vw 2vw; border-radius:2px; }
+.bias-tag.lit { color:var(--amber); border-color:var(--amber-dim); }
+.progress-stack { display:flex; flex-direction:column; gap:3vw; margin-top:4vw; width:80%; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.progress-row { display:flex; flex-direction:column; gap:1.2vw; }
+.progress-label-row { display:flex; justify-content:space-between; align-items:baseline; }
+.progress-label { font-family:'IBM Plex Mono',monospace; font-size:2.2vw; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted); }
+.progress-val { font-family:'IBM Plex Mono',monospace; font-size:2.8vw; color:var(--amber); }
+.progress-track { width:100%; height:1px; background:rgba(255,255,255,0.06); position:relative; overflow:hidden; }
+.progress-fill { position:absolute; left:0; top:0; height:100%; background:var(--amber); opacity:0.6; width:0; transition:width 1.2s ease 0.3s; }
+.progress-fill.go { width:var(--w); }
+.stat-row { display:flex; gap:7vw; margin-top:5vw; opacity:0; transform:translateY(8px); transition:opacity 0.9s ease,transform 0.9s ease; }
+.stat { display:flex; flex-direction:column; gap:1vw; }
+.stat-val { font-family:'IBM Plex Mono',monospace; font-size:6.5vw; font-weight:300; color:var(--amber); line-height:1; }
+.stat-label { font-family:'IBM Plex Mono',monospace; font-size:2vw; letter-spacing:0.14em; text-transform:uppercase; color:var(--text-muted); }
+.dots { position:fixed; bottom:4.5vw; left:50%; transform:translateX(-50%); display:flex; gap:7px; z-index:100; }
+.dot { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,0.15); transition:background 0.4s ease,transform 0.4s ease; }
+.dot.active { background:var(--amber); transform:scale(1.3); }
+.tap-hint { position:fixed; bottom:10vw; left:50%; transform:translateX(-50%); font-family:'IBM Plex Mono',monospace; font-size:2.2vw; letter-spacing:0.18em; text-transform:uppercase; color:var(--text-muted); opacity:0; animation:hint-fade 3s ease 3s forwards; white-space:nowrap; }
+@keyframes hint-fade { 0%{opacity:0;}20%{opacity:1;}80%{opacity:1;}100%{opacity:0;} }
+.revealed { opacity:1 !important; transform:none !important; }
+.revealed-slow { opacity:1 !important; }
 </style>
 </head>
 <body>
 <div class="stage" id="stage">
-  <div class="glow" id="glow" style="top:-10%;left:-10%;"></div>
+<div class="glow" id="glow" style="top:-10%;left:-10%;"></div>
 
-  <!-- ═══ 01 — OPENING ═══ -->
-  <div class="slide active" id="slide-0">
-    <div class="logo-mark" id="s0-logo">Stillform</div>
-    <div class="slide-num" id="s0-num">01 / 09</div>
-    <div class="ring-wrap" id="s0-ring">
-      <svg class="ring-svg" viewBox="0 0 200 200">
-        <circle class="ring-track" cx="100" cy="100" r="95"/>
-        <circle class="ring-arc" cx="100" cy="100" r="95"/>
-        <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.5"/>
-        <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
-          <line x1="100" y1="5" x2="100" y2="16"/>
-          <line x1="195" y1="100" x2="184" y2="100"/>
-          <line x1="100" y1="195" x2="100" y2="184"/>
-          <line x1="5" y1="100" x2="16" y2="100"/>
-        </g>
-      </svg>
-      <div class="ring-center"><div class="ring-count" id="ring-count">4</div></div>
-    </div>
-    <div class="eyebrow" id="s0-eye">A composure system</div>
-    <div class="headline" id="s0-h" style="font-size:14vw;">Composure.<br><em>On demand.</em></div>
-    <div class="subhead" id="s0-sub" style="font-size:4.5vw;">Stabilize. Then think clearly.</div>
-    <div class="slide-url" id="s0-url">stillformapp.com</div>
+<!-- 01 OPENING -->
+<div class="slide active" id="slide-0">
+  <div class="logo-mark" id="s0-logo">Stillform</div>
+  <div class="slide-num" id="s0-num">01 / 11</div>
+  <div class="ring-wrap" id="s0-ring">
+    <svg class="ring-svg" viewBox="0 0 200 200">
+      <circle class="ring-track" cx="100" cy="100" r="95"/>
+      <circle class="ring-arc" cx="100" cy="100" r="95"/>
+      <circle cx="100" cy="100" r="78" fill="none" stroke="rgba(255,255,255,0.025)" stroke-width="0.5"/>
+      <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
+        <line x1="100" y1="5" x2="100" y2="16"/><line x1="195" y1="100" x2="184" y2="100"/>
+        <line x1="100" y1="195" x2="100" y2="184"/><line x1="5" y1="100" x2="16" y2="100"/>
+      </g>
+    </svg>
+    <div class="ring-center"><div class="ring-count" id="ring-count">4</div></div>
   </div>
+  <div class="eyebrow" id="s0-eye">A composure system</div>
+  <div class="headline" id="s0-h" style="font-size:14vw;">Composure.<br><em>On demand.</em></div>
+  <div class="subhead" id="s0-sub" style="font-size:4.5vw;">Stabilize. Then think clearly.</div>
+  <div class="slide-url" id="s0-url">stillformapp.com</div>
+</div>
 
-  <!-- ═══ 02 — WHO IT'S FOR ═══ -->
-  <div class="slide" id="slide-1">
-    <div class="logo-mark" id="s1-logo">Stillform</div>
-    <div class="slide-num" id="s1-num">02 / 09</div>
-    <div class="amber-line" id="s1-line"></div>
-    <div style="max-width:68%;">
-      <div class="eyebrow" id="s1-eye">Built for intensity</div>
-      <div class="headline" id="s1-h" style="font-size:9vw; line-height:1.12;">You feel everything<br>at <em>full volume.</em></div>
-      <div class="divider" id="s1-div"></div>
-      <div class="body-text" id="s1-body" style="font-size:3.8vw;">
-        Intensity before a high-stakes call.<br>
-        Excitement before a first date.<br>
-        Joy so big it makes you spiral.<br>
-        Dread for no reason at all.<br><br>
-        The goal isn't to flatten it.<br>
-        It's to stay <strong style="color:var(--text);font-weight:500;">functional inside it.</strong><br><br>
-        <span style="color:var(--text-muted);font-size:3.2vw;">Not meditation. Not therapy.<br>A precision composure system.</span>
-      </div>
-    </div>
-    <div class="slide-url" id="s1-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 03 — SYSTEM INITIALIZATION ═══ -->
-  <div class="slide" id="slide-2">
-    <div class="logo-mark" id="s2-logo">Stillform</div>
-    <div class="slide-num" id="s2-num">03 / 09</div>
-    <div style="max-width:55%;">
-      <div class="eyebrow" id="s2-eye">◎ Initialize system</div>
-      <div class="headline" id="s2-h" style="font-size:9vw; line-height:1.1;">It learns<br><em>you first.</em></div>
-      <div class="body-text" id="s2-body" style="font-size:3.5vw;">Signal mapping. Blind spot profiler. Before the first session, Stillform maps where you carry intensity and which of the 10 cognitive patterns trip you.</div>
-    </div>
-    <div class="bias-grid" id="s2-bias">
-      <div class="bias-tag lit">Signal mapping</div>
-      <div class="bias-tag lit">Blind spot profiler</div>
-      <div class="bias-tag">Catastrophising</div>
-      <div class="bias-tag">Mind reading</div>
-      <div class="bias-tag">All-or-nothing</div>
-      <div class="bias-tag">Emotional reasoning</div>
-      <div class="bias-tag">Personalising</div>
-      <div class="bias-tag">Fortune telling</div>
-      <div class="bias-tag">Should statements</div>
-      <div class="bias-tag">Magnification</div>
-      <div class="bias-tag">Labelling</div>
-      <div class="bias-tag">Filtering</div>
-    </div>
-    <div class="slide-url" id="s2-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 04 — BIO-FILTER ═══ -->
-  <div class="slide" id="slide-3">
-    <div class="logo-mark" id="s3-logo">Stillform</div>
-    <div class="slide-num" id="s3-num">04 / 09</div>
-    <div class="amber-line" id="s3-line"></div>
-    <div style="max-width:60%;">
-      <div class="eyebrow" id="s3-eye">Hardware diagnostics</div>
-      <div class="headline" id="s3-h" style="font-size:9.5vw; line-height:1.08;">Body.<br><em>Then thought.</em></div>
-      <div class="body-text" id="s3-body" style="font-size:3.5vw;">Every session starts with a system check. What you read as emotion might be your hardware — not your state of mind.</div>
-    </div>
-    <div class="chip-row" id="s3-chips">
-      <div class="chip active">All clear</div>
-      <div class="chip">Physically depleted</div>
-      <div class="chip">Gut signal active</div>
-      <div class="chip">Sleep deprived</div>
-      <div class="chip">Hormonal shift</div>
-      <div class="chip">Pain present</div>
-      <div class="chip">Activated</div>
-      <div class="chip">Medicated</div>
-    </div>
-    <div class="slide-url" id="s3-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 05 — BREATHE & GROUND ═══ -->
-  <div class="slide" id="slide-4">
-    <div class="logo-mark" id="s4-logo">Stillform</div>
-    <div class="slide-num" id="s4-num">05 / 09</div>
-    <div class="eyebrow" id="s4-eye">Protocol 01 · Breathe & ground</div>
-    <div class="headline" id="s4-h" style="font-size:9vw; line-height:1.1;">Two paths in.<br><em>One out.</em></div>
-    <div class="path-row" id="s4-paths">
-      <div class="path-card lit">
-        <div class="path-label">I can't calm down</div>
-        <div class="path-desc">Overwhelm / panic / flooding</div>
-        <div class="path-detail">4-4-8-2 → sensory grounding → regulate</div>
-      </div>
-      <div class="path-card">
-        <div class="path-label">I need to think clearly</div>
-        <div class="path-desc">Spiraling / decision paralysis</div>
-        <div class="path-detail">Physiological sigh → clarity mode</div>
-      </div>
-    </div>
-    <div class="chip-row" id="s4-patterns" style="margin-top:3vw;">
-      <div class="chip active">Calm · 4-4-8-2</div>
-      <div class="chip">Box · 4-4-4-4</div>
-      <div class="chip">4-7-8</div>
-      <div class="chip">Quick reset</div>
-    </div>
-    <div class="slide-url" id="s4-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 06 — BODY SCAN ═══ -->
-  <div class="slide" id="slide-5">
-    <div class="logo-mark" id="s5-logo">Stillform</div>
-    <div class="slide-num" id="s5-num">06 / 09</div>
-    <div class="amber-line" id="s5-line"></div>
-    <div style="max-width:58%;">
-      <div class="eyebrow" id="s5-eye">Protocol 02 · Body scan</div>
-      <div class="headline" id="s5-h" style="font-size:9vw; line-height:1.1;">Locate tension.<br><em>Release it.</em></div>
-      <div class="body-text" id="s5-body" style="font-size:3.5vw;">Six acupressure points. Timed holds. Auto-advances. The body speaks before the mind catches up.</div>
-    </div>
-    <div class="point-grid" id="s5-points">
-      <div class="point-item lit"><div class="point-num">01</div><div class="point-name">Between brows</div></div>
-      <div class="point-item"><div class="point-num">02</div><div class="point-name">Temples</div></div>
-      <div class="point-item"><div class="point-num">03</div><div class="point-name">Base of skull</div></div>
-      <div class="point-item"><div class="point-num">04</div><div class="point-name">Shoulders</div></div>
-      <div class="point-item"><div class="point-num">05</div><div class="point-name">Sternum</div></div>
-      <div class="point-item"><div class="point-num">06</div><div class="point-name">Wrist</div></div>
-    </div>
-    <div class="slide-url" id="s5-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 07 — REFRAME AI ═══ -->
-  <div class="slide" id="slide-6">
-    <div class="logo-mark" id="s6-logo">Stillform</div>
-    <div class="slide-num" id="s6-num">07 / 09</div>
-    <div class="eyebrow" id="s6-eye">Protocol 03 · Reframe AI</div>
-    <div class="headline" id="s6-h" style="font-size:9vw; line-height:1.1;">AI that knows<br><em>your patterns.</em></div>
-    <div class="mode-row" id="s6-modes">
-      <div class="mode-card lit"><div class="mode-name">Regulate</div><div class="mode-desc">Calm the system. Restore function.</div></div>
-      <div class="mode-card"><div class="mode-name">Get Sharp</div><div class="mode-desc">Cut through spiral. Think clearly.</div></div>
-      <div class="mode-card"><div class="mode-name">Lock In</div><div class="mode-desc">Channel intensity. Perform.</div></div>
-    </div>
-    <div class="body-text" id="s6-body" style="font-size:3.2vw; margin-top:3.5vw;">
-      Reads your signal profile, blind spots, bio-filter, feel state, and full session history.<br>
-      Gets smarter the more you use it — silently, without announcement.
-    </div>
-    <div class="slide-url" id="s6-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 08 — SIGNAL LOG + PROGRESS ═══ -->
-  <div class="slide" id="slide-7">
-    <div class="logo-mark" id="s7-logo">Stillform</div>
-    <div class="slide-num" id="s7-num">08 / 09</div>
-    <div class="amber-line" id="s7-line"></div>
-    <div style="max-width:55%;">
-      <div class="eyebrow" id="s7-eye">Signal intelligence</div>
-      <div class="headline" id="s7-h" style="font-size:9vw; line-height:1.1;">Track composure<br><em>over time.</em></div>
-      <div class="body-text" id="s7-body" style="font-size:3.4vw;">Not journaling. Pattern recognition. Session history, composure streak, average shift — all in one view.</div>
-    </div>
-    <div class="progress-stack" id="s7-progress">
-      <div class="progress-row">
-        <div class="progress-label-row"><div class="progress-label">Sessions</div><div class="progress-val">24</div></div>
-        <div class="progress-track"><div class="progress-fill" style="--w:72%;"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label-row"><div class="progress-label">Streak</div><div class="progress-val">11 days</div></div>
-        <div class="progress-track"><div class="progress-fill" style="--w:55%;"></div></div>
-      </div>
-      <div class="progress-row">
-        <div class="progress-label-row"><div class="progress-label">Avg. shift</div><div class="progress-val">+3.2</div></div>
-        <div class="progress-track"><div class="progress-fill" style="--w:64%;"></div></div>
-      </div>
-    </div>
-    <div class="slide-url" id="s7-url">stillformapp.com</div>
-  </div>
-
-  <!-- ═══ 09 — CTA ═══ -->
-  <div class="slide" id="slide-8">
-    <div class="logo-mark" id="s8-logo">Stillform</div>
-    <div class="slide-num" id="s8-num">09 / 09</div>
-    <div style="max-width:70%;">
-      <div class="eyebrow" id="s8-eye">Not meditation. Not therapy.</div>
-      <div class="headline" id="s8-h" style="font-size:10.5vw; line-height:1.08;">A precision<br>composure<br><em>system.</em></div>
-      <div class="stat-row" id="s8-stats">
-        <div class="stat"><div class="stat-val">3</div><div class="stat-label">Protocols</div></div>
-        <div class="stat"><div class="stat-val">10</div><div class="stat-label">Bias patterns</div></div>
-        <div class="stat"><div class="stat-val">90s</div><div class="stat-label">Per session</div></div>
-      </div>
-      <div class="subhead" id="s8-sub" style="font-size:4vw; margin-top:5vw;">
-        $14.99/mo or $9.99/mo billed annually.<br>
-        7-day free trial. Installs on iOS &amp; Android.<br>
-        stillformapp.com
-      </div>
+<!-- 02 WHO IT'S FOR -->
+<div class="slide" id="slide-1">
+  <div class="logo-mark" id="s1-logo">Stillform</div>
+  <div class="slide-num" id="s1-num">02 / 11</div>
+  <div class="amber-line" id="s1-line"></div>
+  <div style="max-width:68%;">
+    <div class="eyebrow" id="s1-eye">Built for intensity</div>
+    <div class="headline" id="s1-h" style="font-size:9vw;line-height:1.12;">You feel everything<br>at <em>full volume.</em></div>
+    <div class="divider" id="s1-div"></div>
+    <div class="body-text" id="s1-body" style="font-size:3.8vw;">
+      Intensity before a high-stakes call.<br>
+      Excitement before a first date.<br>
+      Joy so big it makes you spiral.<br>
+      Dread for no reason at all.<br><br>
+      The goal isn't to flatten it.<br>
+      It's to stay <strong style="color:var(--text);font-weight:500;">functional inside it.</strong><br><br>
+      <span style="color:var(--text-muted);font-size:3.2vw;">Not meditation. Not therapy.<br>A precision composure system.</span>
     </div>
   </div>
+  <div class="slide-url" id="s1-url">stillformapp.com</div>
+</div>
 
-  <div class="dots" id="dots">
-    <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+<!-- 03 COURAGE QUOTE -->
+<div class="slide" id="slide-2">
+  <div class="logo-mark" id="s2-logo">Stillform</div>
+  <div class="slide-num" id="s2-num">03 / 11</div>
+  <div style="max-width:76%;">
+    <div class="eyebrow" id="s2-eye">The signal is real</div>
+    <div class="headline" id="s2-h" style="font-size:8.5vw;line-height:1.18;">
+      Courage isn't the<br>absence of fear.<br>
+      It's acting clearly<br><em>while the signal<br>is still running.</em>
+    </div>
+    <div class="divider" id="s2-div"></div>
+    <div class="body-text" id="s2-body" style="font-size:3.8vw;">That's what composure builds.</div>
   </div>
+  <div class="slide-url" id="s2-url">stillformapp.com</div>
+</div>
 
-  <div class="tap-hint">Tap to advance</div>
+<!-- 04 SYSTEM INITIALIZATION -->
+<div class="slide" id="slide-3">
+  <div class="logo-mark" id="s3-logo">Stillform</div>
+  <div class="slide-num" id="s3-num">04 / 11</div>
+  <div style="max-width:55%;">
+    <div class="eyebrow" id="s3-eye">◎ Initialize system</div>
+    <div class="headline" id="s3-h" style="font-size:9vw;line-height:1.1;">It learns<br><em>you first.</em></div>
+    <div class="body-text" id="s3-body" style="font-size:3.5vw;">Signal mapping. Blind spot profiler. Before the first session, Stillform maps where you carry intensity and which of the 10 cognitive patterns trip you.</div>
+  </div>
+  <div class="bias-grid" id="s3-bias">
+    <div class="bias-tag lit">Signal mapping</div>
+    <div class="bias-tag lit">Blind spot profiler</div>
+    <div class="bias-tag">Catastrophising</div>
+    <div class="bias-tag">Mind reading</div>
+    <div class="bias-tag">All-or-nothing</div>
+    <div class="bias-tag">Emotional reasoning</div>
+    <div class="bias-tag">Personalising</div>
+    <div class="bias-tag">Fortune telling</div>
+    <div class="bias-tag">Should statements</div>
+    <div class="bias-tag">Magnification</div>
+    <div class="bias-tag">Labelling</div>
+    <div class="bias-tag">Filtering</div>
+  </div>
+  <div class="slide-url" id="s3-url">stillformapp.com</div>
+</div>
+
+<!-- 05 BIO-FILTER -->
+<div class="slide" id="slide-4">
+  <div class="logo-mark" id="s4-logo">Stillform</div>
+  <div class="slide-num" id="s4-num">05 / 11</div>
+  <div class="amber-line" id="s4-line"></div>
+  <div style="max-width:60%;">
+    <div class="eyebrow" id="s4-eye">Hardware diagnostics</div>
+    <div class="headline" id="s4-h" style="font-size:9.5vw;line-height:1.08;">Body.<br><em>Then thought.</em></div>
+    <div class="body-text" id="s4-body" style="font-size:3.5vw;">Every session starts with a system check. What you read as emotion might be your hardware — not your state of mind.</div>
+  </div>
+  <div class="chip-row" id="s4-chips">
+    <div class="chip active">All clear</div>
+    <div class="chip">Physically depleted</div>
+    <div class="chip">Gut signal active</div>
+    <div class="chip">Sleep deprived</div>
+    <div class="chip">Hormonal shift</div>
+    <div class="chip">Pain present</div>
+    <div class="chip">Activated</div>
+    <div class="chip">Medicated</div>
+  </div>
+  <div class="slide-url" id="s4-url">stillformapp.com</div>
+</div>
+
+<!-- 06 BREATHE & GROUND -->
+<div class="slide" id="slide-5">
+  <div class="logo-mark" id="s5-logo">Stillform</div>
+  <div class="slide-num" id="s5-num">06 / 11</div>
+  <div class="eyebrow" id="s5-eye">Protocol 01 · Breathe &amp; ground</div>
+  <div class="headline" id="s5-h" style="font-size:9vw;line-height:1.1;">Two paths in.<br><em>One out.</em></div>
+  <div class="path-row" id="s5-paths">
+    <div class="path-card lit">
+      <div class="path-label">I can't calm down</div>
+      <div class="path-desc">Overwhelm / panic / flooding</div>
+      <div class="path-detail">4-4-8-2 → sensory grounding → regulate</div>
+    </div>
+    <div class="path-card">
+      <div class="path-label">I need to think clearly</div>
+      <div class="path-desc">Spiraling / decision paralysis</div>
+      <div class="path-detail">Physiological sigh → clarity mode</div>
+    </div>
+  </div>
+  <div class="chip-row" id="s5-patterns" style="margin-top:3vw;">
+    <div class="chip active">Calm · 4-4-8-2</div>
+    <div class="chip">Box · 4-4-4-4</div>
+    <div class="chip">4-7-8</div>
+    <div class="chip">Quick reset</div>
+  </div>
+  <div class="slide-url" id="s5-url">stillformapp.com</div>
+</div>
+
+<!-- 07 BODY SCAN -->
+<div class="slide" id="slide-6">
+  <div class="logo-mark" id="s6-logo">Stillform</div>
+  <div class="slide-num" id="s6-num">07 / 11</div>
+  <div class="amber-line" id="s6-line"></div>
+  <div style="max-width:58%;">
+    <div class="eyebrow" id="s6-eye">Protocol 02 · Body scan</div>
+    <div class="headline" id="s6-h" style="font-size:9vw;line-height:1.1;">Locate tension.<br><em>Release it.</em></div>
+    <div class="body-text" id="s6-body" style="font-size:3.5vw;">Six acupressure points. Timed holds. Auto-advances. The body speaks before the mind catches up.</div>
+  </div>
+  <div class="point-grid" id="s6-points">
+    <div class="point-item lit"><div class="point-num">01</div><div class="point-name">Between brows</div></div>
+    <div class="point-item"><div class="point-num">02</div><div class="point-name">Temples</div></div>
+    <div class="point-item"><div class="point-num">03</div><div class="point-name">Base of skull</div></div>
+    <div class="point-item"><div class="point-num">04</div><div class="point-name">Shoulders</div></div>
+    <div class="point-item"><div class="point-num">05</div><div class="point-name">Sternum</div></div>
+    <div class="point-item"><div class="point-num">06</div><div class="point-name">Wrist</div></div>
+  </div>
+  <div class="slide-url" id="s6-url">stillformapp.com</div>
+</div>
+
+<!-- 08 REFRAME AI -->
+<div class="slide" id="slide-7">
+  <div class="logo-mark" id="s7-logo">Stillform</div>
+  <div class="slide-num" id="s7-num">08 / 11</div>
+  <div class="eyebrow" id="s7-eye">Protocol 03 · Reframe AI</div>
+  <div class="headline" id="s7-h" style="font-size:9vw;line-height:1.1;">AI that knows<br><em>your patterns.</em></div>
+  <div class="mode-row" id="s7-modes">
+    <div class="mode-card lit"><div class="mode-name">Regulate</div><div class="mode-desc">Calm the system. Restore function.</div></div>
+    <div class="mode-card"><div class="mode-name">Get Sharp</div><div class="mode-desc">Cut through spiral. Think clearly.</div></div>
+    <div class="mode-card"><div class="mode-name">Lock In</div><div class="mode-desc">Channel intensity. Perform.</div></div>
+  </div>
+  <div class="body-text" id="s7-body" style="font-size:3.2vw;margin-top:3.5vw;">
+    Reads your signal profile, blind spots, bio-filter, feel state, and full session history.<br>
+    Gets smarter the more you use it — silently, without announcement.
+  </div>
+  <div class="slide-url" id="s7-url">stillformapp.com</div>
+</div>
+
+<!-- 09 SIGNAL LOG -->
+<div class="slide" id="slide-8">
+  <div class="logo-mark" id="s8-logo">Stillform</div>
+  <div class="slide-num" id="s8-num">09 / 11</div>
+  <div class="amber-line" id="s8-line"></div>
+  <div style="max-width:55%;">
+    <div class="eyebrow" id="s8-eye">Signal intelligence</div>
+    <div class="headline" id="s8-h" style="font-size:9vw;line-height:1.1;">Track composure<br><em>over time.</em></div>
+    <div class="body-text" id="s8-body" style="font-size:3.4vw;">Not journaling. Pattern recognition. Session history, composure streak, average shift — all in one view.</div>
+  </div>
+  <div class="progress-stack" id="s8-progress">
+    <div class="progress-row">
+      <div class="progress-label-row"><div class="progress-label">Sessions</div><div class="progress-val">24</div></div>
+      <div class="progress-track"><div class="progress-fill" style="--w:72%;"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label-row"><div class="progress-label">Streak</div><div class="progress-val">11 days</div></div>
+      <div class="progress-track"><div class="progress-fill" style="--w:55%;"></div></div>
+    </div>
+    <div class="progress-row">
+      <div class="progress-label-row"><div class="progress-label">Avg. shift</div><div class="progress-val">+3.2</div></div>
+      <div class="progress-track"><div class="progress-fill" style="--w:64%;"></div></div>
+    </div>
+  </div>
+  <div class="slide-url" id="s8-url">stillformapp.com</div>
+</div>
+
+<!-- 10 CONFIDENCE -->
+<div class="slide" id="slide-9">
+  <div class="logo-mark" id="s9-logo">Stillform</div>
+  <div class="slide-num" id="s9-num">10 / 11</div>
+  <div class="amber-line" id="s9-line"></div>
+  <div style="max-width:68%;">
+    <div class="eyebrow" id="s9-eye">The output</div>
+    <div class="headline" id="s9-h" style="font-size:10vw;line-height:1.08;">Not calm.<br><em>Certain.</em></div>
+    <div class="divider" id="s9-div"></div>
+    <div class="body-text" id="s9-body" style="font-size:3.8vw;">
+      Confidence isn't a feeling you wait for.<br>
+      It's what's left when your system stops fighting itself.<br><br>
+      Composed people don't perform confidence.<br>
+      They <strong style="color:var(--text);font-weight:500;">operate from it.</strong>
+    </div>
+  </div>
+  <div class="slide-url" id="s9-url">stillformapp.com</div>
+</div>
+
+<!-- 11 CTA -->
+<div class="slide" id="slide-10">
+  <div class="logo-mark" id="s10-logo">Stillform</div>
+  <div class="slide-num" id="s10-num">11 / 11</div>
+  <div style="max-width:70%;">
+    <div class="eyebrow" id="s10-eye">Not meditation. Not therapy.</div>
+    <div class="headline" id="s10-h" style="font-size:10.5vw;line-height:1.08;">A precision<br>composure<br><em>system.</em></div>
+    <div class="stat-row" id="s10-stats">
+      <div class="stat"><div class="stat-val">3</div><div class="stat-label">Protocols</div></div>
+      <div class="stat"><div class="stat-val">10</div><div class="stat-label">Bias patterns</div></div>
+      <div class="stat"><div class="stat-val">90s</div><div class="stat-label">Per session</div></div>
+    </div>
+    <div class="subhead" id="s10-sub" style="font-size:4vw;margin-top:5vw;">
+      $14.99/mo or $9.99/mo billed annually.<br>
+      7-day free trial. Installs on iOS &amp; Android.<br>
+      stillformapp.com
+    </div>
+  </div>
+</div>
+
+<div class="dots" id="dots">
+  <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  <div class="dot"></div><div class="dot"></div>
+</div>
+<div class="tap-hint">Tap to advance</div>
 </div>
 
 <script>
-  let current = 0, animating = false;
-  const total = 9;
+let current = 0, animating = false;
+const total = 11;
 
-  const ringPhases = [4,4,8,2];
-  let phaseIdx = 0, phaseCount = ringPhases[0];
-  const ringEl = document.getElementById('ring-count');
-  setInterval(() => {
-    phaseCount--;
-    if (phaseCount <= 0) { phaseIdx = (phaseIdx + 1) % ringPhases.length; phaseCount = ringPhases[phaseIdx]; }
-    if (ringEl) ringEl.textContent = phaseCount;
-  }, 1000);
+const ringPhases = [4,4,8,2];
+let phaseIdx = 0, phaseCount = ringPhases[0];
+const ringEl = document.getElementById('ring-count');
+setInterval(() => {
+  phaseCount--;
+  if (phaseCount <= 0) { phaseIdx = (phaseIdx+1)%ringPhases.length; phaseCount = ringPhases[phaseIdx]; }
+  if (ringEl) ringEl.textContent = phaseCount;
+}, 1000);
 
-  const configs = [
-    { glow:'top:-10%;left:-10%;', reveals:[
-      {id:'s0-ring',cls:'revealed-slow',delay:200},{id:'s0-logo',cls:'revealed-slow',delay:300},
-      {id:'s0-num',cls:'revealed-slow',delay:300},{id:'s0-url',cls:'revealed-slow',delay:300},
-      {id:'s0-eye',cls:'revealed',delay:500},{id:'s0-h',cls:'revealed',delay:800},{id:'s0-sub',cls:'revealed',delay:1400}]},
-    { glow:'top:20%;left:40%;', reveals:[
-      {id:'s1-logo',cls:'revealed-slow',delay:100},{id:'s1-num',cls:'revealed-slow',delay:100},
-      {id:'s1-url',cls:'revealed-slow',delay:100},{id:'s1-line',cls:'revealed-slow',delay:200},
-      {id:'s1-eye',cls:'revealed',delay:300},{id:'s1-h',cls:'revealed',delay:600},
-      {id:'s1-div',cls:'revealed-slow',delay:1000},{id:'s1-body',cls:'revealed',delay:1200}]},
-    { glow:'top:30%;left:-20%;', reveals:[
-      {id:'s2-logo',cls:'revealed-slow',delay:100},{id:'s2-num',cls:'revealed-slow',delay:100},
-      {id:'s2-url',cls:'revealed-slow',delay:100},{id:'s2-eye',cls:'revealed',delay:300},
-      {id:'s2-h',cls:'revealed',delay:600},{id:'s2-body',cls:'revealed',delay:900},{id:'s2-bias',cls:'revealed',delay:1200}]},
-    { glow:'top:-10%;left:30%;', reveals:[
-      {id:'s3-logo',cls:'revealed-slow',delay:100},{id:'s3-num',cls:'revealed-slow',delay:100},
-      {id:'s3-url',cls:'revealed-slow',delay:100},{id:'s3-line',cls:'revealed-slow',delay:200},
-      {id:'s3-eye',cls:'revealed',delay:300},{id:'s3-h',cls:'revealed',delay:600},
-      {id:'s3-body',cls:'revealed',delay:900},{id:'s3-chips',cls:'revealed',delay:1200}]},
-    { glow:'top:10%;left:-15%;', reveals:[
-      {id:'s4-logo',cls:'revealed-slow',delay:100},{id:'s4-num',cls:'revealed-slow',delay:100},
-      {id:'s4-url',cls:'revealed-slow',delay:100},{id:'s4-eye',cls:'revealed',delay:300},
-      {id:'s4-h',cls:'revealed',delay:600},{id:'s4-paths',cls:'revealed',delay:1000},{id:'s4-patterns',cls:'revealed',delay:1400}]},
-    { glow:'top:20%;left:35%;', reveals:[
-      {id:'s5-logo',cls:'revealed-slow',delay:100},{id:'s5-num',cls:'revealed-slow',delay:100},
-      {id:'s5-url',cls:'revealed-slow',delay:100},{id:'s5-line',cls:'revealed-slow',delay:200},
-      {id:'s5-eye',cls:'revealed',delay:300},{id:'s5-h',cls:'revealed',delay:600},
-      {id:'s5-body',cls:'revealed',delay:900},{id:'s5-points',cls:'revealed',delay:1200}]},
-    { glow:'top:-5%;left:-10%;', reveals:[
-      {id:'s6-logo',cls:'revealed-slow',delay:100},{id:'s6-num',cls:'revealed-slow',delay:100},
-      {id:'s6-url',cls:'revealed-slow',delay:100},{id:'s6-eye',cls:'revealed',delay:300},
-      {id:'s6-h',cls:'revealed',delay:600},{id:'s6-modes',cls:'revealed',delay:1000},{id:'s6-body',cls:'revealed',delay:1400}]},
-    { glow:'top:25%;left:40%;', reveals:[
-      {id:'s7-logo',cls:'revealed-slow',delay:100},{id:'s7-num',cls:'revealed-slow',delay:100},
-      {id:'s7-url',cls:'revealed-slow',delay:100},{id:'s7-line',cls:'revealed-slow',delay:200},
-      {id:'s7-eye',cls:'revealed',delay:300},{id:'s7-h',cls:'revealed',delay:600},
-      {id:'s7-body',cls:'revealed',delay:900},{id:'s7-progress',cls:'revealed',delay:1200}]},
-    { glow:'top:-5%;left:25%;', reveals:[
-      {id:'s8-logo',cls:'revealed-slow',delay:100},{id:'s8-num',cls:'revealed-slow',delay:100},
-      {id:'s8-eye',cls:'revealed',delay:300},{id:'s8-h',cls:'revealed',delay:600},
-      {id:'s8-stats',cls:'revealed',delay:1100},{id:'s8-sub',cls:'revealed',delay:1600}]}
-  ];
+const configs = [
+  { glow:'top:-10%;left:-10%;', reveals:[
+    {id:'s0-ring',cls:'revealed-slow',delay:200},{id:'s0-logo',cls:'revealed-slow',delay:300},
+    {id:'s0-num',cls:'revealed-slow',delay:300},{id:'s0-url',cls:'revealed-slow',delay:300},
+    {id:'s0-eye',cls:'revealed',delay:500},{id:'s0-h',cls:'revealed',delay:800},{id:'s0-sub',cls:'revealed',delay:1400}]},
+  { glow:'top:20%;left:40%;', reveals:[
+    {id:'s1-logo',cls:'revealed-slow',delay:100},{id:'s1-num',cls:'revealed-slow',delay:100},
+    {id:'s1-url',cls:'revealed-slow',delay:100},{id:'s1-line',cls:'revealed-slow',delay:200},
+    {id:'s1-eye',cls:'revealed',delay:300},{id:'s1-h',cls:'revealed',delay:600},
+    {id:'s1-div',cls:'revealed-slow',delay:1000},{id:'s1-body',cls:'revealed',delay:1200}]},
+  { glow:'top:5%;left:20%;', reveals:[
+    {id:'s2-logo',cls:'revealed-slow',delay:100},{id:'s2-num',cls:'revealed-slow',delay:100},
+    {id:'s2-url',cls:'revealed-slow',delay:100},{id:'s2-eye',cls:'revealed',delay:300},
+    {id:'s2-h',cls:'revealed',delay:700},{id:'s2-div',cls:'revealed-slow',delay:1400},{id:'s2-body',cls:'revealed',delay:1700}]},
+  { glow:'top:30%;left:-20%;', reveals:[
+    {id:'s3-logo',cls:'revealed-slow',delay:100},{id:'s3-num',cls:'revealed-slow',delay:100},
+    {id:'s3-url',cls:'revealed-slow',delay:100},{id:'s3-eye',cls:'revealed',delay:300},
+    {id:'s3-h',cls:'revealed',delay:600},{id:'s3-body',cls:'revealed',delay:900},{id:'s3-bias',cls:'revealed',delay:1200}]},
+  { glow:'top:-10%;left:30%;', reveals:[
+    {id:'s4-logo',cls:'revealed-slow',delay:100},{id:'s4-num',cls:'revealed-slow',delay:100},
+    {id:'s4-url',cls:'revealed-slow',delay:100},{id:'s4-line',cls:'revealed-slow',delay:200},
+    {id:'s4-eye',cls:'revealed',delay:300},{id:'s4-h',cls:'revealed',delay:600},
+    {id:'s4-body',cls:'revealed',delay:900},{id:'s4-chips',cls:'revealed',delay:1200}]},
+  { glow:'top:10%;left:-15%;', reveals:[
+    {id:'s5-logo',cls:'revealed-slow',delay:100},{id:'s5-num',cls:'revealed-slow',delay:100},
+    {id:'s5-url',cls:'revealed-slow',delay:100},{id:'s5-eye',cls:'revealed',delay:300},
+    {id:'s5-h',cls:'revealed',delay:600},{id:'s5-paths',cls:'revealed',delay:1000},{id:'s5-patterns',cls:'revealed',delay:1400}]},
+  { glow:'top:20%;left:35%;', reveals:[
+    {id:'s6-logo',cls:'revealed-slow',delay:100},{id:'s6-num',cls:'revealed-slow',delay:100},
+    {id:'s6-url',cls:'revealed-slow',delay:100},{id:'s6-line',cls:'revealed-slow',delay:200},
+    {id:'s6-eye',cls:'revealed',delay:300},{id:'s6-h',cls:'revealed',delay:600},
+    {id:'s6-body',cls:'revealed',delay:900},{id:'s6-points',cls:'revealed',delay:1200}]},
+  { glow:'top:-5%;left:-10%;', reveals:[
+    {id:'s7-logo',cls:'revealed-slow',delay:100},{id:'s7-num',cls:'revealed-slow',delay:100},
+    {id:'s7-url',cls:'revealed-slow',delay:100},{id:'s7-eye',cls:'revealed',delay:300},
+    {id:'s7-h',cls:'revealed',delay:600},{id:'s7-modes',cls:'revealed',delay:1000},{id:'s7-body',cls:'revealed',delay:1400}]},
+  { glow:'top:25%;left:40%;', reveals:[
+    {id:'s8-logo',cls:'revealed-slow',delay:100},{id:'s8-num',cls:'revealed-slow',delay:100},
+    {id:'s8-url',cls:'revealed-slow',delay:100},{id:'s8-line',cls:'revealed-slow',delay:200},
+    {id:'s8-eye',cls:'revealed',delay:300},{id:'s8-h',cls:'revealed',delay:600},
+    {id:'s8-body',cls:'revealed',delay:900},{id:'s8-progress',cls:'revealed',delay:1200}]},
+  { glow:'top:15%;left:30%;', reveals:[
+    {id:'s9-logo',cls:'revealed-slow',delay:100},{id:'s9-num',cls:'revealed-slow',delay:100},
+    {id:'s9-url',cls:'revealed-slow',delay:100},{id:'s9-line',cls:'revealed-slow',delay:200},
+    {id:'s9-eye',cls:'revealed',delay:300},{id:'s9-h',cls:'revealed',delay:600},
+    {id:'s9-div',cls:'revealed-slow',delay:1100},{id:'s9-body',cls:'revealed',delay:1300}]},
+  { glow:'top:-5%;left:25%;', reveals:[
+    {id:'s10-logo',cls:'revealed-slow',delay:100},{id:'s10-num',cls:'revealed-slow',delay:100},
+    {id:'s10-eye',cls:'revealed',delay:300},{id:'s10-h',cls:'revealed',delay:600},
+    {id:'s10-stats',cls:'revealed',delay:1100},{id:'s10-sub',cls:'revealed',delay:1600}]}
+];
 
-  function goTo(idx) {
-    if (animating) return;
-    animating = true;
+function goTo(idx) {
+  if (animating) return;
+  animating = true;
+  const prev = document.getElementById('slide-'+current);
+  prev.style.opacity='0'; prev.style.transition='opacity 0.4s ease';
+  setTimeout(()=>{prev.classList.remove('active');prev.style.transition='';prev.style.opacity='';},400);
+  current = idx;
+  const cfg = configs[current];
+  cfg.reveals.forEach(r=>{const el=document.getElementById(r.id);if(el)el.classList.remove('revealed','revealed-slow');});
+  document.querySelectorAll('.progress-fill').forEach(el=>el.classList.remove('go'));
+  const glow=document.getElementById('glow');
+  glow.style.cssText=`width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle,rgba(200,146,42,0.06) 0%,transparent 70%);pointer-events:none;transition:all 1.5s ease;position:absolute;${cfg.glow}`;
+  document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  setTimeout(()=>{
+    const next=document.getElementById('slide-'+current);
+    next.style.opacity='0';next.classList.add('active');next.style.transition='opacity 0.5s ease';next.style.opacity='1';
+    setTimeout(()=>{next.style.transition='';next.style.opacity='';},500);
+    cfg.reveals.forEach(r=>{setTimeout(()=>{const el=document.getElementById(r.id);if(el)el.classList.add(r.cls);},r.delay);});
+    if(current===8){setTimeout(()=>{document.querySelectorAll('.progress-fill').forEach(el=>el.classList.add('go'));},1400);}
+    setTimeout(()=>{animating=false;},600);
+  },350);
+}
 
-    const prev = document.getElementById(`slide-${current}`);
-    prev.style.opacity = '0'; prev.style.transition = 'opacity 0.4s ease';
-    setTimeout(() => { prev.classList.remove('active'); prev.style.transition = ''; prev.style.opacity = ''; }, 400);
+let autoTimer=setInterval(()=>goTo((current+1)%total),6500);
+document.getElementById('stage').addEventListener('click',()=>{
+  goTo((current+1)%total);
+  clearInterval(autoTimer);
+  autoTimer=setInterval(()=>goTo((current+1)%total),6500);
+});
 
-    current = idx;
-    const cfg = configs[current];
-
-    cfg.reveals.forEach(r => { const el = document.getElementById(r.id); if (el) el.classList.remove('revealed','revealed-slow'); });
-    document.querySelectorAll('.progress-fill').forEach(el => el.classList.remove('go'));
-
-    const glow = document.getElementById('glow');
-    glow.style.cssText = `width:60vw;height:60vw;border-radius:50%;background:radial-gradient(circle,rgba(200,146,42,0.06) 0%,transparent 70%);pointer-events:none;transition:all 1.5s ease;position:absolute;${cfg.glow}`;
-
-    document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i === current));
-
-    setTimeout(() => {
-      const next = document.getElementById(`slide-${current}`);
-      next.style.opacity = '0'; next.classList.add('active');
-      next.style.transition = 'opacity 0.5s ease'; next.style.opacity = '1';
-      setTimeout(() => { next.style.transition = ''; next.style.opacity = ''; }, 500);
-
-      cfg.reveals.forEach(r => {
-        setTimeout(() => { const el = document.getElementById(r.id); if (el) el.classList.add(r.cls); }, r.delay);
-      });
-
-      if (current === 7) {
-        setTimeout(() => { document.querySelectorAll('.progress-fill').forEach(el => el.classList.add('go')); }, 1400);
-      }
-
-      setTimeout(() => { animating = false; }, 600);
-    }, 350);
-  }
-
-  let autoTimer = setInterval(() => goTo((current + 1) % total), 6500);
-
-  document.getElementById('stage').addEventListener('click', () => {
-    goTo((current + 1) % total);
-    clearInterval(autoTimer);
-    autoTimer = setInterval(() => goTo((current + 1) % total), 6500);
-  });
-
-  setTimeout(() => {
-    configs[0].reveals.forEach(r => {
-      setTimeout(() => { const el = document.getElementById(r.id); if (el) el.classList.add(r.cls); }, r.delay);
-    });
-  }, 300);
+setTimeout(()=>{
+  configs[0].reveals.forEach(r=>{setTimeout(()=>{const el=document.getElementById(r.id);if(el)el.classList.add(r.cls);},r.delay);});
+},300);
 </script>
 </body>
 </html>
