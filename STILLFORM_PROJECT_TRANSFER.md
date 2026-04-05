@@ -335,7 +335,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - Apple Health / Google Health Connect — HRV, sleep, heart rate
 - Biometric lock — Face ID / fingerprint on Reframe and Signal Log
 - Premium sound packs
-- PDF/CSV export of session data
+- PDF/CSV export of session data + metrics (signal awareness speed, tool usage, regulation patterns)
 - Shareable composure card
 
 ## App Store Path
