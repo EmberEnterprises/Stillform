@@ -399,6 +399,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - Outcome over Emotion — we don't measure happiness, we measure Signal Awareness Latency (how fast the user notices they're about to act from state instead of decision).
 - Signal Clearance data only surfaces when positive. Digression handled by AI adjusting, not by dashboard showing failure.
 - The app never punishes you for not using it. Living without your phone IS composure. Metrics track what you brought here, not what you missed. No coverage scores, no "you only logged 60% of your signals." Depth over frequency.
+- Metacognition is the product. The user should never feel like they're "logging data" — they should feel like they're observing their own system. Every feature must pass this test: "Am I asking the user to enter data, or am I training them to notice what's already happening?" The logging is a side effect of the noticing. If a feature feels like a form, it's wrong. If it feels like a mirror, it's right.
 - No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.
 
 ## Roadmap Concepts (From Research — Not Yet Built)
