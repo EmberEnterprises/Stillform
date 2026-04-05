@@ -3466,6 +3466,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 ↺ Continue
               </button>
             )}
+            {/* Resend button — when last message is user's and AI never responded */}
+            {messages.length > 0 && messages[messages.length - 1]?.role === "user" && !loading && (
+              <button onClick={() => handleSend(messages[messages.length - 1].text)} style={{
+                position: "absolute", top: -36, right: 0,
+                background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                borderRadius: "var(--r)", padding: "6px 14px", fontSize: 11,
+                color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+              }}>
+                ↺ Resend
+              </button>
+            )}
             </>
           )}
           )}
