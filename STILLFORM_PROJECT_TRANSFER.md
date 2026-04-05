@@ -400,6 +400,12 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 - Signal Clearance data only surfaces when positive. Digression handled by AI adjusting, not by dashboard showing failure.
 - The app never punishes you for not using it. Living without your phone IS composure. Metrics track what you brought here, not what you missed. No coverage scores, no "you only logged 60% of your signals." Depth over frequency.
 - Metacognition is the product. The user should never feel like they're "logging data" — they should feel like they're observing their own system. Every feature must pass this test: "Am I asking the user to enter data, or am I training them to notice what's already happening?" The logging is a side effect of the noticing. If a feature feels like a form, it's wrong. If it feels like a mirror, it's right.
+- The mirror must be curated. Raw data without guardrails is a new way to spiral. Guardrails on what users see:
+  - Growth surfaces first. Decline is handled by the AI adjusting approach, not by the dashboard showing failure.
+  - Frequency is never framed as judgment. "You came here 14 times" is neutral. "You needed Reframe 14 times" is a verdict. Language matters.
+  - Patterns only surface when actionable. "You tend to reach for breathing on Mondays" is useful. "You spiral every Sunday night" is a label.
+  - No comparisons to other users. Ever. Your composure practice is yours.
+  - Negative trends are addressed by the AI in conversation, not displayed as charts. The AI says "I've noticed something — want to talk about it?" It doesn't show a red line going down.
 - No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.
 
 ## Roadmap Concepts (From Research — Not Yet Built)
