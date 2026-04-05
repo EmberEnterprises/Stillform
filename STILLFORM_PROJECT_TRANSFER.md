@@ -363,6 +363,8 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 
 # 6 — Locked Decisions (Do Not Relitigate)
 
+**Integrity is foundational.** Every decision — visual, structural, linguistic — must be honest. We choose language carefully not to hide anything, but to be more accurate. "Off-composure" was replaced because composure applies to all states. "Crisis management" was replaced because the app is for daily practice. "High-intensity people" was replaced because composure is for everyone. Every change moves toward precision, not away from truth. The science is real. The claims link to published papers. The AI doesn't perform understanding — it demonstrates it. The pricing has no tricks. The data practices are exactly what we say they are.
+
 - Stillform is a composure SYSTEM not a wellness app. Operator framing throughout.
 - Composure is a way of being — NOT crisis management, NOT damage control.
 - No AI add-on pricing — AI is included. One price.
