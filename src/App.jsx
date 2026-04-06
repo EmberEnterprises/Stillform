@@ -2995,7 +2995,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 pain: "pain active — chronic or acute, affecting state",
                 medicated: "substance active — caffeine, meds, alcohol, or other input influencing state"
               };
-              return labels[bf] || null;
+              const filters = bf.split(",").map(f => labels[f.trim()]).filter(Boolean);
+              if (filters.length === 0) return null;
+              return `MULTIPLE HARDWARE STATES ACTIVE: ${filters.join(" + ")}. The combination matters — interpret their state through ALL of these filters simultaneously.`;
             } catch { return null; }
           })(),
           signalProfile: (() => {
@@ -5029,7 +5031,7 @@ export default function Stillform() {
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [ciOpen, setCiOpen] = useState(true);
   const [ciEnergy, setCiEnergy] = useState(null);
-  const [ciBio, setCiBio] = useState(null);
+  const [ciBio, setCiBio] = useState(new Set());
   const [ciSaved, setCiSaved] = useState(false);
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
 
@@ -5914,11 +5916,13 @@ export default function Stillform() {
                 const isCheckedIn = ciSaved || checkedIn;
 
                 const saveCheckin = () => {
+                  const bioArray = [...ciBio].filter(b => b !== "clear");
                   try {
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
-                      date: today, energy: ciEnergy || "steady", bio: ciBio || "clear"
+                      date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"]
                     }));
-                    if (ciBio && ciBio !== "clear") localStorage.setItem("stillform_bio_filter", ciBio);
+                    if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
+                    else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
@@ -5973,11 +5977,20 @@ export default function Stillform() {
                         { id: "activated", label: "Activated" },
                         { id: "medicated", label: "Medicated" }
                       ].map(b => (
-                        <button key={b.id} onClick={() => setCiBio(b.id)} style={{
-                          background: ciBio === b.id ? "var(--amber-glow)" : "transparent",
-                          border: `1px solid ${ciBio === b.id ? "var(--amber-dim)" : "var(--border)"}`,
+                        <button key={b.id} onClick={() => {
+                          setCiBio(prev => {
+                            const next = new Set(prev);
+                            if (b.id === "clear") return new Set(["clear"]);
+                            next.delete("clear");
+                            if (next.has(b.id)) next.delete(b.id);
+                            else next.add(b.id);
+                            return next.size === 0 ? new Set(["clear"]) : next;
+                          });
+                        }} style={{
+                          background: ciBio.has(b.id) ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciBio.has(b.id) ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: 20, padding: "5px 14px", fontSize: 11, cursor: "pointer",
-                          color: ciBio === b.id ? "var(--amber)" : "var(--text-muted)",
+                          color: ciBio.has(b.id) ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{b.label}</button>
                       ))}
