@@ -135,9 +135,9 @@ After the 7th session (regardless of frequency), the system reviews tool usage v
 Daily check-in card at top of home screen. Two quick taps:
 
 - Energy: Low / Steady / High / Ready / Wired
-- Hardware check: All clear / Depleted / Under-rested / Pain present / Activated / Medicated
+- Hardware check: multi-select — All clear / Depleted / Under-rested / Pain present / Activated / Medicated (user can select multiple, e.g. pain + under-rested). All selections sent to AI as combined context.
 - "Set my tone →" saves and collapses to "✓ Checked in · tap to update"
-- Bio-filter auto-sets from hardware selection — feeds into every Reframe call that day
+- Bio-filter sends all selected hardware states to AI — combined context changes how AI interprets signals (pain + under-rested is a different baseline than either alone)
 - PENDING: Calendar integration — reads device calendar so system knows what's ahead before you tell it
 
 ## Bio-Filter (Physical State Check)
