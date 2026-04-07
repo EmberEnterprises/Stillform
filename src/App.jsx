@@ -1359,6 +1359,7 @@ function PhysiologicalSighTool({ onComplete }) {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["sigh"], exitPoint: "sigh-complete", source: "sigh" });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      try { window.plausible("Breathing Completed", { props: { duration: fmt(elapsed) } }); } catch {}
     } catch {}
     return elapsed;
   };
@@ -2171,6 +2172,7 @@ function BodyScanTool({ onComplete }) {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: formatTime(elapsed), tools: ["body-scan"], exitPoint: "scan-complete", source: "body-scan" });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      try { window.plausible("Body Scan Completed"); } catch {}
     } catch {}
     return elapsed;
   };
@@ -2950,6 +2952,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setLoading(true);
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
+    if (messages.length === 4) { try { window.plausible("Reframe Deep Engagement", { props: { mode: effectiveMode } }); } catch {} }
 
     try {
       const controller = new AbortController();
@@ -5709,6 +5712,7 @@ export default function Stillform() {
                     onClick={() => {
                       const type = scoreAssessment();
                       try { localStorage.setItem("stillform_regulation_type", type); } catch {}
+                      try { window.plausible("Assessment Completed", { props: { type } }); } catch {}
                       setRegType(type);
                       setAssessmentAnswers([]);
                       setSetupStep(s => s + 1);
@@ -5947,6 +5951,7 @@ export default function Stillform() {
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
+                  try { window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady" } }); } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
                 };
