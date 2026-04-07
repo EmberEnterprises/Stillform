@@ -798,12 +798,96 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - ✅ Mode descriptors show what AI does differently
 - ✅ Neutral signal language throughout (no negative-only framing)
 - ✅ Completed calibration tools hidden from home screen
-- ✅ UAT early access dropdown with full roadmap (14 planned features)
 - ✅ Positioning copy updated throughout
 - ✅ Widget working (Android, SharedPreferences → Capacitor plugin)
 - ✅ All Jonny audit fixes intact
 - ✅ "Sudden urgency" replaces "clarity spike" in sensations
 - ✅ "Ready" added to morning check-in energy options
+
+### April 7 Session — All pushed and live:
+
+**AI Engine Overhaul:**
+- ✅ GPT-4o Mini → GPT-4o (dramatically better quality)
+- ✅ Max tokens 180 → 500 (AI was being strangled)
+- ✅ CRITICAL BUG FIX: Multi-turn conversations were broken — history sent role "ai" but API expects "assistant." Every follow-up was silently erroring. Fixed.
+- ✅ Perspectives-first response format in all 3 prompts — AI gives 2-3 angles BEFORE asking questions
+- ✅ Questions now OPTIONAL — sometimes the reframe IS the response
+- ✅ Questions must sound like a friend ("Sound right?") not a therapist ("What would help you feel more aligned?")
+- ✅ Voice directive: "Talk like someone who's been through some shit. If your response could appear on a motivational poster, rewrite it."
+- ✅ Therapy jargon banned: "dynamics," "aligned," "processing," "sit with that," "unpack that," "space to explore"
+- ✅ 5 golden response examples (GOOD vs BAD) in calm + clarity prompts
+- ✅ Pattern respect added to all 3 prompts ("Is it the same, or just similar?")
+- ✅ Ego awareness added to all 3 prompts ("Something about that landed wrong. What part?")
+- ✅ Chronic illness energy conservation in bio-filter ("We can afford five minutes of this")
+- ✅ Time awareness — AI knows day of week + time of day. Late night sessions hit different.
+- ✅ "On fire" energy option + AI overcommitment/blind spot handler for positive states
+- ✅ Flat state instruction rewritten — match casual energy, be specific not generic
+- ✅ 7-session review rewritten as AI insight, not software correction
+
+**Naming & Language:**
+- ✅ Signal Log → Pulse (everywhere: app, docs, promo, FAQ, settings, export, biometric lock, delete confirmation)
+- ✅ "Journal" tab → "Pulse" on Reframe screen
+- ✅ "Not meditation. Not therapy." removed from all docs and app
+- ✅ Clinical language simplified: parasympathetic → "tells your body to slow down," cognitive biases → "thinking patterns that run on autopilot," cognitive baseline → "brain running slower than usual"
+
+**UX Fixes:**
+- ✅ AI message font 19px → 16px (more conversation visible on mobile)
+- ✅ Removed competing "What triggered this?" input from active Reframe conversation
+- ✅ Butterflies added to signal mapping sensations
+- ✅ Multi-select hardware check (pain + under-rested = different baseline, "All clear" deselects others)
+- ✅ "On fire" energy option in morning check-in
+- ✅ Home screen greeting updated: "when things are hard AND when things are going great"
+- ✅ Standalone Pulse screen: "Check your pulse" → unified with Reframe tab
+
+**Analytics:**
+- ✅ Behavioral analytics: 5 new Plausible events — Breathing Completed, Body Scan Completed, Reframe Deep Engagement (5+ messages), Morning Check-In, Assessment Completed
+- ✅ (User must add Goals in Plausible settings for events to show)
+
+**UAT Dropdown:**
+- ✅ Rebuilt with 3 sections: ★ NEW THIS WEEK (red, flashing badge) / ✓ ALREADY SHIPPED / ⬡ COMING SOON
+- ✅ Full 19-item roadmap restored + "+ more in development"
+
+**Content & Credibility:**
+- ✅ Blog post live: stillformapp.com/blog-two-pathway-regulation.html (cites Ochsner, Gross, Price & Hooven, Buhle, Kanbara)
+- ✅ Mobile-friendly project transfer HTML generated
+
+**Positioning & Strategy:**
+- ✅ "Executive Composure" as category name (for Product Hunt, press, Reddit)
+- ✅ "Trainer, not a crutch" — Signal Awareness Latency proves the app builds a skill
+- ✅ $20K/month revenue strategy documented (3 phases, pre-launch checklist)
+- ✅ Composure when winning — locked decision: "This is core, not an afterthought"
+- ✅ Pricing confirmed: $14.99/mo or $9.99/mo annual. 14-day free trial.
+- ✅ Courage line: "Courage isn't the absence of fear. It's acting clearly while the signal is still running."
+- ✅ Confidence line: "Confidence isn't knowing you'll win. It's knowing you won't lose yourself in the process."
+
+**Psychology (documented in Section 9):**
+- ✅ Metacognition is the product — "If a feature feels like a form, it's wrong. If it feels like a mirror, it's right."
+- ✅ Data integrity always — framing protects, filtering lies. Never hide, suppress, or curate.
+- ✅ The mirror has guardrails — present neutrally, let them interpret.
+- ✅ Trauma blocks potential, not ability — capability is sequestered, not lost
+- ✅ Fear + ego as tag-team security guards (energy bankruptcy + hope bankruptcy)
+- ✅ Stubbornness = redirected persistence — recruit it, don't fight it
+- ✅ Lower stakes to bypass ego — micro-wins rebuild confidence circuitry
+- ✅ Observer Hack IS metacognition IS the product
+- ✅ Chronic illness ego dynamics — resistance in low-energy = system conserving resources
+- ✅ Composure clears the path — noise gets quieter, you hear yourself think
+- ✅ Most people don't know the noise is there — first session is the revelation
+
+**Business:**
+- ✅ Lemon Squeezy APPROVED (April 7) — paywall ready to implement, products not yet created
+- ✅ DUNS applied — blocks BOTH Google Play + Apple (~25 days)
+- ✅ Multi-session coordination rules added to top of doc
+- ✅ Instagram story drafted for UAT testers
+- ✅ Text message drafted for existing testers
+
+**Tester Analytics (April 7):**
+- Irvington NJ → Kapil (confirmed, near Short Hills)
+- Ridgewood NJ → Sean Emmerling (+ user's own visits)
+- Bergenfield NJ → Paula (near Teaneck)
+- Brooklyn → likely Ronnie (Jonny Porto's sibling — Jonny may have shared link)
+- Holtsville → sister-in-law on Long Island
+- NYC × 3 → Ive + link previews + unknowns
+- 9 unique visitors from Instagram story where link was NOT included — people found it on their own
 
 ## Needs Mac (Native Rebuild — WIP, DUNS pending ~25 more days — required for Google Play + Apple)
 
@@ -831,14 +915,34 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - ❌ Lemon Squeezy APPROVED (April 7) — paywall ready to implement
 - ❌ DUNS number (applied, waiting on approval)
 
-## Known Issues / Gaps for Next AI
+## Known Issues / Gaps for Next Session
 
-- **Reframe API "Couldn't connect" error** — Root cause was service worker caching old JS bundles. SW rewritten (v3) to never cache JS/CSS. If error persists after deploy, try incognito once to let new SW activate.
-- **Privacy policy outdated** — needs update for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
+- **Plausible Goals not set up** — User must add Goals in Plausible dashboard for: "Breathing Completed", "Body Scan Completed", "Reframe Deep Engagement", "Morning Check-In", "Assessment Completed", "Pulse Entry"
+- **AI quality still tuning** — GPT-4o is live, prompts significantly improved, but novel scenarios can still produce generic responses. Continue testing and adding golden examples.
+- **Privacy policy outdated** — needs update in Termly for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
 - **No real user sessions yet** — Ava's feedback was from home screen only, Bobby hasn't used it, Jonny did technical audit not user session. Need 3+ real user sessions with testimonials before Reddit launch.
-- **Lemon Squeezy paywall not live** — Bobby completed ID verification. Waiting on Lemon Squeezy approval. Pricing is locked: $14.99/mo or $9.99/mo annual. Do not launch Reddit without paywall.
+- **Lemon Squeezy paywall not integrated** — APPROVED April 7 but products not yet created. Pricing: $14.99/mo or $9.99/mo annual, 14-day free trial. Must use test mode for test purchases.
 - **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
-- **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. `adb shell pm clear com.araembers.stillform` on native, incognito on web.
+- **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. Incognito tab or clear cache to test fresh.
+- **Copyright not filed** — $65 at copyright.gov. Bobby wants this done ASAP.
+- **DUNS number pending** — blocks both Google Play ($25 org) and Apple Developer ($99). ~25 days from application.
+- **Celebrity/influencer outreach list** — not yet built. Target: ADHD/neurodivergent creators with 100K-1M followers on TikTok/YouTube. Free access in exchange for genuine use, not paid endorsement.
+- **State-to-Statement** — on roadmap, planned for pre-launch sprint (one session build)
+- **Shareable composure card** — on roadmap, planned for pre-launch sprint (one session build)
+
+## Pre-Launch Sprint (during DUNS wait, ~25 days)
+
+- [ ] Lemon Squeezy paywall integration
+- [ ] State-to-Statement feature
+- [ ] Shareable composure card
+- [ ] Native APK rebuild (needs Mac)
+- [ ] Copyright filed ($65)
+- [ ] Plausible Goals configured
+- [ ] Privacy policy updated in Termly
+- [ ] 3-5 real testimonials collected
+- [ ] Reddit post drafted
+- [ ] @stillformapp Instagram created
+- [ ] Influencer outreach list built
 
 ---
 
