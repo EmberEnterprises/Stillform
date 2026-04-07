@@ -1209,7 +1209,7 @@ const haptic = {
 };
 
 // Push notification setup — runs once on app load in native context
-// Biometric lock — Face ID / fingerprint gate for Reframe & Signal Log
+// Biometric lock — Face ID / fingerprint gate for Reframe & Pulse
 const biometric = {
   async isAvailable() {
     if (!isNative()) return false;
@@ -2813,7 +2813,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         mode: effectiveMode
       });
       localStorage.setItem("stillform_journal", JSON.stringify(entries));
-      try { window.plausible("Signal Log Entry", { props: { mode: effectiveMode } }); } catch {}
+      try { window.plausible("Pulse Entry", { props: { mode: effectiveMode } }); } catch {}
     } catch {}
     setJournalText("");
   };
@@ -3205,7 +3205,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           color: tab === "journal" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Signal Log
+          Pulse
         </button>
       </div>
 
@@ -3278,7 +3278,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             boxShadow: journalText.trim() ? "inset 0 1px 0 rgba(255,255,255,0.12)" : "none",
             marginBottom: 20
           }}>
-            Log signal
+            Log pulse
           </button>
 
           {/* RECENT + FREQUENT */}
@@ -4991,7 +4991,7 @@ function MyProgress({ onBack, onJournal }) {
         {journalEntries.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("journal")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Signal Log</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Pulse</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.journal ? "▾" : "▸"}</span>
             </button>
             {openSections.journal && (
@@ -5162,7 +5162,7 @@ export default function Stillform() {
     setJournalEntries(updated);
     try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
     setJournalMode("list");
-    try { window.plausible("Signal Log Entry"); } catch {}
+    try { window.plausible("Pulse Entry"); } catch {}
     setJSignal([]); setJTrigger(""); setJTriggerType(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
   };
 
@@ -5336,7 +5336,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nSignal Log — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
               note: null
             },
             {
@@ -6219,7 +6219,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Signal Log</button>
+                <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Pulse</button>
                 <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -6277,10 +6277,10 @@ export default function Stillform() {
 
             {journalMode === "list" && (
               <>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>What's been happening</div>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Signal Log</h1>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Check your pulse</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Pulse</h1>
                 <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
-                  Log what's present in 15 seconds. What happened, what you felt, how it landed. The AI uses this every session.
+                  15 seconds. Tag what's present, note what triggered it. The AI reads these every session to spot what you can't see yourself.
                 </p>
                 <button onClick={() => setJournalMode("new")} style={{
                   width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
@@ -6289,13 +6289,13 @@ export default function Stillform() {
                   display: "flex", alignItems: "center", justifyContent: "space-between",
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)"
                 }}>
-                  <span>+ Log a signal event</span>
+                  <span>+ Log a pulse</span>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", opacity: 0.7 }}>~15 SEC</span>
                 </button>
 
                 {journalEntries.length === 0 && (
                   <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-                    No entries yet. Log your first signal event above.
+                    No entries yet. Log your first pulse above.
                   </div>
                 )}
 
@@ -6452,7 +6452,7 @@ export default function Stillform() {
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, gap: 12 }}>
                     <div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Signal Log Entry</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Pulse Entry</div>
                       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 300, lineHeight: 1.3 }}>{e.triggerType || e.trigger || "Signal event"}</h1>
                     </div>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date}<br/>{e.time}</div>
@@ -6555,7 +6555,7 @@ export default function Stillform() {
                   <li>One-tap reset — always free</li>
                   <li>Breathe, Body Scan, Reframe</li>
                   <li>3 AI modes: Regulate, Get Sharp, Lock In</li>
-                  <li>Signal Log with AI memory</li>
+                  <li>Pulse with AI memory</li>
                   <li>Daily check-in</li>
                   <li>Device-local encrypted storage</li>
                   <li>Signal mapping + tension check</li>
@@ -6646,7 +6646,7 @@ export default function Stillform() {
                 a: "It's a tool, not a person. It may occasionally miss context or give a response that doesn't land. It can't give medical, legal, or financial advice. If something it says doesn't fit — tell it. It adjusts."
               },
               {
-                q: "What is the Signal Log?",
+                q: "What is the Pulse?",
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
@@ -6958,7 +6958,7 @@ export default function Stillform() {
                     }}>
                       <div>
                         <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and Signal Log</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and Pulse</div>
                       </div>
                       <button onClick={() => {
                         biometric.setEnabled(!bioOn);
@@ -7077,14 +7077,14 @@ export default function Stillform() {
                 } catch { return null; }
               })()}
 
-              {/* Signal Log */}
+              {/* Pulse */}
               <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Signal Log</div>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
                     {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries
                   </div>
@@ -7212,7 +7212,7 @@ export default function Stillform() {
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Export</div>
                 {[
-                  { label: "Export signal log (PDF)", desc: "Download your full signal log" },
+                  { label: "Export pulse log (PDF)", desc: "Download your full pulse log" },
                   { label: "Export session history (CSV)", desc: "Your regulation data for personal records or a provider" }
                 ].map((item, i) => (
                   <div key={i} style={{
@@ -7384,14 +7384,14 @@ export default function Stillform() {
               }}>
                 <div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Export your data</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download signal log, sessions, insights as PDF or CSV</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download pulse log, sessions, insights as PDF or CSV</div>
                 </div>
                 <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Coming soon</div>
               </div>
 
               {/* Delete — small, understated, double confirm */}
               <button onClick={() => {
-                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, signal log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
+                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
                   const typed = window.prompt("To confirm deletion, type DELETE below:");
                   if (typed === "DELETE") {
                     try {

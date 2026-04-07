@@ -173,7 +173,7 @@ Daily check-in card at top of home screen. Two quick taps:
 - Session count: determines AI coaching intensity (<3 no patterns, 3-12 gentle, 12+ direct)
 - Prior tool context: what they did before Reframe this session
 - Prior mode context: if they switched modes mid-session
-- Journal context: recent Signal Log entries (used from session 3+)
+- Journal context: recent Pulse entries (used from session 3+)
 - AI session notes: last 5 post-session summaries written by AI (from session 3+)
 - Check-in context: daily check-in data
 
@@ -263,7 +263,7 @@ Hybrid approach:
 
 - Morning Check-In: daily energy + hardware check at top of home screen
 - My Progress: sessions, streak, avg shift, most used tool, signal profile trends
-- Signal Log: emotion chips, frequent + recent entries, optional notes
+- Pulse: emotion chips, frequent + recent entries, optional notes
 - Daily Reminder: push notification toggle + time picker in Settings
 - Audio toggle: breathing guidance on/off
 - Screen-light mode: dims screen during exercises
@@ -367,7 +367,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 
 - Samsung Galaxy Watch Ultra — haptic breathing companion (user has watch, needs Android Studio on Mac)
 - Apple Health / Google Health Connect — HRV, sleep, heart rate
-- Biometric lock — Face ID / fingerprint on Reframe and Signal Log
+- Biometric lock — Face ID / fingerprint on Reframe and Pulse
 - Premium sound packs
 - PDF/CSV export of session data + metrics (signal awareness speed, tool usage, regulation patterns)
 - Shareable composure card
