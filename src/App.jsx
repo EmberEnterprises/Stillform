@@ -6277,10 +6277,10 @@ export default function Stillform() {
 
             {journalMode === "list" && (
               <>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Signal Log</div>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>After-Action Record</h1>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>What's been happening</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Signal Log</h1>
                 <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
-                  Log a signal event in 15 seconds. What happened, what you felt, how it landed. The AI uses this to sharpen over time.
+                  Log what's present in 15 seconds. What happened, what you felt, how it landed. The AI uses this every session.
                 </p>
                 <button onClick={() => setJournalMode("new")} style={{
                   width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
