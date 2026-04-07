@@ -972,6 +972,7 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - [ ] Reddit post drafted
 - [ ] @stillformapp Instagram created
 - [ ] Influencer outreach list built
+- [ ] Test checkout in LIVE mode before launch — verify: variant selector shows Monthly/Annual, PayPal doesn't show personal name, receipt button says "Open Stillform" linking to stillformapp.com
 
 ---
 
