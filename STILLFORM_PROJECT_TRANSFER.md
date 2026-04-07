@@ -278,7 +278,7 @@ Hybrid approach:
 
 # 3 — Hard Blockers
 
-> *ONE blocker between Stillform and public launch: Lemon Squeezy paywall. Bobby's ID verification is complete. Waiting on Lemon Squeezy final approval.*
+> *ONE blocker between Stillform and public launch: Lemon Squeezy paywall. Lemon Squeezy APPROVED April 7. Paywall ready to implement.*
 
 ## What's Waiting on Lemon Squeezy
 
@@ -374,7 +374,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
 
 - Write Reddit post — opening line: "People don't want to be better. They want to be functional."
 - Set up @stillformapp Instagram — post promo reel
-- Lemon Squeezy paywall goes live (waiting on Lemon Squeezy approval)
+- Lemon Squeezy paywall goes live (APPROVED — ready to implement)
 - Post to Reddit: r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD, r/meditation
 - Product Hunt submission
 
@@ -737,7 +737,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 - ❌ PDF/CSV export
 - ❌ Shareable composure card
 - ❌ Privacy policy update (managed in Termly — update through Termly dashboard)
-- ❌ Lemon Squeezy paywall (waiting on Lemon Squeezy approval)
+- ❌ Lemon Squeezy APPROVED (April 7) — paywall ready to implement
 - ❌ DUNS number (applied, waiting on approval)
 
 ## Known Issues / Gaps for Next AI
