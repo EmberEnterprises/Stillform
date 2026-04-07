@@ -688,6 +688,81 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 - Neuroplasticity → Sapolsky, Dweck growth mindset
 - AI response bias guards → Kahneman heuristics, CBT therapist bias research
 
+## Revenue Target: $20K/month
+
+**The number:** ~1,500 paying subscribers at blended rate (~$13/mo average, mix of $14.99 monthly and $9.99 annual).
+
+**The math:**
+- API cost at 1,500 users: ~$600/month (GPT-4o Mini, 3 sessions/day avg)
+- Netlify: ~$20-50/month
+- Margin: ~95%
+- $20K covers all household costs + safety net if Bobby loses job or disability changes
+
+**Pricing:** $14.99/mo or $9.99/mo annual ($119.88/yr, 33% off). One price. No tiers. No upsells. AI included. Cloud sync included. Quick Breathe always free (anyone in crisis can use it without paying — that's integrity).
+
+### Phase 1: First 100 users (weeks 1-4 after paywall)
+
+**Pre-launch (NOW — waiting on DUNS):**
+- Lemon Squeezy APPROVED — set up products + paywall integration
+- Collect 3-5 real testimonials from current testers
+- Instagram story for UAT testers (posted)
+- Personal network outreach (in progress)
+- Finish native APK rebuild with all April changes
+
+**Launch:**
+- Reddit: ONE post, ONE shot. r/ADHD (2.3M), r/neurodivergent, r/anxiety, r/cptsd. Not an ad — a story. Opening line: "People don't want to be better. They want to be functional."
+- Product Hunt submission same week
+- @stillformapp Instagram — post promo reel
+
+### Phase 2: 100-500 users (months 2-3)
+
+Word of mouth kicks in or dies here. What makes people share:
+- The AI said something that hit them — they screenshot it
+- They felt understood for the first time by software
+- They told a friend "this thing actually works"
+- Shareable composure card (build this early — people share growth, not tools)
+
+### Phase 3: 500-1,500 users (months 4-8)
+
+- **FSA/HSA eligibility** — "my insurance pays for it" is a massive conversion unlock
+- **App store presence** — organic discovery on Google Play + Apple App Store
+- **One press hit** — Wired, Verge, or similar could do this in a week
+- **Therapist channel** — the sleeper. One therapist with 40 clients who says "try this between sessions" = 40 qualified leads. Build relationships with therapists who can't see clients daily but want them to have a tool between sessions.
+- **Clinical partnerships** — approach practices that treat ADHD, anxiety, PTSD. Offer provider dashboard (future feature).
+
+### What Drives Retention (keeps users paying)
+
+The AI relationship. Period. After 10 sessions the AI is irreplaceable because starting over means losing the relationship. That's not a dark pattern — that's earned trust through:
+- 9-category memory that makes them feel known
+- Session notes that prove it remembers what mattered
+- Personality mirroring that makes it feel like their person
+- Pattern tracking that shows growth they can't see themselves
+
+### What Keeps Integrity
+
+- No engagement tricks. No streaks. No "you missed a day" notifications.
+- The product works or it doesn't. Retention is proof of value.
+- One price. No upsells. No "premium AI" tier.
+- Quick Breathe free for anyone in crisis.
+- Data is theirs. Delete everything anytime.
+- The less you need the app, the more it's working.
+
+### Pre-Launch Checklist (blocked on DUNS, ~25 days)
+
+- [ ] DUNS number received
+- [ ] Google Play org account ($25)
+- [ ] Apple Developer Program ($99)
+- [ ] Lemon Squeezy products created ($14.99/mo + $9.99/mo annual)
+- [ ] Paywall integrated into stillformapp.com
+- [ ] Test mode purchases verified
+- [ ] 7-day free trial configured
+- [ ] Native APK rebuilt with all April changes
+- [ ] 3-5 real testimonials collected
+- [ ] Reddit post drafted and reviewed
+- [ ] @stillformapp Instagram created
+- [ ] Promo reel posted
+- [ ] Privacy policy updated in Termly
+
 ---
 
 # 12 — Implementation Status (April 4, 2026)
