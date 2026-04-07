@@ -73,7 +73,7 @@ This is Stillform's exact user: high-speed mental processing with no physical co
 - GitHub: EmberEnterprises/Stillform
 - GitHub token: [STORED SEPARATELY — do not commit to repo]
 - Framework: React + Vite
-- AI: GPT-4o Mini via Netlify serverless function (/netlify/functions/reframe.js)
+- AI: GPT-4o via Netlify serverless function (/netlify/functions/reframe.js)
 - Analytics: Plausible (custom script) — live
 - PWA: manifest.json + sw.js + icons — installable on iOS and Android
 - Capacitor 8: initialized with iOS and Android platforms added and synced
@@ -116,7 +116,7 @@ Top-down emotions are more successfully regulated by top-down strategies. Bottom
 **3. Reframe (AI)**
 
 - Three modes: Talk it through (process + reframe), Break the loop (cut thought spirals), Get ready (pre-moment anchor)
-- GPT-4o Mini via Netlify function — rate limited 10 req/IP/min
+- GPT-4o via Netlify function — rate limited 10 req/IP/min
 - Conversation persistence via AES-GCM encrypted localStorage (device key in IndexedDB)
 - History capped at 10 messages
 - AI gets smarter by session count: <3 no patterns, 3-12 gentle, 12+ direct coaching
@@ -586,7 +586,7 @@ git remote set-url origin https://x-access-token:[TOKEN]@github.com/EmberEnterpr
 - Rate limiting: 10 req/IP/min
 - Input validation: max 2000 chars
 - History capped at 10 messages
-- Model: gpt-4o-mini (via OpenAI API)
+- Model: gpt-4o (upgraded April 7 — first impressions are everything) (via OpenAI API)
 - Max tokens: 180 per response
 - Receives: input, history, mode, feelState, bioFilter, signalProfile, biasProfile, checkinContext, sessionCount, priorModeContext, priorToolContext, journalContext
 - AI response principles encoded in system prompts (updated April 4)
