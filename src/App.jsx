@@ -5922,13 +5922,25 @@ export default function Stillform() {
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Coming soon</div>
 
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Samsung Galaxy Watch + Apple Watch — haptic breathing</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Health integration — HRV, sleep, heart rate</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Apple Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Health integration — HRV, sleep, heart rate, cycle data</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Auto-populated morning check-in from biometrics</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Calendar-aware morning practice</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Screen time awareness — context without self-report</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Weather + barometric pressure context</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Signal Awareness speed tracking</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Cloud sync across devices</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Shareable composure card</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Premium sound packs</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Shareable composure card</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Anticipatory Regulation — calendar-aware cool-downs</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Composure Gate — system-level interceptor before reactive actions</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Composure Index — single prestige metric</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Monthly composure summary</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Timed micro-resets — cooling system throughout the day</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6, marginTop: 16 }}>Native app</div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for app store submissions (Google Play + Apple).</div>
