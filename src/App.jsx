@@ -4009,7 +4009,7 @@ function SignalMapTool({ onComplete }) {
 
   const sensations = [
     "Tightness", "Heat", "Numbness", "Racing heart", "Shallow breath", "Nausea", "Trembling", "Brain fog",
-    "Surge of energy", "Sudden urgency", "Restless focus", "Lightness"
+    "Surge of energy", "Sudden urgency", "Restless focus", "Butterflies", "Lightness"
   ];
 
   const triggers = [
