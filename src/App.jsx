@@ -5883,28 +5883,51 @@ export default function Stillform() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", padding: "2px 8px", borderRadius: 4 }}>EARLY ACCESS</span>
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>Your feedback shapes this</span>
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>What's new + what's coming</span>
                   </div>
                   <span style={{ fontSize: 10, color: "var(--text-muted)", transition: "transform 0.2s", transform: uatRoadmapOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
                 </button>
                 {uatRoadmapOpen && (
                   <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Coming soon</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Apple Watch — haptic breathing</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Health integration — HRV, sleep, heart rate, cycle data</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Auto-populated morning check-in from biometrics</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Calendar-aware morning practice</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Screen time awareness — context without self-report</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Weather + barometric pressure context</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Signal Awareness speed tracking</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Cloud sync across devices</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Premium sound packs</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>⬡</span> Shareable composure card</div>
-                    <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Send feedback: ARAembersllc@proton.me</div>
+
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>What's new</div>
+
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> 5-scenario assessment — app adapts to how you process</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Science-backed tutorial with links to published research</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Morning check-in — sets your physical baseline for the AI</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI mirrors your communication style and personality</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI writes session notes — gets sharper every conversation</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI understands ego protection — backs off when you push back</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI adjusts for depleted / pain / under-rested states</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Composure applies to ALL states — not just negative ones</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Patterns treated as real — pause, not rejection</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> App never punishes you for not using it</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Three distinct Reframe modes with different AI behavior</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Adaptive home screen — thought-first / body-first / balanced</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Multi-select hardware check (pain + under-rested etc.)</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Continue / Resend buttons — never lose a conversation</div>
+
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Coming soon</div>
+
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Apple Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Health integration — HRV, sleep, heart rate, cycle data</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Auto-populated morning check-in from biometrics</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Calendar-aware morning practice</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Screen time awareness — context without self-report</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Weather + barometric pressure context</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Signal Awareness speed tracking</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Cloud sync across devices</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Premium sound packs</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Shareable composure card</div>
+
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6, marginTop: 16 }}>Native app</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for Apple Developer Program and App Store submission.</div>
+
+                    <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Your feedback shapes this. Send anything: ARAembersllc@proton.me</div>
                   </div>
                 )}
               </div>
