@@ -627,6 +627,11 @@ Stillform doesn't teach courage or confidence directly. It builds the foundation
 
 **The Observer Hack IS metacognition.** Instead of "I am afraid," the shift to "I'm noticing a fear-based response" creates distance. That distance IS composure. That distance IS the product. Every feature in Stillform trains this shift — from experiencing a state to observing a state.
 
+**Chronic illness changes the ego equation.** When energy is a limited budget, stubbornness becomes a survival tactic — not a character flaw. The ego protects against two bankruptcies:
+1. *Energy bankruptcy* — "Don't try that new thing. We don't have the funds for a setback." The ego treats change as a high-maintenance luxury you can't afford.
+2. *Hope bankruptcy* — "If we don't try, we can't fail. If we don't hope for full potential, we don't have to feel the crushing weight of disappointment when the body doesn't cooperate." Blocking your own potential is a way to control the "no" before life says it for you.
+The AI must recognize this: when someone is depleted and resistant, pushing harder is spending energy they don't have. "I see you're trying to save your energy. We can afford five minutes of this." Acknowledge the ego's job. Negotiate with it, don't override it. Potential for someone with chronic illness isn't "pushing through" — it's mastering composure and clarity even when the body is failing. That IS full potential. The bio-filter exists so the AI knows when someone is in low-power mode and adjusts expectations accordingly.
+
 ---
 
 # 10 — Cloud Sync & Data Safety (PLANNED)
