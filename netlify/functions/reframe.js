@@ -379,7 +379,7 @@ exports.handler = async function(event) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Message too long." }) };
     }
 
-    const messages = [...history.slice(-10), { role: "user", content: input }]; // Cap history at 10 messages
+    const messages = [...history.slice(-10).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content || m.text })), { role: "user", content: input }]; // Cap history at 10 messages, fix role mapping
     let systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM;
 
     // Inject user context if available
@@ -410,7 +410,7 @@ exports.handler = async function(event) {
         focused: "USER'S SELF-REPORTED STATE: Focused. They're already locked in. Don't disrupt the state. Keep responses tight and operational. If they came here focused, they want to sharpen — not regulate.",
         anxious: "USER'S SELF-REPORTED STATE: Anxious. Threat response active. Acknowledge first. Regulate tone and interpretation of ambiguous signals. Separate what is real from what the brain is adding.",
         angry: "USER'S SELF-REPORTED STATE: Angry. Do not minimize or redirect too fast. Acknowledge the anger fully first. Then help them separate the feeling from any action they might be considering. Slow the decision-making.",
-        flat: "USER'S SELF-REPORTED STATE: Flat. Low energy, low motivation, disconnected. Don't push. Don't cheerload. Help them find one small thing that matters right now. Activation, not inspiration.",
+        flat: "USER'S SELF-REPORTED STATE: Flat. Low energy, low motivation, disconnected. Don't push. Don't cheerload. Don't say 'it's okay to feel off' — that's empty. Match their low energy with directness. Name what flat usually means for people: the system is tired, not broken. Help them find one concrete thing — not 'something to ground you' but an actual specific action. If they're casual ('yo idk'), be casual back.",
         mixed: "USER'S SELF-REPORTED STATE: Mixed — multiple emotional states active simultaneously. Don't try to resolve it. Acknowledge the complexity. Help them identify which feeling is loudest right now."
       };
       if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
