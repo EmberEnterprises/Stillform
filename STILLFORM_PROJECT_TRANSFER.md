@@ -926,7 +926,28 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. Incognito tab or clear cache to test fresh.
 - **Copyright not filed** — $65 at copyright.gov. Bobby wants this done ASAP.
 - **DUNS number pending** — blocks both Google Play ($25 org) and Apple Developer ($99). ~25 days from application.
-- **Celebrity/influencer outreach list** — not yet built. Target: ADHD/neurodivergent creators with 100K-1M followers on TikTok/YouTube. Free access in exchange for genuine use, not paid endorsement.
+- **Influencer outreach strategy** — 30-day extended trial then subscription at cost (~$2-3/month, covers API). NOT free — at cost preserves integrity. Standard users get 14-day trial at $14.99/mo. Influencers get 30-day evaluation then cost-only rate. No paid endorsements. Their honest take IS the endorsement.
+
+**Tier 1 targets (perfect alignment):**
+- Jessica McCabe (How to ADHD) — 1.9M YouTube. Her channel IS the ADHD toolbox.
+- Dani Donovan — comic artist, keynote speaker, "The Anti-Planner" author
+- Connor DeWolfe — 5.2M TikTok, ADHD + anxiety
+- Dr. Sasha — board-certified psychiatrist, 900K+ TikTok
+- Jenna (ADHD therapist who HAS ADHD) — therapist channel in one person
+
+**Tier 2 targets (strong alignment):**
+- Chalene Johnson — 780K+ Instagram, business owner with ADHD (Executive Composure fit)
+- ndwellness — 157K TikTok, Autism + ADHD, late diagnosis
+- Tracy — holistic coaching post-accident (Rebuilder persona)
+- Hayley Honeyman — 280K YouTube + 233K Instagram
+- Rich & Rox (ADHD Love) — 789K TikTok, ADHD couple
+
+**Tier 3 targets (niche, high trust):**
+- Kelly B — 357K TikTok, ADHD coach
+- René Brooks (Black Girl, Lost Keys) — deep ADHD research, high trust
+- Nik — ADHD lifestyle mentor, "ADHD superpowers" framing
+
+**Outreach approach:** "I built a composure system for people who feel everything at full intensity. I'd like you to try it for 30 days. If you subscribe after, it's at cost — just covers the AI. If it doesn't work for you, no obligation. If it does, I'd love your honest take."
 - **State-to-Statement** — on roadmap, planned for pre-launch sprint (one session build)
 - **Shareable composure card** — on roadmap, planned for pre-launch sprint (one session build)
 
