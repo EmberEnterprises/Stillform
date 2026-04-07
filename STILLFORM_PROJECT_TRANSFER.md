@@ -928,7 +928,13 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - **DUNS number pending** — blocks both Google Play ($25 org) and Apple Developer ($99). ~25 days from application.
 - **Influencer outreach strategy** — 30-day extended trial then subscription at cost (~$2-3/month, covers API). NOT free — at cost preserves integrity. Standard users get 14-day trial at $14.99/mo. Influencers get 30-day evaluation then cost-only rate. No paid endorsements. Their honest take IS the endorsement.
 
-**Tier 1 targets (perfect alignment):**
+**Growth sequence (locked):**
+1. Reddit launch — free, r/ADHD + r/anxiety + r/neurodivergent. Prove the product converts.
+2. Hit 100 subscribers — validate pricing, collect testimonials, learn conversion rate.
+3. Nano/micro influencer outreach — spend money only after free channels prove the product works.
+4. Instagram ads — only after social proof exists and conversion rate is known.
+
+**Tier 1 targets (perfect alignment — reach out at 100 subs):**
 - Jessica McCabe (How to ADHD) — 1.9M YouTube. Her channel IS the ADHD toolbox.
 - Dani Donovan — comic artist, keynote speaker, "The Anti-Planner" author
 - Connor DeWolfe — 5.2M TikTok, ADHD + anxiety
