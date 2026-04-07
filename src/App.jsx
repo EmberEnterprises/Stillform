@@ -6552,11 +6552,11 @@ export default function Stillform() {
                   <li>3 AI modes: Regulate, Get Sharp, Lock In</li>
                   <li>Signal Log with AI memory</li>
                   <li>Daily check-in</li>
-                  <li>Cloud sync — access from any device</li>
+                  <li>Device-local encrypted storage</li>
                   <li>Signal mapping + tension check</li>
                   <li>Pattern recognition (evolves with use)</li>
                   <li>Voice-to-text everywhere</li>
-                  <li>Encrypted cloud backup</li>
+                  <li>AES-256 encryption on all session data</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }}>
                   Start 7-day free trial →
@@ -6594,7 +6594,7 @@ export default function Stillform() {
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
-            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes with encrypted cloud sync so you can access your data from any device. Your data is encrypted in transit and at rest. You can delete your data at any time from Settings.</p>
+            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. Your data never leaves your device. You can delete your data at any time from Settings.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
 
             <h2>Assumption of Risk</h2>
@@ -7267,7 +7267,7 @@ export default function Stillform() {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Sync across devices</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Access conversations, signal log, and progress from any device. Encrypted.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Coming soon — sync across devices. Requires account.</div>
                   </div>
                   <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
                 </div>
