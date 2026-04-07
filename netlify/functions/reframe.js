@@ -354,6 +354,18 @@ exports.handler = async function(event) {
 
     // Inject user context if available
     const contextParts = [];
+    
+    // Time awareness — AI must know when the user is talking
+    const now = new Date();
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const hour = now.getHours();
+    let timeOfDay = "morning";
+    if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
+    else if (hour >= 17 && hour < 21) timeOfDay = "evening";
+    else if (hour >= 21 || hour < 5) timeOfDay = "late night";
+    else if (hour >= 5 && hour < 8) timeOfDay = "early morning";
+    contextParts.push(`CURRENT TIME: ${days[now.getDay()]} ${timeOfDay} (${now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}). Be aware of when this conversation is happening. Late night sessions hit different than Monday morning ones. 3am anxiety is not the same as 3pm frustration. Let the time inform your tone — don't mention it unless relevant.`);
+
     if (regulationType) {
       const typeMap = {
         "thought-first": "USER'S REGULATION TYPE: Thought-first. This person processes through cognition first — analyzing, replaying, building responses. Their body signals come AFTER cognitive processing. Lead with cognitive engagement. Don't push breathing or body work until they've had space to think it through. If they're here talking, that IS their regulation — let it work.",
