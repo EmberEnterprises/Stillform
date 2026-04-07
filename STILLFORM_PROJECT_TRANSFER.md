@@ -617,6 +617,16 @@ Stillform doesn't teach courage or confidence directly. It builds the foundation
 
 **Manufactured care works if it's consistent.** The user doesn't need the AI to be real. They need it to be consistent — never forgets, never judges, never gets tired of them, never makes it about itself.
 
+**Trauma blocks potential, not ability.** Trauma — especially the kind that targets confidence — physically alters neural processing. The brain prunes pathways associated with risk-taking and shifts from exploration to protection. The talent, intelligence, and capability are still there but sequestered behind a safety vault. Reaching potential isn't about trying harder — it's about convincing the mind it's safe enough to unlock the door. Stillform's entire design philosophy supports this: low-friction entry, no judgment, safety foundation before growth.
+
+**Fear and ego are tag-team security guards.** Fear is the alarm ("don't move or you'll get hurt again"). Ego is the architect that defends the current identity — even a painful one — because change threatens the "you" that's understood. The ego uses stubbornness to say: "I'd rather be right about being less-than than risk the unknown." When someone pushes back on a reframe, that's the ego protecting. The AI should never push harder — it should name it: "Something about that landed wrong. What part?"
+
+**Stubbornness is redirected persistence.** The same trait that blocks someone is the exact tool they need to break through. Don't break the stubbornness — recruit it. "I am going to stubbornly insist on doing this one tiny thing today, regardless of how I feel about myself." The AI should recognize stubbornness as fuel, not resistance.
+
+**Lower the stakes to bypass the ego.** If the ego is triggered by big goals, don't give it any. Focus on things so small they don't feel like a threat to identity. Two-tap morning check-in. One breathing cycle. One reframe. The ego doesn't activate defenses against something that small — and micro-wins rebuild confidence circuitry because the brain's confidence system runs on evidence, not affirmation.
+
+**The Observer Hack IS metacognition.** Instead of "I am afraid," the shift to "I'm noticing a fear-based response" creates distance. That distance IS composure. That distance IS the product. Every feature in Stillform trains this shift — from experiencing a state to observing a state.
+
 ---
 
 # 10 — Cloud Sync & Data Safety (PLANNED)
