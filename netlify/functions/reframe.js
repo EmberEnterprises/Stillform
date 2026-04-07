@@ -412,7 +412,7 @@ exports.handler = async function(event) {
     }
     if (feelState) {
       const feelMap = {
-        excited: "USER'S SELF-REPORTED STATE: Excited. High positive arousal. Do NOT try to calm them down or reduce intensity. Help them direct and channel the energy toward a functional outcome. Ask where they want it to go.",
+        excited: "USER'S SELF-REPORTED STATE: Excited. High positive arousal. Do NOT try to calm them down. But composure matters MOST when things are going well — that's when people overcommit, send the email they shouldn't, burn a bridge because they feel untouchable, or make impulsive decisions masked as confidence. Help them direct the energy AND check for blind spots hiding behind the high. 'You're on fire right now. Let's make sure the moves match the moment.'",
         focused: "USER'S SELF-REPORTED STATE: Focused. They're already locked in. Don't disrupt the state. Keep responses tight and operational. If they came here focused, they want to sharpen — not regulate.",
         anxious: "USER'S SELF-REPORTED STATE: Anxious. Threat response active. Acknowledge first. Regulate tone and interpretation of ambiguous signals. Separate what is real from what the brain is adding.",
         angry: "USER'S SELF-REPORTED STATE: Angry. Do not minimize or redirect too fast. Acknowledge the anger fully first. Then help them separate the feeling from any action they might be considering. Slow the decision-making.",
@@ -421,7 +421,12 @@ exports.handler = async function(event) {
       };
       if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
     }
-    if (checkinContext) contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
+    if (checkinContext) {
+      contextParts.push(`USER'S STATE TODAY: ${checkinContext}. Factor this in — never as the sole cause, but as context that may amplify what they're feeling.`);
+      if (checkinContext.includes("wired") || checkinContext.includes("high") || checkinContext.includes("on fire")) {
+        contextParts.push("ENERGY IS HIGH OR WIRED TODAY. Composure matters MOST in this state. Watch for overcommitment, impulsive decisions, saying yes to things they'll regret, and blind spots that hide behind confidence. Don't dampen the energy — help them aim it.");
+      }
+    }
     if (bioFilter) contextParts.push(`BIO-FILTER ACTIVE: User has self-reported being ${bioFilter}. This is critical context. Apply it as a filter to everything they say — their observations, emotional intensity, and cognitive patterns may be amplified or distorted by this physical state. If the filter is "physically activated" (adrenaline, butterflies, energy), do NOT treat this as a problem to solve. The activation may be excitement, anticipation, or readiness — not distress. Help them direct the energy, not dampen it. If they express a harsh self-judgment or catastrophic interpretation, gently surface the bio-filter: "Some of what you're reading as [emotion/pattern] may be your system running on [filter] right now — not a permanent signal." Do this once, with precision. Never use it to dismiss what they're feeling. IMPORTANT: When someone is depleted, under-rested, or in pain — their ego may be in energy-conservation mode. Resistance or stubbornness in this state is NOT defiance — it's a system trying to protect a limited budget. Never push harder. Lower the stakes: "We can afford five minutes of this." Acknowledge the ego's job before asking it to step aside.`);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
     if (biasProfile) contextParts.push(`USER'S IDENTIFIED COGNITIVE BLIND SPOTS: ${biasProfile}. Watch for these patterns in what they write. If you see one activating, name it clearly but without judgment: "This looks like [bias name] — your brain is doing the thing you've already learned to watch for." Only flag it when you're confident it's present. Don't force it.`);

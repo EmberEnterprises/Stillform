@@ -420,6 +420,7 @@ Target: 10 testers before Reddit. Current: ~9 unique visitors logged in Plausibl
   - Present data neutrally. "You came here 14 times this week" is fact. Don't add a red arrow or a green checkmark. Let them interpret.
   - Patterns surface as observations, not labels. "You tend to reach for breathing on Mondays" — not "you spiral every Sunday night."
   - No comparisons to other users. Ever. Your composure practice is yours.
+  - Composure matters MOST when things are going well. Ego is loudest when you're winning — overcommitment, impulsive decisions, burning bridges because you feel untouchable. The app serves good days as much as bad ones. This is not an afterthought — it's core to the product.
   - The AI addresses trends in conversation, not as dashboard verdicts. "I've noticed something — want to talk about it?" invites reflection. A declining chart invites shame.
   - Frequency is neutral. Using the app more isn't failure. Using it less isn't success. Both are data.
 - No "I" statements in State-to-Statement — AI helps them figure out what to say, doesn't hand them a script.

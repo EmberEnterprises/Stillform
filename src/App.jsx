@@ -5292,7 +5292,7 @@ export default function Stillform() {
               icon: "◎",
               title: "Stillform",
               subtitle: "A precision composure system.",
-              body: "A channel to self-awareness — and a tool to act on it. Regulate your body first. Reset your thinking. Then approach whatever you're dealing with more clearly.\n\nBad sleep, a trigger, excitement, physical pain — the system reads all of it, because physical and environmental state shapes how you feel more than most people realize. Once you understand why you feel what you feel, that knowledge becomes the thing that stabilizes you.\n\nBuilt from lived experience and grounded in proven neuroscience and cognitive research.",
+              body: "A channel to self-awareness — and a tool to act on it. Regulate your body first. Reset your thinking. Then approach whatever you're dealing with more clearly.\n\nComposure isn't just for bad moments. Excitement, confidence, a big win — your state can drive impulsive decisions when things are going great too. Bad sleep, a trigger, physical pain, or riding high — the system reads all of it, because your state shapes your actions more than most people realize.\n\nBuilt from lived experience and grounded in proven neuroscience and cognitive research.",
               note: null
             },
             {
@@ -5803,7 +5803,7 @@ export default function Stillform() {
                   Composure.<br /><em>On demand.</em>
                 </h1>
                 <p className="home-sub">
-                  Master how you carry yourself — every morning and every moment that matters. Set your tone for the day, reset when you need to, and build composure that compounds over time.
+                  Master how you carry yourself — when things are hard and when things are going great. Composure isn’t just for bad days. Set your tone, stay sharp, and build awareness that compounds over time.
                 </p>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                   Let's calibrate your system first.
@@ -5901,8 +5901,9 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI gives you perspectives first, asks questions second</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI sounds like a sharp friend, not a therapist</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Multi-turn conversations fixed — AI actually follows the thread now</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Signal Log renamed to Pulse — check your pulse, 15 seconds</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Pulse (formerly Signal Log) — check your pulse in 15 seconds</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Research blog post live — the science behind the two-pathway system</div>
 
@@ -5999,7 +6000,7 @@ export default function Stillform() {
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Low", "Steady", "High", "Ready", "Wired"].map(e => (
+                      {["Low", "Steady", "High", "Ready", "On fire", "Wired"].map(e => (
                         <button key={e} onClick={() => setCiEnergy(e.toLowerCase())} style={{
                           background: ciEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${ciEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
