@@ -45,7 +45,7 @@ This is Stillform's exact user: high-speed mental processing with no physical co
 
 - Stabilize. Then think clearly.
 - Think clearly. Then settle. (thought-first) / Settle the body. Then think. (body-first) / Choose your entry point. (balanced)
-- Not meditation. Not therapy. A precision composure system.
+- A precision composure system.
 - ◉ Scan·Body / ✶ Reframe·Thought — secondary anchors
 
 ---
@@ -665,7 +665,7 @@ The AI must recognize this: when someone is depleted and resistant, pushing hard
 Goal: Get Stillform approved as an FSA/HSA eligible purchase. Requires all features to be science-backed, research-cited, and psychologically validated. Every tool, every AI response principle, every assessment scenario must trace back to published research. This strengthens positioning as a health tool, not a wellness app.
 
 ## Press Target: Wired Magazine
-Position Stillform for a Wired feature. Differentiators: operator framing, two-pathway neuroscience-backed assessment, AI summarization architecture, Composure Gate concept, Signal Awareness Latency as a metric. The science-backed approach and the "composure system not meditation app" angle is the hook.
+Position Stillform for a Wired feature. Differentiators: operator framing, two-pathway neuroscience-backed assessment, AI summarization architecture, Composure Gate concept, Signal Awareness as a metric. The science-backed precision composure system angle is the hook.
 
 ## Everything Must Be Research-Backed
 Every decision in the product traces to psychology, neuroscience, or behavioral research:
