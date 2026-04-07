@@ -5925,7 +5925,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Shareable composure card</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6, marginTop: 16 }}>Native app</div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for Apple Developer Program and App Store submission.</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for app store submissions (Google Play + Apple).</div>
 
                     <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Your feedback shapes this. Send anything: ARAembersllc@proton.me</div>
                   </div>

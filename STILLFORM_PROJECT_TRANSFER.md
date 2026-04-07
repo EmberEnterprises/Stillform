@@ -708,7 +708,7 @@ Every decision in the product traces to psychology, neuroscience, or behavioral 
 - ✅ "Sudden urgency" replaces "clarity spike" in sensations
 - ✅ "Ready" added to morning check-in energy options
 
-## Needs Mac (Native Rebuild — WIP, DUNS pending ~25 more days)
+## Needs Mac (Native Rebuild — WIP, DUNS pending ~25 more days — required for Google Play + Apple)
 
 - ❌ Native APK with all changes (pull + build + install + clear SW cache)
 - ❌ Test widget with new code on device
