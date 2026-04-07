@@ -601,6 +601,8 @@ Stillform doesn't teach courage or confidence directly. It builds the foundation
 **Composure Clears the Path**
 Composure doesn't add capability. It removes what was blocking access to capability that was always there. The potential isn't unlocked — the noise gets quieter and you can finally hear yourself think. This is a documented outcome, not a marketing promise: the founder experienced intellectual clarity emerging as a direct result of building and using the composure framework. The implication for users: what feels like "not being able to think" may actually be "too much noise to access what you already know."
 
+**Most people don't know the noise is there.** They think their default state IS their baseline. They've never experienced themselves without it. The first breathing session or the first body scan isn't just a tool — it's the first time many people feel the difference between "me thinking" and "noise running." That recognition — "oh, that wasn't me, that was noise" — is the first real metacognitive shift. Everything else builds on it.
+
 > *The framework: Rate your state → Filter for hardware → Regulate → Reframe. That is the composure system. Not wellness. Diagnostics.*
 
 ---
