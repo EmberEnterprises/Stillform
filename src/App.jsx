@@ -2813,7 +2813,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         mode: effectiveMode
       });
       localStorage.setItem("stillform_journal", JSON.stringify(entries));
-      try { window.plausible("Journal Entry", { props: { mode: effectiveMode } }); } catch {}
+      try { window.plausible("Signal Log Entry", { props: { mode: effectiveMode } }); } catch {}
     } catch {}
     setJournalText("");
   };
@@ -3205,7 +3205,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           color: tab === "journal" ? mc.color : "var(--text-muted)",
           cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
         }}>
-          Journal
+          Signal Log
         </button>
       </div>
 
