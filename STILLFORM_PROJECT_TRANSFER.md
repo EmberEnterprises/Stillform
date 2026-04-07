@@ -598,6 +598,9 @@ Top-down (thought-first) emotions are more successfully regulated by cognitive s
 **Composure as the Foundation of Courage and Confidence**
 Stillform doesn't teach courage or confidence directly. It builds the foundation both require. Courage isn't the absence of fear — it's acting clearly while the signal is running high. Confidence isn't believing you'll succeed — it's trusting yourself to stay steady regardless. Signal Awareness compounding over time is the mechanism that produces both. You stop being afraid of your own reactions. That's where real confidence comes from.
 
+**Composure Clears the Path**
+Composure doesn't add capability. It removes what was blocking access to capability that was always there. The potential isn't unlocked — the noise gets quieter and you can finally hear yourself think. This is a documented outcome, not a marketing promise: the founder experienced intellectual clarity emerging as a direct result of building and using the composure framework. The implication for users: what feels like "not being able to think" may actually be "too much noise to access what you already know."
+
 > *The framework: Rate your state → Filter for hardware → Regulate → Reframe. That is the composure system. Not wellness. Diagnostics.*
 
 ---
