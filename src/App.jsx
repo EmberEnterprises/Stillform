@@ -5024,6 +5024,29 @@ export default function Stillform() {
   // Production: show onboarding only once, unless user replays from Settings.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
+  // Subscription & trial tracking
+  const isSubscribed = (() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } })();
+  const trialDaysLeft = (() => {
+    try {
+      const start = localStorage.getItem("stillform_trial_start");
+      if (!start) return 14;
+      const elapsed = (Date.now() - new Date(start).getTime()) / (1000 * 60 * 60 * 24);
+      return Math.max(0, Math.ceil(14 - elapsed));
+    } catch { return 14; }
+  })();
+  const trialExpired = trialDaysLeft <= 0 && !isSubscribed;
+
+  // Check for subscription confirmation from Lemon Squeezy redirect
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("subscribed") === "true" || params.get("checkout") === "success") {
+        localStorage.setItem("stillform_subscribed", "yes");
+        window.history.replaceState({}, "", "/");
+      }
+    } catch {}
+  }, []);
+
   // Check widget launch flag synchronously (works on web only)
   const widgetLaunch = false;
 
@@ -5070,7 +5093,7 @@ export default function Stillform() {
         console.error("WidgetBridge error:", e);
       }
 
-      setScreen("home");
+      setScreen(trialExpired ? "pricing" : "home");
       setScreenReady(true);
     };
     init();
@@ -5132,6 +5155,7 @@ export default function Stillform() {
 
   const completeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
     // Route to calibration assessment, not home
     setSetupStep(0);
@@ -5877,6 +5901,17 @@ export default function Stillform() {
                 </div>
               )}
 
+              {/* TRIAL BADGE */}
+              {!isSubscribed && trialDaysLeft > 0 && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: trialDaysLeft <= 3 ? "#c05040" : "var(--text-muted)" }}>FREE TRIAL</span>
+                    <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
+                  </div>
+                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+                </div>
+              )}
+
               {/* UAT BANNER — visible dropdown with roadmap */}
               <div style={{ marginBottom: 32 }}>
                 <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
@@ -6533,10 +6568,10 @@ export default function Stillform() {
         {/* PRICING */}
         {screen === "pricing" && (
           <section className="pricing">
-            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            {!trialExpired && <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>}
             <div className="pricing-header">
-              <h2>Start free. Stay only if it works.</h2>
-              <p>Try everything free for 7 days. Composure when you need it — under two minutes.</p>
+              <h2>{trialExpired ? "Your free trial has ended." : "Start free. Stay only if it works."}</h2>
+              <p>{trialExpired ? "Subscribe to keep using Stillform. Your data is safe — right where you left it." : "Try everything free for 14 days. Composure when you need it — under two minutes."}</p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
@@ -6579,8 +6614,8 @@ export default function Stillform() {
                   <li>Voice-to-text everywhere</li>
                   <li>AES-256 encryption on all session data</li>
                 </ul>
-                <button className="btn btn-primary" style={{ width: "100%" }}>
-                  Start 7-day free trial →
+                <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => { window.location.href = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7?checkout[custom][redirect_url]=" + encodeURIComponent(window.location.origin + "/?subscribed=true"); }}>
+                  {trialExpired ? "Subscribe now →" : "Start 14-day free trial →"}
                 </button>
               </div>
             </div>
@@ -6608,7 +6643,7 @@ export default function Stillform() {
             <p>The acupressure guidance in Stillform is for general wellness purposes only. It is not medical treatment. The pressure points referenced are based on traditional practices and are provided for informational and self-care purposes. Consult a healthcare provider before beginning any new wellness practice, especially if you are pregnant, have a medical condition, or are taking medication.</p>
 
             <h2>AI-Powered Reframe</h2>
-            <p>The Reframe feature uses artificial intelligence (OpenAI's GPT-4o Mini) to generate responses based on evidence-based reframing techniques. These responses are generated by AI, not by a licensed therapist or medical professional. AI responses may not always be accurate, appropriate, or applicable to your situation. Do not rely on AI-generated content as a substitute for professional mental health care. Do not enter sensitive personal, medical, or identifying information.</p>
+            <p>The Reframe feature uses artificial intelligence (OpenAI's GPT-4o) to generate responses based on evidence-based reframing techniques. These responses are generated by AI, not by a licensed therapist or medical professional. AI responses may not always be accurate, appropriate, or applicable to your situation. Do not rely on AI-generated content as a substitute for professional mental health care. Do not enter sensitive personal, medical, or identifying information.</p>
             <p>Text entered into the Reframe feature is sent to Anthropic's servers for processing. Anthropic does not store, retain, or train on any data sent through their API. Your conversations are not used to improve AI models. See our <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>full Privacy Policy</a> for details.</p>
 
             <h2>Pattern Analysis & Insights</h2>
