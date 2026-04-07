@@ -31,10 +31,12 @@ Stillform IS a daily composure practice AND a fast intervention system. Morning 
 
 ## Positioning
 
+- **Category: Executive Composure.** Not mental health. Not wellness. A new category. Use this phrase for Product Hunt, press, and Reddit.
 - You are selling Composure as a Competitive Advantage
 - Target: anyone who wants more control over how they show up — professionals, parents, creatives, athletes, neurodivergent individuals, anyone who cares about composure
 - They want a dashboard, not a hug. An operator, not a patient.
 - People don't want to be better. They want to be functional.
+- **Trainer, not a crutch.** Signal Awareness Latency (how fast they catch themselves) is proof the app is building a skill they eventually own. The less you need the app, the more it's working. If it creates dependency, it's failed.
 
 ## Core Use Case: The Rebuilder's Burnout
 
@@ -133,12 +135,13 @@ Guided 5-scenario assessment determines regulation type. Followed by signal mapp
 
 ## 7-Session Review Milestone (NEW)
 
-After the 7th session (regardless of frequency), the system reviews tool usage vs assessed type:
+After the 7th session (regardless of frequency), the AI reflects on tool usage vs assessed type. This must feel like the AI noticed something, NOT like the software ran a diagnostic:
 
-- **Mismatch detected:** "You've been here 7 times. Based on how you've been using the tools, you tend to reach for talking first — but you were set up as body-first. Is what you're using now working, or do you want to try leading with Reframe?"
+- **Mismatch detected (AI says):** "I've noticed something. You came in as body-first, but you keep reaching for conversation. That's not wrong — it might mean your system is telling you something about how you actually process. Want to explore that?"
 - **No mismatch:** "7 sessions. You're building something. How's it feeling?"
 - **7-day streak variant:** If 7 consecutive days, use "You've been here 7 days straight" instead
-- No pressure, no "you were wrong" — data + their call
+- NEVER frame as: "Based on your data, you should switch." That's a notification, not metacognition.
+- The user decides. The AI observes. That's the product.
 - First pattern note moved from session 5 to session 3 (if user doesn't feel seen in 48 hours, they leave)
 
 ## Morning Check-In (BUILT — April 4, calendar integration pending)
