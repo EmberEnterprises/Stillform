@@ -4,7 +4,18 @@
 
 ARA Embers LLC · April 2026 · For Stillform Project in Claude
 
-> *Paste this document into the **Stillform** Claude project on session start. Everything here is current as of April 4, 2026. No decisions need to be relitigated.*
+> *Paste this document into the **Stillform** Claude project on session start. Everything here is current as of April 7, 2026. No decisions need to be relitigated.*
+
+## CRITICAL: Multi-Session Rules
+
+Arlin runs multiple Claude sessions on this project. Sessions can die mid-conversation. To prevent conflicts and lost work:
+
+1. **ALWAYS `git pull --rebase origin main` before ANY push.** Another session may have pushed since you started.
+2. **ALWAYS push every change immediately after making it.** Do not batch. Do not wait. If the session dies, unpushed work is lost.
+3. **Update this transfer doc with every significant change.** This doc is the single source of truth. If it's not in here, the next session won't know about it.
+4. **Never have two sessions pushing to the repo simultaneously.** Finish one session's work before starting another.
+5. **GitHub repo:** EmberEnterprises/Stillform — Netlify auto-deploys within ~1 minute of push.
+6. **After any push, verify deploy at stillformapp.com** (incognito tab to bypass service worker cache).
 
 ---
 
@@ -272,7 +283,8 @@ Hybrid approach:
 - Share extension: code written, untested
 - Watch haptics: code written, wear module builds, untested
 - Web fallback: all native features gracefully degrade on web
-- PENDING: Apple Watch companion, Health integrations, Biometric lock
+- PENDING: Apple Watch companion, Health integrations
+- IN PROGRESS: Biometric lock — @aparajita/capacitor-biometric-auth installed by other Claude session (April 7)
 
 ---
 
