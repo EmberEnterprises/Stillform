@@ -289,9 +289,10 @@ Hybrid approach:
 
 ## What's Waiting on DUNS (applied, pending approval)
 
+- Google Play Console org account ($25 one-time) — requires DUNS
 - Apple Developer Program ($99/yr) — requires DUNS for org account
-- App Store submission
-- TestFlight testers
+- App Store + Play Store submissions
+- TestFlight testers (Apple) / Closed testing (Google)
 
 ## Pre-Launch Requirements
 
