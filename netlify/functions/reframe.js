@@ -394,7 +394,7 @@ exports.handler = async function(event) {
       signal: controller.signal,
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        max_tokens: 180,
+        max_tokens: 500,
         messages: [
           { role: "system", content: systemPrompt },
           ...messages
