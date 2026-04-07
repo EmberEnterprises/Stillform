@@ -948,6 +948,8 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - Nik — ADHD lifestyle mentor, "ADHD superpowers" framing
 
 **Outreach approach:** "I built a composure system for people who feel everything at full intensity. I'd like you to try it for 30 days. If you subscribe after, it's at cost — just covers the AI. If it doesn't work for you, no obligation. If it does, I'd love your honest take."
+
+**Performance tier:** Each influencer gets a unique discount code for their audience. If their code generates enough subscribers (threshold TBD based on revenue), their subscription becomes free. We're a startup and can't afford free lifetime access upfront — but we can earn our way there together. This keeps it honest: they're not getting paid to promote, they're getting rewarded for results.
 - **State-to-Statement** — on roadmap, planned for pre-launch sprint (one session build)
 - **Shareable composure card** — on roadmap, planned for pre-launch sprint (one session build)
 
