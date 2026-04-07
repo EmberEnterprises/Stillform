@@ -416,7 +416,7 @@ exports.handler = async function(event) {
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
       signal: controller.signal,
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-4o",
         max_tokens: 500,
         messages: [
           { role: "system", content: systemPrompt },
