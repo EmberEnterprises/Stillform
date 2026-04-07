@@ -5856,7 +5856,7 @@ export default function Stillform() {
                   <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
                     {hasStreak
                       ? "You've been here every day this week. You're building something. How's it feeling?"
-                      : "You've been here 7 times. Are the tools you're reaching for working, or do you want to try a different approach?"}
+                      : "I've noticed something. You've been here 7 times now — and the way you're using the tools might be telling you something about how you actually process. Is what you're reaching for working?"}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); setScreen("home"); }} style={{
