@@ -3406,7 +3406,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   </div>
                 )}
                 {msg.role === "ai" ? (
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300, lineHeight: 1.65, letterSpacing: "0.01em" }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 300, lineHeight: 1.65, letterSpacing: "0.01em" }}>
                     {msg.text.split(/(\*[^*]+\*)/).map((part, j) =>
                       part.startsWith("*") && part.endsWith("*")
                         ? <em key={j} style={{ fontStyle: "italic", color: mc.color }}>{part.slice(1, -1)}</em>
@@ -3548,7 +3548,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Start fresh
             </button>
           </div>
-          {messages.length > 2 && <SessionNote />}
+          {messages.length > 2 && false && <SessionNote />}
         </div>
       )}
       {messages.length === 0 && loading && (
