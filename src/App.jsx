@@ -1141,7 +1141,7 @@ const TOOLS = [
     id: "bias",
     icon: "⬡",
     name: "Know Your Blind Spots",
-    desc: "Learn the cognitive biases that shape how you think under pressure.",
+    desc: "Learn the thinking patterns that run on autopilot when you're stressed.",
     time: "5 min",
     level: 3
   },
@@ -1406,7 +1406,7 @@ function PhysiologicalSighTool({ onComplete }) {
       <div className="complete">
         <div className="complete-icon">✓</div>
         <h2>Reset complete.</h2>
-        <p style={{ marginBottom: 8 }}>Three physiological sighs. Your head is clearer than it was {fmt(elapsed)} ago.</p>
+        <p style={{ marginBottom: 8 }}>Three deep sighs. Your head is clearer than it was {fmt(elapsed)} ago.</p>
         {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
         <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
           Talk through what's happening →
@@ -1488,7 +1488,7 @@ function PhysiologicalSighTool({ onComplete }) {
 }
 
 const BREATHING_PATTERNS = [
-  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale activates parasympathetic system", phases: [
+  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale tells your body to slow down", phases: [
     { name: "Inhale", duration: 4, instruction: "In through your nose." },
     { name: "Hold", duration: 4, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
@@ -1557,7 +1557,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const breathPrompts = [
     { id: "calm", label: "Settle the system", desc: "Thoughts or energy running fast", why: "Extended exhale downregulates your nervous system. Most people feel a shift in 90 seconds." },
     { id: "box", label: "Stabilize under pressure", desc: "High-stakes, need to stay even", why: "Equal rhythm locks your baseline under sustained load" },
-    { id: "478", label: "Release physical tension", desc: "Clenched, exhausted, wired, or can't stop", why: "Long hold + exhale is the deepest physiological reset" },
+    { id: "478", label: "Release physical tension", desc: "Clenched, exhausted, wired, or can't stop", why: "Long hold + exhale is the deepest physical reset" },
     { id: "quick", label: "Regain focus", desc: "60 seconds, between tasks, in public", why: "Shortest pattern that shifts your state" }
   ];
 
@@ -1889,7 +1889,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
           { id: "activated", label: "Activated", desc: "Adrenaline, butterflies, energy surging", icon: "⚡" },
           { id: "depleted", label: "Low capacity", desc: "Fatigue, low energy, heavy body", icon: "◌" },
           { id: "gut", label: "Gut signal", desc: "Digestive noise — gut-brain axis active", icon: "◉" },
-          { id: "sleep", label: "Under-rested", desc: "Reduced cognitive baseline", icon: "◐" },
+          { id: "sleep", label: "Under-rested", desc: "Your brain is running slower than usual", icon: "◐" },
           { id: "hormonal", label: "Hormonal shift", desc: "Cycle, inflammation, or hormonal fluctuation", icon: "◑" },
           { id: "pain", label: "Pain active", desc: "Chronic or acute — affecting state", icon: "◈" },
           { id: "medicated", label: "Substance active", desc: "Caffeine, meds, alcohol, or other input", icon: "◇" },
@@ -2993,7 +2993,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 activated: "activated — adrenaline, butterflies, energy surging through the body",
                 depleted: "low capacity — fatigue, low energy, reduced bandwidth",
                 gut: "gut signal active — digestive noise, gut-brain axis engaged",
-                sleep: "under-rested — reduced cognitive baseline",
+                sleep: "under-rested — brain running slower than usual",
                 hormonal: "hormonal shift — cycle, inflammation, or hormonal fluctuation",
                 pain: "pain active — chronic or acute, affecting state",
                 medicated: "substance active — caffeine, meds, alcohol, or other input influencing state"
@@ -5312,7 +5312,7 @@ export default function Stillform() {
               label: "Three tools",
               title: "Talk. Breathe. Scan.",
               subtitle: "Each one backed by clinical research.",
-              body: "Reframe — AI-powered cognitive reappraisal. Talk through what's happening. The AI identifies distortions, separates signal from noise, and learns your patterns over time.\n\nBreathe — paced breathing derived from autonomic nervous system research. Extended exhale activates your parasympathetic system. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points. Locate tension, release it, clear the signal. Auto-advances.\n\nThe Bio-Filter checks your physical state first — because biology gets misread as emotion more often than you'd think.",
+              body: "Reframe — AI-powered reframing. Talk through what's happening. The AI identifies distortions, separates signal from noise, and learns your patterns over time.\n\nBreathe — paced breathing based on how your nervous system actually works. Extended exhale tells your body the threat is over. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points. Locate tension, release it, clear the signal. Auto-advances.\n\nThe Bio-Filter checks your physical state first — because biology gets misread as emotion more often than you'd think.",
               note: "Quick Breathe is always free. Full access requires a subscription.",
               research: [
                 { label: "Cognitive reappraisal: effects on emotion and physiology", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6188704/" },
@@ -5547,7 +5547,7 @@ export default function Stillform() {
               label: "Calibration · 3 of 4",
               title: "Blind Spot Profile",
               subtitle: "What patterns does your thinking run?",
-              body: "Identify your cognitive defaults. The AI watches for these in real time.",
+              body: "Identify the thinking patterns your brain runs on autopilot. The AI watches for these in real time.",
               cta: "Begin →",
               action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
@@ -5556,7 +5556,7 @@ export default function Stillform() {
               label: "Calibration · 4 of 4",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
-              body: "Calm (4-4-8-2) — extended exhale, parasympathetic activation. When the signal is running high.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
+              body: "Calm (4-4-8-2) — extended exhale, slows your system down. When the signal is running high.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
               cta: null,
               patterns: ["calm", "box", "478", "quick"]
             }
@@ -5887,6 +5887,7 @@ export default function Stillform() {
                 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                     <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", padding: "2px 8px", borderRadius: 4 }}>EARLY ACCESS</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", animation: "pulse 1.5s ease-in-out infinite" }}>NEW!</span>
                     <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>What's new + what's coming</span>
                   </div>
                   <span style={{ fontSize: 10, color: "var(--text-muted)", transition: "transform 0.2s", transform: uatRoadmapOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
@@ -5894,39 +5895,40 @@ export default function Stillform() {
                 {uatRoadmapOpen && (
                   <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
 
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>What's new</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", marginBottom: 8 }}>New this week</div>
+
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI upgraded to GPT-4o — dramatically sharper responses</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI gives you perspectives first, asks questions second</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI sounds like a sharp friend, not a therapist</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Multi-turn conversations fixed — AI actually follows the thread now</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Signal Log renamed to Pulse — check your pulse, 15 seconds</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Research blog post live — the science behind the two-pathway system</div>
+
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> 5-scenario assessment — app adapts to how you process</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Science-backed tutorial with links to published research</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Tutorial with links to published research</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Morning check-in — sets your physical baseline for the AI</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI mirrors your communication style and personality</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI mirrors your communication style</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI writes session notes — gets sharper every conversation</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI understands ego protection — backs off when you push back</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> AI adjusts for depleted / pain / under-rested states</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Composure applies to ALL states — not just negative ones</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Patterns treated as real — pause, not rejection</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> App never punishes you for not using it</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Three distinct Reframe modes with different AI behavior</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Adaptive home screen — thought-first / body-first / balanced</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Multi-select hardware check (pain + under-rested etc.)</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Adaptive home screen — thought-first / body-first / balanced</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> Continue / Resend buttons — never lose a conversation</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--amber)" }}>✓</span> App never punishes you for not using it</div>
 
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Coming soon</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8, marginTop: 16 }}>Coming soon</div>
 
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Samsung Galaxy Watch — haptic breathing</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Apple Watch — haptic breathing</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Health integration — HRV, sleep, heart rate, cycle data</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Auto-populated morning check-in from biometrics</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Samsung Galaxy Watch + Apple Watch — haptic breathing</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Health integration — HRV, sleep, heart rate</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Calendar-aware morning practice</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Screen time awareness — context without self-report</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Weather + barometric pressure context</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Signal Awareness speed tracking</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Cloud sync across devices</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Premium sound packs</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Shareable composure card</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> PDF/CSV export of sessions + metrics</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6, marginTop: 16 }}>Native app</div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for app store submissions (Google Play + Apple).</div>
@@ -6768,9 +6770,9 @@ export default function Stillform() {
                 Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
               {[
-                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is running high", why: "Extended exhale activates your parasympathetic system. Most people feel a shift in 90 seconds." },
+                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is running high", why: "Extended exhale tells your body the threat is over. Most people feel a shift in 90 seconds." },
                 { id: "box", name: "Box (4-4-4-4)", use: "When you need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
-                { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physiological reset available without equipment." },
+                { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physical reset available without equipment." },
                 { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds between tasks", why: "Shortest pattern that produces a measurable state shift." }
               ].map(p => {
                 const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
