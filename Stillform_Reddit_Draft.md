@@ -83,15 +83,85 @@ stillformapp.com
 
 ---
 
-## ARLIN'S VOICE — the real opening (DO NOT EDIT, DO NOT POLISH)
 
-I went through years of roadblocks and stagnation of things that were completely out of my control. A full on identity collapse with a critical and chronic illness that manifested in exasperated painful flares with a sliver of stress. It was the ride of my life and I needed holy shit handles and there was nothing, absolutely nothing, to hold on to without burdening my loved ones even further with the on and off again neuroinflammation psychosis amongst the many other symptoms and caretaking that was involved. I have a lot to apologize for but don't expect to be forgiven and in a sense this is my apology.....
-
-The greatest apology that can be given is one with integrity and redirection in action. This app may not help psychosis due to neuroinflammation but it will help you navigate all the grief, burned bridges and broken pieces left behind when we could not keep our composure and it will help teach you how to maintain it going forward but you gotta do the work it requires of you.
-
-I built a tool for the gap between who you are and who you're trying to be.
 
 ---
 
-*This is the founder's voice. This is why Stillform exists. Use this as the opening of the real post. Everything else is features.*
+## FINAL VERSION — Arlin's voice, polished, ready to post
+
+Everyone wants to be better.
+But when something's blocking you, functional is the first step.
+
+I went through years of roadblocks and stagnation that were completely out of my control.
+A full-on identity collapse, tied to a chronic illness that came with neuroinflammation-induced psychosis and painful flares, sometimes triggered by even a sliver of stress.
+
+It was the ride of my life.
+And I needed holy shit handles.
+
+There was nothing — absolutely nothing — to hold onto that didn't also burden the people around me even further. Not with the on-and-off neuroinflammation, not with the psychosis, not with everything else that came with it.
+
+It didn't stay contained.
+It spilled into everything.
+
+I have a lot to apologize for.
+I don't expect to be forgiven for all of it.
+
+In a way, this is my apology —
+but not in words.
+
+The only apology that means anything is one with integrity, backed by action.
+
+So I built something.
+
+**Stillform**
+
+A tool for the gap between who you are
+and who you're trying to be —
+when you can't consistently access that version of yourself.
+
+It may not help psychosis.
+But it will help you navigate everything that comes after —
+the grief, the burned bridges, the broken pieces,
+and learning how to maintain your composure going forward.
+
+But you have to do the work it asks of you.
+
+---
+
+**What it is**
+
+**The Bio-filter**
+It checks your physical state before interpreting your emotions.
+"I feel overwhelmed" after 4 hours of sleep is a different problem than when you're actually stable.
+It checks if your body is lying to your brain.
+
+**Pattern recognition**
+It learns your blind spots and connects dots you can't see when you're in it.
+It catches the things your brain adds that aren't real.
+
+**Composure when you're winning**
+For the moments you feel untouchable and are about to overcommit or make an impulsive decision because everything is clicking.
+Nobody builds for that.
+
+**Breathing**
+60 seconds or 3 minutes.
+No pseudoscience. Just something to help you get control back.
+
+---
+
+It won't fix everything.
+It won't fix severe conditions.
+But it will help you deal with what's left —
+the aftermath, the damage, and how you move forward without repeating it.
+
+$14.99/month · 14-day free trial
+One person built this from lived experience.
+If it helps you, it works.
+If it doesn't, I want to know why.
+
+**stillformapp.com**
+
+---
+
+*This is the final post. Arlin wrote it. Do not edit. Post when: paywall live, cloud working, 3-5 testimonials.*
 
