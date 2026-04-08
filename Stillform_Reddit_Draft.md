@@ -85,7 +85,9 @@ stillformapp.com
 
 ## ARLIN'S VOICE — the real opening (DO NOT EDIT, DO NOT POLISH)
 
-I went through years of roadblocks and stagnation of things that were completely out of my control. A full on identity collapse with a critical and chronic illness that manifested and exasperated with a sliver of stress. It was the ride of my life and I needed holy shit handles and there was nothing, absolutely nothing, to hold on to without burdening my loved ones even further with the on and off neuroinflammation psychosis. I have a lot to apologize for but don't expect to be forgiven and in a sense this is my apology.
+I went through years of roadblocks and stagnation of things that were completely out of my control. A full on identity collapse with a critical and chronic illness that manifested in exasperated painful flares with a sliver of stress. It was the ride of my life and I needed holy shit handles and there was nothing, absolutely nothing, to hold on to without burdening my loved ones even further with the on and off again neuroinflammation psychosis amongst the many other symptoms and caretaking that was involved. I have a lot to apologize for but don't expect to be forgiven and in a sense this is my apology.....
+
+The greatest apology that can be given is one with integrity and redirection in action. This app may not help psychosis due to neuroinflammation but it will help you navigate all the grief, burned bridges and broken pieces left behind when we could not keep our composure and it will help teach you how to maintain it going forward but you gotta do the work it requires of you.
 
 I built a tool for the gap between who you are and who you're trying to be.
 
