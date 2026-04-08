@@ -4332,6 +4332,8 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
   const canvasRef = useRef(null);
   const animRef = useRef(null);
   const startRef = useRef(Date.now());
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { const t = setTimeout(() => setMounted(true), 100); return () => clearTimeout(t); }, []);
 
   const drawBranch = useCallback((ctx, x, y, angle, len, depth, maxDepth, t, opacity) => {
     if (depth > maxDepth || len < 2 || depth > 6) return; // hard cap at 6 to prevent mobile stack overflow
@@ -4362,20 +4364,25 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || !canvas.parentElement) return;
     const dpr = window.devicePixelRatio || 1;
     const resize = () => {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = rect.width + "px";
-      canvas.style.height = rect.height + "px";
-      const ctx = canvas.getContext("2d");
-      ctx.scale(dpr, dpr);
+      try {
+        if (!canvas.parentElement) return;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + "px";
+        canvas.style.height = rect.height + "px";
+        const ctx = canvas.getContext("2d");
+        if (ctx) ctx.scale(dpr, dpr);
+      } catch {}
     };
-    resize();
+    // Delay initial resize to ensure parent is mounted
+    const t = setTimeout(resize, 50);
     window.addEventListener("resize", resize);
-    return () => window.removeEventListener("resize", resize);
+    return () => { clearTimeout(t); window.removeEventListener("resize", resize); };
   }, []);
 
   useEffect(() => {
@@ -4428,6 +4435,7 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
     return () => { active = false; if (animRef.current) cancelAnimationFrame(animRef.current); };
   }, [breathScale, drawBranch]);
 
+  if (!mounted) return null;
   return <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
 }
 
