@@ -1936,7 +1936,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     <div>
       {!breatheDone ? (
         <div className="breath-container" style={{ position: "relative", overflow: "hidden" }}>
-          {/* FractalBreathCanvas temporarily disabled — causing mobile crash */}
+          {bgtVisualGrounding && <FractalBreathCanvas breathScale={bgtBreathScale} />}
           <div className="breath-circle-wrap">
             <svg className="breath-svg-ring" viewBox="0 0 280 280">
               {/* Tick marks — cardinal */}
@@ -4332,110 +4332,98 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
   const canvasRef = useRef(null);
   const animRef = useRef(null);
   const startRef = useRef(Date.now());
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { const t = setTimeout(() => setMounted(true), 100); return () => clearTimeout(t); }, []);
-
-  const drawBranch = useCallback((ctx, x, y, angle, len, depth, maxDepth, t, opacity) => {
-    if (depth > maxDepth || len < 2 || depth > 6) return; // hard cap at 6 to prevent mobile stack overflow
-    const sway = Math.sin(x * 0.01 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2) * 0.15;
-    const a = angle + sway;
-    const ex = x + Math.cos(a) * len;
-    const ey = y + Math.sin(a) * len;
-    const alpha = opacity * (1 - depth / (maxDepth + 1)) * 0.8;
-    const w = Math.max(0.5, (maxDepth - depth) * 1.1);
-    const warmth = depth / maxDepth;
-    const r = Math.floor(180 + warmth * 40);
-    const g = Math.floor(120 + warmth * 27 - depth * 8);
-    const b = Math.floor(40 + warmth * 18);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    const cpx = (x + ex) / 2 + Math.sin(x * 0.02 + t * 0.5) * len * 0.15;
-    const cpy = (y + ey) / 2 + Math.cos(y * 0.02 + t * 0.5) * len * 0.12;
-    ctx.quadraticCurveTo(cpx, cpy, ex, ey);
-    ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
-    ctx.lineWidth = w;
-    ctx.lineCap = "round";
-    ctx.stroke();
-    const ba = 0.35 + Math.sin(depth + t * 0.1) * 0.15;
-    const shrink = 0.67 + Math.cos(depth * 0.5 + t * 0.2) * 0.06;
-    drawBranch(ctx, ex, ey, a - ba, len * shrink, depth + 1, maxDepth, t, opacity);
-    drawBranch(ctx, ex, ey, a + ba, len * shrink, depth + 1, maxDepth, t, opacity);
-  }, []);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !canvas.parentElement) return;
-    const dpr = window.devicePixelRatio || 1;
-    const resize = () => {
-      try {
-        if (!canvas.parentElement) return;
-        const rect = canvas.parentElement.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        canvas.style.width = rect.width + "px";
-        canvas.style.height = rect.height + "px";
-        const ctx = canvas.getContext("2d");
-        if (ctx) ctx.scale(dpr, dpr);
-      } catch {}
-    };
-    // Delay initial resize to ensure parent is mounted
-    const t = setTimeout(resize, 50);
-    window.addEventListener("resize", resize);
-    return () => { clearTimeout(t); window.removeEventListener("resize", resize); };
-  }, []);
+  const sizeRef = useRef({ w: 0, h: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let active = true;
+
+    const setup = () => {
+      try {
+        if (!canvas.parentElement) return;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        canvas.style.width = rect.width + "px";
+        canvas.style.height = rect.height + "px";
+        sizeRef.current = { w: rect.width, h: rect.height };
+      } catch {}
+    };
+
     const animate = () => {
       if (!active) return;
       try {
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
-      const dpr = window.devicePixelRatio || 1;
-      const w = canvas.width / dpr;
-      const h = canvas.height / dpr;
-      if (w === 0 || h === 0) { animRef.current = requestAnimationFrame(animate); return; }
-      const t = (Date.now() - startRef.current) / 1000;
-      ctx.save();
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.fillStyle = "rgba(10,10,12,0.18)";
-      ctx.fillRect(0, 0, w, h);
-      // Center glow
-      const gr = 60 + breathScale * 100;
-      const grd = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, gr);
-      grd.addColorStop(0, `rgba(201,147,58,${0.04 + breathScale * 0.06})`);
-      grd.addColorStop(1, "rgba(10,10,12,0)");
-      ctx.fillStyle = grd;
-      ctx.fillRect(0, 0, w, h);
-      // Particles
-      for (let i = 0; i < Math.floor(10 + breathScale * 20); i++) {
-        const px = (Math.sin(i * 7.3 + t * 0.05) * 0.5 + 0.5) * w;
-        const py = (Math.sin(i * 3.7 + t * 0.04) * 0.5 + 0.5) * h;
-        const sz = (1 + Math.sin(i + t * 0.1)) * 1.2 * breathScale;
-        ctx.beginPath();
-        ctx.arc(px, py, Math.max(0.5, sz), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(201,147,58,${0.1 + breathScale * 0.15})`;
-        ctx.fill();
-      }
-      // Branches — capped at depth 5 for mobile performance
-      const maxD = Math.min(5, Math.floor(4 + breathScale * 4));
-      const trunk = 20 + breathScale * 40;
-      const baseY = h * 0.85;
-      drawBranch(ctx, w / 2, baseY, -Math.PI / 2, trunk, 0, maxD, t, 0.5 + breathScale * 0.4);
-      drawBranch(ctx, w * 0.3, baseY + 15, -Math.PI / 2 - 0.12, trunk * 0.6, 0, maxD - 1, t + 2, 0.25 + breathScale * 0.25);
-      drawBranch(ctx, w * 0.7, baseY + 15, -Math.PI / 2 + 0.12, trunk * 0.6, 0, maxD - 1, t + 4, 0.25 + breathScale * 0.25);
-      ctx.restore();
-      } catch (e) { /* canvas error — silently continue */ }
+        const ctx = canvas.getContext("2d");
+        if (!ctx) { animRef.current = requestAnimationFrame(animate); return; }
+        const { w, h } = sizeRef.current;
+        if (w === 0 || h === 0) { setup(); animRef.current = requestAnimationFrame(animate); return; }
+        const dpr = window.devicePixelRatio || 1;
+        const t = (Date.now() - startRef.current) / 1000;
+        ctx.save();
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.fillStyle = "rgba(10,10,12,0.18)";
+        ctx.fillRect(0, 0, w, h);
+        // Center glow
+        const gr = 60 + breathScale * 100;
+        const grd = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, gr);
+        grd.addColorStop(0, `rgba(201,147,58,${0.04 + breathScale * 0.06})`);
+        grd.addColorStop(1, "rgba(10,10,12,0)");
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, w, h);
+        // Particles
+        for (let i = 0; i < Math.floor(8 + breathScale * 12); i++) {
+          const px = (Math.sin(i * 7.3 + t * 0.05) * 0.5 + 0.5) * w;
+          const py = (Math.sin(i * 3.7 + t * 0.04) * 0.5 + 0.5) * h;
+          const sz = (1 + Math.sin(i + t * 0.1)) * 1.2 * breathScale;
+          ctx.beginPath();
+          ctx.arc(px, py, Math.max(0.5, sz), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(201,147,58,${0.1 + breathScale * 0.15})`;
+          ctx.fill();
+        }
+        // Branches — iterative stack, no recursion
+        const maxDepth = Math.min(4, Math.floor(3 + breathScale * 2));
+        const stack = [
+          { x: w / 2, y: h * 0.85, angle: -Math.PI / 2, len: 20 + breathScale * 35, depth: 0, opacity: 0.5 + breathScale * 0.4 },
+          { x: w * 0.32, y: h * 0.87, angle: -Math.PI / 2 - 0.12, len: 14 + breathScale * 20, depth: 0, opacity: 0.25 + breathScale * 0.25 },
+          { x: w * 0.68, y: h * 0.87, angle: -Math.PI / 2 + 0.12, len: 14 + breathScale * 20, depth: 0, opacity: 0.25 + breathScale * 0.25 }
+        ];
+        let iterations = 0;
+        while (stack.length > 0 && iterations < 200) {
+          iterations++;
+          const b = stack.pop();
+          if (b.depth > maxDepth || b.len < 3) continue;
+          const sway = Math.sin(b.x * 0.01 + t * 0.3) * 0.12;
+          const a = b.angle + sway;
+          const ex = b.x + Math.cos(a) * b.len;
+          const ey = b.y + Math.sin(a) * b.len;
+          const alpha = b.opacity * (1 - b.depth / (maxDepth + 1)) * 0.7;
+          const warmth = b.depth / Math.max(1, maxDepth);
+          ctx.beginPath();
+          ctx.moveTo(b.x, b.y);
+          ctx.lineTo(ex, ey);
+          ctx.strokeStyle = `rgba(${180 + Math.floor(warmth * 40)},${120 + Math.floor(warmth * 20)},${40 + Math.floor(warmth * 18)},${alpha})`;
+          ctx.lineWidth = Math.max(0.5, (maxDepth - b.depth) * 0.9);
+          ctx.lineCap = "round";
+          ctx.stroke();
+          const ba = 0.35 + Math.sin(b.depth + t * 0.1) * 0.12;
+          const shrink = 0.65;
+          stack.push({ x: ex, y: ey, angle: a - ba, len: b.len * shrink, depth: b.depth + 1, opacity: b.opacity });
+          stack.push({ x: ex, y: ey, angle: a + ba, len: b.len * shrink, depth: b.depth + 1, opacity: b.opacity });
+        }
+        ctx.restore();
+      } catch {}
       animRef.current = requestAnimationFrame(animate);
     };
-    animRef.current = requestAnimationFrame(animate);
-    return () => { active = false; if (animRef.current) cancelAnimationFrame(animRef.current); };
-  }, [breathScale, drawBranch]);
 
-  if (!mounted) return null;
+    const initTimer = setTimeout(() => { setup(); animRef.current = requestAnimationFrame(animate); }, 150);
+    const resizeHandler = () => setup();
+    window.addEventListener("resize", resizeHandler);
+    return () => { active = false; clearTimeout(initTimer); if (animRef.current) cancelAnimationFrame(animRef.current); window.removeEventListener("resize", resizeHandler); };
+  }, [breathScale]);
+
   return <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
 }
 
@@ -4719,7 +4707,7 @@ function PanicMode({ onComplete }) {
   const breathScale = (currentPhase.scale - 1.0) / 0.4; // normalize 1.0-1.4 to 0-1
   return (
     <div className="panic-screen" style={{ position: "relative", overflow: "hidden" }}>
-      {/* FractalBreathCanvas temporarily disabled — causing mobile crash */}
+      {visualGrounding && <FractalBreathCanvas breathScale={Math.max(0, Math.min(1, breathScale))} />}
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, width: "100%" }}>
       {/* Audio toggle — visible, labeled */}
       <button
