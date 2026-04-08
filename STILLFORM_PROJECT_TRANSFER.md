@@ -965,6 +965,34 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - ✅ Fades after 5 seconds. No popup. No modal. Just a nudge.
 - ✅ The system watches the body, not just the words.
 
+**End of Day Check-In:**
+- ✅ Appears after 6 PM on home screen if not already completed today
+- ✅ Three taps: Energy vs morning (Better/Same/Worse), Composure held (Yes/Mostly/No), One word (Solid/Heavy/Sharp/Scattered/Quiet/Grateful/Drained/Proud)
+- ✅ "Close the day →" saves to localStorage (stillform_eod_today)
+- ✅ AI gets yesterday's close as context next morning session
+- ✅ Plausible event: "End of Day Check-In"
+- ✅ Morning sets the tone, evening closes the loop
+- ✅ No forced positivity — "Heavy" is valid data. Silver lining comes from the AI next morning, earned not forced.
+
+**Install Banner:**
+- ✅ Amber banner with Install button when Chrome fires beforeinstallprompt
+- ✅ Fallback text hint "Install: tap ⋮ menu → Add to Home Screen" when Chrome throttles the event
+- ✅ Both hidden in standalone mode (already installed)
+- ✅ Dismissible with ✕
+- ✅ beforeinstallprompt captured in index.html before React loads (Chrome fires early)
+
+**PWA Fixes:**
+- ✅ Service worker v5 with precache restored (Chrome installability signal)
+- ✅ Manifest reverted to working version (no experimental fields)
+- ✅ Chrome 146 confirmed: "Add to Home Screen" menu item IS the install path — renamed by Chrome, not broken
+- ✅ PWA Builder score: 0 errors, 2 warnings, 14 passes
+- ✅ nav-logo user-select: none — tapping STILLFORM no longer triggers Google search
+
+**Calibration Fix:**
+- ✅ Back button in System Calibration now steps backward (3→2→1→0→home) instead of ejecting to home
+- ✅ "SELECT ALL THAT APPLY" now prominent amber monospace callout on all 3 signal mapping steps
+- ✅ Bobby's first real user session caught both issues
+
 **Ghost Echo:**
 - ✅ Faint line at 35% opacity on Pulse screens (standalone + Reframe tab)
 - ✅ Pulls random past session with positive delta
@@ -984,7 +1012,7 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 
 ## Known Issues / Gaps for Next Session
 
-- **Plausible Goals not set up** — User must add Goals in Plausible dashboard for: "Breathing Completed", "Body Scan Completed", "Reframe Deep Engagement", "Morning Check-In", "Assessment Completed", "Pulse Entry"
+- **Plausible Goals not set up** — User must add Goals in Plausible dashboard for: "Breathing Completed", "Body Scan Completed", "Reframe Deep Engagement", "Morning Check-In", "Assessment Completed", "Pulse Entry", "End of Day Check-In"
 - **AI quality still tuning** — GPT-4o is live, prompts significantly improved, but novel scenarios can still produce generic responses. Continue testing and adding golden examples.
 - **Privacy policy outdated** — needs update in Termly for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, Plausible events, GPT-4o as AI provider, device-local storage, AES-GCM encryption.
 - **No real user sessions yet** — Need 3+ real user sessions with testimonials before Reddit launch.
