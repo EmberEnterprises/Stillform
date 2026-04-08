@@ -91,6 +91,8 @@ const styles = `
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--text);
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .nav-logo span { color: var(--amber); }
@@ -5298,11 +5300,15 @@ export default function Stillform() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
-  // PWA install prompt — capture but don't block Chrome's native prompt
+  // PWA install prompt — capture from window (set in index.html before React loads)
   useEffect(() => {
+    // Check if event was already captured before React mounted
+    if (window.__pwaInstallPrompt) {
+      setInstallPrompt(window.__pwaInstallPrompt);
+    }
     const handler = (e) => {
-      // Don't preventDefault — let Chrome show its native install banner
       setInstallPrompt(e);
+      window.__pwaInstallPrompt = e;
     };
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);

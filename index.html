@@ -93,6 +93,12 @@
       plausible.init()
     </script>
     <script>
+      // Capture PWA install prompt BEFORE React loads
+      window.__pwaInstallPrompt = null;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        window.__pwaInstallPrompt = e;
+      });
+
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js');
