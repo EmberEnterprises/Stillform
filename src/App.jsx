@@ -3015,6 +3015,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return `Today: ${checkin.sleep}h sleep, energy ${checkin.energy}, mood "${checkin.mood}"${checkin.stressEvent ? `, stress event: ${checkin.stressEvent}` : ""}${checkin.notes ? `, notes: ${checkin.notes}` : ""}`;
             } catch { return null; }
           })(),
+          eodContext: (() => {
+            try {
+              const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+              const eod = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+              if (!eod || eod.date !== yesterday) return null;
+              return `YESTERDAY'S CLOSE: energy ${eod.energy} vs morning${eod.morningEnergy ? ` (started ${eod.morningEnergy})` : ""}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
+            } catch { return null; }
+          })(),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
           feelState: feelState,
           bioFilter: (() => {
@@ -5203,6 +5211,11 @@ export default function Stillform() {
   const [ciEnergy, setCiEnergy] = useState(null);
   const [ciBio, setCiBio] = useState(new Set());
   const [ciSaved, setCiSaved] = useState(false);
+  const [eodOpen, setEodOpen] = useState(false);
+  const [eodEnergy, setEodEnergy] = useState(null);
+  const [eodComposure, setEodComposure] = useState(null);
+  const [eodWord, setEodWord] = useState(null);
+  const [eodSaved, setEodSaved] = useState(false);
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
 
   // Sync regulation type when navigating screens (catches Settings changes)
@@ -6128,6 +6141,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Discharge — type it out, nothing saves. Pure release valve.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Somatic interrupt — "Drop your shoulders" when you're typing too fast</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Ghost echo — faint reminder of a past win when you log a pulse</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> End of day check-in — close the loop in 15 seconds after 6 PM</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
@@ -6451,6 +6465,108 @@ export default function Stillform() {
                         </button>
                       ))}
                     </div>
+                  </div>
+                );
+              })()}
+
+              {/* END OF DAY CHECK-IN — appears after 6 PM if not done */}
+              {(() => {
+                const hour = new Date().getHours();
+                if (hour < 18) return null; // Only show after 6 PM
+                const today = new Date().toISOString().split("T")[0];
+                const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
+                if (eodDone && !eodOpen) return (
+                  <div style={{ marginBottom: 20, textAlign: "center" }}>
+                    <button onClick={() => setEodOpen(true)} style={{
+                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
+                    }}>✓ Day closed · tap to update</button>
+                  </div>
+                );
+                if (eodSaved && !eodOpen) return (
+                  <div style={{ marginBottom: 20, textAlign: "center" }}>
+                    <button onClick={() => setEodOpen(true)} style={{
+                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
+                    }}>✓ Day closed · tap to update</button>
+                  </div>
+                );
+
+                const saveEod = () => {
+                  try {
+                    const morningData = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+                    localStorage.setItem("stillform_eod_today", JSON.stringify({
+                      date: today,
+                      energy: eodEnergy || "same",
+                      composure: eodComposure || "mostly",
+                      word: eodWord || null,
+                      morningEnergy: morningData?.energy || null
+                    }));
+                  } catch {}
+                  try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
+                  setEodSaved(true);
+                  setEodOpen(false);
+                };
+
+                if (!eodOpen && !eodDone) return (
+                  <button onClick={() => setEodOpen(true)} style={{
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    textAlign: "left", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Close the loop — 15 seconds</div>
+                  </button>
+                );
+
+                return (
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>End of day</div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Energy vs this morning?</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {["Better", "Same", "Worse"].map(e => (
+                        <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
+                          background: eodEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${eodEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          color: eodEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{e}</button>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Hold composure when it mattered?</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {["Yes", "Mostly", "No"].map(e => (
+                        <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
+                          background: eodComposure === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${eodComposure === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          color: eodComposure === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{e}</button>
+                      ))}
+                    </div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word for today</div>
+                    <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
+                      {["Solid", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
+                        <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
+                          background: eodWord === w.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${eodWord === w.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "4px 12px", fontSize: 11, cursor: "pointer",
+                          color: eodWord === w.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{w}</button>
+                      ))}
+                    </div>
+
+                    <button onClick={saveEod} style={{
+                      width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                      borderRadius: "var(--r)", padding: "12px", fontSize: 13, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                    }}>Close the day →</button>
                   </div>
                 );
               })()}

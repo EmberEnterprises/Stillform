@@ -375,7 +375,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -427,6 +427,7 @@ exports.handler = async function(event) {
         contextParts.push("ENERGY IS HIGH OR WIRED TODAY. Composure matters MOST in this state. Watch for overcommitment, impulsive decisions, saying yes to things they'll regret, and blind spots that hide behind confidence. Don't dampen the energy — help them aim it.");
       }
     }
+    if (eodContext) contextParts.push(eodContext);
     if (bioFilter) contextParts.push(`BIO-FILTER ACTIVE: User has self-reported being ${bioFilter}. This is critical context. Apply it as a filter to everything they say — their observations, emotional intensity, and cognitive patterns may be amplified or distorted by this physical state. If the filter is "physically activated" (adrenaline, butterflies, energy), do NOT treat this as a problem to solve. The activation may be excitement, anticipation, or readiness — not distress. Help them direct the energy, not dampen it. If they express a harsh self-judgment or catastrophic interpretation, gently surface the bio-filter: "Some of what you're reading as [emotion/pattern] may be your system running on [filter] right now — not a permanent signal." Do this once, with precision. Never use it to dismiss what they're feeling. IMPORTANT: When someone is depleted, under-rested, or in pain — their ego may be in energy-conservation mode. Resistance or stubbornness in this state is NOT defiance — it's a system trying to protect a limited budget. Never push harder. Lower the stakes: "We can afford five minutes of this." Acknowledge the ego's job before asking it to step aside.`);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
     if (biasProfile) contextParts.push(`USER'S IDENTIFIED COGNITIVE BLIND SPOTS: ${biasProfile}. Watch for these patterns in what they write. If you see one activating, name it clearly but without judgment: "This looks like [bias name] — your brain is doing the thing you've already learned to watch for." Only flag it when you're confident it's present. Don't force it.`);
