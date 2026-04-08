@@ -80,3 +80,16 @@ stillformapp.com
 - Reply to EVERY comment. Indie apps win on Reddit through the founder being present.
 - DO NOT post until: paywall live (not test), cloud sync working, 3-5 real testimonials
 - Tuesday or Wednesday morning, 9-10 AM EST
+
+---
+
+## ARLIN'S VOICE — the real opening (DO NOT EDIT, DO NOT POLISH)
+
+I went through years of roadblocks and stagnation of things that were completely out of my control. A full on identity collapse with a critical and chronic illness that manifested and exasperated with a sliver of stress. It was the ride of my life and I needed holy shit handles and there was nothing, absolutely nothing, to hold on to without burdening my loved ones even further with the on and off neuroinflammation psychosis. I have a lot to apologize for but don't expect to be forgiven and in a sense this is my apology.
+
+I built a tool for the gap between who you are and who you're trying to be.
+
+---
+
+*This is the founder's voice. This is why Stillform exists. Use this as the opening of the real post. Everything else is features.*
+
