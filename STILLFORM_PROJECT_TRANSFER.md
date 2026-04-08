@@ -925,6 +925,117 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - "Your partner goes quiet after a disagreement. What's your first thought?" → maps default
 - AI gets interpersonal bias profile in addition to cognitive distortion profile
 
+
+### April 8 Radiology Session — Research + Feature Specs
+
+**Neuroscience Research Added (Science Sheet now 18 sections):**
+- Affect Labeling (Lieberman 2007) — Pulse emotion chips reduce amygdala activation
+- Emotional Granularity (Barrett, Kashdan 2015) — 12 distinct chips train precise emotion recognition
+- Window of Tolerance (Siegel 1999) — entire product keeps users in the functional zone
+- Implementation Intentions (Gollwitzer 1999) — 5-scenario assessment pre-loads regulation pathway
+- Default Mode Network (Raichle, Brewer) — breathing interrupts rumination circuit
+- Autonomic Flexibility (Thayer, Lehrer) — what the app trains over time
+- Stress Inoculation (Meichenbaum) — daily practice model
+- Interpersonal Microbiases (Nature Communications 2025) — EQ layer in AI prompts
+
+**Interpersonal Microbiases — Layer 1 SHIPPED (AI prompts):**
+- 5 microbiases: intensity amplification, state projection, attribution error, emotional contagion blindness, impact gap
+- AI watches for interpersonal content and names the bias
+- Connects bio-filter to interpersonal reads
+
+**Emotion Chips Rebalanced:**
+- OLD: 10 negative, 1 positive, 1 neutral
+- NEW: 6 positive (Calm, Grateful, Proud, Relief, Joy, Excitement) + 2 neutral (Restless, Mixed) + 10 negative
+- Positive listed FIRST — Barrett's research: positive granularity matters
+- Ship checklist now 11 items — #11: Emotion coverage balance
+
+**FAQ Expanded (10 → 15 entries):**
+- Added: Composure Telemetry, morning check-in, end of day, somatic interrupt, trial expiration
+- Fixed: 7-day → 14-day trial, Journal → Pulse, composure when winning
+
+**Discharge KILLED:**
+- Having a "nothing saves" screen implied Reframe wasn't private. Undermined trust.
+- Removed from: app, bottom nav, tutorial, UAT, science sheet, punch list
+
+**BrainTingle Competitive Analysis:**
+- Founded 2019, dead by ~2021. Tried habits + social + gamification + donations + blockchain. Too many features, no depth.
+- Stillform is the opposite: one tool, deep, personal, no gimmicks. Every feature traces to peer-reviewed research.
+
+---
+
+## Priority Builds — Next Sessions
+
+### Neuro — Voice-Guided Composure Companion
+
+**What:** Voice interface inside the app. Wake word "Neuro" while app is open.
+
+**Interaction model:**
+- "Hey Neuro" → "What do you need?"
+- "Breathe" → asks pattern if no default, or starts default immediately
+- "Breathe regulate" / "Breathe box" → starts specific pattern
+- "Body scan" → starts body scan with voice guidance
+- "Talk it out" → opens Reframe in voice mode, full conversation
+- "How am I doing" → reads composure telemetry summary
+- "Check in" → morning or EOD check-in by voice
+
+**"Talk it out" is the killer feature.** Full voice conversation with Reframe AI. No typing. Neuro speaks back with full context (bio-filter, session count, patterns). For visual thinkers, people in crisis, people who can't type.
+
+**Why it's not a novelty:** Calm's voiceovers are pre-recorded scripts. Neuro is dynamic — it knows your state, your history, your blind spots. "You're running on depleted today — let's start with Regulate, it's gentler."
+
+**Technical approach:**
+- Web Speech Recognition API (Chrome Android) for input
+- Web Speech Synthesis API for Neuro's voice
+- Wake word: continuous recognition while app is foreground, listening for "Neuro"
+- Routes to existing tools — no new tools needed, just voice entry points
+- Won't work in background (web limitation) — only when app is open
+- Native build can extend to background listening later
+
+**Build order:** 1) Mic button in Reframe (voice-to-text input) → 2) AI response read aloud → 3) Voice commands for tools → 4) Wake word detection → 5) Full voice-guided sessions
+
+### Fractal Breathing Visual (Prototype Built, Tested)
+
+**What:** Organic branching fractal animation behind the breathing ring. Branches grow on inhale, dissolve on exhale. Amber particles drift.
+
+**Status:** Prototype built and tested. User tested during CT scan prep — reported it was effective for grounding. Ready for integration.
+
+**Research:** Natural-form fractals reduce stress up to 60% (Taylor, UO). Fractal geometry induces alpha brain wave responses (Hagerhall et al. 2015). NOT proven to be additive over breathing alone — but user-tested and effective.
+
+**Integration plan:** Settings toggle "Visual grounding: on/off" — available as background during breathing tool. Not forced. Not default. Users who need more visual grounding turn it on.
+
+**Integrity note:** Don't ship visual features to look innovative. Ship them when users need them. The prototype exists for when user testing reveals demand.
+
+### Visual Emotional Input (Future Build)
+
+**What:** For visual thinkers who can't translate internal images to text. Instead of typing in Reframe, select from visual metaphors — weather patterns, pressure gauges, color gradients, textures. AI reads the visual selection and responds.
+
+**Why:** Founder is a visual thinker. Significant portion of target users (ADHD, neurodivergent) process in images, not words. Text-based input is a broken path for them. This is accessibility, not novelty.
+
+**Status:** Concept only. Needs design exploration. Post-launch.
+
+### Lock Screen Quick Access
+
+**What:** One-tap access to breathing without unlocking phone.
+
+**Why:** In a moment of escalation, unlocking phone → finding app → navigating to tool is too many steps.
+
+**Technical reality:**
+- PWA cannot touch the lock screen. Period.
+- Native Android: persistent notification with action buttons ("◎ Breathe" / "✶ Talk it out") in notification shade. One tap from lock screen.
+- Native iOS: Lock Screen widgets (iOS 16+)
+- Galaxy Watch companion IS the lock screen button — tap wrist, breathing starts
+
+**Build order:** Galaxy Watch first (already planned). Persistent notification when native APK ships.
+
+### Interpersonal Microbiases — Layer 2 (Future Build)
+
+**What:** Expand Blind Spot Profiler with 5 interpersonal bias scenarios during calibration.
+
+**Scenarios like:** "Your partner goes quiet after a disagreement. What's your first thought?" → maps interpersonal defaults (character judgment vs situation judgment, intensity amplification, projection)
+
+**Status:** Documented. Layer 1 (AI prompts) already shipped. Layer 2 needs UI design.
+
+---
+
 ## Not Yet Built
 
 - ❌ Calendar-aware morning practice (reads device calendar)
