@@ -5298,10 +5298,10 @@ export default function Stillform() {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
-  // PWA install prompt
+  // PWA install prompt — capture but don't block Chrome's native prompt
   useEffect(() => {
     const handler = (e) => {
-      e.preventDefault();
+      // Don't preventDefault — let Chrome show its native install banner
       setInstallPrompt(e);
     };
     window.addEventListener("beforeinstallprompt", handler);
