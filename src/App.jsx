@@ -4111,7 +4111,8 @@ function SignalMapTool({ onComplete }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where do you activate first?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>Tap the areas that respond first — whether stress, excitement, or anything in between. Select all that apply.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 12 }}>Tap the areas that respond first — whether stress, excitement, or anything in between.</p>
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
             const selected = (signals.firstAreas || []).includes(area.id);
@@ -4141,7 +4142,8 @@ function SignalMapTool({ onComplete }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What signals a state shift?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24 }}>The physical sensations that show up when your system is changing gears — up or down.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 12 }}>The physical sensations that show up when your system is changing gears — up or down.</p>
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {sensations.map(s => {
             const selected = (signals.preSensations || []).includes(s);
@@ -4170,7 +4172,8 @@ function SignalMapTool({ onComplete }) {
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Most people don't recognize half their triggers. Scroll through — tap any that feel familiar, even slightly. You might be surprised.</p>
-        <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 24, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
+        <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 12, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {triggers.map(t => {
             const selected = (signals.triggers || []).includes(t);
