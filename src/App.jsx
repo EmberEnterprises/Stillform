@@ -5295,6 +5295,18 @@ export default function Stillform() {
   const [jOutcome, setJOutcome] = useState("");
   const [jIntensity, setJIntensity] = useState(5);
   const [uatRoadmapOpen, setUatRoadmapOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [installDismissed, setInstallDismissed] = useState(false);
+
+  // PWA install prompt
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
   const [uatTestAgain, setUatTestAgain] = useState(null);
 
   const completeOnboarding = () => {
@@ -6041,6 +6053,26 @@ export default function Stillform() {
                       borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
                     }}>Let me try different</button>
+                  </div>
+                </div>
+              )}
+
+              {/* PWA INSTALL BANNER */}
+              {installPrompt && !installDismissed && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "var(--text)" }}>Install Stillform for instant access</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Later</button>
+                    <button onClick={async () => {
+                      if (installPrompt) {
+                        installPrompt.prompt();
+                        const result = await installPrompt.userChoice;
+                        if (result.outcome === "accepted") setInstallPrompt(null);
+                        setInstallDismissed(true);
+                      }
+                    }} style={{ background: "var(--amber)", border: "none", color: "#0A0A0C", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 500 }}>Install</button>
                   </div>
                 </div>
               )}

@@ -2,7 +2,9 @@
   "name": "Stillform",
   "short_name": "Stillform",
   "description": "Composure when you need it. Stabilize in under two minutes.",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0A0A0C",
   "theme_color": "#0A0A0C",
@@ -11,12 +13,14 @@
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
