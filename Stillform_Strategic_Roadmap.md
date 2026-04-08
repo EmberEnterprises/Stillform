@@ -76,6 +76,11 @@
 
 ### Tier 1: Build Before Launch
 
+
+### Mandatory Post-Session Rating (PRIORITY — before launch)
+
+After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, testimonial data, tool comparison. Affect labeling research: naming state IS a final regulation act.
+
 ### Check-In → Reframe Flow (PRIORITY BUILD)
 
 **Morning Flow:**
