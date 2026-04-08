@@ -214,6 +214,28 @@ The meta-analysis found gamification elements "did not improve, and might weaken
 
 **The unfolding:** The app doesn't teach people who to be. It strips away the noise, the distortions, the misreads, the masks — and what's left is the person. The AI's job is to get them regulated enough to see themselves honestly, then shut up. "You didn't need a tool for that one. You handled it. Notice that." — that's the scaffolding coming down.
 
+
+### The Endgame — Composure as Class
+
+Composure isn't self-management. It's the ability to hear people.
+
+When you're dysregulated, your nervous system makes snap judgments — about who's credible, who deserves attention, whose input matters. Those judgments track to ego, status, familiarity, and pattern matching. Not content. Not truth.
+
+The person who grew up in poverty has pattern recognition about scarcity that no MBA teaches. The trauma survivor reads rooms faster than anyone at the table. The neurodivergent thinker sees connections nobody else caught. But none of that lands when the listener is running on bias, ego, and an unregulated nervous system deciding who's worth hearing before a word is spoken.
+
+Stillform's endgame is not "feel better." It's:
+
+**Regulate yourself → See yourself clearly → See others clearly → Let them in.**
+
+The microbiases layer isn't just about managing your emotions. It's about clearing the filter that prevents you from receiving someone else's experience. When the AI says "You dismissed that fast — was that about what they said, or who said it?" — that's not a lecture about bias. That's composure applied outward.
+
+Class isn't money. It isn't titles. It's holding yourself steady enough to let someone else's truth land — even when it challenges yours.
+
+This is not DEI language. This is not a social justice feature. This is composure as a way of being — applied to every interaction, every meeting, every relationship. The app doesn't tell people to be less biased. It gets them composed enough to notice the bias themselves.
+
+People with real lived experience — trauma, hardship, different cultures, different classes — carry input that's vital to every table they sit at. The app's job is to make sure the person across from them is regulated enough to actually receive it.
+
+
 **Target market:** Everyone. The ND community is the beachhead because they need it most and talk about it openly. But composure is universal. A CEO, a parent, a student, a first responder — all need the same thing: clarity under pressure and self-awareness in every state.
 
 ---
