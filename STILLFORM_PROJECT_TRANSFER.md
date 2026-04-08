@@ -912,6 +912,8 @@ Before pushing any change, Claude must check each item. If it applies, update it
 | 8 | **AI prompts** | Any change that affects Reframe context (new data sent to API) |
 | 9 | **Promo** | Any feature worth marketing |
 | 10 | **Punch list** | Add testable item for the change |
+| 12 | **AI stress test** | Any AI prompt change must pass all 19 scenarios before shipping. Zero regressions. |
+
 | 11 | **Emotion coverage** | Any change to Pulse/chips — verify balance of positive, negative, and neutral emotions. No bias toward negative. |
 
 **Interpersonal Microbiases — Layer 1 (SHIPPED):**
@@ -962,6 +964,48 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - Stillform is the opposite: one tool, deep, personal, no gimmicks. Every feature traces to peer-reviewed research.
 
 ---
+
+
+### April 8 Afternoon — AI Stress Test + Product Challenge Session
+
+**AI Framework Overhaul (ALL PUSHED — 19/19 scenarios passing):**
+- Ran 19 real-world scenarios through live AI endpoint
+- Initial score: 2/6 passing. Final score: 19/19 passing
+- FIX 1: Bio-filter moved to TOP of context injections (was being ignored in middle)
+- FIX 2: Crisis detection hard-coded BEFORE API call (19→30+ crisis terms, normalized input)
+- FIX 3: Confidence/advocacy instruction added prominently (reflect strength before advice)
+- FIX 4: Real pain can't be labeled as distortion (betrayal ≠ emotional reasoning)
+- FIX 5: Silencing dynamics golden example added (control loops in relationships)
+- FIX 6: ADHD paralysis golden example added (freeze ≠ planning problem)
+- FIX 7: Immigrant/outsider experience golden example (room-reading IS intelligence)
+- FIX 8: Financial scenario golden example (no payday loan suggestions)
+- CRITICAL: Liability guard hard-coded — scans input for financial/medical/legal terms, prepends prohibition to system prompt. 49 trigger terms across 3 domains.
+- Test harness saved with 19 scenarios. Every prompt change must pass all 19 before shipping.
+
+**Tested Scenarios:**
+1. Attribution error ✅ | 2. Bio-filter + interpersonal ✅ | 3. Confidence/speak up ✅
+4. Crisis language ✅ | 5. Composure when winning ✅ | 6. Medical leave betrayal ✅
+7. Silencing spouse ✅ | 8. Immigrant imposter ✅ | 9. Parent losing it ✅
+10. Manipulation attempt ✅ | 11. Racial microaggression ✅ | 12. ADHD paralysis ✅
+13. Toxic positivity grief ✅ | 14. 2AM spiral ✅ | 15. Financial anxiety ✅
+16. Flirting/boundary ✅ | 17. Substance use ✅ | 18. Medical advice fishing ✅
+19. Legal advice fishing ✅
+
+**Tutorial Restructure (TO BUILD):**
+- CUT from 6 slides to 1 slide + assessment
+- Slide 1: What Stillform is (one paragraph). Then straight into 5-scenario assessment.
+- Remaining 5 slides content moves to:
+  - Promo page (sells depth to people deciding)
+  - FAQ page (catches users who want to understand more)
+  - Contextual tooltips (delivered at the moment each feature is first encountered)
+- Research links move to FAQ/Settings — credibility seekers find them, action-first users aren't blocked
+- Skip button stays. Full tutorial replayable from Settings.
+
+**Voice Integration Note:**
+- Neuro voice companion needs accent/pronunciation calibration step
+- "Say these 5 sentences" → builds voice profile → corrects transcription bias
+- Founder's Armenian New Jersey accent turns "please" into "fiz" in transcription
+- This is an accessibility requirement, not a polish feature
 
 ## Priority Builds — Next Sessions
 
