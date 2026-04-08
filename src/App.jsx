@@ -947,11 +947,11 @@ const styles = `
     border: 1px solid var(--border);
     border-left: 3px solid var(--amber-dim);
     border-radius: 6px;
-    padding: 14px 18px;
+    padding: 12px 16px;
     font-size: 12px;
     color: var(--text-dim);
     line-height: 1.6;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
   }
 
   @media (max-width: 640px) {
@@ -2809,8 +2809,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   // Journal state
   const [journalText, setJournalText] = useState("");
+  const [pulseChips, setPulseChips] = useState(new Set());
   const saveJournal = () => {
-    if (!journalText.trim()) return;
+    if (!journalText.trim() && pulseChips.size === 0) return;
     try {
       const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
       entries.unshift({
@@ -2818,7 +2819,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
         time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
         trigger: journalText.trim(),
-        emotions: [],
+        emotions: [...pulseChips],
         intensity: 0,
         body: "",
         outcome: "",
@@ -2828,6 +2829,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       try { window.plausible("Pulse Entry", { props: { mode: effectiveMode } }); } catch {}
     } catch {}
     setJournalText("");
+    setPulseChips(new Set());
   };
 
   // TIME-TO-REGULATION
@@ -3275,21 +3277,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div>
           {/* EMOTION CHIPS */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
               What's present
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
               {["Calm", "Grateful", "Proud", "Relief", "Joy", "Excitement", "Restless", "Mixed", "Anger", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Numbness", "Grief", "Fear", "Confusion"].map(em => {
-                const selected = (journalText || "").includes(em);
+                const selected = pulseChips.has(em);
                 return (
                   <button key={em} onClick={() => {
-                    setJournalText(prev => {
-                      const has = prev.includes(em);
-                      if (has) return prev.replace(em, "").replace(/^,\s*|,\s*$|,\s*,/g, "").trim();
-                      return prev ? `${prev}, ${em}` : em;
+                    setPulseChips(prev => {
+                      const next = new Set(prev);
+                      if (next.has(em)) next.delete(em);
+                      else next.add(em);
+                      return next;
                     });
                   }} style={{
-                    padding: "5px 11px", borderRadius: "var(--r-sm)", fontSize: 11, cursor: "pointer",
+                    padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
                     fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
                     background: selected ? mc.aiBubble : "var(--surface)",
                     border: `0.5px solid ${selected ? mc.color : "var(--border)"}`,
@@ -3303,22 +3306,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
           {/* FREE TEXT */}
           <div style={{ marginBottom: 12 }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
               Notes — optional
             </div>
             <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
               <textarea
-                value={journalText.replace(/^(Calm|Grateful|Proud|Relief|Joy|Excitement|Restless|Mixed|Anger|Anxiety|Dread|Overwhelm|Shame|Frustration|Numbness|Grief|Fear|Confusion)(,\s*)*/g, "").trim()}
-                onChange={e => {
-                  const chips = ["Calm","Grateful","Proud","Relief","Joy","Excitement","Restless","Mixed","Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Numbness","Grief","Fear","Confusion"]
-                    .filter(em => journalText.includes(em)).join(", ");
-                  setJournalText(chips ? `${chips}, ${e.target.value}` : e.target.value);
-                }}
-                placeholder="Add context..."
+                value={journalText}
+                onChange={e => setJournalText(e.target.value)}
+                placeholder="What happened? Add context..."
                 style={{
-                  flex: 1, minHeight: 120, background: mc.inputBg || "var(--surface)",
+                  flex: 1, minHeight: 100, background: mc.inputBg || "var(--surface)",
                   border: `0.5px solid ${mc.border}`, borderRadius: "var(--r)",
-                  padding: "10px 12px", color: "var(--text)", fontSize: 13,
+                  padding: "10px 12px", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "none"
                 }}
               />
@@ -3326,13 +3325,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           </div>
 
-          <button onClick={saveJournal} disabled={!journalText.trim()} style={{
-            width: "100%", background: journalText.trim() ? mc.sendBg : "var(--surface2)",
-            color: journalText.trim() ? "#0A0A0C" : "var(--text-muted)",
+          <button onClick={saveJournal} disabled={!journalText.trim() && pulseChips.size === 0} style={{
+            width: "100%", background: (journalText.trim() || pulseChips.size > 0) ? mc.sendBg : "var(--surface2)",
+            color: (journalText.trim() || pulseChips.size > 0) ? "#0A0A0C" : "var(--text-muted)",
             border: "none", borderRadius: "var(--r)", padding: "12px",
-            fontSize: 13, fontWeight: 500, cursor: journalText.trim() ? "pointer" : "default",
+            fontSize: 14, fontWeight: 500, cursor: (journalText.trim() || pulseChips.size > 0) ? "pointer" : "default",
             fontFamily: "'DM Sans', sans-serif", transition: "opacity 0.2s",
-            boxShadow: journalText.trim() ? "inset 0 1px 0 rgba(255,255,255,0.12)" : "none",
+            boxShadow: (journalText.trim() || pulseChips.size > 0) ? "inset 0 1px 0 rgba(255,255,255,0.12)" : "none",
             marginBottom: 20
           }}>
             Log pulse
