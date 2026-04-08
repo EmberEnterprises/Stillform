@@ -2042,28 +2042,6 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
               Stop here
             </button>
           </div>
-          {(() => {
-            const tipSeen = (() => { try { return localStorage.getItem("stillform_breath_tip_seen") === "yes"; } catch { return true; } })();
-            if (tipSeen) return null;
-            return (
-              <div style={{
-                marginTop: 24, padding: "12px 16px", background: "var(--surface)",
-                border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                display: "flex", alignItems: "flex-start", gap: 10
-              }}>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 4, letterSpacing: "0.04em" }}>Tip</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Different states need different patterns. Change your default breathing type anytime in Settings.
-                  </div>
-                </div>
-                <button onClick={() => { try { localStorage.setItem("stillform_breath_tip_seen", "yes"); } catch {} }} style={{
-                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 16,
-                  cursor: "pointer", padding: "0 4px", lineHeight: 1, flexShrink: 0
-                }}>×</button>
-              </div>
-            );
-          })()}
         </div>
       )}
 
@@ -7290,7 +7268,7 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Breathing Pattern</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
+                Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
               </div>
               {[
                 { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
