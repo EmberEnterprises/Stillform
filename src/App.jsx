@@ -5269,6 +5269,8 @@ export default function Stillform() {
     } catch {}
   }, []);
   const [pricingPlan, setPricingPlan] = useState("annual");
+  const [dischargeText, setDischargeText] = useState("");
+  const [discharged, setDischarged] = useState(false);
   const [pricingCloud, setPricingCloud] = useState(false);
   const [openLog, setOpenLog] = useState(null);
   const [, forceUpdate] = useState(0);
@@ -6728,71 +6730,59 @@ export default function Stillform() {
         )}
 
         {/* DISCHARGE — ephemeral release valve */}
-        {screen === "discharge" && (() => {
-          const [dischargeText, setDischargeText] = useState("");
-          const [discharged, setDischarged] = useState(false);
-          const [charCount, setCharCount] = useState(0);
+        {screen === "discharge" && (
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+            <button className="intervention-back" onClick={() => { setDischargeText(""); setDischarged(false); setScreen("home"); }}>← Back</button>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 4 }}>Discharge</h1>
+            <p style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 24 }}>Get it out. Nothing here is saved. Ever.</p>
 
-          const handleDischarge = () => {
-            if (!dischargeText.trim()) return;
-            setDischarged(true);
-            setTimeout(() => {
-              setDischargeText("");
-              setDischarged(false);
-              setCharCount(0);
-            }, 1200);
-          };
+            <div style={{ position: "relative" }}>
+              <textarea
+                value={dischargeText}
+                onChange={e => setDischargeText(e.target.value)}
+                placeholder="Type. Nobody will see this."
+                autoFocus
+                style={{
+                  width: "100%", minHeight: 280, background: discharged ? "transparent" : "var(--surface)",
+                  border: `0.5px solid ${discharged ? "rgba(201,147,58,0.4)" : "var(--border)"}`,
+                  borderRadius: "var(--r)", padding: "16px",
+                  color: discharged ? "transparent" : "var(--text)",
+                  fontSize: 14, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7,
+                  resize: "none", transition: "all 0.8s ease-out",
+                  opacity: discharged ? 0 : Math.max(0.3, 1 - dischargeText.length / 800)
+                }}
+              />
+              {discharged && (
+                <div style={{
+                  position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                  animation: "deltaFlash 0.8s ease-out"
+                }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Cleared</div>
+                </div>
+              )}
+            </div>
 
-          return (
-            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 4 }}>Discharge</h1>
-              <p style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 24 }}>Get it out. Nothing here is saved. Ever.</p>
+            <button onClick={() => {
+              if (!dischargeText.trim()) return;
+              setDischarged(true);
+              setTimeout(() => { setDischargeText(""); setDischarged(false); }, 1200);
+            }} disabled={!dischargeText.trim() || discharged} style={{
+              width: "100%", marginTop: 16,
+              background: dischargeText.trim() && !discharged ? "var(--amber)" : "var(--surface2)",
+              color: dischargeText.trim() && !discharged ? "#0A0A0C" : "var(--text-muted)",
+              border: "none", borderRadius: "var(--r)", padding: "14px",
+              fontSize: 13, fontWeight: 500, cursor: dischargeText.trim() ? "pointer" : "default",
+              fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase",
+              transition: "all 0.2s"
+            }}>
+              {discharged ? "Cleared" : "Discharge"}
+            </button>
 
-              <div style={{ position: "relative" }}>
-                <textarea
-                  value={dischargeText}
-                  onChange={e => { setDischargeText(e.target.value); setCharCount(e.target.value.length); }}
-                  placeholder="Type. Nobody will see this."
-                  autoFocus
-                  style={{
-                    width: "100%", minHeight: 280, background: discharged ? "transparent" : "var(--surface)",
-                    border: `0.5px solid ${discharged ? "rgba(201,147,58,0.4)" : "var(--border)"}`,
-                    borderRadius: "var(--r)", padding: "16px",
-                    color: discharged ? "transparent" : "var(--text)",
-                    fontSize: 14, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7,
-                    resize: "none", transition: "all 0.8s ease-out",
-                    opacity: discharged ? 0 : Math.max(0.3, 1 - charCount / 800)
-                  }}
-                />
-                {discharged && (
-                  <div style={{
-                    position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                    animation: "deltaFlash 0.8s ease-out"
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Cleared</div>
-                  </div>
-                )}
-              </div>
-
-              <button onClick={handleDischarge} disabled={!dischargeText.trim() || discharged} style={{
-                width: "100%", marginTop: 16,
-                background: dischargeText.trim() && !discharged ? "var(--amber)" : "var(--surface2)",
-                color: dischargeText.trim() && !discharged ? "#0A0A0C" : "var(--text-muted)",
-                border: "none", borderRadius: "var(--r)", padding: "14px",
-                fontSize: 13, fontWeight: 500, cursor: dischargeText.trim() ? "pointer" : "default",
-                fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase",
-                transition: "all 0.2s"
-              }}>
-                {discharged ? "Cleared" : "Discharge"}
-              </button>
-
-              <p style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", marginTop: 16, fontStyle: "italic" }}>
-                This never touches storage. The value is in the act, not the record.
-              </p>
-            </section>
-          );
-        })()}
+            <p style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", marginTop: 16, fontStyle: "italic" }}>
+              This never touches storage. The value is in the act, not the record.
+            </p>
+          </section>
+        )}
 
         {/* PRICING */}
         {screen === "pricing" && (
