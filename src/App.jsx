@@ -6024,6 +6024,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Research blog post live — the science behind the two-pathway system</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure Telemetry — heat map of your activity on My Progress</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
