@@ -5,9 +5,11 @@
 
 ## DRAFT 1 — The real one
 
-**Title:** People don't want to be better. They want to be functional.
+**Title:** Everyone wants to be better. But when something's blocking you, functional is the first step.
 
 ---
+
+I built a tool for the gap between who you are and who you're trying to be.
 
 I spent 5 years trying to find something that helped me think clearly when my brain wouldn't shut up. Not meditation — I can't sit still long enough. Not therapy — I couldn't get consistent access. Not a mood tracker that collects feelings and does nothing with them.
 
