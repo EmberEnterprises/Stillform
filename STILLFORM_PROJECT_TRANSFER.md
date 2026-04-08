@@ -914,6 +914,17 @@ Before pushing any change, Claude must check each item. If it applies, update it
 | 10 | **Punch list** | Add testable item for the change |
 | 11 | **Emotion coverage** | Any change to Pulse/chips — verify balance of positive, negative, and neutral emotions. No bias toward negative. |
 
+**Interpersonal Microbiases — Layer 1 (SHIPPED):**
+- 5 microbiases added to AI prompts: intensity amplification, state projection, attribution error, emotional contagion blindness, impact gap
+- AI watches for interpersonal content and names the bias cleanly
+- Connects bio-filter state to interpersonal reads (depleted + reading hostility = flag it)
+
+**Interpersonal Microbiases — Layer 2 (NOT YET BUILT):**
+- Expand Blind Spot Profiler with interpersonal bias scenarios
+- 5 scenarios testing for the 5 microbiases
+- "Your partner goes quiet after a disagreement. What's your first thought?" → maps default
+- AI gets interpersonal bias profile in addition to cognitive distortion profile
+
 ## Not Yet Built
 
 - ❌ Calendar-aware morning practice (reads device calendar)

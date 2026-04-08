@@ -269,6 +269,25 @@
 
 ---
 
+
+## Interpersonal Microbiases (EQ / Reframe AI)
+
+**What it does:** The AI watches for 5 subtle biases that distort how users read other people and social situations: intensity amplification, state projection, attribution error, emotional contagion blindness, and impact gap.
+
+**The science:** People systematically overestimate others' negative emotional intensity by 20-30%. This bias is strongest when the perceiver is stressed, tired, or in pain — exactly when they need accurate reads most. Combined with fundamental attribution error (judging character instead of situation) and emotional contagion (absorbing others' states unconsciously), these microbiases drive reactive decisions in relationships and at work.
+
+**Who says so:**
+- Lieberman et al. (2025) — directional bias in interpersonal emotion perception — *Nature Communications*
+- Ross (1977) — fundamental attribution error — foundational social psychology
+- Hatfield, Cacioppo & Rapson (1993) — emotional contagion — *Cambridge University Press*
+- Goleman (1995) — emotional intelligence as interpersonal awareness — *Bantam Books*
+
+**Stillform application:** When a user describes an interpersonal situation, the AI checks for these 5 microbiases. If their bio-filter is active (depleted, pain, under-rested) AND they're reading someone else negatively, the AI connects the dots. "You're running low today — is this really about them, or is your hardware amplifying the signal?" One microbias per response, named cleanly, then move on. Composure isn't just about managing yourself — it's about reading the room accurately.
+
+**If they push back:** "When you're tired, everyone looks hostile. When you're calm, the same email reads as neutral. The bias isn't in them — it's in your read. The AI catches that."
+
+---
+
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:
