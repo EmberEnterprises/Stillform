@@ -4334,7 +4334,7 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
   const startRef = useRef(Date.now());
 
   const drawBranch = useCallback((ctx, x, y, angle, len, depth, maxDepth, t, opacity) => {
-    if (depth > maxDepth || len < 2) return;
+    if (depth > maxDepth || len < 2 || depth > 6) return; // hard cap at 6 to prevent mobile stack overflow
     const sway = Math.sin(x * 0.01 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2) * 0.15;
     const a = angle + sway;
     const ex = x + Math.cos(a) * len;
@@ -4384,10 +4384,13 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
     let active = true;
     const animate = () => {
       if (!active) return;
+      try {
       const ctx = canvas.getContext("2d");
+      if (!ctx) return;
       const dpr = window.devicePixelRatio || 1;
       const w = canvas.width / dpr;
       const h = canvas.height / dpr;
+      if (w === 0 || h === 0) { animRef.current = requestAnimationFrame(animate); return; }
       const t = (Date.now() - startRef.current) / 1000;
       ctx.save();
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -4410,14 +4413,15 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
         ctx.fillStyle = `rgba(201,147,58,${0.1 + breathScale * 0.15})`;
         ctx.fill();
       }
-      // Branches
-      const maxD = Math.floor(4 + breathScale * 4);
+      // Branches — capped at depth 5 for mobile performance
+      const maxD = Math.min(5, Math.floor(4 + breathScale * 4));
       const trunk = 20 + breathScale * 40;
       const baseY = h * 0.85;
       drawBranch(ctx, w / 2, baseY, -Math.PI / 2, trunk, 0, maxD, t, 0.5 + breathScale * 0.4);
       drawBranch(ctx, w * 0.3, baseY + 15, -Math.PI / 2 - 0.12, trunk * 0.6, 0, maxD - 1, t + 2, 0.25 + breathScale * 0.25);
       drawBranch(ctx, w * 0.7, baseY + 15, -Math.PI / 2 + 0.12, trunk * 0.6, 0, maxD - 1, t + 4, 0.25 + breathScale * 0.25);
       ctx.restore();
+      } catch (e) { /* canvas error — silently continue */ }
       animRef.current = requestAnimationFrame(animate);
     };
     animRef.current = requestAnimationFrame(animate);
