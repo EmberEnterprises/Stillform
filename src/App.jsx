@@ -1177,7 +1177,7 @@ const isNative = () => {
 
 // Watch bridge — send breathing pattern to connected Wear OS watch
 const watchBridge = {
-  async startBreathing(pattern = "calm") {
+  async startBreathing(pattern = "quick") {
     if (!isNative()) return;
     try {
       const { Capacitor } = await import('@capacitor/core');
@@ -1500,27 +1500,16 @@ function PhysiologicalSighTool({ onComplete }) {
 }
 
 const BREATHING_PATTERNS = [
-  { id: "calm", name: "Regulate (4-4-8-2)", desc: "Longer exhale tells your body to slow down", phases: [
+  { id: "quick", name: "Quick Reset", desc: "60 seconds. Slows your system down fast.", phases: [
+    { name: "Inhale", duration: 4, instruction: "In through your nose." },
+    { name: "Hold", duration: 4, instruction: "Hold." },
+    { name: "Exhale", duration: 6, instruction: "Out through your mouth." }
+  ]},
+  { id: "deep", name: "Deep Regulate", desc: "3 minutes. Deeper reset. Extended exhale.", phases: [
     { name: "Inhale", duration: 4, instruction: "In through your nose." },
     { name: "Hold", duration: 4, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
     { name: "Rest", duration: 2, instruction: "Rest." }
-  ]},
-  { id: "box", name: "Box (4-4-4-4)", desc: "Equal rhythm. Used by Navy SEALs for focus", phases: [
-    { name: "Inhale", duration: 4, instruction: "In through your nose." },
-    { name: "Hold", duration: 4, instruction: "Hold." },
-    { name: "Exhale", duration: 4, instruction: "Out through your mouth." },
-    { name: "Hold", duration: 4, instruction: "Hold." }
-  ]},
-  { id: "478", name: "4-7-8", desc: "Maximum downregulation. Best when fully stopped.", phases: [
-    { name: "Inhale", duration: 4, instruction: "In through your nose." },
-    { name: "Hold", duration: 7, instruction: "Hold." },
-    { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." }
-  ]},
-  { id: "quick", name: "Quick Reset (4-4-6)", desc: "Shorter pattern when time is tight", phases: [
-    { name: "Inhale", duration: 4, instruction: "In through your nose." },
-    { name: "Hold", duration: 4, instruction: "Hold." },
-    { name: "Exhale", duration: 6, instruction: "Out through your mouth." }
   ]}
 ];
 
@@ -1550,7 +1539,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
 
   // --- BREATHE ---
-  const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
+  const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
   const [patternId, setPatternId] = useState(savedPatternId);
   const [showPatternPicker, setShowPatternPicker] = useState(false);
   const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
@@ -1567,10 +1556,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 
   const [started, setStarted] = useState(false);
   const breathPrompts = [
-    { id: "calm", label: "Settle the system", desc: "Thoughts or energy running fast", why: "Extended exhale downregulates your nervous system. Most people feel a shift in 90 seconds." },
-    { id: "box", label: "Stabilize under pressure", desc: "High-stakes, need to stay even", why: "Equal rhythm locks your baseline under sustained load" },
-    { id: "478", label: "Release physical tension", desc: "Clenched, exhausted, wired, or can't stop", why: "Long hold + exhale is the deepest physical reset" },
-    { id: "quick", label: "Regain focus", desc: "60 seconds, between tasks, in public", why: "Shortest pattern that shifts your state" }
+    { id: "quick", label: "Quick reset", desc: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
+    { id: "deep", label: "Deep regulate", desc: "3 minutes. Deeper reset when you have the space.", why: "Extended exhale cycle. Gives your nervous system time to fully downregulate." }
   ];
 
   const totalCycles = 3; // 3 cycles then check in — don't force more
@@ -5865,15 +5852,15 @@ export default function Stillform() {
               label: "Calibration · 4 of 4",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
-              body: "Calm (4-4-8-2) — extended exhale, slows your system down. When the signal is running high.\n\nBox (4-4-4-4) — equal phases. When you need to stay even.\n\n4-7-8 — maximum reset. When the body won't let go.\n\nQuick Reset — 60 seconds. Works anywhere.",
+              body: "Quick Reset — 60 seconds. Slows your system down fast. Use when you need to regulate and get back to what you're doing.\n\nDeep Regulate — 3 minutes. Extended exhale cycle. Deeper reset for when you have the time and space.",
               cta: null,
-              patterns: ["calm", "box", "478", "quick"]
+              patterns: ["quick", "deep"]
             }
           ];
 
           const current = setupSteps[setupStep];
           const isLast = setupStep === setupSteps.length - 1;
-          const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "calm"; } catch { return "calm"; } })();
+          const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
 
           // Assessment state (uses component-level assessmentAnswers)
           const currentScenario = current.isAssessment ? (current.scenarios[assessmentAnswers.length] || null) : null;
@@ -5895,10 +5882,8 @@ export default function Stillform() {
           };
 
           const patternLabels = {
-            calm: { name: "Regulate", detail: "4-4-8-2 · When the signal is running high" },
-            box: { name: "Box", detail: "4-4-4-4 · When you need to stay even" },
-            "478": { name: "4-7-8", detail: "When the body won't let go" },
-            quick: { name: "Quick Reset", detail: "2-2-4-1 · 60 seconds" }
+            quick: { name: "Quick Reset", detail: "60 seconds · Fast regulation" },
+            deep: { name: "Deep Regulate", detail: "3 minutes · Extended exhale cycle" }
           };
 
           return (
@@ -7277,12 +7262,10 @@ export default function Stillform() {
                 Different states need different patterns. Your selection starts automatically every session — no menu, no friction. Tap to change your default.
               </div>
               {[
-                { id: "calm", name: "Regulate (4-4-8-2)", use: "When the signal is running high", why: "Extended exhale tells your body the threat is over. Most people feel a shift in 90 seconds." },
-                { id: "box", name: "Box (4-4-4-4)", use: "When you need to stay even", why: "Equal rhythm used by special forces for sustained focus under pressure." },
-                { id: "478", name: "4-7-8", use: "When the body won't let go", why: "Long hold + exhale is the deepest physical reset available without equipment." },
-                { id: "quick", name: "Quick Reset (4-4-6)", use: "60 seconds between tasks", why: "Shortest pattern that produces a measurable state shift." }
+                { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
+                { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." }
               ].map(p => {
-                const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "calm") === p.id; } catch { return p.id === "calm"; } })();
+                const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
                 return (
                   <button key={p.id} onClick={() => {
                     try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
