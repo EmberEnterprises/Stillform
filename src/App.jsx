@@ -1936,7 +1936,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     <div>
       {!breatheDone ? (
         <div className="breath-container" style={{ position: "relative", overflow: "hidden" }}>
-          {bgtVisualGrounding && <FractalBreathCanvas breathScale={bgtBreathScale} />}
+          {/* FractalBreathCanvas temporarily disabled — causing mobile crash */}
           <div className="breath-circle-wrap">
             <svg className="breath-svg-ring" viewBox="0 0 280 280">
               {/* Tick marks — cardinal */}
@@ -4719,7 +4719,7 @@ function PanicMode({ onComplete }) {
   const breathScale = (currentPhase.scale - 1.0) / 0.4; // normalize 1.0-1.4 to 0-1
   return (
     <div className="panic-screen" style={{ position: "relative", overflow: "hidden" }}>
-      {visualGrounding && <FractalBreathCanvas breathScale={Math.max(0, Math.min(1, breathScale))} />}
+      {/* FractalBreathCanvas temporarily disabled — causing mobile crash */}
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, width: "100%" }}>
       {/* Audio toggle — visible, labeled */}
       <button
