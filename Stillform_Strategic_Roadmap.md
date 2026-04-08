@@ -366,6 +366,19 @@ People with real lived experience — trauma, hardship, different cultures, diff
 
 ---
 
+
+### Research Partnership (AFTER infrastructure)
+
+**When to pursue:** After cloud sync, push notifications, morning/evening Reframe flow, mandatory post-rating, and 4-6 weeks of real user data.
+
+**Why not now:** Researcher would evaluate a static PWA with no persistence, no return structure, no longitudinal data. They'd judge the prototype, not the product.
+
+**Target:** Graduate student in clinical psych or neuroscience. 5 university programs. Email drafted and saved — send when infrastructure is ready.
+
+**What they evaluate:** Bio-filter as misattribution correction, session flow vs regulation sequence in literature, pre/post delta data across 50+ sessions, retention patterns.
+
+**What you get:** Published pilot study (free validation), framework feedback from someone who knows the science, credibility for marketing ("evaluated by researchers at [university]").
+
 ## B2B OPPORTUNITY — Clinical Integration (FUTURE)
 
 ### The Signal
