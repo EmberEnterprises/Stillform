@@ -183,6 +183,92 @@
 
 ---
 
+
+## Window of Tolerance (The Entire Product Purpose)
+
+**What it does:** The entire app exists to keep users inside their window of tolerance — the zone where they can think clearly, regulate emotions, and function. Breathing brings hyperaroused users down. Reframe processes looping thoughts. Body Scan releases physical tension. The morning check-in and bio-filter detect when the window is already narrowed by sleep, pain, or depletion.
+
+**The science:** The window of tolerance is the optimal arousal zone where a person can function effectively — emotionally regulated, cognitively flexible, and socially engaged. Above it = hyperarousal (panic, rage, overwhelm). Below it = hypoarousal (numbness, shutdown, disconnection). Trauma, stress, and physical depletion narrow the window. Regulation skills widen it.
+
+**Who says so:**
+- Siegel (1999) — "The Developing Mind" — coined the Window of Tolerance model
+- Ogden, Minton & Pain (2006) — "Trauma and the Body" — body-based approaches widen the window
+- Porges (2011) — Polyvagal Theory — vagal nerve regulation underlies window management
+
+**Stillform application:** Every tool maps to window management. Breathe = calms hyperarousal. Body Scan = releases held tension narrowing the window. Reframe = processes cognitive loops. Bio-filter = detects when physical state has already narrowed the window before you even start. The pre/post rating literally measures how far you've moved back into the zone.
+
+**If they push back:** "You know that zone where you can think clearly and handle things? That's the window. Above it you're spiraling. Below it you're shut down. Every tool in Stillform is designed to put you back in that zone — or keep you there."
+
+---
+
+## Implementation Intentions (5-Scenario Assessment)
+
+**What it does:** The assessment determines your regulation type and pre-programs your home screen to show the right tool first. Body-first users see Breathe. Thought-first users see Reframe. You've already decided what to do before the moment hits.
+
+**The science:** "If X happens, I will do Y" planning — implementation intentions — dramatically increases follow-through on regulation strategies. Pre-deciding your response pathway before you need it bypasses the decision paralysis that happens during emotional flooding.
+
+**Who says so:**
+- Gollwitzer (1999) — "Implementation Intentions: Strong Effects of Simple Plans" — *American Psychologist*
+- Gollwitzer & Sheeran (2006) — meta-analysis showing implementation intentions have medium-to-large effect on goal attainment — *Advances in Experimental Social Psychology*
+- Webb & Sheeran (2004) — implementation intentions improve health behavior change — *British Journal of Social Psychology*
+
+**Stillform application:** The 5-scenario assessment IS implementation intention formation. When you identify as body-first, the app pre-loads your pathway: stress → Breathe first → then Reframe. You don't have to decide in the moment. The decision was already made during calibration.
+
+**If they push back:** "The assessment isn't just categorizing you. It's pre-loading your response. When the moment hits and you can't think straight, the app already knows your first move."
+
+---
+
+## Default Mode Network Interruption (Breathing Exercises)
+
+**What it does:** Paced breathing interrupts the brain's default mode network — the neural circuit responsible for mind-wandering, rumination, and self-referential thought loops.
+
+**The science:** The default mode network (DMN) is active during rest and drives rumination — "why did I say that," "what if this happens," repetitive self-focused thinking. Task-focused activities like paced breathing activate the task-positive network, which suppresses DMN activity. You can't ruminate and count 4-4-8-2 at the same time.
+
+**Who says so:**
+- Raichle et al. (2001) — "A default mode of brain function" — discovery of DMN — *PNAS*
+- Brewer et al. (2011) — meditation reduces DMN activity — *PNAS*
+- Doll et al. (2015) — mindful breathing shifts activation from DMN to task-positive networks — *Social Cognitive and Affective Neuroscience*
+
+**Stillform application:** The breathing ring, tick marks, and counting demand task-positive attention. The visual focus + counting rhythm + controlled breathing create a triple-lock on DMN suppression. Rumination literally can't run while you're tracking a 4-4-8-2 pattern.
+
+**If they push back:** "Your brain has a 'loop' circuit that replays worries. Focused breathing turns it off — not metaphorically. The network responsible for rumination goes quiet when you're counting breath phases."
+
+---
+
+## Autonomic Flexibility (What the App Trains Over Time)
+
+**What it does:** Repeated regulation practice increases the nervous system's ability to shift between activation (sympathetic) and recovery (parasympathetic) states — the core skill Stillform builds over time.
+
+**The science:** Autonomic flexibility — the ability to fluidly shift between fight/flight and rest/digest — is one of the strongest markers of emotional resilience. Higher heart rate variability (HRV) reflects greater autonomic flexibility. Regulation practice (breathing, reappraisal) trains this flexibility like a muscle.
+
+**Who says so:**
+- Thayer & Lane (2000) — HRV as index of regulated emotional responding — *Review of General Psychology*
+- Appelhans & Luecken (2006) — HRV reflects emotion regulation capacity — *Review of General Psychology*
+- Lehrer & Gevirtz (2014) — HRV biofeedback training improves autonomic regulation — *Frontiers in Public Health*
+
+**Stillform application:** Every completed session is one rep of autonomic flexibility training. The pre/post rating delta measures the shift. The Composure Telemetry heat map tracks practice frequency. Over time, the user's nervous system gets faster at shifting back to baseline — that's Signal Awareness Latency decreasing. The app doesn't just help in the moment; it trains the system to need less help.
+
+**If they push back:** "Each session is a rep. You're not just calming down — you're training your nervous system to shift faster. That's why it gets easier. Your autonomic flexibility is increasing."
+
+---
+
+## Stress Inoculation (Daily Practice Model)
+
+**What it does:** Morning check-in + tools + end of day creates a daily micro-dose of regulation practice, even on good days. This builds capacity before it's needed.
+
+**The science:** Stress inoculation — controlled, manageable exposure to stress and regulation — builds resilience for future high-stress events. Practicing when calm trains the skills that deploy automatically under pressure. Military, first responders, and surgeons use this principle.
+
+**Who says so:**
+- Meichenbaum (1985) — Stress Inoculation Training (SIT) — foundational text
+- Saunders et al. (1996) — SIT effective across anxiety disorders, PTSD, performance anxiety — *Clinical Psychology Review*
+- Robson & Manacapilli (2014) — stress inoculation in military performance — RAND Corporation
+
+**Stillform application:** The morning check-in IS the inoculation. Setting your tone when nothing's wrong builds the muscle for when something is. "Composure when winning" isn't just a philosophy — it's stress inoculation theory applied. You practice composure daily so it's available when the stakes rise.
+
+**If they push back:** "Special forces train in controlled environments so they perform under fire. Your morning check-in is the same principle. Practice the skill when it's easy so it's there when it's not."
+
+---
+
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:
