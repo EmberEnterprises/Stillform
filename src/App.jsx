@@ -1699,6 +1699,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 
   const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
   const progress = ((cycle - 1) * phases.length + phaseIdx) / (totalCycles * phases.length);
+  const bgtBreathScale = (phaseIdx === 0 || phaseIdx === 1) ? 1 : 0;
+  const bgtVisualGrounding = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
 
   const groundSavedRef = useRef(false);
   const groundElapsedRef = useRef(0);
@@ -1946,7 +1948,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   return (
     <div>
       {!breatheDone ? (
-        <div className="breath-container">
+        <div className="breath-container" style={{ position: "relative", overflow: "hidden" }}>
+          {bgtVisualGrounding && <FractalBreathCanvas breathScale={bgtBreathScale} />}
           <div className="breath-circle-wrap">
             <svg className="breath-svg-ring" viewBox="0 0 280 280">
               {/* Tick marks — cardinal */}
@@ -4331,6 +4334,105 @@ function BodyCheckInTool({ onComplete }) {
   );
 }
 
+function FractalBreathCanvas({ breathScale = 0.5 }) {
+  const canvasRef = useRef(null);
+  const animRef = useRef(null);
+  const startRef = useRef(Date.now());
+
+  const drawBranch = useCallback((ctx, x, y, angle, len, depth, maxDepth, t, opacity) => {
+    if (depth > maxDepth || len < 2) return;
+    const sway = Math.sin(x * 0.01 + t * 0.3) * Math.cos(y * 0.006 + t * 0.2) * 0.15;
+    const a = angle + sway;
+    const ex = x + Math.cos(a) * len;
+    const ey = y + Math.sin(a) * len;
+    const alpha = opacity * (1 - depth / (maxDepth + 1)) * 0.8;
+    const w = Math.max(0.5, (maxDepth - depth) * 1.1);
+    const warmth = depth / maxDepth;
+    const r = Math.floor(180 + warmth * 40);
+    const g = Math.floor(120 + warmth * 27 - depth * 8);
+    const b = Math.floor(40 + warmth * 18);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const cpx = (x + ex) / 2 + Math.sin(x * 0.02 + t * 0.5) * len * 0.15;
+    const cpy = (y + ey) / 2 + Math.cos(y * 0.02 + t * 0.5) * len * 0.12;
+    ctx.quadraticCurveTo(cpx, cpy, ex, ey);
+    ctx.strokeStyle = `rgba(${r},${g},${b},${alpha})`;
+    ctx.lineWidth = w;
+    ctx.lineCap = "round";
+    ctx.stroke();
+    const ba = 0.35 + Math.sin(depth + t * 0.1) * 0.15;
+    const shrink = 0.67 + Math.cos(depth * 0.5 + t * 0.2) * 0.06;
+    drawBranch(ctx, ex, ey, a - ba, len * shrink, depth + 1, maxDepth, t, opacity);
+    drawBranch(ctx, ex, ey, a + ba, len * shrink, depth + 1, maxDepth, t, opacity);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const dpr = window.devicePixelRatio || 1;
+    const resize = () => {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+    return () => window.removeEventListener("resize", resize);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    let active = true;
+    const animate = () => {
+      if (!active) return;
+      const ctx = canvas.getContext("2d");
+      const dpr = window.devicePixelRatio || 1;
+      const w = canvas.width / dpr;
+      const h = canvas.height / dpr;
+      const t = (Date.now() - startRef.current) / 1000;
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = "rgba(10,10,12,0.18)";
+      ctx.fillRect(0, 0, w, h);
+      // Center glow
+      const gr = 60 + breathScale * 100;
+      const grd = ctx.createRadialGradient(w / 2, h * 0.55, 0, w / 2, h * 0.55, gr);
+      grd.addColorStop(0, `rgba(201,147,58,${0.04 + breathScale * 0.06})`);
+      grd.addColorStop(1, "rgba(10,10,12,0)");
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, w, h);
+      // Particles
+      for (let i = 0; i < Math.floor(10 + breathScale * 20); i++) {
+        const px = (Math.sin(i * 7.3 + t * 0.05) * 0.5 + 0.5) * w;
+        const py = (Math.sin(i * 3.7 + t * 0.04) * 0.5 + 0.5) * h;
+        const sz = (1 + Math.sin(i + t * 0.1)) * 1.2 * breathScale;
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(0.5, sz), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(201,147,58,${0.1 + breathScale * 0.15})`;
+        ctx.fill();
+      }
+      // Branches
+      const maxD = Math.floor(4 + breathScale * 4);
+      const trunk = 20 + breathScale * 40;
+      const baseY = h * 0.85;
+      drawBranch(ctx, w / 2, baseY, -Math.PI / 2, trunk, 0, maxD, t, 0.5 + breathScale * 0.4);
+      drawBranch(ctx, w * 0.3, baseY + 15, -Math.PI / 2 - 0.12, trunk * 0.6, 0, maxD - 1, t + 2, 0.25 + breathScale * 0.25);
+      drawBranch(ctx, w * 0.7, baseY + 15, -Math.PI / 2 + 0.12, trunk * 0.6, 0, maxD - 1, t + 4, 0.25 + breathScale * 0.25);
+      ctx.restore();
+      animRef.current = requestAnimationFrame(animate);
+    };
+    animRef.current = requestAnimationFrame(animate);
+    return () => { active = false; if (animRef.current) cancelAnimationFrame(animRef.current); };
+  }, [breathScale, drawBranch]);
+
+  return <canvas ref={canvasRef} style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }} />;
+}
+
 function PanicMode({ onComplete }) {
   // Auto-starting breathing — no Begin button, no choices
   // 4-4-6-2 pattern, 4 cycles, then gently offer next step
@@ -4607,8 +4709,12 @@ function PanicMode({ onComplete }) {
   }
 
   // BREATHING ACTIVE — auto-started, one instruction only
+  const visualGrounding = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
+  const breathScale = (currentPhase.scale - 1.0) / 0.4; // normalize 1.0-1.4 to 0-1
   return (
-    <div className="panic-screen">
+    <div className="panic-screen" style={{ position: "relative", overflow: "hidden" }}>
+      {visualGrounding && <FractalBreathCanvas breathScale={Math.max(0, Math.min(1, breathScale))} />}
+      <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", flex: 1, width: "100%" }}>
       {/* Audio toggle — visible, labeled */}
       <button
         onClick={toggleAudio}
@@ -4649,6 +4755,7 @@ function PanicMode({ onComplete }) {
       </div>
 
       <div className="panic-counter">{cycle} of {totalCycles}</div>
+      </div>
     </div>
   );
 }
@@ -6150,6 +6257,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Ghost echo — faint reminder of a past win when you log a pulse</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> End of day check-in — close the loop in 15 seconds after 6 PM</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Install banner — guides new users to install the app</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Visual grounding — organic fractal visuals behind breathing (Settings toggle)</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
@@ -7314,9 +7422,10 @@ export default function Stillform() {
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Display</div>
               {[
                 { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
-                { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" }
+                { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
+                { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
               ].map(opt => {
-                const isOn = (() => { try { return localStorage.getItem(opt.key) === "on"; } catch { return false; } })();
+                const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
                 return (
                   <div key={opt.key} style={{
                     background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
