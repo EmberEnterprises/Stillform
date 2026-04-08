@@ -896,6 +896,23 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - ❌ Watch haptics testing
 - ❌ Share extension testing
 
+## Ship Checklist (MANDATORY — every code change)
+
+Before pushing any change, Claude must check each item. If it applies, update it in the same commit. No exceptions.
+
+| # | Check | When it applies |
+|---|-------|----------------|
+| 1 | **UAT dropdown** | Any user-visible change — add to ★ NEW THIS WEEK |
+| 2 | **Tutorial** | Any new feature or renamed feature |
+| 3 | **FAQ** | Any change to how a feature works or what it's called |
+| 4 | **Transfer doc** | Every change, always |
+| 5 | **Plausible event** | Any new trackable action (add Goal name to doc + code) |
+| 6 | **Privacy policy note** | Any new data collected or new provider |
+| 7 | **Science sheet** | Any new research-backed feature |
+| 8 | **AI prompts** | Any change that affects Reframe context (new data sent to API) |
+| 9 | **Promo** | Any feature worth marketing |
+| 10 | **Punch list** | Add testable item for the change |
+
 ## Not Yet Built
 
 - ❌ Calendar-aware morning practice (reads device calendar)
