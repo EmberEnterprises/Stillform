@@ -968,8 +968,9 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - ✅ Home screen only — tools have their own rhythms. Home is where user lingers before deciding.
 - ✅ User feels calmer without knowing why. Body-first design.
 
-**Discharge (Ephemeral Release Valve):**
-- ✅ Accessible from home screen bottom nav
+**Discharge: REMOVED**
+- Killed April 8. Having a 'nothing saves' screen implied Reframe wasn't private. Undermined trust.
+- ❌ Removed from: app, bottom nav, tutorial, UAT, science sheet, punch list
 - ✅ Full textarea, nothing saves to localStorage. Ever.
 - ✅ Text opacity fades as user types (inverse of character count)
 - ✅ "Discharge" button flashes amber "Cleared" and dissolves text

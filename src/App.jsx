@@ -5287,8 +5287,6 @@ export default function Stillform() {
     } catch {}
   }, []);
   const [pricingPlan, setPricingPlan] = useState("annual");
-  const [dischargeText, setDischargeText] = useState("");
-  const [discharged, setDischarged] = useState(false);
   const [pricingCloud, setPricingCloud] = useState(false);
   const [openLog, setOpenLog] = useState(null);
   const [, forceUpdate] = useState(0);
@@ -5535,7 +5533,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nDischarge — sometimes you just need to get it out. Type whatever's in your head. Nothing saves. The text fades as you type and dissolves when you're done. The value is in the act, not the record.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
               note: null
             },
             {
@@ -6145,7 +6143,6 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Research blog post live — the science behind the two-pathway system</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure Telemetry — heat map of your activity on My Progress</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> 60 BPM ambient pulse — the app calms you before you tap anything</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Discharge — type it out, nothing saves. Pure release valve.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Somatic interrupt — "Drop your shoulders" when you're typing too fast</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Ghost echo — faint reminder of a past win when you log a pulse</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> End of day check-in — close the loop in 15 seconds after 6 PM</div>
@@ -6582,7 +6579,6 @@ export default function Stillform() {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
                 <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Pulse</button>
-                <button onClick={() => setScreen("discharge")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Discharge</button>
                 <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -6891,61 +6887,6 @@ export default function Stillform() {
                 </>
               );
             })()}
-          </section>
-        )}
-
-        {/* DISCHARGE — ephemeral release valve */}
-        {screen === "discharge" && (
-          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => { setDischargeText(""); setDischarged(false); setScreen("home"); }}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 4 }}>Discharge</h1>
-            <p style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 24 }}>Get it out. Nothing here is saved. Ever.</p>
-
-            <div style={{ position: "relative" }}>
-              <textarea
-                value={dischargeText}
-                onChange={e => setDischargeText(e.target.value)}
-                placeholder="Type. Nobody will see this."
-                autoFocus
-                style={{
-                  width: "100%", minHeight: 280, background: discharged ? "transparent" : "var(--surface)",
-                  border: `0.5px solid ${discharged ? "rgba(201,147,58,0.4)" : "var(--border)"}`,
-                  borderRadius: "var(--r)", padding: "16px",
-                  color: discharged ? "transparent" : "var(--text)",
-                  fontSize: 14, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7,
-                  resize: "none", transition: "all 0.8s ease-out",
-                  opacity: discharged ? 0 : Math.max(0.3, 1 - dischargeText.length / 800)
-                }}
-              />
-              {discharged && (
-                <div style={{
-                  position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                  animation: "deltaFlash 0.8s ease-out"
-                }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Cleared</div>
-                </div>
-              )}
-            </div>
-
-            <button onClick={() => {
-              if (!dischargeText.trim()) return;
-              setDischarged(true);
-              setTimeout(() => { setDischargeText(""); setDischarged(false); }, 1200);
-            }} disabled={!dischargeText.trim() || discharged} style={{
-              width: "100%", marginTop: 16,
-              background: dischargeText.trim() && !discharged ? "var(--amber)" : "var(--surface2)",
-              color: dischargeText.trim() && !discharged ? "#0A0A0C" : "var(--text-muted)",
-              border: "none", borderRadius: "var(--r)", padding: "14px",
-              fontSize: 13, fontWeight: 500, cursor: dischargeText.trim() ? "pointer" : "default",
-              fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase",
-              transition: "all 0.2s"
-            }}>
-              {discharged ? "Cleared" : "Discharge"}
-            </button>
-
-            <p style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", marginTop: 16, fontStyle: "italic" }}>
-              This never touches storage. The value is in the act, not the record.
-            </p>
           </section>
         )}
 

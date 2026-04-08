@@ -122,21 +122,6 @@
 
 ---
 
-## Discharge (Ephemeral Writing)
-
-**What it does:** Type freely, nothing saves. Text fades as you type. Hit Discharge and it dissolves.
-
-**The science:** Expressive writing — even without saving or reviewing — reduces intrusive thoughts and emotional intensity. The physical act of externalizing a thought changes its cognitive weight. Pennebaker's research shows the benefit is in the act, not the record.
-
-**Who says so:**
-- Pennebaker & Beall (1986) — expressive writing improves physical and psychological health — *Journal of Abnormal Psychology*
-- Klein & Boals (2001) — expressive writing reduces intrusive/avoidant thinking — *Journal of Experimental Psychology: General*
-- Smyth et al. (1999) — written disclosure reduces symptoms in chronic conditions — *JAMA*
-
-**If they push back:** "We're not saving it because the research says saving it isn't the point. The release is the regulation."
-
----
-
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:

@@ -38,19 +38,7 @@
 
 ### Bottom Nav
 - [ ] PULSE link works → goes to Pulse screen
-- [ ] DISCHARGE link works → goes to Discharge screen
 - [ ] MY PROGRESS link works → goes to My Progress screen
-
-### Discharge
-- [ ] Screen loads with empty textarea
-- [ ] Placeholder: "Type. Nobody will see this."
-- [ ] Text opacity fades as you type more
-- [ ] "Discharge" button lights up amber when text exists
-- [ ] Tapping Discharge → "Cleared" flash → text dissolves
-- [ ] After clearing, textarea is empty again
-- [ ] "The value is in the act, not the record." shows at bottom
-- [ ] NOTHING saves to localStorage — verify in DevTools
-- [ ] Back button returns to home and clears text
 
 ### Composure Telemetry (Heat Map)
 - [ ] Visible on My Progress screen below stats
