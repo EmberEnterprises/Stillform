@@ -122,6 +122,36 @@
 
 ---
 
+
+## Ghost Echo (Past Resilience)
+
+**What it does:** Faint text on Pulse screens showing a past successful session — "Apr 3 — you shifted +2.4 in 2m 30s."
+
+**The science:** Self-efficacy — the belief that you can handle a situation — is the strongest predictor of whether you actually will. Showing evidence of past success at the moment of current difficulty activates mastery experience, the most powerful source of self-efficacy.
+
+**Who says so:**
+- Bandura (1977) — "Self-efficacy: Toward a unifying theory of behavioral change" — *Psychological Review*
+- Bandura (1997) — "Self-Efficacy: The Exercise of Control" — foundational text on mastery experiences
+
+**If they push back:** "It's not a motivational quote. It's your own data showing you've done this before. That's the difference between encouragement and evidence."
+
+---
+
+## End of Day Check-In (Reflective Close)
+
+**What it does:** After 6 PM, three taps: energy vs morning, composure held, one word for the day. AI uses it as context next morning.
+
+**The science:** Reflective practice — structured end-of-day review — improves self-regulation and metacognitive awareness. The morning-evening bookend creates a feedback loop that accelerates pattern recognition.
+
+**Who says so:**
+- Schön (1983) — "The Reflective Practitioner" — reflection-in-action and reflection-on-action
+- Mann et al. (2009) — reflective practice in health professions improves self-awareness — *Advances in Health Sciences Education*
+- Boud et al. (1985) — "Reflection: Turning Experience into Learning"
+
+**If they push back:** "You set your tone in the morning. You close the loop at night. The AI connects the dots between the two. That's how patterns become visible."
+
+---
+
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:

@@ -5541,7 +5541,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
@@ -6999,7 +6999,7 @@ export default function Stillform() {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for your morning practice and for the moments that test you. Set your tone, stay sharp, reset when you need to."
+                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for your morning practice, for the moments that test you, and for the moments when you're winning. Composure matters most when things are going well."
               },
               {
                 q: "Who is this for?",
@@ -7007,7 +7007,7 @@ export default function Stillform() {
               },
               {
                 q: "What does the AI actually do?",
-                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your journal and session history."
+                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your Pulse entries and session history."
               },
               {
                 q: "What are the three Reframe modes?",
@@ -7015,7 +7015,7 @@ export default function Stillform() {
               },
               {
                 q: "Does the AI learn about me?",
-                a: "Yes. It reads your journal, signal profile, blind spots, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
+                a: "Yes. It reads your Pulse, signal profile, blind spots, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
               },
               {
                 q: "What's the AI's limitation?",
@@ -7026,16 +7026,36 @@ export default function Stillform() {
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
-                q: "What's the Journal tab in Reframe?",
-                a: "A space to write freely. Process, think out loud, work through something. No structure required. The AI references your entries in every future session."
+                q: "What's the Pulse tab in Reframe?",
+                a: "A space to log what's present while you're in conversation with the AI. Tag emotions, note triggers. The AI references your entries in every future session."
+              },
+              {
+                q: "What is Composure Telemetry?",
+                a: "A 12-week visual timeline on My Progress. Every session and Pulse entry lights up a cell. Brighter amber means more activity that day. It's your composure practice at a glance — not a diary, a flight recorder."
+              },
+              {
+                q: "What's the morning check-in?",
+                a: "Two taps at the start of your day. Set your energy level and physical state. The AI uses this as context for every session — if you're depleted, it adjusts. If you're on fire, it watches for blind spots."
+              },
+              {
+                q: "What's the end of day check-in?",
+                a: "After 6 PM, three taps to close the loop. Energy vs this morning, did you hold composure, one word for the day. The AI uses yesterday's close as context the next morning."
+              },
+              {
+                q: "What happens when I type fast in Reframe?",
+                a: "The app notices. If you're typing rapidly — a sign your body is ahead of your thoughts — a gentle nudge appears: 'Drop your shoulders' or 'Unclench your jaw.' It fades after a few seconds. The system watches your body, not just your words."
               },
               {
                 q: "Is my data private?",
-                a: "Your data is encrypted and stored securely. The AI receives your context to generate a response, then forgets it. You can delete everything anytime from Settings."
+                a: "Your data is encrypted and stored on your device. The AI receives your context to generate a response, then forgets it. Nothing is stored on our servers. You can delete everything anytime from Settings."
               },
               {
                 q: "How much does it cost?",
-                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). 7-day free trial. One price — everything included. No add-ons."
+                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). 14-day free trial. One price — everything included. No add-ons."
+              },
+              {
+                q: "What happens after my free trial?",
+                a: "After 14 days, you'll be asked to subscribe to continue using Stillform. Your data stays on your device — nothing is lost. Subscribe and pick up right where you left off."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
