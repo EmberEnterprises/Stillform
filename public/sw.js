@@ -1,7 +1,11 @@
-const CACHE = 'stillform-v4';
+const CACHE = 'stillform-v5';
+const PRECACHE = ['/', '/index.html'];
 
 self.addEventListener('install', event => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE).then(cache => cache.addAll(PRECACHE))
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -15,25 +19,17 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = event.request.url;
 
-  // NEVER intercept API calls
+  // Never intercept API calls
   if (url.includes('netlify/functions') || url.includes('/api/')) {
-    event.respondWith(fetch(event.request));
     return;
   }
 
-  // JS and CSS — always fetch fresh (Vite hashes these)
-  if (url.match(/\.(js|css)(\?|$)/)) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // Dev tools — pass through
+  // Never cache dev tools
   if (url.includes('__vite') || url.includes('hot-update') || url.includes('sockjs')) {
-    event.respondWith(fetch(event.request));
     return;
   }
 
-  // Everything else (HTML, images, fonts, icons): network first, cache for offline
+  // Network first for everything, fall back to cache for offline
   event.respondWith(
     fetch(event.request).then(response => {
       if (response.ok && event.request.method === 'GET') {
