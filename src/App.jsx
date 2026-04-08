@@ -6095,6 +6095,13 @@ export default function Stillform() {
                   </div>
                 </div>
               )}
+              {/* FALLBACK INSTALL HINT — shows in browser mode when no install prompt event */}
+              {!installPrompt && !installDismissed && !window.matchMedia("(display-mode: standalone)").matches && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                  <span style={{ fontSize: 11, color: "var(--text-dim)" }}>Install: tap ⋮ menu → "Add to Home Screen"</span>
+                  <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>✕</button>
+                </div>
+              )}
 
               {/* TRIAL BADGE */}
               {!isSubscribed && trialDaysLeft > 0 && (
