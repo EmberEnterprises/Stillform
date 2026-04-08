@@ -4824,6 +4824,89 @@ function MyProgress({ onBack, onJournal }) {
           })()}
         </div>
 
+        {/* PULSE HEAT MAP — composure telemetry */}
+        {(() => {
+          const allEvents = [];
+          sessions.forEach(s => { if (s.timestamp) allEvents.push(new Date(s.timestamp)); });
+          journalEntries.forEach(e => { if (e.id) allEvents.push(new Date(e.id)); });
+          if (allEvents.length < 1) return null;
+
+          const today = new Date();
+          today.setHours(23, 59, 59, 999);
+          const weeks = 12;
+          const startDate = new Date(today);
+          startDate.setDate(startDate.getDate() - (weeks * 7 - 1));
+          startDate.setHours(0, 0, 0, 0);
+
+          // Build day map: "YYYY-MM-DD" → count
+          const dayMap = {};
+          allEvents.forEach(d => {
+            const key = d.toISOString().slice(0, 10);
+            dayMap[key] = (dayMap[key] || 0) + 1;
+          });
+
+          // Build grid: 7 rows (Mon-Sun) × 12 cols (weeks)
+          const cells = [];
+          const d = new Date(startDate);
+          // Adjust to Monday
+          while (d.getDay() !== 1) d.setDate(d.getDate() - 1);
+          const gridStart = new Date(d);
+
+          for (let week = 0; week < weeks; week++) {
+            for (let day = 0; day < 7; day++) {
+              const cellDate = new Date(gridStart);
+              cellDate.setDate(gridStart.getDate() + week * 7 + day);
+              const key = cellDate.toISOString().slice(0, 10);
+              const count = dayMap[key] || 0;
+              const future = cellDate > today;
+              cells.push({ week, day, count, future, date: cellDate });
+            }
+          }
+
+          const maxCount = Math.max(1, ...cells.map(c => c.count));
+          const dayLabels = ["M", "", "W", "", "F", "", ""];
+
+          return (
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>Composure Telemetry</div>
+              <div style={{ display: "flex", gap: 2 }}>
+                {/* Day labels */}
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, marginRight: 4, justifyContent: "flex-start" }}>
+                  {dayLabels.map((label, i) => (
+                    <div key={i} style={{ width: 12, height: 14, fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", display: "flex", alignItems: "center" }}>{label}</div>
+                  ))}
+                </div>
+                {/* Grid */}
+                {Array.from({ length: weeks }, (_, week) => (
+                  <div key={week} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                    {Array.from({ length: 7 }, (_, day) => {
+                      const cell = cells[week * 7 + day];
+                      if (!cell) return null;
+                      const intensity = cell.future ? 0 : cell.count / maxCount;
+                      const bg = cell.future ? "transparent"
+                        : cell.count === 0 ? "rgba(255,255,255,0.03)"
+                        : `rgba(201, 147, 58, ${0.15 + intensity * 0.75})`;
+                      const border = cell.future ? "0.5px solid transparent" : cell.count === 0 ? "0.5px solid var(--border)" : "0.5px solid rgba(201, 147, 58, 0.2)";
+                      return (
+                        <div key={day} title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${cell.count} event${cell.count !== 1 ? "s" : ""}`} style={{
+                          width: 14, height: 14, borderRadius: 2, background: bg, border, transition: "background 0.3s"
+                        }} />
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, justifyContent: "flex-end" }}>
+                <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>Less</span>
+                {[0, 0.25, 0.5, 0.75, 1].map((v, i) => (
+                  <div key={i} style={{ width: 10, height: 10, borderRadius: 2, background: v === 0 ? "rgba(255,255,255,0.03)" : `rgba(201, 147, 58, ${0.15 + v * 0.75})`, border: "0.5px solid rgba(201, 147, 58, 0.15)" }} />
+                ))}
+                <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>More</span>
+              </div>
+            </div>
+          );
+        })()}
+
         {/* PATTERNS — trend view */}
         {hasPatterns && (
           <div style={{ marginBottom: 8 }}>
