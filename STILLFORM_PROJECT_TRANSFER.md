@@ -934,6 +934,52 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - ❌ Haptic entrainment on native — 60 BPM vibration on long-press of CTA. Parked: Capacitor haptics installed but native-only, can't test from web.
 - ❌ Server-side subscription verification — current paywall is localStorage honor system. Needs cloud sync infrastructure for real verification.
 
+
+### April 8 Morning Session — All pushed:
+
+**Discharge: KILLED**
+- Having a "nothing saves" screen implied Reframe wasn't private. Undermined trust. Removed from all touchpoints.
+
+**End of Day Check-In:**
+- Appears after 6 PM, three taps: energy vs morning, composure held, one word
+- AI gets yesterday's close as context next morning
+- Plausible event: "End of Day Check-In"
+- No forced positivity — "Heavy" is valid data
+
+**Install Banner:**
+- Amber banner when Chrome fires beforeinstallprompt
+- Fallback text hint when Chrome throttles: "Install: tap menu → Add to Home Screen"
+- beforeinstallprompt captured in index.html before React loads
+- Hidden in standalone mode, dismissible
+
+**PWA Fixes:**
+- Service worker v5 with precache restored
+- Chrome 146 confirmed: "Add to Home Screen" IS the install path (Chrome renamed it)
+- PWA Builder: 0 errors, 2 warnings, 14 passes
+- nav-logo user-select: none (STILLFORM tap no longer triggers Google search)
+
+**Calibration Fixes (Bobby's first user session):**
+- Back button steps backward instead of ejecting to home
+- "SELECT ALL THAT APPLY" now prominent amber callout on all 3 steps
+
+**FAQ Expanded (10 → 15 entries):**
+- Added: Composure Telemetry, morning check-in, end of day, somatic interrupt, trial expiration
+- Fixed: 7-day → 14-day trial, Journal → Pulse, composure when winning
+
+**Tutorial Updated:**
+- Heat map mentioned in "Your growth" slide
+- End of Day mentioned in "Daily practice" slide
+- Discharge removed from "Daily practice" slide
+
+**Science Sheet Updated:**
+- Added: Ghost Echo (self-efficacy, Bandura), End of Day (reflective practice, Schön)
+- Removed: Discharge section
+
+**Ship Checklist Established:**
+- 10-point mandatory checklist for every code change
+- Saved to Claude memory + transfer doc
+- UAT, Tutorial, FAQ, Transfer doc, Plausible, Privacy, Science sheet, AI prompts, Promo, Punch list
+
 ### April 7 Late Night Session — All pushed:
 
 **Lemon Squeezy Products (LIVE in test mode):**
