@@ -2625,15 +2625,18 @@ function BodyScanTool({ onComplete }) {
 function useSpeechToText(onResult) {
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
+  const intentionalStop = useRef(false);
 
   const toggle = () => {
     if (listening) {
+      intentionalStop.current = true;
       recognitionRef.current?.stop();
       setListening(false);
       return;
     }
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
+    intentionalStop.current = false;
     const recognition = new SpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = false;
@@ -2645,14 +2648,22 @@ function useSpeechToText(onResult) {
       }
       if (transcript) onResult(transcript);
     };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
+    recognition.onerror = () => { intentionalStop.current = true; setListening(false); };
+    recognition.onend = () => {
+      // Mobile Chrome kills continuous recognition after each pause
+      // Auto-restart unless user intentionally stopped
+      if (!intentionalStop.current) {
+        try { recognition.start(); } catch { setListening(false); }
+      } else {
+        setListening(false);
+      }
+    };
     recognitionRef.current = recognition;
     recognition.start();
     setListening(true);
   };
 
-  useEffect(() => { return () => recognitionRef.current?.stop(); }, []);
+  useEffect(() => { return () => { intentionalStop.current = true; recognitionRef.current?.stop(); }; }, []);
 
   const supported = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
   return { listening, toggle, supported };
