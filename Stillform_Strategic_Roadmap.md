@@ -76,6 +76,41 @@
 
 ### Tier 1: Build Before Launch
 
+### Check-In → Reframe Flow (PRIORITY BUILD)
+
+**Morning Flow:**
+1. Check-in opens → energy + hardware (quick taps)
+2. "Set my tone →" transitions directly into Reframe MORNING MODE
+3. AI has check-in data pre-loaded: "You're running depleted today. What's on your plate?"
+4. Brief exchange — priming, forward-looking, 90 seconds
+5. AI closes: "You're set. Go."
+6. Morning mode AI behavior: sharp, directional, primes for what's ahead, flags blind spots from bio-filter state
+
+**Evening Flow:**
+1. EOD check-in → 3 taps (energy vs morning, composure, one word)
+2. "Want to clear anything before bed?" → Yes / No
+3. No → "Sleep well. See you tomorrow."
+4. Yes → Reframe EVENING MODE (closure, not analysis)
+5. Evening mode AI behavior:
+   - Shorter responses than any other mode
+   - "Put it down" language, not "let's work through it"
+   - Never opens new threads. Never says "tell me more."
+   - If they vent: let them, then close: "You said it. It's out. Now sleep."
+   - Actively resists going deep: "That's a tomorrow problem. Tonight the only job is sleep."
+   - Goal is calming, winding down, releasing — NOT processing
+   - Never sends them to bed thinking harder than when they arrived
+6. AI closes: "You're set. Sleep."
+
+**Tomorrow morning AI has yesterday's EOD:**
+"Yesterday you closed heavy with worse energy. You still showed up today. What's different this morning?"
+
+**Three time-based Reframe modes:**
+- Morning: Prime (forward, sharp, directional)
+- Anytime: Full Reframe (existing 3 modes — Talk/Loop/Ready)
+- Evening: Close (backward, release, calm, short)
+
+**Technical:** Mode auto-detected from time of day when entering through check-in flow. Manual Reframe access uses existing 3 modes regardless of time.
+
 **Neuro Voice Companion**
 - Wake word "Neuro" while app is open
 - Voice commands: "Breathe," "Body scan," "Talk it out," "Check in"
