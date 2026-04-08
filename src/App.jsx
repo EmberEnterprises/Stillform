@@ -5759,7 +5759,7 @@ export default function Stillform() {
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+              <button className="intervention-back" onClick={() => { if (setupStep > 0) { setSetupStep(s => s - 1); } else { setScreen("home"); } }}>← Back</button>
 
               {/* System calibration header */}
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
