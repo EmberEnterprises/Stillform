@@ -2868,6 +2868,26 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
+  // Somatic interrupt — detects rapid typing, shows body nudge
+  const keystrokeTimestamps = useRef([]);
+  const [somaticNudge, setSomaticNudge] = useState(null);
+  const somaticTimeout = useRef(null);
+  const somaticNudges = ["Drop your shoulders.", "Unclench your jaw.", "Soften your hands.", "Breathe out slowly.", "Feet on the floor."];
+  const checkTypingSpeed = () => {
+    const now = Date.now();
+    keystrokeTimestamps.current.push(now);
+    // Keep last 20 keystrokes
+    if (keystrokeTimestamps.current.length > 20) keystrokeTimestamps.current.shift();
+    const recent = keystrokeTimestamps.current.filter(t => now - t < 3000);
+    // 15+ keystrokes in 3 seconds = rapid typing
+    if (recent.length >= 15 && !somaticNudge) {
+      setSomaticNudge(somaticNudges[Math.floor(Math.random() * somaticNudges.length)]);
+      keystrokeTimestamps.current = [];
+      if (somaticTimeout.current) clearTimeout(somaticTimeout.current);
+      somaticTimeout.current = setTimeout(() => setSomaticNudge(null), 5000);
+    }
+  };
+
   // Pre-fill from share extension
   useEffect(() => {
     if (sharedText) {
@@ -3478,12 +3498,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           ) : (
             <>
+            {/* Somatic interrupt — appears during rapid typing */}
+            {somaticNudge && (
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--amber)",
+                letterSpacing: "0.06em", padding: "6px 0", marginBottom: 4,
+                animation: "deltaFlash 0.6s ease-out", transition: "opacity 0.5s",
+                textAlign: "center"
+              }}>{somaticNudge}</div>
+            )}
             <textarea
               className="ai-input"
               style={{ borderColor: mc.border }}
               placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's on your mind..."}
               value={input}
-              onChange={e => setInput(e.target.value)}
+              onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
               onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
               rows={3}
             />
@@ -6036,6 +6065,8 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Research blog post live — the science behind the two-pathway system</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure Telemetry — heat map of your activity on My Progress</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> 60 BPM ambient pulse — the app calms you before you tap anything</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Discharge — type it out, nothing saves. Pure release valve.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Somatic interrupt — "Drop your shoulders" when you're typing too fast</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
@@ -6366,6 +6397,7 @@ export default function Stillform() {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
                 <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Pulse</button>
+                <button onClick={() => setScreen("discharge")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Discharge</button>
                 <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -6659,6 +6691,73 @@ export default function Stillform() {
             })()}
           </section>
         )}
+
+        {/* DISCHARGE — ephemeral release valve */}
+        {screen === "discharge" && (() => {
+          const [dischargeText, setDischargeText] = useState("");
+          const [discharged, setDischarged] = useState(false);
+          const [charCount, setCharCount] = useState(0);
+
+          const handleDischarge = () => {
+            if (!dischargeText.trim()) return;
+            setDischarged(true);
+            setTimeout(() => {
+              setDischargeText("");
+              setDischarged(false);
+              setCharCount(0);
+            }, 1200);
+          };
+
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 4 }}>Discharge</h1>
+              <p style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 24 }}>Get it out. Nothing here is saved. Ever.</p>
+
+              <div style={{ position: "relative" }}>
+                <textarea
+                  value={dischargeText}
+                  onChange={e => { setDischargeText(e.target.value); setCharCount(e.target.value.length); }}
+                  placeholder="Type. Nobody will see this."
+                  autoFocus
+                  style={{
+                    width: "100%", minHeight: 280, background: discharged ? "transparent" : "var(--surface)",
+                    border: `0.5px solid ${discharged ? "rgba(201,147,58,0.4)" : "var(--border)"}`,
+                    borderRadius: "var(--r)", padding: "16px",
+                    color: discharged ? "transparent" : "var(--text)",
+                    fontSize: 14, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.7,
+                    resize: "none", transition: "all 0.8s ease-out",
+                    opacity: discharged ? 0 : Math.max(0.3, 1 - charCount / 800)
+                  }}
+                />
+                {discharged && (
+                  <div style={{
+                    position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+                    animation: "deltaFlash 0.8s ease-out"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Cleared</div>
+                  </div>
+                )}
+              </div>
+
+              <button onClick={handleDischarge} disabled={!dischargeText.trim() || discharged} style={{
+                width: "100%", marginTop: 16,
+                background: dischargeText.trim() && !discharged ? "var(--amber)" : "var(--surface2)",
+                color: dischargeText.trim() && !discharged ? "#0A0A0C" : "var(--text-muted)",
+                border: "none", borderRadius: "var(--r)", padding: "14px",
+                fontSize: 13, fontWeight: 500, cursor: dischargeText.trim() ? "pointer" : "default",
+                fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase",
+                transition: "all 0.2s"
+              }}>
+                {discharged ? "Cleared" : "Discharge"}
+              </button>
+
+              <p style={{ fontSize: 10, color: "var(--text-muted)", textAlign: "center", marginTop: 16, fontStyle: "italic" }}>
+                This never touches storage. The value is in the act, not the record.
+              </p>
+            </section>
+          );
+        })()}
 
         {/* PRICING */}
         {screen === "pricing" && (
