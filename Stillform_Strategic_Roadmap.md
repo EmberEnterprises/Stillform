@@ -78,6 +78,41 @@
 
 
 
+
+### Session Notes Visible to User (BUILD — post-cloud)
+
+**Problem:** AI writes session notes after every Reframe. User never sees them. No proof the system is learning. Your Patterns shows numbers only.
+
+**Fix:** Two note types per session:
+
+**1. Internal note (existing, unchanged):**
+- Blunt, honest, for AI context only
+- "User still deflecting on dismissal. Third time. Bio-filter was active."
+- Never shown to user. Feeds next session.
+
+**2. User-facing insight (NEW):**
+- Shown in Your Patterns under "What the AI has noticed"
+- Last 3-5 insights visible
+- Filtered through strict guardrails
+
+**User-facing insight guardrails (NON-NEGOTIABLE):**
+- NEVER label: no "you have anger issues" / "you're anxious-attached"
+- NEVER judge: no "you overreact" / "you keep making the same mistake"
+- NEVER repeat vulnerabilities as labels: no "your father abandoned you"
+- NEVER use clinical language: no "attachment style" / "trauma response"
+- NEVER claim pattern from fewer than 3 instances
+- ALWAYS frame as growth: "You caught it faster" / "First time you described holding your ground"
+- ALWAYS frame patterns as awareness: "This has come up a few times" not "You always do this"
+- Tone: coach's observation, not therapist's note, not chart entry
+
+**Generation prompt for user-facing insight:**
+"Write ONE sentence the user will read about this session. Frame it as growth, awareness, or strength. Never label, diagnose, judge, or reference specific vulnerabilities. If nothing meaningful happened, return null — do not force an insight."
+
+**Where it surfaces:**
+- Your Patterns: new section "What the AI has noticed" below stats
+- After session 5+: one insight shown after post-rating before Done
+- Insight must feel earned, not generic
+
 ### Offline Reframe Fallback (PRIORITY — before launch)
 
 **Problem:** When GPT-4o API fails, Reframe is dead. User typed something vulnerable and gets nothing back. Single point of failure on the most important feature.
