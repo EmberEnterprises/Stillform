@@ -3305,7 +3305,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 value={journalText}
                 onChange={e => setJournalText(e.target.value)}
-                placeholder="What happened? Add context..."
+                placeholder={["What triggered this?", "What were you about to do?", "Who was involved?", "What did your body feel?", "What thought fired first?", "Where were you when it hit?"][Math.floor(Date.now() / 86400000) % 6]}
                 style={{
                   flex: 1, minHeight: 100, background: mc.inputBg || "var(--surface)",
                   border: `0.5px solid ${mc.border}`, borderRadius: "var(--r)",
@@ -3441,6 +3441,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 </div>
               )}
               <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
+                {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+                    This is an AI that learns your patterns. Say what's on your mind — it gets sharper the more you use it.
+                  </div>
+                )}
                 {openingText}
               </div>
             </>
@@ -6893,7 +6898,7 @@ export default function Stillform() {
                     <textarea
                       value={jBody}
                       onChange={e => setJBody(e.target.value)}
-                      placeholder="Any additional context..."
+                      placeholder={["What triggered this?", "What were you about to do?", "Who was involved?", "What did your body feel?", "What thought fired first?", "Where were you when it hit?"][Math.floor(Date.now() / 86400000) % 6]}
                       style={{
                         flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)",
                         padding: "10px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif",
@@ -7190,17 +7195,32 @@ export default function Stillform() {
             ].map((country, i) => (
               <div key={i} style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
-                {country.lines.map((line, j) => (
+                {country.lines.map((line, j) => {
+                  const isPhone = /^[\d\s\-+]+$/.test(line.number);
+                  const isText = line.number.toLowerCase().startsWith("text");
+                  const isUrl = line.number.includes(".");
+                  const phoneDigits = line.number.replace(/[^\d+]/g, "");
+                  const smsMatch = line.number.match(/\d{5,}/);
+                  return (
                   <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
                         <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{line.name}</div>
                         {line.note && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{line.note}</div>}
                       </div>
-                      <div style={{ fontSize: 15, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap" }}>{line.number}</div>
+                      {isPhone ? (
+                        <a href={`tel:${phoneDigits}`} style={{ fontSize: 15, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap", textDecoration: "none" }}>{line.number} →</a>
+                      ) : isText && smsMatch ? (
+                        <a href={`sms:${smsMatch[0]}`} style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap", textDecoration: "none" }}>{line.number} →</a>
+                      ) : isUrl ? (
+                        <a href={`https://${line.number}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap", textDecoration: "none" }}>{line.number} →</a>
+                      ) : (
+                        <div style={{ fontSize: 15, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap" }}>{line.number}</div>
+                      )}
                     </div>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             ))}
           </section>
