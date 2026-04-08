@@ -646,6 +646,16 @@ const styles = `
     50% { opacity: 0.3; }
   }
 
+  @keyframes entrain60 {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  @keyframes entrain60glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(201,147,58,0); }
+    50% { box-shadow: 0 0 18px rgba(201,147,58,0.08); }
+  }
+
   @keyframes deltaFlash {
     0% { opacity: 0; transform: scale(0.8); }
     40% { opacity: 1; transform: scale(1.08); }
@@ -6171,9 +6181,9 @@ export default function Stillform() {
               })()}
 
               {/* DOMINANT CTA — Adaptive to regulation type */}
-              <div style={{ marginBottom: 48 }}>
+              <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 {/* Identity line */}
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em" }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Choose your entry point."}
                 </div>
 
