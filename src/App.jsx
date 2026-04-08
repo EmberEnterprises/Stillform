@@ -3279,7 +3279,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               What's present
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {["Anger", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Excitement", "Numbness", "Grief", "Fear", "Confusion", "Mixed"].map(em => {
+              {["Calm", "Grateful", "Proud", "Relief", "Joy", "Excitement", "Restless", "Mixed", "Anger", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Numbness", "Grief", "Fear", "Confusion"].map(em => {
                 const selected = (journalText || "").includes(em);
                 return (
                   <button key={em} onClick={() => {
@@ -3308,9 +3308,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
             <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
               <textarea
-                value={journalText.replace(/^(Anger|Anxiety|Dread|Overwhelm|Shame|Frustration|Excitement|Numbness|Grief|Fear|Confusion|Mixed)(,\s*)*/g, "").trim()}
+                value={journalText.replace(/^(Calm|Grateful|Proud|Relief|Joy|Excitement|Restless|Mixed|Anger|Anxiety|Dread|Overwhelm|Shame|Frustration|Numbness|Grief|Fear|Confusion)(,\s*)*/g, "").trim()}
                 onChange={e => {
-                  const chips = ["Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                  const chips = ["Calm","Grateful","Proud","Relief","Joy","Excitement","Restless","Mixed","Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Numbness","Grief","Fear","Confusion"]
                     .filter(em => journalText.includes(em)).join(", ");
                   setJournalText(chips ? `${chips}, ${e.target.value}` : e.target.value);
                 }}
@@ -3353,7 +3353,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               entries.forEach(e => (e.emotions || []).forEach(em => { freq[em] = (freq[em] || 0) + 1; }));
               // Also count from trigger text for old entries
               entries.forEach(e => {
-                ["Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Excitement","Numbness","Grief","Fear","Confusion","Mixed"]
+                ["Calm","Grateful","Proud","Relief","Joy","Excitement","Restless","Mixed","Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Numbness","Grief","Fear","Confusion"]
                   .forEach(em => { if ((e.trigger || "").includes(em)) freq[em] = (freq[em] || 0) + 0.5; });
               });
               const topEmotions = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 4);

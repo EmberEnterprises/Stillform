@@ -912,6 +912,7 @@ Before pushing any change, Claude must check each item. If it applies, update it
 | 8 | **AI prompts** | Any change that affects Reframe context (new data sent to API) |
 | 9 | **Promo** | Any feature worth marketing |
 | 10 | **Punch list** | Add testable item for the change |
+| 11 | **Emotion coverage** | Any change to Pulse/chips — verify balance of positive, negative, and neutral emotions. No bias toward negative. |
 
 ## Not Yet Built
 
