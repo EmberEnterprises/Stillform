@@ -297,6 +297,43 @@ People with real lived experience — trauma, hardship, different cultures, diff
 
 ---
 
+
+---
+
+## B2B OPPORTUNITY — Clinical Integration (FUTURE)
+
+### The Signal
+Arlin's ketamine doctor asked if Stillform could be used during or after treatment. A medical professional saw the tool and said "my patients need this." Strongest product validation to date.
+
+### The Opportunity
+Ketamine, psilocybin, EMDR, and other treatments create neuroplasticity windows — the brain is more receptive to reframing for hours/days after sessions. Most patients go home alone. The therapist isn't available until next week. The window closes. Stillform fills that gap as a self-regulation bridge between sessions.
+
+**Channel:** Clinics recommend Stillform to patients on the way out. Not prescribed. Recommended — same as journaling or breathing exercises. Doctor hands them a card or sends a link. Patient downloads, uses between sessions.
+
+**Revenue model:** B2B clinic licenses (bulk subscriptions) or affiliate referral codes per clinic. Future pricing tier.
+
+### The Guardrails (NON-NEGOTIABLE)
+
+1. **Stillform is NOT used during treatment.** Full stop. Altered states of consciousness + AI reframing = liability.
+2. **Stillform is NOT a medical device.** Do not market for use during medical treatment. FDA medical device classification is a $500k+ compliance problem.
+3. **No "ketamine mode" or clinical features.** The app stays general-purpose. It works for post-treatment users the same way it works for everyone.
+4. **No clinical partnership language.** The doctor recommends it. The doctor does not prescribe it. Stillform is not part of a treatment protocol.
+5. **Privacy policy + Terms of Service must explicitly state:** "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment."
+6. **The AI must never reference the user's medical treatment.** Even if they mention ketamine, the AI responds to their STATE, not their treatment. "You're feeling open and raw right now" not "that's the ketamine working."
+
+### Action Items
+- [ ] Get the doctor's name and contact
+- [ ] Ask if they'd try it personally and give a testimonial
+- [ ] Update Terms of Service: not a medical tool, not for use during treatment
+- [ ] Update Privacy Policy: same language
+- [ ] Document as future B2B channel — post-launch, post-traction
+- [ ] Do NOT build anything clinical before consulting a healthcare attorney
+
+### Why This Matters
+Every ketamine clinic, every therapist, every EMDR practitioner has the same problem: patients leave sessions in a window of opportunity and have nothing structured to do with it until next week. If Stillform becomes the thing clinics hand out at the door, that's a distribution channel that doesn't require Reddit, doesn't require ads, and comes with built-in trust from a medical professional's recommendation.
+
+But timing matters. Product first. Traction first. Compliance later. Do not chase this before the core product is proven with regular users.
+
 ## OPEN QUESTIONS — NEED DECISIONS
 
 1. **Simplify breathing?** Two options ("Slow down" / "Quick reset") vs keep four with honest framing?
