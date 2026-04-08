@@ -3108,6 +3108,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         throw new Error(errData.error || "Server error");
       }
       const parsed = await response.json();
+      if (parsed.crisisDetected) { try { window.plausible("Crisis Detection Triggered"); } catch {} }
+      if (parsed.liabilityGuard) { try { window.plausible("Liability Guard Triggered"); } catch {} }
       setMessages(prev => [...prev, {
         role: "ai",
         text: parsed.reframe,

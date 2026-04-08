@@ -168,7 +168,7 @@
 
 ---
 
-## Emotional Granularity (12 Distinct Emotion Chips)
+## Emotional Granularity (18 Distinct Emotion Chips)
 
 **What it does:** Offers 12 specific emotions instead of just "good" or "bad" — training users to distinguish between Anger, Dread, Overwhelm, Shame, etc.
 
@@ -287,6 +287,17 @@
 **If they push back:** "When you're tired, everyone looks hostile. When you're calm, the same email reads as neutral. The bias isn't in them — it's in your read. The AI catches that."
 
 ---
+
+
+## Fractal Visual Grounding (Breathing Visuals)
+
+Natural fractal patterns — branching trees, rivers, coastlines — reduce physiological stress by up to 60% compared to non-fractal patterns. The visual cortex responds to mid-range fractal complexity (D ≈ 1.3-1.5) by shifting into alpha wave activity associated with relaxed alertness.
+
+- Taylor et al. (University of Oregon) — exposure to mid-complexity fractals reduces stress by up to 60% as measured by skin conductance — *multiple publications, Nonlinear Dynamics, Psychology, and Life Sciences*
+- Hagerhall et al. (2015) — natural fractal patterns induce alpha wave EEG responses associated with relaxed wakefulness — *Nonlinear Dynamics, Psychology, and Life Sciences*
+- Joye & Van den Berg (2011) — restorative effects of visual exposure to natural environments are partly driven by fractal geometry — *Environment and Behavior*
+
+**In Stillform:** Organic amber branching visuals behind the breathing ring grow on inhale and dissolve on exhale. Users see natural fractal geometry synced to their breath cycle. Optional via Settings toggle. User-tested: reported effective for grounding during medical imaging (CT scan).
 
 ## The One-Liner
 

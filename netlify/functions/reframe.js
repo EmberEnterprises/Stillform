@@ -550,7 +550,7 @@ exports.handler = async function(event) {
       parsed = { distortion: null, reframe: clean };
     }
 
-    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify(parsed) };
+    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ...parsed, crisisDetected: hasCrisisLanguage, liabilityGuard: hasFinancial || hasMedical || hasLegal }) };
   } catch (err) {
     console.error("Error:", err.message);
     const msg = err.name === "AbortError" ? "Request timed out. Try again." : (err.message || "Something went wrong.");

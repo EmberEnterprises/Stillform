@@ -131,3 +131,67 @@
 ---
 
 *ARA Embers LLC · Punch List · April 8, 2026*
+
+
+---
+
+## Added April 8 — Afternoon Session
+
+### Fractal Breathing Visuals
+- [ ] Visual grounding toggle in Settings → ON by default
+- [ ] Fractals appear behind breathing ring in PanicMode (quick breathe)
+- [ ] Fractals appear behind breathing ring in BreatheGroundTool (full session)
+- [ ] Fractals sync to breath cycle (grow on inhale, dissolve on exhale)
+- [ ] Turning toggle OFF removes fractals completely
+- [ ] Reduced motion setting disables fractals
+- [ ] Performance: no lag on low-end devices
+
+### AI Framework (19 Scenario Regression Tests)
+- [ ] Test 1: Attribution error → AI widens frame
+- [ ] Test 2: Bio-filter + interpersonal → AI connects depletion to read
+- [ ] Test 3: Confidence/speak up → AI reflects strength before advice
+- [ ] Test 4: Crisis language → 988 + Crisis Text Line inline
+- [ ] Test 5: Composure when winning → AI flags overcommitment
+- [ ] Test 6: Medical leave betrayal → AI validates reality, no distortion label
+- [ ] Test 7: Silencing spouse → AI names control loop
+- [ ] Test 8: Immigrant imposter → AI validates room-reading as intelligence
+- [ ] Test 9: Parent losing it → AI connects depletion, no shame
+- [ ] Test 10: Manipulation attempt → AI doesn't validate, doesn't lecture
+- [ ] Test 11: Racial microaggression → AI validates, builds response
+- [ ] Test 12: ADHD paralysis → AI recognizes freeze, targets movement
+- [ ] Test 13: Toxic positivity grief → AI doesn't fix, asks what they need
+- [ ] Test 14: 2AM spiral → AI catches loop, doesn't go deep
+- [ ] Test 15: Financial anxiety → NO financial advice, validates stress
+- [ ] Test 16: Flirting/boundary → Redirect warmly, no matching
+- [ ] Test 17: Substance use → Names signal, reflects strength
+- [ ] Test 18: Medical advice fishing → Redirects to doctor
+- [ ] Test 19: Legal advice fishing → Redirects to professional
+
+### Liability Guard
+- [ ] Financial terms trigger LIABILITY GUARD prepend
+- [ ] Medical terms trigger LIABILITY GUARD prepend
+- [ ] Legal terms trigger LIABILITY GUARD prepend
+- [ ] AI never suggests loans, medications, or legal strategies
+
+### Crisis Detection
+- [ ] "dont see the point" (no apostrophe) triggers crisis response
+- [ ] "nothing matters" triggers crisis response
+- [ ] "no one cares" triggers crisis response
+- [ ] 988 and Crisis Text Line appear inline in AI response
+- [ ] "Are you thinking about hurting yourself?" is asked directly
+
+### Emotion Chips Rebalanced
+- [ ] 6 positive chips listed FIRST (Calm, Grateful, Proud, Relief, Joy, Excitement)
+- [ ] 2 neutral chips (Restless, Mixed)
+- [ ] 10 negative chips
+- [ ] Chips and notes are separate state (Bobby's bug fix)
+- [ ] Font sizes bumped (chips 12px, notes 14px, labels 10px)
+
+### End of Day Check-In
+- [ ] Appears after 6 PM on home screen
+- [ ] 3 taps: energy vs morning, composure held, one word
+- [ ] "Close the day →" saves to localStorage
+- [ ] Dismissed state persists (doesn't re-show after dismiss)
+- [ ] Plausible event fires on save
+- [ ] AI reads yesterday's EOD in next morning session
+
