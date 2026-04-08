@@ -3169,6 +3169,23 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
 
+      {/* Ghost echo — faint past resilience */}
+      {(() => {
+        try {
+          const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+          const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
+          if (wins.length === 0) return null;
+          const win = wins[Math.floor(Math.random() * wins.length)];
+          const d = new Date(win.timestamp);
+          const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+          return (
+            <div style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.3, fontStyle: "italic", marginBottom: 12, fontFamily: "'DM Sans', sans-serif" }}>
+              {dateStr} — you shifted +{win.delta.toFixed(1)} in {win.durationFormatted}.
+            </div>
+          );
+        } catch { return null; }
+      })()}
+
       {/* FEEL STATE — optional single-tap, neutral by default */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
@@ -6067,6 +6084,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> 60 BPM ambient pulse — the app calms you before you tap anything</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Discharge — type it out, nothing saves. Pure release valve.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Somatic interrupt — "Drop your shoulders" when you're typing too fast</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Ghost echo — faint reminder of a past win when you log a pulse</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, marginTop: 16 }}>Already shipped</div>
 
@@ -6460,6 +6478,23 @@ export default function Stillform() {
                 <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
                   15 seconds. Tag what's present, note what triggered it. The AI reads these every session to spot what you can't see yourself.
                 </p>
+
+                {/* Ghost echo — faint reminder of past resilience */}
+                {(() => {
+                  try {
+                    const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                    const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
+                    if (wins.length === 0) return null;
+                    const win = wins[Math.floor(Math.random() * wins.length)];
+                    const d = new Date(win.timestamp);
+                    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                    return (
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.35, fontStyle: "italic", marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>
+                        {dateStr} — you shifted +{win.delta.toFixed(1)} in {win.durationFormatted}.
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
                 <button onClick={() => setJournalMode("new")} style={{
                   width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
                   borderRadius: "var(--r)", padding: "14px 18px", cursor: "pointer", color: "var(--amber)",
