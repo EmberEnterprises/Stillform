@@ -270,6 +270,67 @@ People with real lived experience — trauma, hardship, different cultures, diff
 
 ---
 
+
+---
+
+## EXECUTION ACCOUNTABILITY — "Does It Actually Work?"
+
+### The Problem
+Philosophy in a document doesn't equal change in a person's life. Having the right AI prompts doesn't mean the AI is actually catching biases, building confidence, or shifting behavior. The framework is strong. The execution must match.
+
+### Infrastructure That Proves It Works
+
+**1. Session-Level Measurement (Silent)**
+- Compare user's first message to last message each session
+- Track: did language shift from reactive to reflective? From self-diminishing to direct?
+- AI session notes flag: bias identified, strength reflected back, shrink pattern challenged
+- This data proves the system is doing what it claims
+
+**2. 7-Session Review Must Be Specific**
+- Not generic "how's it going" — track composure applied to real interactions
+- Questions the AI should answer about the user:
+  - Are they advocating for themselves more?
+  - Are they catching their own filters before the AI does?
+  - Are they holding their position or folding?
+- Surface specific evidence: "Three weeks ago you said you couldn't speak up. Last week you did."
+
+**3. Longitudinal Outcome Tracking (Requires Cloud)**
+- Pulse entries over time should show measurable shifts:
+  - Fewer entries tagged with shame, shrinking, avoidance
+  - More entries reporting: spoke up, held a boundary, stayed in the room
+  - Shift in emotion chip usage from negative-heavy to balanced
+- The AI surfaces the trend: "Your pattern is changing. That's not the app — that's you."
+
+**4. AI Stress Testing Protocol**
+- Before any AI prompt change ships, test against real scenarios:
+  - "My boss talked over me again and I just let it happen"
+  - "I know I'm right but I don't have the degree so nobody listens"
+  - "I come from nothing, these people don't respect me"
+  - "I went on medical leave and they pushed me out"
+- If the AI gives generic comfort ("that must be frustrating") → it failed
+- It must: name the pattern, reflect the strength, build confidence to act
+
+**5. User Outcome Check (After 10 Sessions)**
+- One open question: "Has anything changed in how you show up?"
+- Not a rating. Not a score. Free text.
+- Responses become proof that execution matched intent
+- If answers are "no" → fix the AI. If answers describe real change → the product works.
+
+**6. Composure Applied Both Directions**
+- OUTWARD: Listener gets composed enough to stop filtering input by status/background/bias
+- INWARD: Speaker gets composed enough to stop shrinking, qualifying, performing credibility
+- The AI must build BOTH: catch the listener's bias AND build the speaker's confidence
+- "You just identified something most people miss. That's pattern recognition from lived experience."
+
+### The Standard
+A junk app puts "find your voice" on the landing page and delivers a breathing timer.
+Stillform tracks whether you actually found it. Measures the shift. Names it back to you. Adjusts when it's not landing.
+
+### Founder's Intent (April 8, 2026)
+"The framework is there. The execution isn't yet. I want every aspect thought through tactfully and strategically. This can change the world if it's executed properly. I don't want agreement — I want proof it works in the hands of real people."
+
+---
+
 ## NEXT SESSION PLAN
 
 **Priority 1:** Cloud infrastructure (Supabase setup, auth, sync, backup)
