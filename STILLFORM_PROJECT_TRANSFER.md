@@ -912,20 +912,98 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 - ❌ PDF/CSV export
 - ❌ Shareable composure card
 - ❌ Privacy policy update (managed in Termly — update through Termly dashboard)
-- ❌ Lemon Squeezy APPROVED (April 7) — paywall ready to implement
 - ❌ DUNS number (applied, waiting on approval)
+- ❌ Weekly AAR (After-Action Report) — AI-generated 3-sentence weekly briefing. Parked: needs API call, not a quick UI build.
+- ❌ Haptic entrainment on native — 60 BPM vibration on long-press of CTA. Parked: Capacitor haptics installed but native-only, can't test from web.
+- ❌ Server-side subscription verification — current paywall is localStorage honor system. Needs cloud sync infrastructure for real verification.
+
+### April 7 Late Night Session — All pushed:
+
+**Lemon Squeezy Products (LIVE in test mode):**
+- ✅ Product created: "Stillform" with two variants
+- ✅ Monthly variant: $14.99/month, 14-day free trial, SaaS tax category
+- ✅ Annual variant: $119.88/year ($9.99/month), 14-day free trial
+- ✅ Both visible on single checkout page with radio selector
+- ✅ Checkout link: https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7
+- ✅ Bobby (Robert Geismar) is registered owner — name shows on PayPal, normal for merchant accounts
+
+**Paywall Integration:**
+- ✅ Trial tracking: 14-day countdown starts on onboarding completion (stillform_trial_start in localStorage)
+- ✅ Trial badge on home screen showing days remaining (turns red at 3 days, "Subscribe" link)
+- ✅ Paywall gate: trial expired → forced to pricing screen, no back button
+- ✅ Checkout button opens Lemon Squeezy with redirect back to ?subscribed=true
+- ✅ Subscription detection from redirect param (stillform_subscribed in localStorage)
+- ✅ Pricing screen updated: 7-day → 14-day trial
+- ✅ Privacy section updated: GPT-4o Mini → GPT-4o
+- ✅ Honor-system paywall (localStorage). Server-side verification comes with cloud sync.
+
+**Composure Telemetry (Heat Map):**
+- ✅ GitHub-style contribution graph on My Progress screen
+- ✅ 12 weeks of data, sessions + Pulse entries combined
+- ✅ Amber intensity by frequency per day
+- ✅ M/W/F day labels, Less→More legend, hover shows date + event count
+- ✅ Header: "Composure Telemetry" — flight recorder, not diary
+
+**60 BPM Ambient Entrainment:**
+- ✅ Two CSS animations at exactly 1s cycle (60 BPM = calm resting heart rate)
+- ✅ entrain60: barely perceptible opacity shift (0.85→1→0.85) on identity line text
+- ✅ entrain60glow: faint amber box-shadow pulse on CTA area
+- ✅ Home screen only — tools have their own rhythms. Home is where user lingers before deciding.
+- ✅ User feels calmer without knowing why. Body-first design.
+
+**Discharge (Ephemeral Release Valve):**
+- ✅ Accessible from home screen bottom nav
+- ✅ Full textarea, nothing saves to localStorage. Ever.
+- ✅ Text opacity fades as user types (inverse of character count)
+- ✅ "Discharge" button flashes amber "Cleared" and dissolves text
+- ✅ "The value is in the act, not the record."
+
+**Somatic Interrupt:**
+- ✅ Monitors keystroke velocity in Reframe textarea
+- ✅ 15+ keystrokes in 3 seconds = rapid typing detected
+- ✅ Injects one amber line above input: "Drop your shoulders." / "Unclench your jaw." / "Soften your hands." / "Breathe out slowly." / "Feet on the floor."
+- ✅ Fades after 5 seconds. No popup. No modal. Just a nudge.
+- ✅ The system watches the body, not just the words.
+
+**Ghost Echo:**
+- ✅ Faint line at 35% opacity on Pulse screens (standalone + Reframe tab)
+- ✅ Pulls random past session with positive delta
+- ✅ Shows: "Apr 3 — you shifted +2.4 in 2m 30s."
+- ✅ Not motivational — evidential. Evidence you've navigated this before.
+
+**Language & UX:**
+- ✅ Clinical language simplified: "cognitive biases" → "thinking patterns that run on autopilot", "cognitive baseline" → "brain running slower than usual", "physiological sighs" → "Three deep sighs"
+- ✅ UAT dropdown rebuilt: 3 sections (★ NEW THIS WEEK / ✓ ALREADY SHIPPED / ⬡ COMING SOON) with flashing NEW! badge
+- ✅ Full 19-item roadmap restored in Coming Soon + "+ more in development"
+- ✅ Composure when winning threaded through: home screen, FAQ, AI energy handler, morning check-in ("On fire" option), doc locked decision
+
+**Netlify:**
+- ✅ Auto-publishing LOCKED — deploys are now manual. Claude pushes to GitHub, user triggers deploy in Netlify when ready.
+- ✅ Pro plan $20/month — 383 deploys burned 5,745 credits. Manual deploys will cut this 90%.
+- ✅ Consider downgrading to free tier after launch (password protection removed, bandwidth is 0.06GB of 100GB free tier).
 
 ## Known Issues / Gaps for Next Session
 
 - **Plausible Goals not set up** — User must add Goals in Plausible dashboard for: "Breathing Completed", "Body Scan Completed", "Reframe Deep Engagement", "Morning Check-In", "Assessment Completed", "Pulse Entry"
 - **AI quality still tuning** — GPT-4o is live, prompts significantly improved, but novel scenarios can still produce generic responses. Continue testing and adding golden examples.
-- **Privacy policy outdated** — needs update in Termly for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, and future cloud sync / health data collection.
-- **No real user sessions yet** — Ava's feedback was from home screen only, Bobby hasn't used it, Jonny did technical audit not user session. Need 3+ real user sessions with testimonials before Reddit launch.
-- **Lemon Squeezy paywall not integrated** — APPROVED April 7 but products not yet created. Pricing: $14.99/mo or $9.99/mo annual, 14-day free trial. Must use test mode for test purchases.
+- **Privacy policy outdated** — needs update in Termly for: regulation type assessment, AI session notes, morning check-in storage, bio-filter data, Plausible events, GPT-4o as AI provider, device-local storage, AES-GCM encryption.
+- **No real user sessions yet** — Need 3+ real user sessions with testimonials before Reddit launch.
+- **Paywall needs end-to-end testing** — Test with 4242 card in Lemon Squeezy test mode. Verify redirect back to app marks subscription. Verify trial countdown works correctly.
+- **Annual checkout link is shared** — both Monthly and Annual variants show on the same checkout page. One link handles both. Confirmed working.
 - **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
 - **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. Incognito tab or clear cache to test fresh.
 - **Copyright not filed** — $65 at copyright.gov. Bobby wants this done ASAP.
 - **DUNS number pending** — blocks both Google Play ($25 org) and Apple Developer ($99). ~25 days from application.
+- **Discharge screen uses useState inside IIFE** — may cause React warnings. Watch for issues on deploy. If problems, refactor to component-level state.
+
+## Parked Features (evaluated, not built — revisit later)
+
+- **Velocity Indicator** (amber color shift based on typing speed) — Somatic interrupt already does the functional version. Showing state without intervening is a mirror without a hand. Skip.
+- **Gestural Blind Logging** (swipe zones for state logging) — conflicts with normal scrolling. Accidental logs remove intention, and intention is the product. Skip.
+- **Focus Lock / Deep Mode** — PWA fullscreen already handles this. Native status bar hiding via Capacitor. Not a web build.
+- **State Delta Vector Lines** (connecting pre/post dots on scatter plot) — pre/post rating + avg shift already exist. Visual vector is polish for 200+ users. Park.
+- **"High-Stakes Presets"** (named composure modes like "The Boardroom") — 3 Reframe modes already do this functionally. Named presets add complexity for no functional gain. Skip.
+- **Dynamic Resistance UI** (longer button press when agitated) — interesting concept but adds friction when the user needs speed. Contradicts zero-friction principle. Skip.
 - **Influencer outreach strategy** — 30-day extended trial then subscription at cost (~$2-3/month, covers API). NOT free — at cost preserves integrity. Standard users get 14-day trial at $14.99/mo. Influencers get 30-day evaluation then cost-only rate. No paid endorsements. Their honest take IS the endorsement.
 
 **Growth sequence (locked):**
@@ -961,17 +1039,21 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 
 ## Pre-Launch Sprint (during DUNS wait, ~25 days)
 
-- [ ] Lemon Squeezy paywall integration
+- [x] Lemon Squeezy paywall products created (test mode)
+- [x] Paywall wired into app (trial tracking + checkout redirect)
+- [ ] Test paywall end-to-end (4242 card, verify redirect + subscription detection)
+- [ ] Switch Lemon Squeezy to live mode when ready
 - [ ] State-to-Statement feature
 - [ ] Shareable composure card
 - [ ] Native APK rebuild (needs Mac)
 - [ ] Copyright filed ($65)
-- [ ] Plausible Goals configured
+- [ ] Plausible Goals configured (6 events)
 - [ ] Privacy policy updated in Termly
 - [ ] 3-5 real testimonials collected
 - [ ] Reddit post drafted
 - [ ] @stillformapp Instagram created
-- [ ] Influencer outreach list built
+- [ ] Influencer outreach list finalized
+- [ ] Evaluate Netlify downgrade to free tier (password protection removed)
 - [ ] Test checkout in LIVE mode before launch — verify: variant selector shows Monthly/Annual, PayPal doesn't show personal name, receipt button says "Open Stillform" linking to stillformapp.com
 
 ---
