@@ -3001,7 +3001,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
               const eod = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
               if (!eod || eod.date !== yesterday) return null;
-              return `YESTERDAY'S CLOSE: energy ${eod.energy} vs morning${eod.morningEnergy ? ` (started ${eod.morningEnergy})` : ""}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
+              return `YESTERDAY'S CLOSE: energy level ${eod.energy}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
             } catch { return null; }
           })(),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
@@ -6620,9 +6620,9 @@ export default function Stillform() {
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>End of day</div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Energy vs this morning?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Better", "Same", "Worse"].map(e => (
+                      {["Full", "Steady", "Low", "Empty"].map(e => (
                         <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
                           background: eodEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
@@ -7131,7 +7131,7 @@ export default function Stillform() {
               },
               {
                 q: "What's the end of day check-in?",
-                a: "After 6 PM, three taps to close the loop. Energy vs this morning, did you hold composure, one word for the day. The AI uses yesterday's close as context the next morning."
+                a: "After 6 PM, three taps to close the loop. Where your energy is, did you hold composure, one word for the day. The AI uses yesterday's close as context the next morning."
               },
               {
                 q: "What happens when I type fast in Reframe?",
