@@ -152,6 +152,37 @@
 
 ---
 
+
+## Affect Labeling (Pulse Emotion Chips)
+
+**What it does:** Users tap emotion chips (Anger, Anxiety, Dread, etc.) to name what they're feeling
+
+**The science:** The act of putting a name on an emotion — "affect labeling" — directly reduces amygdala activation and increases prefrontal cortex engagement. You don't have to analyze the feeling or reframe it. Just naming it turns down the alarm. fMRI studies show this happens automatically, even without conscious intent to regulate.
+
+**Who says so:**
+- Lieberman et al. (2007) — "Putting Feelings Into Words" — affect labeling reduces amygdala activity — *Psychological Science*
+- Torre & Lieberman (2018) — "Putting Feelings Into Words: Affect Labeling as Implicit Emotion Regulation" — *Emotion Review*
+- Burklund et al. (2014) — affect labeling activates right ventrolateral prefrontal cortex — *Psychological Science*
+
+**If they push back:** "Tapping 'Anxiety' on a screen does more than you think. fMRI shows it literally turns down your brain's alarm center. You don't have to understand the feeling — just naming it changes the neural response."
+
+---
+
+## Emotional Granularity (12 Distinct Emotion Chips)
+
+**What it does:** Offers 12 specific emotions instead of just "good" or "bad" — training users to distinguish between Anger, Dread, Overwhelm, Shame, etc.
+
+**The science:** People who can make fine-grained distinctions between emotions regulate better, cope more effectively, and are less likely to resort to harmful coping strategies. This ability — emotional granularity — is a trainable skill that improves with practice. The Pulse chips are granularity training in disguise.
+
+**Who says so:**
+- Barrett et al. (2001) — emotional granularity linked to better emotion regulation strategies — *Cognition & Emotion*
+- Kashdan, Barrett & McKnight (2015) — higher granularity protects against binge drinking, aggression, self-harm — *Current Directions in Psychological Science*
+- Hoemann, Barrett & Quigley (2021) — emotional granularity increases with repeated self-assessment — *Frontiers in Psychology*
+
+**If they push back:** "The difference between 'I feel bad' and 'I feel overwhelmed but not angry' is the difference between spiraling and knowing what to do next. The more precise you get at naming it, the better your brain gets at handling it."
+
+---
+
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:

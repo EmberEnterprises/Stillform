@@ -5534,7 +5534,11 @@ export default function Stillform() {
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
               body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
-              note: null
+              note: null,
+              research: [
+                { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
+                { label: "Emotional granularity improves regulation", url: "https://journals.sagepub.com/doi/abs/10.1177/0963721414550708" }
+              ]
             },
             {
               icon: "◎",
