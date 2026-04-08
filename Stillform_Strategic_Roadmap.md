@@ -77,6 +77,37 @@
 ### Tier 1: Build Before Launch
 
 
+
+### Offline Reframe Fallback (PRIORITY — before launch)
+
+**Problem:** When GPT-4o API fails, Reframe is dead. User typed something vulnerable and gets nothing back. Single point of failure on the most important feature.
+
+**Fix:** API failure triggers a self-guided structured reframe. No internet needed.
+
+**Flow:**
+1. User's message is preserved (they don't retype)
+2. Screen shifts: "Connection issue. Let's work through this manually."
+3. "What's the feeling right now?" → same feel-state chips
+4. "What's your brain adding that might not be true?" → text input
+5. "What would you tell a friend dealing with this?" → text input
+6. "One thing you can do right now." → text input
+7. Completion: "You just reframed it yourself. That's the skill."
+
+**Evidence layer:**
+- Pull session history from localStorage
+- Show: "You've done this X times. Average shift: X points."
+- Reference specific past session: "Last Tuesday you came in Angry and left Focused."
+- Reinforce: "The AI helps you see patterns faster. The work is yours."
+
+**Why this matters beyond error recovery:**
+- Teaches users the reframe skill without AI dependency
+- Proves the scaffolding philosophy: the app becomes unnecessary
+- AI going down = the moment the user discovers they don't need it
+- Saves to session history. AI sees it next time: "You worked through that on your own. That's growth."
+- Turns a failure into the most powerful moment in the app
+
+**Technical:** 3 retries with exponential backoff. After 3 failures, offline mode activates. Manual reframe saves as session with flag "self-guided: true" so AI knows later.
+
 ### Mandatory Post-Session Rating (PRIORITY — before launch)
 
 After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, testimonial data, tool comparison. Affect labeling research: naming state IS a final regulation act.
