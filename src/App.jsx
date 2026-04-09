@@ -2831,11 +2831,33 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    const invalidFile = files.find(f => !f.type.startsWith("image/"));
+
+    // ── GUARDRAILS ────────────────────────────────────────────────────────
+    // 1. File type — images only, no executables or documents disguised as images
+    const allowedTypes = ["image/jpeg","image/jpg","image/png","image/webp","image/gif","image/heic","image/heif"];
+    const invalidFile = files.find(f => !allowedTypes.includes(f.type.toLowerCase()));
     if (invalidFile) {
-      setError("Please upload image files only (screenshots, photos).");
+      setError("Screenshots and photos only (JPG, PNG, WEBP).");
       return;
     }
+    // 2. File count — max 3 screenshots at once
+    if (files.length > 3) {
+      setError("Maximum 3 screenshots at a time.");
+      return;
+    }
+    // 3. File size — max 10MB per file (prevents memory bombs)
+    const oversized = files.find(f => f.size > 10 * 1024 * 1024);
+    if (oversized) {
+      setError("Each screenshot must be under 10MB.");
+      return;
+    }
+    // 4. Total payload size — max 20MB combined
+    const totalSize = files.reduce((sum, f) => sum + f.size, 0);
+    if (totalSize > 20 * 1024 * 1024) {
+      setError("Total screenshot size must be under 20MB.");
+      return;
+    }
+
     setOcrLoading(true);
     setError(null);
     try {
