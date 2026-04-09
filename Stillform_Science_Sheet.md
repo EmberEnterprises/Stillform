@@ -299,6 +299,45 @@ Natural fractal patterns — branching trees, rivers, coastlines — reduce phys
 
 **In Stillform:** Organic amber branching visuals behind the breathing ring grow on inhale and dissolve on exhale. Users see natural fractal geometry synced to their breath cycle. Optional via Settings toggle. User-tested: reported effective for grounding during medical imaging (CT scan).
 
+---
+
+## Neuroscience Execution Audit (April 10, 2026)
+
+**Question asked:** "Is what we executed the best way to help users?"
+
+**Short answer:** It's one of the strongest practical implementations for a mobile composure app, but "best" still depends on real-world outcomes (retention, symptom shift, decision quality, safety), not architecture alone.
+
+### What is strongly aligned with current evidence
+- **Paced breathing for rapid downshift:** recent meta-analyses continue to show short-term HRV/autonomic benefits and stress reduction.
+- **Affect labeling + reappraisal sequence:** neural evidence supports PFC engagement and reduced amygdala reactivity when emotions are named and reframed.
+- **Interoception-first design (bio-filter, body scan, somatic interrupt):** current reviews support interoceptive training as a mediator of emotion regulation.
+- **If-then pathwaying (assessment -> default tool):** implementation-intention literature remains strong for converting intention into action under stress.
+- **Fallback continuity during API outages:** preserving user agency with a guided offline path aligns with what improves digital intervention adherence.
+
+### Recent cross-check references (2023-2025)
+- Shao, Man, & Lee (2024) — slow-paced breathing meta-analysis: short-term cardiovascular/autonomic gains, modest negative-emotion reduction.
+- Linardon et al. (2024) — mindfulness app RCT meta-analysis: small but significant anxiety/depression improvements versus inactive controls.
+- Frontiers in Digital Health (2023) — mHealth cognitive reappraisal review/meta-analysis: small-to-medium effects in complex mobile interventions.
+- Lazzarelli et al. (2024) — interoception + emotion regulation integrative review: both top-down and bottom-up interventions supported.
+- npj Digital Medicine (2025) — 92 RCT app meta-analysis: digital mental health apps show moderate efficacy overall; engagement metrics remain inconsistent.
+
+### Where evidence is supportive but not definitive
+- **Fractal visual grounding:** promising stress-reduction signal, but additive benefit over breathing alone is not fully established.
+- **Highly personalized digital recommendations:** broadly promising for engagement, but effect-size gains over simpler approaches are mixed across reviews.
+- **Conversational AI quality effects:** positive signals exist, but outcomes vary by prompt quality, user segment, and intervention dosage.
+
+### Risk controls needed to keep neuroscience integrity high
+- Keep claims calibrated: "supports regulation" not "treats conditions."
+- Track pre/post delta and fallback usage as first-class outcomes.
+- Ensure safety escalation remains deterministic (crisis + liability guards already in place).
+- Avoid over-complexity: preserve low-friction flow and one clear next action per interaction.
+
+### Practical verdict
+- **Clinical plausibility:** High
+- **Mechanistic alignment:** High
+- **Evidence of user-level efficacy in this specific app:** Medium (needs live outcome data)
+- **Best next scientific step:** instrument and review real outcomes weekly (activation, completion, pre/post shift, retention, fallback rate, and adverse-flow flags).
+
 ## The One-Liner
 
 If someone asks "what is Stillform?" in 10 seconds:

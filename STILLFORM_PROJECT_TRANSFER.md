@@ -1554,3 +1554,57 @@ stillform_sb_session (Supabase auth session)
 - Full diagnostic before any fix. Not reactive one-line patches.
 - Same issue never comes back twice.
 - If checklist has failures: fix silently, rerun, only bring to Arlin at 100%.
+
+---
+
+## April 10, 2026 — Agent Session Log (Stability + Launch Readiness)
+
+### What was shipped in code
+- Reframe reliability hardening:
+  - 3 retries with exponential backoff for AI calls
+  - structured self-guided fallback after repeated failures
+  - fallback sessions stored with `selfGuided: true`
+  - calm inline fallback state (non-panic wording)
+- Morning and evening Reframe routing:
+  - morning check-in now opens Reframe directly (`entry_mode: morning`)
+  - evening close prompt opens Reframe directly (`entry_mode: evening`)
+  - morning/evening context instructions injected server-side
+- Post-session rating:
+  - "Where are you now?" completion made non-skippable
+- Cloud sync:
+  - safer upsert target and per-user restore behavior
+  - dedupe by key on restore path
+- Paywall:
+  - checkout lock/loading guard added
+  - safer error handling for broken trial state
+  - subscribe state made reactive on redirect return
+- Settings/pricing clarity:
+  - removed leftover premium Cloud Sync placeholder
+  - copy updated to reflect encrypted local + encrypted cloud backup path
+
+### Ship checklist audit (this session)
+1. **UAT dropdown** — ⚠️ Pending manual copy update if launch messaging is edited again.
+2. **Tutorial** — ✅ Updated/checked for storage wording consistency.
+3. **FAQ** — ✅ Updated for offline fallback + cloud privacy wording.
+4. **Transfer doc** — ✅ Updated (this section).
+5. **Plausible event** — ✅ Added/used for offline fallback path.
+6. **Privacy policy** — 🔴 Pending human action in Termly (see pinned items).
+7. **Science sheet** — ✅ Updated with neuroscience execution audit and risk notes.
+8. **AI prompts** — ✅ Updated for morning/evening entry-mode behavior.
+9. **Promo** — ⚠️ Pending; no promo copy refresh done in this session.
+10. **Punch list** — ✅ Updated with new testable launch-hardening items.
+11. **Emotion coverage** — ✅ No chip distribution changes in this session.
+
+### Pinned user-required actions (do when able; not all required today)
+1. Publish **Termly privacy policy update** explicitly stating:
+   - encrypted cloud storage/backups via Supabase
+   - email auth for Cloud Sync
+   - restore behavior across devices
+2. Switch **Lemon Squeezy test -> live** and replace checkout URL in app.
+3. Run live checkout verification for **monthly + annual** and confirm variant mapping.
+4. Run second-device cloud restore verification (sessions, pulse, profiles).
+5. Implement server-side subscription truth (webhook + Supabase status table) before broad launch.
+
+### Launch recommendation snapshot
+- **Soft launch:** GO (controlled audience + close monitoring)
+- **Broad launch:** WAIT until #1, #2, #3 in pinned actions are done

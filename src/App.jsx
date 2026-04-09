@@ -6016,7 +6016,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted. Local data stays on your device, and optional Cloud Sync stores encrypted backups for restore across devices. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
@@ -7260,7 +7260,7 @@ export default function Stillform() {
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
-            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. Your data never leaves your device. You can delete your data at any time from Settings.</p>
+            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups are also stored in our Supabase cloud infrastructure so you can restore data across devices. Data is encrypted on-device before upload.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
 
             <h2>Assumption of Risk</h2>
@@ -7348,7 +7348,7 @@ export default function Stillform() {
               },
               {
                 q: "What if I cancel?",
-                a: "Your data stays on your device — nothing is lost. You can resubscribe anytime and pick up right where you left off."
+                a: "Your local data stays on your device. If Cloud Sync was enabled, your encrypted backups remain available for restore when you resubscribe."
               },
               {
                 q: "Is my data backed up?",
@@ -8002,56 +8002,52 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
 
-            {/* PREMIUM CUSTOMIZATION */}
+            {/* Customization */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Customization</div>
 
-              {/* Theme — free: dark. Others IAP */}
+              {/* Theme options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
                 {[
-                  { id: "dark", label: "Dark", free: true },
-                  { id: "midnight", label: "Midnight Blue", free: false },
-                  { id: "warm", label: "Warm Amber", free: false },
-                  { id: "light", label: "Light", free: false }
+                  { id: "dark", label: "Dark" },
+                  { id: "midnight", label: "Midnight Blue" },
+                  { id: "warm", label: "Warm Amber" },
+                  { id: "light", label: "Light" }
                 ].map(t => (
                   <div key={t.id} style={{
                     background: t.id === "dark" ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${t.id === "dark" ? "var(--amber-dim)" : "var(--border)"}`,
                     borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    opacity: t.free ? 1 : 0.4
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
-                    <div style={{ fontSize: 14, color: t.free ? "var(--text)" : "var(--text-muted)" }}>{t.label}</div>
-                    {!t.free && <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Premium</div>}
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>{t.label}</div>
                   </div>
                 ))}
               </div>
 
-              {/* AI Tone — IAP */}
+              {/* AI Tone options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
                 {[
-                  { id: "default", label: "Balanced (default)", free: true },
-                  { id: "gentle", label: "Gentle", free: false },
-                  { id: "direct", label: "Direct & blunt", free: false },
-                  { id: "clinical", label: "Clinical / technical", free: false },
-                  { id: "motivational", label: "Motivational", free: false }
+                  { id: "default", label: "Balanced (default)" },
+                  { id: "gentle", label: "Gentle" },
+                  { id: "direct", label: "Direct & blunt" },
+                  { id: "clinical", label: "Clinical / technical" },
+                  { id: "motivational", label: "Motivational" }
                 ].map(t => (
                   <div key={t.id} style={{
                     background: t.id === "default" ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${t.id === "default" ? "var(--amber-dim)" : "var(--border)"}`,
                     borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    opacity: t.free ? 1 : 0.4
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
-                    <div style={{ fontSize: 14, color: t.free ? "var(--text)" : "var(--text-muted)" }}>{t.label}</div>
-                    {!t.free && <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Premium</div>}
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>{t.label}</div>
                   </div>
                 ))}
               </div>
 
-              {/* Export — IAP */}
+              {/* Export */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Export</div>
                 {[
@@ -8060,14 +8056,14 @@ export default function Stillform() {
                 ].map((item, i) => (
                   <div key={i} style={{
                     background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", marginBottom: 4, opacity: 0.4,
+                    padding: "12px 16px", marginBottom: 4, opacity: 0.75,
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
                     <div>
-                      <div style={{ fontSize: 14, color: "var(--text-muted)" }}>{item.label}</div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>{item.label}</div>
                       <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
                     </div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Premium</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Coming soon</div>
                   </div>
                 ))}
               </div>

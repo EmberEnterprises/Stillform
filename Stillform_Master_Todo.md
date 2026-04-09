@@ -181,4 +181,31 @@
 
 ---
 
+## 📌 APRIL 10 AGENT UPDATE (code complete + user follow-ups)
+
+### ✅ Code completed in this branch
+- [x] Morning check-in -> Reframe handoff wired (entry mode: morning)
+- [x] Evening prompt -> Reframe handoff wired (entry mode: evening)
+- [x] Morning/evening AI guidance injected server-side
+- [x] Post-session rating made non-skippable
+- [x] Offline Reframe fallback implemented (3 retries + exponential backoff + 5-step self-guided flow)
+- [x] Self-guided sessions saved with `selfGuided: true`
+- [x] Cloud sync reliability improved (per-user restore + key-level dedupe + conflict upsert target)
+- [x] Paywall edge hardening (checkout lock state, safer errors, inconsistent trial-state guard)
+- [x] Premium-style Cloud Sync placeholder removed from Settings to reduce pricing confusion
+
+### 🧷 User actions (do when you can — not urgent today)
+- [ ] **Termly privacy policy update** to explicitly state encrypted cloud storage (Supabase), auth email usage, and restore flow.
+- [ ] **Lemon Squeezy test -> live switch** (replace checkout URL with live URL in app once ready).
+- [ ] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set.
+- [ ] **Confirm variant mapping** in Lemon checkout (monthly vs annual) and receipts.
+- [ ] **Server-side subscription verification** (webhook + Supabase truth table) for production revenue protection.
+- [ ] **Manual QA on a second device** for cloud restore integrity (sessions, pulse, profiles).
+
+### 🟡 Launch status snapshot
+- **Soft launch:** ready with controlled audience.
+- **Broad launch:** wait for live payment verification + server-side subscription truth + privacy policy publish.
+
+---
+
 *This is the single source of what needs to happen. Update every session.*

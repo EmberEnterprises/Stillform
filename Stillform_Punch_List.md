@@ -229,3 +229,36 @@
 ### Privacy policy
 - [ ] Termly privacy policy updated to reflect Supabase data storage
 - [ ] "Your data is encrypted." claim accurate (no premature sync claim)
+
+---
+
+## Added April 10 — Reliability + Launch Hardening
+
+### Reframe fallback and completion flow
+- [ ] Reframe API fails 3 times -> self-guided fallback appears automatically
+- [ ] Fallback shows 5-step structure (feeling -> brain adding -> friend advice -> one action -> completion)
+- [ ] Fallback session saved in `stillform_sessions` with `selfGuided: true`
+- [ ] "Offline fallback active" message appears without panic-style language
+- [ ] Post-session "Where are you now?" cannot be skipped
+
+### Morning/Evening Reframe routing
+- [ ] Morning check-in "Set my tone ->" opens Reframe directly
+- [ ] Evening prompt "Talk it out ->" opens Reframe directly
+- [ ] Morning entry produces forward-looking response style
+- [ ] Evening entry produces closure-style response (no new thread opening)
+
+### Paywall hardening
+- [ ] Subscribe button cannot be double-clicked into duplicate checkout launches
+- [ ] Checkout loading state appears ("Opening checkout...")
+- [ ] Missing trial-start guard shows clear message instead of silent failure
+- [ ] Monthly/Annual toggle choice is reflected correctly in Lemon checkout (manual verify)
+
+### Settings / pricing clarity
+- [ ] No "Premium" gating language appears for included subscriber options
+- [ ] Pricing features mention encrypted cloud backup
+
+### Pinned human-required actions (can do later if not feeling well)
+- [ ] Termly privacy policy published with explicit cloud storage + encrypted backup language
+- [ ] Lemon Squeezy moved from test mode to live mode
+- [ ] Live-mode checkout tested for monthly + annual variants
+- [ ] Server-side subscription verification planned (webhook + Supabase truth table)
