@@ -5566,7 +5566,7 @@ export default function Stillform() {
               ⚙
             </button>
             <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
-              Start Free Trial
+              Subscribe
             </button>
           </div>
         </nav>
@@ -7015,7 +7015,7 @@ export default function Stillform() {
           <section className="pricing">
             {!trialExpired && <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>}
             <div className="pricing-header">
-              <h2>{trialExpired ? "Your free trial has ended." : "Start free. Stay only if it works."}</h2>
+              <h2>{trialExpired ? "Your subscription has ended." : "Subscribe. Stay only if it works."}</h2>
               <p>{trialExpired ? "Subscribe to keep using Stillform. Your data is safe — right where you left it." : "Try everything free for 14 days. Composure when you need it — under two minutes."}</p>
             </div>
             <div className="pricing-cards">
@@ -7060,7 +7060,7 @@ export default function Stillform() {
                   <li>AES-256 encryption on all session data</li>
                 </ul>
                 <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => { window.location.href = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7?checkout[custom][redirect_url]=" + encodeURIComponent(window.location.origin + "/?subscribed=true"); }}>
-                  {trialExpired ? "Subscribe now →" : "Start 14-day free trial →"}
+                  {trialExpired ? "Subscribe now →" : "Subscribe →"}
                 </button>
               </div>
             </div>
@@ -7171,11 +7171,11 @@ export default function Stillform() {
               },
               {
                 q: "How much does it cost?",
-                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). 14-day free trial. One price — everything included. No add-ons."
+                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). One price — everything included. No add-ons."
               },
               {
-                q: "What happens after my free trial?",
-                a: "After 14 days, you'll be asked to subscribe to continue using Stillform. Your data stays on your device — nothing is lost. Subscribe and pick up right where you left off."
+                q: "What if I cancel?",
+                a: "Your data stays on your device — nothing is lost. You can resubscribe anytime and pick up right where you left off."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
