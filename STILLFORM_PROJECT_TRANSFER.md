@@ -1467,6 +1467,42 @@ ARA Embers LLC · Stillform Project Transfer · April 2026
 
 ### Current blockers:
 - Supabase cloud sync (was supposed to be today — next priority)
+
+---
+
+## April 9 Evening — Cloud Sync Session
+
+### Supabase project created
+- URL: https://pxrewildfnbxlygjofpx.supabase.co
+- Schema created via SQL Editor: user_data, backups, user_profiles tables
+- RLS enabled on all tables — users can only access their own data
+- Indexes on user_id + data_key for fast lookup
+
+### What was built (staged, not yet pushed)
+- Full Supabase sync module in App.jsx (before CryptoStore):
+  - sbSignIn, sbSignUp, sbSignOut, sbRefreshSession
+  - encryptForCloud, decryptFromCloud (AES-256, device key in IndexedDB)
+  - sbSyncUp (uploads all SYNC_KEYS encrypted)
+  - sbSyncDown (restores all keys from cloud)
+  - sbPreUpdateBackup (full snapshot before any version change)
+  - sbVersionCheck (runs on every app load, triggers backup if version changed)
+  - sbCreateProfile (creates user_profiles row on first sign-in)
+- Cloud Sync UI in Settings — sign in/out, sync now, signed-in email display
+- Auto-sync after every Reframe session save (background, non-blocking)
+- sbVersionCheck + sbSyncDown on every app open when signed in
+- UAT, FAQ, Plausible events, punch list all updated
+
+### Keys synced to cloud
+stillform_sessions, stillform_journal, stillform_signal_profile, stillform_bias_profile, stillform_saved_reframes, stillform_ai_session_notes, stillform_regulation_type, stillform_breath_pattern, stillform_onboarded, stillform_reminder, stillform_reminder_time, stillform_audio, stillform_scan_pace, stillform_screenlight, stillform_reducedmotion, stillform_visual_grounding, stillform_subscribed, stillform_trial_start, stillform_qb_position
+
+### Keys NOT synced (device-specific)
+stillform_reframe_session_calm/clarity/hype (encrypted conversations, device-key protected)
+stillform_biometric_enabled (device-specific)
+stillform_sb_session (Supabase auth session)
+
+### Post-push required
+- Termly privacy policy update (new data flow: email + encrypted blobs in Supabase)
+- Update "Your data is encrypted." everywhere — punch list item, post-cloud
 - Paywall E2E test (4242 card, Bobby)
 - TestFlight build
 - 3-5 real testimonials before Reddit
