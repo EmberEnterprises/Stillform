@@ -5417,6 +5417,13 @@ export default function Stillform() {
             Still<span>form</span>
           </div>
           <div className="nav-actions">
+            <button onClick={() => setScreen("faq")} style={{
+              background: "none", border: "none", width: 32, height: 32, borderRadius: "50%",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              color: "var(--text-muted)", fontSize: 14, cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", fontWeight: 500,
+              border: "0.5px solid var(--border)", transition: "all 0.2s"
+            }}>?</button>
             <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
