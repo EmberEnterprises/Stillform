@@ -2823,8 +2823,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, preRating: feelState || null };
-      if (postRating) entry.postRating = postRating;
+      const fss = (s) => ({ angry:1, anxious:2, flat:2, mixed:3, excited:4, focused:5 }[s] ?? null);
+      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, preRating: fss(feelState), preState: feelState || null };
+      if (postRating) { entry.postRating = fss(postRating); entry.postState = postRating; }
+      if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
       sessions.push(entry);
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
@@ -3036,7 +3038,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try {
               const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
               if (!checkin) return null;
-              return `Today: ${checkin.sleep}h sleep, energy ${checkin.energy}, mood "${checkin.mood}"${checkin.stressEvent ? `, stress event: ${checkin.stressEvent}` : ""}${checkin.notes ? `, notes: ${checkin.notes}` : ""}`;
+              const parts = [];
+              if (checkin.sleep) parts.push(`${checkin.sleep}h sleep`);
+              if (checkin.energy) parts.push(`energy: ${checkin.energy}`);
+              if (checkin.mood && checkin.mood !== "not set" && checkin.mood !== "undefined") parts.push(`mood: "${checkin.mood}"`);
+              if (checkin.stressEvent) parts.push(`stress: ${checkin.stressEvent}`);
+              if (checkin.bio?.length) parts.push(`hardware: ${checkin.bio.filter(b => b !== "clear").join(", ")}`);
+              if (checkin.notes) parts.push(`notes: ${checkin.notes}`);
+              return parts.length ? `Today — ${parts.join(", ")}` : null;
             } catch { return null; }
           })(),
           eodContext: (() => {
@@ -3287,7 +3296,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
       <div className="disclaimer">
-        Your data is encrypted and synced securely. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+        Your data is encrypted. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
       </div>
 
             {tab === "talk" && (
@@ -5346,7 +5355,7 @@ export default function Stillform() {
   const saveJournalEntry = () => {
     const entry = {
       id: Date.now(),
-      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      date: new Date().toISOString().split("T")[0],
       time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
       signal: jSignal,
       trigger: jTrigger.trim(),
@@ -5547,7 +5556,7 @@ export default function Stillform() {
               label: "Your growth",
               title: "People change. We measure it.",
               subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and synced securely. Delete everything anytime from Settings. Replay this tutorial anytime.",
+              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted and stored on your device. Delete everything anytime from Settings. Replay this tutorial anytime.",
               note: null,
               research: [
                 { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
@@ -7001,7 +7010,7 @@ export default function Stillform() {
 
             <h2>AI-Powered Reframe</h2>
             <p>The Reframe feature uses artificial intelligence (OpenAI's GPT-4o) to generate responses based on evidence-based reframing techniques. These responses are generated by AI, not by a licensed therapist or medical professional. AI responses may not always be accurate, appropriate, or applicable to your situation. Do not rely on AI-generated content as a substitute for professional mental health care. Do not enter sensitive personal, medical, or identifying information.</p>
-            <p>Text entered into the Reframe feature is sent to Anthropic's servers for processing. Anthropic does not store, retain, or train on any data sent through their API. Your conversations are not used to improve AI models. See our <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>full Privacy Policy</a> for details.</p>
+            <p>Text entered into the Reframe feature is sent to OpenAI's servers for processing via our API integration. OpenAI does not store or retain conversation data sent through the API, and it is not used to train AI models. See our <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>full Privacy Policy</a> for details.</p>
 
             <h2>Pattern Analysis & Insights</h2>
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
