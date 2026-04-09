@@ -5305,6 +5305,7 @@ export default function Stillform() {
   const [eodComposure, setEodComposure] = useState(null);
   const [eodWord, setEodWord] = useState(null);
   const [eodSaved, setEodSaved] = useState(false);
+  const [eodPromptDismissed, setEodPromptDismissed] = useState(false);
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
 
   // Sync regulation type when navigating screens (catches Settings changes)
@@ -6292,7 +6293,7 @@ export default function Stillform() {
                 const minute = now.getMinutes();
                 const currentMinutes = hour * 60 + minute;
                 const morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })(); // default 4:30 AM = 270 min
-                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1110; } catch { return 1110; } })(); // default 6:30 PM = 1110 min
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM = 1080 min
                 
                 // Don't show morning check-in outside morning window
                 if (currentMinutes < morningStart || currentMinutes >= eveningStart) return null;
@@ -6584,7 +6585,7 @@ export default function Stillform() {
               {(() => {
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1110; } catch { return 1110; } })(); // default 6:30 PM
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM
                 if (currentMinutes < eveningStart) return null;
                 const today = now.toISOString().split("T")[0];
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
@@ -6598,10 +6599,20 @@ export default function Stillform() {
                 );
                 if (eodSaved && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    <button onClick={() => setEodOpen(true)} style={{
-                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
-                    }}>✓ Day closed · tap to update</button>
+                    {!eodPromptDismissed ? (
+                      <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", textAlign: "center" }}>
+                        <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.6 }}>Anything you want to clear before bed?</div>
+                        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+                          <button className="btn btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => { setEodPromptDismissed(true); setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" }); setScreen("tool"); }}>Talk it out →</button>
+                          <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 14px" }} onClick={() => setEodPromptDismissed(true)}>I'm good</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false); }} style={{
+                        background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
+                      }}>✓ Day closed · tap to update</button>
+                    )}
                   </div>
                 );
 
@@ -7317,7 +7328,7 @@ export default function Stillform() {
               </div>
               {(() => {
                 const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
-                const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1110"); } catch { return 1110; } })();
+                const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1080"); } catch { return 1080; } })();
                 const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
                 const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
                 return (
