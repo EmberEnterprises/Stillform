@@ -2676,6 +2676,32 @@ async function secureSet(key, value) {
   } catch {}
 }
 
+// ─── IMAGE OCR UTILITY ───────────────────────────────────────────────────────
+// Loads Tesseract.js lazily from CDN — only when user taps the upload button
+// Extracts text from screenshots (emails, texts, social posts) client-side
+// No data leaves the device — all processing happens in the browser
+const loadTesseract = () => new Promise((resolve, reject) => {
+  if (window.Tesseract) { resolve(window.Tesseract); return; }
+  const script = document.createElement("script");
+  script.src = "https://unpkg.com/tesseract.js@5/dist/tesseract.min.js";
+  script.onload = () => resolve(window.Tesseract);
+  script.onerror = () => reject(new Error("Failed to load OCR engine"));
+  document.head.appendChild(script);
+});
+
+const extractTextFromImage = async (file) => {
+  const Tesseract = await loadTesseract();
+  const url = URL.createObjectURL(file);
+  try {
+    const result = await Tesseract.recognize(url, "eng", {
+      logger: () => {} // suppress progress logs
+    });
+    return result.data.text.trim();
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+};
+
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
@@ -2799,6 +2825,35 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   }, [sharedText]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload an image file (screenshot, photo).");
+      return;
+    }
+    setOcrLoading(true);
+    setError(null);
+    try {
+      const text = await extractTextFromImage(file);
+      if (!text || text.length < 5) {
+        setError("Couldn\'t read text from that image. Try a clearer screenshot.");
+        return;
+      }
+      // Drop extracted text into input — user can edit before sending
+      setInput(prev => prev ? prev + "\n\n" + text : text);
+      try { window.plausible("Image Upload", { props: { chars: text.length } }); } catch {}
+    } catch {
+      setError("OCR failed. Try a clearer screenshot or type it out.");
+    } finally {
+      setOcrLoading(false);
+      // Reset file input so same file can be re-uploaded
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
   const messagesEndRef = useRef(null);
   const [savedIds, setSavedIds] = useState(new Set());
   const loadingTimeout = useRef(null);
@@ -3419,18 +3474,46 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             )}
             </>
           )}
-          {!loading && speech.supported && (
-            <button onClick={speech.toggle} style={{
-              background: speech.listening ? "rgba(200,60,60,0.2)" : "var(--surface2)",
-              border: speech.listening ? "1px solid rgba(200,60,60,0.4)" : "1px solid var(--border)",
-              borderRadius: "var(--r-lg)", width: 40, height: 40, cursor: "pointer",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18, color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
-              transition: "all 0.2s", flexShrink: 0,
-              animation: speech.listening ? "pulse 1.5s ease-in-out infinite" : "none"
-            }}>
-              🎙
-            </button>
+          {!loading && (
+            <>
+              {/* Image upload for OCR — emails, texts, social posts */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleImageUpload}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={ocrLoading}
+                title="Upload a screenshot to extract text"
+                style={{
+                  background: ocrLoading ? "rgba(201,147,42,0.15)" : "var(--surface2)",
+                  border: `1px solid ${ocrLoading ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: "var(--r-lg)", width: 40, height: 40, cursor: ocrLoading ? "wait" : "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 16, color: ocrLoading ? "var(--amber)" : "var(--text-dim)",
+                  transition: "all 0.2s", flexShrink: 0,
+                  animation: ocrLoading ? "pulse 1.5s ease-in-out infinite" : "none"
+                }}
+              >
+                {ocrLoading ? "⏳" : "📎"}
+              </button>
+              {speech.supported && (
+                <button onClick={speech.toggle} style={{
+                  background: speech.listening ? "rgba(200,60,60,0.2)" : "var(--surface2)",
+                  border: speech.listening ? "1px solid rgba(200,60,60,0.4)" : "1px solid var(--border)",
+                  borderRadius: "var(--r-lg)", width: 40, height: 40, cursor: "pointer",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 18, color: speech.listening ? "rgba(200,80,80,0.9)" : "var(--text-dim)",
+                  transition: "all 0.2s", flexShrink: 0,
+                  animation: speech.listening ? "pulse 1.5s ease-in-out infinite" : "none"
+                }}>
+                  🎙
+                </button>
+              )}
+            </>
           )}
           {loading ? (
             <button className="btn-send" style={{ background: "var(--surface2)", color: "var(--text-dim)" }} onClick={() => {
@@ -6104,6 +6187,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Upload a screenshot in Reframe — tap 📎 to extract text from emails, texts, or social posts. Processed on your device, nothing sent anywhere.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
@@ -6823,6 +6907,10 @@ export default function Stillform() {
               {
                 q: "What if I cancel?",
                 a: "Your data stays on your device — nothing is lost. You can resubscribe anytime and pick up right where you left off."
+              },
+              {
+                q: "Can I upload a screenshot to Reframe?",
+                a: "Yes. Tap the 📎 icon in Reframe to upload a screenshot of an email, text, or social post. The text is extracted on your device — nothing is sent to any server. It drops into the input so you can edit it before sending to the AI."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
