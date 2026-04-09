@@ -5684,18 +5684,18 @@ export default function Stillform() {
               label: "Calibration · 2 of 4",
               title: "Signal Mapping",
               subtitle: "Where does your body respond first?",
-              body: "Quick calibration — about 2 minutes. The AI references this in every session.",
-              cta: "Begin →",
-              action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
+              body: null,
+              cta: null,
+              autoLaunch: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
             },
             {
               step: 3,
               label: "Calibration · 3 of 4",
               title: "Blind Spot Profile",
               subtitle: "What patterns does your thinking run?",
-              body: "Identify the thinking patterns your brain runs on autopilot. The AI watches for these in real time.",
-              cta: "Begin →",
-              action: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
+              body: null,
+              cta: null,
+              autoLaunch: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
             },
             {
               step: 4,
@@ -5843,6 +5843,7 @@ export default function Stillform() {
               )}
 
               {/* CTA */}
+              {current.autoLaunch && (() => { setTimeout(() => current.autoLaunch(), 0); return null; })()}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {current.cta && (
                   <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}
