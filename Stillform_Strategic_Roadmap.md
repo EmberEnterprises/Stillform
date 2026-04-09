@@ -143,6 +143,33 @@
 
 **Technical:** 3 retries with exponential backoff. After 3 failures, offline mode activates. Manual reframe saves as session with flag "self-guided: true" so AI knows later.
 
+
+### Pulse → Reframe Direct Flow (BUILD BEFORE LAUNCH)
+
+**Problem:** User logs a Pulse entry (Angry — "boss talked over me") and it goes to a list. Dead end. Pulse and Reframe are two separate boxes.
+
+**Fix:** After saving a Pulse entry, prompt: "Want to reframe this?" → Yes opens Reframe with that entry pre-loaded.
+
+**Flow:**
+1. User logs Pulse: chips + note
+2. Save completes
+3. Prompt appears: "Want to talk through this?" → Yes / Done
+4. Yes → Reframe opens with entry pre-loaded as first context
+5. AI opens with: "You just logged [emotion] — [note]. What happened?"
+6. Full Reframe session proceeds with that Pulse entry as anchor
+
+**Why this matters:**
+- Connects the two core features into one system
+- The Pulse becomes the trigger, Reframe becomes the response
+- No more logging emotions into a void
+- The AI starts with specific context instead of a blank "What's on your mind?"
+- Creates the feedback loop: state detection → interpretation → perspective
+
+**Technical:** Pass Pulse entry as `priorToolContext` in the Reframe API call. "User just logged: [chips] — [note]. Start from here."
+
+**AI prompt addition for flat/stagnation states:**
+When user is flat and input is low-energy: "Maybe this isn't stagnation — it's incubation. What's brewing underneath?" Don't push harder on low energy. Reframe the stillness as productive.
+
 ### Mandatory Post-Session Rating (PRIORITY — before launch)
 
 After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, testimonial data, tool comparison. Affect labeling research: naming state IS a final regulation act.
