@@ -7364,7 +7364,7 @@ export default function Stillform() {
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
                   Sign in here and we will continue checkout automatically.
                 </div>
-                {(pricingAuthOpen || checkoutMessage) && (
+                {pricingAuthOpen && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                     <input
                       type="email"
@@ -7385,15 +7385,7 @@ export default function Stillform() {
                       className="btn btn-primary"
                       style={{ width: "100%" }}
                       disabled={pricingAuthLoading || pricingAuthCooldownSeconds > 0}
-                      onClick={async () => {
-                        try {
-                          localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
-                            createdAt: Date.now(),
-                            pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
-                          }));
-                        } catch {}
-                        await signInAndContinueCheckout();
-                      }}
+                      onClick={signInAndContinueCheckout}
                     >
                       {pricingAuthLoading
                         ? "Signing in..."
@@ -7403,7 +7395,7 @@ export default function Stillform() {
                     </button>
                   </div>
                 )}
-                {!pricingAuthOpen && !checkoutMessage && (
+                {!pricingAuthOpen && (
                   <button
                     className="btn btn-primary"
                     style={{ width: "100%" }}
@@ -7419,14 +7411,7 @@ export default function Stillform() {
                 className="btn btn-primary"
                 style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
                 disabled={checkoutLoading}
-                onClick={() => {
-                  if (!syncSignedIn) {
-                    setPricingAuthOpen(true);
-                    setCheckoutMessage("Sign in below to continue checkout.");
-                    return;
-                  }
-                  checkoutToLemon();
-                }}
+                onClick={checkoutToLemon}
               >
                 {checkoutLoading
                   ? "Opening checkout..."
@@ -7489,14 +7474,7 @@ export default function Stillform() {
                   className="btn btn-primary"
                   style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
                   disabled={checkoutLoading}
-                  onClick={() => {
-                    if (!syncSignedIn) {
-                      setPricingAuthOpen(true);
-                      setCheckoutMessage("Sign in below to continue checkout.");
-                      return;
-                    }
-                    checkoutToLemon();
-                  }}
+                  onClick={checkoutToLemon}
                 >
                   {checkoutLoading
                     ? "Opening checkout..."
