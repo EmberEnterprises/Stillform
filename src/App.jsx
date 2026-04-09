@@ -611,6 +611,7 @@ const styles = `
 
   .ai-input {
     flex: 1;
+    width: 100%;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -3441,15 +3442,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 textAlign: "center"
               }}>{somaticNudge}</div>
             )}
-            <textarea
-              className="ai-input"
-              style={{ borderColor: mc.border }}
-              placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's on your mind..."}
-              value={input}
-              onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
-              onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-              rows={3}
-            />
+            <div style={{ position: "relative", flex: 1 }}>
+              <textarea
+                className="ai-input"
+                style={{ borderColor: input.length > 1800 ? "rgba(200,100,50,0.6)" : mc.border, width: "100%", boxSizing: "border-box" }}
+                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's on your mind..."}
+                value={input}
+                maxLength={2000}
+                onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
+                onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                rows={3}
+              />
+              {input.length > 1600 && (
+                <div style={{ position: "absolute", bottom: 6, right: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.06em", color: input.length > 1900 ? "rgba(200,100,50,0.9)" : "var(--text-muted)", pointerEvents: "none" }}>
+                  {2000 - input.length}
+                </div>
+              )}
+              {input.length >= 2000 && (
+                <div style={{ position: "absolute", bottom: -20, left: 0, fontSize: 11, color: "rgba(200,100,50,0.9)", fontFamily: "'DM Sans', sans-serif" }}>
+                  The AI works best with one focused thought. Try trimming to what matters most.
+                </div>
+              )}
+            </div>
             {/* Continue button — when returning to a conversation with no input typed */}
             {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !input.trim() && (
               <button onClick={() => handleSend("I need to continue where we left off")} style={{
@@ -6277,13 +6291,16 @@ export default function Stillform() {
                 const morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })(); // default 4:30 AM = 270 min
                 const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM = 1080 min
                 
-                // Don't show morning check-in outside morning window
-                if (currentMinutes < morningStart || currentMinutes >= eveningStart) return null;
+                // Morning check-in shows 4:30 AM – 5:30 PM
+                // Stops at 5:30 so there's no overlap or confusion with EOD at 6 PM
+                const morningEnd = 1050; // 5:30 PM
+                if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
                 
-                // Don't show if EOD already done today
                 const today = now.toISOString().split("T")[0];
-                const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
-                if (eodDone) return null;
+                // EOD done suppresses morning check-in only if EOD was completed TODAY
+                // (edge case: someone does EOD very early morning — rare but valid)
+                const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
+                if (eodDoneToday) return null;
 
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
                 const isCheckedIn = ciSaved || checkedIn;
@@ -6563,12 +6580,14 @@ export default function Stillform() {
                 );
               })()}
 
-              {/* END OF DAY CHECK-IN — appears after evening start time if not done */}
+              {/* END OF DAY CHECK-IN — appears 6 PM through 4 AM only */}
               {(() => {
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM
-                if (currentMinutes < eveningStart) return null;
+                const morningCap = 240; // 4:00 AM — EOD window closes
+                const inEodWindow = currentMinutes >= eveningStart || currentMinutes < morningCap;
+                if (!inEodWindow) return null;
                 const today = now.toISOString().split("T")[0];
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodSaved && !eodOpen) return (
