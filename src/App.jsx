@@ -3718,6 +3718,10 @@ function MicroBiasTool({ onComplete }) {
 function MetacognitionTool({ onComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
+  // Track start
+  if (step === 0 && Object.keys(responses).length === 0) {
+    try { window.plausible?.("Watch & Choose Started"); } catch {}
+  }
 
   const prompts = [
     {
@@ -3784,6 +3788,7 @@ function MetacognitionTool({ onComplete }) {
           responses
         });
         localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+        try { window.plausible?.("Watch & Choose Autonomous"); } catch {}
       } catch {}
       setStep(prompts.length);
     }}
