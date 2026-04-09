@@ -2848,20 +2848,36 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         return raw
           .split("\n")
           .map(l => l.trim())
-          // Remove lines that are metadata artifacts (timestamps, carrier info, RCS labels)
           .filter(l => {
             if (l.length < 3) return false;
-            // Drop lines that are mostly symbols/numbers (timestamps, metadata)
-            const alphaRatio = (l.match(/[a-zA-Z\s]/g) || []).length / l.length;
-            if (alphaRatio < 0.4 && l.length < 30) return false;
-            // Drop known metadata patterns
-            if (/^\d{1,2}:\d{2}/.test(l)) return false; // timestamps
-            if (/RCS message|©|\(F\)|\(E\)|oi \d/.test(l)) return false; // carrier
-            if (/^[^a-zA-Z]{0,3}$/.test(l)) return false; // symbol-only
+            // Drop timestamp lines: "1:23 PM", "12:26 EL", etc.
+            if (/^\d{1,2}:\d{2}/.test(l)) return false;
+            // Drop carrier/metadata lines
+            if (/RCS message|©|\(F\)|\(E\)|oi \d|¢€|¢|€/.test(l)) return false;
+            // Drop lines that start with & or @ (metadata artifacts)
+            if (/^[&@#]/.test(l)) return false;
+            // Drop lines that look like contact header: "Name LO :" or "Name LO:"
+            if (/\b(LO|CO|EL)\s*:/.test(l)) return false;
+            // Drop lines that are phone UI noise: battery, signal, notification counts
+            if (/^[\d\s\|<>@&©¢€\+\-\.]{0,5}$/.test(l)) return false;
+            // Drop symbol-heavy lines where less than 50% is real words
+            const words = l.match(/[a-zA-Z]{2,}/g) || [];
+            const wordChars = words.join("").length;
+            if (wordChars / l.length < 0.4 && l.length < 40) return false;
             return true;
           })
+          // After filtering, strip leading metadata from remaining lines
+          // e.g. "& ¢€ Paula Fischkelta LO : actual message" → "actual message"
+          .map(l => {
+            // Strip "Name Name LO : " prefix pattern
+            return l.replace(/^[^:]+\bLO\s*:\s*/, "")
+                    .replace(/^[^:]+\bCO\s*:\s*/, "")
+                    .replace(/^[\s&@#¢€©]+/, "")
+                    .trim();
+          })
+          .filter(l => l.length > 3)
           .join("\n")
-          .replace(/\n{3,}/g, "\n\n") // collapse multiple blank lines
+          .replace(/\n{3,}/g, "\n\n")
           .trim();
       };
       const cleanedText = cleanOcr(text);
