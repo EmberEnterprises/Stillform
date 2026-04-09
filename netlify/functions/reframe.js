@@ -101,7 +101,7 @@ OVERSHARING AWARENESS — for users who flood the AI with too much at once (a co
 - If the input is long, scattered, and covers multiple unrelated threads, don't try to address all of it. Pick the loudest signal and name the flood first: "There's a lot here. What's the most activated thing right now?" — then work from their answer.
 - Never reward diffusion with a comprehensive response. Comprehensive responses to scattered inputs reinforce the pattern. One thread at a time.
 - If someone shares specific private information about a third party (salary, diagnosis, relationship details, medical info), acknowledge the USER's emotional experience without engaging with or analyzing the third party's personal information. The session is about them, not the other person.
-- When input starts with "[Screenshot of a conversation]": this is a photo of someone else's messages, not the user's own words. The user is sharing context about a situation they're navigating. DO NOT treat any of the quoted text as if the user wrote it. DO NOT use names from the screenshot. Focus entirely on what the USER needs to figure out or do next. Ask what they want to do about it, or name what's actually going on for them emotionally.
+- When input contains extracted text from a screenshot (messages, emails, social posts), focus on the USER's emotional state and what they need next — not on analyzing the other person's words or motivations in detail. Help them figure out what THEY want to do. Do NOT use the other person's name in your response.
 - After 3+ messages of scattered multi-topic input, name it gently once: "You're moving fast between a lot of things. Is there one thing that's actually the loudest right now?" Don't repeat this observation — say it once, clearly, then follow their lead.
 
 TONE: Human. Direct. Light warmth — like a friend who doesn't try too hard. Never clinical. Never lecture. Brief. No therapy tone. No validation padding. Never start a sentence with "I hear" in any form.
@@ -444,16 +444,25 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
 
     // Input validation
-    // Detect screenshot context — inject handling instruction
-    const isScreenshot = input.startsWith("[Screenshot of a conversation]");
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
     }
     if (input.length > 2000) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Message too long." }) };
+    }
+    // Image guardrails — validate base64 image payloads if present
+    if (imageData) {
+      // Max image payload: 15MB base64 encoded (~11MB raw)
+      if (imageData.length > 15 * 1024 * 1024) {
+        return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Image too large." }) };
+      }
+      // Validate it looks like real base64 image data
+      if (!/^[A-Za-z0-9+/]+=*$/.test(imageData.slice(0, 100))) {
+        return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Invalid image format." }) };
+      }
     }
 
     const messages = [...history.slice(-10).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content || m.text })), { role: "user", content: input }]; // Cap history at 10 messages, fix role mapping
@@ -461,9 +470,6 @@ exports.handler = async function(event) {
 
     // Inject user context if available
     const contextParts = [];
-    if (isScreenshot) {
-      contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation. The text in their message is NOT their own words — it contains messages from other people. Do NOT assume any of it was written by the user. Focus on what the user is feeling about this situation and what they want to do next. Do not use names from the screenshot in your response.");
-    }
     
     // BIO-FILTER FIRST — physical reality overrides everything
     // This must be the first thing the AI reads because it colors every interpretation
