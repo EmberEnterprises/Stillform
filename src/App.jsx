@@ -1142,14 +1142,7 @@ const TOOLS = [
     time: "10 sec",
     level: 2
   },
-  {
-    id: "patterns",
-    icon: "◆",
-    name: "Your Patterns",
-    desc: "What the data shows about how you regulate.",
-    time: "1 min",
-    level: 3
-  },
+
   {
     id: "bias",
     icon: "⬡",
@@ -3025,7 +3018,23 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const toolNames = { breathe: "Breathe (breathing + grounding)", "body-scan": "Body Scan (acupressure)", reframe: "Reframe", sigh: "Physiological Sigh" };
               const used = last.tools.map(t => toolNames[t] || t).filter(Boolean);
               if (!used.length) return null;
-              return `The user just completed: ${used.join(" → ")} before opening Reframe. They've already done physical regulation. You don't need to suggest breathing or grounding — move directly to cognitive work.`;
+              let ctx = `The user just completed: ${used.join(" → ")} before opening Reframe. They've already done physical regulation. You don't need to suggest breathing or grounding — move directly to cognitive work.`;
+              // Add grounding pattern if available
+              try {
+                const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+                if (gd.length > 0) {
+                  const recent = gd[gd.length - 1];
+                  if (recent.skipped) {
+                    ctx += ` They skipped grounding at step ${recent.skippedAt} of 5.`;
+                  } else {
+                    const wrote = (recent.steps || []).filter(s => s.wrote).length;
+                    const totalSec = Math.round((recent.totalMs || 0) / 1000);
+                    if (wrote > 0) ctx += ` They engaged with grounding and wrote observations on ${wrote} step${wrote > 1 ? "s" : ""}.`;
+                    if (totalSec < 20) ctx += " They moved through grounding quickly — may still be activated.";
+                  }
+                }
+              } catch {}
+              return ctx;
             } catch { return null; }
           })(),
           priorModeContext: (() => {
@@ -3619,114 +3628,6 @@ function MicroBiasTool({ onComplete }) {
           <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
         ))}
       </div>
-    </div>
-  );
-}
-
-function PatternsTool({ onComplete }) {
-  const [sessions, setSessions] = useState([]);
-  const [signals, setSignals] = useState({});
-
-  useEffect(() => {
-    try { setSessions(JSON.parse(localStorage.getItem("stillform_sessions") || "[]")); } catch {}
-
-    try { setSignals(JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}")); } catch {}
-  }, []);
-
-  // Generate insights from data
-  const insights = [];
-
-  if (sessions.length >= 3) {
-    // Most used tool
-    const toolCounts = {};
-    sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
-    const topTool = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0];
-    if (topTool) {
-      const names = { breathe: "Breathe", ground: "Grounding", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe" };
-      insights.push({ label: "Most effective tool", value: names[topTool[0]] || topTool[0], detail: `Used ${topTool[1]} times` });
-    }
-
-    // Average regulation time
-    const times = sessions.filter(s => s.duration).map(s => s.duration);
-    if (times.length >= 2) {
-      const avg = Math.round(times.reduce((a, b) => a + b, 0) / times.length / 1000);
-      const min = Math.floor(avg / 60);
-      const sec = avg % 60;
-      insights.push({ label: "Average time to regulate", value: min > 0 ? `${min}m ${sec}s` : `${sec}s`, detail: `Across ${times.length} sessions` });
-    }
-
-    // Getting faster?
-    if (times.length >= 4) {
-      const firstHalf = times.slice(0, Math.floor(times.length / 2));
-      const secondHalf = times.slice(Math.floor(times.length / 2));
-      const avgFirst = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-      const avgSecond = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
-      if (avgSecond < avgFirst * 0.85) {
-        const pct = Math.round((1 - avgSecond / avgFirst) * 100);
-        insights.push({ label: "Regulation speed", value: `${pct}% faster`, detail: "Compared to your first sessions" });
-      }
-    }
-
-    // Fastest recovery
-    if (times.length >= 2) {
-      const fastest = Math.min(...times);
-      const fastMin = Math.floor(Math.round(fastest / 1000) / 60);
-      const fastSec = Math.round(fastest / 1000) % 60;
-      insights.push({ label: "Fastest recovery", value: fastMin > 0 ? `${fastMin}m ${fastSec}s` : `${fastSec}s`, detail: "Your personal best" });
-    }
-
-    // Session count
-    insights.push({ label: "Total sessions", value: `${sessions.length}`, detail: "Every one of these worked" });
-  }
-
-  // Tension pattern from check-in history (morning check-in tension data)
-  const checkinHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
-  if (checkinHistory?.tension) {
-    const high = Object.entries(checkinHistory.tension).filter(([,v]) => v === 2).map(([k]) => k);
-    if (high.length > 0) {
-      insights.push({ label: "Tension pattern today", value: high.join(", "), detail: "Flagged in your morning check-in" });
-    }
-  }
-
-  if (insights.length === 0) {
-    return (
-      <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
-        <div style={{ fontSize: 28, marginBottom: 16 }}>◇</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Building your profile.</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
-          This tool reads your session history, check-ins, and signal profile to show you real patterns — regulation speed, most effective tools, tension trends.
-        </p>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, lineHeight: 1.7, marginBottom: 24 }}>
-          Run a few sessions and do the daily check-in. Data appears here automatically.
-        </p>
-        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", marginBottom: 24 }}>
-          <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>What you'll see here</div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.8 }}>
-            Most effective protocol · Average regulation speed · Whether you're getting faster · Highest tension areas · Total session count
-          </div>
-        </div>
-        <button className="btn btn-ghost" onClick={onComplete}>Back</button>
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ maxWidth: 400, margin: "0 auto" }}>
-      <div style={{ fontSize: 28, marginBottom: 12, textAlign: "center" }}>◇</div>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8, textAlign: "center" }}>Your Patterns</h2>
-      <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 28, textAlign: "center" }}>What the data shows. One insight at a time.</p>
-
-      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {insights.map((ins, i) => (
-          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px" }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>{ins.label}</div>
-            <div style={{ fontSize: 20, fontWeight: 500, color: "var(--amber)", marginBottom: 4 }}>{ins.value}</div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{ins.detail}</div>
-          </div>
-        ))}
-      </div>
-
-      <button className="btn btn-ghost" style={{ width: "100%", marginTop: 24 }} onClick={onComplete}>Done</button>
     </div>
   );
 }
@@ -4810,6 +4711,13 @@ function MyProgress({ onBack }) {
 
   const hasPatterns = journalEntries.length >= 3 || sessionsWithRatings.length >= 5;
 
+  // Additional data sources
+  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+  const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
+  const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
+  const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
+  const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
+
   const cardStyle = { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
   const rowStyle = { width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
   const subRowStyle = { background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px" };
@@ -4841,7 +4749,7 @@ function MyProgress({ onBack }) {
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
           </div>}
           {(() => {
-            const durations = sessions.map(s => s.duration).filter(d => d > 0);
+            const durations = sessions.map(s => s.duration).filter(d => 0 < d);
             if (durations.length < 2) return null;
             const fastest = Math.min(...durations);
             const fastSec = Math.round(fastest / 1000);
@@ -4851,6 +4759,29 @@ function MyProgress({ onBack }) {
               <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Fastest session</div>
             </div>;
           })()}
+        {regulationType && <div style={cardStyle}>
+          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>
+            {regulationType === "thought-first" ? "Thought-first" : regulationType === "body-first" ? "Body-first" : "Balanced"}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Processing type</div>
+        </div>}
+        {groundingHistory.length >= 3 && (() => {
+          const skipped = groundingHistory.filter(g => g.skipped).length;
+          const rate = Math.round((skipped / groundingHistory.length) * 100);
+          const label = rate >= 50 ? `Skipped ${rate}%` : rate === 0 ? "Never skipped" : `${100 - rate}% complete`;
+          return <div style={cardStyle}>
+            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{label}</div>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Grounding rate</div>
+          </div>;
+        })()}
+        {checkinToday && <div style={cardStyle}>
+          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{checkinToday.energy || "—"}</div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Today's energy</div>
+        </div>}
+        {eodToday && <div style={cardStyle}>
+          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{eodToday.composure || "—"}</div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Yesterday's composure</div>
+        </div>}
         </div>
 
         {/* PULSE HEAT MAP — composure telemetry */}
@@ -5078,6 +5009,26 @@ function MyProgress({ onBack }) {
             </div>
           )}
         </div>
+
+        {/* AI SESSION NOTES */}
+        {aiSessionNotes.length > 0 && (
+          <div style={{ marginBottom: 8 }}>
+            <button onClick={() => toggle("ainotes")} style={rowStyle}>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What the AI noticed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiSessionNotes.length} session{aiSessionNotes.length !== 1 ? "s" : ""} logged</div></div>
+              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.ainotes ? "▾" : "▸"}</span>
+            </button>
+            {openSections.ainotes && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
+                {[...aiSessionNotes].reverse().slice(0, 5).map((n, i) => (
+                  <div key={i} style={subRowStyle}>
+                    <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{new Date(n.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{n.note}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* REFRAMES */}
         {savedReframes.length > 0 && (
@@ -5423,7 +5374,7 @@ export default function Stillform() {
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
       case "signals": return <SignalMapTool {...props} />;
       case "checkin": return <BodyCheckInTool {...props} />;
-      case "patterns": return <PatternsTool {...props} />;
+
       case "bias": return <MicroBiasTool {...props} />;
       case "meta": return <MetacognitionTool {...props} />;
       default:
@@ -5527,7 +5478,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — when you select how you're feeling before a session, it logs automatically. Add context anytime from the Pulse screen. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — when you select how you're feeling before a session, it logs automatically. View your full history, patterns, and AI session notes in My Progress.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
               note: null,
               research: [
                 { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
@@ -6132,7 +6083,11 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI gives you perspectives first, asks questions second</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI sounds like a sharp friend, not a therapist</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Multi-turn conversations fixed — AI actually follows the thread now</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Pulse — check your pulse in 15 seconds. Feel state logs automatically when you start a session.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> My Progress — all your data in one place. Sessions, patterns, pulse history, AI notes, and what you know about yourself.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Morning check-in now includes tension check — tap body areas to flag where you're holding it before your day starts.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
@@ -6223,7 +6178,10 @@ export default function Stillform() {
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
-                  try { window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady" } }); } catch {}
+                  try {
+                    const tensionAreas = Object.keys(ciTension).filter(k => ciTension[k] > 0);
+                    window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", tension_areas: tensionAreas.length } });
+                  } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
                 };
@@ -6475,7 +6433,6 @@ export default function Stillform() {
                 const tools = [
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
                   ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
-                  { id: "patterns", label: "Your Patterns", rec: false },
                   { id: "meta", label: "Watch & Choose", rec: false },
                 ];
 
@@ -6816,8 +6773,12 @@ export default function Stillform() {
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
+                q: "What is Watch & Choose?",
+                a: "A five-step tool that walks you through catching a thought pattern in real time — notice it in your body, name the thought, recognize the pattern, find what you actually need, then choose what to do next. Access it from Go Deeper on the home screen."
+              },
+              {
                 q: "How does Pulse work?",
-                a: "When you select how you're feeling before a session, it logs automatically to Pulse. The AI references your history in every future session to spot patterns over time."
+                a: "When you select how you're feeling before a session, it logs automatically. Your full Pulse history lives in My Progress — along with AI session notes, pattern analysis, and everything the app has learned about you."
               },
               {
                 q: "What is Composure Telemetry?",
@@ -6825,7 +6786,7 @@ export default function Stillform() {
               },
               {
                 q: "What's the morning check-in?",
-                a: "Two taps at the start of your day. Set your energy level and physical state. The AI uses this as context for every session — if you're depleted, it adjusts. If you're on fire, it watches for blind spots."
+                a: "Three quick steps at the start of your day — your energy level, your hardware state, and where you're holding tension in your body. Takes under 30 seconds. The AI uses all of it as context for every session that day."
               },
               {
                 q: "What's the end of day check-in?",
