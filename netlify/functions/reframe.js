@@ -495,17 +495,18 @@ exports.handler = async function(event) {
     if (priorToolContext) contextParts.push(priorToolContext);
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 3) {
-      if (journalContext.includes("TODAY'S PULSE ENTRIES")) {
-        contextParts.push(journalContext + "\nFor today's entries: if this is the first message, ask 'Is [today's entry] what's on your mind, or something new?' For older entries: recognize patterns, name themes gently.");
+      // "TODAY'S SIGNAL LOG ENTRIES" = entries logged today (manual or auto) — reference proactively
+      if (journalContext.includes("TODAY'S SIGNAL LOG ENTRIES")) {
+        contextParts.push(journalContext + "\nFor today's entries: if this is the first message and there are today entries, ask naturally 'Is [today's logged thing] what's on your mind, or something different?' For older entries: recognize patterns, name themes gently. Never quote entries back verbatim.");
       } else {
-        contextParts.push(`RECENT JOURNAL ENTRIES (private, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
+        contextParts.push(`PULSE ENTRIES (private signal log, written by the user):\n${journalContext}\nUse these to recognize patterns. If you see recurring themes, name them gently — "You've been here about this before." Never quote entries back verbatim.`);
       }
     }
     if (journalContext && sessionCount < 3) {
-      if (journalContext.includes("TODAY'S PULSE ENTRIES")) {
-        contextParts.push(journalContext + "\nFor today's entries: if this is the first message, ask 'Is this what's on your mind?' For older entries: context only, don't reference yet.");
+      if (journalContext.includes("TODAY'S SIGNAL LOG ENTRIES")) {
+        contextParts.push(journalContext + "\nFor today's entries: if this is the first message, ask simply 'Is this what's on your mind?' For older entries: context only — don't reference patterns yet, user is still building trust.");
       } else {
-        contextParts.push(`RECENT JOURNAL ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
+        contextParts.push(`PULSE ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
       }
     }
 
