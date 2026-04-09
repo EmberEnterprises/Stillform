@@ -3437,6 +3437,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           )}
           <div ref={messagesEndRef} />
         </div>
+        {somaticNudge && (
+          <div style={{
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "var(--amber)",
+            letterSpacing: "0.08em", padding: "8px 14px", marginBottom: 8,
+            background: "rgba(201,147,58,0.08)", borderRadius: "var(--r)",
+            border: "0.5px solid rgba(201,147,58,0.2)",
+            animation: "deltaFlash 0.6s ease-out", textAlign: "center"
+          }}>{somaticNudge}</div>
+        )}
         <div className="ai-input-row">
           {loading ? (
             <div style={{ flex: 1, fontSize: 13, color: "var(--text-dim)", padding: "0 12px", display: "flex", alignItems: "center" }}>
@@ -3444,15 +3453,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           ) : (
             <>
-            {/* Somatic interrupt — appears during rapid typing */}
-            {somaticNudge && (
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: "var(--amber)",
-                letterSpacing: "0.06em", padding: "6px 0", marginBottom: 4,
-                animation: "deltaFlash 0.6s ease-out", transition: "opacity 0.5s",
-                textAlign: "center"
-              }}>{somaticNudge}</div>
-            )}
+
             <div style={{ position: "relative", flex: 1 }}>
               <textarea
                 className="ai-input"
@@ -5354,7 +5355,7 @@ function QBPill({ onPress }) {
     // Safe default — bottom right, evaluated lazily
     return {
       x: (typeof window !== "undefined" ? window.innerWidth : 400) - 160,
-      y: (typeof window !== "undefined" ? window.innerHeight : 700) - 140
+      y: 80
     };
   };
 
@@ -5367,7 +5368,7 @@ function QBPill({ onPress }) {
 
   const clamp = (p) => ({
     x: Math.max(8, Math.min(window.innerWidth - 152, p.x)),
-    y: Math.max(60, Math.min(window.innerHeight - 60, p.y))
+    y: Math.max(60, Math.min(window.innerHeight - 120, p.y))
   });
 
   const onPointerDown = (e) => {
