@@ -2670,21 +2670,35 @@ const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
   const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'}; let uploaded=0; const errors=[];
   for (const key of SYNC_KEYS) {
-    try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
+    try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
   }
   try { window.plausible?.("Cloud Sync Up",{props:{keys:uploaded}}); } catch {}
   return {ok:errors.length===0,uploaded,errors};
 };
 const sbSyncDown = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
-  let restored=0; const errors=[];
+  const user = sbGetUser();
+  if (!user?.id) return {ok:false,reason:"no_user_id"};
+  let restored=0; const errors=[]; const restoredKeys = new Set();
   try {
-    const rows=await sbFetch("/rest/v1/user_data?select=data_key,encrypted_blob&order=updated_at.desc");
+    const rows=await sbFetch(`/rest/v1/user_data?select=data_key,encrypted_blob,updated_at&user_id=eq.${encodeURIComponent(user.id)}&order=updated_at.desc`);
     if (!rows?.length) return {ok:true,restored:0};
-    for (const row of rows) { try { const dec=await decryptFromCloud(row.encrypted_blob); if (dec!==null) { localStorage.setItem(row.data_key,typeof dec==="string"?dec:JSON.stringify(dec)); restored++; } } catch { errors.push(row.data_key); } }
+    for (const row of rows) {
+      if (!row?.data_key || restoredKeys.has(row.data_key)) continue;
+      try {
+        const dec=await decryptFromCloud(row.encrypted_blob);
+        if (dec!==null) {
+          localStorage.setItem(row.data_key,typeof dec==="string"?dec:JSON.stringify(dec));
+          restored++;
+          restoredKeys.add(row.data_key);
+        }
+      } catch {
+        errors.push(row.data_key);
+      }
+    }
   } catch(e) { return {ok:false,reason:e.message}; }
   try { window.plausible?.("Cloud Sync Down",{props:{keys:restored}}); } catch {}
-  return {ok:errors.length===0,restored};
+  return {ok:errors.length===0,restored,errors};
 };
 const sbPreUpdateBackup = async () => {
   if (!sbIsSignedIn()) return {ok:false};
@@ -2792,6 +2806,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
+  const [postRating, setPostRating] = useState(null);
+  const [entryMode, setEntryMode] = useState(null);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -2820,6 +2836,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     : "What's on your mind?";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
+  useEffect(() => {
+    try {
+      const entry = localStorage.getItem("stillform_reframe_entry_mode");
+      if (entry) {
+        setEntryMode(entry);
+        localStorage.removeItem("stillform_reframe_entry_mode");
+      }
+    } catch {}
+  }, []);
+
   // Migrate old conversation from before mode-specific keys
   useEffect(() => {
     try {
@@ -2846,7 +2872,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const fss = (s) => ({ angry:1, anxious:2, flat:2, mixed:3, excited:4, focused:5 }[s] ?? null);
-      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, preRating: fss(feelState), preState: feelState || null };
+      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, preRating: fss(feelState), preState: feelState || null };
       if (postRating) { entry.postRating = fss(postRating); entry.postState = postRating; }
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
       sessions.push(entry);
@@ -3208,6 +3234,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             } catch { return null; }
           })(),
           regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })(),
+          sessionEntryMode: entryMode,
           sessionNotes: (() => {
             try {
               const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
@@ -3314,21 +3341,19 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 36 }}>
           {feelChips.map(f => (
-            <button key={f.id} onClick={() => { saveSession(f.id); onComplete(); }} style={{
-              background: "transparent", border: `1px solid var(--border)`,
+            <button key={f.id} onClick={() => setPostRating(f.id)} style={{
+              background: postRating === f.id ? "var(--amber-glow)" : "transparent", border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
               borderRadius: 20, padding: "8px 20px", fontSize: 13,
-              color: "var(--text-muted)", cursor: "pointer",
+              color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
             }}>
               {f.label}
             </button>
           ))}
         </div>
-        <button onClick={() => { saveSession(); onComplete(); }} style={{
-          background: "none", border: "none", fontSize: 12,
-          color: "var(--text-muted)", cursor: "pointer",
-          fontFamily: "'DM Sans', sans-serif", opacity: 0.6
-        }}>Skip</button>
+        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => { saveSession(postRating); setPostRating(null); onComplete(); }}>
+          Done
+        </button>
       </div>
     );
   }
@@ -3643,6 +3668,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             {messages.length > 1 && (
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
+                setPostRating(null);
                 setShowPostRating(true);
               }}>
                 Done for now
@@ -6552,6 +6578,9 @@ export default function Stillform() {
                   } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
+                  try { localStorage.setItem("stillform_reframe_entry_mode", "morning"); } catch {}
+                  setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
+                  setScreen("tool");
                 };
 
                 if (isCheckedIn) return (
@@ -6852,7 +6881,7 @@ export default function Stillform() {
                       <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", textAlign: "center" }}>
                         <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.6 }}>Anything you want to clear before bed?</div>
                         <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                          <button className="btn btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => { setEodPromptDismissed(true); setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" }); setScreen("tool"); }}>Talk it out →</button>
+                          <button className="btn btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => { setEodPromptDismissed(true); try { localStorage.setItem("stillform_reframe_entry_mode", "evening"); } catch {} setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" }); setScreen("tool"); }}>Talk it out →</button>
                           <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 14px" }} onClick={() => setEodPromptDismissed(true)}>I'm good</button>
                         </div>
                       </div>

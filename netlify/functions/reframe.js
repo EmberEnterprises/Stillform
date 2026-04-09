@@ -444,13 +444,14 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null } = JSON.parse(event.body);
 
     // Input validation
-    const isScreenshot = (images && images.length > 0) || input.startsWith("[Screenshot of a conversation]");
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
     }
+    const trimmedInput = input.trim();
+    const isScreenshot = (images && images.length > 0) || trimmedInput.startsWith("[Screenshot of a conversation]");
     if (input.length > 2000) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Message too long." }) };
     }
@@ -502,6 +503,11 @@ exports.handler = async function(event) {
     else if (hour >= 21 || hour < 5) timeOfDay = "late night";
     else if (hour >= 5 && hour < 8) timeOfDay = "early morning";
     contextParts.push(`CURRENT TIME: ${days[now.getDay()]} ${timeOfDay} (${now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}). Be aware of when this conversation is happening. Late night sessions hit different than Monday morning ones. 3am anxiety is not the same as 3pm frustration. Let the time inform your tone — don't mention it unless relevant.`);
+    if (sessionEntryMode === "morning") {
+      contextParts.push("MORNING MODE: This session started from the morning check-in. Keep it forward-looking, sharp, and priming-oriented. Do not over-analyze old threads. In 3-5 sentences, help them set tone for the day with one concrete next move they can carry into the next 90 seconds.");
+    } else if (sessionEntryMode === "evening") {
+      contextParts.push("EVENING MODE: This session started from the end-of-day prompt. Prioritize closure over analysis. Keep it short, calming, and grounding. Do NOT open new threads and do NOT ask broad follow-up questions like 'tell me more.' Help them put the day down.");
+    }
 
     if (regulationType) {
       const typeMap = {
