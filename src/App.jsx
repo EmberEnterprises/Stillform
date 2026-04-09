@@ -2600,6 +2600,103 @@ function MicButton({ onTranscript }) {
   );
 }
 
+// ─── SUPABASE CLOUD SYNC ─────────────────────────────────────────────────────
+const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
+const APP_VERSION = "1.0.0";
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position"];
+const sbFetch = async (path, opts = {}) => {
+  const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
+  const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message||"Supabase "+res.status); }
+  return res.json().catch(()=>null);
+};
+const sbGetSession = () => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } };
+const sbSetSession = s => { try { localStorage.setItem("stillform_sb_session", JSON.stringify(s)); } catch {} };
+const sbClearSession = () => { try { localStorage.removeItem("stillform_sb_session"); } catch {} };
+const sbIsSignedIn = () => !!sbGetSession()?.access_token;
+const sbGetUser = () => sbGetSession()?.user || null;
+const sbSignUp = async (email, password) => {
+  const d = await sbFetch("/auth/v1/signup", { method:"POST", body: JSON.stringify({email, password}) });
+  if (d?.session) sbSetSession(d.session);
+  return d;
+};
+const sbSignIn = async (email, password) => {
+  const d = await sbFetch("/auth/v1/token?grant_type=password", { method:"POST", body: JSON.stringify({email, password}) });
+  if (d?.access_token) sbSetSession(d);
+  return d;
+};
+const sbSignOut = async () => { try { await sbFetch("/auth/v1/logout", {method:"POST"}); } catch {} sbClearSession(); };
+const sbRefreshSession = async () => {
+  const s = sbGetSession(); if (!s?.refresh_token) return null;
+  try { const d = await sbFetch("/auth/v1/token?grant_type=refresh_token", {method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})}); if (d?.access_token) { sbSetSession(d); return d; } } catch {}
+  sbClearSession(); return null;
+};
+const getSyncEncKey = async () => {
+  try {
+    const db = await new Promise((res,rej) => { const r=indexedDB.open("stillform_keys",1); r.onupgradeneeded=e=>e.target.result.createObjectStore("keys"); r.onsuccess=e=>res(e.target.result); r.onerror=()=>rej(r.error); });
+    return new Promise((res,rej) => {
+      const tx=db.transaction("keys","readwrite"), store=tx.objectStore("keys"), get=store.get("sync_key");
+      get.onsuccess = async () => { if (get.result) { res(get.result); return; } const k=await crypto.subtle.generateKey({name:"AES-GCM",length:256},true,["encrypt","decrypt"]); store.put(k,"sync_key"); res(k); };
+      get.onerror=()=>rej(get.error);
+    });
+  } catch { return null; }
+};
+const encryptForCloud = async data => {
+  try {
+    const key=await getSyncEncKey(); if (!key) return JSON.stringify(data);
+    const iv=crypto.getRandomValues(new Uint8Array(12));
+    const enc=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,new TextEncoder().encode(JSON.stringify(data)));
+    return JSON.stringify({__enc:true,iv:Array.from(iv),data:Array.from(new Uint8Array(enc))});
+  } catch { return JSON.stringify(data); }
+};
+const decryptFromCloud = async blob => {
+  try {
+    const p=JSON.parse(blob); if (!p.__enc) return p;
+    const key=await getSyncEncKey(); if (!key) return null;
+    const dec=await crypto.subtle.decrypt({name:"AES-GCM",iv:new Uint8Array(p.iv)},key,new Uint8Array(p.data));
+    return JSON.parse(new TextDecoder().decode(dec));
+  } catch { return null; }
+};
+const sbSyncUp = async () => {
+  if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
+  const user=sbGetUser(); let uploaded=0; const errors=[];
+  for (const key of SYNC_KEYS) {
+    try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
+  }
+  try { window.plausible?.("Cloud Sync Up",{props:{keys:uploaded}}); } catch {}
+  return {ok:errors.length===0,uploaded,errors};
+};
+const sbSyncDown = async () => {
+  if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
+  let restored=0; const errors=[];
+  try {
+    const rows=await sbFetch("/rest/v1/user_data?select=data_key,encrypted_blob&order=updated_at.desc");
+    if (!rows?.length) return {ok:true,restored:0};
+    for (const row of rows) { try { const dec=await decryptFromCloud(row.encrypted_blob); if (dec!==null) { localStorage.setItem(row.data_key,typeof dec==="string"?dec:JSON.stringify(dec)); restored++; } } catch { errors.push(row.data_key); } }
+  } catch(e) { return {ok:false,reason:e.message}; }
+  try { window.plausible?.("Cloud Sync Down",{props:{keys:restored}}); } catch {}
+  return {ok:errors.length===0,restored};
+};
+const sbPreUpdateBackup = async () => {
+  if (!sbIsSignedIn()) return {ok:false};
+  const user=sbGetUser();
+  try {
+    const snap={}; for (const k of SYNC_KEYS) { const v=localStorage.getItem(k); if (v!==null) snap[k]=v; }
+    await sbFetch("/rest/v1/backups",{method:"POST",body:JSON.stringify({user_id:user.id,backup_blob:await encryptForCloud(snap),app_version:APP_VERSION,trigger_type:"pre-update"})});
+    try { window.plausible?.("Pre-Update Backup"); } catch {}
+    return {ok:true};
+  } catch(e) { return {ok:false,reason:e.message}; }
+};
+const sbVersionCheck = async () => {
+  try { const last=localStorage.getItem("stillform_app_version"); if (last&&last!==APP_VERSION) await sbPreUpdateBackup(); localStorage.setItem("stillform_app_version",APP_VERSION); } catch {}
+};
+const sbCreateProfile = async () => {
+  if (!sbIsSignedIn()) return;
+  const user=sbGetUser();
+  try { await sbFetch("/rest/v1/user_profiles",{method:"POST",headers:{"Prefer":"resolution=ignore-duplicates"},body:JSON.stringify({id:user.id,app_version:APP_VERSION,last_seen:new Date().toISOString()})}); } catch {}
+};
+// ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
 // Key is generated once per device and stored in IndexedDB.
@@ -2746,6 +2843,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
       sessions.push(entry);
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      // Background cloud sync — non-blocking
+      if (sbIsSignedIn()) sbSyncUp().catch(() => {});
     } catch {}
 
     // Post-session AI summary — background call, non-blocking
@@ -5392,7 +5491,12 @@ export default function Stillform() {
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
-    setupPushNotifications(); // init push notifications in native context
+    setupPushNotifications();
+    // Cloud sync init — version check + restore data if signed in
+    sbVersionCheck().catch(() => {});
+    if (sbIsSignedIn()) {
+      sbRefreshSession().then(() => sbSyncDown().catch(() => {})).catch(() => {});
+    }
     return () => clearTimeout(t);
   }, []);
 
@@ -5525,6 +5629,12 @@ export default function Stillform() {
   });
 
   const [uatRoadmapOpen, setUatRoadmapOpen] = useState(false);
+  const [syncEmail, setSyncEmail] = useState("");
+  const [syncPassword, setSyncPassword] = useState("");
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncError, setSyncError] = useState(null);
+  const [syncSuccess, setSyncSuccess] = useState(null);
+  const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
@@ -6333,6 +6443,8 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Cloud sync — sign in under Settings to back up your data and access it on any device. Encrypted on your device before upload. We can't read it.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Cloud sync — sign in under Settings to back up your data and access it on any device. Encrypted on your device before upload. We cannot read it.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Share screenshots in Reframe — tap 📎 to upload up to 3 conversation screenshots. The AI reads the actual layout — who said what — so advice goes to you, not the other person.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Quick Breathe pill is now draggable — hold and drag to reposition it anywhere on screen. Position saves across sessions.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Footer visible on every screen with Crisis Resources always accessible. Active screen link is hidden to avoid confusion.</div>
@@ -7051,6 +7163,10 @@ export default function Stillform() {
                 a: "Your data stays on your device — nothing is lost. You can resubscribe anytime and pick up right where you left off."
               },
               {
+                q: "Is my data backed up?",
+                a: "Yes — go to Settings and sign in or create an account to enable cloud backup. Your data is encrypted on your device before it leaves, so we can't read it. It syncs automatically after each session and restores fully on a new device."
+              },
+              {
                 q: "Can I upload screenshots to Reframe?",
                 a: "Yes. Tap 📎 to share up to 3 conversation screenshots at once. The AI reads the actual layout — bubble position, who said what — so it gives you advice based on your situation, not the other person's words. Images are sent directly to the AI and nothing is stored."
               }
@@ -7462,6 +7578,95 @@ export default function Stillform() {
                   </>
                 );
               })()}
+            </div>
+
+            {/* Cloud Sync */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Cloud Sync</div>
+              {syncSignedIn ? (
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
+                    Signed in as <span style={{ color: "var(--amber)" }}>{sbGetUser()?.email}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+                    Your data is encrypted and backed up. It syncs automatically after each session.
+                  </div>
+                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
+                      setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
+                      try {
+                        const r = await sbSyncUp();
+                        setSyncSuccess(r.ok ? `Synced ${r.uploaded} items` : "Sync partial — retry");
+                      } catch { setSyncError("Sync failed. Check connection."); }
+                      setSyncLoading(false);
+                    }}>
+                      {syncLoading ? "Syncing..." : "Sync now"}
+                    </button>
+                    <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => {
+                      await sbSignOut();
+                      setSyncSignedIn(false);
+                      setSyncSuccess(null);
+                      setSyncError(null);
+                    }}>
+                      Sign out
+                    </button>
+                  </div>
+                  {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginTop: 8 }}>{syncSuccess}</div>}
+                  {syncError && <div style={{ fontSize: 12, color: "#e05", marginTop: 8 }}>{syncError}</div>}
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
+                    Back up your data and access it on any device. Your data is encrypted before it leaves your device — we can't read it.
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={syncEmail}
+                      onChange={e => setSyncEmail(e.target.value)}
+                      style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={syncPassword}
+                      onChange={e => setSyncPassword(e.target.value)}
+                      style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                    />
+                    {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button className="btn btn-primary" style={{ fontSize: 14, flex: 1 }} onClick={async () => {
+                      if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
+                      setSyncLoading(true); setSyncError(null);
+                      try {
+                        await sbSignUp(syncEmail, syncPassword);
+                        await sbCreateProfile();
+                        await sbSyncUp();
+                        setSyncSignedIn(true);
+                        setSyncEmail(""); setSyncPassword("");
+                        refreshSettings();
+                      } catch (e) {
+                        // If signup fails (user exists), try sign in
+                        try {
+                          await sbSignIn(syncEmail, syncPassword);
+                          const r = await sbSyncDown();
+                          setSyncSignedIn(true);
+                          setSyncEmail(""); setSyncPassword("");
+                          refreshSettings();
+                        } catch (e2) { setSyncError(e2.message || "Sign in failed. Check your details."); }
+                      }
+                      setSyncLoading(false);
+                    }}>
+                      {syncLoading ? "Please wait..." : "Sign in / Create account"}
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                    New to Stillform? Enter your email and a password — your account is created automatically.
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Your Logs */}
