@@ -6391,7 +6391,9 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Upload a screenshot in Reframe — tap 📎 to extract text from emails, texts, or social posts. Processed on your device, nothing sent anywhere.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Upload screenshots in Reframe — tap 📎 to share a conversation, email, or text. Supports multiple screenshots at once. Content stays on your device.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Quick Breathe pill is now draggable — hold and drag to reposition it anywhere on screen. Position saves across sessions.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Footer visible on every screen with Crisis Resources always accessible. Active screen link is hidden to avoid confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
@@ -7108,7 +7110,7 @@ export default function Stillform() {
               },
               {
                 q: "Can I upload a screenshot to Reframe?",
-                a: "Yes. Tap the 📎 icon in Reframe to upload a screenshot of an email, text, or social post. The text is extracted on your device — nothing is sent to any server. It drops into the input so you can edit it before sending to the AI."
+                a: "Yes. Tap 📎 to upload up to 3 screenshots at once — a conversation, email, or anything you want to think through. The AI sees it as a conversation you're sharing, not as your own words. Nothing is stored or sent anywhere except the AI prompt."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
