@@ -2829,18 +2829,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const fileInputRef = useRef(null);
 
   const handleImageUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setError("Please upload an image file (screenshot, photo).");
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    const invalidFile = files.find(f => !f.type.startsWith("image/"));
+    if (invalidFile) {
+      setError("Please upload image files only (screenshots, photos).");
       return;
     }
     setOcrLoading(true);
     setError(null);
     try {
-      const text = await extractTextFromImage(file);
+      // Process all files and concatenate — supports multiple screenshots
+      const texts = await Promise.all(files.map(f => extractTextFromImage(f)));
+      const text = texts.filter(t => t && t.length > 4).join("\n\n---\n\n");
       if (!text || text.length < 5) {
-        setError("Couldn\'t read text from that image. Try a clearer screenshot.");
+        setError("Couldn\'t read text from those images. Try clearer screenshots.");
         return;
       }
       // Clean OCR output — strip phone UI metadata before dropping into input
@@ -2848,34 +2851,24 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         return raw
           .split("\n")
           .map(l => l.trim())
+          .map(l => {
+            // Convert "Firstname Lastname LO :" → "Firstname:" to preserve sender context
+            const senderMatch = l.match(/^([A-Z][a-z]+)(?:\s+[A-Z][a-z]+)*\s+(?:LO|CO|EL)\s*:\s*(.+)/);
+            if (senderMatch) return `${senderMatch[1]}: ${senderMatch[2]}`;
+            // Strip leading symbol garbage but keep content: "& ¢€ Some text" → "Some text"
+            return l.replace(/^[\s&@#¢€©|<>]+/, "").trim();
+          })
           .filter(l => {
             if (l.length < 3) return false;
-            // Drop timestamp lines: "1:23 PM", "12:26 EL", etc.
+            // Drop timestamp lines: "1:23 PM", "12:26 EL @ao" etc.
             if (/^\d{1,2}:\d{2}/.test(l)) return false;
             // Drop carrier/metadata lines
-            if (/RCS message|©|\(F\)|\(E\)|oi \d|¢€|¢|€/.test(l)) return false;
-            // Drop lines that start with & or @ (metadata artifacts)
-            if (/^[&@#]/.test(l)) return false;
-            // Drop lines that look like contact header: "Name LO :" or "Name LO:"
-            if (/\b(LO|CO|EL)\s*:/.test(l)) return false;
-            // Drop lines that are phone UI noise: battery, signal, notification counts
-            if (/^[\d\s\|<>@&©¢€\+\-\.]{0,5}$/.test(l)) return false;
-            // Drop symbol-heavy lines where less than 50% is real words
+            if (/RCS message|©|\(F\)|\(E\)|oi \d|¢€/.test(l)) return false;
+            // Drop lines that are pure symbols/numbers with no real words
             const words = l.match(/[a-zA-Z]{2,}/g) || [];
-            const wordChars = words.join("").length;
-            if (wordChars / l.length < 0.4 && l.length < 40) return false;
+            if (words.length === 0 && l.length < 20) return false;
             return true;
           })
-          // After filtering, strip leading metadata from remaining lines
-          // e.g. "& ¢€ Paula Fischkelta LO : actual message" → "actual message"
-          .map(l => {
-            // Strip "Name Name LO : " prefix pattern
-            return l.replace(/^[^:]+\bLO\s*:\s*/, "")
-                    .replace(/^[^:]+\bCO\s*:\s*/, "")
-                    .replace(/^[\s&@#¢€©]+/, "")
-                    .trim();
-          })
-          .filter(l => l.length > 3)
           .join("\n")
           .replace(/\n{3,}/g, "\n\n")
           .trim();
@@ -3524,6 +3517,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
+                multiple
                 style={{ display: "none" }}
                 onChange={handleImageUpload}
               />
