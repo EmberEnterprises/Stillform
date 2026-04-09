@@ -65,9 +65,21 @@ export async function handler(event) {
       });
     }
 
+    const normalizedStatus = String(record.status || "").toLowerCase();
+    const statusExpiry = record.status_expires_at ? new Date(record.status_expires_at).getTime() : null;
+    const inGrace = Number.isFinite(statusExpiry) && statusExpiry > Date.now();
+    const effectiveSubscribed = (() => {
+      if (normalizedStatus === "inactive") return false;
+      if (normalizedStatus === "expired") return false;
+      if (normalizedStatus === "paused") return false;
+      if (normalizedStatus === "unpaid") return false;
+      if (normalizedStatus === "cancelled") return Boolean(inGrace);
+      return Boolean(record.is_subscribed);
+    })();
+
     return json(200, {
       ok: true,
-      is_subscribed: Boolean(record.is_subscribed),
+      is_subscribed: effectiveSubscribed,
       source: record.source || (record.user_id ? "user" : "install"),
       status: record.status || null,
       status_expires_at: record.status_expires_at || null,
