@@ -90,6 +90,25 @@
 - Pulse renamed consistently everywhere user-facing (Signal Log killed)
 - What's New panel updated (DUNS status, naming)
 
+**✅ SHIPPED April 9:**
+- Pulse merged into My Progress — one scrolling page, one destination
+- Biometric gate moved to My Progress
+- Separate Pulse screen removed
+- Privacy policy: Anthropic → OpenAI
+- Morning check-in context: graceful null handling
+- Pulse date format: ISO throughout
+- Sync claim removed everywhere
+- Feel state → numeric score mapping (angry=1, anxious=2, flat=2, mixed=3, excited=4, focused=5)
+
+**Image Upload with OCR (ROADMAP — build after Supabase):**
+- Use case: emails, texts, social media posts — user screenshots something stressing them and uploads it to Reframe
+- Method: Tesseract.js (browser-based OCR, free, no external service, data never leaves device — fits privacy-first positioning)
+- Flow: upload icon in Reframe → pick screenshot → OCR extracts text → drops into input pre-populated → user edits/adds context → sends to AI
+- AI receives it as plain text, no special handling needed — existing tone interpretation prompts already cover this use case
+- Accuracy caveat: Tesseract handles clean screenshots well, weaker on dark mode or stylized fonts — revisit with Google Cloud Vision if accuracy is a real complaint post-launch
+- Privacy policy: no update needed if using Tesseract.js (client-side only). Update required if switching to cloud OCR.
+- Ship checklist items when building: Plausible event ("Image Upload"), FAQ entry, tutorial mention
+
 **Still to build:**
 
 
