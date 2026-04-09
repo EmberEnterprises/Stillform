@@ -1323,8 +1323,13 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
 - **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. Incognito tab or clear cache to test fresh.
 - **Copyright not filed** — $65 at copyright.gov. Bobby wants this done ASAP.
-- **DUNS number pending** — blocks both Google Play ($25 org) and Apple Developer ($99). ~25 days from application.
-- **Discharge screen uses useState inside IIFE** — may cause React warnings. Watch for issues on deploy. If problems, refactor to component-level state.
+- **DUNS confirmed** — Apple Developer purchased, DUNS accepted. Google Play Console setup still pending ($25, no DUNS needed).
+- **"Your data is encrypted and synced securely"** — sync claim is premature. Update to "Your data is encrypted." everywhere after Supabase is live. On punch list.
+- **Dead code in ReframeTool** — `saveJournal`, `pulseChips`, `journalText`, `tab`/`setTab` states remain after Pulse tab removal. Harmless but should be cleaned up. On punch list.
+- **Manual Pulse date format** — ✅ Fixed (April 8). Entries now use ISO date format so AI journalContext today-filter works correctly.
+- **Post-session rating in Reframe** — ✅ Fixed (April 8). "Done for now" now gates through "Where are you now?" chip selection. preRating + postRating both saved to session record.
+- **Morning check-in → Reframe handoff** — ✅ Fixed (April 8). "Set my tone →" now navigates directly to Reframe after saving.
+- **AI fatigue in long conversations** — ✅ Fixed (April 8). reframe.js now injects fatigue guardrail at 6+ messages, explicitly prohibiting generic/repetitive/shortened responses.
 
 ## Parked Features (evaluated, not built — revisit later)
 
@@ -1385,6 +1390,38 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - [ ] Influencer outreach list finalized
 - [ ] Evaluate Netlify downgrade to free tier (password protection removed)
 - [ ] Test checkout in LIVE mode before launch — verify: variant selector shows Monthly/Annual, PayPal doesn't show personal name, receipt button says "Open Stillform" linking to stillformapp.com
+
+## Punch List (post-cloud, post-launch)
+
+- [ ] **Sync claim** — replace "Your data is encrypted and synced securely" with "Your data is encrypted." everywhere in the app. Update after Supabase is live.
+- [ ] **Dead code cleanup in ReframeTool** — remove `saveJournal`, `pulseChips`, `journalText`, `tab`, `setTab`. All unreachable after Pulse tab removal.
+- [ ] **journalContext date format (manual entries)** — existing Signal Log entries saved before April 8 use localized date format. Consider a one-time migration on app load to normalize all dates to ISO format.
+- [ ] **Netlify credit usage** — deploys now manual. Batch code changes and push once per session, not per change. Claude must stage all edits locally before pushing.
+
+---
+
+### April 8 — Ecosystem Audit + Fixes Session
+
+**Ecosystem audit findings:**
+- Data pipeline fully wired: feel state, bio-filter, signal profile, bias profile, check-in, EOD, session notes, session count, prior context all reach the API correctly
+- Three gaps found and fixed: morning check-in dead end, no post-session rating in Reframe, manual Pulse entries never matched AI "today" filter
+- AI fatigue in long conversations identified and guardrailed in reframe.js
+- "Your data is encrypted and synced securely" is premature — punched for post-cloud fix
+- Dead code left in ReframeTool after Pulse tab removal — punched for cleanup
+
+**Code shipped (2 files, 1 push):**
+- App.jsx: post-session rating gate, morning check-in → Reframe handoff, ISO date fix for Pulse entries
+- reframe.js: AI fatigue guardrail injected at 6+ messages
+- Commits: App.jsx `15f3870`, reframe.js `6a49979`
+
+**Pulse tab removal (earlier same session):**
+- Pulse tab removed from Reframe entirely — feel state auto-logs to Signal Log on session start
+- FAQ, tutorial, What's New panel, naming all updated
+- "Signal Log" renamed to "Pulse" everywhere user-facing
+- Confirmed: `stillform_journal` is the single data store — always was. Journal/discharge were UI layers on same key.
+- Commits: `bf32c61`, `5f206a9`, `af0849d`
+
+**Netlify deploys:** Manual only. Batch all changes per session before pushing. Do not push per-change.
 
 ---
 
