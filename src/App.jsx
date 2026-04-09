@@ -4788,12 +4788,41 @@ function CheckInWidget({ onComplete }) {
   );
 }
 
-function MyProgress({ onBack, onJournal }) {
+function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const [showNewEntry, setShowNewEntry] = useState(false);
+  const [viewEntry, setViewEntry] = useState(null);
+  const [jSignal, setJSignal] = useState([]);
+  const [jTriggerType, setJTriggerType] = useState("");
+  const [jTrigger, setJTrigger] = useState("");
+  const [jBody, setJBody] = useState("");
+  const [jOutcome, setJOutcome] = useState("");
+  const [journalEntries, setJournalEntries] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+  });
+  const signalAreas = ["Jaw","Shoulders","Chest","Gut","Hands","Legs","Head","Throat"];
+  const triggerTypes = ["Social demand","Performance pressure","Conflict","Uncertainty","Sensory overload","Transition","Rejection","Fatigue","Physical pain","Other"];
+  const outcomeTypes = ["Composed","Talked through","Loop broken","Ready","Incomplete","Reacted","Still processing"];
+  const savePulseEntry = () => {
+    if (!jSignal.length && !jTriggerType && !jTrigger.trim()) return;
+    const entry = { id: Date.now(), date: new Date().toISOString().split("T")[0], time: new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}), signal: jSignal, trigger: jTrigger.trim(), triggerType: jTriggerType, emotions: [], body: jBody.trim(), outcome: jOutcome, notes: jBody.trim() };
+    const updated = [entry, ...journalEntries];
+    setJournalEntries(updated);
+    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
+    try { window.plausible("Pulse Entry"); } catch {}
+    setJSignal([]); setJTrigger(""); setJTriggerType(""); setJBody(""); setJOutcome("");
+    setShowNewEntry(false);
+  };
+  const deletePulseEntry = (id) => {
+    if (!window.confirm("Delete this entry?")) return;
+    const updated = journalEntries.filter(e => e.id !== id);
+    setJournalEntries(updated);
+    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
+    setViewEntry(null);
+  };
 
   const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
-  const journalEntries = (() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; } })();
   const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
@@ -5149,27 +5178,103 @@ function MyProgress({ onBack, onJournal }) {
           </div>
         )}
 
-        {/* JOURNAL */}
-        {journalEntries.length > 0 && (
-          <div style={{ marginBottom: 8 }}>
-            <button onClick={() => toggle("journal")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Pulse</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div></div>
-              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.journal ? "▾" : "▸"}</span>
-            </button>
-            {openSections.journal && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
-                {[...journalEntries].reverse().slice(0, 10).map((e, i) => (
-                  <div key={i} style={subRowStyle}>
-                    <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 3 }}>{e.date}</div>
-                    {e.trigger && <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 3 }}>{e.trigger}</div>}
-                    {e.emotions?.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{e.emotions.join(" · ")}</div>}
-                  </div>
-                ))}
-                <button onClick={onJournal} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: "8px 0", textAlign: "left" }}>View all signal entries →</button>
-              </div>
+        {/* PULSE — full inline, not accordion */}
+        <div style={{ marginTop: 24, paddingTop: 24, borderTop: "0.5px solid var(--border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Pulse</div>
+              {journalEntries.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
+            </div>
+            {!showNewEntry && !viewEntry && (
+              <button onClick={() => setShowNewEntry(true)} style={{ background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
+                + Log a pulse
+              </button>
             )}
           </div>
-        )}
+
+          {/* VIEW SINGLE ENTRY */}
+          {viewEntry && (() => {
+            const e = viewEntry;
+            const labelStyle = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.16em", textTransform: "uppercase" };
+            const valueStyle = { fontSize: 13, color: "var(--text)", lineHeight: 1.6 };
+            return (
+              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px" }}>
+                <button onClick={() => setViewEntry(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginBottom: 16, padding: 0 }}>← Back</button>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 16, lineHeight: 1.3 }}>{e.triggerType || e.trigger || "Signal event"}</div>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 16 }}>{e.date} · {e.time}</div>
+                {e.signal?.length > 0 && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Signal</div><div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{e.signal.map(s => <span key={s} style={{ padding: "3px 8px", borderRadius: "var(--r-sm)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9 }}>{s}</span>)}</div></div>}
+                {(e.triggerType || e.trigger) && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Trigger</div><div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div></div>}
+                {e.outcome && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Outcome</div><div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div></div>}
+                {e.notes && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Notes</div><div style={valueStyle}>{e.notes}</div></div>}
+                <button onClick={() => deletePulseEntry(e.id)} style={{ marginTop: 8, background: "none", border: "0.5px solid rgba(200,60,60,0.3)", borderRadius: "var(--r)", padding: "8px 14px", fontSize: 11, color: "rgba(200,80,80,0.7)", cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace" }}>Delete entry</button>
+              </div>
+            );
+          })()}
+
+          {/* NEW ENTRY FORM */}
+          {showNewEntry && !viewEntry && (
+            <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 16 }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>New Entry</div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Signal — where did it activate?</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {signalAreas.map(area => <button key={area} onClick={() => setJSignal(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area])} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jSignal.includes(area) ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jSignal.includes(area) ? "var(--amber-dim)" : "var(--border)"}`, color: jSignal.includes(area) ? "var(--amber)" : "var(--text-dim)" }}>{area}</button>)}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Trigger</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
+                  {triggerTypes.map(t => <button key={t} onClick={() => setJTriggerType(prev => prev === t ? "" : t)} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jTriggerType === t ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jTriggerType === t ? "var(--amber-dim)" : "var(--border)"}`, color: jTriggerType === t ? "var(--amber)" : "var(--text-dim)" }}>{t}</button>)}
+                </div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <textarea value={jTrigger} onChange={e => setJTrigger(e.target.value)} placeholder="Add detail..." style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
+                  <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Outcome</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {outcomeTypes.map(o => <button key={o} onClick={() => setJOutcome(prev => prev === o ? "" : o)} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jOutcome === o ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jOutcome === o ? "var(--amber-dim)" : "var(--border)"}`, color: jOutcome === o ? "var(--amber)" : "var(--text-dim)" }}>{o}</button>)}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Notes <span style={{ opacity: 0.5 }}>— optional</span></div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <textarea value={jBody} onChange={e => setJBody(e.target.value)} placeholder="What's the context?" style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
+                  <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
+                </div>
+              </div>
+
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={savePulseEntry} disabled={!jSignal.length && !jTriggerType && !jTrigger.trim()} style={{ flex: 1, background: (jSignal.length || jTriggerType || jTrigger.trim()) ? "var(--amber)" : "var(--surface2)", color: (jSignal.length || jTriggerType || jTrigger.trim()) ? "#0A0A0C" : "var(--text-muted)", border: "none", borderRadius: "var(--r)", padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Save</button>
+                <button onClick={() => { setShowNewEntry(false); setJSignal([]); setJTrigger(""); setJTriggerType(""); setJBody(""); setJOutcome(""); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px", fontSize: 12, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {/* ENTRY LIST */}
+          {!viewEntry && !showNewEntry && (
+            journalEntries.length === 0 ? (
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", padding: "16px 0" }}>No entries yet. Pulse logs automatically when you select a feel state before a session.</div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {[...journalEntries].reverse().map((e, i) => (
+                  <button key={e.id || i} onClick={() => setViewEntry(e)} style={{ ...subRowStyle, textAlign: "left", cursor: "pointer", width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: e.source === "reframe-auto" ? 0 : 4 }}>
+                      <div style={{ fontSize: 12, fontWeight: 500, color: "var(--text)" }}>{e.triggerType || e.trigger?.slice(0,40) || (e.emotions?.length ? e.emotions.join(", ") : "State logged")}</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", flexShrink: 0, marginLeft: 8 }}>{e.date}</div>
+                    </div>
+                    {e.source !== "reframe-auto" && e.outcome && <div style={{ fontSize: 10, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em" }}>→ {e.outcome}</div>}
+                  </button>
+                ))}
+              </div>
+            )
+          )}
+        </div>
       </>)}
     </section>
   );
@@ -5309,15 +5414,7 @@ export default function Stillform() {
   const [journalEntries, setJournalEntries] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
   });
-  const [journalMode, setJournalMode] = useState("list");
-  const [journalViewIdx, setJournalViewIdx] = useState(null);
-  const [jSignal, setJSignal] = useState([]);
-  const [jTriggerType, setJTriggerType] = useState("");
-  const [jTrigger, setJTrigger] = useState("");
-  const [jEmotion, setJEmotion] = useState([]);
-  const [jBody, setJBody] = useState("");
-  const [jOutcome, setJOutcome] = useState("");
-  const [jIntensity, setJIntensity] = useState(5);
+
   const [uatRoadmapOpen, setUatRoadmapOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
@@ -5347,43 +5444,7 @@ export default function Stillform() {
     setScreen("setup");
   };
 
-  const journalEmotions = ["Anger", "Anxiety", "Shame", "Sadness", "Frustration", "Overwhelm", "Fear", "Numbness", "Confusion", "Guilt", "Relief", "Calm", "Pride", "Clarity", "Gratitude", "Joy"];
-  const signalAreas = ["Jaw", "Shoulders", "Chest", "Gut", "Hands", "Legs", "Head", "Throat"];
-  const triggerTypes = ["Social demand", "Performance pressure", "Conflict", "Uncertainty", "Sensory overload", "Transition", "Rejection", "Fatigue", "Physical pain", "Other"];
-  const outcomeTypes = ["Composed", "Talked through", "Loop broken", "Ready", "Incomplete", "Reacted", "Still processing"];
-
-  const saveJournalEntry = () => {
-    const entry = {
-      id: Date.now(),
-      date: new Date().toISOString().split("T")[0],
-      time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
-      signal: jSignal,
-      trigger: jTrigger.trim(),
-      triggerType: jTriggerType,
-      emotions: jEmotion,
-      intensity: jIntensity,
-      body: jBody.trim(),
-      outcome: jOutcome,
-      notes: jBody.trim()
-    };
-    const updated = [entry, ...journalEntries];
-    setJournalEntries(updated);
-    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
-    setJournalMode("list");
-    try { window.plausible("Pulse Entry"); } catch {}
-    setJSignal([]); setJTrigger(""); setJTriggerType(""); setJEmotion([]); setJBody(""); setJOutcome(""); setJIntensity(5);
-  };
-
-  const deleteJournalEntry = (id) => {
-    if (!window.confirm("Delete this entry?")) return;
-    const updated = journalEntries.filter(e => e.id !== id);
-    setJournalEntries(updated);
-    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
-    setJournalMode("list");
-  };
-
-  // Scroll to top on every screen change + analytics
-  useEffect(() => {
+    // Scroll to top on every screen change + analytics useEffect(() => {
     window.scrollTo(0, 0);
     if (screen !== "home" && screen !== "onboarding") {
       try { window.plausible("Screen View", { props: { screen } }); } catch {}
@@ -6619,8 +6680,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                <button onClick={async () => { if (await biometric.gate()) setScreen("journal"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Pulse</button>
-                <button onClick={() => setScreen("progress")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
+                <button onClick={async () => { if (await biometric.gate()) setScreen("progress"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
             </section>
@@ -6665,271 +6725,10 @@ export default function Stillform() {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => setScreen("home")} onJournal={async () => { if (await biometric.gate()) setScreen("journal"); }} />
+          <MyProgress onBack={() => setScreen("home")} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
-        {screen === "journal" && (
-          <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => journalMode === "list" ? setScreen("home") : setJournalMode("list")}>
-              ← {journalMode === "list" ? "Home" : "Back"}
-            </button>
-
-            {journalMode === "list" && (
-              <>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Check your pulse</div>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Pulse</h1>
-                <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 24, lineHeight: 1.7 }}>
-                  15 seconds. Tag what's present, note what triggered it. The AI reads these every session to spot what you can't see yourself.
-                </p>
-
-                {/* Ghost echo — faint reminder of past resilience */}
-                {(() => {
-                  try {
-                    const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-                    const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
-                    if (wins.length === 0) return null;
-                    const win = wins[Math.floor(Math.random() * wins.length)];
-                    const d = new Date(win.timestamp);
-                    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                    return (
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", opacity: 0.35, fontStyle: "italic", marginBottom: 16, fontFamily: "'DM Sans', sans-serif" }}>
-                        {dateStr} — you shifted +{win.delta.toFixed(1)} in {win.durationFormatted}.
-                      </div>
-                    );
-                  } catch { return null; }
-                })()}
-                <button onClick={() => setJournalMode("new")} style={{
-                  width: "100%", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r)", padding: "14px 18px", cursor: "pointer", color: "var(--amber)",
-                  fontSize: 13, fontFamily: "'DM Sans', sans-serif", marginBottom: 24, textAlign: "left",
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.04)"
-                }}>
-                  <span>+ Log a pulse</span>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", opacity: 0.7 }}>~15 SEC</span>
-                </button>
-
-                {journalEntries.length === 0 && (
-                  <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-                    No entries yet. Log your first pulse above.
-                  </div>
-                )}
-
-                {journalEntries.map((e, i) => (
-                  <button key={e.id} onClick={() => { setJournalViewIdx(i); setJournalMode("view"); }} style={{
-                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "14px 18px", textAlign: "left", cursor: "pointer",
-                    marginBottom: 6, color: "var(--text)", fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)", transition: "border-color 0.2s"
-                  }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, alignItems: "flex-start" }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)" }}>
-                        {e.triggerType || e.trigger?.slice(0, 40) || "Signal event"}
-                      </div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em", flexShrink: 0, marginLeft: 12 }}>{e.date}</div>
-                    </div>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      {e.signal?.length > 0 && (
-                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--amber)", textTransform: "uppercase" }}>
-                          {e.signal.join(" · ")}
-                        </span>
-                      )}
-                      {e.outcome && (
-                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", textTransform: "uppercase" }}>
-                          → {e.outcome}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                ))}
-              </>
-            )}
-
-            {journalMode === "new" && (
-              <>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>New Entry</div>
-                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 28 }}>Log the event</h1>
-
-                {/* SIGNAL — where did it activate */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                    01 · Signal — where did it activate?
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                    {signalAreas.map(area => (
-                      <button key={area} onClick={() => setJSignal(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area])}
-                        style={{
-                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
-                          background: jSignal.includes(area) ? "var(--amber-glow)" : "var(--surface)",
-                          border: `0.5px solid ${jSignal.includes(area) ? "var(--amber-dim)" : "var(--border)"}`,
-                          color: jSignal.includes(area) ? "var(--amber)" : "var(--text-dim)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
-                        }}
-                      >{area}</button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* TRIGGER — what caused it */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                    02 · Trigger — what caused it?
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 10 }}>
-                    {triggerTypes.map(t => (
-                      <button key={t} onClick={() => setJTriggerType(prev => prev === t ? "" : t)}
-                        style={{
-                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
-                          background: jTriggerType === t ? "var(--amber-glow)" : "var(--surface)",
-                          border: `0.5px solid ${jTriggerType === t ? "var(--amber-dim)" : "var(--border)"}`,
-                          color: jTriggerType === t ? "var(--amber)" : "var(--text-dim)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
-                        }}
-                      >{t}</button>
-                    ))}
-                  </div>
-                  <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-                    <textarea
-                      value={jTrigger}
-                      onChange={e => setJTrigger(e.target.value)}
-                      placeholder="Add detail if needed..."
-                      style={{
-                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)",
-                        padding: "10px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif",
-                        resize: "none", minHeight: 52, lineHeight: 1.6
-                      }}
-                    />
-                    <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
-                  </div>
-                </div>
-
-                {/* OUTCOME — what happened */}
-                <div style={{ marginBottom: 24 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                    03 · Outcome — what happened?
-                  </div>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                    {outcomeTypes.map(o => (
-                      <button key={o} onClick={() => setJOutcome(prev => prev === o ? "" : o)}
-                        style={{
-                          padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
-                          background: jOutcome === o ? "var(--amber-glow)" : "var(--surface)",
-                          border: `0.5px solid ${jOutcome === o ? "var(--amber-dim)" : "var(--border)"}`,
-                          color: jOutcome === o ? "var(--amber)" : "var(--text-dim)",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
-                        }}
-                      >{o}</button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* NOTES — optional */}
-                <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                    04 · Notes <span style={{ opacity: 0.5 }}>— optional</span>
-                  </div>
-                  <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-                    <textarea
-                      value={jBody}
-                      onChange={e => setJBody(e.target.value)}
-                      placeholder={["What triggered this?", "What were you about to do?", "Who was involved?", "What did your body feel?", "What thought fired first?", "Where were you when it hit?"][Math.floor(Date.now() / 86400000) % 6]}
-                      style={{
-                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)",
-                        padding: "10px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif",
-                        resize: "none", minHeight: 52, lineHeight: 1.6
-                      }}
-                    />
-                    <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
-                  </div>
-                </div>
-
-                <button onClick={saveJournalEntry} disabled={!jSignal.length && !jTriggerType && !jTrigger.trim()} style={{
-                  width: "100%", padding: "14px", borderRadius: "var(--r)", fontSize: 14, fontWeight: 500,
-                  fontFamily: "'DM Sans', sans-serif",
-                  cursor: (jSignal.length || jTriggerType || jTrigger.trim()) ? "pointer" : "not-allowed",
-                  background: (jSignal.length || jTriggerType || jTrigger.trim()) ? "var(--amber)" : "var(--surface2)",
-                  color: (jSignal.length || jTriggerType || jTrigger.trim()) ? "#0A0A0C" : "var(--text-muted)",
-                  border: "none", transition: "all 0.2s",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.12)"
-                }}>
-                  Log entry
-                </button>
-              </>
-            )}
-
-            {journalMode === "view" && journalViewIdx !== null && journalEntries[journalViewIdx] && (() => {
-              const e = journalEntries[journalViewIdx];
-              const labelStyle = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.16em", textTransform: "uppercase" };
-              const valueStyle = { fontSize: 14, color: "var(--text)", lineHeight: 1.6 };
-              return (
-                <>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, gap: 12 }}>
-                    <div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Pulse Entry</div>
-                      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, fontWeight: 300, lineHeight: 1.3 }}>{e.triggerType || e.trigger || "Signal event"}</h1>
-                    </div>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", whiteSpace: "nowrap", flexShrink: 0 }}>{e.date}<br/>{e.time}</div>
-                  </div>
-
-                  {e.signal?.length > 0 && (
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={labelStyle}>Signal</div>
-                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                        {e.signal.map(s => (
-                          <span key={s} style={{ padding: "4px 10px", borderRadius: "var(--r-sm)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em" }}>{s}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {(e.triggerType || e.trigger) && (
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={labelStyle}>Trigger</div>
-                      <div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div>
-                    </div>
-                  )}
-
-                  {e.outcome && (
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={labelStyle}>Outcome</div>
-                      <div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div>
-                    </div>
-                  )}
-
-                  {e.notes && (
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={labelStyle}>Notes</div>
-                      <div style={valueStyle}>{e.notes}</div>
-                    </div>
-                  )}
-
-                  {e.emotions?.length > 0 && (
-                    <div style={{ marginBottom: 20 }}>
-                      <div style={labelStyle}>Emotions logged</div>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                        {e.emotions.map(em => (
-                          <span key={em} style={{ padding: "4px 10px", borderRadius: "var(--r-sm)", fontSize: 11, background: "var(--surface2)", border: "0.5px solid var(--border)", color: "var(--text-dim)" }}>{em}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <button onClick={() => deleteJournalEntry(e.id)} style={{
-                    marginTop: 24, background: "none", border: "0.5px solid rgba(200,60,60,0.3)", borderRadius: "var(--r)",
-                    padding: "10px 16px", fontSize: 12, color: "rgba(200,80,80,0.7)", cursor: "pointer",
-                    fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em"
-                  }}>
-                    Delete entry
-                  </button>
-                </>
-              );
-            })()}
-          </section>
-        )}
 
         {/* PRICING */}
         {screen === "pricing" && (
