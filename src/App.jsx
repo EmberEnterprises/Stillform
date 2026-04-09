@@ -10,7 +10,8 @@ class ErrorBoundary extends Component {
       return (
         <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "#C8922A", marginBottom: 12 }}>Something went wrong.</div>
-          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 32, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
+          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 16, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
+          <div style={{ fontSize: 11, color: "#555", marginBottom: 24, fontFamily: "monospace", maxWidth: 320, wordBreak: "break-word" }}>{this.state.error?.message || String(this.state.error)}</div>
           <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
             style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
             Restart Stillform
