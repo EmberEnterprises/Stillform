@@ -5266,11 +5266,11 @@ function QBPill({ onPress }) {
     };
   };
 
-  const [pos, setPos] = React.useState(getSavedPos);
-  const [dragging, setDragging] = React.useState(false);
-  const [didDrag, setDidDrag] = React.useState(false);
-  const startRef = React.useRef(null);
-  const posRef = React.useRef(pos);
+  const [pos, setPos] = useState(getSavedPos);
+  const [dragging, setDragging] = useState(false);
+  const [didDrag, setDidDrag] = useState(false);
+  const startRef = useRef(null);
+  const posRef = useRef(pos);
   posRef.current = pos;
 
   const clamp = (p) => ({
