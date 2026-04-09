@@ -4274,6 +4274,7 @@ function PanicMode({ onComplete }) {
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
         tools: exitPoint === "grounding" ? ["breathe", "ground"] : ["breathe"],
+        source: "panic",
         exitPoint
       });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
@@ -6288,7 +6289,7 @@ export default function Stillform() {
 
                 if (isCheckedIn) return (
                   <div style={{ marginBottom: 20 }}>
-                    <button onClick={() => { setCiSaved(false); setCiOpen(true); }} style={{
+                    <button onClick={() => { setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set()); }} style={{
                       background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer", padding: 0
                     }}>
