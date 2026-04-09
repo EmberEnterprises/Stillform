@@ -4,20 +4,24 @@
 
 ---
 
-## BLOCKERS CLEARED TODAY
+## BLOCKERS STATUS (as of April 8)
 
 - ✅ Lemon Squeezy approved (test mode, products created)
 - ✅ Apple Developer Program purchased ($99/yr) — TestFlight unlocked
-- ✅ DUNS number confirmed (Apple accepted ARA Embers LLC)
-- ✅ Latest build published on Netlify (commit f281548 + Bobby's fix 2587511)
+- ✅ Latest build published on Netlify
 - ✅ Science sheet: 18 peer-reviewed sections
-- ✅ Ship checklist: 11 items, saved to memory
+- ✅ Ship checklist: 11 items
+- ⏳ DUNS — applied April 4, expected ~May 4. Apple approved without it (5-day verification). Google Play org account blocked until DUNS arrives.
+- ❌ Cloud infrastructure (Supabase) — next session
+- ❌ Paywall end-to-end test — blocked on cloud
+- ❌ Google Play closed testing — blocked on DUNS (~May 4)
+- ❌ TestFlight — Xcode compile not yet verified
 
 ---
 
 ## CRITICAL PATH — IN ORDER
 
-### 1. Cloud Infrastructure (NEXT SESSION — blocks everything)
+### 1. Cloud Infrastructure (NEXT SESSION — April 9)
 
 **Why it's #1:** Nothing else matters if user data lives in localStorage. One cache clear = total loss. No real accounts = no subscription verification = honor system paywall. No cloud = no cross-device sync = users locked to one browser.
 
@@ -75,6 +79,18 @@
 ## FEATURES READY TO BUILD — PRIORITIZED
 
 ### Tier 1: Build Before Launch
+
+**✅ SHIPPED April 8:**
+- Pulse tab removed from Reframe — feel state auto-logs to Signal Log on session start
+- Post-session rating gate in Reframe ("Where are you now?" chips, maps to 1–5 numeric scale on save)
+- Morning check-in "Set my tone →" now hands off directly to Reframe
+- Pulse entries now use ISO date format — AI "today" filter works correctly
+- AI fatigue guardrail in reframe.js — standard rises with conversation depth, not falls
+- Feel state → numeric score mapping: angry=1, anxious=2, flat=2, mixed=3, excited=4, focused=5
+- Pulse renamed consistently everywhere user-facing (Signal Log killed)
+- What's New panel updated (DUNS status, naming)
+
+**Still to build:**
 
 
 
@@ -445,14 +461,16 @@ But timing matters. Product first. Traction first. Compliance later. Do not chas
 
 ## OPEN QUESTIONS — NEED DECISIONS
 
-1. **Simplify breathing?** Two options ("Slow down" / "Quick reset") vs keep four with honest framing?
-2. **Supabase vs Firebase?** Supabase is Postgres + open source. Firebase is Google ecosystem. Both have free tiers.
-3. **When to go live on Lemon Squeezy?** Switch from test to live mode — needs Bobby to trigger.
-4. **Reddit timing?** Paywall must be live + cloud sync must work + 3-5 real testimonials. When?
-5. **TestFlight priority?** Is this before or after cloud sync? Users on TestFlight will lose data without cloud.
-6. **Neuro voice — web first or native first?** Web Speech API works in Chrome but not Safari. Native gives wider support.
-7. **Pricing reconsideration?** $14.99/mo is high for an unproven app. Consider $9.99/mo flat with no annual discount for launch, raise after traction?
-8. **Research partnership?** A grad student could run a pilot study for their thesis — free validation. Worth pursuing?
+1. **Breathing** — simplified to 2 options (Quick Reset + Deep Regulate). ✅ Shipped.
+2. **Supabase** — confirmed. Building next session (April 9).
+3. **Lemon Squeezy live mode** — switch after cloud sync verified. Needs Bobby to trigger.
+4. **Reddit timing** — paywall live + cloud sync working + 3-5 real testimonials. Not before.
+5. **TestFlight** — after cloud sync. Users will lose data without it.
+6. **Neuro voice** — web first (Web Speech API). Safari gap acceptable for now.
+7. **Pricing** — locked at $14.99/mo or $9.99/mo annual. Revisit after 100 paying users.
+8. **Research partnership** — after cloud + 4-6 weeks real user data. Email drafted, not sent.
+9. **Merge strategy for Supabase** — UNRESOLVED. Decide before building: if user has localStorage data on two devices before account creation, what wins on sync? Options: last-write-wins (simple), merge by timestamp (complex), prompt user (best UX).
+10. **Google Play individual vs org** — individual account ($25, no DUNS) lets you start 14-day testing clock now. Downside: personal name shows on store until converted. Decision needed.
 
 ---
 
@@ -517,13 +535,16 @@ Stillform tracks whether you actually found it. Measures the shift. Names it bac
 
 ---
 
-## NEXT SESSION PLAN
+## NEXT SESSION PLAN (April 9)
 
-**Priority 1:** Cloud infrastructure (Supabase setup, auth, sync, backup)
-**Priority 2:** Paywall end-to-end test with 4242 card
-**Priority 3:** TestFlight build (if Xcode cooperates)
-**Priority 4:** Address open questions above
-**Priority 5:** Neuro voice prototype (mic button in Reframe)
+**Priority 1:** Cloud infrastructure (Supabase — auth, sync, backup, merge strategy decision first)
+**Priority 2:** Bundle and push staged App.jsx changes (feel state score mapping + any session changes)
+**Priority 3:** Paywall end-to-end test with 4242 card
+**Priority 4:** TestFlight — verify Capacitor build compiles clean
+**Priority 5:** Google Play individual account decision (start 14-day clock without DUNS?)
+
+**Staged but not pushed (waiting to bundle):**
+- Feel state → numeric score mapping in ReframeTool saveSession
 
 ---
 
