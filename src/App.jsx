@@ -2885,8 +2885,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         setError("Couldn\'t extract clean text from that image. Try a clearer screenshot.");
         return;
       }
-      // Drop extracted text into input — user can edit before sending
-      setInput(prev => prev ? prev + "\n\n" + cleanedText : cleanedText);
+      // Prepend context so AI knows this is a screenshot of a conversation, not the user's own words
+      const contextualText = `[Screenshot of a conversation]\n${cleanedText}\n\nThis is what I'm dealing with — what do I do with this?`;
+      setInput(prev => prev ? prev + "\n\n" + contextualText : contextualText);
       try { window.plausible("Image Upload", { props: { chars: text.length } }); } catch {}
     } catch {
       setError("OCR failed. Try a clearer screenshot or type it out.");
