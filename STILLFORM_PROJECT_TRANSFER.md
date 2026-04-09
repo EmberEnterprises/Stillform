@@ -900,18 +900,22 @@ The AI relationship. Period. After 10 sessions the AI is irreplaceable because s
 
 Before pushing any change, Claude must check each item. If it applies, update it in the same commit. No exceptions.
 
+**BEFORE EVERY PUSH — NO EXCEPTIONS:**
+Pull the live file from GitHub and verify every claimed change is actually present. Do not tell Arlin something is done until it is confirmed in the live deployed file. This is non-negotiable. Integrity is the standard.
+
 | # | Check | When it applies |
 |---|-------|----------------|
-| 1 | **UAT dropdown** | Any user-visible change — add to ★ NEW THIS WEEK |
-| 2 | **Tutorial** | Any new feature or renamed feature |
-| 3 | **FAQ** | Any change to how a feature works or what it's called |
-| 4 | **Transfer doc** | Every change, always |
-| 5 | **Plausible event** | Any new trackable action (add Goal name to doc + code) |
-| 6 | **Privacy policy note** | Any new data collected or new provider |
-| 7 | **Science sheet** | Any new research-backed feature |
-| 8 | **AI prompts** | Any change that affects Reframe context (new data sent to API) |
-| 9 | **Promo** | Any feature worth marketing |
-| 10 | **Punch list** | Add testable item for the change |
+| 1 | **VERIFY LIVE** | Pull live file from GitHub and confirm every change is present before claiming it's done. No exceptions. Ever. |
+| 2 | **UAT dropdown** | Any user-visible change — add to ★ NEW THIS WEEK |
+| 3 | **Tutorial** | Any new feature or renamed feature |
+| 4 | **FAQ** | Any change to how a feature works or what it's called |
+| 5 | **Transfer doc** | Every change, always |
+| 6 | **Plausible event** | Any new trackable action (add Goal name to doc + code) |
+| 7 | **Privacy policy note** | Any new data collected or new provider |
+| 8 | **Science sheet** | Any new research-backed feature |
+| 9 | **AI prompts** | Any change that affects Reframe context (new data sent to API) |
+| 10 | **Promo** | Any feature worth marketing |
+| 11 | **Punch list** | Add testable item for the change |
 | 12 | **AI stress test** | Any AI prompt change must pass all 19 scenarios before shipping. Zero regressions. |
 
 | 11 | **Emotion coverage** | Any change to Pulse/chips — verify balance of positive, negative, and neutral emotions. No bias toward negative. |
