@@ -3467,7 +3467,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Start fresh
             </button>
           </div>
-          {messages.length > 2 && false && }
+          
         </div>
       )}
       {messages.length === 0 && loading && (
