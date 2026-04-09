@@ -5317,7 +5317,8 @@ export default function Stillform() {
     setScreen("setup");
   };
 
-    // Scroll to top on every screen change + analytics useEffect(() => {
+  // Scroll to top on every screen change + analytics
+  useEffect(() => {
     window.scrollTo(0, 0);
     if (screen !== "home" && screen !== "onboarding") {
       try { window.plausible("Screen View", { props: { screen } }); } catch {}
