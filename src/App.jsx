@@ -5249,6 +5249,74 @@ function MyProgress({ onBack }) {
   );
 }
 
+// ─── DRAGGABLE QUICK BREATHE PILL ───────────────────────────────────────────
+// Users can drag to reposition. Position saved in localStorage.
+function QBPill({ onPress }) {
+  const storageKey = "stillform_qb_position";
+  const defaultPos = { x: window.innerWidth - 160, y: window.innerHeight - 140 };
+  
+  const getSavedPos = () => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey));
+      if (saved && typeof saved.x === "number" && typeof saved.y === "number") return saved;
+    } catch {}
+    return defaultPos;
+  };
+
+  const [pos, setPos] = React.useState(getSavedPos);
+  const [dragging, setDragging] = React.useState(false);
+  const [didDrag, setDidDrag] = React.useState(false);
+  const startRef = React.useRef(null);
+  const posRef = React.useRef(pos);
+  posRef.current = pos;
+
+  const clamp = (p) => ({
+    x: Math.max(8, Math.min(window.innerWidth - 152, p.x)),
+    y: Math.max(60, Math.min(window.innerHeight - 60, p.y))
+  });
+
+  const onPointerDown = (e) => {
+    e.preventDefault();
+    setDragging(true);
+    setDidDrag(false);
+    startRef.current = { px: e.clientX - posRef.current.x, py: e.clientY - posRef.current.y };
+    
+    const onMove = (me) => {
+      const next = clamp({ x: me.clientX - startRef.current.px, y: me.clientY - startRef.current.py });
+      setPos(next);
+      setDidDrag(true);
+    };
+    const onUp = () => {
+      setDragging(false);
+      try { localStorage.setItem(storageKey, JSON.stringify(posRef.current)); } catch {}
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+    };
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
+  return (
+    <div
+      onPointerDown={onPointerDown}
+      onClick={() => { if (!didDrag) onPress(); }}
+      style={{
+        position: "fixed", left: pos.x, top: pos.y, zIndex: 200,
+        background: "var(--bg)", border: "1px solid var(--amber-dim)",
+        borderRadius: 28, padding: "10px 18px", fontSize: 12, letterSpacing: "0.06em",
+        color: "var(--amber)", cursor: dragging ? "grabbing" : "grab",
+        fontFamily: "'DM Sans', sans-serif",
+        boxShadow: dragging ? "0 8px 24px rgba(0,0,0,0.5)" : "0 2px 12px rgba(0,0,0,0.3)",
+        transition: dragging ? "none" : "box-shadow 0.2s",
+        userSelect: "none", WebkitUserSelect: "none",
+        transform: dragging ? "scale(1.05)" : "scale(1)"
+      }}
+    >
+      ◎ Quick Breathe
+    </div>
+  );
+}
+
 export default function Stillform() {
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
@@ -6010,16 +6078,9 @@ export default function Stillform() {
         })()}
 
         {/* FLOATING RESET — accessible from any screen except active tool sessions */}
-        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "setup" && screen !== "tool" && (
-          <button onClick={() => setScreen("panic")} style={{
-            position: "fixed", bottom: 80, right: 24, zIndex: 100,
-            background: "var(--bg)", border: "1px solid var(--amber-dim)",
-            borderRadius: 28, padding: "10px 18px", fontSize: 12, letterSpacing: "0.06em",
-            color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-            boxShadow: "0 2px 12px rgba(0,0,0,0.3)", transition: "all 0.2s"
-          }}>
-            ◎ Quick Breathe
-          </button>
+        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && 
+         !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
+          <QBPill onPress={() => setScreen("panic")} />
         )}
 
         {/* PANIC MODE — zero decisions, auto-start breathing */}
@@ -6729,13 +6790,7 @@ export default function Stillform() {
                   <>{activeTool.icon} {activeTool.name}</>
                 )}
               </div>
-              <button onClick={() => setScreen("panic")} style={{
-                background: "none", border: "1px solid var(--amber-dim)", borderRadius: "var(--r)",
-                padding: "4px 10px", fontSize: 11, color: "var(--amber)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
-              }}>
-                Quick Reset
-              </button>
+
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
               Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
@@ -7717,19 +7772,27 @@ export default function Stillform() {
           </section>
         )}
 
-        {/* FOOTER — hidden during active sessions and full-screen screens */}
-        {!["tool","panic","onboarding","setup","pricing"].includes(screen) && <footer className="footer">
-          <div className="footer-logo">Stillform</div>
-          <div className="footer-links">
-            <button onClick={() => setScreen("pricing")}>Subscribe</button>
-            <button onClick={() => setScreen("settings")}>Settings</button>
-            <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
-          </div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center" }}>
-            Private. No data sold. No noise.
-          </div>
-          <div className="footer-copy">© 2026 ARA Embers LLC</div>
-        </footer>}
+        {/* FOOTER — always visible except tool/panic/onboarding. Active screen link hidden. */}
+        {!["tool","panic","onboarding"].includes(screen) && (
+          <footer className="footer">
+            <div className="footer-logo">Stillform</div>
+            <div className="footer-links">
+              {screen !== "pricing" && screen !== "home" && (
+                <button onClick={() => setScreen("pricing")}>Subscribe</button>
+              )}
+              {screen !== "settings" && (
+                <button onClick={() => setScreen("settings")}>Settings</button>
+              )}
+              {screen !== "crisis" && (
+                <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
+              )}
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center" }}>
+              Private. No data sold. No noise.
+            </div>
+            <div className="footer-copy">© 2026 ARA Embers LLC</div>
+          </footer>
+        )}
       </div>
     </>
     </ErrorBoundary>
