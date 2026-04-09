@@ -2608,7 +2608,13 @@ const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_pr
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
-  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.message||"Supabase "+res.status); }
+  if (!res.ok) {
+    const e = await res.json().catch(()=>({}));
+    if (res.status === 429) {
+      throw new Error("Too many attempts right now. Please wait about a minute, then try again.");
+    }
+    throw new Error(e.message||"Supabase "+res.status);
+  }
   return res.json().catch(()=>null);
 };
 const sbGetSession = () => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } };
