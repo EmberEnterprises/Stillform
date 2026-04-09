@@ -3718,8 +3718,9 @@ function MicroBiasTool({ onComplete }) {
 function MetacognitionTool({ onComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
-  // Track start
-  if (step === 0 && Object.keys(responses).length === 0) {
+  const startTrackedRef = React.useRef(false);
+  if (step === 0 && !startTrackedRef.current) {
+    startTrackedRef.current = true;
     try { window.plausible?.("Watch & Choose Started"); } catch {}
   }
 
@@ -5863,7 +5864,7 @@ export default function Stillform() {
                 {current.subtitle}
               </div>
               <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.8, marginBottom: 36 }}>
-                {current.body.split("\n\n").map((para, i) => (
+                {current.body && current.body.split("\n\n").map((para, i) => (
                   <p key={i} style={{ marginBottom: 12 }}>{para}</p>
                 ))}
               </div>
