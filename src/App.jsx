@@ -7721,7 +7721,6 @@ export default function Stillform() {
         {!["tool","panic","onboarding","setup","pricing"].includes(screen) && <footer className="footer">
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
-            <button onClick={() => setScreen("home")}>Home</button>
             <button onClick={() => setScreen("pricing")}>Subscribe</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
