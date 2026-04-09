@@ -2970,6 +2970,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
     if (messages.length === 4) { try { window.plausible("Reframe Deep Engagement", { props: { mode: effectiveMode } }); } catch {} }
+    // Auto-log feel state to Signal Log on first message of session
+    if (messages.length === 0 && !retryText && feelState) {
+      try {
+        const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+        entries.unshift({ id: Date.now(), emotions: [feelState], trigger: "", timestamp: new Date().toISOString(), source: "reframe-auto" });
+        localStorage.setItem("stillform_journal", JSON.stringify(entries));
+      } catch {}
+    }
 
     try {
       const controller = new AbortController();
@@ -3231,155 +3239,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
-      {/* TALK / JOURNAL TABS */}
-      <div style={{ display: "flex", marginBottom: 16, borderBottom: `1px solid ${mc.border}` }}>
-        <button onClick={() => setTab("talk")} style={{
-          flex: 1, background: "none", border: "none", borderBottom: tab === "talk" ? `2px solid ${mc.color}` : "2px solid transparent",
-          padding: "10px 0", fontSize: 13, fontWeight: tab === "talk" ? 500 : 400,
-          color: tab === "talk" ? mc.color : "var(--text-muted)",
-          cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
-        }}>
-          Talk · get guidance
-        </button>
-        <button onClick={() => setTab("journal")} style={{
-          flex: 1, background: "none", border: "none", borderBottom: tab === "journal" ? `2px solid ${mc.color}` : "2px solid transparent",
-          padding: "10px 0", fontSize: 13, fontWeight: tab === "journal" ? 500 : 400,
-          color: tab === "journal" ? mc.color : "var(--text-muted)",
-          cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s"
-        }}>
-          Pulse
-        </button>
-      </div>
-
       <div className="disclaimer">
         Your data is encrypted and synced securely. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
       </div>
 
-      {/* ── JOURNAL TAB ── */}
-      {tab === "journal" && (
-        <div>
-          {/* EMOTION CHIPS */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              What's present
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-              {["Calm", "Grateful", "Proud", "Relief", "Joy", "Excitement", "Restless", "Mixed", "Anger", "Anxiety", "Dread", "Overwhelm", "Shame", "Frustration", "Numbness", "Grief", "Fear", "Confusion"].map(em => {
-                const selected = pulseChips.has(em);
-                return (
-                  <button key={em} onClick={() => {
-                    setPulseChips(prev => {
-                      const next = new Set(prev);
-                      if (next.has(em)) next.delete(em);
-                      else next.add(em);
-                      return next;
-                    });
-                  }} style={{
-                    padding: "6px 12px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
-                    background: selected ? mc.aiBubble : "var(--surface)",
-                    border: `0.5px solid ${selected ? mc.color : "var(--border)"}`,
-                    color: selected ? mc.color : "var(--text-muted)",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)"
-                  }}>{em}</button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* FREE TEXT */}
-          <div style={{ marginBottom: 12 }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
-              Notes — optional
-            </div>
-            <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-              <textarea
-                value={journalText}
-                onChange={e => setJournalText(e.target.value)}
-                placeholder={["What triggered this?", "What were you about to do?", "Who was involved?", "What did your body feel?", "What thought fired first?", "Where were you when it hit?"][Math.floor(Date.now() / 86400000) % 6]}
-                style={{
-                  flex: 1, minHeight: 100, background: mc.inputBg || "var(--surface)",
-                  border: `0.5px solid ${mc.border}`, borderRadius: "var(--r)",
-                  padding: "10px 12px", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6, resize: "none"
-                }}
-              />
-              <MicButton onTranscript={t => setJournalText(prev => prev + (prev ? " " : "") + t)} />
-            </div>
-          </div>
-
-          <button onClick={saveJournal} disabled={!journalText.trim() && pulseChips.size === 0} style={{
-            width: "100%", background: (journalText.trim() || pulseChips.size > 0) ? mc.sendBg : "var(--surface2)",
-            color: (journalText.trim() || pulseChips.size > 0) ? "#0A0A0C" : "var(--text-muted)",
-            border: "none", borderRadius: "var(--r)", padding: "12px",
-            fontSize: 14, fontWeight: 500, cursor: (journalText.trim() || pulseChips.size > 0) ? "pointer" : "default",
-            fontFamily: "'DM Sans', sans-serif", transition: "opacity 0.2s",
-            boxShadow: (journalText.trim() || pulseChips.size > 0) ? "inset 0 1px 0 rgba(255,255,255,0.12)" : "none",
-            marginBottom: 20
-          }}>
-            Log pulse
-          </button>
-
-          {/* RECENT + FREQUENT */}
-          {(() => {
-            try {
-              const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-              if (entries.length === 0) return (
-                <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6, fontStyle: "italic" }}>
-                  No entries yet. The AI uses these every session.
-                </div>
-              );
-
-              // Emotion frequency
-              const freq = {};
-              entries.forEach(e => (e.emotions || []).forEach(em => { freq[em] = (freq[em] || 0) + 1; }));
-              // Also count from trigger text for old entries
-              entries.forEach(e => {
-                ["Calm","Grateful","Proud","Relief","Joy","Excitement","Restless","Mixed","Anger","Anxiety","Dread","Overwhelm","Shame","Frustration","Numbness","Grief","Fear","Confusion"]
-                  .forEach(em => { if ((e.trigger || "").includes(em)) freq[em] = (freq[em] || 0) + 0.5; });
-              });
-              const topEmotions = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 4);
-
-              return (
-                <>
-                  {topEmotions.length > 0 && (
-                    <div style={{ marginBottom: 16 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Most frequent</div>
-                      <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                        {topEmotions.map(([em]) => (
-                          <span key={em} style={{
-                            padding: "3px 9px", borderRadius: "var(--r-sm)", fontSize: 10,
-                            background: mc.aiBubble, border: `0.5px solid ${mc.border}`,
-                            color: mc.color, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em"
-                          }}>{em}</span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Recent</div>
-                  {entries.slice(0, 3).map((e, i) => (
-                    <div key={e.id || i} style={{
-                      padding: "10px 12px", background: mc.aiBubble || "var(--surface)",
-                      border: `0.5px solid ${mc.border || "var(--border)"}`,
-                      borderRadius: "var(--r)", marginBottom: 6
-                    }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.06em" }}>{e.date}</div>
-                      <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
-                        {e.triggerType || (e.trigger || "").slice(0, 60)}{(e.trigger || "").length > 60 ? "…" : ""}
-                      </div>
-                      {e.outcome && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: mc.color, marginTop: 4, letterSpacing: "0.06em", textTransform: "uppercase" }}>{e.outcome}</div>}
-                    </div>
-                  ))}
-                </>
-              );
-            } catch { return null; }
-          })()}
-        </div>
-      )}
-
-      {/* ── TALK TAB ── */}
-      {tab === "talk" && (
+            {tab === "talk" && (
       <>
 
       {/* Error banner */}
@@ -7148,8 +7012,8 @@ export default function Stillform() {
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
-                q: "What's the Pulse tab in Reframe?",
-                a: "A space to log what's present while you're in conversation with the AI. Tag emotions, note triggers. The AI references your entries in every future session."
+                q: "How does Signal Log work?",
+                a: "When you select a feel state before starting a session, it's automatically logged to your Signal Log. The AI references your history in every future session to spot patterns over time."
               },
               {
                 q: "What is Composure Telemetry?",
@@ -7997,3 +7861,4 @@ export default function Stillform() {
     </ErrorBoundary>
   );
 }
+
