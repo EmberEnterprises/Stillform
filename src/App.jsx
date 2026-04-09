@@ -1308,46 +1308,7 @@ const scheduleReminder = async (title, body, hour, minute) => {
 };
 
 
-function SessionNote() {
-  const [note, setNote] = useState("");
-  const [saved, setSaved] = useState(false);
 
-  const save = () => {
-    if (!note.trim()) return;
-    try {
-      const notes = JSON.parse(localStorage.getItem("stillform_notes") || "[]");
-      notes.push({ timestamp: new Date().toISOString(), text: note.trim() });
-      localStorage.setItem("stillform_notes", JSON.stringify(notes));
-    } catch {}
-    setSaved(true);
-  };
-
-  if (saved) return <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 12 }}>✓ Noted.</div>;
-
-  return (
-    <div style={{ marginTop: 16 }}>
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
-          style={{
-            flex: 1, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
-            padding: "8px 12px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
-          }}
-          placeholder="What triggered this? (optional)"
-          value={note}
-          onChange={e => setNote(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && save()}
-        />
-        <MicButton onTranscript={t => setNote(prev => prev + (prev ? " " : "") + t)} />
-        {note.trim() && (
-          <button onClick={save} style={{
-            background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r)",
-            padding: "8px 12px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-          }}>Save</button>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // Check display preferences
 function useDisplayPrefs() {
@@ -1427,7 +1388,7 @@ function PhysiologicalSighTool({ onComplete }) {
         <button className="btn btn-ghost" style={{ marginTop: 10, width: "100%" }} onClick={onComplete}>
           Done
         </button>
-        <SessionNote />
+        
       </div>
     );
   }
@@ -1743,7 +1704,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
             Exit session
           </button>
         </div>
-        <SessionNote />
+        
       </div>
     );
   }
@@ -1988,31 +1949,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
           }}>
             {audioOn ? "♪ Sound on" : "♪ Sound off"}
           </button>
-          {!showPatternPicker && (
-            <button onClick={() => { setRunning(false); setShowPatternPicker(true); }} style={{
-              background: "none", border: "none", color: "var(--text-muted)", fontSize: 11,
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginBottom: 16,
-              letterSpacing: "0.04em", opacity: running ? 0.5 : 1
-            }}>
-              {pattern.name} · change pattern
-            </button>
-          )}
-          {showPatternPicker && (
-            <div style={{ width: "100%", maxWidth: 320, marginBottom: 20 }}>
-              {BREATHING_PATTERNS.map(p => (
-                <button key={p.id} onClick={() => selectPattern(p.id)} style={{
-                  width: "100%", padding: "10px 14px", textAlign: "left", cursor: "pointer",
-                  background: p.id === patternId ? "var(--amber-glow)" : "var(--surface)",
-                  border: `1px solid ${p.id === patternId ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
-                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 2 }}>{p.name}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{p.desc}</div>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Pattern name shown, no mid-session change — user picks at start */}
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.04em", fontFamily: "'DM Sans', sans-serif" }}>
+            {pattern.name}
+          </div>
           {!running ? (
             <button className="btn btn-primary" style={{ fontSize: 16, padding: "14px 40px" }} onClick={() => setRunning(true)}>
               Begin
@@ -2368,7 +2308,7 @@ function BodyScanTool({ onComplete }) {
           MOVING TO REFRAME…
         </div>
         <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>Exit session</button>
-        <SessionNote />
+        
       </div>
     );
   }
@@ -2746,7 +2686,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
-  const [tab, setTab] = useState(defaultTab);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -2792,30 +2731,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   }, []);
 
-  // Journal state
-  const [journalText, setJournalText] = useState("");
-  const [pulseChips, setPulseChips] = useState(new Set());
-  const saveJournal = () => {
-    if (!journalText.trim() && pulseChips.size === 0) return;
-    try {
-      const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-      entries.unshift({
-        id: Date.now(),
-        date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
-        time: new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
-        trigger: journalText.trim(),
-        emotions: [...pulseChips],
-        intensity: 0,
-        body: "",
-        outcome: "",
-        mode: effectiveMode
-      });
-      localStorage.setItem("stillform_journal", JSON.stringify(entries));
-      try { window.plausible("Pulse Entry", { props: { mode: effectiveMode } }); } catch {}
-    } catch {}
-    setJournalText("");
-    setPulseChips(new Set());
-  };
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -3045,6 +2960,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               if (checkin.mood && checkin.mood !== "not set" && checkin.mood !== "undefined") parts.push(`mood: "${checkin.mood}"`);
               if (checkin.stressEvent) parts.push(`stress: ${checkin.stressEvent}`);
               if (checkin.bio?.length) parts.push(`hardware: ${checkin.bio.filter(b => b !== "clear").join(", ")}`);
+              if (checkin.tension) {
+                const high = Object.entries(checkin.tension).filter(([,v]) => v === 2).map(([k]) => k);
+                const mild = Object.entries(checkin.tension).filter(([,v]) => v === 1).map(([k]) => k);
+                if (high.length) parts.push(`high tension: ${high.join(", ")}`);
+                if (mild.length) parts.push(`mild tension: ${mild.join(", ")}`);
+              }
               if (checkin.notes) parts.push(`notes: ${checkin.notes}`);
               return parts.length ? `Today — ${parts.join(", ")}` : null;
             } catch { return null; }
@@ -3537,7 +3458,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Start fresh
             </button>
           </div>
-          {messages.length > 2 && false && <SessionNote />}
+          {messages.length > 2 && false && }
         </div>
       )}
       {messages.length === 0 && loading && (
@@ -3704,12 +3625,11 @@ function MicroBiasTool({ onComplete }) {
 
 function PatternsTool({ onComplete }) {
   const [sessions, setSessions] = useState([]);
-  const [checkins, setCheckins] = useState([]);
   const [signals, setSignals] = useState({});
 
   useEffect(() => {
     try { setSessions(JSON.parse(localStorage.getItem("stillform_sessions") || "[]")); } catch {}
-    try { setCheckins(JSON.parse(localStorage.getItem("stillform_checkins") || "[]")); } catch {}
+
     try { setSignals(JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}")); } catch {}
   }, []);
 
@@ -3759,20 +3679,12 @@ function PatternsTool({ onComplete }) {
     insights.push({ label: "Total sessions", value: `${sessions.length}`, detail: "Every one of these worked" });
   }
 
-  // Check-in patterns
-  if (checkins.length >= 3) {
-    const areaTotals = {};
-    checkins.forEach(c => {
-      Object.entries(c.levels || {}).forEach(([area, level]) => {
-        if (!areaTotals[area]) areaTotals[area] = { total: 0, count: 0 };
-        areaTotals[area].total += level;
-        areaTotals[area].count++;
-      });
-    });
-    const highest = Object.entries(areaTotals).sort((a, b) => (b[1].total / b[1].count) - (a[1].total / a[1].count))[0];
-    if (highest && highest[1].total / highest[1].count > 1) {
-      const names = { jaw: "Jaw", shoulders: "Shoulders", chest: "Chest", gut: "Gut" };
-      insights.push({ label: "Tension pattern", value: names[highest[0]] || highest[0], detail: "Consistently your highest tension area" });
+  // Tension pattern from check-in history (morning check-in tension data)
+  const checkinHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+  if (checkinHistory?.tension) {
+    const high = Object.entries(checkinHistory.tension).filter(([,v]) => v === 2).map(([k]) => k);
+    if (high.length > 0) {
+      insights.push({ label: "Tension pattern today", value: high.join(", "), detail: "Flagged in your morning check-in" });
     }
   }
 
@@ -4178,12 +4090,7 @@ function BodyCheckInTool({ onComplete }) {
     if (currentIdx < areas.length - 1) {
       setTimeout(() => setCurrentIdx(i => i + 1), 300);
     } else {
-      // Save check-in
-      try {
-        const checkins = JSON.parse(localStorage.getItem("stillform_checkins") || "[]");
-        checkins.push({ timestamp: new Date().toISOString(), levels: updated });
-        localStorage.setItem("stillform_checkins", JSON.stringify(checkins));
-      } catch {}
+      // Tension data — handled by morning check-in now
       setTimeout(() => setDone(true), 300);
     }
   };
@@ -4562,7 +4469,7 @@ function PanicMode({ onComplete }) {
             Crisis resources →
           </a>
         </div>
-        <SessionNote />
+        
       </div>
     );
   }
@@ -4621,7 +4528,7 @@ function PanicMode({ onComplete }) {
             Done — close
           </button>
         </div>
-        <SessionNote />
+        
       </div>
     );
   }
@@ -5339,6 +5246,7 @@ export default function Stillform() {
   const [ciOpen, setCiOpen] = useState(true);
   const [ciEnergy, setCiEnergy] = useState(null);
   const [ciBio, setCiBio] = useState(new Set());
+  const [ciTension, setCiTension] = useState({});
   const [ciSaved, setCiSaved] = useState(false);
   const [eodOpen, setEodOpen] = useState(false);
   const [eodEnergy, setEodEnergy] = useState(null);
@@ -6309,7 +6217,8 @@ export default function Stillform() {
                   const bioArray = [...ciBio].filter(b => b !== "clear");
                   try {
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
-                      date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"]
+                      date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
+                      tension: Object.keys(ciTension).length > 0 ? ciTension : null
                     }));
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
@@ -6386,6 +6295,27 @@ export default function Stillform() {
                         }}>{b.label}</button>
                       ))}
                     </div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where are you holding tension?</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {["Jaw","Shoulders","Chest","Gut","Hands","Legs"].map(area => {
+                        const level = ciTension[area] || 0;
+                        return (
+                          <button key={area} onClick={() => setCiTension(prev => ({
+                            ...prev, [area]: prev[area] === 2 ? 0 : (prev[area] || 0) + 1
+                          }))} style={{
+                            padding: "5px 12px", borderRadius: 20, fontSize: 11, cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            background: level === 0 ? "transparent" : level === 1 ? "rgba(201,147,42,0.15)" : "var(--amber-glow)",
+                            border: `1px solid ${level === 0 ? "var(--border)" : "var(--amber-dim)"}`,
+                            color: level === 0 ? "var(--text-muted)" : "var(--amber)"
+                          }}>
+                            {area}{level > 0 ? ` ${"·".repeat(level)}` : ""}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 16, fontStyle: "italic" }}>Tap once = mild · twice = high</div>
 
                     <button onClick={saveCheckin} style={{
                       width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
@@ -6546,6 +6476,7 @@ export default function Stillform() {
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
                   ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
                   { id: "patterns", label: "Your Patterns", rec: false },
+                  { id: "meta", label: "Watch & Choose", rec: false },
                 ];
 
                 return (
@@ -7589,14 +7520,7 @@ export default function Stillform() {
                   <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals →</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
                 </button>
-                <button onClick={() => startTool(TOOLS.find(t => t.id === "checkin"))} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Tension check →</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>10-second scan. Are you holding something you haven't noticed?</div>
-                </button>
+                {/* Tension check moved into morning check-in flow */}
               </div>
             </div>
 
@@ -7604,19 +7528,19 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => setScreen("privacy")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Privacy & Disclaimers
-                </button>
                 <button onClick={() => setScreen("faq")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
                   FAQ
+                </button>
+                <button onClick={() => setScreen("privacy")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Privacy & Disclaimers
                 </button>
                 <a href="mailto:ARAembersllc@proton.me" style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
@@ -7692,7 +7616,6 @@ export default function Stillform() {
                     try {
                       localStorage.removeItem("stillform_sessions");
                       localStorage.removeItem("stillform_signal_profile");
-                      localStorage.removeItem("stillform_checkins");
                       localStorage.removeItem("stillform_saved_reframes");
                       localStorage.removeItem("stillform_reframe_session_calm");
                       localStorage.removeItem("stillform_reframe_session_clarity");
@@ -7715,12 +7638,12 @@ export default function Stillform() {
           </section>
         )}
 
-        {/* FOOTER */}
-        <footer className="footer">
+        {/* FOOTER — hidden during active sessions and full-screen screens */}
+        {!["tool","panic","onboarding","setup","pricing"].includes(screen) && <footer className="footer">
           <div className="footer-logo">Stillform</div>
           <div className="footer-links">
             <button onClick={() => setScreen("home")}>Home</button>
-            <button onClick={() => setScreen("pricing")}>Pricing</button>
+            <button onClick={() => setScreen("pricing")}>Subscribe</button>
             <button onClick={() => setScreen("settings")}>Settings</button>
             <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
           </div>
@@ -7728,7 +7651,7 @@ export default function Stillform() {
             Private. No data sold. No noise.
           </div>
           <div className="footer-copy">© 2026 ARA Embers LLC</div>
-        </footer>
+        </footer>}
       </div>
     </>
     </ErrorBoundary>
