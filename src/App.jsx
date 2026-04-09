@@ -5777,13 +5777,16 @@ export default function Stillform() {
       }
       const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7";
       const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
-      window.location.href = `${checkoutBase}?checkout[custom][redirect_url]=${redirect}`;
+      const variant = encodeURIComponent(pricingPlan === "annual" ? "annual" : "monthly");
+      window.location.href = `${checkoutBase}?checkout[custom][variant]=${variant}&checkout[custom][redirect_url]=${redirect}`;
     } catch {
       setCheckoutLoading(false);
       setCheckoutMessage("Couldn't open checkout. Try again.");
     }
   };
   const [pricingPlan, setPricingPlan] = useState("annual");
+  const [themeChoice, setThemeChoice] = useState(() => { try { return localStorage.getItem("stillform_theme") || "dark"; } catch { return "dark"; } });
+  const [aiToneChoice, setAiToneChoice] = useState(() => { try { return localStorage.getItem("stillform_ai_tone") || "balanced"; } catch { return "balanced"; } });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState(null);
   const [openLog, setOpenLog] = useState(null);
@@ -7207,7 +7210,7 @@ export default function Stillform() {
                   <li>Offline self-guided fallback if AI is unavailable</li>
                   <li>Pulse with AI memory</li>
                   <li>Daily check-in</li>
-                  <li>Device-local encrypted storage</li>
+                  <li>Encrypted local storage + encrypted cloud backup</li>
                   <li>Signal mapping + tension check</li>
                   <li>Pattern recognition (evolves with use)</li>
                   <li>Voice-to-text everywhere</li>
@@ -8102,7 +8105,7 @@ export default function Stillform() {
               </div>
               </div>
 
-              {/* Cloud Sync — premium */}
+              {/* Cloud Sync status */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Cloud Sync</div>
                 <div style={{
@@ -8112,7 +8115,7 @@ export default function Stillform() {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Sync across devices</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Coming soon — sync across devices. Requires account.</div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Available now in Cloud Sync above. Sign in and tap Sync now.</div>
                   </div>
                   <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
                 </div>
