@@ -2744,6 +2744,7 @@ async function secureSet(key, value) {
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
+  const [showPostRating, setShowPostRating] = useState(false);
   const [tab, setTab] = useState(defaultTab);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
@@ -2817,12 +2818,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
-  const saveSession = () => {
+  const saveSession = (postRating = null) => {
     const elapsed = Date.now() - startTime.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode });
+      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, preRating: feelState || null };
+      if (postRating) entry.postRating = postRating;
+      sessions.push(entry);
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
 
@@ -3199,6 +3202,41 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
+  if (showPostRating) {
+    const feelChips = [
+      { id: "excited", label: "Excited" },
+      { id: "focused", label: "Focused" },
+      { id: "anxious", label: "Anxious" },
+      { id: "angry", label: "Angry" },
+      { id: "flat", label: "Flat" },
+      { id: "mixed", label: "Mixed" }
+    ];
+    return (
+      <div style={{ textAlign: "center", padding: "48px 0" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+          Where are you now?
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 36 }}>
+          {feelChips.map(f => (
+            <button key={f.id} onClick={() => { saveSession(f.id); onComplete(); }} style={{
+              background: "transparent", border: `1px solid var(--border)`,
+              borderRadius: 20, padding: "8px 20px", fontSize: 13,
+              color: "var(--text-muted)", cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <button onClick={() => { saveSession(); onComplete(); }} style={{
+          background: "none", border: "none", fontSize: 12,
+          color: "var(--text-muted)", cursor: "pointer",
+          fontFamily: "'DM Sans', sans-serif", opacity: 0.6
+        }}>Skip</button>
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
 
@@ -3460,9 +3498,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             {messages.length > 1 && (
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
-                saveSession();
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
-                setExitAnchor(true);
+                setShowPostRating(true);
               }}>
                 Done for now
               </button>
