@@ -2759,14 +2759,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       return null;
     } catch { return null; }
   });
-  const effectiveMode = activeMode || "calm";
+  // Auto-route mode from feel state — no user selection needed
+  const autoMode = (() => {
+    if (activeMode) return activeMode; // manual override still works if set programmatically
+    if (feelState === "excited" || feelState === "focused") return "hype";
+    return "calm"; // default — clarity mode is triggered per-message by input content
+  })();
+  const effectiveMode = autoMode;
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
   const openingText = isHype
     ? "What are you walking into? Name it and what's making it hard."
-    : isClarity
-    ? "What's looping? The thought, decision, or conversation you keep replaying."
-    : "What's happening? Describe the situation. The AI helps you see it clearly.";
+    : "What's on your mind?";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
   // Migrate old conversation from before mode-specific keys
@@ -2977,7 +2981,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         signal: controller.signal,
         body: JSON.stringify({
           input: textToSend,
-          mode: effectiveMode,
+          mode: (() => {
+            // Auto-route to clarity mode if input signals spiraling/looping
+            const lower = textToSend.toLowerCase();
+            const clarityTriggers = ["can't stop", "cant stop", "keep thinking", "won't stop", "wont stop", "looping", "replaying", "over and over", "can't sleep", "cant sleep", "won't shut up", "wont shut up", "same thought", "stuck in my head", "broken record"];
+            if (clarityTriggers.some(t => lower.includes(t)) && textToSend.split(/\s+/).length < 30) return "clarity";
+            return effectiveMode;
+          })(),
           history: prevMessages.map(m => ({
             role: m.role === "ai" ? "assistant" : "user",
             content: m.text
@@ -3130,7 +3140,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const modeConfig = {
     calm: {
-      icon: "◎", title: "Talk it through", subtitle: rotatingSubtitle,
+      icon: "◎", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "#c9933a",
       bg: "linear-gradient(180deg, rgba(201,147,58,0.10) 0%, transparent 50%)",
       border: "rgba(201,147,58,0.25)",
@@ -3139,7 +3149,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "#c9933a"
     },
     clarity: {
-      icon: "✦", title: "Break the loop", subtitle: rotatingSubtitle,
+      icon: "✦", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "#7aadcf",
       bg: "linear-gradient(180deg, rgba(122,173,207,0.12) 0%, transparent 50%)",
       border: "rgba(122,173,207,0.28)",
@@ -3148,7 +3158,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "#7aadcf"
     },
     hype: {
-      icon: "◌", title: "Get ready", subtitle: rotatingSubtitle,
+      icon: "◌", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "#c9793a",
       bg: "linear-gradient(180deg, rgba(201,121,58,0.12) 0%, transparent 50%)",
       border: "rgba(201,121,58,0.30)",
@@ -3206,28 +3216,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         </div>
       </div>
 
-      {/* MODE PICKER — three tones */}
-      <div style={{ display: "flex", gap: 6, marginBottom: 16 }}>
-        {[
-          { id: "calm", label: "Talk it through", desc: "AI processes with you and reframes", icon: "◎", color: "#c9933a" },
-          { id: "clarity", label: "Break the loop", desc: "AI cuts the spiral with one question", icon: "✦", color: "#7aadcf" },
-          { id: "hype", label: "Get ready", desc: "AI gives you one anchor to carry in", icon: "◌", color: "#c9793a" }
-        ].map(m => {
-          const active = effectiveMode === m.id;
-          return (
-            <button key={m.id} onClick={() => setActiveMode(m.id)} style={{
-              flex: 1, background: active ? `${m.color}18` : "transparent",
-              border: `1px solid ${active ? m.color : "var(--border)"}`,
-              borderRadius: "var(--r-lg)", padding: "10px 8px", cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", transition: "all 0.2s", textAlign: "center"
-            }}>
-              <div style={{ fontSize: 14, color: active ? m.color : "var(--text-muted)", marginBottom: 2 }}>{m.icon}</div>
-              <div style={{ fontSize: 10, color: active ? m.color : "var(--text-muted)", letterSpacing: "0.06em", fontWeight: 500 }}>{m.label}</div>
-              <div style={{ fontSize: 8, color: active ? m.color : "var(--text-dim)", marginTop: 2, opacity: 0.7 }}>{m.desc}</div>
-            </button>
-          );
-        })}
-      </div>
+      {/* MODE AUTO-DETECTED — from feel state + input content */}
 
       {/* TALK / JOURNAL TABS */}
       <div style={{ display: "flex", marginBottom: 16, borderBottom: `1px solid ${mc.border}` }}>
@@ -5623,7 +5612,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nThree Reframe modes give you different AI feedback:\n• Talk it through — AI processes with you and reframes\n• Break the loop — AI cuts a thought spiral with one question\n• Get ready — AI gives you one anchor to carry into a moment",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
               note: null,
               research: [
                 { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
@@ -7130,8 +7119,8 @@ export default function Stillform() {
                 a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your Pulse entries and session history."
               },
               {
-                q: "What are the three Reframe modes?",
-                a: "Talk it through — the AI processes with you and reframes what's happening. Break the loop — the AI cuts a thought spiral with one sharp question. Get ready — the AI gives you one anchor thought to carry into the moment."
+                q: "How does the AI know what I need?",
+                a: "It reads your feel state, your physical state, and what you type. If you're excited, it channels the energy and checks for overcommitment. If you're spiraling, it cuts the loop with one sharp question. If you're processing, it gives you perspectives and names what your brain is adding. You don't choose a mode — it adapts to you."
               },
               {
                 q: "Does the AI learn about me?",
