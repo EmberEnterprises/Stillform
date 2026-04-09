@@ -506,6 +506,33 @@ exports.handler = async function(event) {
       contextParts.push("This user has significant history. You can name patterns directly, reference what you've seen across sessions, and coach proactively. They trust the system.");
     }
 
+    // AI FATIGUE GUARDRAIL — responses degrade in long conversations: shorter, vaguer, more generic, repetitive
+    // This is unacceptable in a composure context. Standard rises with turn count, not falls.
+    const turnCount = history.length;
+    if (turnCount >= 6) {
+      contextParts.push(`CONVERSATION DEPTH WARNING — ${Math.floor(turnCount / 2)} exchanges in. This is when AI systems get lazy. You are NOT allowed to:
+- Give a response that could have been your opening message
+- Repeat any reframe already offered this conversation
+- Use more generic language than earlier exchanges
+- Summarize what's already been said
+- Give one-sentence responses when the user is going deep
+- Write anything vague enough to apply to anyone in any situation
+
+You know MORE about this person now than when you started. Every response must reflect that specificity. The bar gets HIGHER the longer this runs — not lower.
+
+FATIGUE SIGNALS TO AVOID:
+- "It sounds like you're working through a lot." — generic, earned nothing
+- "That's understandable." — empty
+- Pivoting to a new topic before the current one lands
+- Asking a question you already asked
+
+WHAT STAYING SHARP LOOKS LIKE:
+- Reference something specific they said earlier in this conversation
+- Notice a shift in their language and name it
+- Build on the last reframe rather than starting over
+- Match the depth they're bringing — if they go deeper, go with them`);
+    }
+
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     // CRISIS DETECTION — hard-coded, cannot be ignored by the AI
