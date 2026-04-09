@@ -6589,14 +6589,6 @@ export default function Stillform() {
                 if (currentMinutes < eveningStart) return null;
                 const today = now.toISOString().split("T")[0];
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
-                if (eodDone && !eodOpen) return (
-                  <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    <button onClick={() => setEodOpen(true)} style={{
-                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
-                    }}>✓ Day closed · tap to update</button>
-                  </div>
-                );
                 if (eodSaved && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
                     {!eodPromptDismissed ? (
@@ -6613,6 +6605,14 @@ export default function Stillform() {
                         fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
                       }}>✓ Day closed · tap to update</button>
                     )}
+                  </div>
+                );
+                if (eodDone && !eodOpen) return (
+                  <div style={{ marginBottom: 20, textAlign: "center" }}>
+                    <button onClick={() => setEodOpen(true)} style={{
+                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
+                    }}>✓ Day closed · tap to update</button>
                   </div>
                 );
 
