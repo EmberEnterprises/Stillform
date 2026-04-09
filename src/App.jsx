@@ -2970,7 +2970,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
     if (messages.length === 4) { try { window.plausible("Reframe Deep Engagement", { props: { mode: effectiveMode } }); } catch {} }
-    // Auto-log feel state to Signal Log on first message of session
+    // Auto-log feel state to Pulse on first message of session
     if (messages.length === 0 && !retryText && feelState) {
       try {
         const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
@@ -5498,7 +5498,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nSignal Log — when you select how you're feeling before a session, it logs automatically. Add context anytime from the Signal Log screen. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — when you select how you're feeling before a session, it logs automatically. Add context anytime from the Pulse screen. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
               note: null,
               research: [
                 { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
@@ -6103,7 +6103,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI gives you perspectives first, asks questions second</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI sounds like a sharp friend, not a therapist</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Multi-turn conversations fixed — AI actually follows the thread now</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Pulse (formerly Signal Log) — check your pulse in 15 seconds</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Pulse — check your pulse in 15 seconds. Feel state logs automatically when you start a session.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Composure when winning — AI watches for overcommitment and blind spots when you're riding high</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Language simplified — no more clinical jargon</div>
@@ -6154,7 +6154,7 @@ export default function Stillform() {
                     <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", fontStyle: "italic" }}>+ more in development</div>
 
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6, marginTop: 16 }}>Native app</div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Waiting on DUNS number (~25 days) for app store submissions (Google Play + Apple).</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10 }}>In development. Apple Developer active — TestFlight ready. Google Play Console setup pending.</div>
 
                     <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>Your feedback shapes this. Send anything: ARAembersllc@proton.me</div>
                   </div>
@@ -7021,8 +7021,8 @@ export default function Stillform() {
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
               {
-                q: "How does Signal Log work?",
-                a: "When you select a feel state before starting a session, it's automatically logged to your Signal Log. The AI references your history in every future session to spot patterns over time."
+                q: "How does Pulse work?",
+                a: "When you select how you're feeling before a session, it logs automatically to Pulse. The AI references your history in every future session to spot patterns over time."
               },
               {
                 q: "What is Composure Telemetry?",
