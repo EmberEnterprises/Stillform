@@ -3049,6 +3049,35 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const [lastInput, setLastInput] = useState("");
 
+  const buildOfflineFallback = (textToSend) => {
+    const priorWins = (() => {
+      try {
+        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+        return sessions.filter(s => typeof s.delta === "number" && s.delta > 0).slice(-3);
+      } catch { return []; }
+    })();
+    const evidence = priorWins.map(s => {
+      const d = s.timestamp ? new Date(s.timestamp) : null;
+      const dateStr = d && !Number.isNaN(d.getTime())
+        ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
+        : "a prior session";
+      return `${dateStr}: shifted +${Number(s.delta).toFixed(1)}`;
+    });
+    const step5 = evidence.length
+      ? `5) Evidence from your own history: ${evidence.join(" | ")}. You've shifted before — you can shift again.`
+      : "5) Completion: Pick one tiny action you'll take in the next 90 seconds. Small is enough.";
+    return [
+      "Offline self-guided reframe (AI is temporarily unavailable):",
+      "1) Name the feeling in one line. No story yet.",
+      "2) What might your brain be adding on top of the facts?",
+      "3) If your closest friend said this, what would you tell them in one honest sentence?",
+      "4) One action in the next 90 seconds that helps your future self.",
+      step5,
+      "",
+      `Your original message: "${textToSend.trim().slice(0, 260)}${textToSend.trim().length > 260 ? "..." : ""}"`
+    ].join("\n");
+  };
+
   const handleSend = async (retryText) => {
     const textToSend = retryText || input;
     if (!textToSend.trim() || loading) return;
@@ -3077,14 +3106,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }
 
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 24000);
-
-      const response = await fetch("/.netlify/functions/reframe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
+      const requestBody = JSON.stringify({
           input: textToSend,
           images: pendingImages.length > 0 ? pendingImages : undefined,
           mode: (() => {
@@ -3242,14 +3264,67 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return notes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
             } catch { return null; }
           })()
-        })
-      });
-      clearTimeout(timeout);
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        throw new Error(errData.error || "Server error");
+        });
+
+      let parsed = null;
+      let lastErr = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 24000);
+        try {
+          const response = await fetch("/.netlify/functions/reframe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            signal: controller.signal,
+            body: requestBody
+          });
+          clearTimeout(timeout);
+          if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error || "Server error");
+          }
+          parsed = await response.json();
+          break;
+        } catch (err) {
+          clearTimeout(timeout);
+          lastErr = err;
+          if (attempt < 2) {
+            const backoffMs = [500, 1000, 2000][attempt] || 1000;
+            await new Promise(resolve => setTimeout(resolve, backoffMs));
+          }
+        }
       }
-      const parsed = await response.json();
+
+      if (!parsed) {
+        const fallbackText = buildOfflineFallback(textToSend);
+        setMessages(prev => [...prev, {
+          role: "ai",
+          text: fallbackText,
+          distortion: null,
+          selfGuided: true
+        }]);
+        try {
+          const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+          sessions.push({
+            timestamp: new Date().toISOString(),
+            duration: Date.now() - startTime.current,
+            durationFormatted: `${Math.max(1, Math.round((Date.now() - startTime.current) / 1000))}s`,
+            tools: ["reframe"],
+            exitPoint: "reframe-offline-fallback",
+            source: "reframe",
+            mode: effectiveMode,
+            entryMode: entryMode || null,
+            selfGuided: true,
+            preState: feelState || null
+          });
+          localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+        } catch {}
+        try { window.plausible("Reframe Offline Fallback", { props: { mode: effectiveMode } }); } catch {}
+        setError(`Connection issue after retries. You can continue with this guided fallback now.`);
+        setLoading(false);
+        return;
+      }
+
       if (parsed.crisisDetected) { try { window.plausible("Crisis Detection Triggered"); } catch {} }
       if (parsed.liabilityGuard) { try { window.plausible("Liability Guard Triggered"); } catch {} }
       setMessages(prev => [...prev, {
@@ -3380,6 +3455,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* FEEL STATE — optional single-tap, neutral by default */}
       <div style={{ marginBottom: 16 }}>
+        {selfGuidedActive && (
+          <div style={{
+            background: "rgba(201,147,58,0.08)",
+            border: "1px solid var(--amber-dim)",
+            borderRadius: "var(--r-lg)",
+            padding: "12px 14px",
+            marginBottom: 12
+          }}>
+            <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+              Offline fallback active
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 10 }}>
+              Connection is unstable. Use this guided fallback now — your progress still saves.
+            </div>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setShowSelfGuided(true)}>
+              Open guided fallback →
+            </button>
+          </div>
+        )}
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
           What's present — <span style={{ color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>optional</span>
         </div>
@@ -3426,6 +3520,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
             <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => handleSend(lastInput)}>
               ↺ Retry
+            </button>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput)}>
+              Continue offline
             </button>
             <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setError(null)}>
               Dismiss
@@ -5799,7 +5896,7 @@ export default function Stillform() {
           </div>
           <div className="nav-actions">
             <button onClick={() => setScreen("faq")} style={{
-              background: "none", border: "none", width: 32, height: 32, borderRadius: "50%",
+              background: "none", width: 32, height: 32, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               color: "var(--text-muted)", fontSize: 14, cursor: "pointer",
               fontFamily: "'DM Sans', sans-serif", fontWeight: 500,
@@ -6165,7 +6262,7 @@ export default function Stillform() {
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
                     Scenario {assessmentAnswers.length + 1} of {current.scenarios.length}
                   </div>
-                  <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 20, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}>
+                  <div style={{ color: "var(--text)", lineHeight: 1.6, marginBottom: 20, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}>
                     {currentScenario.q}
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
