@@ -5854,14 +5854,19 @@ export default function Stillform() {
         setCheckoutLoading(false);
         return;
       }
+      const userId = sbGetUser()?.id;
+      if (!userId) {
+        setCheckoutMessage("Sign in or create an account first so your subscription is tied to your login.");
+        setCheckoutLoading(false);
+        return;
+      }
       const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc";
       const params = new URLSearchParams();
       params.set("checkout[custom][variant]", pricingPlan === "annual" ? "annual" : "monthly");
       params.set("checkout[custom][redirect_url]", window.location.origin + "/?subscribed=true");
       const installId = getOrCreateInstallId();
       if (installId) params.set("checkout[custom][install_id]", installId);
-      const userId = sbGetUser()?.id;
-      if (userId) params.set("checkout[custom][user_id]", userId);
+      params.set("checkout[custom][user_id]", userId);
       window.location.href = `${checkoutBase}?${params.toString()}`;
     } catch {
       setCheckoutLoading(false);
@@ -7951,7 +7956,18 @@ export default function Stillform() {
                         }
 
                         if (signedIn) {
+                          try {
+                            await fetch("/.netlify/functions/subscription-link-account", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `Bearer ${sbGetSession()?.access_token || ""}`
+                              },
+                              body: JSON.stringify({ install_id: getOrCreateInstallId() })
+                            });
+                          } catch {}
                           setSyncSignedIn(true);
+                          setSubscriptionCheckTick(n => n + 1);
                           setSyncEmail(""); setSyncPassword("");
                           refreshSettings();
                         }

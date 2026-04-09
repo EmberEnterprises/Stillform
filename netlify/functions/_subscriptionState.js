@@ -129,7 +129,7 @@ export const upsertSubscriptionStatus = async ({
 const readStateByIdentity = async (identityKey) => {
   if (!identityKey) return null;
   const rows = await sbAdminFetch(
-    `/rest/v1/${SUBSCRIPTION_TABLE}?identity_key=eq.${encodeURIComponent(identityKey)}&select=identity_key,user_id,install_id,is_subscribed,status,status_expires_at,trial_ends_at,updated_at&limit=1`
+    `/rest/v1/${SUBSCRIPTION_TABLE}?identity_key=eq.${encodeURIComponent(identityKey)}&select=identity_key,user_id,install_id,lemon_customer_id,lemon_subscription_id,user_email,plan_variant,product_name,status,lemon_status,is_subscribed,status_expires_at,trial_ends_at,renews_at,ends_at,updated_at&limit=1`
   );
   return Array.isArray(rows) && rows.length ? rows[0] : null;
 };
@@ -152,4 +152,19 @@ export const getSubscriptionStatusForLookup = async ({ userId = null, installId 
     ...winner,
     source: winner.identity_key?.startsWith("user:") ? "user" : "install"
   };
+};
+
+export const linkInstallToUser = async ({ userId = null, installId = null }) => {
+  if (!userId || !installId) return null;
+  const installRow = await readStateByIdentity(identityKeyFrom("install", installId));
+  if (!installRow) return null;
+
+  const base = {
+    ...installRow,
+    user_id: userId,
+    updated_at: nowIso()
+  };
+  delete base.identity_key;
+
+  return writeIdentityRow(identityKeyFrom("user", userId), base);
 };
