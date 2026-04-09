@@ -26,7 +26,8 @@ class ErrorBoundary extends Component {
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap');
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+  input, textarea { -webkit-user-select: text; user-select: text; }
 
   :root {
     --bg:         #0A0A0C;
@@ -1265,10 +1266,10 @@ const setupPushNotifications = async () => {
         try { localStorage.setItem('stillform_push_token', token.value); } catch {}
       });
       PushNotifications.addListener('pushNotificationReceived', notification => {
-        console.log('Push received:', notification);
+
       });
       PushNotifications.addListener('pushNotificationActionPerformed', action => {
-        console.log('Push action:', action);
+
       });
     }
   } catch {}
@@ -3417,7 +3418,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </button>
             )}
             </>
-          )}
           )}
           {!loading && speech.supported && (
             <button onClick={speech.toggle} style={{
@@ -5850,8 +5850,15 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* CTA */}
-              {current.autoLaunch && (() => { setTimeout(() => current.autoLaunch(), 0); return null; })()}
+              {/* CTA — autoLaunch fires once when step renders */}
+              {current.autoLaunch && (() => {
+                // Use a module-level flag to prevent re-fire on re-render
+                if (!window.__sfAutoLaunched || window.__sfAutoLaunched !== setupStep) {
+                  window.__sfAutoLaunched = setupStep;
+                  setTimeout(() => { current.autoLaunch(); }, 50);
+                }
+                return null;
+              })()}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {current.cta && (
                   <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}
