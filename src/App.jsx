@@ -2974,8 +2974,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (messages.length === 0 && !retryText && feelState) {
       try {
         const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-        entries.unshift({ id: Date.now(), emotions: [feelState], trigger: "", timestamp: new Date().toISOString(), source: "reframe-auto" });
+        const todayIso = new Date().toISOString().split("T")[0];
+        entries.unshift({ id: Date.now(), emotions: [feelState], trigger: "", date: todayIso, timestamp: new Date().toISOString(), source: "reframe-auto" });
         localStorage.setItem("stillform_journal", JSON.stringify(entries));
+        try { window.plausible("Pulse Entry", { props: { source: "reframe-auto" } }); } catch {}
       } catch {}
     }
 
@@ -3004,18 +3006,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return null;
-              const today = new Date().toISOString().split("T")[0];
-              const todayEntries = entries.filter(e => e.date === today);
-              const olderEntries = entries.filter(e => e.date !== today);
+              const todayIso = new Date().toISOString().split("T")[0];
+              const fmtEntry = e => {
+                const emotions = e.emotions?.length ? `(${e.emotions.join(", ")})` : "";
+                const trigger = e.trigger?.trim();
+                const outcome = e.outcome ? ` → ${e.outcome}` : "";
+                return trigger ? `${trigger} ${emotions}${outcome}`.trim() : emotions + outcome;
+              };
+              // Exclude auto-logged state entries from proactive prompt — feelState already passed separately
+              const todayManual = entries.filter(e => e.date === todayIso && e.source !== "reframe-auto");
+              const older = entries.filter(e => e.date !== todayIso && e.source !== "reframe-auto");
               let ctx = "";
-              if (todayEntries.length > 0) {
-                ctx += "TODAY'S PULSE ENTRIES (reference these PROACTIVELY — the user logged these today, ask if this is what's on their mind):\n";
-                ctx += todayEntries.map(e => `${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
+              if (todayManual.length > 0) {
+                ctx += "TODAY'S SIGNAL LOG ENTRIES (reference these PROACTIVELY — the user logged these today, ask if this is what's on their mind):\n";
+                ctx += todayManual.map(fmtEntry).join("\n");
               }
-              if (olderEntries.length > 0) {
+              if (older.length > 0) {
                 if (ctx) ctx += "\n\n";
-                ctx += "PREVIOUS PULSE ENTRIES (for pattern recognition only):\n";
-                ctx += olderEntries.slice(-10).map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
+                ctx += "PREVIOUS SIGNAL LOG ENTRIES (for pattern recognition only):\n";
+                ctx += older.slice(-10).map(e => `[${e.date || ""}] ${fmtEntry(e)}`).join("\n");
               }
               return ctx || null;
             } catch { return null; }
@@ -5489,7 +5498,7 @@ export default function Stillform() {
               label: "Daily practice",
               title: "Morning calibration. In-the-moment reset.",
               subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — after a moment passes, log what happened. Tag the emotion, note the trigger. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
+              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nSignal Log — when you select how you're feeling before a session, it logs automatically. Add context anytime from the Signal Log screen. The AI reads these over time to spot patterns you can't see yourself.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
               note: null,
               research: [
                 { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
