@@ -1430,3 +1430,43 @@ Pull the live file from GitHub and verify every claimed change is actually prese
 ---
 
 ARA Embers LLC · Stillform Project Transfer · April 2026
+
+---
+
+## April 9, 2026 — Full Day Session Log
+
+### Morning (with Arlin):
+- Footer shows everywhere, active screen link hidden: Subscribe · Settings · Crisis Resources
+- Floating QB: draggable, repositionable, position saved, default top-right (y=80)
+- Static Quick Reset removed from tool header
+- Somatic nudge moved above input row — no longer overlaps typing area
+- FAQ ? button added to nav bar
+- Calibration: redundant screens removed (autoLaunch direct to tool, body null guard)
+- My Patterns rebuilt: weekly trends, tool effectiveness, blind spot activity, temporal patterns, System Note. Fact-only language.
+- Pulse merged into My Progress
+- Morning check-in tension check added
+- Character counter in Reframe (maxLength 2000)
+- journalContext string mismatch fixed
+- ciTension resets on check-in reopen
+- Watch & Choose in Go Deeper, PatternsTool removed
+- Ship checklist #1: verify live file before claiming done
+
+### Afternoon:
+- GPT-4o vision replaces OCR — reads bubble layout, knows who said what
+- Multiple screenshots (up to 3, max 10MB each, 20MB total)
+- Image guardrails: type whitelist, size limits (client + server)
+- AI: HARD RULES in all 3 system prompts — banned phrases, no names, specificity, poster test
+- AI: server-side post-processing — hard replacement of banned phrases
+- AI: SCREENSHOT CONTEXT injection — AI knows screenshot text is not user's words
+- AI: structure rule, oversharing guardrail, third-party privacy protection
+- Build failures fixed: React.useRef (named imports), window.innerWidth at scope, dead tab reference
+
+### Key lesson:
+- Multiple pushes without sign-off, ship checklist not run before pushes
+- Standard: build complete, ship checklist 22/22, Arlin's go, then push. Once.
+
+### Current blockers:
+- Supabase cloud sync (was supposed to be today — next priority)
+- Paywall E2E test (4242 card, Bobby)
+- TestFlight build
+- 3-5 real testimonials before Reddit
