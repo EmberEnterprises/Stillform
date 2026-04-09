@@ -5856,8 +5856,15 @@ export default function Stillform() {
       }
       const userId = sbGetUser()?.id;
       if (!userId) {
-        setCheckoutMessage("Sign in or create an account first so your subscription is tied to your login.");
+        setCheckoutMessage("Sign in first, then we'll continue checkout automatically.");
+        try {
+          localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
+            createdAt: Date.now(),
+            pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
+          }));
+        } catch {}
         setCheckoutLoading(false);
+        setScreen("settings");
         return;
       }
       const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc";
@@ -5895,6 +5902,7 @@ export default function Stillform() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
+  const [pendingCheckoutAfterLogin, setPendingCheckoutAfterLogin] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
@@ -7258,6 +7266,35 @@ export default function Stillform() {
         {screen === "pricing" && (
           <section className="pricing">
             {!trialExpired && <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>}
+            {!syncSignedIn && (
+              <div style={{
+                maxWidth: 420,
+                margin: "0 auto 16px",
+                padding: "12px 14px",
+                borderRadius: "var(--r-lg)",
+                background: "var(--surface)",
+                border: "1px solid var(--border)"
+              }}>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
+                  Sign in first so your subscription is connected to your account.
+                </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    try {
+                      localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
+                        createdAt: Date.now(),
+                        pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
+                      }));
+                    } catch {}
+                    setScreen("settings");
+                  }}
+                >
+                  Continue to sign in →
+                </button>
+              </div>
+            )}
             <div style={{ maxWidth: 360, margin: "0 auto 14px" }}>
               <button
                 className="btn btn-primary"
@@ -7965,6 +8002,17 @@ export default function Stillform() {
                               },
                               body: JSON.stringify({ install_id: getOrCreateInstallId() })
                             });
+                          } catch {}
+                          try {
+                            const pending = JSON.parse(localStorage.getItem("stillform_checkout_after_login") || "null");
+                            const isFreshPending = pending?.createdAt && (Date.now() - pending.createdAt) < (10 * 60 * 1000);
+                            if (isFreshPending) {
+                              if (pending.pricingPlan === "annual" || pending.pricingPlan === "monthly") {
+                                setPricingPlan(pending.pricingPlan);
+                              }
+                              localStorage.removeItem("stillform_checkout_after_login");
+                              setTimeout(() => checkoutToLemon(), 200);
+                            }
                           } catch {}
                           setSyncSignedIn(true);
                           setSubscriptionCheckTick(n => n + 1);
