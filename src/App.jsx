@@ -6629,6 +6629,7 @@ export default function Stillform() {
                   } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
+                  setEodPromptDismissed(false);
                   setEodOpen(false);
                 };
 
