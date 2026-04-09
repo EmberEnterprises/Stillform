@@ -444,10 +444,10 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
 
     // Input validation
-    const isScreenshot = input.startsWith("[Screenshot of a conversation]");
+    const isScreenshot = (images && images.length > 0) || input.startsWith("[Screenshot of a conversation]");
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
     }
@@ -466,7 +466,20 @@ exports.handler = async function(event) {
       }
     }
 
-    const messages = [...history.slice(-10).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content || m.text })), { role: "user", content: input }]; // Cap history at 10 messages, fix role mapping
+    // Build last user message — vision if images present, text otherwise
+    const lastUserMessage = images && images.length > 0
+      ? {
+          role: "user",
+          content: [
+            ...images.map(img => ({
+              type: "image_url",
+              image_url: { url: `data:${img.type};base64,${img.data}`, detail: "low" }
+            })),
+            { type: "text", text: input }
+          ]
+        }
+      : { role: "user", content: input };
+    const messages = [...history.slice(-10).map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.content || m.text })), lastUserMessage]; // Cap history at 10 messages
     let systemPrompt = mode === "clarity" ? CLARITY_SYSTEM : mode === "hype" ? HYPE_SYSTEM : CALM_SYSTEM;
 
     // Inject user context if available
