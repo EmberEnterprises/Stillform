@@ -2616,20 +2616,28 @@ const sbSetSession = s => { try { localStorage.setItem("stillform_sb_session", J
 const sbClearSession = () => { try { localStorage.removeItem("stillform_sb_session"); } catch {} };
 const sbIsSignedIn = () => !!sbGetSession()?.access_token;
 const sbGetUser = () => sbGetSession()?.user || null;
+const sbNormalizeSession = (d) => {
+  // Supabase returns different shapes for signup vs signin — normalize to same structure
+  if (d?.session?.access_token) return { ...d.session, user: d.user || d.session.user };
+  if (d?.access_token) return d;
+  return null;
+};
 const sbSignUp = async (email, password) => {
   const d = await sbFetch("/auth/v1/signup", { method:"POST", body: JSON.stringify({email, password}) });
-  if (d?.session) sbSetSession(d.session);
+  const session = sbNormalizeSession(d);
+  if (session) sbSetSession(session);
   return d;
 };
 const sbSignIn = async (email, password) => {
   const d = await sbFetch("/auth/v1/token?grant_type=password", { method:"POST", body: JSON.stringify({email, password}) });
-  if (d?.access_token) sbSetSession(d);
+  const session = sbNormalizeSession(d);
+  if (session) sbSetSession(session);
   return d;
 };
 const sbSignOut = async () => { try { await sbFetch("/auth/v1/logout", {method:"POST"}); } catch {} sbClearSession(); };
 const sbRefreshSession = async () => {
   const s = sbGetSession(); if (!s?.refresh_token) return null;
-  try { const d = await sbFetch("/auth/v1/token?grant_type=refresh_token", {method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})}); if (d?.access_token) { sbSetSession(d); return d; } } catch {}
+  try { const d = await sbFetch("/auth/v1/token?grant_type=refresh_token", {method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})}); const session = sbNormalizeSession(d); if (session) { sbSetSession(session); return session; } } catch {}
   sbClearSession(); return null;
 };
 const getSyncEncKey = async () => {
@@ -2660,7 +2668,7 @@ const decryptFromCloud = async blob => {
 };
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
-  const user=sbGetUser(); let uploaded=0; const errors=[];
+  const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'}; let uploaded=0; const errors=[];
   for (const key of SYNC_KEYS) {
     try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
   }
@@ -7596,7 +7604,7 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncUp();
-                        setSyncSuccess(r.ok ? `Synced ${r.uploaded} items` : "Sync partial — retry");
+                        setSyncSuccess(r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`);
                       } catch { setSyncError("Sync failed. Check connection."); }
                       setSyncLoading(false);
                     }}>
@@ -7641,21 +7649,38 @@ export default function Stillform() {
                       if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
                       setSyncLoading(true); setSyncError(null);
                       try {
-                        await sbSignUp(syncEmail, syncPassword);
-                        await sbCreateProfile();
-                        await sbSyncUp();
-                        setSyncSignedIn(true);
-                        setSyncEmail(""); setSyncPassword("");
-                        refreshSettings();
-                      } catch (e) {
-                        // If signup fails (user exists), try sign in
+                        // Try sign in first — if user exists this works immediately
+                        // If not, fall through to signup
+                        let signedIn = false;
                         try {
                           await sbSignIn(syncEmail, syncPassword);
-                          const r = await sbSyncDown();
+                          if (sbIsSignedIn()) {
+                            await sbSyncDown();
+                            signedIn = true;
+                          }
+                        } catch {}
+
+                        if (!signedIn) {
+                          // New user — sign up
+                          const signupResult = await sbSignUp(syncEmail, syncPassword);
+                          if (!sbIsSignedIn()) {
+                            // Email confirmation required
+                            setSyncError("Check your email to confirm your account, then sign in.");
+                            setSyncLoading(false);
+                            return;
+                          }
+                          await sbCreateProfile();
+                          await sbSyncUp();
+                          signedIn = true;
+                        }
+
+                        if (signedIn) {
                           setSyncSignedIn(true);
                           setSyncEmail(""); setSyncPassword("");
                           refreshSettings();
-                        } catch (e2) { setSyncError(e2.message || "Sign in failed. Check your details."); }
+                        }
+                      } catch (e) {
+                        setSyncError(e.message || "Something went wrong. Check your details.");
                       }
                       setSyncLoading(false);
                     }}>
