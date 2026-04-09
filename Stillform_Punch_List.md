@@ -195,3 +195,37 @@
 - [ ] Plausible event fires on save
 - [ ] AI reads yesterday's EOD in next morning session
 
+
+---
+
+## CLOUD SYNC (April 9, 2026)
+
+### Setup
+- [ ] Settings → Cloud Sync section visible
+- [ ] Enter email + password → "Sign in / Create account" creates account
+- [ ] Signed-in state shows email address
+- [ ] "Sync now" button syncs data and shows count
+
+### Encryption
+- [ ] Data encrypted before upload — Supabase dashboard shows encrypted blobs only
+- [ ] After sign out, sign back in — data restores correctly
+
+### Auto-sync
+- [ ] Complete a Reframe session → data syncs automatically in background
+- [ ] App open while signed in → latest data pulled silently
+
+### Multi-device
+- [ ] Sign in on second device → all data (sessions, journal, signal profile) restored
+- [ ] Signal profile, bias profile, saved reframes all present after restore
+
+### Pre-update backup
+- [ ] Change APP_VERSION in code → on next load, backup fires before anything else
+- [ ] Backup visible in Supabase backups table
+
+### Sign out
+- [ ] Sign out → Cloud Sync section shows sign-in form again
+- [ ] Local data untouched after sign out
+
+### Privacy policy
+- [ ] Termly privacy policy updated to reflect Supabase data storage
+- [ ] "Your data is encrypted." claim accurate (no premature sync claim)
