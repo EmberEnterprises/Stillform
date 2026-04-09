@@ -6285,9 +6285,23 @@ export default function Stillform() {
                 )}
               </div>
 
-              {/* MORNING CHECK-IN — appears if not checked in today */}
+              {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
-                const today = new Date().toISOString().split("T")[0];
+                const now = new Date();
+                const hour = now.getHours();
+                const minute = now.getMinutes();
+                const currentMinutes = hour * 60 + minute;
+                const morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })(); // default 4:30 AM = 270 min
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1110; } catch { return 1110; } })(); // default 6:30 PM = 1110 min
+                
+                // Don't show morning check-in outside morning window
+                if (currentMinutes < morningStart || currentMinutes >= eveningStart) return null;
+                
+                // Don't show if EOD already done today
+                const today = now.toISOString().split("T")[0];
+                const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
+                if (eodDone) return null;
+
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
                 const isCheckedIn = ciSaved || checkedIn;
 
@@ -6566,11 +6580,13 @@ export default function Stillform() {
                 );
               })()}
 
-              {/* END OF DAY CHECK-IN — appears after 6 PM if not done */}
+              {/* END OF DAY CHECK-IN — appears after evening start time if not done */}
               {(() => {
-                const hour = new Date().getHours();
-                if (hour < 18) return null; // Only show after 6 PM
-                const today = new Date().toISOString().split("T")[0];
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1110; } catch { return 1110; } })(); // default 6:30 PM
+                if (currentMinutes < eveningStart) return null;
+                const today = now.toISOString().split("T")[0];
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodDone && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
@@ -7291,6 +7307,32 @@ export default function Stillform() {
                   </button>
                 );
               })}
+            </div>
+
+            {/* Check-In Schedule */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Check-In Schedule</div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                When morning check-in appears and when end of day begins.
+              </div>
+              {(() => {
+                const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
+                const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1110"); } catch { return 1110; } })();
+                const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+                const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                      <div style={{ fontSize: 13, color: "var(--text)" }}>Morning starts</div>
+                      <input type="time" value={toTime(morningMin)} onChange={e => { try { localStorage.setItem("stillform_morning_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                      <div style={{ fontSize: 13, color: "var(--text)" }}>Evening starts</div>
+                      <input type="time" value={toTime(eveningMin)} onChange={e => { try { localStorage.setItem("stillform_evening_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Daily Reminder */}
