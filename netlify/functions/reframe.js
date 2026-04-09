@@ -447,6 +447,7 @@ exports.handler = async function(event) {
     const { input, history = [], mode = "calm", imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null } = JSON.parse(event.body);
 
     // Input validation
+    const isScreenshot = input.startsWith("[Screenshot of a conversation]");
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
     }
@@ -470,6 +471,9 @@ exports.handler = async function(event) {
 
     // Inject user context if available
     const contextParts = [];
+    if (isScreenshot) {
+      contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
+    }
     
     // BIO-FILTER FIRST — physical reality overrides everything
     // This must be the first thing the AI reads because it colors every interpretation
