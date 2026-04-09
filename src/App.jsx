@@ -2996,7 +2996,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return null;
-              return entries.map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
+              const today = new Date().toISOString().split("T")[0];
+              const todayEntries = entries.filter(e => e.date === today);
+              const olderEntries = entries.filter(e => e.date !== today);
+              let ctx = "";
+              if (todayEntries.length > 0) {
+                ctx += "TODAY'S PULSE ENTRIES (reference these PROACTIVELY — the user logged these today, ask if this is what's on their mind):\n";
+                ctx += todayEntries.map(e => `${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
+              }
+              if (olderEntries.length > 0) {
+                if (ctx) ctx += "\n\n";
+                ctx += "PREVIOUS PULSE ENTRIES (for pattern recognition only):\n";
+                ctx += olderEntries.slice(-10).map(e => `[${e.date}] ${e.trigger}${e.emotions?.length ? ` (${e.emotions.join(", ")})` : ""}${e.outcome ? ` → ${e.outcome}` : ""}`).join("\n");
+              }
+              return ctx || null;
             } catch { return null; }
           })(),
           checkinContext: (() => {
