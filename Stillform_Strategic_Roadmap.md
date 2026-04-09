@@ -469,7 +469,11 @@ But timing matters. Product first. Traction first. Compliance later. Do not chas
 6. **Neuro voice** — web first (Web Speech API). Safari gap acceptable for now.
 7. **Pricing** — locked at $14.99/mo or $9.99/mo annual. Revisit after 100 paying users.
 8. **Research partnership** — after cloud + 4-6 weeks real user data. Email drafted, not sent.
-9. **Merge strategy for Supabase** — UNRESOLVED. Decide before building: if user has localStorage data on two devices before account creation, what wins on sync? Options: last-write-wins (simple), merge by timestamp (complex), prompt user (best UX).
+9. **Merge strategy for Supabase** — RESOLVED. Do not use last-write-wins — risks destroying weeks of data if a second device has an empty state. Strategy: split by data type.
+   - **Sessions, Pulse entries, AI session notes** → union merge, deduplicate by id/timestamp. Keep everything from every device. No data ever lost.
+   - **Signal profile, bias profile, settings, bio-filter** → last-write-wins by timestamp. Single objects, most recent is correct.
+   - **Check-in, EOD** → last-write-wins by date. One per day, latest version wins.
+   - On account creation: pull cloud → merge with localStorage → push merged result back. Silent, no user prompt.
 10. **Google Play individual vs org** — individual account ($25, no DUNS) lets you start 14-day testing clock now. Downside: personal name shows on store until converted. Decision needed.
 
 ---
