@@ -2843,8 +2843,34 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         setError("Couldn\'t read text from that image. Try a clearer screenshot.");
         return;
       }
+      // Clean OCR output — strip phone UI metadata before dropping into input
+      const cleanOcr = (raw) => {
+        return raw
+          .split("\n")
+          .map(l => l.trim())
+          // Remove lines that are metadata artifacts (timestamps, carrier info, RCS labels)
+          .filter(l => {
+            if (l.length < 3) return false;
+            // Drop lines that are mostly symbols/numbers (timestamps, metadata)
+            const alphaRatio = (l.match(/[a-zA-Z\s]/g) || []).length / l.length;
+            if (alphaRatio < 0.4 && l.length < 30) return false;
+            // Drop known metadata patterns
+            if (/^\d{1,2}:\d{2}/.test(l)) return false; // timestamps
+            if (/RCS message|©|\(F\)|\(E\)|oi \d/.test(l)) return false; // carrier
+            if (/^[^a-zA-Z]{0,3}$/.test(l)) return false; // symbol-only
+            return true;
+          })
+          .join("\n")
+          .replace(/\n{3,}/g, "\n\n") // collapse multiple blank lines
+          .trim();
+      };
+      const cleanedText = cleanOcr(text);
+      if (!cleanedText || cleanedText.length < 5) {
+        setError("Couldn\'t extract clean text from that image. Try a clearer screenshot.");
+        return;
+      }
       // Drop extracted text into input — user can edit before sending
-      setInput(prev => prev ? prev + "\n\n" + text : text);
+      setInput(prev => prev ? prev + "\n\n" + cleanedText : cleanedText);
       try { window.plausible("Image Upload", { props: { chars: text.length } }); } catch {}
     } catch {
       setError("OCR failed. Try a clearer screenshot or type it out.");
