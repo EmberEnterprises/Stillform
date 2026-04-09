@@ -4964,148 +4964,216 @@ function MyProgress({ onBack }) {
           );
         })()}
 
-        {/* PATTERNS — trend view */}
-        {hasPatterns && (
-          <div style={{ marginBottom: 8 }}>
-            <button onClick={() => toggle("patterns")} style={rowStyle}>
-              <div>
-                <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Pattern Analysis</div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                  {[
-                    topSignalEntry && `${topSignalEntry[0]} activating most`,
-                    improving && "regulation improving"
-                  ].filter(Boolean).join(" · ") || "System notes from your data"}
+        {/* MY PATTERNS — diagnostic intelligence, not history */}
+        {hasPatterns && (() => {
+          // ── DATA COMPUTATION ─────────────────────────────────────────
+          const now = new Date();
+          const oneWeekAgo = new Date(now - 7 * 86400000);
+          const twoWeeksAgo = new Date(now - 14 * 86400000);
+
+          // Sessions this week vs last week
+          const sessionsThisWeek = sessions.filter(s => new Date(s.timestamp) >= oneWeekAgo);
+          const sessionsLastWeek = sessions.filter(s => {
+            const d = new Date(s.timestamp);
+            return d >= twoWeeksAgo && d < oneWeekAgo;
+          });
+
+          // Avg shift this week vs last week
+          const avgShiftForGroup = (group) => {
+            const rated = group.filter(s => s.preRating && s.postRating);
+            if (rated.length === 0) return null;
+            return rated.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / rated.length;
+          };
+          const shiftThisWeek = avgShiftForGroup(sessionsThisWeek);
+          const shiftLastWeek = avgShiftForGroup(sessionsLastWeek);
+          const shiftTrend = shiftThisWeek !== null && shiftLastWeek !== null
+            ? shiftThisWeek - shiftLastWeek : null;
+
+          // Tool usage and effectiveness
+          const toolStats = {};
+          sessions.forEach(s => {
+            (s.tools || []).forEach(t => {
+              if (!toolStats[t]) toolStats[t] = { count: 0, shifts: [] };
+              toolStats[t].count++;
+              if (s.preRating && s.postRating) toolStats[t].shifts.push(s.postRating - s.preRating);
+            });
+          });
+          const toolList = Object.entries(toolStats)
+            .filter(([, v]) => v.count >= 2)
+            .map(([id, v]) => ({
+              id,
+              count: v.count,
+              pct: Math.round((v.count / Math.max(sessions.length, 1)) * 100),
+              avgShift: v.shifts.length ? (v.shifts.reduce((a, b) => a + b, 0) / v.shifts.length) : null
+            }))
+            .sort((a, b) => (b.avgShift || 0) - (a.avgShift || 0));
+          const topTool = toolList[0];
+          const underusedHighPerformer = toolList.find(t => t.avgShift > 1.5 && t.pct < 30 && t.count >= 2);
+
+          // Day-of-week pattern
+          const dayCounts = {};
+          const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+          sessions.forEach(s => {
+            const day = dayNames[new Date(s.timestamp).getDay()];
+            dayCounts[day] = (dayCounts[day] || 0) + 1;
+          });
+          const topDay = Object.entries(dayCounts).sort((a,b) => b[1]-a[1])[0];
+          const topDaySignificant = topDay && topDay[1] >= 3 && topDay[1] / sessions.length >= 0.3;
+
+          // Pulse signal patterns
+          const pulseThisWeek = journalEntries.filter(e => new Date(e.date || e.timestamp) >= oneWeekAgo);
+          const signalCounts = {};
+          pulseThisWeek.forEach(e => {
+            (e.emotions || []).forEach(em => {
+              signalCounts[em] = (signalCounts[em] || 0) + 1;
+            });
+          });
+          const topSignalThisWeek = Object.entries(signalCounts).sort((a,b) => b[1]-a[1])[0];
+
+          // Body area frequency from journal
+          const areaCounts = {};
+          journalEntries.forEach(e => {
+            if (e.area) areaCounts[e.area] = (areaCounts[e.area] || 0) + 1;
+          });
+          const topArea = Object.entries(areaCounts).sort((a,b) => b[1]-a[1])[0];
+
+          // Blind spot pattern from AI session notes
+          const biasHits = {};
+          aiSessionNotes.forEach(n => {
+            if (!n.note) return;
+            const note = n.note.toLowerCase();
+            (biasProfile || []).forEach(bias => {
+              if (note.includes(bias.toLowerCase().split(" ")[0])) {
+                biasHits[bias] = (biasHits[bias] || 0) + 1;
+              }
+            });
+          });
+          const topBias = Object.entries(biasHits).sort((a,b) => b[1]-a[1])[0];
+
+          // Recommendation — one thing based on data, factual only
+          let recommendation = null;
+          if (underusedHighPerformer) {
+            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", meta: "Watch & Choose" };
+            recommendation = `${toolLabels[underusedHighPerformer.id] || underusedHighPerformer.id} shows your strongest avg shift (+${underusedHighPerformer.avgShift.toFixed(1)}) but accounts for ${underusedHighPerformer.pct}% of sessions.`;
+          } else if (shiftTrend !== null && shiftTrend > 0.3) {
+            recommendation = `Avg composure shift increased by +${shiftTrend.toFixed(1)} compared to last week.`;
+          } else if (topDay && topDaySignificant) {
+            recommendation = `${topDay[1]} of your sessions have been on ${topDay[0]}s. That may reflect a recurring pattern worth noting.`;
+          }
+
+          // Summary line for accordion header
+          const summaryParts = [];
+          if (sessionsThisWeek.length > 0) summaryParts.push(`${sessionsThisWeek.length} session${sessionsThisWeek.length !== 1 ? "s" : ""} this week`);
+          if (shiftTrend !== null) summaryParts.push(shiftTrend > 0 ? `shift improving` : `shift holding`);
+          if (topSignalThisWeek) summaryParts.push(`${topSignalThisWeek[0]} most active`);
+          const summaryLine = summaryParts.join(" · ") || "System notes from your data";
+
+          const insightStyle = { fontSize: 13, color: "var(--text)", lineHeight: 1.7 };
+          const dimStyle = { fontSize: 11, color: "var(--text-muted)", marginTop: 4 };
+          const sectionLabel = { fontSize: 10, color: "var(--amber)", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace" };
+
+          return (
+            <div style={{ marginBottom: 8 }}>
+              <button onClick={() => toggle("patterns")} style={rowStyle}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>My Patterns</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{summaryLine}</div>
                 </div>
-              </div>
-              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.patterns ? "▾" : "▸"}</span>
-            </button>
-            {openSections.patterns && (
-              <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.patterns ? "▾" : "▸"}</span>
+              </button>
+              {openSections.patterns && (
+                <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 16 }}>
 
-                {/* Day-of-week spike */}
-                {topDayEntry && topDayCount >= 2 && (
-                  <div>
-                    <div style={monoLabel}>Temporal Pattern</div>
-                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
-                      Signal events cluster on <span style={{ color: "var(--amber)" }}>{topDayEntry[0]}s</span> — {topDayCount} of {journalEntries.length} logged events.
+                  {/* This week */}
+                  {sessionsThisWeek.length > 0 && (
+                    <div>
+                      <div style={sectionLabel}>This Week</div>
+                      <div style={insightStyle}>
+                        {sessionsThisWeek.length} session{sessionsThisWeek.length !== 1 ? "s" : ""} logged.
+                        {shiftThisWeek !== null && ` Avg composure shift: ${shiftThisWeek > 0 ? "+" : ""}${shiftThisWeek.toFixed(1)}.`}
+                        {shiftTrend !== null && Math.abs(shiftTrend) >= 0.3 && (
+                          shiftTrend > 0
+                            ? ` Up ${shiftTrend.toFixed(1)} from last week.`
+                            : ` Down ${Math.abs(shiftTrend).toFixed(1)} from last week.`
+                        )}
+                      </div>
+                      {topSignalThisWeek && topSignalThisWeek[1] >= 2 && (
+                        <div style={dimStyle}>Most logged signal this week: {topSignalThisWeek[0]} ({topSignalThisWeek[1]}x)</div>
+                      )}
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
-                      System note: Is this a recurring environmental trigger?
+                  )}
+
+                  {/* Tool effectiveness */}
+                  {toolList.length >= 2 && (
+                    <div>
+                      <div style={sectionLabel}>Tool Effectiveness</div>
+                      {toolList.slice(0, 3).map(t => {
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", meta: "Watch & Choose", signals: "Map Signals", bias: "Blind Spots" };
+                        return (
+                          <div key={t.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "0.5px solid var(--border)" }}>
+                            <div style={{ fontSize: 13, color: "var(--text)" }}>{labels[t.id] || t.id}</div>
+                            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "right" }}>
+                              {t.avgShift !== null ? `avg +${t.avgShift.toFixed(1)}` : "—"}
+                              <span style={{ marginLeft: 8, color: "var(--text-dim)" }}>{t.pct}% of sessions</span>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Primary activation zone */}
-                {topSignalEntry && (
-                  <div>
-                    <div style={monoLabel}>Primary Activation Zone</div>
-                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
-                      <span style={{ color: "var(--amber)" }}>{topSignalEntry[0]}</span> activates in {topSignalEntry[1]} of {journalEntries.length} logged events ({Math.round((topSignalEntry[1] / journalEntries.length) * 100)}%).
+                  {/* Primary activation zone */}
+                  {topArea && topArea[1] >= 3 && (
+                    <div>
+                      <div style={sectionLabel}>Primary Activation Zone</div>
+                      <div style={insightStyle}>
+                        {topArea[0]} logged in {topArea[1]} of {journalEntries.length} pulse entries ({Math.round((topArea[1] / journalEntries.length) * 100)}%).
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Trigger type pattern */}
-                {topTriggerEntry && topTriggerEntry[1] >= 2 && (
-                  <div>
-                    <div style={monoLabel}>Trigger Profile</div>
-                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>
-                      Most frequent trigger: <span style={{ color: "var(--amber)" }}>{topTriggerEntry[0]}</span> ({topTriggerEntry[1]}x logged).
+                  {/* Day of week pattern */}
+                  {topDaySignificant && (
+                    <div>
+                      <div style={sectionLabel}>Temporal Pattern</div>
+                      <div style={insightStyle}>
+                        {topDay[1]} of {sessions.length} sessions on {topDay[0]}s.
+                      </div>
+                      <div style={dimStyle}>Observation only — patterns can reflect schedule, not just state.</div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Outcome distribution */}
-                {topOutcomeEntry && (
-                  <div>
-                    <div style={monoLabel}>Outcome Distribution</div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                      {Object.entries(outcomeFreq).sort((a, b) => b[1] - a[1]).map(([outcome, count]) => (
-                        <div key={outcome} style={{
-                          padding: "4px 10px", borderRadius: "var(--r-sm)",
-                          background: outcome === topOutcomeEntry[0] ? "var(--amber-glow)" : "var(--surface)",
-                          border: `0.5px solid ${outcome === topOutcomeEntry[0] ? "var(--amber-dim)" : "var(--border)"}`,
-                          fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.08em",
-                          color: outcome === topOutcomeEntry[0] ? "var(--amber)" : "var(--text-muted)",
-                          textTransform: "uppercase"
-                        }}>
-                          {outcome} · {count}
-                        </div>
-                      ))}
+                  {/* Blind spot activity */}
+                  {topBias && topBias[1] >= 2 && (
+                    <div>
+                      <div style={sectionLabel}>Blind Spot Activity</div>
+                      <div style={insightStyle}>
+                        {topBias[0]} appeared in {topBias[1]} recent session{topBias[1] !== 1 ? "s" : ""}.
+                      </div>
+                      <div style={dimStyle}>Based on AI session notes. Not a diagnosis — a data point.</div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Session improvement trend */}
-                {trendDiff !== null && sessionsWithRatings.length >= 6 && (
-                  <div>
-                    <div style={monoLabel}>Regulation Trend</div>
-                    <div style={{ fontSize: 13, color: improving ? "var(--amber)" : "var(--text-dim)", lineHeight: 1.6 }}>
-                      {improving
-                        ? `Avg shift up +${trendDiff} pts comparing first vs recent sessions. Regulation is improving.`
-                        : `Avg shift holding steady across sessions. Baseline consistent.`
-                      }
+                  {/* One recommendation */}
+                  {recommendation && (
+                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 14px" }}>
+                      <div style={sectionLabel}>System Note</div>
+                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7 }}>{recommendation}</div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {journalEntries.length < 3 && (
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic" }}>
-                    Log more signal events to unlock deeper pattern analysis.
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+                  {/* No data state */}
+                  {sessionsThisWeek.length === 0 && toolList.length < 2 && !topArea && !topBias && (
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0" }}>
+                      More data needed. Patterns surface after a few sessions.
+                    </div>
+                  )}
 
-        {/* SELF KNOWLEDGE */}
-        {(biasProfile?.length > 0 || signalProfile?.firstAreas?.length > 0) && (
-          <div style={{ marginBottom: 8 }}>
-            <button onClick={() => toggle("self")} style={rowStyle}>
-              <div>
-                <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What you know about yourself</div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                  {[signalProfile?.firstAreas?.length > 0 && "signals mapped", biasProfile?.length > 0 && `${biasProfile.length} blind spots`].filter(Boolean).join(" · ")}
                 </div>
-              </div>
-              <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.self ? "▾" : "▸"}</span>
-            </button>
-            {openSections.self && (
-              <div style={{ background: "var(--surface2)", border: "1px solid var(--border)", borderTop: "none", borderRadius: "0 0 10px 10px", padding: "14px 18px" }}>
-                {signalProfile?.firstAreas?.length > 0 && <div style={{ marginBottom: 10 }}><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Activates first in</div><div style={{ fontSize: 13, color: "var(--text)" }}>{signalProfile.firstAreas.join(" · ")}</div></div>}
-                {signalProfile?.triggers?.length > 0 && <div style={{ marginBottom: 10 }}><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Known triggers</div><div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{signalProfile.triggers.join(" · ")}</div></div>}
-                {biasProfile?.length > 0 && <div><div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 3 }}>Blind spots</div><div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6 }}>{biasProfile.join(" · ")}</div></div>}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* SESSIONS */}
-        <div style={{ marginBottom: 8 }}>
-          <button onClick={() => toggle("sessions")} style={rowStyle}>
-            <div>
-              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Sessions</div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{sessions.length} total{positiveShifts > 0 ? ` · ${positiveShifts} positive shifts` : ""}</div>
+              )}
             </div>
-            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.sessions ? "▾" : "▸"}</span>
-          </button>
-          {openSections.sessions && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
-              {[...sessions].reverse().slice(0, 20).map((s, i) => {
-                const date = s.timestamp ? new Date(s.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" }) : "";
-                const tool = (s.tools || []).map(t => toolNames[t] || t).filter((v, idx, a) => a.indexOf(v) === idx).join(" → ");
-                const delta = s.delta || 0;
-                return (
-                  <div key={i} style={{ ...subRowStyle, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div><div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 2 }}>{date}</div><div style={{ fontSize: 13, color: "var(--text)" }}>{tool || "Session"}{s.durationFormatted ? ` · ${s.durationFormatted}` : ""}</div></div>
-                    {s.preRating && s.postRating && <div style={{ fontSize: 13, fontWeight: 500, color: delta > 0 ? "var(--amber)" : "var(--text-muted)", flexShrink: 0, marginLeft: 12 }}>{s.preRating}→{s.postRating}{delta > 0 ? ` +${delta}` : ""}</div>}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* AI SESSION NOTES */}
         {aiSessionNotes.length > 0 && (
@@ -6890,7 +6958,7 @@ export default function Stillform() {
             <p>The Reframe feature uses artificial intelligence (OpenAI's GPT-4o) to generate responses based on evidence-based reframing techniques. These responses are generated by AI, not by a licensed therapist or medical professional. AI responses may not always be accurate, appropriate, or applicable to your situation. Do not rely on AI-generated content as a substitute for professional mental health care. Do not enter sensitive personal, medical, or identifying information.</p>
             <p>Text entered into the Reframe feature is sent to OpenAI's servers for processing via our API integration. OpenAI does not store or retain conversation data sent through the API, and it is not used to train AI models. See our <a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>full Privacy Policy</a> for details.</p>
 
-            <h2>Pattern Analysis & Insights</h2>
+            <h2>My Patterns — System Diagnostics</h2>
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
