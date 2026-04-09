@@ -1027,6 +1027,57 @@ Before pushing any change, Claude must check each item. If it applies, update it
 **Code changes shipped this evening:**
 - Commits: breathing simplification, fractal rewrite, speech fix, tip removal, EOD energy, EOD composure, crisis links, Reframe explainer, Pulse placeholders
 
+
+### April 8 Final Evening Session — Live Testing + Ketamine Ideas
+
+**Code shipped this evening (all pushed, all deployed):**
+- FractalBreathCanvas rewritten — iterative, mobile-safe, no more crash
+- Speech recognition auto-restart on Android (mic kept dying between phrases)
+- Breathing simplified 4 → 2 (Quick Reset 60s, Deep Regulate 3min)
+- Obsolete breathing pattern tip removed
+- Crisis screen: tap-to-call tel: links on all numbers
+- Reframe first-time explainer: "This is an AI that learns your patterns"
+- Pulse rotating note placeholders (daily rotation of specific questions)
+- EOD energy: "Where's your energy?" (Full/Steady/Low/Empty) — no morning comparison
+- EOD composure: "How'd you carry yourself today?" (Solid/Mixed/Rough) — not pass/fail
+- Check-in time windows: morning only shows 4:30 AM–6 PM, EOD after 6 PM
+- User-configurable check-in times in Settings
+- Evening Reframe prompt after EOD: "Anything you want to clear before bed?"
+- "Start Free Trial" → "Subscribe" everywhere
+- Three Reframe mode buttons KILLED — AI auto-routes from feel state + input content
+- Pulse entries from today proactively referenced by AI in Reframe
+- Historical Pulse entries stay background context for pattern recognition
+
+**Specs documented for future build:**
+- Confirmation Loop: "Does that land?" post-session (Yes/Not quite/Off base)
+- Pulse → Reframe direct flow (log entry → "Want to talk through this?")
+- Pulse as entry point inside Reframe, not separate screen
+- Incubation reframe for flat/stagnant states
+- Voice accent calibration for Neuro
+- Research partnership (after infrastructure)
+- B2B clinical channel (after product proven)
+
+**Current code state:**
+- Latest commit: c7b4459
+- App.jsx: ~7,987 lines
+- reframe.js: ~560 lines
+- 19/19 AI test scenarios passing
+- Netlify auto-publish ON
+
+**NEXT SESSION PRIORITIES (in order):**
+1. Supabase cloud infrastructure (auth, sync, backup, subscription verification)
+2. Paywall end-to-end test (4242 card through Lemon Squeezy)
+3. TestFlight build (Xcode signing, App Store Connect)
+4. Morning check-in → Reframe morning mode flow
+5. Evening Reframe mode (closure AI, not analysis)
+6. Mandatory post-session rating (full screen, no skip)
+7. Offline reframe fallback (API failure = self-guided graduation)
+8. Pulse → Reframe direct flow
+9. Kill Pulse standalone screen (data entry happens in flows, viewing in My Progress)
+10. "?" help icon in nav + FAQ to top of Settings
+11. Promo page update
+
+
 ## Priority Builds — Next Sessions
 
 ### Neuro — Voice-Guided Composure Companion
