@@ -5862,7 +5862,7 @@ export default function Stillform() {
       }
       const userId = sbGetUser()?.id;
       if (!userId) {
-        setCheckoutMessage("Sign in below to continue checkout.");
+        setCheckoutMessage(null);
         try {
           localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
             createdAt: Date.now(),
@@ -6613,7 +6613,7 @@ export default function Stillform() {
         })()}
 
         {/* FLOATING RESET — accessible from any screen except active tool sessions */}
-        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && 
+        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
           <QBPill onPress={() => setScreen("panic")} />
         )}
@@ -7406,24 +7406,24 @@ export default function Stillform() {
                 )}
               </div>
             )}
-            <div style={{ maxWidth: 360, margin: "0 auto 14px" }}>
-              <button
-                className="btn btn-primary"
-                style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
-                disabled={checkoutLoading}
-                onClick={checkoutToLemon}
-              >
-                {checkoutLoading
-                  ? "Opening checkout..."
-                  : (syncSignedIn ? "Subscribe instantly →" : "Sign in to subscribe →")}
-              </button>
-              <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
-                Quick checkout. Plan details are below if you want them.
+            {syncSignedIn && (
+              <div style={{ maxWidth: 360, margin: "0 auto 14px" }}>
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
+                  disabled={checkoutLoading}
+                  onClick={checkoutToLemon}
+                >
+                  {checkoutLoading ? "Opening checkout..." : "Subscribe instantly →"}
+                </button>
+                <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
+                  Quick checkout. Plan details are below if you want them.
+                </div>
+                {checkoutMessage && (
+                  <div style={{ fontSize: 12, color: "#e05", marginTop: 10, textAlign: "center" }}>{checkoutMessage}</div>
+                )}
               </div>
-              {checkoutMessage && (
-                <div style={{ fontSize: 12, color: "#e05", marginTop: 10, textAlign: "center" }}>{checkoutMessage}</div>
-              )}
-            </div>
+            )}
             <div className="pricing-header">
               <h2>{trialExpired ? "Your subscription has ended." : "Subscribe. Stay only if it works."}</h2>
               <p>{trialExpired ? "Subscribe to keep using Stillform. Your data is safe — right where you left it." : "Try everything free for 14 days. Composure when you need it — under two minutes."}</p>
@@ -7470,16 +7470,20 @@ export default function Stillform() {
                   <li>Voice-to-text everywhere</li>
                   <li>AES-256 encryption on all session data</li>
                 </ul>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
-                  disabled={checkoutLoading}
-                  onClick={checkoutToLemon}
-                >
-                  {checkoutLoading
-                    ? "Opening checkout..."
-                    : (!syncSignedIn ? "Sign in to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
-                </button>
+                {syncSignedIn ? (
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
+                    disabled={checkoutLoading}
+                    onClick={checkoutToLemon}
+                  >
+                    {checkoutLoading ? "Opening checkout..." : (trialExpired ? "Subscribe now →" : "Subscribe →")}
+                  </button>
+                ) : (
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", textAlign: "center" }}>
+                    Sign in above to continue.
+                  </div>
+                )}
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
