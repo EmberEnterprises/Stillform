@@ -479,6 +479,15 @@ exports.handler = async function(event) {
       if (checkinContext.includes("wired") || checkinContext.includes("high") || checkinContext.includes("on fire")) {
         contextParts.push("ENERGY IS HIGH OR WIRED TODAY. Composure matters MOST in this state. Watch for overcommitment, impulsive decisions, saying yes to things they'll regret, and blind spots that hide behind confidence. Don't dampen the energy — help them aim it.");
       }
+      if (checkinContext.includes("high tension")) {
+        const tensionMatch = checkinContext.match(/high tension: ([^,\.]+)/);
+        if (tensionMatch) {
+          contextParts.push(`PHYSICAL TENSION FLAGGED: They reported holding high tension in their ${tensionMatch[1].trim()} this morning. If what they're describing feels emotionally heavy, it may be partly physical. You can name this once, lightly: "You mentioned holding tension in your ${tensionMatch[1].trim()} today — sometimes that's the body talking before the mind catches up."`);
+        }
+      }
+      if (checkinContext.includes("mild tension")) {
+        contextParts.push("Mild physical tension reported today. Worth noting if their emotional intensity seems disproportionate — body may be contributing.");
+      }
     }
     if (eodContext) contextParts.push(eodContext);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
