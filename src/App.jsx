@@ -5862,15 +5862,15 @@ export default function Stillform() {
       }
       const userId = sbGetUser()?.id;
       if (!userId) {
-        setCheckoutMessage("Sign in first, then we'll continue checkout automatically.");
+        setCheckoutMessage("Sign in below to continue checkout.");
         try {
           localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
             createdAt: Date.now(),
             pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
           }));
         } catch {}
+        setPricingAuthOpen(true);
         setCheckoutLoading(false);
-        setScreen("settings");
         return;
       }
       const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc";
@@ -5908,9 +5908,89 @@ export default function Stillform() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
-  const [pendingCheckoutAfterLogin, setPendingCheckoutAfterLogin] = useState(false);
+  const [pricingAuthOpen, setPricingAuthOpen] = useState(false);
+  const [pricingAuthEmail, setPricingAuthEmail] = useState("");
+  const [pricingAuthPassword, setPricingAuthPassword] = useState("");
+  const [pricingAuthLoading, setPricingAuthLoading] = useState(false);
+  const [pricingAuthError, setPricingAuthError] = useState(null);
+  const [pricingAuthCooldownUntil, setPricingAuthCooldownUntil] = useState(0);
+  const [, setPricingAuthTick] = useState(0);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
+
+  const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
+
+  useEffect(() => {
+    if (pricingAuthCooldownSeconds <= 0) return;
+    const id = setInterval(() => setPricingAuthTick(n => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [pricingAuthCooldownSeconds]);
+
+  const startPricingAuthCooldown = (message) => {
+    const m = String(message || "").match(/wait(?: about)? (\d+)\s*second/i);
+    const seconds = Math.max(15, Number(m?.[1] || 60));
+    setPricingAuthCooldownUntil(Date.now() + (seconds * 1000));
+  };
+
+  const signInAndContinueCheckout = async () => {
+    if (!pricingAuthEmail || !pricingAuthPassword) {
+      setPricingAuthError("Enter email and password.");
+      return;
+    }
+    if (pricingAuthCooldownSeconds > 0) {
+      setPricingAuthError(`Please wait ${pricingAuthCooldownSeconds}s, then try again.`);
+      return;
+    }
+    setPricingAuthLoading(true);
+    setPricingAuthError(null);
+    try {
+      let signedIn = false;
+      try {
+        await sbSignIn(pricingAuthEmail, pricingAuthPassword);
+        if (sbIsSignedIn()) {
+          await sbSyncDown();
+          signedIn = true;
+        }
+      } catch {}
+
+      if (!signedIn) {
+        await sbSignUp(pricingAuthEmail, pricingAuthPassword);
+        if (!sbIsSignedIn()) {
+          setPricingAuthError("Check your email to confirm your account, then sign in.");
+          setPricingAuthLoading(false);
+          return;
+        }
+        await sbCreateProfile();
+        await sbSyncUp();
+        signedIn = true;
+      }
+
+      if (signedIn) {
+        try {
+          await fetch("/.netlify/functions/subscription-link-account", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${sbGetSession()?.access_token || ""}`
+            },
+            body: JSON.stringify({ install_id: getOrCreateInstallId() })
+          });
+        } catch {}
+        setSyncSignedIn(true);
+        setSubscriptionCheckTick(n => n + 1);
+        setSyncEmail("");
+        setSyncPassword("");
+        setPricingAuthOpen(false);
+        refreshSettings();
+        setTimeout(() => checkoutToLemon(), 200);
+      }
+    } catch (e) {
+      const msg = e?.message || "Something went wrong. Check your details.";
+      if (/too many attempts|wait/i.test(msg)) startPricingAuthCooldown(msg);
+      setPricingAuthError(msg);
+    }
+    setPricingAuthLoading(false);
+  };
 
   // PWA install prompt — capture from window (set in index.html before React loads)
   useEffect(() => {
@@ -7282,23 +7362,56 @@ export default function Stillform() {
                 border: "1px solid var(--border)"
               }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
-                  Sign in first so your subscription is connected to your account.
+                  Sign in here and we will continue checkout automatically.
                 </div>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%" }}
-                  onClick={() => {
-                    try {
-                      localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
-                        createdAt: Date.now(),
-                        pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
-                      }));
-                    } catch {}
-                    setScreen("settings");
-                  }}
-                >
-                  Continue to sign in →
-                </button>
+                {(pricingAuthOpen || checkoutMessage) && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={pricingAuthEmail}
+                      onChange={e => setPricingAuthEmail(e.target.value)}
+                      style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                    />
+                    <input
+                      type="password"
+                      placeholder="Password"
+                      value={pricingAuthPassword}
+                      onChange={e => setPricingAuthPassword(e.target.value)}
+                      style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+                    />
+                    {pricingAuthError && <div style={{ fontSize: 12, color: "#e05" }}>{pricingAuthError}</div>}
+                    <button
+                      className="btn btn-primary"
+                      style={{ width: "100%" }}
+                      disabled={pricingAuthLoading || pricingAuthCooldownSeconds > 0}
+                      onClick={async () => {
+                        try {
+                          localStorage.setItem("stillform_checkout_after_login", JSON.stringify({
+                            createdAt: Date.now(),
+                            pricingPlan: pricingPlan === "annual" ? "annual" : "monthly"
+                          }));
+                        } catch {}
+                        await signInAndContinueCheckout();
+                      }}
+                    >
+                      {pricingAuthLoading
+                        ? "Signing in..."
+                        : pricingAuthCooldownSeconds > 0
+                          ? `Please wait ${pricingAuthCooldownSeconds}s`
+                          : "Sign in and continue →"}
+                    </button>
+                  </div>
+                )}
+                {!pricingAuthOpen && !checkoutMessage && (
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: "100%" }}
+                    onClick={() => setPricingAuthOpen(true)}
+                  >
+                    Continue to sign in →
+                  </button>
+                )}
               </div>
             )}
             <div style={{ maxWidth: 360, margin: "0 auto 14px" }}>
@@ -7306,9 +7419,18 @@ export default function Stillform() {
                 className="btn btn-primary"
                 style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
                 disabled={checkoutLoading}
-                onClick={checkoutToLemon}
+                onClick={() => {
+                  if (!syncSignedIn) {
+                    setPricingAuthOpen(true);
+                    setCheckoutMessage("Sign in below to continue checkout.");
+                    return;
+                  }
+                  checkoutToLemon();
+                }}
               >
-                {checkoutLoading ? "Opening checkout..." : "Subscribe instantly →"}
+                {checkoutLoading
+                  ? "Opening checkout..."
+                  : (syncSignedIn ? "Subscribe instantly →" : "Sign in to subscribe →")}
               </button>
               <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
                 Quick checkout. Plan details are below if you want them.
@@ -7367,9 +7489,18 @@ export default function Stillform() {
                   className="btn btn-primary"
                   style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
                   disabled={checkoutLoading}
-                  onClick={checkoutToLemon}
+                  onClick={() => {
+                    if (!syncSignedIn) {
+                      setPricingAuthOpen(true);
+                      setCheckoutMessage("Sign in below to continue checkout.");
+                      return;
+                    }
+                    checkoutToLemon();
+                  }}
                 >
-                  {checkoutLoading ? "Opening checkout..." : (trialExpired ? "Subscribe now →" : "Subscribe →")}
+                  {checkoutLoading
+                    ? "Opening checkout..."
+                    : (!syncSignedIn ? "Sign in to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
                 </button>
               </div>
             </div>
