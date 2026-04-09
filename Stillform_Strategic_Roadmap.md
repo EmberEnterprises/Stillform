@@ -206,6 +206,9 @@ After every session (breathing, body scan, Reframe), full-screen "Where are you 
 
 ### Tier 2: Build After Launch
 
+**Confirmation Loop — "Does That Land?"**
+After Reframe session, AI offers one summary: "It sounds like the real issue isn't [what they said] — it's [what the AI detected]." User reacts: Yes / Not quite / Off base. Yes = validated insight. Not quite = AI adjusts ("What am I missing?"). Off base = AI logs the miss. Over time builds per-user preference profile — which reframe styles land vs miss. Turns self-assessment into a recognition task. Future: extend to friction detection (stalling, rapid deletions, false starts). Depends on cloud for longitudinal learning. Basic version works with localStorage.
+
 **Galaxy Watch Companion**
 - Haptic breathing companion on wrist
 - User's brother specifically waiting for this
