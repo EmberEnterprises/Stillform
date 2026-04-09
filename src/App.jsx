@@ -5775,7 +5775,7 @@ export default function Stillform() {
         setCheckoutLoading(false);
         return;
       }
-      const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7";
+      const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc";
       const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
       const variant = encodeURIComponent(pricingPlan === "annual" ? "annual" : "monthly");
       window.location.href = `${checkoutBase}?checkout[custom][variant]=${variant}&checkout[custom][redirect_url]=${redirect}`;

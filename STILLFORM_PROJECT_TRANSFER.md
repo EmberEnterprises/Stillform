@@ -1229,7 +1229,7 @@ Pull the live file from GitHub and verify every claimed change is actually prese
 - ✅ Monthly variant: $14.99/month, 14-day free trial, SaaS tax category
 - ✅ Annual variant: $119.88/year ($9.99/month), 14-day free trial
 - ✅ Both visible on single checkout page with radio selector
-- ✅ Checkout link: https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7
+- ✅ Checkout link: https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc
 - ✅ Bobby (Robert Geismar) is registered owner — name shows on PayPal, normal for merchant accounts
 
 **Paywall Integration:**
