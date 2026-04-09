@@ -1323,7 +1323,7 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - **Android APK is stale** — dozens of web changes since last native build. Must rebuild before any native testing.
 - **Service worker caching** — remains a dev-time issue. After every deploy, old JS may be served. Incognito tab or clear cache to test fresh.
 - **Copyright not filed** — $65 at copyright.gov. Bobby wants this done ASAP.
-- **DUNS — clarified April 8** — No DUNS number issued for ARA Embers LLC. Apple approved enrollment via 5-day business verification window. Google Play org account ($25) confirmed requires DUNS — attempted and blocked without one. Next session: retry Google Play enrollment. If still blocked, apply at dnb.com (free, ~30 days).
+- **DUNS — applied April 4** — Applied at dnb.com for ARA Embers LLC. Free, ~30 days, expected ~May 4. Apple approved enrollment via 5-day business verification (no DUNS needed). Google Play org account ($25) confirmed requires DUNS — blocked without one. When DUNS arrives, complete Google Play enrollment.
 - **"Your data is encrypted and synced securely"** — sync claim is premature. Update to "Your data is encrypted." everywhere after Supabase is live. On punch list.
 - **Dead code in ReframeTool** — `saveJournal`, `pulseChips`, `journalText`, `tab`/`setTab` states remain after Pulse tab removal. Harmless but should be cleaned up. On punch list.
 - **Manual Pulse date format** — ✅ Fixed (April 8). Entries now use ISO date format so AI journalContext today-filter works correctly.
