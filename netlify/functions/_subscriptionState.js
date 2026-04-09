@@ -38,7 +38,10 @@ const computeIsSubscribed = ({ status, lemonStatus, endsAt, eventName }) => {
   const endsInFuture = ends && new Date(ends).getTime() > Date.now();
 
   if (normalizedEvent === "subscription_expired") return false;
+  if (normalized === "inactive") return false;
   if (normalized === "expired") return false;
+  if (normalized === "paused") return false;
+  if (normalized === "unpaid") return false;
   if (normalized === "cancelled") return Boolean(endsInFuture);
   // Keep access while payment retries run; strict revocation happens on "expired".
   return true;
