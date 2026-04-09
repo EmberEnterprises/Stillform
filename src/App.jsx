@@ -3718,7 +3718,7 @@ function MicroBiasTool({ onComplete }) {
 function MetacognitionTool({ onComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
-  const startTrackedRef = React.useRef(false);
+  const startTrackedRef = useRef(false);
   if (step === 0 && !startTrackedRef.current) {
     startTrackedRef.current = true;
     try { window.plausible?.("Watch & Choose Started"); } catch {}
