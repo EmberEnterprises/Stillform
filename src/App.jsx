@@ -2808,6 +2808,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [showPostRating, setShowPostRating] = useState(false);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
+  const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -3078,6 +3079,43 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     ].join("\n");
   };
 
+  const saveSelfGuidedSession = () => {
+    try {
+      const elapsedMs = Date.now() - startTime.current;
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      sessions.push({
+        timestamp: new Date().toISOString(),
+        duration: elapsedMs,
+        durationFormatted: `${Math.max(1, Math.round(elapsedMs / 1000))}s`,
+        tools: ["reframe"],
+        exitPoint: "reframe-offline-fallback",
+        source: "reframe",
+        mode: effectiveMode,
+        entryMode: entryMode || null,
+        selfGuided: true,
+        preState: feelState || null
+      });
+      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+    } catch {}
+  };
+
+  const runSelfGuidedFallback = (sourceText, reason = null) => {
+    const safeInput = (sourceText || lastInput || input || "I'm overloaded and need a reset.").trim();
+    const fallbackText = buildOfflineFallback(safeInput);
+    setMessages(prev => [...prev, {
+      role: "ai",
+      text: fallbackText,
+      distortion: null,
+      selfGuided: true
+    }]);
+    saveSelfGuidedSession();
+    setSelfGuidedActive(true);
+    if (reason) setError(reason);
+    else setError(null);
+    setLoading(false);
+    try { window.plausible("Reframe Offline Fallback", { props: { mode: effectiveMode } }); } catch {}
+  };
+
   const handleSend = async (retryText) => {
     const textToSend = retryText || input;
     if (!textToSend.trim() || loading) return;
@@ -3296,32 +3334,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }
 
       if (!parsed) {
-        const fallbackText = buildOfflineFallback(textToSend);
-        setMessages(prev => [...prev, {
-          role: "ai",
-          text: fallbackText,
-          distortion: null,
-          selfGuided: true
-        }]);
-        try {
-          const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-          sessions.push({
-            timestamp: new Date().toISOString(),
-            duration: Date.now() - startTime.current,
-            durationFormatted: `${Math.max(1, Math.round((Date.now() - startTime.current) / 1000))}s`,
-            tools: ["reframe"],
-            exitPoint: "reframe-offline-fallback",
-            source: "reframe",
-            mode: effectiveMode,
-            entryMode: entryMode || null,
-            selfGuided: true,
-            preState: feelState || null
-          });
-          localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
-        } catch {}
-        try { window.plausible("Reframe Offline Fallback", { props: { mode: effectiveMode } }); } catch {}
-        setError(`Connection issue after retries. You can continue with this guided fallback now.`);
-        setLoading(false);
+        runSelfGuidedFallback(textToSend, "AI connection is unstable right now. Self-guided mode is active.");
         return;
       }
 
@@ -3332,6 +3345,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         text: parsed.reframe,
         distortion: parsed.distortion
       }]);
+      setSelfGuidedActive(false);
       setError(null);
     } catch (err) {
       if (err.name === "AbortError") {
@@ -3469,7 +3483,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 10 }}>
               Connection is unstable. Use this guided fallback now — your progress still saves.
             </div>
-            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setShowSelfGuided(true)}>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput || input)}>
               Open guided fallback →
             </button>
           </div>
@@ -3776,6 +3790,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               setMessages([]);
               setError(null);
               setLoading(false);
+              setSelfGuidedActive(false);
               setInput("");
             }}>
               Start fresh
@@ -5635,7 +5650,7 @@ export default function Stillform() {
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Subscription & trial tracking
-  const isSubscribed = (() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } })();
+  const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
   const trialDaysLeft = (() => {
     try {
       const start = localStorage.getItem("stillform_trial_start");
@@ -5652,6 +5667,7 @@ export default function Stillform() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("subscribed") === "true" || params.get("checkout") === "success") {
         localStorage.setItem("stillform_subscribed", "yes");
+        setIsSubscribed(true);
         window.history.replaceState({}, "", "/");
       }
     } catch {}
@@ -5746,8 +5762,22 @@ export default function Stillform() {
       }
     } catch {}
   }, []);
+  const checkoutToLemon = () => {
+    if (checkoutLoading) return;
+    setCheckoutLoading(true);
+    setCheckoutMessage(null);
+    try {
+      const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
+      const url = `https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7?checkout[custom][variant]=${pricingPlan}&checkout[custom][redirect_url]=${redirect}`;
+      window.location.href = url;
+    } catch {
+      setCheckoutLoading(false);
+      setCheckoutMessage("Checkout failed to open. Please try again.");
+    }
+  };
   const [pricingPlan, setPricingPlan] = useState("annual");
-  const [pricingCloud, setPricingCloud] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState(null);
   const [openLog, setOpenLog] = useState(null);
   const [, forceUpdate] = useState(0);
   const refreshSettings = () => forceUpdate(n => n + 1);
@@ -7165,7 +7195,8 @@ export default function Stillform() {
                 <ul className="pricing-features">
                   <li>One-tap reset — always free</li>
                   <li>Breathe, Body Scan, Reframe</li>
-                  <li>3 AI modes: Regulate, Get Sharp, Lock In</li>
+                  <li>Adaptive AI mode (calm, clarity, or hype)</li>
+                  <li>Offline self-guided fallback if AI is unavailable</li>
                   <li>Pulse with AI memory</li>
                   <li>Daily check-in</li>
                   <li>Device-local encrypted storage</li>
@@ -7174,9 +7205,37 @@ export default function Stillform() {
                   <li>Voice-to-text everywhere</li>
                   <li>AES-256 encryption on all session data</li>
                 </ul>
-                <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => { window.location.href = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7?checkout[custom][redirect_url]=" + encodeURIComponent(window.location.origin + "/?subscribed=true"); }}>
-                  {trialExpired ? "Subscribe now →" : "Subscribe →"}
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
+                  disabled={checkoutLoading}
+                  onClick={async () => {
+                    if (checkoutLoading) return;
+                    setCheckoutLoading(true);
+                    setCheckoutMessage(null);
+                    try {
+                      const trialStart = (() => {
+                        try { return localStorage.getItem("stillform_trial_start"); } catch { return null; }
+                      })();
+                      if (trialExpired && !trialStart) {
+                        setCheckoutMessage("Subscription required. Trial start date is missing on this device.");
+                        setCheckoutLoading(false);
+                        return;
+                      }
+                      const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7";
+                      const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
+                      window.location.href = `${checkoutBase}?checkout[custom][redirect_url]=${redirect}`;
+                    } catch {
+                      setCheckoutMessage("Couldn't open checkout. Try again.");
+                      setCheckoutLoading(false);
+                    }
+                  }}
+                >
+                  {checkoutLoading ? "Opening checkout..." : (trialExpired ? "Subscribe now →" : "Subscribe →")}
                 </button>
+                {checkoutMessage && (
+                  <div style={{ fontSize: 12, color: "#e05", marginTop: 10, textAlign: "center" }}>{checkoutMessage}</div>
+                )}
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
@@ -7257,6 +7316,10 @@ export default function Stillform() {
                 a: "It's a tool, not a person. It may occasionally miss context or give a response that doesn't land. It can't give medical, legal, or financial advice. If something it says doesn't fit — tell it. It adjusts."
               },
               {
+                q: "What if AI can't connect?",
+                a: "Reframe retries automatically. If connection still fails, Stillform switches to a built-in self-guided fallback so you're never blocked. Your fallback session still saves in your history."
+              },
+              {
                 q: "What is the Pulse?",
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
               },
@@ -7286,7 +7349,7 @@ export default function Stillform() {
               },
               {
                 q: "Is my data private?",
-                a: "Your data is encrypted and stored on your device. The AI receives your context to generate a response, then forgets it. Nothing is stored on our servers. You can delete everything anytime from Settings."
+                a: "Your data is encrypted. Local data is stored on your device, and optional Cloud Sync stores encrypted backups you can restore on another device. The AI receives context to generate a response, then returns output. You can delete your data anytime from Settings."
               },
               {
                 q: "How much does it cost?",
