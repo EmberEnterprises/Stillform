@@ -6633,9 +6633,9 @@ export default function Stillform() {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Hold composure when it mattered?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How'd you carry yourself today?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Yes", "Mostly", "No"].map(e => (
+                      {["Solid", "Mixed", "Rough"].map(e => (
                         <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
                           background: eodComposure === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodComposure === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,

@@ -1007,6 +1007,26 @@ Before pushing any change, Claude must check each item. If it applies, update it
 - Founder's Armenian New Jersey accent turns "please" into "fiz" in transcription
 - This is an accessibility requirement, not a polish feature
 
+
+### April 8 Evening — Live Testing Session (post-ketamine)
+
+**Bugs Found & Fixed:**
+- FractalBreathCanvas crash on mobile — recursive drawing caused stack overflow. Rewritten as iterative stack with 200-iteration cap, 150ms mount delay. All bio-filter options now work.
+- Speech recognition (mic button) only captured one phrase on Android — Chrome kills continuous recognition between pauses. Fixed with auto-restart on onend unless user intentionally stopped.
+- Obsolete "Different states need different patterns" tip removed — written for 4 patterns, meaningless with 2.
+
+**UX Improvements from Live Testing:**
+- EOD energy: "Energy vs this morning?" → "Where's your energy?" (Full/Steady/Low/Empty). Old version anchored to negative comparison. AI calculates delta silently.
+- EOD composure: "Hold composure when it mattered?" → "How'd you carry yourself today?" (Solid/Mixed/Rough). Old version was a pass/fail test. New version is an observation.
+- Breathing simplified: 4 patterns → 2 (Quick Reset 60s, Deep Regulate 3min). Research shows pattern doesn't matter — attention to breath is the active ingredient.
+- Crisis screen: all numbers now tap-to-call (tel: links), text lines tap-to-text (sms: links)
+- Reframe first-time explainer: "This is an AI that learns your patterns" shows once, never again
+- Pulse rotating placeholders: daily rotation of specific questions instead of vague "Add context"
+- Fractal breathing visuals: working on mobile, iterative rendering, settings toggle ON by default
+
+**Code changes shipped this evening:**
+- Commits: breathing simplification, fractal rewrite, speech fix, tip removal, EOD energy, EOD composure, crisis links, Reframe explainer, Pulse placeholders
+
 ## Priority Builds — Next Sessions
 
 ### Neuro — Voice-Guided Composure Companion
