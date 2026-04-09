@@ -3904,20 +3904,27 @@ function SignalMapTool({ onComplete }) {
   ];
 
   const triggers = [
+    // High — positive activation
+    "Big win or unexpected good news", "Excitement before something important",
+    "Riding high — risk of overcommitting", "Creative flow or peak performance state",
+    "Recognition or praise", "A big opportunity opening up",
     // Situational
     "Work / deadlines", "Conflict / confrontation", "Being put on the spot", "Public speaking / performing",
     "Difficult conversations", "Being judged or evaluated", "Waiting for results or news",
+    "High-stakes decision", "Negotiation or competition",
     // Emotional
     "Rejection or abandonment", "Feeling disrespected", "Jealousy", "Guilt or shame from the past",
     "Grief / loss / anniversaries", "Feeling invisible or unheard",
     // Relational
     "Family dynamics", "Romantic relationship tension", "Parenting moments", "Social situations / networking",
+    "Supporting someone else through something hard",
     // Physical / environmental
     "Chronic pain flares", "Sleep deprivation", "Sensory overload (noise, light, crowds)",
     "Hormonal changes", "Hunger or blood sugar drops",
     // Cognitive
     "Money / financial pressure", "Self-worth / impostor feelings", "Uncertainty / not knowing",
-    "Being alone with your thoughts", "Comparison to others", "Unfinished tasks piling up"
+    "Being alone with your thoughts", "Comparison to others", "Unfinished tasks piling up",
+    "Making a decision with incomplete information"
   ];
 
   const save = (key, value) => {
