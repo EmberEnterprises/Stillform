@@ -7355,14 +7355,14 @@ export default function Stillform() {
             {!syncSignedIn && (
               <div style={{
                 maxWidth: 420,
-                margin: "0 auto 16px",
+                margin: "0 auto 12px",
                 padding: "12px 14px",
                 borderRadius: "var(--r-lg)",
                 background: "var(--surface)",
                 border: "1px solid var(--border)"
               }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
-                  Sign in here and we will continue checkout automatically.
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, lineHeight: 1.5 }}>
+                  Sign in to subscribe. We'll continue checkout automatically.
                 </div>
                 {pricingAuthOpen && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -7403,24 +7403,6 @@ export default function Stillform() {
                   >
                     Continue to sign in →
                   </button>
-                )}
-              </div>
-            )}
-            {syncSignedIn && (
-              <div style={{ maxWidth: 360, margin: "0 auto 14px" }}>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
-                  disabled={checkoutLoading}
-                  onClick={checkoutToLemon}
-                >
-                  {checkoutLoading ? "Opening checkout..." : "Subscribe instantly →"}
-                </button>
-                <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
-                  Quick checkout. Plan details are below if you want them.
-                </div>
-                {checkoutMessage && (
-                  <div style={{ fontSize: 12, color: "#e05", marginTop: 10, textAlign: "center" }}>{checkoutMessage}</div>
                 )}
               </div>
             )}
@@ -7470,19 +7452,27 @@ export default function Stillform() {
                   <li>Voice-to-text everywhere</li>
                   <li>AES-256 encryption on all session data</li>
                 </ul>
-                {syncSignedIn ? (
-                  <button
-                    className="btn btn-primary"
-                    style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
-                    disabled={checkoutLoading}
-                    onClick={checkoutToLemon}
-                  >
-                    {checkoutLoading ? "Opening checkout..." : (trialExpired ? "Subscribe now →" : "Subscribe →")}
-                  </button>
-                ) : (
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", textAlign: "center" }}>
-                    Sign in above to continue.
-                  </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
+                  disabled={checkoutLoading}
+                  onClick={() => {
+                    if (!syncSignedIn) {
+                      setPricingAuthOpen(true);
+                      return;
+                    }
+                    checkoutToLemon();
+                  }}
+                >
+                  {checkoutLoading
+                    ? "Opening checkout..."
+                    : (!syncSignedIn ? "Sign in to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
+                </button>
+                <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
+                  Quick checkout. Plan details are below if you want them.
+                </div>
+                {checkoutMessage && (
+                  <div style={{ fontSize: 12, color: "#e05", marginTop: 10, textAlign: "center" }}>{checkoutMessage}</div>
                 )}
               </div>
             </div>
