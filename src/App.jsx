@@ -3110,7 +3110,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }]);
     saveSelfGuidedSession();
     setSelfGuidedActive(true);
-    if (reason) setError(reason);
+    if (reason) setError(`Connection issue detected. ${reason}`);
     else setError(null);
     setLoading(false);
     try { window.plausible("Reframe Offline Fallback", { props: { mode: effectiveMode } }); } catch {}
@@ -5767,12 +5767,20 @@ export default function Stillform() {
     setCheckoutLoading(true);
     setCheckoutMessage(null);
     try {
+      const trialStart = (() => {
+        try { return localStorage.getItem("stillform_trial_start"); } catch { return null; }
+      })();
+      if (trialExpired && !trialStart) {
+        setCheckoutMessage("Subscription required. Trial start date is missing on this device.");
+        setCheckoutLoading(false);
+        return;
+      }
+      const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7";
       const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
-      const url = `https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7?checkout[custom][variant]=${pricingPlan}&checkout[custom][redirect_url]=${redirect}`;
-      window.location.href = url;
+      window.location.href = `${checkoutBase}?checkout[custom][redirect_url]=${redirect}`;
     } catch {
       setCheckoutLoading(false);
-      setCheckoutMessage("Checkout failed to open. Please try again.");
+      setCheckoutMessage("Couldn't open checkout. Try again.");
     }
   };
   const [pricingPlan, setPricingPlan] = useState("annual");
@@ -7209,27 +7217,7 @@ export default function Stillform() {
                   className="btn btn-primary"
                   style={{ width: "100%", opacity: checkoutLoading ? 0.75 : 1, cursor: checkoutLoading ? "wait" : "pointer" }}
                   disabled={checkoutLoading}
-                  onClick={async () => {
-                    if (checkoutLoading) return;
-                    setCheckoutLoading(true);
-                    setCheckoutMessage(null);
-                    try {
-                      const trialStart = (() => {
-                        try { return localStorage.getItem("stillform_trial_start"); } catch { return null; }
-                      })();
-                      if (trialExpired && !trialStart) {
-                        setCheckoutMessage("Subscription required. Trial start date is missing on this device.");
-                        setCheckoutLoading(false);
-                        return;
-                      }
-                      const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/a150deb3-79d1-4418-904d-434662c9eed7";
-                      const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
-                      window.location.href = `${checkoutBase}?checkout[custom][redirect_url]=${redirect}`;
-                    } catch {
-                      setCheckoutMessage("Couldn't open checkout. Try again.");
-                      setCheckoutLoading(false);
-                    }
-                  }}
+                  onClick={checkoutToLemon}
                 >
                   {checkoutLoading ? "Opening checkout..." : (trialExpired ? "Subscribe now →" : "Subscribe →")}
                 </button>
