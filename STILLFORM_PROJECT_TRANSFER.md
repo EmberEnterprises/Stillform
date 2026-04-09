@@ -1174,7 +1174,7 @@ Pull the live file from GitHub and verify every claimed change is actually prese
 - ❌ DUNS number (applied, waiting on approval)
 - ❌ Weekly AAR (After-Action Report) — AI-generated 3-sentence weekly briefing. Parked: needs API call, not a quick UI build.
 - ❌ Haptic entrainment on native — 60 BPM vibration on long-press of CTA. Parked: Capacitor haptics installed but native-only, can't test from web.
-- ❌ Server-side subscription verification — current paywall is localStorage honor system. Needs cloud sync infrastructure for real verification.
+- ✅ Server-side subscription verification foundation added (webhook + Supabase status table + app status check). Requires env vars + Lemon webhook configuration to go live.
 
 
 ### April 8 Morning Session — All pushed:
@@ -1603,7 +1603,11 @@ stillform_sb_session (Supabase auth session)
 2. Switch **Lemon Squeezy test -> live** and replace checkout URL in app.
 3. Run live checkout verification for **monthly + annual** and confirm variant mapping.
 4. Run second-device cloud restore verification (sessions, pulse, profiles).
-5. Implement server-side subscription truth (webhook + Supabase status table) before broad launch.
+5. Configure/enable server-side subscription truth in production:
+   - run `netlify/functions/_subscriptionSetup.sql` in Supabase SQL editor
+   - set `SUPABASE_SERVICE_ROLE_KEY` and `LEMON_WEBHOOK_SECRET` in Netlify env vars
+   - create Lemon webhook to `/.netlify/functions/subscription-webhook`
+   - see `SUBSCRIPTION_SETUP.md` for exact steps
 
 ### Launch recommendation snapshot
 - **Soft launch:** GO (controlled audience + close monitoring)

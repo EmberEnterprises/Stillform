@@ -2718,6 +2718,51 @@ const sbCreateProfile = async () => {
   const user=sbGetUser();
   try { await sbFetch("/rest/v1/user_profiles",{method:"POST",headers:{"Prefer":"resolution=ignore-duplicates"},body:JSON.stringify({id:user.id,app_version:APP_VERSION,last_seen:new Date().toISOString()})}); } catch {}
 };
+const INSTALL_ID_KEY = "stillform_install_id";
+const getOrCreateInstallId = () => {
+  try {
+    const existing = localStorage.getItem(INSTALL_ID_KEY);
+    if (existing) return existing;
+    const next = (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function")
+      ? crypto.randomUUID()
+      : `sf_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    localStorage.setItem(INSTALL_ID_KEY, next);
+    return next;
+  } catch {
+    return null;
+  }
+};
+const sbCheckSubscriptionStatus = async () => {
+  const installId = getOrCreateInstallId();
+  const token = sbGetSession()?.access_token;
+  const params = new URLSearchParams();
+  if (installId) params.set("install_id", installId);
+  const url = `/.netlify/functions/subscription-status${params.toString() ? `?${params.toString()}` : ""}`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    }
+  });
+  if (!res.ok) throw new Error(`Subscription status ${res.status}`);
+  return res.json().catch(() => null);
+};
+const SUBSCRIBE_PENDING_KEY = "stillform_subscribe_pending_at";
+const markSubscribePending = () => {
+  try { localStorage.setItem(SUBSCRIBE_PENDING_KEY, String(Date.now())); } catch {}
+};
+const clearSubscribePending = () => {
+  try { localStorage.removeItem(SUBSCRIBE_PENDING_KEY); } catch {}
+};
+const hasFreshSubscribePending = (windowMs) => {
+  try {
+    const ts = Number(localStorage.getItem(SUBSCRIBE_PENDING_KEY) || "0");
+    if (!ts) return false;
+    return Date.now() - ts < windowMs;
+  } catch {
+    return false;
+  }
+};
 // ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
@@ -5651,6 +5696,8 @@ export default function Stillform() {
   
   // Subscription & trial tracking
   const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
+  const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
+  const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   const trialDaysLeft = (() => {
     try {
       const start = localStorage.getItem("stillform_trial_start");
@@ -5667,11 +5714,43 @@ export default function Stillform() {
       const params = new URLSearchParams(window.location.search);
       if (params.get("subscribed") === "true" || params.get("checkout") === "success") {
         localStorage.setItem("stillform_subscribed", "yes");
+        markSubscribePending();
         setIsSubscribed(true);
+        setSubscriptionCheckTick(n => n + 1);
         window.history.replaceState({}, "", "/");
       }
     } catch {}
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const PENDING_WEBHOOK_GRACE_MS = 20 * 60 * 1000;
+    const syncSubscriptionTruth = async () => {
+      try {
+        const status = await sbCheckSubscriptionStatus();
+        if (cancelled || !status) return;
+        if (status?.is_subscribed === true) {
+          try {
+            localStorage.setItem("stillform_subscribed", "yes");
+            clearSubscribePending();
+          } catch {}
+          setIsSubscribed(true);
+          return;
+        }
+        // If checkout just completed, allow webhook delivery lag before downgrading local state.
+        if (hasFreshSubscribePending(PENDING_WEBHOOK_GRACE_MS)) return;
+        try {
+          localStorage.removeItem("stillform_subscribed");
+          clearSubscribePending();
+        } catch {}
+        setIsSubscribed(false);
+      } catch {
+        // Keep current state when status API is unavailable.
+      }
+    };
+    syncSubscriptionTruth();
+    return () => { cancelled = true; };
+  }, [syncSignedIn, subscriptionCheckTick]);
 
   // Check widget launch flag synchronously (works on web only)
   const widgetLaunch = false;
@@ -5776,9 +5855,14 @@ export default function Stillform() {
         return;
       }
       const checkoutBase = "https://embers.lemonsqueezy.com/checkout/buy/540c609b-2534-4362-9e9f-0b07b08dbedc";
-      const redirect = encodeURIComponent(window.location.origin + "/?subscribed=true");
-      const variant = encodeURIComponent(pricingPlan === "annual" ? "annual" : "monthly");
-      window.location.href = `${checkoutBase}?checkout[custom][variant]=${variant}&checkout[custom][redirect_url]=${redirect}`;
+      const params = new URLSearchParams();
+      params.set("checkout[custom][variant]", pricingPlan === "annual" ? "annual" : "monthly");
+      params.set("checkout[custom][redirect_url]", window.location.origin + "/?subscribed=true");
+      const installId = getOrCreateInstallId();
+      if (installId) params.set("checkout[custom][install_id]", installId);
+      const userId = sbGetUser()?.id;
+      if (userId) params.set("checkout[custom][user_id]", userId);
+      window.location.href = `${checkoutBase}?${params.toString()}`;
     } catch {
       setCheckoutLoading(false);
       setCheckoutMessage("Couldn't open checkout. Try again.");
@@ -5806,7 +5890,6 @@ export default function Stillform() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
-  const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
 
