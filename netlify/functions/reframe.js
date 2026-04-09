@@ -625,6 +625,30 @@ WHAT STAYING SHARP LOOKS LIKE:
       parsed = { distortion: null, reframe: clean };
     }
 
+    // POST-PROCESSING: catch banned phrases the model ignored
+    // These are hard replacements — model instructions alone aren't reliable enough
+    if (parsed.reframe) {
+      parsed.reframe = parsed.reframe
+        .replace(/[Ii]t'?s understandable( that)?/g, "That tracks —")
+        .replace(/[Tt]hat'?s understandable/g, "That tracks.")
+        .replace(/[Uu]nderstandably[,.]?/g, "")
+        .replace(/completely valid/gi, "real")
+        .replace(/that'?s valid/gi, "that's real")
+        .replace(/your feelings? (are|is) valid/gi, "that's a real signal")
+        .replace(/[Yy]ou'?re navigating a lot/g, "You're carrying a lot right now")
+        .replace(/[Yy]ou have a lot on your plate/g, "There's a lot in motion")
+        .replace(/give yourself permission/gi, "")
+        .replace(/[Mm]ake sure to prioritize/g, "Focus on")
+        .replace(/your needs are important/gi, "")
+        .replace(/that must be (really |so )?(hard|difficult|tough|overwhelming)/gi, "")
+        .replace(/I can (see|understand) why/gi, "")
+        .replace(/[Ii]t makes sense that/g, "")
+        .replace(/[Oo]f course you/g, "")
+        .replace(/\.\s{2,}/g, ". ")
+        .replace(/,\s{2,}/g, ", ")
+        .trim();
+    }
+
     return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ...parsed, crisisDetected: hasCrisisLanguage, liabilityGuard: hasFinancial || hasMedical || hasLegal }) };
   } catch (err) {
     console.error("Error:", err.message);
