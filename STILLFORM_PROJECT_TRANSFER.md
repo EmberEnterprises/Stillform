@@ -1470,3 +1470,51 @@ ARA Embers LLC · Stillform Project Transfer · April 2026
 - Paywall E2E test (4242 card, Bobby)
 - TestFlight build
 - 3-5 real testimonials before Reddit
+
+
+---
+
+## DEVELOPMENT STANDARDS — APPLY EVERY SESSION
+
+### Before touching any code
+1. Pull the live file fresh from GitHub. Never work from memory.
+2. Read the relevant section before changing anything.
+3. Plan the complete change — every file, every function, every checklist item — before writing a single line.
+4. If removing a state variable: grep the entire file for every reference including JSX render.
+
+### Ship checklist — run before every push
+1. UAT dropdown — updated if user-visible change
+2. Tutorial — updated if new feature
+3. FAQ — updated if it changes how something works
+4. Transfer doc — updated every session
+5. Plausible event — added if trackable
+6. Privacy policy — updated if new data collected
+7. Science sheet — updated if research-backed
+8. AI prompts — updated if affects Reframe context
+9. Promo — updated if worth marketing
+10. Punch list — testable item added
+11. Emotion coverage — verify positive/negative/neutral balance if touching Pulse/chips
+
+### Pushing rules
+- Never push without Arlin's explicit go. No exceptions except clear crash fixes.
+- One complete push per feature. Build it all, check it all, push once.
+- After every push: verify every change is in the live file before saying it is done.
+- Netlify deploys are manual. Arlin triggers them.
+
+### Code rules
+- Named imports only. Never React.useState, React.useRef, React.useEffect.
+- Before removing any state variable: grep entire file for every reference including JSX render.
+- Before any .split() or .map(): verify the variable cannot be null.
+- Before any window.* call: verify it is inside a function, not at module scope.
+- Every push: verify no tab refs, no React.* namespace, no broken expressions, all fragments balanced.
+
+### AI and Reframe rules
+- Banned phrases enforced server-side in post-processing — not just in prompts.
+- Every AI prompt change: verify HARD RULES, FORBIDDEN phrases, SPECIFICITY TEST, POSTER TEST, OVERSHARING AWARENESS, STRUCTURE RULE all present.
+- Screenshot inputs: isScreenshot detection and SCREENSHOT CONTEXT injection must both be present.
+- No other person's name in AI responses.
+
+### Diagnostic standard
+- Full diagnostic before any fix. Not reactive one-line patches.
+- Same issue never comes back twice.
+- If checklist has failures: fix silently, rerun, only bring to Arlin at 100%.
