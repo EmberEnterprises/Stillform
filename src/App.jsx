@@ -2680,27 +2680,8 @@ async function secureSet(key, value) {
 // Loads Tesseract.js lazily from CDN — only when user taps the upload button
 // Extracts text from screenshots (emails, texts, social posts) client-side
 // No data leaves the device — all processing happens in the browser
-const loadTesseract = () => new Promise((resolve, reject) => {
-  if (window.Tesseract) { resolve(window.Tesseract); return; }
-  const script = document.createElement("script");
-  script.src = "https://unpkg.com/tesseract.js@5/dist/tesseract.min.js";
-  script.onload = () => resolve(window.Tesseract);
-  script.onerror = () => reject(new Error("Failed to load OCR engine"));
-  document.head.appendChild(script);
-});
+// GPT-4o vision handles image reading
 
-const extractTextFromImage = async (file) => {
-  const Tesseract = await loadTesseract();
-  const url = URL.createObjectURL(file);
-  try {
-    const result = await Tesseract.recognize(url, "eng", {
-      logger: () => {} // suppress progress logs
-    });
-    return result.data.text.trim();
-  } finally {
-    URL.revokeObjectURL(url);
-  }
-};
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
@@ -2826,89 +2807,41 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [pendingImages, setPendingImages] = useState([]);
   const fileInputRef = useRef(null);
 
   const handleImageUpload = async (e) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
 
-    // ── GUARDRAILS ────────────────────────────────────────────────────────
-    // 1. File type — images only, no executables or documents disguised as images
+    // ── GUARDRAILS ─────────────────────────────────────────────────────────
     const allowedTypes = ["image/jpeg","image/jpg","image/png","image/webp","image/gif","image/heic","image/heif"];
     const invalidFile = files.find(f => !allowedTypes.includes(f.type.toLowerCase()));
-    if (invalidFile) {
-      setError("Screenshots and photos only (JPG, PNG, WEBP).");
-      return;
-    }
-    // 2. File count — max 3 screenshots at once
-    if (files.length > 3) {
-      setError("Maximum 3 screenshots at a time.");
-      return;
-    }
-    // 3. File size — max 10MB per file (prevents memory bombs)
+    if (invalidFile) { setError("Screenshots and photos only (JPG, PNG, WEBP)."); return; }
+    if (files.length > 3) { setError("Maximum 3 screenshots at a time."); return; }
     const oversized = files.find(f => f.size > 10 * 1024 * 1024);
-    if (oversized) {
-      setError("Each screenshot must be under 10MB.");
-      return;
-    }
-    // 4. Total payload size — max 20MB combined
+    if (oversized) { setError("Each screenshot must be under 10MB."); return; }
     const totalSize = files.reduce((sum, f) => sum + f.size, 0);
-    if (totalSize > 20 * 1024 * 1024) {
-      setError("Total screenshot size must be under 20MB.");
-      return;
-    }
+    if (totalSize > 20 * 1024 * 1024) { setError("Total screenshot size must be under 20MB."); return; }
 
     setOcrLoading(true);
     setError(null);
     try {
-      // Process all files and concatenate — supports multiple screenshots
-      const texts = await Promise.all(files.map(f => extractTextFromImage(f)));
-      const text = texts.filter(t => t && t.length > 4).join("\n\n---\n\n");
-      if (!text || text.length < 5) {
-        setError("Couldn\'t read text from those images. Try clearer screenshots.");
-        return;
-      }
-      // Clean OCR output — strip phone UI metadata before dropping into input
-      const cleanOcr = (raw) => {
-        return raw
-          .split("\n")
-          .map(l => l.trim())
-          .map(l => {
-            // Convert "Firstname Lastname LO :" → "Firstname:" to preserve sender context
-            const senderMatch = l.match(/^([A-Z][a-z]+)(?:\s+[A-Z][a-z]+)*\s+(?:LO|CO|EL)\s*:\s*(.+)/);
-            if (senderMatch) return `${senderMatch[1]}: ${senderMatch[2]}`;
-            // Strip leading symbol garbage but keep content: "& ¢€ Some text" → "Some text"
-            return l.replace(/^[\s&@#¢€©|<>]+/, "").trim();
-          })
-          .filter(l => {
-            if (l.length < 3) return false;
-            // Drop timestamp lines: "1:23 PM", "12:26 EL @ao" etc.
-            if (/^\d{1,2}:\d{2}/.test(l)) return false;
-            // Drop carrier/metadata lines
-            if (/RCS message|©|\(F\)|\(E\)|oi \d|¢€/.test(l)) return false;
-            // Drop lines that are pure symbols/numbers with no real words
-            const words = l.match(/[a-zA-Z]{2,}/g) || [];
-            if (words.length === 0 && l.length < 20) return false;
-            return true;
-          })
-          .join("\n")
-          .replace(/\n{3,}/g, "\n\n")
-          .trim();
-      };
-      const cleanedText = cleanOcr(text);
-      if (!cleanedText || cleanedText.length < 5) {
-        setError("Couldn\'t extract clean text from that image. Try a clearer screenshot.");
-        return;
-      }
-      // Prepend context so AI knows this is a screenshot of a conversation, not the user's own words
-      const contextualText = `[Screenshot of a conversation]\n${cleanedText}\n\nThis is what I'm dealing with — what do I do with this?`;
-      setInput(prev => prev ? prev + "\n\n" + contextualText : contextualText);
-      try { window.plausible("Image Upload", { props: { chars: text.length } }); } catch {}
+      // Convert to base64 for GPT-4o vision — reads bubble layout, who said what
+      const toBase64 = (file) => new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve({ data: reader.result.split(",")[1], type: file.type });
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const images = await Promise.all(files.map(toBase64));
+      setPendingImages(images);
+      setInput(prev => prev || "What do I do with this?");
+      try { window.plausible("Image Upload", { props: { count: images.length } }); } catch {}
     } catch {
-      setError("OCR failed. Try a clearer screenshot or type it out.");
+      setError("Failed to load image. Try again.");
     } finally {
       setOcrLoading(false);
-      // Reset file input so same file can be re-uploaded
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
@@ -2994,6 +2927,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setMessages(retryText ? [...prevMessages, userMsg] : [...messages, userMsg]);
     setLastInput(textToSend);
     if (!retryText) setInput("");
+    if (pendingImages.length > 0) setPendingImages([]);
     setLoading(true);
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
@@ -3019,6 +2953,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         signal: controller.signal,
         body: JSON.stringify({
           input: textToSend,
+          images: pendingImages.length > 0 ? pendingImages : undefined,
           mode: (() => {
             // Auto-route to clarity mode if input signals spiraling/looping
             const lower = textToSend.toLowerCase();
@@ -3591,6 +3526,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {messages.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
+            {pendingImages.length > 0 && (
+              <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: "0.06em", padding: "4px 10px", background: "rgba(201,147,58,0.1)",
+                borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
+                {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
+              </div>
+            )}
             {messages.length > 1 && (
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
@@ -6391,7 +6333,7 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Upload screenshots in Reframe — tap 📎 to share a conversation, email, or text. Supports multiple screenshots at once. Content stays on your device.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Share screenshots in Reframe — tap 📎 to upload up to 3 conversation screenshots. The AI reads the actual layout — who said what — so advice goes to you, not the other person.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Quick Breathe pill is now draggable — hold and drag to reposition it anywhere on screen. Position saves across sessions.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Footer visible on every screen with Crisis Resources always accessible. Active screen link is hidden to avoid confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI knows the time — late night sessions hit different</div>
@@ -7109,8 +7051,8 @@ export default function Stillform() {
                 a: "Your data stays on your device — nothing is lost. You can resubscribe anytime and pick up right where you left off."
               },
               {
-                q: "Can I upload a screenshot to Reframe?",
-                a: "Yes. Tap 📎 to upload up to 3 screenshots at once — a conversation, email, or anything you want to think through. The AI sees it as a conversation you're sharing, not as your own words. Nothing is stored or sent anywhere except the AI prompt."
+                q: "Can I upload screenshots to Reframe?",
+                a: "Yes. Tap 📎 to share up to 3 conversation screenshots at once. The AI reads the actual layout — bubble position, who said what — so it gives you advice based on your situation, not the other person's words. Images are sent directly to the AI and nothing is stored."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
