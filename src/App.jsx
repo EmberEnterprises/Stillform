@@ -5253,14 +5253,17 @@ function MyProgress({ onBack }) {
 // Users can drag to reposition. Position saved in localStorage.
 function QBPill({ onPress }) {
   const storageKey = "stillform_qb_position";
-  const defaultPos = { x: window.innerWidth - 160, y: window.innerHeight - 140 };
-  
+
   const getSavedPos = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && typeof saved.x === "number" && typeof saved.y === "number") return saved;
     } catch {}
-    return defaultPos;
+    // Safe default — bottom right, evaluated lazily
+    return {
+      x: (typeof window !== "undefined" ? window.innerWidth : 400) - 160,
+      y: (typeof window !== "undefined" ? window.innerHeight : 700) - 140
+    };
   };
 
   const [pos, setPos] = React.useState(getSavedPos);
