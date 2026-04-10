@@ -271,3 +271,24 @@
 - [ ] Lemon Squeezy moved from test mode to live mode
 - [ ] Live-mode checkout tested for monthly + annual variants
 - [ ] Server-side subscription verification planned (webhook + Supabase truth table)
+
+---
+
+## SHIP BASELINE — NON-NEGOTIABLE INVARIANTS (Required before every push)
+
+### Invariant lock (must all be true)
+- [ ] Audience framing is universal: Stillform is for everyone (no niche-only positioning language)
+- [ ] Composure is described as a daily trainable skill, not a trait for specific groups
+- [ ] No copy contradicts trust/integrity posture (no overclaiming, no manipulative urgency)
+- [ ] Ecosystem logic preserved (strengthen existing loops before adding branchy modules)
+- [ ] Public-facing deck/app wording is aligned (no strategy/app mismatch)
+
+### Execution quality gate (must all be true)
+- [ ] One coherent pass completed (no reactive patch-chain edits left unresolved)
+- [ ] Constraint check performed before implementation (what changes / what does not)
+- [ ] Post-change verification performed against invariants and product purpose
+- [ ] Build passes (`npm run build`)
+- [ ] SHIP preflight passes (`npm run ship:preflight`)
+
+### Escalation rule
+- [ ] If any invariant fails, release is blocked and changes are reworked before push

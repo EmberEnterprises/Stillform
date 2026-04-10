@@ -4,6 +4,9 @@ import { spawnSync } from "node:child_process";
 const checks = [
   { label: "Build (vite)", cmd: "npm", args: ["run", "build"] },
   { label: "Unresolved merge markers", cmd: "rg", args: ["-n", "<<<<<<<|=======|>>>>>>>", "src", "netlify", "public"], type: "merge-check" },
+  { label: "Deck uses universal audience framing", cmd: "rg", args: ["-n", "for everyone|composure infrastructure for everyone|composure is a universal skill", "public/uat-roadmap.html"], type: "must-match" },
+  { label: "Deck avoids high-pressure-only framing", cmd: "rg", args: ["-n", "high-pressure|high pressure|high-consequence", "public/uat-roadmap.html"], type: "must-not-match" },
+  { label: "Deck avoids niche-only category labels", cmd: "rg", args: ["-n", "Executive Composure", "public/uat-roadmap.html"], type: "must-not-match" },
   { label: "Protocol launcher helper", cmd: "rg", args: ["-n", "const launchScenarioProtocolById = async", "src/App.jsx"], type: "must-match" },
   { label: "Protocol launcher controller", cmd: "rg", args: ["-n", "const launchScenarioProtocol = async", "src/App.jsx"], type: "must-match" },
   { label: "Morning protocol launch call", cmd: "rg", args: ["-n", "await launchScenarioProtocol\\(recommendedProtocol\\.id\\)", "src/App.jsx"], type: "must-match" },
@@ -33,6 +36,16 @@ const run = ({ label, cmd, args, type = "default" }) => {
   }
   if (type === "must-match") {
     if (res.status === 0) {
+      process.stdout.write(`\n✓ ${label} passed\n`);
+      return;
+    }
+    failed = true;
+    process.stdout.write(`\n✗ ${label} failed\n`);
+    return;
+  }
+  if (type === "must-not-match") {
+    // rg exits 0 when matches found, 1 when no matches, 2+ on errors.
+    if (res.status === 1) {
       process.stdout.write(`\n✓ ${label} passed\n`);
       return;
     }
