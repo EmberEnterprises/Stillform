@@ -267,6 +267,8 @@
 - [ ] Integration consent scaffold in Settings (pending / granted / revoked for calendar and health)
 - [ ] Revoke action clears integration cache for the revoked source
 - [ ] Retry action records retry timestamp and clears stale integration error state
+- [ ] Daily loop adherence telemetry persists check-in and EOD completion history over time
+- [ ] My Progress shows 14-day loop completion metrics (overall + morning + EOD)
 - [ ] Post-launch: provider hookups (Apple/Google calendar + health providers) with explicit consent and revoke paths
 
 ### Pinned human-required actions (can do later if not feeling well)

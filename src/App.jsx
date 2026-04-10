@@ -1324,6 +1324,23 @@ const INTEGRATION_STORAGE_KEYS = {
   }
 };
 
+const LOOP_HISTORY_KEYS = {
+  morning: "stillform_checkin_history",
+  eod: "stillform_eod_history"
+};
+
+const LOOP_HISTORY_MAX_ITEMS = 120;
+
+const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
+  try {
+    const current = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    const base = Array.isArray(current) ? current.filter((item) => item?.date !== entry?.date) : [];
+    base.push(entry);
+    const trimmed = base.slice(-maxItems);
+    localStorage.setItem(storageKey, JSON.stringify(trimmed));
+  } catch {}
+};
+
 // Integration context adapter
 // Single source of truth for calendar/health context across the app.
 const getIntegrationContext = () => {
@@ -2889,7 +2906,7 @@ function MicButton({ onTranscript }) {
 const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 const APP_VERSION = "1.0.0";
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_history","stillform_eod_history"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -5604,6 +5621,22 @@ function MyProgress({ onBack }) {
   // Additional data sources
   const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
+  const morningHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morning) || "[]"); } catch { return []; } })();
+  const eodHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eod) || "[]"); } catch { return []; } })();
+  const withinDays = (isoDate, days) => {
+    if (!isoDate) return false;
+    try {
+      const d = new Date(isoDate);
+      if (Number.isNaN(d.getTime())) return false;
+      const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+      return d.getTime() >= cutoff;
+    } catch {
+      return false;
+    }
+  };
+  const morning14dCount = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const eod14dCount = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const loopCompletion14d = Math.round(((morning14dCount + eod14dCount) / (14 * 2)) * 100);
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
@@ -5870,6 +5903,11 @@ function MyProgress({ onBack }) {
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
                     Protocol launches: <span style={{ color: "var(--text)" }}>{protocolRuns}</span>
                     {" · "}Rated sessions: <span style={{ color: "var(--text)" }}>{ratingDeltaSessions.length}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Loop completion (14d): <span style={{ color: "var(--text)" }}>{loopCompletion14d}%</span>
+                    {" · "}Morning: <span style={{ color: "var(--text)" }}>{morningCompletion14d}%</span>
+                    {" · "}EOD: <span style={{ color: "var(--text)" }}>{eodCompletion14d}%</span>
                   </div>
                   {avgShift !== null && (
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
@@ -9643,6 +9681,8 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_session_hype");
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_checkin_today");
+                      localStorage.removeItem("stillform_checkin_history");
+                      localStorage.removeItem("stillform_eod_history");
                       localStorage.removeItem("stillform_onboarded");
                       window.location.reload();
                     } catch {}
