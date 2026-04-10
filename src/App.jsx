@@ -1325,7 +1325,9 @@ const INTEGRATION_STORAGE_KEYS = {
 };
 
 const LOOP_HISTORY_KEYS = {
+  morningStart: "stillform_checkin_open_history",
   morning: "stillform_checkin_history",
+  eodStart: "stillform_eod_open_history",
   eod: "stillform_eod_history"
 };
 
@@ -2906,7 +2908,7 @@ function MicButton({ onTranscript }) {
 const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 const APP_VERSION = "1.0.0";
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_history","stillform_eod_history"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -5621,7 +5623,9 @@ function MyProgress({ onBack }) {
   // Additional data sources
   const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
+  const morningOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morningStart) || "[]"); } catch { return []; } })();
   const morningHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morning) || "[]"); } catch { return []; } })();
+  const eodOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eodStart) || "[]"); } catch { return []; } })();
   const eodHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eod) || "[]"); } catch { return []; } })();
   const withinDays = (isoDate, days) => {
     if (!isoDate) return false;
@@ -5634,9 +5638,35 @@ function MyProgress({ onBack }) {
       return false;
     }
   };
+  const toDayKey = (entry) => {
+    const raw = entry?.date || entry?.timestamp;
+    if (!raw) return null;
+    try {
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return null;
+      return d.toISOString().slice(0, 10);
+    } catch {
+      return null;
+    }
+  };
+  const recentDaySet = (items) => new Set(
+    (Array.isArray(items) ? items : [])
+      .filter((entry) => withinDays(entry?.date || entry?.timestamp, 14))
+      .map(toDayKey)
+      .filter(Boolean)
+  );
+  const morningOpen14dDays = recentDaySet(morningOpenHistory);
+  const morningDone14dDays = recentDaySet(morningHistory);
+  const eodOpen14dDays = recentDaySet(eodOpenHistory);
+  const eodDone14dDays = recentDaySet(eodHistory);
+
   const morning14dCount = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
   const eod14dCount = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
   const loopCompletion14d = Math.round(((morning14dCount + eod14dCount) / (14 * 2)) * 100);
+  const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
+  const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
+  const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
+  const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
@@ -5908,6 +5938,10 @@ function MyProgress({ onBack }) {
                     Loop completion (14d): <span style={{ color: "var(--text)" }}>{loopCompletion14d}%</span>
                     {" · "}Morning: <span style={{ color: "var(--text)" }}>{morningCompletion14d}%</span>
                     {" · "}EOD: <span style={{ color: "var(--text)" }}>{eodCompletion14d}%</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
+                    {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
                   </div>
                   {avgShift !== null && (
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
@@ -7791,6 +7825,12 @@ export default function Stillform() {
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
                     }));
+                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.morning, {
+                      date: today,
+                      timestamp: new Date().toISOString(),
+                      energy: ciEnergy || "steady",
+                      tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
+                    }, LOOP_HISTORY_MAX_ITEMS);
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
@@ -7806,7 +7846,16 @@ export default function Stillform() {
 
                 if (isCheckedIn) return (
                   <div style={{ marginBottom: 20 }}>
-                    <button onClick={() => { setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set()); }} style={{
+                    <button onClick={() => {
+                      try {
+                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                          date: today,
+                          timestamp: new Date().toISOString(),
+                          source: "update"
+                        }, LOOP_HISTORY_MAX_ITEMS);
+                      } catch {}
+                      setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
+                    }} style={{
                       background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer", padding: 0
                     }}>
@@ -7816,7 +7865,16 @@ export default function Stillform() {
                 );
 
                 if (!ciOpen) return (
-                  <button onClick={() => setCiOpen(true)} style={{
+                  <button onClick={() => {
+                    try {
+                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "open"
+                      }, LOOP_HISTORY_MAX_ITEMS);
+                    } catch {}
+                    setCiOpen(true);
+                  }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
@@ -8112,7 +8170,16 @@ export default function Stillform() {
                         </div>
                       </div>
                     ) : (
-                      <button onClick={() => { setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false); }} style={{
+                      <button onClick={() => {
+                        try {
+                          appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                            date: today,
+                            timestamp: new Date().toISOString(),
+                            source: "update"
+                          }, LOOP_HISTORY_MAX_ITEMS);
+                        } catch {}
+                        setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
+                      }} style={{
                         background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                         fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
                       }}>✓ Day closed · tap to update</button>
@@ -8121,7 +8188,16 @@ export default function Stillform() {
                 );
                 if (eodDone && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    <button onClick={() => setEodOpen(true)} style={{
+                    <button onClick={() => {
+                      try {
+                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                          date: today,
+                          timestamp: new Date().toISOString(),
+                          source: "update"
+                        }, LOOP_HISTORY_MAX_ITEMS);
+                      } catch {}
+                      setEodOpen(true);
+                    }} style={{
                       background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
                     }}>✓ Day closed · tap to update</button>
@@ -8138,6 +8214,11 @@ export default function Stillform() {
                       word: eodWord || null,
                       morningEnergy: morningData?.energy || null
                     }));
+                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.eod, {
+                      date: today,
+                      timestamp: new Date().toISOString(),
+                      composure: eodComposure || "mostly"
+                    }, LOOP_HISTORY_MAX_ITEMS);
                   } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
@@ -8146,7 +8227,16 @@ export default function Stillform() {
                 };
 
                 if (!eodOpen && !eodDone) return (
-                  <button onClick={() => setEodOpen(true)} style={{
+                  <button onClick={() => {
+                    try {
+                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "open"
+                      }, LOOP_HISTORY_MAX_ITEMS);
+                    } catch {}
+                    setEodOpen(true);
+                  }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
@@ -9681,7 +9771,9 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_session_hype");
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_checkin_today");
+                      localStorage.removeItem("stillform_checkin_open_history");
                       localStorage.removeItem("stillform_checkin_history");
+                      localStorage.removeItem("stillform_eod_open_history");
                       localStorage.removeItem("stillform_eod_history");
                       localStorage.removeItem("stillform_onboarded");
                       window.location.reload();
