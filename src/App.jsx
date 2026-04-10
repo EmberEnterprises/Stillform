@@ -6680,6 +6680,16 @@ export default function Stillform() {
     } catch {}
   };
 
+  const setSyncFeedbackWithClear = (type, message) => {
+    if (type === "error") {
+      setSyncError(message);
+      try { window.setTimeout(() => setSyncError(null), 3200); } catch {}
+      return;
+    }
+    setSyncSuccess(message);
+    try { window.setTimeout(() => setSyncSuccess(null), 3200); } catch {}
+  };
+
   const refreshSubscriptionStatus = async () => {
     if (subscriptionStatusLoading) return;
     setSubscriptionStatusLoading(true);
@@ -8880,11 +8890,33 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncUp();
-                        setSyncSuccess(r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`);
-                      } catch { setSyncError("Sync failed. Check connection."); }
+                        setSyncFeedbackWithClear(
+                          r.ok ? "success" : "error",
+                          r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`
+                        );
+                      } catch {
+                        setSyncFeedbackWithClear("error", "Sync failed. Check connection.");
+                      }
                       setSyncLoading(false);
                     }}>
                       {syncLoading ? "Syncing..." : "Sync now"}
+                    </button>
+                    <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
+                      setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
+                      try {
+                        const r = await sbSyncDown();
+                        setSyncFeedbackWithClear(
+                          r?.ok ? "success" : "error",
+                          r?.ok
+                            ? `Restored ${r.restored || 0} items from cloud ✓`
+                            : `Restore completed with issues (${r?.errors?.length || 0}).`
+                        );
+                      } catch {
+                        setSyncFeedbackWithClear("error", "Restore failed. Check connection.");
+                      }
+                      setSyncLoading(false);
+                    }}>
+                      {syncLoading ? "Restoring..." : "Restore now"}
                     </button>
                     <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => {
                       await sbSignOut();
