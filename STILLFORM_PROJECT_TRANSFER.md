@@ -732,6 +732,7 @@ Word of mouth kicks in or dies here. What makes people share:
 - **App store presence** — organic discovery on Google Play + Apple App Store
 - **One press hit** — Wired, Verge, or similar could do this in a week
 - **Therapist channel** — the sleeper. One therapist with 40 clients who says "try this between sessions" = 40 qualified leads. Build relationships with therapists who can't see clients daily but want them to have a tool between sessions.
+- **Executive coach channel** — high-fit distribution for operator framing. Partner with executive/performance coaches who can position Stillform as a between-session composure system for leaders under pressure.
 - **Clinical partnerships** — approach practices that treat ADHD, anxiety, PTSD. Offer provider dashboard (future feature).
 
 ### What Drives Retention (keeps users paying)
