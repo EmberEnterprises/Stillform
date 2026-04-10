@@ -6102,7 +6102,6 @@ export default function Stillform() {
     try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
   });
 
-  const [uatRoadmapOpen, setUatRoadmapOpen] = useState(false);
   const [syncEmail, setSyncEmail] = useState("");
   const [syncPassword, setSyncPassword] = useState("");
   const [syncLoading, setSyncLoading] = useState(false);
@@ -7004,76 +7003,66 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* UAT BANNER — visible dropdown with roadmap */}
+              {/* UAT BANNER — direct links */}
               <div style={{ marginBottom: 32 }}>
-                <button onClick={() => setUatRoadmapOpen(!uatRoadmapOpen)} style={{
-                  width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
-                  borderRadius: "var(--r)", padding: "12px 16px", cursor: "pointer",
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  WebkitTapHighlightColor: "transparent"
-                }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
                     <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", padding: "2px 8px", borderRadius: 4 }}>EARLY ACCESS</span>
                     <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", animation: "pulse 1.5s ease-in-out infinite" }}>NEW!</span>
                     <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>What's new + what's coming</span>
                   </div>
-                  <span style={{ fontSize: 10, color: "var(--text-muted)", transition: "transform 0.2s", transform: uatRoadmapOpen ? "rotate(180deg)" : "rotate(0deg)" }}>▾</span>
-                </button>
-                {uatRoadmapOpen && (
-                  <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", marginBottom: 8 }}>
-                      UAT Deck
-                    </div>
-                    <div style={{ marginBottom: 10 }}>
-                      The full UAT update list now lives in a PowerPoint deck for easier sharing with testers.
-                    </div>
-                    <a
-                      href="/Stillform-UAT-Roadmap-Apr-2026.pptx"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-block",
-                        background: "var(--amber)",
-                        color: "#0A0A0C",
-                        textDecoration: "none",
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 12px",
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 10,
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                        fontWeight: 600
-                      }}
-                    >
-                      Open UAT Roadmap Deck (PPTX)
-                    </a>
-                    <a
-                      href="/Stillform-UAT-Deck-Template-v2.pptx"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      style={{
-                        display: "inline-block",
-                        marginLeft: 8,
-                        background: "transparent",
-                        color: "var(--amber)",
-                        textDecoration: "none",
-                        border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 12px",
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 10,
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                        fontWeight: 600
-                      }}
-                    >
-                      Open Branded Template (v2)
-                    </a>
-                    <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                      Tip: use the roadmap deck for tester updates, then duplicate the v2 template for the next release.
-                    </div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", marginBottom: 8 }}>
+                    UAT Deck
                   </div>
-                )}
+                  <div style={{ marginBottom: 10 }}>
+                    The full UAT update list now lives in a PowerPoint deck for easier sharing with testers.
+                  </div>
+                  <a
+                    href="/Stillform-UAT-Roadmap-Apr-2026.pptx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      background: "var(--amber)",
+                      color: "#0A0A0C",
+                      textDecoration: "none",
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 12px",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontWeight: 600
+                    }}
+                  >
+                    Open UAT Roadmap Deck (PPTX)
+                  </a>
+                  <a
+                    href="/Stillform-UAT-Deck-Template-v2.pptx"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      marginLeft: 8,
+                      background: "transparent",
+                      color: "var(--amber)",
+                      textDecoration: "none",
+                      border: "0.5px solid var(--amber-dim)",
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 12px",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                      fontWeight: 600
+                    }}
+                  >
+                    Open Branded Template (v2)
+                  </a>
+                  <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>
+                    Tip: use the roadmap deck for tester updates, then duplicate the v2 template for the next release.
+                  </div>
+                </div>
               </div>
 
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
