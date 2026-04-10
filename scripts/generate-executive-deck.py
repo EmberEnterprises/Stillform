@@ -179,35 +179,51 @@ def slide_global_distress(prs, idx, total):
     s = prs.slides.add_slide(prs.slide_layouts[6])
     set_bg(s)
     add_header(s, idx, total)
-    add_title(s, "Global Emotional Load", "Daily distress indicators remain elevated worldwide")
+    add_title(s, "Global Emotional Landscape", "Risk signals and capacity signals both matter")
 
-    add_card(s, Inches(0.75), Inches(2.08), Inches(8.05), Inches(4.65))
-    data = CategoryChartData()
-    data.categories = ["Worry", "Stress", "Physical pain", "Sadness", "Anger"]
-    data.add_series("Global adults (%)", (39, 37, 32, 26, 22))
-
-    chart = s.shapes.add_chart(
+    # Left: negative emotional load
+    add_card(s, Inches(0.75), Inches(2.08), Inches(6.0), Inches(4.65))
+    data_neg = CategoryChartData()
+    data_neg.categories = ["Worry", "Stress", "Physical pain", "Sadness", "Anger"]
+    data_neg.add_series("Negative emotions (%)", (39, 37, 32, 26, 22))
+    chart_neg = s.shapes.add_chart(
         XL_CHART_TYPE.BAR_CLUSTERED,
-        Inches(1.05),
-        Inches(2.45),
-        Inches(7.45),
-        Inches(3.95),
-        data,
+        Inches(1.0),
+        Inches(2.55),
+        Inches(5.55),
+        Inches(3.85),
+        data_neg,
     ).chart
-    style_chart(chart)
-    chart.has_legend = False
-    series = chart.series[0]
-    series.format.fill.solid()
-    series.format.fill.fore_color.rgb = ACCENT
-    series.format.line.color.rgb = ACCENT
-    chart.value_axis.maximum_scale = 45
+    style_chart(chart_neg)
+    chart_neg.has_legend = False
+    neg_series = chart_neg.series[0]
+    neg_series.format.fill.solid()
+    neg_series.format.fill.fore_color.rgb = RED
+    neg_series.format.line.color.rgb = RED
+    chart_neg.value_axis.maximum_scale = 45
 
-    add_card(s, Inches(9.05), Inches(2.08), Inches(3.55), Inches(4.65))
-    add_kpi(s, Inches(9.35), Inches(2.45), "Worry", "39%", RED)
-    add_kpi(s, Inches(9.35), Inches(3.72), "Stress", "37%", ACCENT)
-    add_kpi(s, Inches(9.35), Inches(4.99), "Pain", "32%", BLUE)
+    # Right: positive emotional capacity
+    add_card(s, Inches(6.95), Inches(2.08), Inches(5.85), Inches(4.65))
+    data_pos = CategoryChartData()
+    data_pos.categories = ["Respect", "Laughter", "Enjoyment", "Well-rested", "Learned"]
+    data_pos.add_series("Positive experiences (%)", (88, 73, 73, 72, 52))
+    chart_pos = s.shapes.add_chart(
+        XL_CHART_TYPE.BAR_CLUSTERED,
+        Inches(7.2),
+        Inches(2.55),
+        Inches(5.4),
+        Inches(3.85),
+        data_pos,
+    ).chart
+    style_chart(chart_pos)
+    chart_pos.has_legend = False
+    pos_series = chart_pos.series[0]
+    pos_series.format.fill.solid()
+    pos_series.format.fill.fore_color.rgb = GREEN
+    pos_series.format.line.color.rgb = GREEN
+    chart_pos.value_axis.maximum_scale = 100
 
-    add_source(s, "Gallup State of the World's Emotional Health (2024 global survey)")
+    add_source(s, "Gallup State of the World's Emotional Health (2024 global survey): negative + positive indicators")
 
 
 def slide_who_need(prs, idx, total):
