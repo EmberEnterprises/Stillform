@@ -5260,6 +5260,55 @@ function MyProgress({ onBack }) {
           );
         })()}
 
+        {/* PROOF — outcome and protocol evidence */}
+        {(() => {
+          const ratingDeltaSessions = sessions.filter(s => s.preRating && s.postRating && Number.isFinite(s.postRating - s.preRating));
+          const avgShift = ratingDeltaSessions.length
+            ? (ratingDeltaSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / ratingDeltaSessions.length)
+            : null;
+          const protocolRuns = sessions.filter(s => s.entryMode && String(s.entryMode).startsWith("protocol-")).length;
+          const activeDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
+          if (sessions.length < 2) return null;
+          return (
+            <div style={{ marginBottom: 12 }}>
+              <button onClick={() => toggle("proof")} style={rowStyle}>
+                <div>
+                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof of change</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                    {activeDays} active day{activeDays !== 1 ? "s" : ""} · {protocolRuns} protocol run{protocolRuns !== 1 ? "s" : ""}
+                  </div>
+                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.proof ? "▾" : "▸"}</span>
+              </button>
+              {openSections.proof && (
+                <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Sessions logged: <span style={{ color: "var(--text)" }}>{sessions.length}</span>
+                    {" · "}Active days: <span style={{ color: "var(--text)" }}>{activeDays}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Protocol launches: <span style={{ color: "var(--text)" }}>{protocolRuns}</span>
+                    {" · "}Rated sessions: <span style={{ color: "var(--text)" }}>{ratingDeltaSessions.length}</span>
+                  </div>
+                  {avgShift !== null && (
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                      Average composure gain per rated session:{" "}
+                      <span style={{ color: avgShift >= 0 ? "var(--amber)" : "#e05" }}>
+                        {avgShift >= 0 ? "+" : ""}{avgShift.toFixed(1)}
+                      </span>
+                    </div>
+                  )}
+                  {avgShift === null && (
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                      Add pre and post ratings to see measured composure gains here.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* MY PATTERNS — diagnostic intelligence, not history */}
         {hasPatterns && (() => {
           // ── DATA COMPUTATION ─────────────────────────────────────────
@@ -5788,6 +5837,16 @@ export default function Stillform() {
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
+  const [outcomeFocus, setOutcomeFocus] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_outcome_focus") || "null"); } catch { return null; }
+  });
+
+  useEffect(() => {
+    try {
+      if (!outcomeFocus) localStorage.removeItem("stillform_outcome_focus");
+      else localStorage.setItem("stillform_outcome_focus", JSON.stringify(outcomeFocus));
+    } catch {}
+  }, [outcomeFocus]);
 
   // Widget action check — calls native plugin, routes before splash ends
   useEffect(() => {
@@ -6046,6 +6105,42 @@ export default function Stillform() {
     } else {
       startTool(TOOLS.find(t => t.id === "breathe"));
     }
+  };
+
+  const launchScenarioProtocol = async (protocolId) => {
+    const outcomeId = outcomeFocus?.id || "none";
+    try {
+      localStorage.setItem("stillform_last_protocol", JSON.stringify({
+        id: protocolId,
+        outcome: outcomeId,
+        at: new Date().toISOString()
+      }));
+    } catch {}
+    try { window.plausible("Scenario Protocol Started", { props: { protocol: protocolId, outcome: outcomeId } }); } catch {}
+
+    if (protocolId === "hard-conversation") {
+      if (!(await biometric.gate())) return;
+      try { localStorage.setItem("stillform_reframe_entry_mode", "protocol-hard-conversation"); } catch {}
+      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
+      setScreen("tool");
+      return;
+    }
+    if (protocolId === "physiological-spike") {
+      startPathway("calm");
+      return;
+    }
+    if (protocolId === "after-conflict-reset") {
+      startTool(TOOLS.find(t => t.id === "scan"));
+      return;
+    }
+    if (protocolId === "winning-locked-in") {
+      if (!(await biometric.gate())) return;
+      try { localStorage.setItem("stillform_reframe_entry_mode", "protocol-winning"); } catch {}
+      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" });
+      setScreen("tool");
+      return;
+    }
+    startPathway("calm");
   };
 
   const renderTool = () => {
@@ -7003,6 +7098,107 @@ export default function Stillform() {
                 );
               })()}
 
+              {/* OUTCOME + SCENARIO PROTOCOLS */}
+              {(() => {
+                const outcomes = [
+                  { id: "composure", title: "Stay composed under pressure", subtitle: "High-stakes calls, messages, decisions" },
+                  { id: "sharp", title: "Stay sharp while winning", subtitle: "Keep confidence; avoid overcommit" },
+                  { id: "recover", title: "Recover fast after activation", subtitle: "Interrupt spirals and reset quickly" }
+                ];
+                const protocols = [
+                  {
+                    id: "hard-conversation",
+                    title: "Hard conversation",
+                    subtitle: "Get clear before sending",
+                    route: "Reframe · Clarity",
+                    match: ["composure", "recover"]
+                  },
+                  {
+                    id: "physiological-spike",
+                    title: "Physiological spike",
+                    subtitle: "Body-first reset now",
+                    route: "Breathe",
+                    match: ["recover", "composure"]
+                  },
+                  {
+                    id: "winning-locked-in",
+                    title: "Winning but unfocused",
+                    subtitle: "Channel momentum cleanly",
+                    route: "Reframe · Hype",
+                    match: ["sharp"]
+                  },
+                  {
+                    id: "after-conflict-reset",
+                    title: "After conflict reset",
+                    subtitle: "Drop tension from body",
+                    route: "Body Scan",
+                    match: ["recover", "composure"]
+                  }
+                ];
+
+                const recommended = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
+                return (
+                  <div style={{ marginBottom: 24 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
+                      Outcome Engine
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+                      {outcomes.map(o => {
+                        const active = outcomeFocus?.id === o.id;
+                        return (
+                          <button
+                            key={o.id}
+                            onClick={() => {
+                              const next = active ? null : o;
+                              setOutcomeFocus(next);
+                              try { localStorage.setItem("stillform_outcome_focus", JSON.stringify(next)); } catch {}
+                            }}
+                            style={{
+                              width: "100%",
+                              background: active ? "var(--amber-glow)" : "var(--surface)",
+                              border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                              borderRadius: "var(--r)",
+                              padding: "11px 14px",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
+                              WebkitTapHighlightColor: "transparent"
+                            }}
+                          >
+                            <div style={{ fontSize: 13, color: active ? "var(--amber)" : "var(--text)" }}>{o.title}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{o.subtitle}</div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div style={{
+                      background: "var(--surface)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      padding: "12px 14px"
+                    }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+                        Recommended protocol
+                      </div>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 13, color: "var(--text)" }}>{recommended.title}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{recommended.subtitle}</div>
+                          <div style={{ fontSize: 10, color: "var(--amber)", marginTop: 5, fontFamily: "'IBM Plex Mono', monospace" }}>{recommended.route}</div>
+                        </div>
+                        <button
+                          onClick={() => launchScenarioProtocol(recommended.id)}
+                          className="btn btn-primary"
+                          style={{ whiteSpace: "nowrap", padding: "8px 12px", fontSize: 12 }}
+                        >
+                          Run now →
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* DOMINANT CTA — Adaptive to regulation type */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 {/* Identity line */}
@@ -7362,7 +7558,7 @@ export default function Stillform() {
                 border: "1px solid var(--border)"
               }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, lineHeight: 1.5 }}>
-                  Sign in to subscribe. We'll continue checkout automatically.
+                  Sign in / Sign up to subscribe. We'll continue checkout automatically.
                 </div>
                 {pricingAuthOpen && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -7466,7 +7662,7 @@ export default function Stillform() {
                 >
                   {checkoutLoading
                     ? "Opening checkout..."
-                    : (!syncSignedIn ? "Sign in to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
+                    : (!syncSignedIn ? "Sign in / Sign up to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
                 </button>
                 <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
                   Quick checkout. Plan details are below if you want them.
