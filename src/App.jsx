@@ -1301,9 +1301,94 @@ const scheduleReminder = async (title, body, hour, minute) => {
   } catch {}
 };
 
+const INTEGRATION_STORAGE_KEYS = {
+  calendar: {
+    consent: "stillform_calendar_consent",
+    error: "stillform_calendar_error",
+    retryAt: "stillform_calendar_retry_at",
+    data: [
+      "stillform_calendar_summary",
+      "stillform_calendar_events",
+      "stillform_calendar_updated_at"
+    ]
+  },
+  health: {
+    consent: "stillform_health_consent",
+    error: "stillform_health_error",
+    retryAt: "stillform_health_retry_at",
+    data: [
+      "stillform_health_summary",
+      "stillform_health_snapshot",
+      "stillform_health_updated_at"
+    ]
+  }
+};
+
+const LOOP_HISTORY_KEYS = {
+  morningStart: "stillform_checkin_open_history",
+  morning: "stillform_checkin_history",
+  eodStart: "stillform_eod_open_history",
+  eod: "stillform_eod_history"
+};
+
+const LOOP_HISTORY_MAX_ITEMS = 120;
+const LOOP_NUDGE_MIN_OPENS = 3;
+const LOOP_NUDGE_DROPOFF_THRESHOLD = 40;
+const LOOP_NUDGE_MIN_OPENS_LOWER_BOUND = 2;
+const LOOP_NUDGE_MIN_OPENS_UPPER_BOUND = 5;
+const LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND = 25;
+const LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND = 60;
+const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
+const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
+const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
+const LOOP_NUDGE_EVENTS_MAX_ITEMS = 180;
+
+const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
+  try {
+    const current = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    const base = Array.isArray(current) ? current.filter((item) => item?.date !== entry?.date) : [];
+    base.push(entry);
+    const trimmed = base.slice(-maxItems);
+    localStorage.setItem(storageKey, JSON.stringify(trimmed));
+  } catch {}
+};
+
+const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => {
+  try {
+    const current = JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]");
+    const list = Array.isArray(current) ? current : [];
+    const exists = list.some((item) => (
+      item?.event === entry?.event &&
+      item?.type === entry?.type &&
+      item?.date === entry?.date
+    ));
+    if (exists) return false;
+    const next = [...list, entry].slice(-maxItems);
+    localStorage.setItem(LOOP_NUDGE_EVENTS_KEY, JSON.stringify(next));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Integration context adapter
 // Single source of truth for calendar/health context across the app.
 const getIntegrationContext = () => {
+  const readConsent = (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return (v === "granted" || v === "revoked") ? v : "pending";
+    } catch {
+      return "pending";
+    }
+  };
+  const readString = (key) => {
+    try {
+      return localStorage.getItem(key) || null;
+    } catch {
+      return null;
+    }
+  };
   const parseIsoTime = (v) => {
     if (!v) return null;
     try {
@@ -1322,8 +1407,15 @@ const getIntegrationContext = () => {
     if (ageHours <= 72) return { label: "Aging", stale: false };
     return { label: "Stale", stale: true };
   };
+  const calendarConsent = readConsent(INTEGRATION_STORAGE_KEYS.calendar.consent);
+  const healthConsent = readConsent(INTEGRATION_STORAGE_KEYS.health.consent);
+  const calendarError = readString(INTEGRATION_STORAGE_KEYS.calendar.error);
+  const healthError = readString(INTEGRATION_STORAGE_KEYS.health.error);
+  const calendarLastRetryAt = parseIsoTime(readString(INTEGRATION_STORAGE_KEYS.calendar.retryAt));
+  const healthLastRetryAt = parseIsoTime(readString(INTEGRATION_STORAGE_KEYS.health.retryAt));
   const calendar = (() => {
     try {
+      if (calendarConsent === "revoked") return null;
       const summary = localStorage.getItem("stillform_calendar_summary");
       const events = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
       const next = Array.isArray(events) && events.length > 0 ? events[0] : null;
@@ -1354,6 +1446,7 @@ const getIntegrationContext = () => {
 
   const health = (() => {
     try {
+      if (healthConsent === "revoked") return null;
       const summary = localStorage.getItem("stillform_health_summary");
       const snap = JSON.parse(localStorage.getItem("stillform_health_snapshot") || "null");
       const updatedAt = parseIsoTime(localStorage.getItem("stillform_health_updated_at") || snap?.updatedAt || null);
@@ -1398,10 +1491,21 @@ const getIntegrationContext = () => {
   return {
     calendar,
     health,
+    calendarConsent,
+    healthConsent,
+    calendarError,
+    healthError,
+    calendarLastRetryAt,
+    healthLastRetryAt,
     calendarContext,
     healthContext,
     upcomingPressure: calendar && !calendar.stale ? calendar.summary : null,
-    hasAny: !!(calendar || health)
+    hasAny: !!(calendar || health),
+    hasStale: !!(calendar?.stale || health?.stale),
+    calendarSource: calendar?.source || null,
+    healthSource: health?.source || null,
+    calendarFreshness: calendar?.freshness || null,
+    healthFreshness: health?.freshness || null
   };
 };
 
@@ -2832,7 +2936,7 @@ function MicButton({ onTranscript }) {
 const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 const APP_VERSION = "1.0.0";
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -2997,6 +3101,7 @@ const hasFreshSubscribePending = (windowMs) => {
     return false;
   }
 };
+const SUBSCRIPTION_PENDING_GRACE_MS = 20 * 60 * 1000;
 // ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
@@ -5546,6 +5651,94 @@ function MyProgress({ onBack }) {
   // Additional data sources
   const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
+  const morningOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morningStart) || "[]"); } catch { return []; } })();
+  const morningHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morning) || "[]"); } catch { return []; } })();
+  const eodOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eodStart) || "[]"); } catch { return []; } })();
+  const eodHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eod) || "[]"); } catch { return []; } })();
+  const loopNudgeEvents = (() => { try { return JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]"); } catch { return []; } })();
+  const withinDays = (isoDate, days) => {
+    if (!isoDate) return false;
+    try {
+      const d = new Date(isoDate);
+      if (Number.isNaN(d.getTime())) return false;
+      const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+      return d.getTime() >= cutoff;
+    } catch {
+      return false;
+    }
+  };
+  const toDayKey = (entry) => {
+    const raw = entry?.date || entry?.timestamp;
+    if (!raw) return null;
+    try {
+      const d = new Date(raw);
+      if (Number.isNaN(d.getTime())) return null;
+      return d.toISOString().slice(0, 10);
+    } catch {
+      return null;
+    }
+  };
+  const recentDaySet = (items) => new Set(
+    (Array.isArray(items) ? items : [])
+      .filter((entry) => withinDays(entry?.date || entry?.timestamp, 14))
+      .map(toDayKey)
+      .filter(Boolean)
+  );
+  const morningOpen14dDays = recentDaySet(morningOpenHistory);
+  const morningDone14dDays = recentDaySet(morningHistory);
+  const eodOpen14dDays = recentDaySet(eodOpenHistory);
+  const eodDone14dDays = recentDaySet(eodHistory);
+
+  const morning14dCount = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const eod14dCount = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const loopCompletion14d = Math.round(((morning14dCount + eod14dCount) / (14 * 2)) * 100);
+  const morningCompletion14d = Math.round((morning14dCount / 14) * 100);
+  const eodCompletion14d = Math.round((eod14dCount / 14) * 100);
+  const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
+  const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
+  const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
+  const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+  const loopNudgeShown14d = (Array.isArray(loopNudgeEvents) ? loopNudgeEvents : []).filter(
+    (entry) => entry?.event === "shown" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const loopNudgeActioned14d = (Array.isArray(loopNudgeEvents) ? loopNudgeEvents : []).filter(
+    (entry) => entry?.event === "actioned" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const recoveredNudges14d = loopNudgeShown14d.filter((entry) => (
+    entry?.type === "morning"
+      ? morningDone14dDays.has(entry?.date)
+      : eodDone14dDays.has(entry?.date)
+  )).length;
+  const nudgeRecovery14dPct = loopNudgeShown14d.length
+    ? Math.round((recoveredNudges14d / loopNudgeShown14d.length) * 100)
+    : null;
+  const completionRatio14d = (morningDone14dDays.size + eodDone14dDays.size) / (14 * 2);
+  const adaptiveDropoffThreshold14d = Math.max(
+    LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
+    Math.min(
+      LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND,
+      LOOP_NUDGE_DROPOFF_THRESHOLD
+      + (completionRatio14d >= 0.75 ? 8 : 0)
+      - (completionRatio14d <= 0.35 ? 8 : 0)
+      - (loopNudgeDismissStreak >= 2 ? 4 : 0)
+    )
+  );
+  const adaptiveMinOpens14d = Math.max(
+    LOOP_NUDGE_MIN_OPENS_LOWER_BOUND,
+    Math.min(
+      LOOP_NUDGE_MIN_OPENS_UPPER_BOUND,
+      LOOP_NUDGE_MIN_OPENS
+      + (completionRatio14d >= 0.75 ? 1 : 0)
+      - (completionRatio14d <= 0.35 ? 1 : 0)
+    )
+  );
+  const adaptiveNudgeSensitivityLabel = (
+    adaptiveDropoffThreshold14d <= LOOP_NUDGE_DROPOFF_THRESHOLD - 6
+      ? "high support"
+      : adaptiveDropoffThreshold14d >= LOOP_NUDGE_DROPOFF_THRESHOLD + 6
+        ? "quiet mode"
+        : "balanced"
+  );
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
@@ -5568,8 +5761,8 @@ function MyProgress({ onBack }) {
     `Avg composure gain: ${proofAvgShift === null ? "N/A" : `${proofAvgShift >= 0 ? "+" : ""}${proofAvgShift.toFixed(1)}`}`,
     `Current streak: ${streak} day${streak !== 1 ? "s" : ""}`,
     `Most used tool: ${topToolName}`,
-    `Calendar context: ${integrationContext.calendarSource || "none"}`,
-    `Health context: ${integrationContext.healthSource || "none"}`
+    `Calendar context: ${integrationContext.calendar?.source || "none"}`,
+    `Health context: ${integrationContext.health?.source || "none"}`
   ];
   const shareCardText = shareCardLines.join("\n");
   const setShareStatusWithClear = (msg) => {
@@ -5813,6 +6006,26 @@ function MyProgress({ onBack }) {
                     Protocol launches: <span style={{ color: "var(--text)" }}>{protocolRuns}</span>
                     {" · "}Rated sessions: <span style={{ color: "var(--text)" }}>{ratingDeltaSessions.length}</span>
                   </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Loop completion (14d): <span style={{ color: "var(--text)" }}>{loopCompletion14d}%</span>
+                    {" · "}Morning: <span style={{ color: "var(--text)" }}>{morningCompletion14d}%</span>
+                    {" · "}EOD: <span style={{ color: "var(--text)" }}>{eodCompletion14d}%</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
+                    {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
+                  </div>
+                  {nudgeRecovery14dPct !== null && (
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                      Nudge recovery (14d): <span style={{ color: "var(--text)" }}>{nudgeRecovery14dPct}%</span> ({recoveredNudges14d}/{loopNudgeShown14d.length})
+                      {" · "}Actioned: <span style={{ color: "var(--text)" }}>{loopNudgeActioned14d.length}</span>
+                    </div>
+                  )}
+                  {nudgeRecovery14dPct === null && (
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                      Nudge recovery (14d): waiting for intervention data.
+                    </div>
+                  )}
                   {avgShift !== null && (
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
                       Average composure gain per rated session:{" "}
@@ -6328,11 +6541,11 @@ export default function Stillform() {
 
   useEffect(() => {
     let cancelled = false;
-    const PENDING_WEBHOOK_GRACE_MS = 20 * 60 * 1000;
     const syncSubscriptionTruth = async () => {
       try {
         const status = await sbCheckSubscriptionStatus();
         if (cancelled || !status) return;
+        if (screen === "settings") setSubscriptionLastCheckedAt(Date.now());
         if (status?.is_subscribed === true) {
           try {
             localStorage.setItem("stillform_subscribed", "yes");
@@ -6342,7 +6555,7 @@ export default function Stillform() {
           return;
         }
         // If checkout just completed, allow webhook delivery lag before downgrading local state.
-        if (hasFreshSubscribePending(PENDING_WEBHOOK_GRACE_MS)) return;
+        if (hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS)) return;
         try {
           localStorage.removeItem("stillform_subscribed");
           clearSubscribePending();
@@ -6375,7 +6588,155 @@ export default function Stillform() {
   const [eodWord, setEodWord] = useState(null);
   const [eodSaved, setEodSaved] = useState(false);
   const [eodPromptDismissed, setEodPromptDismissed] = useState(false);
+  const [loopNudgeDismissedDay, setLoopNudgeDismissedDay] = useState(() => {
+    try { return localStorage.getItem(LOOP_NUDGE_DISMISSED_DAY_KEY) || ""; } catch { return ""; }
+  });
+  const [loopNudgeDismissStreak, setLoopNudgeDismissStreak] = useState(() => {
+    try {
+      const raw = Number.parseInt(localStorage.getItem(LOOP_NUDGE_DISMISS_STREAK_KEY) || "0", 10);
+      return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+
+  const getLoopNudgeSnapshot = () => {
+    const todayIso = new Date().toISOString().split("T")[0];
+    const parseLoopHistory = (key) => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+    const toDayKey = (entry) => {
+      const raw = entry?.date || entry?.timestamp;
+      if (!raw) return null;
+      try {
+        const dt = new Date(raw);
+        if (Number.isNaN(dt.getTime())) return null;
+        return dt.toISOString().slice(0, 10);
+      } catch {
+        return null;
+      }
+    };
+    const withinRecentDays = (rawDate, days) => {
+      if (!rawDate) return false;
+      try {
+        const dt = new Date(rawDate);
+        if (Number.isNaN(dt.getTime())) return false;
+        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+        return dt.getTime() >= cutoff;
+      } catch {
+        return false;
+      }
+    };
+    const recentLoopDaySet = (items) => new Set(
+      (Array.isArray(items) ? items : [])
+        .filter((entry) => withinRecentDays(entry?.date || entry?.timestamp, 14))
+        .map(toDayKey)
+        .filter(Boolean)
+    );
+
+    const morningOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morningStart));
+    const morningDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morning));
+    const eodOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eodStart));
+    const eodDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eod));
+    const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
+    const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
+    const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
+    const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+    const completedLoopDays14d = new Set([...morningDone14dDays, ...eodDone14dDays]).size;
+    const completionRatio14d = completedLoopDays14d / 14;
+    const adaptiveDropoffThreshold = Math.max(
+      LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
+      Math.min(
+        LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND,
+        LOOP_NUDGE_DROPOFF_THRESHOLD
+        + (completionRatio14d >= 0.75 ? 8 : 0)
+        - (completionRatio14d <= 0.35 ? 8 : 0)
+        + (loopNudgeDismissStreak >= 2 ? 6 : 0)
+      )
+    );
+    const adaptiveMinOpens = Math.max(
+      LOOP_NUDGE_MIN_OPENS_LOWER_BOUND,
+      Math.min(
+        LOOP_NUDGE_MIN_OPENS_UPPER_BOUND,
+        LOOP_NUDGE_MIN_OPENS
+        + (completionRatio14d >= 0.75 ? 1 : 0)
+        - (completionRatio14d <= 0.35 ? 1 : 0)
+        + (loopNudgeDismissStreak >= 3 ? 1 : 0)
+      )
+    );
+    const sensitivityLabel = completionRatio14d <= 0.35
+      ? "Protective"
+      : ((completionRatio14d >= 0.75 || loopNudgeDismissStreak >= 3) ? "Conservative" : "Balanced");
+
+    const nowNudge = new Date();
+    const currentMinutesNudge = nowNudge.getHours() * 60 + nowNudge.getMinutes();
+    const morningStartMin = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+    const eveningStartMin = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+    const morningEndMin = 1050;
+    const morningCap = 240;
+    const inMorningWindow = currentMinutesNudge >= morningStartMin && currentMinutesNudge < morningEndMin;
+    const inEodWindow = currentMinutesNudge >= eveningStartMin || currentMinutesNudge < morningCap;
+
+    const morningDoneToday = (() => {
+      try {
+        const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+        return c?.date === todayIso;
+      } catch {
+        return false;
+      }
+    })();
+    const eodDoneToday = (() => {
+      try {
+        const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+        return e?.date === todayIso;
+      } catch {
+        return false;
+      }
+    })();
+
+    const loopNudgeCandidates = [
+      {
+        id: "morning",
+        title: "Morning loop consistency",
+        actionLabel: "Resume morning check-in",
+        opens: morningOpen14dDays.size,
+        dropoffCount: morningDropoff14dCount,
+        dropoffPct: morningDropoff14dPct,
+        eligible: inMorningWindow && !morningDoneToday
+      },
+      {
+        id: "eod",
+        title: "End-of-day loop consistency",
+        actionLabel: "Close the loop now",
+        opens: eodOpen14dDays.size,
+        dropoffCount: eodDropoff14dCount,
+        dropoffPct: eodDropoff14dPct,
+        eligible: inEodWindow && !eodDoneToday
+      }
+    ]
+      .filter((item) => item.eligible)
+      .filter((item) => item.opens >= adaptiveMinOpens && item.dropoffPct >= adaptiveDropoffThreshold)
+      .sort((a, b) => b.dropoffPct - a.dropoffPct);
+
+    const activeLoopNudge = loopNudgeCandidates[0] || null;
+    const showLoopNudge = !!activeLoopNudge && loopNudgeDismissedDay !== todayIso;
+    return {
+      todayIso,
+      activeLoopNudge,
+      showLoopNudge,
+      isSoftTone: loopNudgeDismissStreak >= 2,
+      adaptiveDropoffThreshold,
+      adaptiveMinOpens,
+      completionRatio14d,
+      sensitivityLabel
+    };
+  };
 
   // Sync regulation type when navigating screens (catches Settings changes)
   useEffect(() => {
@@ -6383,6 +6744,38 @@ export default function Stillform() {
       try { setRegType(localStorage.getItem("stillform_regulation_type") || null); } catch {}
     }
   }, [screen]);
+
+  useEffect(() => {
+    if (screen !== "home") return;
+    const { todayIso, activeLoopNudge, showLoopNudge, adaptiveDropoffThreshold, adaptiveMinOpens, sensitivityLabel } = getLoopNudgeSnapshot();
+    if (!showLoopNudge || !activeLoopNudge) return;
+    const tracked = appendLoopNudgeEvent({
+      event: "shown",
+      type: activeLoopNudge.id,
+      date: todayIso,
+      timestamp: new Date().toISOString(),
+      dropoffPct: activeLoopNudge.dropoffPct,
+      opens14d: activeLoopNudge.opens,
+      dropoffCount: activeLoopNudge.dropoffCount,
+      adaptiveDropoffThreshold,
+      adaptiveMinOpens,
+      sensitivityLabel
+    });
+    if (tracked) {
+      try {
+        window.plausible("Loop Nudge Shown", {
+          props: {
+            type: activeLoopNudge.id,
+            dropoff_pct: activeLoopNudge.dropoffPct,
+            opens_14d: activeLoopNudge.opens,
+            adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+            adaptive_min_opens: adaptiveMinOpens,
+            sensitivity: sensitivityLabel.toLowerCase()
+          }
+        });
+      } catch {}
+    }
+  }, [screen, loopNudgeDismissedDay, loopNudgeDismissStreak, ciOpen, ciSaved, eodOpen, eodSaved]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -6515,6 +6908,8 @@ export default function Stillform() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
+  const [syncAuthCooldownUntil, setSyncAuthCooldownUntil] = useState(0);
+  const [, setSyncAuthTick] = useState(0);
   const [pricingAuthOpen, setPricingAuthOpen] = useState(false);
   const [pricingAuthEmail, setPricingAuthEmail] = useState("");
   const [pricingAuthPassword, setPricingAuthPassword] = useState("");
@@ -6524,15 +6919,37 @@ export default function Stillform() {
   const [, setPricingAuthTick] = useState(0);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
+  const [integrationActionStatus, setIntegrationActionStatus] = useState("");
+  const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
+  const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
+  const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const integrationContext = getIntegrationContext();
+  const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
+  const syncAuthCooldownSeconds = Math.max(0, Math.ceil((syncAuthCooldownUntil - Date.now()) / 1000));
   const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
+
+  useEffect(() => {
+    if (syncAuthCooldownSeconds <= 0) return;
+    const id = setInterval(() => setSyncAuthTick(n => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [syncAuthCooldownSeconds]);
 
   useEffect(() => {
     if (pricingAuthCooldownSeconds <= 0) return;
     const id = setInterval(() => setPricingAuthTick(n => n + 1), 1000);
     return () => clearInterval(id);
   }, [pricingAuthCooldownSeconds]);
+
+  const startSyncAuthCooldown = (message) => {
+    const m = String(message || "").match(/wait(?: about)? (\d+)\s*second/i);
+    const seconds = Math.max(15, Number(m?.[1] || 60));
+    setSyncAuthCooldownUntil(Date.now() + (seconds * 1000));
+  };
+
+  const isRateLimitedMessage = (message) => /too many attempts|wait/i.test(String(message || ""));
+  const isAlreadyRegisteredMessage = (message) => /already (registered|exists|been registered)/i.test(String(message || ""));
+  const isInvalidCredentialsMessage = (message) => /invalid login credentials|invalid email or password|email not confirmed/i.test(String(message || ""));
 
   const startPricingAuthCooldown = (message) => {
     const m = String(message || "").match(/wait(?: about)? (\d+)\s*second/i);
@@ -6553,16 +6970,33 @@ export default function Stillform() {
     setPricingAuthError(null);
     try {
       let signedIn = false;
+      let signInError = null;
       try {
         await sbSignIn(pricingAuthEmail, pricingAuthPassword);
         if (sbIsSignedIn()) {
           await sbSyncDown();
           signedIn = true;
         }
-      } catch {}
+      } catch (e) {
+        signInError = e;
+      }
 
       if (!signedIn) {
-        await sbSignUp(pricingAuthEmail, pricingAuthPassword);
+        if (isRateLimitedMessage(signInError?.message)) {
+          startPricingAuthCooldown(signInError?.message);
+          throw signInError;
+        }
+        if (isInvalidCredentialsMessage(signInError?.message)) {
+          throw new Error("Incorrect email or password. Please try again.");
+        }
+        try {
+          await sbSignUp(pricingAuthEmail, pricingAuthPassword);
+        } catch (signupErr) {
+          if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) {
+            throw new Error("Incorrect email or password. Please try again.");
+          }
+          throw signupErr;
+        }
         if (!sbIsSignedIn()) {
           setPricingAuthError("Check your email to confirm your account, then sign in.");
           setPricingAuthLoading(false);
@@ -6585,6 +7019,7 @@ export default function Stillform() {
           });
         } catch {}
         setSyncSignedIn(true);
+        setPricingAuthCooldownUntil(0);
         setSubscriptionCheckTick(n => n + 1);
         setSyncEmail("");
         setSyncPassword("");
@@ -6594,10 +7029,163 @@ export default function Stillform() {
       }
     } catch (e) {
       const msg = e?.message || "Something went wrong. Check your details.";
-      if (/too many attempts|wait/i.test(msg)) startPricingAuthCooldown(msg);
+      if (isRateLimitedMessage(msg)) startPricingAuthCooldown(msg);
       setPricingAuthError(msg);
     }
     setPricingAuthLoading(false);
+  };
+
+  const setIntegrationStatusWithClear = (message) => {
+    setIntegrationActionStatus(message);
+    try {
+      window.setTimeout(() => setIntegrationActionStatus(""), 2600);
+    } catch {}
+  };
+
+  const setIntegrationConsent = (kind, nextState) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      if (nextState === "granted" || nextState === "revoked" || nextState === "pending") {
+        localStorage.setItem(config.consent, nextState);
+      }
+      if (nextState === "revoked") {
+        config.data.forEach((k) => localStorage.removeItem(k));
+        localStorage.removeItem(config.error);
+      }
+      if (nextState === "granted") {
+        localStorage.removeItem(config.error);
+      }
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      const msg = nextState === "granted"
+        ? `${label} context enabled.`
+        : nextState === "revoked"
+          ? `${label} context revoked and local cache cleared.`
+          : `${label} context reset to pending.`;
+      setIntegrationStatusWithClear(msg);
+    } catch {
+      setIntegrationStatusWithClear("Could not update integration consent.");
+    }
+  };
+
+  const retryIntegrationContext = (kind) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      localStorage.removeItem(config.error);
+      localStorage.setItem(config.retryAt, new Date().toISOString());
+      if (localStorage.getItem(config.consent) !== "granted") {
+        localStorage.setItem(config.consent, "granted");
+      }
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      setIntegrationStatusWithClear(`${label} retry queued. Refreshing status.`);
+    } catch {
+      setIntegrationStatusWithClear("Could not queue integration retry.");
+    }
+  };
+
+  const clearIntegrationError = (kind) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      localStorage.removeItem(config.error);
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      setIntegrationStatusWithClear(`${label} error cleared.`);
+    } catch {
+      setIntegrationStatusWithClear("Could not clear integration error.");
+    }
+  };
+
+  const clearIntegrationContextCache = () => {
+    const keys = [
+      ...INTEGRATION_STORAGE_KEYS.calendar.data,
+      ...INTEGRATION_STORAGE_KEYS.health.data
+    ];
+    try {
+      keys.forEach((k) => localStorage.removeItem(k));
+      refreshSettings();
+      setIntegrationStatusWithClear("Cleared stale integration context.");
+    } catch {
+      setIntegrationStatusWithClear("Could not clear integration context.");
+    }
+  };
+
+  const integrationSignalColor = (kind, hasContext) => {
+    const consent = kind === "calendar" ? integrationContext.calendarConsent : integrationContext.healthConsent;
+    const error = kind === "calendar" ? integrationContext.calendarError : integrationContext.healthError;
+    if (error) return "#c05040";
+    if (consent === "revoked") return "var(--text-muted)";
+    if (hasContext) return "var(--amber)";
+    return "var(--text-muted)";
+  };
+
+  const integrationSignalLabel = (kind, hasContext, detail) => {
+    const consent = kind === "calendar" ? integrationContext.calendarConsent : integrationContext.healthConsent;
+    const error = kind === "calendar" ? integrationContext.calendarError : integrationContext.healthError;
+    if (error) return `Error · ${detail}`;
+    if (consent === "revoked") return `Revoked · ${detail}`;
+    if (consent === "pending") return `Pending consent · ${detail}`;
+    return hasContext ? `Connected · ${detail}` : `Awaiting context · ${detail}`;
+  };
+
+  const setSubscriptionStatusWithClear = (message) => {
+    setSubscriptionStatusMessage(message);
+    try {
+      window.setTimeout(() => setSubscriptionStatusMessage(""), 3200);
+    } catch {}
+  };
+
+  const setSyncFeedbackWithClear = (type, message) => {
+    if (type === "error") {
+      setSyncError(message);
+      try { window.setTimeout(() => setSyncError(null), 3200); } catch {}
+      return;
+    }
+    setSyncSuccess(message);
+    try { window.setTimeout(() => setSyncSuccess(null), 3200); } catch {}
+  };
+
+  const refreshSubscriptionStatus = async () => {
+    if (subscriptionStatusLoading) return;
+    setSubscriptionStatusLoading(true);
+    try {
+      const status = await sbCheckSubscriptionStatus();
+      if (!status) {
+        setSubscriptionStatusWithClear("Subscription check returned no data.");
+        return;
+      }
+      setSubscriptionLastCheckedAt(Date.now());
+      const serverSubscribed = status?.is_subscribed === true;
+      const lookupSource = status?.user_id ? "account" : "device";
+      if (serverSubscribed) {
+        try {
+          localStorage.setItem("stillform_subscribed", "yes");
+          clearSubscribePending();
+        } catch {}
+        setIsSubscribed(true);
+        setSubscriptionStatusWithClear(`Active via ${lookupSource} server truth.`);
+      } else {
+        const pending = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
+        if (!pending) {
+          try {
+            localStorage.removeItem("stillform_subscribed");
+            clearSubscribePending();
+          } catch {}
+          setIsSubscribed(false);
+          setSubscriptionStatusWithClear(`No active subscription found for this ${lookupSource}.`);
+        } else {
+          setSubscriptionStatusWithClear("Checkout is pending. Waiting for webhook sync.");
+        }
+      }
+      setSubscriptionCheckTick(n => n + 1);
+    } catch {
+      setSubscriptionStatusWithClear("Couldn't reach subscription server. Keeping current access.");
+    } finally {
+      setSubscriptionStatusLoading(false);
+    }
   };
 
   // PWA install prompt — capture from window (set in index.html before React loads)
@@ -7327,6 +7915,104 @@ export default function Stillform() {
             }
           }
 
+          const { todayIso, activeLoopNudge, showLoopNudge, isSoftTone, adaptiveDropoffThreshold, adaptiveMinOpens, sensitivityLabel } = getLoopNudgeSnapshot();
+          const dismissLoopNudge = () => {
+            if (!activeLoopNudge) return;
+            const previousDismissDate = loopNudgeDismissedDay ? new Date(`${loopNudgeDismissedDay}T00:00:00`) : null;
+            const todayDate = new Date(`${todayIso}T00:00:00`);
+            const dayDiff = previousDismissDate
+              ? Math.round((todayDate.getTime() - previousDismissDate.getTime()) / (1000 * 60 * 60 * 24))
+              : null;
+            const nextDismissStreak = dayDiff === 0
+              ? Math.max(1, loopNudgeDismissStreak)
+              : (dayDiff === 1 ? loopNudgeDismissStreak + 1 : 1);
+            try { localStorage.setItem(LOOP_NUDGE_DISMISSED_DAY_KEY, todayIso); } catch {}
+            try { localStorage.setItem(LOOP_NUDGE_DISMISS_STREAK_KEY, String(nextDismissStreak)); } catch {}
+            setLoopNudgeDismissedDay(todayIso);
+            setLoopNudgeDismissStreak(nextDismissStreak);
+            const tracked = appendLoopNudgeEvent({
+              event: "dismissed",
+              type: activeLoopNudge.id,
+              date: todayIso,
+              timestamp: new Date().toISOString(),
+              dropoffPct: activeLoopNudge.dropoffPct,
+              opens14d: activeLoopNudge.opens,
+              dropoffCount: activeLoopNudge.dropoffCount,
+              dismissStreak: nextDismissStreak,
+              adaptiveDropoffThreshold,
+              adaptiveMinOpens,
+              sensitivityLabel
+            });
+            if (tracked) {
+              try {
+                window.plausible("Loop Nudge Dismissed", {
+                  props: {
+                    type: activeLoopNudge.id,
+                    dropoff_pct: activeLoopNudge.dropoffPct,
+                    opens_14d: activeLoopNudge.opens,
+                    dismiss_streak: nextDismissStreak,
+                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                    adaptive_min_opens: adaptiveMinOpens,
+                    sensitivity: sensitivityLabel.toLowerCase()
+                  }
+                });
+              } catch {}
+            }
+          };
+          const handleLoopNudgeAction = () => {
+            if (!activeLoopNudge) return;
+            const tracked = appendLoopNudgeEvent({
+              event: "actioned",
+              type: activeLoopNudge.id,
+              date: todayIso,
+              timestamp: new Date().toISOString(),
+              dropoffPct: activeLoopNudge.dropoffPct,
+              opens14d: activeLoopNudge.opens,
+              dropoffCount: activeLoopNudge.dropoffCount,
+              adaptiveDropoffThreshold,
+              adaptiveMinOpens,
+              sensitivityLabel
+            });
+            if (tracked) {
+              try {
+                window.plausible("Loop Nudge Actioned", {
+                  props: {
+                    type: activeLoopNudge.id,
+                    dropoff_pct: activeLoopNudge.dropoffPct,
+                    opens_14d: activeLoopNudge.opens,
+                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                    adaptive_min_opens: adaptiveMinOpens,
+                    sensitivity: sensitivityLabel.toLowerCase()
+                  }
+                });
+              } catch {}
+            }
+            try { localStorage.setItem(LOOP_NUDGE_DISMISS_STREAK_KEY, "0"); } catch {}
+            setLoopNudgeDismissStreak(0);
+            if (activeLoopNudge.id === "morning") {
+              try {
+                appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                  date: todayIso,
+                  timestamp: new Date().toISOString(),
+                  source: "nudge"
+                }, LOOP_HISTORY_MAX_ITEMS);
+              } catch {}
+              setCiSaved(false);
+              setCiOpen(true);
+              return;
+            }
+            try {
+              appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                date: todayIso,
+                timestamp: new Date().toISOString(),
+                source: "nudge"
+              }, LOOP_HISTORY_MAX_ITEMS);
+            } catch {}
+            setEodSaved(false);
+            setEodOpen(true);
+            setEodPromptDismissed(false);
+          };
+
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
@@ -7361,6 +8047,60 @@ export default function Stillform() {
                       fontFamily: "'DM Sans', sans-serif"
                     }}>Let me try different</button>
                   </div>
+                </div>
+              )}
+
+              {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
+              {showLoopNudge && (
+                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    Loop reliability nudge
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
+                    {isSoftTone
+                      ? "Quick check-in now keeps your daily loop steady."
+                      : `${activeLoopNudge?.title}: ${activeLoopNudge?.dropoffPct}% drop-off in the last 14 days (${activeLoopNudge?.dropoffCount}/${activeLoopNudge?.opens}).`}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={handleLoopNudgeAction}
+                      style={{
+                        flex: 1,
+                        background: "var(--amber)",
+                        color: "#0A0A0C",
+                        border: "none",
+                        borderRadius: "var(--r)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      {activeLoopNudge?.actionLabel}
+                    </button>
+                    {!isSoftTone && (
+                      <button
+                        onClick={dismissLoopNudge}
+                        style={{
+                          background: "none",
+                          color: "var(--text-muted)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          padding: "9px 10px",
+                          fontSize: 11,
+                          fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer"
+                        }}
+                      >
+                        Not now
+                      </button>
+                    )}
+                  </div>
+                  {isSoftTone && (
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8 }}>
+                      Keeping this simple after recent dismissals.
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -7500,6 +8240,12 @@ export default function Stillform() {
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
                     }));
+                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.morning, {
+                      date: today,
+                      timestamp: new Date().toISOString(),
+                      energy: ciEnergy || "steady",
+                      tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
+                    }, LOOP_HISTORY_MAX_ITEMS);
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
@@ -7515,7 +8261,16 @@ export default function Stillform() {
 
                 if (isCheckedIn) return (
                   <div style={{ marginBottom: 20 }}>
-                    <button onClick={() => { setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set()); }} style={{
+                    <button onClick={() => {
+                      try {
+                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                          date: today,
+                          timestamp: new Date().toISOString(),
+                          source: "update"
+                        }, LOOP_HISTORY_MAX_ITEMS);
+                      } catch {}
+                      setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
+                    }} style={{
                       background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer", padding: 0
                     }}>
@@ -7525,7 +8280,16 @@ export default function Stillform() {
                 );
 
                 if (!ciOpen) return (
-                  <button onClick={() => setCiOpen(true)} style={{
+                  <button onClick={() => {
+                    try {
+                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "open"
+                      }, LOOP_HISTORY_MAX_ITEMS);
+                    } catch {}
+                    setCiOpen(true);
+                  }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
@@ -7821,7 +8585,16 @@ export default function Stillform() {
                         </div>
                       </div>
                     ) : (
-                      <button onClick={() => { setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false); }} style={{
+                      <button onClick={() => {
+                        try {
+                          appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                            date: today,
+                            timestamp: new Date().toISOString(),
+                            source: "update"
+                          }, LOOP_HISTORY_MAX_ITEMS);
+                        } catch {}
+                        setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
+                      }} style={{
                         background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                         fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
                       }}>✓ Day closed · tap to update</button>
@@ -7830,7 +8603,16 @@ export default function Stillform() {
                 );
                 if (eodDone && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    <button onClick={() => setEodOpen(true)} style={{
+                    <button onClick={() => {
+                      try {
+                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                          date: today,
+                          timestamp: new Date().toISOString(),
+                          source: "update"
+                        }, LOOP_HISTORY_MAX_ITEMS);
+                      } catch {}
+                      setEodOpen(true);
+                    }} style={{
                       background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
                       fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
                     }}>✓ Day closed · tap to update</button>
@@ -7847,6 +8629,11 @@ export default function Stillform() {
                       word: eodWord || null,
                       morningEnergy: morningData?.energy || null
                     }));
+                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.eod, {
+                      date: today,
+                      timestamp: new Date().toISOString(),
+                      composure: eodComposure || "mostly"
+                    }, LOOP_HISTORY_MAX_ITEMS);
                   } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
@@ -7855,7 +8642,16 @@ export default function Stillform() {
                 };
 
                 if (!eodOpen && !eodDone) return (
-                  <button onClick={() => setEodOpen(true)} style={{
+                  <button onClick={() => {
+                    try {
+                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "open"
+                      }, LOOP_HISTORY_MAX_ITEMS);
+                    } catch {}
+                    setEodOpen(true);
+                  }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
@@ -8390,42 +9186,6 @@ export default function Stillform() {
               })()}
             </div>
 
-            {/* Integrations */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Integrations</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Stillform uses connected context to reduce input burden. If not connected, the loop still works manually.
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      {integrationContext.calendar
-                        ? `${integrationContext.calendar.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.calendar.summary}`
-                        : "Not connected yet"}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 10, color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    {integrationContext.calendar ? "ACTIVE" : "PENDING"}
-                  </div>
-                </div>
-                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      {integrationContext.health
-                        ? `${integrationContext.health.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.health.summary}`
-                        : "Not connected yet"}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 10, color: integrationContext.health ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    {integrationContext.health ? "ACTIVE" : "PENDING"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Daily Reminder */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily Reminder</div>
@@ -8620,8 +9380,12 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.calendar ? `Connected · ${integrationContext.calendar.source} · ${integrationContext.calendar.freshness || "Unknown"}` : "Not connected"}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("calendar", !!integrationContext.calendar) }}>
+                    {integrationSignalLabel(
+                      "calendar",
+                      !!integrationContext.calendar,
+                      `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`
+                    )}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
@@ -8629,10 +9393,35 @@ export default function Stillform() {
                     ? integrationContext.calendar.summary
                     : "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."}
                 </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendarConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.calendarConsent || "pending"}
+                  </div>
+                </div>
+                {integrationContext.calendarConsent === "revoked" && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Calendar access is revoked. Re-enable to let Stillform use upcoming schedule context.
+                  </div>
+                )}
+                {integrationContext.calendarError && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    Calendar error: {integrationContext.calendarError}
+                  </div>
+                )}
+                {integrationContext.calendarLastRetryAt && (
+                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
+                    Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}
+                  </div>
+                )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.health ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.health ? `Connected · ${integrationContext.health.source} · ${integrationContext.health.freshness || "Unknown"}` : "Not connected"}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("health", !!integrationContext.health) }}>
+                    {integrationSignalLabel(
+                      "health",
+                      !!integrationContext.health,
+                      `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`
+                    )}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -8640,6 +9429,166 @@ export default function Stillform() {
                     ? integrationContext.health.summary
                     : "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."}
                 </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.healthConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.healthConsent || "pending"}
+                  </div>
+                </div>
+                {integrationContext.healthConsent === "revoked" && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Health access is revoked. Re-enable to let Stillform use sleep/readiness context.
+                  </div>
+                )}
+                {integrationContext.healthError && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    Health error: {integrationContext.healthError}
+                  </div>
+                )}
+                {integrationContext.healthLastRetryAt && (
+                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
+                    Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}
+                  </div>
+                )}
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => {
+                      refreshSettings();
+                      setIntegrationStatusWithClear("Integration status refreshed.");
+                    }}
+                  >
+                    Refresh status
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={clearIntegrationContextCache}
+                    disabled={!integrationContext.hasAny}
+                  >
+                    Clear stale context
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => setIntegrationConsent("calendar", "granted")}
+                  >
+                    Enable calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => setIntegrationConsent("health", "granted")}
+                  >
+                    Enable health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => setIntegrationConsent("calendar", "revoked")}
+                  >
+                    Revoke calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => setIntegrationConsent("health", "revoked")}
+                  >
+                    Revoke health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => retryIntegrationContext("calendar")}
+                  >
+                    Retry calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => retryIntegrationContext("health")}
+                  >
+                    Retry health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => clearIntegrationError("calendar")}
+                    disabled={!integrationContext.calendarError}
+                  >
+                    Clear calendar error
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => clearIntegrationError("health")}
+                    disabled={!integrationContext.healthError}
+                  >
+                    Clear health error
+                  </button>
+                </div>
+                {integrationContext.hasStale && (
+                  <div style={{ marginTop: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    One or more integration signals are stale. Stillform will continue in manual mode until context is refreshed.
+                  </div>
+                )}
+                {integrationActionStatus && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
+                    {integrationActionStatus}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Subscription status */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Subscription status</div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Local app state</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
+                    {isSubscribed ? "ACTIVE" : "INACTIVE"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                  {isSubscribed
+                    ? "This device currently has active access."
+                    : (trialExpired ? "Trial expired. Subscription required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Server truth</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
+                    {hasPendingWebhookSync ? "PENDING WEBHOOK" : "READY TO CHECK"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  {hasPendingWebhookSync
+                    ? "Recent checkout detected. Waiting for webhook confirmation window before downgrading access."
+                    : "Use server refresh if subscription status looks wrong on this device."}
+                </div>
+                {subscriptionLastCheckedAt > 0 && (
+                  <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+                    Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
+                  </div>
+                )}
+
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={refreshSubscriptionStatus}
+                    disabled={subscriptionStatusLoading}
+                  >
+                    {subscriptionStatusLoading ? "Checking..." : "Refresh status (server)"}
+                  </button>
+                </div>
+                {subscriptionStatusMessage && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
+                    {subscriptionStatusMessage}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -8711,11 +9660,33 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncUp();
-                        setSyncSuccess(r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`);
-                      } catch { setSyncError("Sync failed. Check connection."); }
+                        setSyncFeedbackWithClear(
+                          r.ok ? "success" : "error",
+                          r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`
+                        );
+                      } catch {
+                        setSyncFeedbackWithClear("error", "Sync failed. Check connection.");
+                      }
                       setSyncLoading(false);
                     }}>
                       {syncLoading ? "Syncing..." : "Sync now"}
+                    </button>
+                    <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
+                      setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
+                      try {
+                        const r = await sbSyncDown();
+                        setSyncFeedbackWithClear(
+                          r?.ok ? "success" : "error",
+                          r?.ok
+                            ? `Restored ${r.restored || 0} items from cloud ✓`
+                            : `Restore completed with issues (${r?.errors?.length || 0}).`
+                        );
+                      } catch {
+                        setSyncFeedbackWithClear("error", "Restore failed. Check connection.");
+                      }
+                      setSyncLoading(false);
+                    }}>
+                      {syncLoading ? "Restoring..." : "Restore now"}
                     </button>
                     <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => {
                       await sbSignOut();
@@ -8750,26 +9721,52 @@ export default function Stillform() {
                       style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
                     />
                     {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
+                    {syncAuthCooldownSeconds > 0 && (
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        Too many attempts. Please wait {syncAuthCooldownSeconds}s before trying again.
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="btn btn-primary" style={{ fontSize: 14, flex: 1 }} onClick={async () => {
                       if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
+                      if (syncAuthCooldownSeconds > 0) {
+                        setSyncError(`Please wait ${syncAuthCooldownSeconds}s, then try again.`);
+                        return;
+                      }
                       setSyncLoading(true); setSyncError(null);
                       try {
                         // Try sign in first — if user exists this works immediately
                         // If not, fall through to signup
                         let signedIn = false;
+                        let signInError = null;
                         try {
                           await sbSignIn(syncEmail, syncPassword);
                           if (sbIsSignedIn()) {
                             await sbSyncDown();
                             signedIn = true;
                           }
-                        } catch {}
+                        } catch (e) {
+                          signInError = e;
+                        }
 
                         if (!signedIn) {
+                          if (isRateLimitedMessage(signInError?.message)) {
+                            startSyncAuthCooldown(signInError?.message);
+                            throw signInError;
+                          }
+                          if (isInvalidCredentialsMessage(signInError?.message)) {
+                            throw new Error("Incorrect email or password. Please try again.");
+                          }
                           // New user — sign up
-                          const signupResult = await sbSignUp(syncEmail, syncPassword);
+                          try {
+                            await sbSignUp(syncEmail, syncPassword);
+                          } catch (signupErr) {
+                            if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) {
+                              throw new Error("Incorrect email or password. Please try again.");
+                            }
+                            throw signupErr;
+                          }
                           if (!sbIsSignedIn()) {
                             // Email confirmation required
                             setSyncError("Check your email to confirm your account, then sign in.");
@@ -8804,16 +9801,21 @@ export default function Stillform() {
                             }
                           } catch {}
                           setSyncSignedIn(true);
+                          setSyncAuthCooldownUntil(0);
                           setSubscriptionCheckTick(n => n + 1);
                           setSyncEmail(""); setSyncPassword("");
                           refreshSettings();
                         }
                       } catch (e) {
-                        setSyncError(e.message || "Something went wrong. Check your details.");
+                        const msg = e?.message || "Something went wrong. Check your details.";
+                        if (isRateLimitedMessage(msg)) startSyncAuthCooldown(msg);
+                        setSyncError(msg);
                       }
                       setSyncLoading(false);
                     }}>
-                      {syncLoading ? "Please wait..." : "Sign in / Create account"}
+                      {syncLoading
+                        ? "Please wait..."
+                        : (syncAuthCooldownSeconds > 0 ? `Wait ${syncAuthCooldownSeconds}s` : "Sign in / Create account")}
                     </button>
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
@@ -9184,6 +10186,10 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_session_hype");
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_checkin_today");
+                      localStorage.removeItem("stillform_checkin_open_history");
+                      localStorage.removeItem("stillform_checkin_history");
+                      localStorage.removeItem("stillform_eod_open_history");
+                      localStorage.removeItem("stillform_eod_history");
                       localStorage.removeItem("stillform_onboarded");
                       window.location.reload();
                     } catch {}
