@@ -158,11 +158,11 @@ def slide_1_definition(prs, idx, total):
     add_source(s, "Stillform product architecture and privacy/disclaimer copy")
 
 
-def slide_2_why_visuals(prs, idx, total):
+def slide_2_decision_framework(prs, idx, total):
     s = prs.slides.add_slide(prs.slide_layouts[6])
     set_bg(s)
     add_header(s, idx, total)
-    add_title(s, "Why These Visuals Matter", "Each chart answers an executive decision question")
+    add_title(s, "Executive Decision Framework", "Each section maps science to an operating decision")
 
     add_panel(s, Inches(0.75), Inches(2.05), Inches(12.1), Inches(4.8))
     table = s.shapes.add_table(6, 3, Inches(1.0), Inches(2.35), Inches(11.6), Inches(4.2)).table
@@ -170,7 +170,7 @@ def slide_2_why_visuals(prs, idx, total):
     table.columns[1].width = Inches(4.1)
     table.columns[2].width = Inches(4.7)
     rows = [
-        ("Visual", "Question", "Why it matters"),
+        ("Decision lens", "Question", "Why it matters"),
         ("Global context", "Is composure demand real?", "Shows pressure environment users live in."),
         ("Metacognition", "Can users monitor state better?", "Validates awareness training mechanics."),
         ("EQ/microbias", "Are social reads cleaner?", "Reduces conflict misreads and relational cost."),
@@ -434,7 +434,7 @@ def slide_9_close(prs, idx, total):
         [
             "Stillform is a composure system for everyone.",
             "Its value is not inspirational content; it is measurable state-to-action transfer under pressure.",
-            "The deck's visuals matter only because each one ties directly to a mechanism and a telemetry proof signal.",
+            "Each section only stays if it ties directly to mechanism quality and telemetry proof.",
             "The release standard is simple: if the mechanism is not measurable, it is not ready to claim.",
         ],
         first_size=29,
@@ -450,7 +450,7 @@ def build():
     total = 9
 
     slide_1_definition(prs, 1, total)
-    slide_2_why_visuals(prs, 2, total)
+    slide_2_decision_framework(prs, 2, total)
     slide_3_global_context(prs, 3, total)
     slide_4_metacognition(prs, 4, total)
     slide_5_eq(prs, 5, total)
