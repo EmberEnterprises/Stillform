@@ -1402,6 +1402,10 @@ Pull the live file from GitHub and verify every claimed change is actually prese
 - [ ] **Dead code cleanup in ReframeTool** — remove `saveJournal`, `pulseChips`, `journalText`, `tab`, `setTab`. All unreachable after Pulse tab removal.
 - [ ] **journalContext date format (manual entries)** — existing Signal Log entries saved before April 8 use localized date format. Consider a one-time migration on app load to normalize all dates to ISO format.
 - [ ] **Netlify credit usage** — deploys now manual. Batch code changes and push once per session, not per change. Claude must stage all edits locally before pushing.
+- [ ] **Trial countdown integrity** — after launch, replace any static trial-day number UI with dynamic entitlement-based day count (server truth), keeping UAT static behavior only during testing.
+- [ ] **Integration track visibility** — keep calendar/health/context integrations explicitly listed in launch sequencing (not implicit in roadmap only).
+- [ ] **Calendar context ingestion** — scaffold complete pre-launch; provider hookup post-launch with explicit consent/revoke flow.
+- [ ] **Health context ingestion** — scaffold complete pre-launch; provider hookup post-launch with explicit consent/revoke flow.
 
 ---
 

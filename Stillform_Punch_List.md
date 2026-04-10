@@ -252,10 +252,19 @@
 - [ ] Checkout loading state appears ("Opening checkout...")
 - [ ] Missing trial-start guard shows clear message instead of silent failure
 - [ ] Monthly/Annual toggle choice is reflected correctly in Lemon checkout (manual verify)
+- [ ] Post-launch: replace any static "X days left" trial display with server-backed dynamic trial-day calculation (UAT static display is acceptable for now)
 
 ### Settings / pricing clarity
 - [ ] No "Premium" gating language appears for included subscriber options
 - [ ] Pricing features mention encrypted cloud backup
+
+### Integrations track (aligned to roadmap, can be built in parallel)
+- [ ] Calendar context ingestion scaffold in app (local summary key + AI context field)
+- [ ] Health context ingestion scaffold in app (sleep/HRV/readiness summary key + AI context field)
+- [ ] Morning loop displays upcoming pressure window when calendar context is present
+- [ ] Reframe request includes integration context payload (calendar + health) when available
+- [ ] Integration settings copy added (planned/connected/error states) without requiring live provider auth
+- [ ] Post-launch: provider hookups (Apple/Google calendar + health providers) with explicit consent and revoke paths
 
 ### Pinned human-required actions (can do later if not feeling well)
 - [ ] Termly privacy policy published with explicit cloud storage + encrypted backup language
