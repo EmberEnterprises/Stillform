@@ -5982,6 +5982,43 @@ function MyProgress({ onBack }) {
           const avgShift = ratingDeltaSessions.length
             ? (ratingDeltaSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / ratingDeltaSessions.length)
             : null;
+          const ratedTrendValues = ratingDeltaSessions.slice(-10).map((s) => s.postRating - s.preRating);
+          const dropoffPenalty = Math.round((morningDropoff14dPct + eodDropoff14dPct) / 2);
+          const recoveryBaseline = nudgeRecovery14dPct === null ? Math.max(0, 100 - dropoffPenalty) : nudgeRecovery14dPct;
+          const reliabilityScore = Math.max(
+            0,
+            Math.min(100, Math.round((loopCompletion14d * 0.65) + (recoveryBaseline * 0.35)))
+          );
+          const renderTrendSparkline = (values) => {
+            if (!Array.isArray(values) || values.length < 2) {
+              return (
+                <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                  Add at least 2 rated sessions to unlock trend line.
+                </div>
+              );
+            }
+            const width = 200;
+            const height = 52;
+            const minV = Math.min(...values, 0);
+            const maxV = Math.max(...values, 0);
+            const range = Math.max(1, maxV - minV);
+            const points = values.map((v, i) => {
+              const x = (i / Math.max(values.length - 1, 1)) * (width - 8) + 4;
+              const y = ((maxV - v) / range) * (height - 12) + 6;
+              return { x, y };
+            });
+            const pathD = points.map((p, idx) => `${idx === 0 ? "M" : "L"} ${p.x.toFixed(2)} ${p.y.toFixed(2)}`).join(" ");
+            const zeroY = ((maxV - 0) / range) * (height - 12) + 6;
+            return (
+              <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="56" role="img" aria-label="Composure trend line">
+                <line x1="4" y1={zeroY} x2={width - 4} y2={zeroY} stroke="rgba(255,255,255,0.14)" strokeDasharray="2 3" strokeWidth="1" />
+                <path d={pathD} fill="none" stroke="var(--amber)" strokeWidth="2" strokeLinecap="round" />
+                {points.map((p, idx) => (
+                  <circle key={idx} cx={p.x} cy={p.y} r="1.7" fill={idx === points.length - 1 ? "var(--amber)" : "rgba(201,147,58,0.45)"} />
+                ))}
+              </svg>
+            );
+          };
           const protocolRuns = sessions.filter(s => s.entryMode && String(s.entryMode).startsWith("protocol-")).length;
           const activeDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
           if (sessions.length < 2) return null;
@@ -6014,6 +6051,28 @@ function MyProgress({ onBack }) {
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
                     Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
                     {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
+                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+                        Shift trend (last 10 rated)
+                      </div>
+                      {renderTrendSparkline(ratedTrendValues)}
+                    </div>
+                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 10px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+                        Loop reliability
+                      </div>
+                      <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid rgba(201,147,58,0.18)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "absolute", inset: -5, borderRadius: "50%", clipPath: `polygon(50% 50%, 50% 0%, ${50 + (reliabilityScore * 0.5)}% 0%, 100% 100%, 0% 100%)`, background: "rgba(201,147,58,0.2)", pointerEvents: "none" }} />
+                        <div style={{ position: "relative", zIndex: 1, fontSize: 13, color: "var(--amber)", fontWeight: 600 }}>
+                          {reliabilityScore}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8 }}>
+                        14-day composite
+                      </div>
+                    </div>
                   </div>
                   {nudgeRecovery14dPct !== null && (
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
@@ -6216,11 +6275,18 @@ function MyProgress({ onBack }) {
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
                         const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", meta: "Watch & Choose", signals: "Map Signals", bias: "Blind Spots" };
+                        const shift = t.avgShift ?? 0;
+                        const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
                           <div key={t.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 0", borderBottom: "0.5px solid var(--border)" }}>
-                            <div style={{ fontSize: 13, color: "var(--text)" }}>{labels[t.id] || t.id}</div>
+                            <div style={{ minWidth: 120 }}>
+                              <div style={{ fontSize: 13, color: "var(--text)" }}>{labels[t.id] || t.id}</div>
+                              <div style={{ width: 120, height: 5, borderRadius: 999, background: "rgba(255,255,255,0.08)", marginTop: 5, overflow: "hidden" }}>
+                                <div style={{ width: `${shiftPct}%`, height: "100%", background: "linear-gradient(90deg, rgba(201,147,58,0.45), var(--amber))" }} />
+                              </div>
+                            </div>
                             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "right" }}>
-                              {t.avgShift !== null ? `avg +${t.avgShift.toFixed(1)}` : "—"}
+                              {t.avgShift !== null ? `avg ${t.avgShift >= 0 ? "+" : ""}${t.avgShift.toFixed(1)}` : "—"}
                               <span style={{ marginLeft: 8, color: "var(--text-dim)" }}>{t.pct}% of sessions</span>
                             </div>
                           </div>
