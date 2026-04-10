@@ -6247,42 +6247,6 @@ export default function Stillform() {
     }
   };
 
-  const launchScenarioProtocol = async (protocolId) => {
-    const outcomeId = outcomeFocus?.id || "none";
-    try {
-      localStorage.setItem("stillform_last_protocol", JSON.stringify({
-        id: protocolId,
-        outcome: outcomeId,
-        at: new Date().toISOString()
-      }));
-    } catch {}
-    try { window.plausible("Scenario Protocol Started", { props: { protocol: protocolId, outcome: outcomeId } }); } catch {}
-
-    if (protocolId === "hard-conversation") {
-      if (!(await biometric.gate())) return;
-      try { localStorage.setItem("stillform_reframe_entry_mode", "protocol-hard-conversation"); } catch {}
-      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
-      setScreen("tool");
-      return;
-    }
-    if (protocolId === "physiological-spike") {
-      startPathway("calm");
-      return;
-    }
-    if (protocolId === "after-conflict-reset") {
-      startTool(TOOLS.find(t => t.id === "scan"));
-      return;
-    }
-    if (protocolId === "winning-locked-in") {
-      if (!(await biometric.gate())) return;
-      try { localStorage.setItem("stillform_reframe_entry_mode", "protocol-winning"); } catch {}
-      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" });
-      setScreen("tool");
-      return;
-    }
-    startPathway("calm");
-  };
-
   const renderTool = () => {
     const props = { onComplete: (redirectTo) => {
       if (redirectTo) {
@@ -7060,7 +7024,39 @@ export default function Stillform() {
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
                 const isCheckedIn = ciSaved || checkedIn;
 
-                const saveCheckin = () => {
+                const protocols = [
+                  {
+                    id: "hard-conversation",
+                    title: "Hard conversation",
+                    subtitle: "Get clear before sending",
+                    route: "Reframe · Clarity",
+                    match: ["composure", "recover"]
+                  },
+                  {
+                    id: "physiological-spike",
+                    title: "Physiological spike",
+                    subtitle: "Body-first reset now",
+                    route: "Breathe",
+                    match: ["recover", "composure"]
+                  },
+                  {
+                    id: "winning-locked-in",
+                    title: "Winning but unfocused",
+                    subtitle: "Channel momentum cleanly",
+                    route: "Reframe · Hype",
+                    match: ["sharp"]
+                  },
+                  {
+                    id: "after-conflict-reset",
+                    title: "After conflict reset",
+                    subtitle: "Drop tension from body",
+                    route: "Body Scan",
+                    match: ["recover", "composure"]
+                  }
+                ];
+                const recommendedProtocol = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
+
+                const saveCheckin = async () => {
                   const bioArray = [...ciBio].filter(b => b !== "clear");
                   try {
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
@@ -7076,9 +7072,8 @@ export default function Stillform() {
                   } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
-                  try { localStorage.setItem("stillform_reframe_entry_mode", "morning"); } catch {}
-                  setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-                  setScreen("tool");
+                  try { window.plausible("Morning Outcome Chosen", { props: { outcome: outcomeFocus?.id || "none", protocol: recommendedProtocol.id } }); } catch {}
+                  await launchScenarioProtocol(recommendedProtocol.id);
                 };
 
                 if (isCheckedIn) return (
@@ -7175,109 +7170,8 @@ export default function Stillform() {
                       borderRadius: "var(--r)", padding: "12px", fontSize: 14, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
                     }}>
-                      Set my tone →
+                      Set my tone and launch →
                     </button>
-                  </div>
-                );
-              })()}
-
-              {/* OUTCOME + SCENARIO PROTOCOLS */}
-              {(() => {
-                const outcomes = [
-                  { id: "composure", title: "Stay composed under pressure", subtitle: "High-stakes calls, messages, decisions" },
-                  { id: "sharp", title: "Stay sharp while winning", subtitle: "Keep confidence; avoid overcommit" },
-                  { id: "recover", title: "Recover fast after activation", subtitle: "Interrupt spirals and reset quickly" }
-                ];
-                const protocols = [
-                  {
-                    id: "hard-conversation",
-                    title: "Hard conversation",
-                    subtitle: "Get clear before sending",
-                    route: "Reframe · Clarity",
-                    match: ["composure", "recover"]
-                  },
-                  {
-                    id: "physiological-spike",
-                    title: "Physiological spike",
-                    subtitle: "Body-first reset now",
-                    route: "Breathe",
-                    match: ["recover", "composure"]
-                  },
-                  {
-                    id: "winning-locked-in",
-                    title: "Winning but unfocused",
-                    subtitle: "Channel momentum cleanly",
-                    route: "Reframe · Hype",
-                    match: ["sharp"]
-                  },
-                  {
-                    id: "after-conflict-reset",
-                    title: "After conflict reset",
-                    subtitle: "Drop tension from body",
-                    route: "Body Scan",
-                    match: ["recover", "composure"]
-                  }
-                ];
-
-                const recommended = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
-                return (
-                  <div style={{ marginBottom: 24 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>
-                      Outcome Engine
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
-                      {outcomes.map(o => {
-                        const active = outcomeFocus?.id === o.id;
-                        return (
-                          <button
-                            key={o.id}
-                            onClick={() => {
-                              const next = active ? null : o;
-                              setOutcomeFocus(next);
-                              try { localStorage.setItem("stillform_outcome_focus", JSON.stringify(next)); } catch {}
-                            }}
-                            style={{
-                              width: "100%",
-                              background: active ? "var(--amber-glow)" : "var(--surface)",
-                              border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                              borderRadius: "var(--r)",
-                              padding: "11px 14px",
-                              textAlign: "left",
-                              cursor: "pointer",
-                              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)",
-                              WebkitTapHighlightColor: "transparent"
-                            }}
-                          >
-                            <div style={{ fontSize: 13, color: active ? "var(--amber)" : "var(--text)" }}>{o.title}</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{o.subtitle}</div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <div style={{
-                      background: "var(--surface)",
-                      border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r)",
-                      padding: "12px 14px"
-                    }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
-                        Recommended protocol
-                      </div>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                        <div>
-                          <div style={{ fontSize: 13, color: "var(--text)" }}>{recommended.title}</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{recommended.subtitle}</div>
-                          <div style={{ fontSize: 10, color: "var(--amber)", marginTop: 5, fontFamily: "'IBM Plex Mono', monospace" }}>{recommended.route}</div>
-                        </div>
-                        <button
-                          onClick={() => launchScenarioProtocol(recommended.id)}
-                          className="btn btn-primary"
-                          style={{ whiteSpace: "nowrap", padding: "8px 12px", fontSize: 12 }}
-                        >
-                          Run now →
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 );
               })()}
