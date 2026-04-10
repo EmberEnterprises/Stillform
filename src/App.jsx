@@ -2857,8 +2857,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
+  const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
+  const [statementAudience, setStatementAudience] = useState("");
+  const [statementNeed, setStatementNeed] = useState("");
+  const [statementAsk, setStatementAsk] = useState("");
+  const [statementTone, setStatementTone] = useState("calm");
+  const [statementCopied, setStatementCopied] = useState(false);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
@@ -3465,6 +3471,140 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
+  const buildStateToStatementAnchor = () => {
+    const toneLabel = {
+      calm: "Calm and clear",
+      firm: "Firm boundary",
+      warm: "Warm and direct",
+      concise: "Short and explicit"
+    }[statementTone] || "Calm and clear";
+    const lines = [`${toneLabel}:`];
+    if (statementAudience.trim()) lines.push(`Audience: ${statementAudience.trim()}`);
+    if (statementNeed.trim()) lines.push(`Message: ${statementNeed.trim()}`);
+    if (statementAsk.trim()) lines.push(`Ask: ${statementAsk.trim()}`);
+    return lines.join("\n");
+  };
+
+  const finishStateToStatement = () => {
+    try {
+      window.plausible("State to Statement Completed", {
+        props: {
+          tone: statementTone,
+          has_message: statementNeed.trim() ? "yes" : "no",
+          has_ask: statementAsk.trim() ? "yes" : "no"
+        }
+      });
+    } catch {}
+    setShowStateToStatement(false);
+    setStatementAudience("");
+    setStatementNeed("");
+    setStatementAsk("");
+    setStatementTone("calm");
+    setStatementCopied(false);
+    onComplete();
+  };
+
+  const skipStateToStatement = () => {
+    try { window.plausible("State to Statement Skipped"); } catch {}
+    setShowStateToStatement(false);
+    setStatementCopied(false);
+    onComplete();
+  };
+
+  const copyStateToStatement = async () => {
+    const text = buildStateToStatementAnchor();
+    if (!text.trim()) return;
+    try {
+      if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      setStatementCopied(true);
+      try { window.plausible("State to Statement Copied"); } catch {}
+    } catch {}
+  };
+
+  if (showStateToStatement) {
+    return (
+      <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+          State to statement
+        </div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
+          Optional: turn this session into a clear external message. Anchor only, not a script.
+        </div>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+          {[
+            { id: "calm", label: "Calm" },
+            { id: "firm", label: "Firm" },
+            { id: "warm", label: "Warm" },
+            { id: "concise", label: "Short" }
+          ].map(tone => (
+            <button
+              key={tone.id}
+              onClick={() => setStatementTone(tone.id)}
+              style={{
+                background: statementTone === tone.id ? "var(--amber-glow)" : "transparent",
+                border: `1px solid ${statementTone === tone.id ? "var(--amber-dim)" : "var(--border)"}`,
+                borderRadius: 16,
+                padding: "6px 12px",
+                fontSize: 12,
+                color: statementTone === tone.id ? "var(--amber)" : "var(--text-muted)",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              {tone.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
+          <input
+            type="text"
+            value={statementAudience}
+            onChange={(e) => setStatementAudience(e.target.value)}
+            placeholder="Audience (e.g., partner, manager, team)"
+            style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+          />
+          <textarea
+            value={statementNeed}
+            onChange={(e) => setStatementNeed(e.target.value)}
+            placeholder="Core message: what needs to be understood?"
+            rows={3}
+            style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
+          />
+          <textarea
+            value={statementAsk}
+            onChange={(e) => setStatementAsk(e.target.value)}
+            placeholder="Specific ask or boundary"
+            rows={2}
+            style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
+          />
+        </div>
+
+        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+            Anchor preview
+          </div>
+          <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
+            {buildStateToStatementAnchor()}
+          </pre>
+        </div>
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-primary" onClick={finishStateToStatement}>
+            Finish session
+          </button>
+          <button className="btn btn-ghost" onClick={copyStateToStatement}>
+            {statementCopied ? "Copied" : "Copy anchor"}
+          </button>
+          <button className="btn btn-ghost" onClick={skipStateToStatement}>
+            Skip for now
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (showPostRating) {
     const feelChips = [
       { id: "excited", label: "Excited" },
@@ -3491,7 +3631,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           ))}
         </div>
-        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => { saveSession(postRating); setPostRating(null); onComplete(); }}>
+        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => { saveSession(postRating); setPostRating(null); setShowPostRating(false); setShowStateToStatement(true); }}>
           Done
         </button>
       </div>
@@ -3831,6 +3971,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
                 try { localStorage.removeItem(STORAGE_KEY); } catch {}
                 setPostRating(null);
+                setShowStateToStatement(false);
                 setShowPostRating(true);
               }}>
                 Done for now
