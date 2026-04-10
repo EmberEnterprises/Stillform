@@ -1405,6 +1405,44 @@ const getIntegrationContext = () => {
   };
 };
 
+const setPendingSessionEntryContext = (entryMode, entryProtocolId) => {
+  try {
+    const payload = {
+      entryMode: entryMode || null,
+      entryProtocolId: entryProtocolId || null,
+      createdAt: Date.now()
+    };
+    localStorage.setItem("stillform_session_entry_context", JSON.stringify(payload));
+  } catch {}
+};
+
+const consumePendingSessionEntryContext = (maxAgeMs = 2 * 60 * 60 * 1000) => {
+  try {
+    const raw = localStorage.getItem("stillform_session_entry_context");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    localStorage.removeItem("stillform_session_entry_context");
+    if (!parsed || typeof parsed !== "object") return null;
+    if (!parsed.createdAt || (Date.now() - Number(parsed.createdAt)) > maxAgeMs) return null;
+    return {
+      entryMode: parsed.entryMode || null,
+      entryProtocolId: parsed.entryProtocolId || null
+    };
+  } catch {
+    try { localStorage.removeItem("stillform_session_entry_context"); } catch {}
+    return null;
+  }
+};
+
+const attachPendingSessionEntryContext = (entry) => {
+  const ctx = consumePendingSessionEntryContext();
+  if (!ctx) return entry;
+  const next = { ...entry };
+  if (ctx.entryMode) next.entryMode = ctx.entryMode;
+  if (ctx.entryProtocolId) next.entryProtocolId = ctx.entryProtocolId;
+  return next;
+};
+
 const launchScenarioProtocolById = async ({
   protocolId,
   setPathway,
@@ -1414,6 +1452,7 @@ const launchScenarioProtocolById = async ({
 }) => {
   const id = String(protocolId || "");
   const setEntry = (mode, protocol) => {
+    setPendingSessionEntryContext(mode, protocol);
     try {
       localStorage.setItem("stillform_reframe_entry_mode", mode);
       localStorage.setItem("stillform_reframe_entry_protocol", protocol);
@@ -1432,6 +1471,7 @@ const launchScenarioProtocolById = async ({
   // Body-first reset
   if (id === "physiological-spike") {
     setPathway("calm");
+    setPendingSessionEntryContext("protocol-body-reset", id);
     setActiveTool({ id: "breathe", quickStart: true });
     setScreen("tool");
     return true;
@@ -1448,6 +1488,7 @@ const launchScenarioProtocolById = async ({
   // Conflict reset
   if (id === "after-conflict-reset") {
     setPathway("calm");
+    setPendingSessionEntryContext("protocol-body-scan", id);
     setActiveTool({ id: "scan", name: "Body Scan" });
     setScreen("tool");
     return true;
@@ -1471,6 +1512,7 @@ function PhysiologicalSighTool({ onComplete }) {
   const [phase, setPhase] = useState("inhale1");
   const [count, setCount] = useState(2);
   const [running, setRunning] = useState(false);
+  const contextEntryRef = useRef(consumePendingSessionEntryContext());
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1479,7 +1521,17 @@ function PhysiologicalSighTool({ onComplete }) {
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["sigh"], exitPoint: "sigh-complete", source: "sigh" });
+      const ctx = contextEntryRef.current || {};
+      sessions.push({
+        timestamp: new Date().toISOString(),
+        duration: elapsed,
+        durationFormatted: fmt(elapsed),
+        tools: ["sigh"],
+        exitPoint: "sigh-complete",
+        source: "sigh",
+        entryMode: ctx.entryMode || null,
+        entryProtocolId: ctx.entryProtocolId || null
+      });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
       try { window.plausible("Breathing Completed", { props: { duration: fmt(elapsed) } }); } catch {}
     } catch {}
@@ -1628,6 +1680,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
   const [bioFilter, setBioFilter] = useState(null);
+  const contextEntryRef = useRef(consumePendingSessionEntryContext());
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -1641,7 +1694,17 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     const elapsed = Date.now() - startTime.current;
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: formatTime(elapsed), tools, exitPoint, source: "breathe-ground" });
+      const ctx = contextEntryRef.current || {};
+      sessions.push({
+        timestamp: new Date().toISOString(),
+        duration: elapsed,
+        durationFormatted: formatTime(elapsed),
+        tools,
+        exitPoint,
+        source: "breathe-ground",
+        entryMode: ctx.entryMode || null,
+        entryProtocolId: ctx.entryProtocolId || null
+      });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
     return elapsed;
@@ -2229,6 +2292,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 function BodyScanTool({ onComplete }) {
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
+  const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const formatTime = (ms) => {
     const totalSec = Math.round(ms / 1000);
     const min = Math.floor(totalSec / 60);
@@ -2239,7 +2303,17 @@ function BodyScanTool({ onComplete }) {
     const elapsed = Date.now() - startTime.current;
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({ timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: formatTime(elapsed), tools: ["body-scan"], exitPoint: "scan-complete", source: "body-scan" });
+      const ctx = contextEntryRef.current || {};
+      sessions.push({
+        timestamp: new Date().toISOString(),
+        duration: elapsed,
+        durationFormatted: formatTime(elapsed),
+        tools: ["body-scan"],
+        exitPoint: "scan-complete",
+        source: "body-scan",
+        entryMode: ctx.entryMode || null,
+        entryProtocolId: ctx.entryProtocolId || null
+      });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
       try { window.plausible("Body Scan Completed"); } catch {}
     } catch {}
@@ -4914,6 +4988,7 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
 function PanicMode({ onComplete }) {
   // Auto-starting breathing — no Begin button, no choices
   // 4-4-6-2 pattern, 4 cycles, then gently offer next step
+  const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const breathPhases = [
     { name: "Inhale", duration: 4, scale: 1.4 },
     { name: "Hold", duration: 4, scale: 1.4 },
@@ -4938,13 +5013,16 @@ function PanicMode({ onComplete }) {
     setRegulationTime(elapsed);
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      const ctx = contextEntryRef.current || {};
       sessions.push({
         timestamp: new Date().toISOString(),
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
         tools: exitPoint === "grounding" ? ["breathe", "ground"] : ["breathe"],
         source: "panic",
-        exitPoint
+        exitPoint,
+        entryMode: ctx.entryMode || null,
+        entryProtocolId: ctx.entryProtocolId || null
       });
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
