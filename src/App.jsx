@@ -7047,8 +7047,30 @@ export default function Stillform() {
                     >
                       Open UAT Roadmap Deck (PPTX)
                     </a>
+                    <a
+                      href="/Stillform-UAT-Deck-Template-v2.pptx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "inline-block",
+                        marginLeft: 8,
+                        background: "transparent",
+                        color: "var(--amber)",
+                        textDecoration: "none",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 12px",
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 10,
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        fontWeight: 600
+                      }}
+                    >
+                      Open Branded Template (v2)
+                    </a>
                     <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                      Tip: use this link in tester updates so everyone sees the same source.
+                      Tip: use the roadmap deck for tester updates, then duplicate the v2 template for the next release.
                     </div>
                   </div>
                 )}
