@@ -1334,6 +1334,10 @@ const LOOP_HISTORY_KEYS = {
 const LOOP_HISTORY_MAX_ITEMS = 120;
 const LOOP_NUDGE_MIN_OPENS = 3;
 const LOOP_NUDGE_DROPOFF_THRESHOLD = 40;
+const LOOP_NUDGE_MIN_OPENS_LOWER_BOUND = 2;
+const LOOP_NUDGE_MIN_OPENS_UPPER_BOUND = 5;
+const LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND = 25;
+const LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND = 60;
 const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
 const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
@@ -5708,6 +5712,33 @@ function MyProgress({ onBack }) {
   const nudgeRecovery14dPct = loopNudgeShown14d.length
     ? Math.round((recoveredNudges14d / loopNudgeShown14d.length) * 100)
     : null;
+  const completionRatio14d = (morningDone14dDays.size + eodDone14dDays.size) / (14 * 2);
+  const adaptiveDropoffThreshold14d = Math.max(
+    LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
+    Math.min(
+      LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND,
+      LOOP_NUDGE_DROPOFF_THRESHOLD
+      + (completionRatio14d >= 0.75 ? 8 : 0)
+      - (completionRatio14d <= 0.35 ? 8 : 0)
+      - (loopNudgeDismissStreak >= 2 ? 4 : 0)
+    )
+  );
+  const adaptiveMinOpens14d = Math.max(
+    LOOP_NUDGE_MIN_OPENS_LOWER_BOUND,
+    Math.min(
+      LOOP_NUDGE_MIN_OPENS_UPPER_BOUND,
+      LOOP_NUDGE_MIN_OPENS
+      + (completionRatio14d >= 0.75 ? 1 : 0)
+      - (completionRatio14d <= 0.35 ? 1 : 0)
+    )
+  );
+  const adaptiveNudgeSensitivityLabel = (
+    adaptiveDropoffThreshold14d <= LOOP_NUDGE_DROPOFF_THRESHOLD - 6
+      ? "high support"
+      : adaptiveDropoffThreshold14d >= LOOP_NUDGE_DROPOFF_THRESHOLD + 6
+        ? "quiet mode"
+        : "balanced"
+  );
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
@@ -6617,6 +6648,31 @@ export default function Stillform() {
     const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
     const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
     const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+    const completedLoopDays14d = new Set([...morningDone14dDays, ...eodDone14dDays]).size;
+    const completionRatio14d = completedLoopDays14d / 14;
+    const adaptiveDropoffThreshold = Math.max(
+      LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
+      Math.min(
+        LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND,
+        LOOP_NUDGE_DROPOFF_THRESHOLD
+        + (completionRatio14d >= 0.75 ? 8 : 0)
+        - (completionRatio14d <= 0.35 ? 8 : 0)
+        + (loopNudgeDismissStreak >= 2 ? 6 : 0)
+      )
+    );
+    const adaptiveMinOpens = Math.max(
+      LOOP_NUDGE_MIN_OPENS_LOWER_BOUND,
+      Math.min(
+        LOOP_NUDGE_MIN_OPENS_UPPER_BOUND,
+        LOOP_NUDGE_MIN_OPENS
+        + (completionRatio14d >= 0.75 ? 1 : 0)
+        - (completionRatio14d <= 0.35 ? 1 : 0)
+        + (loopNudgeDismissStreak >= 3 ? 1 : 0)
+      )
+    );
+    const sensitivityLabel = completionRatio14d <= 0.35
+      ? "Protective"
+      : ((completionRatio14d >= 0.75 || loopNudgeDismissStreak >= 3) ? "Conservative" : "Balanced");
 
     const nowNudge = new Date();
     const currentMinutesNudge = nowNudge.getHours() * 60 + nowNudge.getMinutes();
@@ -6665,7 +6721,7 @@ export default function Stillform() {
       }
     ]
       .filter((item) => item.eligible)
-      .filter((item) => item.opens >= LOOP_NUDGE_MIN_OPENS && item.dropoffPct >= LOOP_NUDGE_DROPOFF_THRESHOLD)
+      .filter((item) => item.opens >= adaptiveMinOpens && item.dropoffPct >= adaptiveDropoffThreshold)
       .sort((a, b) => b.dropoffPct - a.dropoffPct);
 
     const activeLoopNudge = loopNudgeCandidates[0] || null;
@@ -6674,7 +6730,11 @@ export default function Stillform() {
       todayIso,
       activeLoopNudge,
       showLoopNudge,
-      isSoftTone: loopNudgeDismissStreak >= 2
+      isSoftTone: loopNudgeDismissStreak >= 2,
+      adaptiveDropoffThreshold,
+      adaptiveMinOpens,
+      completionRatio14d,
+      sensitivityLabel
     };
   };
 
@@ -6687,7 +6747,7 @@ export default function Stillform() {
 
   useEffect(() => {
     if (screen !== "home") return;
-    const { todayIso, activeLoopNudge, showLoopNudge } = getLoopNudgeSnapshot();
+    const { todayIso, activeLoopNudge, showLoopNudge, adaptiveDropoffThreshold, adaptiveMinOpens, sensitivityLabel } = getLoopNudgeSnapshot();
     if (!showLoopNudge || !activeLoopNudge) return;
     const tracked = appendLoopNudgeEvent({
       event: "shown",
@@ -6696,7 +6756,10 @@ export default function Stillform() {
       timestamp: new Date().toISOString(),
       dropoffPct: activeLoopNudge.dropoffPct,
       opens14d: activeLoopNudge.opens,
-      dropoffCount: activeLoopNudge.dropoffCount
+      dropoffCount: activeLoopNudge.dropoffCount,
+      adaptiveDropoffThreshold,
+      adaptiveMinOpens,
+      sensitivityLabel
     });
     if (tracked) {
       try {
@@ -6704,7 +6767,10 @@ export default function Stillform() {
           props: {
             type: activeLoopNudge.id,
             dropoff_pct: activeLoopNudge.dropoffPct,
-            opens_14d: activeLoopNudge.opens
+            opens_14d: activeLoopNudge.opens,
+            adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+            adaptive_min_opens: adaptiveMinOpens,
+            sensitivity: sensitivityLabel.toLowerCase()
           }
         });
       } catch {}
@@ -7849,7 +7915,7 @@ export default function Stillform() {
             }
           }
 
-          const { todayIso, activeLoopNudge, showLoopNudge, isSoftTone } = getLoopNudgeSnapshot();
+          const { todayIso, activeLoopNudge, showLoopNudge, isSoftTone, adaptiveDropoffThreshold, adaptiveMinOpens, sensitivityLabel } = getLoopNudgeSnapshot();
           const dismissLoopNudge = () => {
             if (!activeLoopNudge) return;
             const previousDismissDate = loopNudgeDismissedDay ? new Date(`${loopNudgeDismissedDay}T00:00:00`) : null;
@@ -7872,7 +7938,10 @@ export default function Stillform() {
               dropoffPct: activeLoopNudge.dropoffPct,
               opens14d: activeLoopNudge.opens,
               dropoffCount: activeLoopNudge.dropoffCount,
-              dismissStreak: nextDismissStreak
+              dismissStreak: nextDismissStreak,
+              adaptiveDropoffThreshold,
+              adaptiveMinOpens,
+              sensitivityLabel
             });
             if (tracked) {
               try {
@@ -7881,7 +7950,10 @@ export default function Stillform() {
                     type: activeLoopNudge.id,
                     dropoff_pct: activeLoopNudge.dropoffPct,
                     opens_14d: activeLoopNudge.opens,
-                    dismiss_streak: nextDismissStreak
+                    dismiss_streak: nextDismissStreak,
+                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                    adaptive_min_opens: adaptiveMinOpens,
+                    sensitivity: sensitivityLabel.toLowerCase()
                   }
                 });
               } catch {}
@@ -7896,7 +7968,10 @@ export default function Stillform() {
               timestamp: new Date().toISOString(),
               dropoffPct: activeLoopNudge.dropoffPct,
               opens14d: activeLoopNudge.opens,
-              dropoffCount: activeLoopNudge.dropoffCount
+              dropoffCount: activeLoopNudge.dropoffCount,
+              adaptiveDropoffThreshold,
+              adaptiveMinOpens,
+              sensitivityLabel
             });
             if (tracked) {
               try {
@@ -7904,7 +7979,10 @@ export default function Stillform() {
                   props: {
                     type: activeLoopNudge.id,
                     dropoff_pct: activeLoopNudge.dropoffPct,
-                    opens_14d: activeLoopNudge.opens
+                    opens_14d: activeLoopNudge.opens,
+                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                    adaptive_min_opens: adaptiveMinOpens,
+                    sensitivity: sensitivityLabel.toLowerCase()
                   }
                 });
               } catch {}

@@ -17,6 +17,7 @@ const checks = [
   { label: "Daily loop adherence telemetry", cmd: "rg", args: ["-n", "appendDailyLoopHistory|stillform_checkin_history|stillform_eod_history|Loop completion \\(14d\\)", "src/App.jsx"], type: "must-match" },
   { label: "Loop intervention nudge controls", cmd: "rg", args: ["-n", "LOOP_NUDGE_MIN_OPENS|LOOP_NUDGE_DROPOFF_THRESHOLD|Loop reliability nudge|stillform_loop_nudge_dismissed_day", "src/App.jsx"], type: "must-match" },
   { label: "Loop nudge effectiveness telemetry", cmd: "rg", args: ["-n", "LOOP_NUDGE_EVENTS_KEY|Loop Nudge Shown|Loop Nudge Actioned|Loop Nudge Dismissed|Nudge recovery \\(14d\\)", "src/App.jsx"], type: "must-match" },
+  { label: "Adaptive loop nudge sensitivity", cmd: "rg", args: ["-n", "LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND|LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND|adaptiveDropoffThreshold|adaptiveMinOpens|Adaptive nudge sensitivity", "src/App.jsx"], type: "must-match" },
   { label: "Subscription diagnostics controls", cmd: "rg", args: ["-n", "refreshSubscriptionStatus|Subscription status|Refresh status \\(server\\)|PENDING WEBHOOK", "src/App.jsx"], type: "must-match" },
   { label: "Cloud restore controls", cmd: "rg", args: ["-n", "Restore now|Restoring\\.|Restored .* items from cloud|setSyncFeedbackWithClear", "src/App.jsx"], type: "must-match" },
   { label: "Sync auth cooldown guard", cmd: "rg", args: ["-n", "syncAuthCooldownSeconds|startSyncAuthCooldown|Too many attempts\\. Please wait", "src/App.jsx"], type: "must-match" },
