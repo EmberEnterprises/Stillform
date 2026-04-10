@@ -6338,7 +6338,7 @@ export default function Stillform() {
       try {
         const status = await sbCheckSubscriptionStatus();
         if (cancelled || !status) return;
-        setSubscriptionLastCheckedAt(Date.now());
+        if (screen === "settings") setSubscriptionLastCheckedAt(Date.now());
         if (status?.is_subscribed === true) {
           try {
             localStorage.setItem("stillform_subscribed", "yes");
