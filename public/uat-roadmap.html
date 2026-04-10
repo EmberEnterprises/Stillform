@@ -509,32 +509,92 @@
       </section>
 
       <section class="slide">
-        <h2 class="slide-title">Current product state</h2>
-        <div class="grid">
-          <div>
-            <div class="divider" style="margin-top:0;">Shipped recently</div>
-            <ul>
-              <li>Outcome intent integrated into Morning Check-In</li>
-              <li>Scenario protocol launch routing from morning flow</li>
-              <li>State-to-Statement bridge after reframe completion</li>
-              <li>Proof-of-change panel for behavioral evidence</li>
-              <li>Server-side subscription verification foundation</li>
-              <li>Integration context adapter with freshness handling</li>
-              <li>Shareable composure card with PDF export path</li>
-              <li>SHIP preflight integrity gate for release safety</li>
-            </ul>
-          </div>
-          <div>
-            <div class="divider" style="margin-top:0;">Waiting / next</div>
-            <ul>
-              <li>Calendar-aware anticipatory regulation</li>
-              <li>Health integrations</li>
-              <li>Native launch and channel scaling</li>
-              <li>Expanded partner playbooks (executive coaches)</li>
-              <li>Dynamic post-launch trial-day truth (server entitlement)</li>
-            </ul>
-          </div>
-        </div>
+        <h2 class="slide-title">Execution transparency: completed, tested, and next to launch</h2>
+        <div class="divider" style="margin-top:0;">Completed + tested</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Who</th>
+              <th>What is completed</th>
+              <th>Why this matters</th>
+              <th>How it was tested</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1 - Proof</td>
+              <td>Paid users and UAT testers entering the paywall</td>
+              <td>Server-side subscription verification (webhook/status/link-account) and in-paywall sign-in/sign-up flow</td>
+              <td>Prevents entitlement mismatch and removes subscription flow confusion</td>
+              <td>Checkout/auth/status paths validated in release flow, plus build and SHIP preflight gate</td>
+            </tr>
+            <tr>
+              <td>Phase 1 to 2 - Daily loop reliability</td>
+              <td>Users navigating pressure windows throughout the day</td>
+              <td>Outcome intent moved into Morning Check-In with scenario routing; EOD close continuity preserved</td>
+              <td>Keeps one coherent composure loop instead of fragmented home modules</td>
+              <td>Morning -> launch -> session -> completion path smoke-tested with protocol metadata capture</td>
+            </tr>
+            <tr>
+              <td>Phase 2 - Evidence and transfer</td>
+              <td>Users and coach/partner stakeholders tracking real change</td>
+              <td>State-to-Statement step, Proof of Change panel, and Shareable Composure Card with PDF export</td>
+              <td>Turns internal regulation into visible, practical outcomes and accountability artifacts</td>
+              <td>Session-save, card generation, copy/download/print export paths verified in app and preflight checks</td>
+            </tr>
+            <tr>
+              <td>Phase 2 foundation for Phase 4</td>
+              <td>Users who rely on external context (calendar/health)</td>
+              <td>Shared integration adapter, freshness logic, and integration status visibility in Settings</td>
+              <td>Creates one trusted source of context truth before provider expansion</td>
+              <td>Adapter wiring and freshness usage checked in code and release preflight</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="divider">About to launch (next gated phases)</div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Phase</th>
+              <th>Who</th>
+              <th>What is next</th>
+              <th>Why this is next</th>
+              <th>How launch readiness is verified</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Phase 1 hardening</td>
+              <td>All subscribers and new trial users</td>
+              <td>Dynamic production trial/entitlement truth and final billing-policy compliance checks</td>
+              <td>Trust and platform compliance are required for stable revenue and store approval</td>
+              <td>Server entitlement validation, restore-flow QA, and policy checklist sign-off</td>
+            </tr>
+            <tr>
+              <td>Phase 3 - Distribution</td>
+              <td>Executive coaches, therapist-adjacent partners, and their communities</td>
+              <td>Partner referral assets and channel playbooks tied to composure outcomes</td>
+              <td>High-trust channels match the product's integrity model better than broad cold acquisition</td>
+              <td>Pilot cohort conversion/retention review and partner feedback loop</td>
+            </tr>
+            <tr>
+              <td>Phase 4 - Integrations</td>
+              <td>Users managing high-load schedules and health variability</td>
+              <td>Calendar and health provider hookups, consent/revoke flows, and integration retry/error UX</td>
+              <td>Reduces manual input burden while preserving context quality and user control</td>
+              <td>Permission-state testing, freshness-state QA, and device-level integration checks</td>
+            </tr>
+            <tr>
+              <td>Native launch readiness</td>
+              <td>iOS and Android production users</td>
+              <td>Store submission package, privacy disclosures, signing/versioning, and real-device QA matrix</td>
+              <td>Prevents approval delays and production trust regressions at launch</td>
+              <td>Pre-submit checklist completion across metadata, build signing, and critical path smoke tests</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="slide">
