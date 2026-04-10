@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stillform UAT Roadmap</title>
+    <title>Stillform Ecosystem Overview</title>
     <style>
       :root {
         --bg: #0e0f11;
@@ -59,6 +59,14 @@
         padding: 18px 18px 16px;
         margin-bottom: 14px;
       }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      @media (max-width: 760px) {
+        .grid { grid-template-columns: 1fr; }
+      }
       .slide-title {
         margin: 0 0 10px;
         font-size: 12px;
@@ -93,41 +101,146 @@
         color: var(--text-dim);
         font-size: 11px;
       }
+      .hero {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 14px;
+        margin-bottom: 14px;
+      }
+      @media (max-width: 760px) {
+        .hero { grid-template-columns: 1fr; }
+      }
+      .metric {
+        background: var(--surface-2);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 10px 12px;
+      }
+      .metric .k {
+        font-size: 10px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 4px;
+      }
+      .metric .v {
+        color: var(--amber);
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-size: 28px;
+        line-height: 1;
+      }
     </style>
   </head>
   <body>
     <main class="wrap">
       <div class="kicker">Stillform · UAT</div>
-      <h1>UAT Roadmap</h1>
-      <p class="sub">Single-source presentation page for testers. Updated April 2026.</p>
+      <h1>Stillform Ecosystem Overview</h1>
+      <p class="sub">Business-plan style presentation for UAT and stakeholder alignment. Updated April 2026.</p>
+
+      <section class="hero">
+        <div class="slide">
+          <h2 class="slide-title">What Stillform is</h2>
+          <ul>
+            <li>A composure system: how you carry yourself in moments that matter.</li>
+            <li>Daily practice + in-the-moment intervention, designed as one system.</li>
+            <li>Operator framing: precision, reliability, and functional output.</li>
+            <li>Core flow: Rate state → Filter hardware → Regulate → Reframe.</li>
+          </ul>
+        </div>
+        <div class="slide">
+          <h2 class="slide-title">Business snapshot</h2>
+          <div class="metric">
+            <div class="k">Category</div>
+            <div class="v">Executive Composure</div>
+          </div>
+          <div class="metric" style="margin-top:10px;">
+            <div class="k">Pricing</div>
+            <div class="v">$14.99 / $9.99</div>
+          </div>
+          <div class="metric" style="margin-top:10px;">
+            <div class="k">Model</div>
+            <div class="v">One price. No upsells.</div>
+          </div>
+        </div>
+      </section>
 
       <section class="slide">
-        <h2 class="slide-title">New this week</h2>
+        <h2 class="slide-title">Who it is for</h2>
+        <div class="grid">
+          <ul>
+            <li>Professionals under sustained pressure</li>
+            <li>Founders and builders running hot</li>
+            <li>Parents, creatives, athletes, operators</li>
+          </ul>
+          <ul>
+            <li>Neurodivergent users needing fast self-regulation</li>
+            <li>People who want better composure on good days and hard days</li>
+            <li>Coach/therapist-adjacent users between sessions</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="slide">
+        <h2 class="slide-title">What users should expect</h2>
         <ul>
-          <li>Outcome Engine on Home (choose desired outcome first)</li>
-          <li>Scenario Protocol launcher (one-tap route by context)</li>
-          <li>State-to-Statement (optional post-session communication anchor)</li>
+          <li>Morning check-in sets baseline context before the day starts.</li>
+          <li>Adaptive tools route by processing style (thought-first/body-first/balanced).</li>
+          <li>Fast regulation in moments of activation without losing agency.</li>
+          <li>Evening close-out to prevent carrying unresolved signal into sleep.</li>
+          <li>Progress visibility framed as evidence, not judgment.</li>
+        </ul>
+      </section>
+
+      <section class="slide">
+        <h2 class="slide-title">Ecosystem architecture (intertwined)</h2>
+        <ul>
+          <li><strong>Calibration:</strong> 5-scenario setup determines default pathway.</li>
+          <li><strong>Daily loop:</strong> Morning baseline → day interventions → EOD close.</li>
+          <li><strong>Adaptive AI:</strong> context stack (state, hardware, profile, recent notes).</li>
+          <li><strong>Proof layer:</strong> objective progress trends + pattern insights.</li>
+          <li><strong>Trust layer:</strong> privacy integrity, reliable fallbacks, subscription correctness.</li>
+        </ul>
+      </section>
+
+      <section class="slide">
+        <h2 class="slide-title">Shipped recently</h2>
+        <ul>
+          <li>Outcome Engine on Home (intent first)</li>
+          <li>Scenario Protocol launcher (recommended one-tap routes)</li>
+          <li>State-to-Statement (session-to-real-world bridge)</li>
           <li>Proof of change panel in My Progress</li>
-          <li>Paywall auth copy: “Sign in / Sign up to subscribe”</li>
+          <li>Paywall auth copy update for clarity</li>
         </ul>
       </section>
 
       <section class="slide">
-        <h2 class="slide-title">How to use this in UAT</h2>
+        <h2 class="slide-title">In progress / waiting</h2>
         <ul>
-          <li>Use this page as the canonical update link for all testers.</li>
-          <li>Keep wording factual and behavior-accurate.</li>
-          <li>Promote only shipped features in “New this week”.</li>
+          <li>Shareable composure card</li>
+          <li>Calendar-aware practice and anticipatory regulation</li>
+          <li>Health integrations (HRV, sleep, heart rate context)</li>
+          <li>Native launch and distribution execution</li>
+          <li>Go-to-market channels: therapists + executive coaches</li>
         </ul>
       </section>
 
-      <div class="divider">Coming soon highlights</div>
-      <span class="pill">Shareable composure card</span>
-      <span class="pill">Calendar-aware practice</span>
-      <span class="pill">Health integrations</span>
-      <span class="pill">Composure index</span>
+      <section class="slide">
+        <h2 class="slide-title">Execution priorities (sequential)</h2>
+        <ul>
+          <li><strong>1. Trust & reliability:</strong> zero mismatch between claims and behavior.</li>
+          <li><strong>2. Ecosystem coherence:</strong> strengthen existing loop before adding net-new branches.</li>
+          <li><strong>3. Retention quality:</strong> daily adherence through low-friction, high-value interactions.</li>
+          <li><strong>4. Distribution:</strong> targeted channels with strongest fit and proof.</li>
+        </ul>
+      </section>
 
-      <p class="footer">Stillform is a composure system — daily calibration + in-the-moment regulation.</p>
+      <div class="divider">Key expectations</div>
+      <span class="pill">Daily composure practice</span>
+      <span class="pill">Fast intervention under pressure</span>
+      <span class="pill">No trust compromises</span>
+      <span class="pill">Operator-grade clarity</span>
+
+      <p class="footer">Stillform is a composure system — not a crisis-only tool, not a form-filling app, and not a feature pile. It is one integrated operating model.</p>
     </main>
   </body>
   </html>

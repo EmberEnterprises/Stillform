@@ -7003,44 +7003,38 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* UAT BANNER — single web presentation link */}
-              <div style={{ marginBottom: 32 }}>
-                <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", padding: "2px 8px", borderRadius: 4 }}>EARLY ACCESS</span>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", animation: "pulse 1.5s ease-in-out infinite" }}>NEW!</span>
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)" }}>What's new + what's coming</span>
+              {/* UAT BANNER — compact ecosystem link */}
+              <div style={{ marginBottom: 20 }}>
+                <a
+                  href="/uat-roadmap.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    textDecoration: "none",
+                    color: "inherit",
+                    background: "var(--surface)",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)",
+                    padding: "10px 14px"
+                  }}
+                >
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", borderRadius: 4, padding: "2px 8px" }}>EARLY ACCESS</span>
+                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c05040" }}>UPDATED</span>
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                      Ecosystem brief: what Stillform is, who it serves, what's shipped, what's next.
+                    </div>
                   </div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c05040", marginBottom: 8 }}>
-                    UAT Deck
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", whiteSpace: "nowrap" }}>
+                    Open →
                   </div>
-                  <div style={{ marginBottom: 10 }}>
-                    The full UAT update now lives as a web presentation.
-                  </div>
-                  <a
-                    href="/uat-roadmap.html"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "inline-block",
-                      background: "var(--amber)",
-                      color: "#0A0A0C",
-                      textDecoration: "none",
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 12px",
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      fontWeight: 600
-                    }}
-                  >
-                    Open UAT Presentation
-                  </a>
-                  <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                    One link for testers. No download required.
-                  </div>
-                </div>
+                </a>
               </div>
 
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
