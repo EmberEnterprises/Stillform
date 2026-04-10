@@ -269,6 +269,7 @@
 - [ ] Retry action records retry timestamp and clears stale integration error state
 - [ ] Daily loop adherence telemetry persists check-in and EOD completion history over time
 - [ ] My Progress shows 14-day loop completion metrics (overall + morning + EOD)
+- [ ] Home screen loop intervention nudge appears when 14-day morning/EOD drop-off is high (non-punitive copy + direct resume action + daily dismiss)
 - [ ] Post-launch: provider hookups (Apple/Google calendar + health providers) with explicit consent and revoke paths
 
 ### Pinned human-required actions (can do later if not feeling well)

@@ -1332,6 +1332,9 @@ const LOOP_HISTORY_KEYS = {
 };
 
 const LOOP_HISTORY_MAX_ITEMS = 120;
+const LOOP_NUDGE_MIN_OPENS = 3;
+const LOOP_NUDGE_DROPOFF_THRESHOLD = 40;
+const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 
 const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
   try {
@@ -6505,6 +6508,9 @@ export default function Stillform() {
   const [eodWord, setEodWord] = useState(null);
   const [eodSaved, setEodSaved] = useState(false);
   const [eodPromptDismissed, setEodPromptDismissed] = useState(false);
+  const [loopNudgeDismissedDay, setLoopNudgeDismissedDay] = useState(() => {
+    try { return localStorage.getItem(LOOP_NUDGE_DISMISSED_DAY_KEY) || ""; } catch { return ""; }
+  });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
 
   // Sync regulation type when navigating screens (catches Settings changes)
@@ -7652,6 +7658,131 @@ export default function Stillform() {
             }
           }
 
+          const todayIso = new Date().toISOString().split("T")[0];
+          const parseLoopHistory = (key) => {
+            try {
+              const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+              return Array.isArray(parsed) ? parsed : [];
+            } catch {
+              return [];
+            }
+          };
+          const withinRecentDays = (rawDate, days) => {
+            if (!rawDate) return false;
+            try {
+              const dt = new Date(rawDate);
+              if (Number.isNaN(dt.getTime())) return false;
+              const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+              return dt.getTime() >= cutoff;
+            } catch {
+              return false;
+            }
+          };
+          const toLoopDayKey = (entry) => {
+            const raw = entry?.date || entry?.timestamp;
+            if (!raw) return null;
+            try {
+              const dt = new Date(raw);
+              if (Number.isNaN(dt.getTime())) return null;
+              return dt.toISOString().slice(0, 10);
+            } catch {
+              return null;
+            }
+          };
+          const recentLoopDaySet = (items) => new Set(
+            (Array.isArray(items) ? items : [])
+              .filter((entry) => withinRecentDays(entry?.date || entry?.timestamp, 14))
+              .map(toLoopDayKey)
+              .filter(Boolean)
+          );
+          const morningOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morningStart));
+          const morningDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morning));
+          const eodOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eodStart));
+          const eodDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eod));
+          const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
+          const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
+          const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
+          const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+
+          const nowNudge = new Date();
+          const currentMinutesNudge = nowNudge.getHours() * 60 + nowNudge.getMinutes();
+          const morningStartMin = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+          const eveningStartMin = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+          const morningEndMin = 1050;
+          const morningCap = 240;
+          const inMorningWindow = currentMinutesNudge >= morningStartMin && currentMinutesNudge < morningEndMin;
+          const inEodWindow = currentMinutesNudge >= eveningStartMin || currentMinutesNudge < morningCap;
+          const morningDoneToday = (() => {
+            try {
+              const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+              return c?.date === todayIso;
+            } catch {
+              return false;
+            }
+          })();
+          const eodDoneToday = (() => {
+            try {
+              const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+              return e?.date === todayIso;
+            } catch {
+              return false;
+            }
+          })();
+          const loopNudgeCandidates = [
+            {
+              id: "morning",
+              title: "Morning loop consistency",
+              actionLabel: "Resume morning check-in",
+              opens: morningOpen14dDays.size,
+              dropoffCount: morningDropoff14dCount,
+              dropoffPct: morningDropoff14dPct,
+              eligible: inMorningWindow && !morningDoneToday
+            },
+            {
+              id: "eod",
+              title: "End-of-day loop consistency",
+              actionLabel: "Close the loop now",
+              opens: eodOpen14dDays.size,
+              dropoffCount: eodDropoff14dCount,
+              dropoffPct: eodDropoff14dPct,
+              eligible: inEodWindow && !eodDoneToday
+            }
+          ]
+            .filter((item) => item.eligible)
+            .filter((item) => item.opens >= LOOP_NUDGE_MIN_OPENS && item.dropoffPct >= LOOP_NUDGE_DROPOFF_THRESHOLD)
+            .sort((a, b) => b.dropoffPct - a.dropoffPct);
+          const activeLoopNudge = loopNudgeCandidates[0] || null;
+          const showLoopNudge = !!activeLoopNudge && loopNudgeDismissedDay !== todayIso;
+          const dismissLoopNudge = () => {
+            try { localStorage.setItem(LOOP_NUDGE_DISMISSED_DAY_KEY, todayIso); } catch {}
+            setLoopNudgeDismissedDay(todayIso);
+          };
+          const handleLoopNudgeAction = () => {
+            if (!activeLoopNudge) return;
+            if (activeLoopNudge.id === "morning") {
+              try {
+                appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                  date: todayIso,
+                  timestamp: new Date().toISOString(),
+                  source: "nudge"
+                }, LOOP_HISTORY_MAX_ITEMS);
+              } catch {}
+              setCiSaved(false);
+              setCiOpen(true);
+              return;
+            }
+            try {
+              appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                date: todayIso,
+                timestamp: new Date().toISOString(),
+                source: "nudge"
+              }, LOOP_HISTORY_MAX_ITEMS);
+            } catch {}
+            setEodSaved(false);
+            setEodOpen(true);
+            setEodPromptDismissed(false);
+          };
+
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
@@ -7685,6 +7816,51 @@ export default function Stillform() {
                       borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
                     }}>Let me try different</button>
+                  </div>
+                </div>
+              )}
+
+              {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
+              {showLoopNudge && (
+                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    Loop reliability nudge
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
+                    {activeLoopNudge?.title}: {activeLoopNudge?.dropoffPct}% drop-off in the last 14 days ({activeLoopNudge?.dropoffCount}/{activeLoopNudge?.opens}).
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={handleLoopNudgeAction}
+                      style={{
+                        flex: 1,
+                        background: "var(--amber)",
+                        color: "#0A0A0C",
+                        border: "none",
+                        borderRadius: "var(--r)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      {activeLoopNudge?.actionLabel}
+                    </button>
+                    <button
+                      onClick={dismissLoopNudge}
+                      style={{
+                        background: "none",
+                        color: "var(--text-muted)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Not now
+                    </button>
                   </div>
                 </div>
               )}
