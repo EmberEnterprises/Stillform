@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stillform UAT Roadmap</title>
+    <style>
+      :root {
+        --bg: #0e0f11;
+        --surface: #17191d;
+        --surface-2: #1f2228;
+        --text: #e9e9ea;
+        --text-dim: #a0a2a8;
+        --amber: #c9933a;
+        --amber-glow: rgba(201, 147, 58, 0.12);
+        --border: rgba(255, 255, 255, 0.1);
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+        line-height: 1.6;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 32px 20px 80px;
+      }
+      .kicker {
+        display: inline-block;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--amber);
+        background: var(--amber-glow);
+        border: 1px solid rgba(201, 147, 58, 0.28);
+        border-radius: 999px;
+        padding: 4px 10px;
+        margin-bottom: 14px;
+      }
+      h1 {
+        margin: 0 0 8px;
+        font-family: "Cormorant Garamond", Georgia, serif;
+        font-weight: 300;
+        font-size: clamp(34px, 6vw, 52px);
+        color: var(--amber);
+      }
+      .sub {
+        margin: 0 0 24px;
+        color: var(--text-dim);
+        font-size: 14px;
+      }
+      .slide {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 18px 16px;
+        margin-bottom: 14px;
+      }
+      .slide-title {
+        margin: 0 0 10px;
+        font-size: 12px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+      ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      li { margin: 6px 0; color: var(--text); }
+      .footer {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+      .divider {
+        margin: 22px 0 10px;
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        padding: 3px 8px;
+        margin-right: 6px;
+        color: var(--text-dim);
+        font-size: 11px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="kicker">Stillform · UAT</div>
+      <h1>UAT Roadmap</h1>
+      <p class="sub">Single-source presentation page for testers. Updated April 2026.</p>
+
+      <section class="slide">
+        <h2 class="slide-title">New this week</h2>
+        <ul>
+          <li>Outcome Engine on Home (choose desired outcome first)</li>
+          <li>Scenario Protocol launcher (one-tap route by context)</li>
+          <li>State-to-Statement (optional post-session communication anchor)</li>
+          <li>Proof of change panel in My Progress</li>
+          <li>Paywall auth copy: “Sign in / Sign up to subscribe”</li>
+        </ul>
+      </section>
+
+      <section class="slide">
+        <h2 class="slide-title">How to use this in UAT</h2>
+        <ul>
+          <li>Use this page as the canonical update link for all testers.</li>
+          <li>Keep wording factual and behavior-accurate.</li>
+          <li>Promote only shipped features in “New this week”.</li>
+        </ul>
+      </section>
+
+      <div class="divider">Coming soon highlights</div>
+      <span class="pill">Shareable composure card</span>
+      <span class="pill">Calendar-aware practice</span>
+      <span class="pill">Health integrations</span>
+      <span class="pill">Composure index</span>
+
+      <p class="footer">Stillform is a composure system — daily calibration + in-the-moment regulation.</p>
+    </main>
+  </body>
+  </html>

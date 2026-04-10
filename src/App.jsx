@@ -7003,7 +7003,7 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* UAT BANNER — direct links */}
+              {/* UAT BANNER — single web presentation link */}
               <div style={{ marginBottom: 32 }}>
                 <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.8, padding: "14px 16px", border: "0.5px solid var(--border)", borderRadius: "var(--r)", background: "var(--surface)" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
@@ -7015,10 +7015,10 @@ export default function Stillform() {
                     UAT Deck
                   </div>
                   <div style={{ marginBottom: 10 }}>
-                    The full UAT update list now lives in a PowerPoint deck for easier sharing with testers.
+                    The full UAT update now lives as a web presentation.
                   </div>
                   <a
-                    href="/Stillform-UAT-Roadmap-Apr-2026.pptx"
+                    href="/uat-roadmap.html"
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
@@ -7035,32 +7035,10 @@ export default function Stillform() {
                       fontWeight: 600
                     }}
                   >
-                    Open UAT Roadmap Deck (PPTX)
-                  </a>
-                  <a
-                    href="/Stillform-UAT-Deck-Template-v2.pptx"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: "inline-block",
-                      marginLeft: 8,
-                      background: "transparent",
-                      color: "var(--amber)",
-                      textDecoration: "none",
-                      border: "0.5px solid var(--amber-dim)",
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 12px",
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.08em",
-                      textTransform: "uppercase",
-                      fontWeight: 600
-                    }}
-                  >
-                    Open Branded Template (v2)
+                    Open UAT Presentation
                   </a>
                   <div style={{ marginTop: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                    Tip: use the roadmap deck for tester updates, then duplicate the v2 template for the next release.
+                    One link for testers. No download required.
                   </div>
                 </div>
               </div>
