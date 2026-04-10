@@ -1335,6 +1335,9 @@ const LOOP_HISTORY_MAX_ITEMS = 120;
 const LOOP_NUDGE_MIN_OPENS = 3;
 const LOOP_NUDGE_DROPOFF_THRESHOLD = 40;
 const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
+const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
+const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
+const LOOP_NUDGE_EVENTS_MAX_ITEMS = 180;
 
 const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
   try {
@@ -1344,6 +1347,24 @@ const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
     const trimmed = base.slice(-maxItems);
     localStorage.setItem(storageKey, JSON.stringify(trimmed));
   } catch {}
+};
+
+const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => {
+  try {
+    const current = JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]");
+    const list = Array.isArray(current) ? current : [];
+    const exists = list.some((item) => (
+      item?.event === entry?.event &&
+      item?.type === entry?.type &&
+      item?.date === entry?.date
+    ));
+    if (exists) return false;
+    const next = [...list, entry].slice(-maxItems);
+    localStorage.setItem(LOOP_NUDGE_EVENTS_KEY, JSON.stringify(next));
+    return true;
+  } catch {
+    return false;
+  }
 };
 
 // Integration context adapter
@@ -2911,7 +2932,7 @@ function MicButton({ onTranscript }) {
 const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 const APP_VERSION = "1.0.0";
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -5630,6 +5651,7 @@ function MyProgress({ onBack }) {
   const morningHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morning) || "[]"); } catch { return []; } })();
   const eodOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eodStart) || "[]"); } catch { return []; } })();
   const eodHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eod) || "[]"); } catch { return []; } })();
+  const loopNudgeEvents = (() => { try { return JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]"); } catch { return []; } })();
   const withinDays = (isoDate, days) => {
     if (!isoDate) return false;
     try {
@@ -5666,10 +5688,26 @@ function MyProgress({ onBack }) {
   const morning14dCount = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
   const eod14dCount = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
   const loopCompletion14d = Math.round(((morning14dCount + eod14dCount) / (14 * 2)) * 100);
+  const morningCompletion14d = Math.round((morning14dCount / 14) * 100);
+  const eodCompletion14d = Math.round((eod14dCount / 14) * 100);
   const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
   const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
   const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
   const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+  const loopNudgeShown14d = (Array.isArray(loopNudgeEvents) ? loopNudgeEvents : []).filter(
+    (entry) => entry?.event === "shown" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const loopNudgeActioned14d = (Array.isArray(loopNudgeEvents) ? loopNudgeEvents : []).filter(
+    (entry) => entry?.event === "actioned" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const recoveredNudges14d = loopNudgeShown14d.filter((entry) => (
+    entry?.type === "morning"
+      ? morningDone14dDays.has(entry?.date)
+      : eodDone14dDays.has(entry?.date)
+  )).length;
+  const nudgeRecovery14dPct = loopNudgeShown14d.length
+    ? Math.round((recoveredNudges14d / loopNudgeShown14d.length) * 100)
+    : null;
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
@@ -5946,6 +5984,17 @@ function MyProgress({ onBack }) {
                     Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
                     {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
                   </div>
+                  {nudgeRecovery14dPct !== null && (
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                      Nudge recovery (14d): <span style={{ color: "var(--text)" }}>{nudgeRecovery14dPct}%</span> ({recoveredNudges14d}/{loopNudgeShown14d.length})
+                      {" · "}Actioned: <span style={{ color: "var(--text)" }}>{loopNudgeActioned14d.length}</span>
+                    </div>
+                  )}
+                  {nudgeRecovery14dPct === null && (
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                      Nudge recovery (14d): waiting for intervention data.
+                    </div>
+                  )}
                   {avgShift !== null && (
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
                       Average composure gain per rated session:{" "}
@@ -6511,7 +6560,123 @@ export default function Stillform() {
   const [loopNudgeDismissedDay, setLoopNudgeDismissedDay] = useState(() => {
     try { return localStorage.getItem(LOOP_NUDGE_DISMISSED_DAY_KEY) || ""; } catch { return ""; }
   });
+  const [loopNudgeDismissStreak, setLoopNudgeDismissStreak] = useState(() => {
+    try {
+      const raw = Number.parseInt(localStorage.getItem(LOOP_NUDGE_DISMISS_STREAK_KEY) || "0", 10);
+      return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+
+  const getLoopNudgeSnapshot = () => {
+    const todayIso = new Date().toISOString().split("T")[0];
+    const parseLoopHistory = (key) => {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    };
+    const toDayKey = (entry) => {
+      const raw = entry?.date || entry?.timestamp;
+      if (!raw) return null;
+      try {
+        const dt = new Date(raw);
+        if (Number.isNaN(dt.getTime())) return null;
+        return dt.toISOString().slice(0, 10);
+      } catch {
+        return null;
+      }
+    };
+    const withinRecentDays = (rawDate, days) => {
+      if (!rawDate) return false;
+      try {
+        const dt = new Date(rawDate);
+        if (Number.isNaN(dt.getTime())) return false;
+        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+        return dt.getTime() >= cutoff;
+      } catch {
+        return false;
+      }
+    };
+    const recentLoopDaySet = (items) => new Set(
+      (Array.isArray(items) ? items : [])
+        .filter((entry) => withinRecentDays(entry?.date || entry?.timestamp, 14))
+        .map(toDayKey)
+        .filter(Boolean)
+    );
+
+    const morningOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morningStart));
+    const morningDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morning));
+    const eodOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eodStart));
+    const eodDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eod));
+    const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
+    const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
+    const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
+    const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
+
+    const nowNudge = new Date();
+    const currentMinutesNudge = nowNudge.getHours() * 60 + nowNudge.getMinutes();
+    const morningStartMin = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+    const eveningStartMin = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+    const morningEndMin = 1050;
+    const morningCap = 240;
+    const inMorningWindow = currentMinutesNudge >= morningStartMin && currentMinutesNudge < morningEndMin;
+    const inEodWindow = currentMinutesNudge >= eveningStartMin || currentMinutesNudge < morningCap;
+
+    const morningDoneToday = (() => {
+      try {
+        const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+        return c?.date === todayIso;
+      } catch {
+        return false;
+      }
+    })();
+    const eodDoneToday = (() => {
+      try {
+        const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+        return e?.date === todayIso;
+      } catch {
+        return false;
+      }
+    })();
+
+    const loopNudgeCandidates = [
+      {
+        id: "morning",
+        title: "Morning loop consistency",
+        actionLabel: "Resume morning check-in",
+        opens: morningOpen14dDays.size,
+        dropoffCount: morningDropoff14dCount,
+        dropoffPct: morningDropoff14dPct,
+        eligible: inMorningWindow && !morningDoneToday
+      },
+      {
+        id: "eod",
+        title: "End-of-day loop consistency",
+        actionLabel: "Close the loop now",
+        opens: eodOpen14dDays.size,
+        dropoffCount: eodDropoff14dCount,
+        dropoffPct: eodDropoff14dPct,
+        eligible: inEodWindow && !eodDoneToday
+      }
+    ]
+      .filter((item) => item.eligible)
+      .filter((item) => item.opens >= LOOP_NUDGE_MIN_OPENS && item.dropoffPct >= LOOP_NUDGE_DROPOFF_THRESHOLD)
+      .sort((a, b) => b.dropoffPct - a.dropoffPct);
+
+    const activeLoopNudge = loopNudgeCandidates[0] || null;
+    const showLoopNudge = !!activeLoopNudge && loopNudgeDismissedDay !== todayIso;
+    return {
+      todayIso,
+      activeLoopNudge,
+      showLoopNudge,
+      isSoftTone: loopNudgeDismissStreak >= 2
+    };
+  };
 
   // Sync regulation type when navigating screens (catches Settings changes)
   useEffect(() => {
@@ -6519,6 +6684,32 @@ export default function Stillform() {
       try { setRegType(localStorage.getItem("stillform_regulation_type") || null); } catch {}
     }
   }, [screen]);
+
+  useEffect(() => {
+    if (screen !== "home") return;
+    const { todayIso, activeLoopNudge, showLoopNudge } = getLoopNudgeSnapshot();
+    if (!showLoopNudge || !activeLoopNudge) return;
+    const tracked = appendLoopNudgeEvent({
+      event: "shown",
+      type: activeLoopNudge.id,
+      date: todayIso,
+      timestamp: new Date().toISOString(),
+      dropoffPct: activeLoopNudge.dropoffPct,
+      opens14d: activeLoopNudge.opens,
+      dropoffCount: activeLoopNudge.dropoffCount
+    });
+    if (tracked) {
+      try {
+        window.plausible("Loop Nudge Shown", {
+          props: {
+            type: activeLoopNudge.id,
+            dropoff_pct: activeLoopNudge.dropoffPct,
+            opens_14d: activeLoopNudge.opens
+          }
+        });
+      } catch {}
+    }
+  }, [screen, loopNudgeDismissedDay, loopNudgeDismissStreak, ciOpen, ciSaved, eodOpen, eodSaved]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -7658,107 +7849,68 @@ export default function Stillform() {
             }
           }
 
-          const todayIso = new Date().toISOString().split("T")[0];
-          const parseLoopHistory = (key) => {
-            try {
-              const parsed = JSON.parse(localStorage.getItem(key) || "[]");
-              return Array.isArray(parsed) ? parsed : [];
-            } catch {
-              return [];
-            }
-          };
-          const withinRecentDays = (rawDate, days) => {
-            if (!rawDate) return false;
-            try {
-              const dt = new Date(rawDate);
-              if (Number.isNaN(dt.getTime())) return false;
-              const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-              return dt.getTime() >= cutoff;
-            } catch {
-              return false;
-            }
-          };
-          const toLoopDayKey = (entry) => {
-            const raw = entry?.date || entry?.timestamp;
-            if (!raw) return null;
-            try {
-              const dt = new Date(raw);
-              if (Number.isNaN(dt.getTime())) return null;
-              return dt.toISOString().slice(0, 10);
-            } catch {
-              return null;
-            }
-          };
-          const recentLoopDaySet = (items) => new Set(
-            (Array.isArray(items) ? items : [])
-              .filter((entry) => withinRecentDays(entry?.date || entry?.timestamp, 14))
-              .map(toLoopDayKey)
-              .filter(Boolean)
-          );
-          const morningOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morningStart));
-          const morningDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.morning));
-          const eodOpen14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eodStart));
-          const eodDone14dDays = recentLoopDaySet(parseLoopHistory(LOOP_HISTORY_KEYS.eod));
-          const morningDropoff14dCount = Array.from(morningOpen14dDays).filter((day) => !morningDone14dDays.has(day)).length;
-          const eodDropoff14dCount = Array.from(eodOpen14dDays).filter((day) => !eodDone14dDays.has(day)).length;
-          const morningDropoff14dPct = morningOpen14dDays.size ? Math.round((morningDropoff14dCount / morningOpen14dDays.size) * 100) : 0;
-          const eodDropoff14dPct = eodOpen14dDays.size ? Math.round((eodDropoff14dCount / eodOpen14dDays.size) * 100) : 0;
-
-          const nowNudge = new Date();
-          const currentMinutesNudge = nowNudge.getHours() * 60 + nowNudge.getMinutes();
-          const morningStartMin = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
-          const eveningStartMin = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
-          const morningEndMin = 1050;
-          const morningCap = 240;
-          const inMorningWindow = currentMinutesNudge >= morningStartMin && currentMinutesNudge < morningEndMin;
-          const inEodWindow = currentMinutesNudge >= eveningStartMin || currentMinutesNudge < morningCap;
-          const morningDoneToday = (() => {
-            try {
-              const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-              return c?.date === todayIso;
-            } catch {
-              return false;
-            }
-          })();
-          const eodDoneToday = (() => {
-            try {
-              const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
-              return e?.date === todayIso;
-            } catch {
-              return false;
-            }
-          })();
-          const loopNudgeCandidates = [
-            {
-              id: "morning",
-              title: "Morning loop consistency",
-              actionLabel: "Resume morning check-in",
-              opens: morningOpen14dDays.size,
-              dropoffCount: morningDropoff14dCount,
-              dropoffPct: morningDropoff14dPct,
-              eligible: inMorningWindow && !morningDoneToday
-            },
-            {
-              id: "eod",
-              title: "End-of-day loop consistency",
-              actionLabel: "Close the loop now",
-              opens: eodOpen14dDays.size,
-              dropoffCount: eodDropoff14dCount,
-              dropoffPct: eodDropoff14dPct,
-              eligible: inEodWindow && !eodDoneToday
-            }
-          ]
-            .filter((item) => item.eligible)
-            .filter((item) => item.opens >= LOOP_NUDGE_MIN_OPENS && item.dropoffPct >= LOOP_NUDGE_DROPOFF_THRESHOLD)
-            .sort((a, b) => b.dropoffPct - a.dropoffPct);
-          const activeLoopNudge = loopNudgeCandidates[0] || null;
-          const showLoopNudge = !!activeLoopNudge && loopNudgeDismissedDay !== todayIso;
+          const { todayIso, activeLoopNudge, showLoopNudge, isSoftTone } = getLoopNudgeSnapshot();
           const dismissLoopNudge = () => {
+            if (!activeLoopNudge) return;
+            const previousDismissDate = loopNudgeDismissedDay ? new Date(`${loopNudgeDismissedDay}T00:00:00`) : null;
+            const todayDate = new Date(`${todayIso}T00:00:00`);
+            const dayDiff = previousDismissDate
+              ? Math.round((todayDate.getTime() - previousDismissDate.getTime()) / (1000 * 60 * 60 * 24))
+              : null;
+            const nextDismissStreak = dayDiff === 0
+              ? Math.max(1, loopNudgeDismissStreak)
+              : (dayDiff === 1 ? loopNudgeDismissStreak + 1 : 1);
             try { localStorage.setItem(LOOP_NUDGE_DISMISSED_DAY_KEY, todayIso); } catch {}
+            try { localStorage.setItem(LOOP_NUDGE_DISMISS_STREAK_KEY, String(nextDismissStreak)); } catch {}
             setLoopNudgeDismissedDay(todayIso);
+            setLoopNudgeDismissStreak(nextDismissStreak);
+            const tracked = appendLoopNudgeEvent({
+              event: "dismissed",
+              type: activeLoopNudge.id,
+              date: todayIso,
+              timestamp: new Date().toISOString(),
+              dropoffPct: activeLoopNudge.dropoffPct,
+              opens14d: activeLoopNudge.opens,
+              dropoffCount: activeLoopNudge.dropoffCount,
+              dismissStreak: nextDismissStreak
+            });
+            if (tracked) {
+              try {
+                window.plausible("Loop Nudge Dismissed", {
+                  props: {
+                    type: activeLoopNudge.id,
+                    dropoff_pct: activeLoopNudge.dropoffPct,
+                    opens_14d: activeLoopNudge.opens,
+                    dismiss_streak: nextDismissStreak
+                  }
+                });
+              } catch {}
+            }
           };
           const handleLoopNudgeAction = () => {
             if (!activeLoopNudge) return;
+            const tracked = appendLoopNudgeEvent({
+              event: "actioned",
+              type: activeLoopNudge.id,
+              date: todayIso,
+              timestamp: new Date().toISOString(),
+              dropoffPct: activeLoopNudge.dropoffPct,
+              opens14d: activeLoopNudge.opens,
+              dropoffCount: activeLoopNudge.dropoffCount
+            });
+            if (tracked) {
+              try {
+                window.plausible("Loop Nudge Actioned", {
+                  props: {
+                    type: activeLoopNudge.id,
+                    dropoff_pct: activeLoopNudge.dropoffPct,
+                    opens_14d: activeLoopNudge.opens
+                  }
+                });
+              } catch {}
+            }
+            try { localStorage.setItem(LOOP_NUDGE_DISMISS_STREAK_KEY, "0"); } catch {}
+            setLoopNudgeDismissStreak(0);
             if (activeLoopNudge.id === "morning") {
               try {
                 appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
@@ -7827,7 +7979,9 @@ export default function Stillform() {
                     Loop reliability nudge
                   </div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
-                    {activeLoopNudge?.title}: {activeLoopNudge?.dropoffPct}% drop-off in the last 14 days ({activeLoopNudge?.dropoffCount}/{activeLoopNudge?.opens}).
+                    {isSoftTone
+                      ? "Quick check-in now keeps your daily loop steady."
+                      : `${activeLoopNudge?.title}: ${activeLoopNudge?.dropoffPct}% drop-off in the last 14 days (${activeLoopNudge?.dropoffCount}/${activeLoopNudge?.opens}).`}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button
@@ -7846,22 +8000,29 @@ export default function Stillform() {
                     >
                       {activeLoopNudge?.actionLabel}
                     </button>
-                    <button
-                      onClick={dismissLoopNudge}
-                      style={{
-                        background: "none",
-                        color: "var(--text-muted)",
-                        border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)",
-                        padding: "9px 10px",
-                        fontSize: 11,
-                        fontFamily: "'DM Sans', sans-serif",
-                        cursor: "pointer"
-                      }}
-                    >
-                      Not now
-                    </button>
+                    {!isSoftTone && (
+                      <button
+                        onClick={dismissLoopNudge}
+                        style={{
+                          background: "none",
+                          color: "var(--text-muted)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          padding: "9px 10px",
+                          fontSize: 11,
+                          fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer"
+                        }}
+                      >
+                        Not now
+                      </button>
+                    )}
                   </div>
+                  {isSoftTone && (
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8 }}>
+                      Keeping this simple after recent dismissals.
+                    </div>
+                  )}
                 </div>
               )}
 
