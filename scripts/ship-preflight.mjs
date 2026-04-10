@@ -8,6 +8,10 @@ const checks = [
   { label: "Protocol launcher controller", cmd: "rg", args: ["-n", "const launchScenarioProtocol = async", "src/App.jsx"], type: "must-match" },
   { label: "Morning protocol launch call", cmd: "rg", args: ["-n", "await launchScenarioProtocol\\(recommendedProtocol\\.id\\)", "src/App.jsx"], type: "must-match" },
   { label: "Integration adapter usage", cmd: "rg", args: ["-n", "getIntegrationContext\\(|calendarContext: integrationContext\\.calendarContext|healthContext: integrationContext\\.healthContext", "src/App.jsx"], type: "must-match" },
+  { label: "Integration diagnostics controls", cmd: "rg", args: ["-n", "clearIntegrationContextCache|Refresh status|Clear stale context|hasStale", "src/App.jsx"], type: "must-match" },
+  { label: "Subscription diagnostics controls", cmd: "rg", args: ["-n", "refreshSubscriptionStatus|Subscription status|Refresh status \\(server\\)|PENDING WEBHOOK", "src/App.jsx"], type: "must-match" },
+  { label: "Sync auth cooldown guard", cmd: "rg", args: ["-n", "syncAuthCooldownSeconds|startSyncAuthCooldown|Too many attempts\\. Please wait", "src/App.jsx"], type: "must-match" },
+  { label: "Auth fallback safety guard", cmd: "rg", args: ["-n", "isInvalidCredentialsMessage|Incorrect email or password\\. Please try again\\.", "src/App.jsx"], type: "must-match" },
   { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" }
 ];
 

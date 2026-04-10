@@ -1401,7 +1401,12 @@ const getIntegrationContext = () => {
     calendarContext,
     healthContext,
     upcomingPressure: calendar && !calendar.stale ? calendar.summary : null,
-    hasAny: !!(calendar || health)
+    hasAny: !!(calendar || health),
+    hasStale: !!(calendar?.stale || health?.stale),
+    calendarSource: calendar?.source || null,
+    healthSource: health?.source || null,
+    calendarFreshness: calendar?.freshness || null,
+    healthFreshness: health?.freshness || null
   };
 };
 
@@ -2997,6 +3002,7 @@ const hasFreshSubscribePending = (windowMs) => {
     return false;
   }
 };
+const SUBSCRIPTION_PENDING_GRACE_MS = 20 * 60 * 1000;
 // ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
@@ -5568,8 +5574,8 @@ function MyProgress({ onBack }) {
     `Avg composure gain: ${proofAvgShift === null ? "N/A" : `${proofAvgShift >= 0 ? "+" : ""}${proofAvgShift.toFixed(1)}`}`,
     `Current streak: ${streak} day${streak !== 1 ? "s" : ""}`,
     `Most used tool: ${topToolName}`,
-    `Calendar context: ${integrationContext.calendarSource || "none"}`,
-    `Health context: ${integrationContext.healthSource || "none"}`
+    `Calendar context: ${integrationContext.calendar?.source || "none"}`,
+    `Health context: ${integrationContext.health?.source || "none"}`
   ];
   const shareCardText = shareCardLines.join("\n");
   const setShareStatusWithClear = (msg) => {
@@ -6328,11 +6334,11 @@ export default function Stillform() {
 
   useEffect(() => {
     let cancelled = false;
-    const PENDING_WEBHOOK_GRACE_MS = 20 * 60 * 1000;
     const syncSubscriptionTruth = async () => {
       try {
         const status = await sbCheckSubscriptionStatus();
         if (cancelled || !status) return;
+        setSubscriptionLastCheckedAt(Date.now());
         if (status?.is_subscribed === true) {
           try {
             localStorage.setItem("stillform_subscribed", "yes");
@@ -6342,7 +6348,7 @@ export default function Stillform() {
           return;
         }
         // If checkout just completed, allow webhook delivery lag before downgrading local state.
-        if (hasFreshSubscribePending(PENDING_WEBHOOK_GRACE_MS)) return;
+        if (hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS)) return;
         try {
           localStorage.removeItem("stillform_subscribed");
           clearSubscribePending();
@@ -6515,6 +6521,8 @@ export default function Stillform() {
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
+  const [syncAuthCooldownUntil, setSyncAuthCooldownUntil] = useState(0);
+  const [, setSyncAuthTick] = useState(0);
   const [pricingAuthOpen, setPricingAuthOpen] = useState(false);
   const [pricingAuthEmail, setPricingAuthEmail] = useState("");
   const [pricingAuthPassword, setPricingAuthPassword] = useState("");
@@ -6524,15 +6532,37 @@ export default function Stillform() {
   const [, setPricingAuthTick] = useState(0);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
+  const [integrationActionStatus, setIntegrationActionStatus] = useState("");
+  const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
+  const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
+  const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const integrationContext = getIntegrationContext();
+  const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
+  const syncAuthCooldownSeconds = Math.max(0, Math.ceil((syncAuthCooldownUntil - Date.now()) / 1000));
   const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
+
+  useEffect(() => {
+    if (syncAuthCooldownSeconds <= 0) return;
+    const id = setInterval(() => setSyncAuthTick(n => n + 1), 1000);
+    return () => clearInterval(id);
+  }, [syncAuthCooldownSeconds]);
 
   useEffect(() => {
     if (pricingAuthCooldownSeconds <= 0) return;
     const id = setInterval(() => setPricingAuthTick(n => n + 1), 1000);
     return () => clearInterval(id);
   }, [pricingAuthCooldownSeconds]);
+
+  const startSyncAuthCooldown = (message) => {
+    const m = String(message || "").match(/wait(?: about)? (\d+)\s*second/i);
+    const seconds = Math.max(15, Number(m?.[1] || 60));
+    setSyncAuthCooldownUntil(Date.now() + (seconds * 1000));
+  };
+
+  const isRateLimitedMessage = (message) => /too many attempts|wait/i.test(String(message || ""));
+  const isAlreadyRegisteredMessage = (message) => /already (registered|exists|been registered)/i.test(String(message || ""));
+  const isInvalidCredentialsMessage = (message) => /invalid login credentials|invalid email or password|email not confirmed/i.test(String(message || ""));
 
   const startPricingAuthCooldown = (message) => {
     const m = String(message || "").match(/wait(?: about)? (\d+)\s*second/i);
@@ -6553,16 +6583,33 @@ export default function Stillform() {
     setPricingAuthError(null);
     try {
       let signedIn = false;
+      let signInError = null;
       try {
         await sbSignIn(pricingAuthEmail, pricingAuthPassword);
         if (sbIsSignedIn()) {
           await sbSyncDown();
           signedIn = true;
         }
-      } catch {}
+      } catch (e) {
+        signInError = e;
+      }
 
       if (!signedIn) {
-        await sbSignUp(pricingAuthEmail, pricingAuthPassword);
+        if (isRateLimitedMessage(signInError?.message)) {
+          startPricingAuthCooldown(signInError?.message);
+          throw signInError;
+        }
+        if (isInvalidCredentialsMessage(signInError?.message)) {
+          throw new Error("Incorrect email or password. Please try again.");
+        }
+        try {
+          await sbSignUp(pricingAuthEmail, pricingAuthPassword);
+        } catch (signupErr) {
+          if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) {
+            throw new Error("Incorrect email or password. Please try again.");
+          }
+          throw signupErr;
+        }
         if (!sbIsSignedIn()) {
           setPricingAuthError("Check your email to confirm your account, then sign in.");
           setPricingAuthLoading(false);
@@ -6585,6 +6632,7 @@ export default function Stillform() {
           });
         } catch {}
         setSyncSignedIn(true);
+        setPricingAuthCooldownUntil(0);
         setSubscriptionCheckTick(n => n + 1);
         setSyncEmail("");
         setSyncPassword("");
@@ -6594,10 +6642,82 @@ export default function Stillform() {
       }
     } catch (e) {
       const msg = e?.message || "Something went wrong. Check your details.";
-      if (/too many attempts|wait/i.test(msg)) startPricingAuthCooldown(msg);
+      if (isRateLimitedMessage(msg)) startPricingAuthCooldown(msg);
       setPricingAuthError(msg);
     }
     setPricingAuthLoading(false);
+  };
+
+  const setIntegrationStatusWithClear = (message) => {
+    setIntegrationActionStatus(message);
+    try {
+      window.setTimeout(() => setIntegrationActionStatus(""), 2600);
+    } catch {}
+  };
+
+  const clearIntegrationContextCache = () => {
+    const keys = [
+      "stillform_calendar_summary",
+      "stillform_calendar_events",
+      "stillform_calendar_updated_at",
+      "stillform_health_summary",
+      "stillform_health_snapshot",
+      "stillform_health_updated_at"
+    ];
+    try {
+      keys.forEach((k) => localStorage.removeItem(k));
+      refreshSettings();
+      setIntegrationStatusWithClear("Cleared stale integration context.");
+    } catch {
+      setIntegrationStatusWithClear("Could not clear integration context.");
+    }
+  };
+
+  const setSubscriptionStatusWithClear = (message) => {
+    setSubscriptionStatusMessage(message);
+    try {
+      window.setTimeout(() => setSubscriptionStatusMessage(""), 3200);
+    } catch {}
+  };
+
+  const refreshSubscriptionStatus = async () => {
+    if (subscriptionStatusLoading) return;
+    setSubscriptionStatusLoading(true);
+    try {
+      const status = await sbCheckSubscriptionStatus();
+      if (!status) {
+        setSubscriptionStatusWithClear("Subscription check returned no data.");
+        return;
+      }
+      setSubscriptionLastCheckedAt(Date.now());
+      const serverSubscribed = status?.is_subscribed === true;
+      const lookupSource = status?.user_id ? "account" : "device";
+      if (serverSubscribed) {
+        try {
+          localStorage.setItem("stillform_subscribed", "yes");
+          clearSubscribePending();
+        } catch {}
+        setIsSubscribed(true);
+        setSubscriptionStatusWithClear(`Active via ${lookupSource} server truth.`);
+      } else {
+        const pending = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
+        if (!pending) {
+          try {
+            localStorage.removeItem("stillform_subscribed");
+            clearSubscribePending();
+          } catch {}
+          setIsSubscribed(false);
+          setSubscriptionStatusWithClear(`No active subscription found for this ${lookupSource}.`);
+        } else {
+          setSubscriptionStatusWithClear("Checkout is pending. Waiting for webhook sync.");
+        }
+      }
+      setSubscriptionCheckTick(n => n + 1);
+    } catch {
+      setSubscriptionStatusWithClear("Couldn't reach subscription server. Keeping current access.");
+    } finally {
+      setSubscriptionStatusLoading(false);
+    }
   };
 
   // PWA install prompt — capture from window (set in index.html before React loads)
@@ -8390,42 +8510,6 @@ export default function Stillform() {
               })()}
             </div>
 
-            {/* Integrations */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Integrations</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Stillform uses connected context to reduce input burden. If not connected, the loop still works manually.
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      {integrationContext.calendar
-                        ? `${integrationContext.calendar.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.calendar.summary}`
-                        : "Not connected yet"}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 10, color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    {integrationContext.calendar ? "ACTIVE" : "PENDING"}
-                  </div>
-                </div>
-                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      {integrationContext.health
-                        ? `${integrationContext.health.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.health.summary}`
-                        : "Not connected yet"}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 10, color: integrationContext.health ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
-                    {integrationContext.health ? "ACTIVE" : "PENDING"}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Daily Reminder */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily Reminder</div>
@@ -8621,7 +8705,9 @@ export default function Stillform() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.calendar ? `Connected · ${integrationContext.calendar.source} · ${integrationContext.calendar.freshness || "Unknown"}` : "Not connected"}
+                    {integrationContext.calendar
+                      ? `${integrationContext.calendar.stale ? "Stale" : "Connected"} · ${integrationContext.calendar.source} · ${integrationContext.calendar.freshness || "Unknown"}`
+                      : "Not connected"}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
@@ -8632,7 +8718,9 @@ export default function Stillform() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.health ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.health ? `Connected · ${integrationContext.health.source} · ${integrationContext.health.freshness || "Unknown"}` : "Not connected"}
+                    {integrationContext.health
+                      ? `${integrationContext.health.stale ? "Stale" : "Connected"} · ${integrationContext.health.source} · ${integrationContext.health.freshness || "Unknown"}`
+                      : "Not connected"}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -8640,6 +8728,87 @@ export default function Stillform() {
                     ? integrationContext.health.summary
                     : "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."}
                 </div>
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => {
+                      refreshSettings();
+                      setIntegrationStatusWithClear("Integration status refreshed.");
+                    }}
+                  >
+                    Refresh status
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={clearIntegrationContextCache}
+                    disabled={!integrationContext.hasAny}
+                  >
+                    Clear stale context
+                  </button>
+                </div>
+                {integrationContext.hasStale && (
+                  <div style={{ marginTop: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    One or more integration signals are stale. Stillform will continue in manual mode until context is refreshed.
+                  </div>
+                )}
+                {integrationActionStatus && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
+                    {integrationActionStatus}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Subscription status */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Subscription status</div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Local app state</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
+                    {isSubscribed ? "ACTIVE" : "INACTIVE"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                  {isSubscribed
+                    ? "This device currently has active access."
+                    : (trialExpired ? "Trial expired. Subscription required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
+                </div>
+
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Server truth</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
+                    {hasPendingWebhookSync ? "PENDING WEBHOOK" : "READY TO CHECK"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  {hasPendingWebhookSync
+                    ? "Recent checkout detected. Waiting for webhook confirmation window before downgrading access."
+                    : "Use server refresh if subscription status looks wrong on this device."}
+                </div>
+                {subscriptionLastCheckedAt > 0 && (
+                  <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+                    Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
+                  </div>
+                )}
+
+                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={refreshSubscriptionStatus}
+                    disabled={subscriptionStatusLoading}
+                  >
+                    {subscriptionStatusLoading ? "Checking..." : "Refresh status (server)"}
+                  </button>
+                </div>
+                {subscriptionStatusMessage && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
+                    {subscriptionStatusMessage}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -8750,26 +8919,52 @@ export default function Stillform() {
                       style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
                     />
                     {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
+                    {syncAuthCooldownSeconds > 0 && (
+                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        Too many attempts. Please wait {syncAuthCooldownSeconds}s before trying again.
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button className="btn btn-primary" style={{ fontSize: 14, flex: 1 }} onClick={async () => {
                       if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
+                      if (syncAuthCooldownSeconds > 0) {
+                        setSyncError(`Please wait ${syncAuthCooldownSeconds}s, then try again.`);
+                        return;
+                      }
                       setSyncLoading(true); setSyncError(null);
                       try {
                         // Try sign in first — if user exists this works immediately
                         // If not, fall through to signup
                         let signedIn = false;
+                        let signInError = null;
                         try {
                           await sbSignIn(syncEmail, syncPassword);
                           if (sbIsSignedIn()) {
                             await sbSyncDown();
                             signedIn = true;
                           }
-                        } catch {}
+                        } catch (e) {
+                          signInError = e;
+                        }
 
                         if (!signedIn) {
+                          if (isRateLimitedMessage(signInError?.message)) {
+                            startSyncAuthCooldown(signInError?.message);
+                            throw signInError;
+                          }
+                          if (isInvalidCredentialsMessage(signInError?.message)) {
+                            throw new Error("Incorrect email or password. Please try again.");
+                          }
                           // New user — sign up
-                          const signupResult = await sbSignUp(syncEmail, syncPassword);
+                          try {
+                            await sbSignUp(syncEmail, syncPassword);
+                          } catch (signupErr) {
+                            if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) {
+                              throw new Error("Incorrect email or password. Please try again.");
+                            }
+                            throw signupErr;
+                          }
                           if (!sbIsSignedIn()) {
                             // Email confirmation required
                             setSyncError("Check your email to confirm your account, then sign in.");
@@ -8804,16 +8999,21 @@ export default function Stillform() {
                             }
                           } catch {}
                           setSyncSignedIn(true);
+                          setSyncAuthCooldownUntil(0);
                           setSubscriptionCheckTick(n => n + 1);
                           setSyncEmail(""); setSyncPassword("");
                           refreshSettings();
                         }
                       } catch (e) {
-                        setSyncError(e.message || "Something went wrong. Check your details.");
+                        const msg = e?.message || "Something went wrong. Check your details.";
+                        if (isRateLimitedMessage(msg)) startSyncAuthCooldown(msg);
+                        setSyncError(msg);
                       }
                       setSyncLoading(false);
                     }}>
-                      {syncLoading ? "Please wait..." : "Sign in / Create account"}
+                      {syncLoading
+                        ? "Please wait..."
+                        : (syncAuthCooldownSeconds > 0 ? `Wait ${syncAuthCooldownSeconds}s` : "Sign in / Create account")}
                     </button>
                   </div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
