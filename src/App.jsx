@@ -1301,6 +1301,160 @@ const scheduleReminder = async (title, body, hour, minute) => {
   } catch {}
 };
 
+// Integration context adapter
+// Single source of truth for calendar/health context across the app.
+const getIntegrationContext = () => {
+  const parseIsoTime = (v) => {
+    if (!v) return null;
+    try {
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : d;
+    } catch {
+      return null;
+    }
+  };
+  const formatFreshness = (updatedAt) => {
+    if (!updatedAt) return { label: "Unknown", stale: false };
+    const ageMs = Date.now() - updatedAt.getTime();
+    const ageHours = ageMs / (1000 * 60 * 60);
+    if (ageHours <= 6) return { label: "Fresh", stale: false };
+    if (ageHours <= 24) return { label: "Today", stale: false };
+    if (ageHours <= 72) return { label: "Aging", stale: false };
+    return { label: "Stale", stale: true };
+  };
+  const calendar = (() => {
+    try {
+      const summary = localStorage.getItem("stillform_calendar_summary");
+      const events = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
+      const next = Array.isArray(events) && events.length > 0 ? events[0] : null;
+      const updatedAt = parseIsoTime(localStorage.getItem("stillform_calendar_updated_at") || next?.updatedAt || null);
+      const freshness = formatFreshness(updatedAt);
+      if (summary) {
+        return {
+          summary,
+          source: "summary",
+          updatedAt,
+          freshness: freshness.label,
+          stale: freshness.stale
+        };
+      }
+      if (next?.title) {
+        const when = next.start ? ` at ${next.start}` : "";
+        return {
+          summary: `Upcoming: ${next.title}${when}`,
+          source: "event",
+          updatedAt,
+          freshness: freshness.label,
+          stale: freshness.stale
+        };
+      }
+      return null;
+    } catch { return null; }
+  })();
+
+  const health = (() => {
+    try {
+      const summary = localStorage.getItem("stillform_health_summary");
+      const snap = JSON.parse(localStorage.getItem("stillform_health_snapshot") || "null");
+      const updatedAt = parseIsoTime(localStorage.getItem("stillform_health_updated_at") || snap?.updatedAt || null);
+      const freshness = formatFreshness(updatedAt);
+      if (summary) {
+        return {
+          summary,
+          source: "summary",
+          updatedAt,
+          freshness: freshness.label,
+          stale: freshness.stale
+        };
+      }
+      if (!snap) return null;
+      const parts = [];
+      if (snap.sleepHours != null) parts.push(`${snap.sleepHours}h sleep`);
+      if (snap.hrv != null) parts.push(`HRV ${snap.hrv}`);
+      if (snap.restingHr != null) parts.push(`resting HR ${snap.restingHr}`);
+      if (snap.readiness) parts.push(`readiness ${snap.readiness}`);
+      if (!parts.length) return null;
+      return {
+        summary: parts.join(", "),
+        source: "snapshot",
+        updatedAt,
+        freshness: freshness.label,
+        stale: freshness.stale
+      };
+    } catch { return null; }
+  })();
+
+  const calendarContext = (() => {
+    if (!calendar?.summary) return null;
+    if (calendar.stale) return `STALE CALENDAR CONTEXT: ${calendar.summary}`;
+    return `CALENDAR CONTEXT: ${calendar.summary}`;
+  })();
+  const healthContext = (() => {
+    if (!health?.summary) return null;
+    if (health.stale) return `STALE HEALTH CONTEXT: ${health.summary}`;
+    return `HEALTH CONTEXT: ${health.summary}`;
+  })();
+
+  return {
+    calendar,
+    health,
+    calendarContext,
+    healthContext,
+    upcomingPressure: calendar && !calendar.stale ? calendar.summary : null,
+    hasAny: !!(calendar || health)
+  };
+};
+
+const launchScenarioProtocolById = async ({
+  protocolId,
+  setPathway,
+  setActiveTool,
+  setScreen,
+  gateBiometric
+}) => {
+  const id = String(protocolId || "");
+  const setEntry = (mode, protocol) => {
+    try {
+      localStorage.setItem("stillform_reframe_entry_mode", mode);
+      localStorage.setItem("stillform_reframe_entry_protocol", protocol);
+    } catch {}
+  };
+
+  // Reframe clarity path
+  if (id === "hard-conversation") {
+    if (gateBiometric && !(await gateBiometric())) return false;
+    setPathway("clarity");
+    setEntry("protocol-clarity", id);
+    setActiveTool({ id: "reframe", name: "Reframe", mode: "clarity" });
+    setScreen("tool");
+    return true;
+  }
+  // Body-first reset
+  if (id === "physiological-spike") {
+    setPathway("calm");
+    setActiveTool({ id: "breathe", quickStart: true });
+    setScreen("tool");
+    return true;
+  }
+  // Reframe hype path
+  if (id === "winning-locked-in") {
+    if (gateBiometric && !(await gateBiometric())) return false;
+    setPathway("hype");
+    setEntry("protocol-hype", id);
+    setActiveTool({ id: "reframe", name: "Reframe", mode: "hype" });
+    setScreen("tool");
+    return true;
+  }
+  // Conflict reset
+  if (id === "after-conflict-reset") {
+    setPathway("calm");
+    setActiveTool({ id: "scan", name: "Body Scan" });
+    setScreen("tool");
+    return true;
+  }
+  return false;
+};
+
 
 
 
@@ -2860,11 +3014,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
+  const [entryProtocolId, setEntryProtocolId] = useState(null);
   const [statementAudience, setStatementAudience] = useState("");
   const [statementNeed, setStatementNeed] = useState("");
   const [statementAsk, setStatementAsk] = useState("");
   const [statementTone, setStatementTone] = useState("calm");
   const [statementCopied, setStatementCopied] = useState(false);
+  const [statementCardCopied, setStatementCardCopied] = useState(false);
+  const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
@@ -2902,6 +3059,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         localStorage.removeItem("stillform_reframe_entry_mode");
       }
     } catch {}
+    try {
+      const protocol = localStorage.getItem("stillform_reframe_entry_protocol");
+      if (protocol) {
+        setEntryProtocolId(protocol);
+        localStorage.removeItem("stillform_reframe_entry_protocol");
+      }
+    } catch {}
   }, []);
 
   // Migrate old conversation from before mode-specific keys
@@ -2924,14 +3088,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
+  const scoreState = (s) => ({ angry:1, anxious:2, flat:2, mixed:3, excited:4, focused:5 }[s] ?? null);
   const saveSession = (postRating = null) => {
     const elapsed = Date.now() - startTime.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
       const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      const fss = (s) => ({ angry:1, anxious:2, flat:2, mixed:3, excited:4, focused:5 }[s] ?? null);
-      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, preRating: fss(feelState), preState: feelState || null };
-      if (postRating) { entry.postRating = fss(postRating); entry.postState = postRating; }
+      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, entryProtocolId: entryProtocolId || null, preRating: scoreState(feelState), preState: feelState || null };
+      if (postRating) { entry.postRating = scoreState(postRating); entry.postState = postRating; }
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
       sessions.push(entry);
       localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
@@ -3270,6 +3434,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return `YESTERDAY'S CLOSE: energy level ${eod.energy}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
             } catch { return null; }
           })(),
+          calendarContext: integrationContext.calendarContext,
+          healthContext: integrationContext.healthContext,
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
           feelState: feelState,
           bioFilter: (() => {
@@ -3485,6 +3651,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return lines.join("\n");
   };
 
+  const buildStateToStatementCard = () => {
+    const modeLabel = { calm: "Talk it out", clarity: "Break the loop", hype: "Get ready" }[effectiveMode] || "Reframe";
+    const timestamp = sessionShareSummary?.timestamp
+      ? new Date(sessionShareSummary.timestamp)
+      : new Date();
+    const delta = sessionShareSummary?.delta;
+    const lines = [
+      "Stillform Session Card",
+      `${timestamp.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+      "",
+      `Tool: ${modeLabel}`,
+      `State shift: ${delta === null || delta === undefined ? "N/A" : `${delta >= 0 ? "+" : ""}${delta}`}`,
+      `From: ${sessionShareSummary?.preState || "Not set"}`,
+      `To: ${sessionShareSummary?.postState || "Not set"}`,
+      "",
+      "External anchor:",
+      buildStateToStatementAnchor()
+    ];
+    return lines.join("\n");
+  };
+  const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
+
   const finishStateToStatement = () => {
     try {
       window.plausible("State to Statement Completed", {
@@ -3501,14 +3689,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setStatementAsk("");
     setStatementTone("calm");
     setStatementCopied(false);
-    onComplete();
+    setStatementCardCopied(false);
+    setSessionShareSummary(null);
+    onComplete(resolvePostReframeRoute());
   };
 
   const skipStateToStatement = () => {
     try { window.plausible("State to Statement Skipped"); } catch {}
     setShowStateToStatement(false);
     setStatementCopied(false);
-    onComplete();
+    setStatementCardCopied(false);
+    setSessionShareSummary(null);
+    onComplete(resolvePostReframeRoute());
   };
 
   const copyStateToStatement = async () => {
@@ -3518,6 +3710,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
       setStatementCopied(true);
       try { window.plausible("State to Statement Copied"); } catch {}
+    } catch {}
+  };
+
+  const copyStateToStatementCard = async () => {
+    const text = buildStateToStatementCard();
+    if (!text.trim()) return;
+    try {
+      if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      setStatementCardCopied(true);
+      try { window.plausible("State to Statement Card Copied"); } catch {}
     } catch {}
   };
 
@@ -3583,10 +3785,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
-            Anchor preview
+            Session card preview
           </div>
           <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-            {buildStateToStatementAnchor()}
+            {buildStateToStatementCard()}
           </pre>
         </div>
 
@@ -3596,6 +3798,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </button>
           <button className="btn btn-ghost" onClick={copyStateToStatement}>
             {statementCopied ? "Copied" : "Copy anchor"}
+          </button>
+          <button className="btn btn-ghost" onClick={copyStateToStatementCard}>
+            {statementCardCopied ? "Card copied" : "Copy session card"}
           </button>
           <button className="btn btn-ghost" onClick={skipStateToStatement}>
             Skip for now
@@ -3631,7 +3836,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           ))}
         </div>
-        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => { saveSession(postRating); setPostRating(null); setShowPostRating(false); setShowStateToStatement(true); }}>
+        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => {
+          const selectedPost = postRating;
+          saveSession(selectedPost);
+          const pre = scoreState(feelState);
+          const post = scoreState(selectedPost);
+          setSessionShareSummary({
+            timestamp: new Date().toISOString(),
+            preState: feelState || null,
+            postState: selectedPost || null,
+            delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
+          });
+          setPostRating(null);
+          setShowPostRating(false);
+          setShowStateToStatement(true);
+        }}>
           Done
         </button>
       </div>
@@ -5147,6 +5366,7 @@ function CheckInWidget({ onComplete }) {
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const [shareCardStatus, setShareCardStatus] = useState("");
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [viewEntry, setViewEntry] = useState(null);
   const [jSignal, setJSignal] = useState([]);
@@ -5251,6 +5471,90 @@ function MyProgress({ onBack }) {
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
+  const proofRatedSessions = sessions.filter(s => s.preRating && s.postRating && Number.isFinite(s.postRating - s.preRating));
+  const proofActiveDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
+  const proofProtocolRuns = sessions.filter(s => s.entryMode && String(s.entryMode).startsWith("protocol-")).length;
+  const proofAvgShift = proofRatedSessions.length
+    ? (proofRatedSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / proofRatedSessions.length)
+    : null;
+  const topToolName = topToolEntry ? (toolNames[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
+  const integrationContext = getIntegrationContext();
+  const shareCardLines = [
+    "Stillform Composure Card",
+    `${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
+    "",
+    `Sessions logged: ${sessions.length}`,
+    `Active days: ${proofActiveDays}`,
+    `Protocol launches: ${proofProtocolRuns}`,
+    `Rated sessions: ${proofRatedSessions.length}`,
+    `Avg composure gain: ${proofAvgShift === null ? "N/A" : `${proofAvgShift >= 0 ? "+" : ""}${proofAvgShift.toFixed(1)}`}`,
+    `Current streak: ${streak} day${streak !== 1 ? "s" : ""}`,
+    `Most used tool: ${topToolName}`,
+    `Calendar context: ${integrationContext.calendarSource || "none"}`,
+    `Health context: ${integrationContext.healthSource || "none"}`
+  ];
+  const shareCardText = shareCardLines.join("\n");
+  const setShareStatusWithClear = (msg) => {
+    setShareCardStatus(msg);
+    try { window.setTimeout(() => setShareCardStatus(""), 2600); } catch {}
+  };
+  const copyShareCard = async () => {
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareCardText);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = shareCardText;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setShareStatusWithClear("Copied.");
+      try { window.plausible("Composure Card Copied"); } catch {}
+    } catch {
+      setShareStatusWithClear("Copy failed.");
+    }
+  };
+  const downloadShareCard = () => {
+    try {
+      const blob = new Blob([shareCardText], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const stamp = new Date().toISOString().slice(0, 10);
+      a.href = url;
+      a.download = `stillform-composure-card-${stamp}.txt`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setShareStatusWithClear("Downloaded.");
+      try { window.plausible("Composure Card Downloaded"); } catch {}
+    } catch {
+      setShareStatusWithClear("Download failed.");
+    }
+  };
+  const exportShareCardPdf = () => {
+    try {
+      const w = window.open("", "_blank", "noopener,noreferrer");
+      if (!w) {
+        setShareStatusWithClear("Popup blocked. Allow popups to export PDF.");
+        return;
+      }
+      const escaped = shareCardText
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Stillform Composure Card</title><style>body{font-family:Arial,sans-serif;background:#fff;color:#111;margin:32px;} pre{white-space:pre-wrap;line-height:1.6;font-size:13px;}</style></head><body><pre>${escaped}</pre></body></html>`);
+      w.document.close();
+      w.focus();
+      w.print();
+      setShareStatusWithClear("Print dialog opened. Save as PDF.");
+      try { window.plausible("Composure Card PDF Export"); } catch {}
+    } catch {
+      setShareStatusWithClear("PDF export failed.");
+    }
+  };
 
   const cardStyle = { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
   const rowStyle = { width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
@@ -5449,6 +5753,32 @@ function MyProgress({ onBack }) {
             </div>
           );
         })()}
+
+        {/* SHAREABLE COMPOSURE CARD — exportable result artifact */}
+        <div style={{ marginBottom: 12 }}>
+          <button onClick={() => toggle("sharecard")} style={rowStyle}>
+            <div>
+              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Shareable composure card</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                Share progress snapshot or export as PDF
+              </div>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.sharecard ? "▾" : "▸"}</span>
+          </button>
+          {openSections.sharecard && (
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", color: "var(--text)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, lineHeight: 1.6 }}>{shareCardText}</pre>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button onClick={copyShareCard} style={{ background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>Copy</button>
+                <button onClick={downloadShareCard} style={{ background: "none", border: "0.5px solid var(--border)", color: "var(--text)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Download .txt</button>
+                <button onClick={exportShareCardPdf} style={{ background: "none", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Export PDF</button>
+              </div>
+              {shareCardStatus && (
+                <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{shareCardStatus}</div>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* MY PATTERNS — diagnostic intelligence, not history */}
         {hasPatterns && (() => {
@@ -6116,6 +6446,7 @@ export default function Stillform() {
   const [, setPricingAuthTick] = useState(0);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
+  const integrationContext = getIntegrationContext();
 
   const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
 
@@ -6247,10 +6578,36 @@ export default function Stillform() {
     }
   };
 
+  const launchScenarioProtocol = async (protocolId) => {
+    const launched = await launchScenarioProtocolById({
+      protocolId,
+      setPathway,
+      setActiveTool,
+      setScreen,
+      gateBiometric: () => biometric.gate()
+    });
+    if (!launched) {
+      // Fail safe: if routing config drifts, default to calm reframe so users are never blocked.
+      setPathway("calm");
+      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+      setScreen("tool");
+      try { window.plausible("Scenario Protocol Fallback", { props: { protocol: String(protocolId || "unknown") } }); } catch {}
+      return;
+    }
+    try { window.plausible("Scenario Protocol Launched", { props: { protocol: String(protocolId || "unknown") } }); } catch {}
+  };
+
   const renderTool = () => {
     const props = { onComplete: (redirectTo) => {
       if (redirectTo) {
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
+        if (redirectTo === "eod-close") {
+          setEodSaved(false);
+          setEodPromptDismissed(false);
+          setEodOpen(true);
+          setScreen("home");
+          return;
+        }
         if (redirectTo === "reframe") {
           setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
           setScreen("tool");
@@ -7055,6 +7412,8 @@ export default function Stillform() {
                   }
                 ];
                 const recommendedProtocol = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
+                const integrationContext = getIntegrationContext();
+                const upcomingPressure = integrationContext.upcomingPressure;
 
                 const saveCheckin = async () => {
                   const bioArray = [...ciBio].filter(b => b !== "clear");
@@ -7068,7 +7427,7 @@ export default function Stillform() {
                   } catch {}
                   try {
                     const tensionAreas = Object.keys(ciTension).filter(k => ciTension[k] > 0);
-                    window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", tension_areas: tensionAreas.length } });
+                    window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", tension_areas: tensionAreas.length, upcoming_context: upcomingPressure ? "yes" : "no" } });
                   } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
@@ -7101,6 +7460,11 @@ export default function Stillform() {
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>Morning check-in</div>
+                    {upcomingPressure && (
+                      <div style={{ fontSize: 11, color: "var(--amber)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "8px 10px", marginBottom: 14, lineHeight: 1.5 }}>
+                        {upcomingPressure}
+                      </div>
+                    )}
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
@@ -7948,6 +8312,42 @@ export default function Stillform() {
               })()}
             </div>
 
+            {/* Integrations */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Integrations</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                Stillform uses connected context to reduce input burden. If not connected, the loop still works manually.
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                      {integrationContext.calendar
+                        ? `${integrationContext.calendar.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.calendar.summary}`
+                        : "Not connected yet"}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 10, color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    {integrationContext.calendar ? "ACTIVE" : "PENDING"}
+                  </div>
+                </div>
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                      {integrationContext.health
+                        ? `${integrationContext.health.source === "summary" ? "Connected" : "Detected"} · ${integrationContext.health.summary}`
+                        : "Not connected yet"}
+                    </div>
+                  </div>
+                  <div style={{ fontSize: 10, color: integrationContext.health ? "var(--amber)" : "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                    {integrationContext.health ? "ACTIVE" : "PENDING"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Daily Reminder */}
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily Reminder</div>
@@ -8135,6 +8535,35 @@ export default function Stillform() {
                 })()}
               </div>
             )}
+
+            {/* Integrations */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Integrations</div>
+              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.calendar ? `Connected · ${integrationContext.calendar.source} · ${integrationContext.calendar.freshness || "Unknown"}` : "Not connected"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                  {integrationContext.calendar
+                    ? integrationContext.calendar.summary
+                    : "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."}
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.health ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.health ? `Connected · ${integrationContext.health.source} · ${integrationContext.health.freshness || "Unknown"}` : "Not connected"}
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  {integrationContext.health
+                    ? integrationContext.health.summary
+                    : "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."}
+                </div>
+              </div>
+            </div>
 
             {/* Sound */}
             <div style={{ marginBottom: 28 }}>
