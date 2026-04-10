@@ -20,6 +20,16 @@ TITLE_FONT = "Cormorant Garamond"
 BODY_FONT = "DM Sans"
 MONO_FONT = "IBM Plex Mono"
 
+TITLE_SIZE = Pt(40)
+SUBTITLE_SIZE = Pt(16)
+BODY_SIZE = Pt(16)
+SECTION_STATEMENT_SIZE = Pt(24)
+TABLE_HEADER_SIZE = Pt(12)
+TABLE_BODY_SIZE = Pt(10)
+CARD_BODY_SIZE = Pt(14)
+MONO_SMALL_SIZE = Pt(9)
+MONO_LABEL_SIZE = Pt(10)
+
 
 def set_background(slide):
     fill = slide.background.fill
