@@ -1,10 +1,5 @@
 #!/usr/bin/env python3
-"""
-Generate Stillform Strategic Overview PowerPoint (.pptx).
-
-This script builds a clean, presentation-ready deck from the current
-science-first strategic framing.
-"""
+"""Generate a polished Stillform strategic PowerPoint deck."""
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
@@ -12,12 +7,14 @@ from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import PP_ALIGN
 from pptx.util import Inches, Pt
 
-
 BG = RGBColor(14, 15, 17)
 SURFACE = RGBColor(23, 25, 29)
+SURFACE_ALT = RGBColor(31, 34, 40)
+LINE = RGBColor(53, 56, 64)
 AMBER = RGBColor(201, 147, 58)
 TEXT = RGBColor(233, 233, 234)
-TEXT_DIM = RGBColor(160, 162, 168)
+TEXT_DIM = RGBColor(165, 168, 176)
+WHITE_SOFT = RGBColor(196, 198, 204)
 
 TITLE_FONT = "Cormorant Garamond"
 BODY_FONT = "DM Sans"
@@ -30,35 +27,41 @@ def set_background(slide):
     fill.fore_color.rgb = BG
 
 
-def add_header(slide, kicker="STILLFORM · STRATEGIC DECK"):
-    box = slide.shapes.add_textbox(Inches(0.7), Inches(0.35), Inches(6.2), Inches(0.35))
-    p = box.text_frame.paragraphs[0]
-    run = p.add_run()
-    run.text = kicker
-    run.font.name = MONO_FONT
-    run.font.size = Pt(11)
-    run.font.color.rgb = AMBER
+def add_shell(slide, idx, total, kicker="STILLFORM · STRATEGIC DECK"):
+    bar = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0), Inches(0), Inches(13.333), Inches(0.35))
+    bar.fill.solid()
+    bar.fill.fore_color.rgb = SURFACE
+    bar.line.fill.background()
 
-    line = slide.shapes.add_shape(
-        MSO_SHAPE.RECTANGLE, Inches(0.7), Inches(0.7), Inches(12.0), Inches(0.01)
-    )
-    line.fill.solid()
-    line.fill.fore_color.rgb = RGBColor(50, 52, 58)
-    line.line.fill.background()
+    k = slide.shapes.add_textbox(Inches(0.55), Inches(0.12), Inches(5.5), Inches(0.2))
+    p = k.text_frame.paragraphs[0]
+    r = p.add_run()
+    r.text = kicker
+    r.font.name = MONO_FONT
+    r.font.size = Pt(9)
+    r.font.color.rgb = AMBER
+
+    n = slide.shapes.add_textbox(Inches(11.3), Inches(0.12), Inches(1.5), Inches(0.2))
+    p2 = n.text_frame.paragraphs[0]
+    p2.alignment = PP_ALIGN.RIGHT
+    r2 = p2.add_run()
+    r2.text = f"{idx:02d} / {total:02d}"
+    r2.font.name = MONO_FONT
+    r2.font.size = Pt(9)
+    r2.font.color.rgb = TEXT_DIM
 
 
 def add_title(slide, title, subtitle=None):
-    t = slide.shapes.add_textbox(Inches(0.7), Inches(0.95), Inches(11.8), Inches(1.2))
-    tf = t.text_frame
-    p = tf.paragraphs[0]
-    run = p.add_run()
-    run.text = title
-    run.font.name = TITLE_FONT
-    run.font.size = Pt(38)
-    run.font.color.rgb = AMBER
+    t = slide.shapes.add_textbox(Inches(0.7), Inches(0.7), Inches(12.0), Inches(1.2))
+    p = t.text_frame.paragraphs[0]
+    r = p.add_run()
+    r.text = title
+    r.font.name = TITLE_FONT
+    r.font.size = Pt(40)
+    r.font.color.rgb = AMBER
 
     if subtitle:
-        s = slide.shapes.add_textbox(Inches(0.72), Inches(1.9), Inches(11.3), Inches(0.55))
+        s = slide.shapes.add_textbox(Inches(0.73), Inches(1.65), Inches(11.8), Inches(0.45))
         p2 = s.text_frame.paragraphs[0]
         r2 = p2.add_run()
         r2.text = subtitle
@@ -67,48 +70,106 @@ def add_title(slide, title, subtitle=None):
         r2.font.color.rgb = TEXT_DIM
 
 
-def add_bullets(slide, x, y, w, h, bullets, size=20):
+def add_section_break(slide, idx, total, section, statement):
+    set_background(slide)
+    add_shell(slide, idx, total)
+    add_title(slide, section, "SECTION BREAK")
+
+    card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.95), Inches(2.3), Inches(11.35), Inches(3.45))
+    card.fill.solid()
+    card.fill.fore_color.rgb = SURFACE
+    card.line.color.rgb = LINE
+    card.line.width = Pt(1.2)
+
+    band = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.95), Inches(2.3), Inches(0.16), Inches(3.45))
+    band.fill.solid()
+    band.fill.fore_color.rgb = AMBER
+    band.line.fill.background()
+
+    b = slide.shapes.add_textbox(Inches(1.35), Inches(3.0), Inches(10.2), Inches(2.0))
+    p = b.text_frame.paragraphs[0]
+    p.alignment = PP_ALIGN.LEFT
+    r = p.add_run()
+    r.text = statement
+    r.font.name = BODY_FONT
+    r.font.size = Pt(26)
+    r.font.color.rgb = TEXT
+
+
+def add_bullets(slide, x, y, w, h, bullets, size=18, spacing=10):
     box = slide.shapes.add_textbox(x, y, w, h)
     tf = box.text_frame
     tf.word_wrap = True
     tf.clear()
-    for i, b in enumerate(bullets):
+    for i, text in enumerate(bullets):
         p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
-        p.text = b
+        p.text = text
         p.level = 0
         p.font.name = BODY_FONT
         p.font.size = Pt(size)
         p.font.color.rgb = TEXT
-        p.space_after = Pt(10)
+        p.space_after = Pt(spacing)
 
 
-def add_section_label(slide, text, x=0.7, y=2.5):
-    box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(4.5), Inches(0.35))
-    p = box.text_frame.paragraphs[0]
-    run = p.add_run()
-    run.text = text
-    run.font.name = MONO_FONT
-    run.font.size = Pt(11)
-    run.font.color.rgb = AMBER
-
-
-def add_table_like(slide, x, y, w, h, rows, col_widths):
-    table_shape = slide.shapes.add_table(len(rows), len(rows[0]), x, y, w, h)
-    table = table_shape.table
-    for i, cw in enumerate(col_widths):
-        table.columns[i].width = cw
+def add_table(slide, x, y, w, h, rows, col_widths, body_size=11):
+    t_shape = slide.shapes.add_table(len(rows), len(rows[0]), x, y, w, h)
+    table = t_shape.table
+    for i, col_w in enumerate(col_widths):
+        table.columns[i].width = col_w
 
     for r_idx, row in enumerate(rows):
         for c_idx, value in enumerate(row):
             cell = table.cell(r_idx, c_idx)
             cell.text = value
             cell.fill.solid()
-            cell.fill.fore_color.rgb = SURFACE if r_idx == 0 else BG
+            if r_idx == 0:
+                cell.fill.fore_color.rgb = SURFACE
+            else:
+                cell.fill.fore_color.rgb = BG if r_idx % 2 == 1 else SURFACE_ALT
+            cell.margin_left = Inches(0.07)
+            cell.margin_right = Inches(0.07)
+            cell.margin_top = Inches(0.04)
+            cell.margin_bottom = Inches(0.04)
             for p in cell.text_frame.paragraphs:
                 for run in p.runs:
                     run.font.name = BODY_FONT
-                    run.font.size = Pt(12 if r_idx == 0 else 11)
-                    run.font.color.rgb = AMBER if r_idx == 0 else TEXT
+                    run.font.size = Pt(12 if r_idx == 0 else body_size)
+                    run.font.color.rgb = AMBER if r_idx == 0 else WHITE_SOFT
+
+
+def add_metric_cards(slide, cards):
+    card_w = Inches(3.95)
+    gap = Inches(0.25)
+    x0 = Inches(0.7)
+    y = Inches(2.2)
+    h = Inches(3.95)
+    for i, card in enumerate(cards):
+        x = x0 + i * (card_w + gap)
+        shape = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, card_w, h)
+        shape.fill.solid()
+        shape.fill.fore_color.rgb = SURFACE
+        shape.line.color.rgb = LINE
+        shape.line.width = Pt(1)
+
+        title = slide.shapes.add_textbox(x + Inches(0.25), y + Inches(0.22), card_w - Inches(0.5), Inches(0.35))
+        p1 = title.text_frame.paragraphs[0]
+        r1 = p1.add_run()
+        r1.text = card["title"].upper()
+        r1.font.name = MONO_FONT
+        r1.font.size = Pt(10)
+        r1.font.color.rgb = AMBER
+
+        body = slide.shapes.add_textbox(x + Inches(0.25), y + Inches(0.7), card_w - Inches(0.5), Inches(2.95))
+        add_bullets(
+            slide,
+            x + Inches(0.25),
+            y + Inches(0.7),
+            card_w - Inches(0.5),
+            Inches(2.95),
+            card["bullets"],
+            size=14,
+            spacing=8,
+        )
 
 
 def build_deck(path):
@@ -116,11 +177,12 @@ def build_deck(path):
     prs.slide_width = Inches(13.333)
     prs.slide_height = Inches(7.5)
     blank = prs.slide_layouts[6]
+    total = 15
 
-    # 1. Title
+    # 1 cover
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
+    add_shell(s, 1, total)
     add_title(
         s,
         "Stillform Strategic Overview",
@@ -129,218 +191,295 @@ def build_deck(path):
     add_bullets(
         s,
         Inches(0.8),
-        Inches(2.7),
+        Inches(2.45),
         Inches(11.8),
-        Inches(3.7),
+        Inches(3.4),
         [
-            "Category: Preventive risk management for emotional maturity and behavioral decision quality.",
-            "Audience: Everyone who needs better regulation under load — work, family, health, relationships.",
-            "Standard: Every claim must map to mechanism, evidence, and measurable product signal.",
+            "Mission: make composure trainable, measurable, and transferable for everyone.",
+            "Category: neuroscience-guided preventive risk management for emotional maturity and decision quality.",
+            "Standard: every claim maps to mechanism, evidence, and measurable product signal.",
         ],
-        size=18,
+        size=19,
     )
 
-    # 2. Who/What/How/Why
+    # 2 section break
+    s = prs.slides.add_slide(blank)
+    add_section_break(s, 2, total, "Operating Thesis", "Who / What / How / Why with zero category drift.")
+
+    # 3 operating definition
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
-    add_title(s, "Operating definition", "Who · What · How · Why")
-    rows = [
-        ["Dimension", "Definition", "Why it matters"],
-        ["Who", "For everyone building composure as a trainable daily skill.", "Universal need, not niche framing."],
-        ["What", "A neuroscience-guided preventive risk management system for behavior.", "Reduces avoidable human damage before it compounds."],
-        ["How", "Detect state -> route intervention -> transfer to action -> close loop -> learn patterns.", "Mechanism-driven, not content-driven."],
-        ["Why", "Unregulated state degrades judgment, communication, and relationships.", "Lower errors, cleaner decisions, better outcomes."],
-    ]
-    add_table_like(
+    add_shell(s, 3, total)
+    add_title(s, "Operating definition", "Core framing constraints")
+    add_table(
         s,
         Inches(0.7),
         Inches(2.0),
         Inches(12.0),
-        Inches(4.7),
-        rows,
-        [Inches(1.4), Inches(5.0), Inches(5.6)],
+        Inches(4.95),
+        [
+            ["Dimension", "Definition", "Why it matters"],
+            ["Who", "Everyone building composure as a trainable daily capability.", "Universal requirement, not niche positioning."],
+            ["What", "A neuroscience-guided preventive risk management system for behavior.", "Reduces avoidable damage before it compounds."],
+            ["How", "Detect state -> route intervention -> transfer action -> close daily loop -> learn patterns.", "Mechanism-driven architecture, not inspirational content."],
+            ["Why", "Unregulated state degrades judgment, communication, and relationships.", "Cleaner decisions and lower downstream relational/operational cost."],
+        ],
+        [Inches(1.55), Inches(5.15), Inches(5.3)],
     )
 
-    # 3. Mechanics + neuroscience
+    # 4 section break
+    s = prs.slides.add_slide(blank)
+    add_section_break(s, 4, total, "Mechanics + Science", "Mechanism table split into clean slides for readability.")
+
+    # 5 mechanics map I
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
-    add_title(s, "Mechanics + neuroscience map", "Science -> product implementation -> measured signal")
-    rows = [
-        ["Mechanic", "Scientific basis", "Product implementation", "Measured signal"],
-        ["Affect labeling", "Lieberman et al. (2007)", "Pulse chips + post-session labeling", "State precision + shift trends"],
-        ["Cognitive reappraisal", "Ochsner & Gross; Buhle et al.", "Reframe structured perspective work", "Pre/post composure delta"],
-        ["Interoceptive regulation", "Mehling; Critchley & Garfinkel", "Bio-filter + body scan + somatic prompts", "Faster recovery windows"],
-        ["Implementation intentions", "Gollwitzer", "Calibration -> default routing", "Action latency reduction"],
-        ["Stress inoculation", "Meichenbaum", "Morning baseline + EOD close loop", "Loop adherence over time"],
-    ]
-    add_table_like(
+    add_shell(s, 5, total)
+    add_title(s, "Mechanics map I", "Science -> product implementation -> measured signal")
+    add_table(
         s,
         Inches(0.55),
         Inches(1.95),
         Inches(12.25),
-        Inches(5.0),
-        rows,
-        [Inches(1.9), Inches(3.1), Inches(3.5), Inches(3.75)],
+        Inches(5.1),
+        [
+            ["Mechanic", "Scientific basis", "Product implementation", "Measured signal"],
+            ["Affect labeling", "Lieberman et al. (2007); Torre & Lieberman (2018)", "Pulse chips + post-session labeling", "State precision and composure-shift trend"],
+            ["Cognitive reappraisal", "Ochsner & Gross (2005); Buhle et al. (2014)", "Reframe structured perspective sequence", "Pre/post composure delta"],
+            ["Interoceptive regulation", "Mehling et al. (2012); Critchley & Garfinkel (2017)", "Bio-filter + body scan + somatic prompts", "Recovery latency reduction"],
+            ["Implementation intentions", "Gollwitzer (1999); Gollwitzer & Sheeran (2006)", "Calibration -> default tool routing", "Action latency reduction"],
+        ],
+        [Inches(1.95), Inches(3.15), Inches(3.45), Inches(3.7)],
+        body_size=10,
     )
 
-    # 4. Core loop mechanics
+    # 6 mechanics map II
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
-    add_title(s, "Core loop mechanics", "Preventive architecture, not reactive patching")
-    add_section_label(s, "How the system runs", y=2.2)
-    add_bullets(
+    add_shell(s, 6, total)
+    add_title(s, "Mechanics map II", "Longitudinal conditioning and risk reduction")
+    add_table(
+        s,
+        Inches(0.55),
+        Inches(1.95),
+        Inches(12.25),
+        Inches(5.1),
+        [
+            ["Mechanic", "Scientific basis", "Product implementation", "Measured signal"],
+            ["Stress inoculation", "Meichenbaum (1985)", "Morning baseline + EOD closure", "Loop adherence and relapse protection"],
+            ["Autonomic flexibility", "Thayer & Lane (2000); Appelhans & Luecken (2006)", "Repeated regulation reps over sessions", "Faster baseline return over time"],
+            ["Emotional granularity", "Barrett et al. (2001); Kashdan et al. (2015)", "Expanded emotion taxonomy in Pulse", "Higher-quality self-report and intervention fit"],
+            ["Misattribution correction", "Schachter & Singer (1962); Goldstein et al. (2007)", "Bio-filter modifies interpretation before response", "False-threat interpretation reduction"],
+        ],
+        [Inches(1.95), Inches(3.15), Inches(3.45), Inches(3.7)],
+        body_size=10,
+    )
+
+    # 7 section break
+    s = prs.slides.add_slide(blank)
+    add_section_break(s, 7, total, "Product System", "Preventive loop design and measurable evidence surfaces.")
+
+    # 8 core loop cards
+    s = prs.slides.add_slide(blank)
+    set_background(s)
+    add_shell(s, 8, total)
+    add_title(s, "Core loop architecture", "Six linked mechanics, one coherent daily system")
+    add_metric_cards(
+        s,
+        [
+            {
+                "title": "Loop start",
+                "bullets": [
+                    "Morning baseline",
+                    "Energy + hardware read",
+                    "Risk context before action",
+                    "No branch clutter",
+                ],
+            },
+            {
+                "title": "Loop middle",
+                "bullets": [
+                    "State-based routing",
+                    "Body-first or thought-first",
+                    "Reframe + regulation",
+                    "Transfer to practical action",
+                ],
+            },
+            {
+                "title": "Loop close",
+                "bullets": [
+                    "EOD closure signal",
+                    "Pattern continuity",
+                    "Nudge recovery checks",
+                    "Longitudinal compounding",
+                ],
+            },
+        ],
+    )
+
+    # 9 evidence model
+    s = prs.slides.add_slide(blank)
+    set_background(s)
+    add_shell(s, 9, total)
+    add_title(s, "Evidence model", "What must be true to claim impact")
+    add_table(
         s,
         Inches(0.75),
-        Inches(2.55),
-        Inches(12.0),
-        Inches(3.9),
-        [
-            "1) Morning baseline: energy + hardware check (bio-filter).",
-            "2) State routing: body-first, thought-first, or balanced intervention order.",
-            "3) In-session work: paced regulation + cognitive reframing + affect labeling.",
-            "4) Transfer: state-to-statement and practical next-action bridge.",
-            "5) End-of-day closure: daily loop completion and pattern continuity.",
-            "6) Longitudinal learning: pattern memory + proof of change surfaces.",
-        ],
-        size=17,
-    )
-
-    # 5. Metrics + proof
-    s = prs.slides.add_slide(blank)
-    set_background(s)
-    add_header(s)
-    add_title(s, "Evidence model", "What must be true to claim impact")
-    rows = [
-        ["Layer", "Metric", "Interpretation"],
-        ["Session", "Pre/post composure delta", "Immediate regulation effectiveness"],
-        ["Daily loop", "Morning/EOD completion + drop-off", "Behavioral consistency quality"],
-        ["Intervention", "Nudge shown/actioned/recovery", "Preventive support conversion"],
-        ["Longitudinal", "Trend in awareness latency", "Maturity and self-regulation speed"],
-        ["Trust", "Restore reliability + entitlement truth", "Operational integrity under production load"],
-    ]
-    add_table_like(
-        s,
-        Inches(0.8),
-        Inches(2.05),
-        Inches(11.8),
-        Inches(4.7),
-        rows,
-        [Inches(2.2), Inches(3.8), Inches(5.8)],
-    )
-
-    # 6. Integrity system
-    s = prs.slides.add_slide(blank)
-    set_background(s)
-    add_header(s)
-    add_title(s, "Integrity system", "How quality and trust are enforced")
-    add_bullets(
-        s,
-        Inches(0.8),
-        Inches(2.35),
+        Inches(2.0),
         Inches(11.9),
-        Inches(3.9),
+        Inches(4.95),
         [
-            "SHIP preflight gates: build integrity + claim integrity + audience integrity.",
-            "Invariant lock: universal audience framing, no niche drift, no manipulative copy.",
-            "Execution quality gate: coherent pass, post-change verification, release blocking on failure.",
-            "Subscription truth, cloud restore, and diagnostics are treated as trust-critical infrastructure.",
+            ["Layer", "Metric", "Interpretation"],
+            ["Session", "Pre/post composure delta", "Immediate regulation effect quality"],
+            ["Daily loop", "Morning/EOD completion + drop-off", "Behavioral consistency under load"],
+            ["Intervention", "Nudge shown/actioned/recovery", "Preventive support conversion"],
+            ["Longitudinal", "Awareness latency trend", "Maturity and self-regulation speed"],
+            ["Trust", "Restore reliability + entitlement truth", "Operational integrity in production"],
         ],
-        size=18,
+        [Inches(2.2), Inches(3.9), Inches(5.8)],
     )
 
-    # 7. Business model
+    # 10 section break
+    s = prs.slides.add_slide(blank)
+    add_section_break(s, 10, total, "Business + Distribution", "Operator-grade economics and channel logic.")
+
+    # 11 business model
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
-    add_title(s, "Business model and distribution", "Operator-grade business plan snapshot")
-    rows = [
-        ["Component", "Current position", "Why this is defensible"],
-        ["Revenue model", "Single tier subscription ($14.99 / $9.99 annualized)", "Low decision friction + trust alignment"],
-        ["Category", "Preventive risk management for behavior", "Differentiated from generic wellness consumption"],
-        ["Distribution", "High-trust channels: coaches, therapist-adjacent, communities", "Trust transfer beats cold top-of-funnel spend"],
-        ["Retention thesis", "Daily loop utility + measured progress + continuity", "Habit + proof + context memory creates stickiness"],
-    ]
-    add_table_like(
+    add_shell(s, 11, total)
+    add_title(s, "Business model", "Simple model, trust-aligned economics")
+    add_table(
         s,
         Inches(0.7),
         Inches(2.0),
         Inches(12.0),
         Inches(4.9),
-        rows,
-        [Inches(2.2), Inches(4.3), Inches(5.5)],
+        [
+            ["Component", "Current position", "Defensibility logic"],
+            ["Revenue model", "Single tier ($14.99 / $9.99 annualized)", "Low friction + no upsell trust tax"],
+            ["Category", "Preventive risk management for behavior", "Distinct from passive wellness consumption"],
+            ["Distribution", "Coaches, therapist-adjacent, trusted communities", "Trust transfer beats cold paid acquisition"],
+            ["Retention thesis", "Daily loop utility + proof of change + continuity", "Habit + evidence + context memory"],
+        ],
+        [Inches(2.15), Inches(4.2), Inches(5.65)],
     )
 
-    # 8. Execution transparency
+    # 12 phase cards
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
-    add_title(s, "Execution transparency", "Completed + tested vs next gated phases")
+    add_shell(s, 12, total)
+    add_title(s, "Execution phases", "Non-calendar phase logic")
+    add_metric_cards(
+        s,
+        [
+            {
+                "title": "Phase 1-2",
+                "bullets": [
+                    "Reliability + proof",
+                    "Subscription truth",
+                    "Daily loop hardening",
+                    "Measured retention baseline",
+                ],
+            },
+            {
+                "title": "Phase 3",
+                "bullets": [
+                    "Distribution scale",
+                    "Coach/practitioner channels",
+                    "Referral systemization",
+                    "Conversion quality gates",
+                ],
+            },
+            {
+                "title": "Phase 4",
+                "bullets": [
+                    "Calendar + health hookups",
+                    "Consent/revoke integrity",
+                    "Lower manual input burden",
+                    "Context quality protection",
+                ],
+            },
+        ],
+    )
+
+    # 13 section break
+    s = prs.slides.add_slide(blank)
+    add_section_break(s, 13, total, "Integrity + Risk", "Release discipline and risk controls as product features.")
+
+    # 14 integrity + risk split
+    s = prs.slides.add_slide(blank)
+    set_background(s)
+    add_shell(s, 14, total)
+    add_title(s, "Integrity operations", "How trust is enforced in code and release practice")
+    left = slide_left = Inches(0.7)
+    card_w = Inches(5.85)
+    y = Inches(2.05)
+    h = Inches(4.95)
+
+    c1 = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, left, y, card_w, h)
+    c1.fill.solid()
+    c1.fill.fore_color.rgb = SURFACE
+    c1.line.color.rgb = LINE
+    c1.line.width = Pt(1)
     add_bullets(
         s,
-        Inches(0.8),
-        Inches(2.35),
-        Inches(11.9),
-        Inches(3.8),
+        left + Inches(0.25),
+        y + Inches(0.3),
+        card_w - Inches(0.45),
+        h - Inches(0.4),
         [
-            "Completed + tested: subscription truth plumbing, cloud restore controls, loop telemetry, intervention nudges, adaptive sensitivity.",
-            "Deck integrity uplift: business plan + integrity evidence + science-first mechanics register.",
-            "Next gated phases: live-mode billing truth, native launch QA matrix, integration provider hookups with consent/revoke controls.",
-            "Readiness standard: no phase advances without objective gate pass.",
+            "SHIP preflight gates: build + invariant + trust checks.",
+            "Audience lock: universal framing; no niche-only drift.",
+            "Claim lock: mechanism-first language; no overclaiming.",
+            "Escalation: any invariant failure blocks release.",
+            "Diagnostics on trust-critical flows (subscription/sync/restore).",
         ],
-        size=17,
+        size=14,
+        spacing=8,
     )
 
-    # 9. Risks + mitigations
-    s = prs.slides.add_slide(blank)
-    set_background(s)
-    add_header(s)
-    add_title(s, "Risk register", "Known risks and active mitigations")
-    rows = [
-        ["Risk", "Mitigation"],
-        ["Claim drift or overstatement", "Mechanism-first language and SHIP claim checks before release"],
-        ["Feature sprawl / UX noise", "Ecosystem-first policy: strengthen loop before adding branches"],
-        ["Reliability regressions", "Build + preflight gates + diagnostics for trust-critical surfaces"],
-        ["Retention decay", "Daily loop reinforcement + intervention recovery measurement"],
-    ]
-    add_table_like(
+    c2x = Inches(6.8)
+    c2 = s.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, c2x, y, card_w, h)
+    c2.fill.solid()
+    c2.fill.fore_color.rgb = SURFACE_ALT
+    c2.line.color.rgb = LINE
+    c2.line.width = Pt(1)
+    add_bullets(
         s,
-        Inches(1.0),
-        Inches(2.1),
-        Inches(11.2),
-        Inches(4.6),
-        rows,
-        [Inches(3.7), Inches(7.5)],
+        c2x + Inches(0.25),
+        y + Inches(0.3),
+        card_w - Inches(0.45),
+        h - Inches(0.4),
+        [
+            "Risk: feature sprawl -> Mitigation: ecosystem-first gate.",
+            "Risk: reliability regression -> Mitigation: preflight + smoke checks.",
+            "Risk: trust mismatch -> Mitigation: copy/behavior parity review.",
+            "Risk: retention decay -> Mitigation: loop adherence + nudge recovery telemetry.",
+            "Risk: evidence drift -> Mitigation: measured outcomes before stronger claims.",
+        ],
+        size=14,
+        spacing=8,
     )
 
-    # 10. Closing
+    # 15 close
     s = prs.slides.add_slide(blank)
     set_background(s)
-    add_header(s)
+    add_shell(s, 15, total)
     add_title(s, "Stillform", "Preventive risk management for human behavior")
-    close = s.shapes.add_textbox(Inches(0.8), Inches(2.8), Inches(11.8), Inches(2.5))
+    close = s.shapes.add_textbox(Inches(0.8), Inches(2.5), Inches(11.8), Inches(2.7))
     tf = close.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
     p.alignment = PP_ALIGN.LEFT
-    run = p.add_run()
-    run.text = (
+    r = p.add_run()
+    r.text = (
         "Mission: reduce avoidable human damage by making composure trainable, measurable, and transferable.\n\n"
-        "Standard: honor, honesty, and integrity in product behavior, language, and release decisions."
+        "Standard: honor, honesty, and integrity in product behavior, language, and release decisions.\n\n"
+        "stillformapp.com"
     )
-    run.font.name = BODY_FONT
-    run.font.size = Pt(24)
-    run.font.color.rgb = TEXT
-
-    footer = s.shapes.add_textbox(Inches(0.8), Inches(6.55), Inches(11.5), Inches(0.4))
-    p2 = footer.text_frame.paragraphs[0]
-    r2 = p2.add_run()
-    r2.text = "stillformapp.com"
-    r2.font.name = MONO_FONT
-    r2.font.size = Pt(14)
-    r2.font.color.rgb = AMBER
+    r.font.name = BODY_FONT
+    r.font.size = Pt(24)
+    r.font.color.rgb = TEXT
 
     prs.save(path)
 
