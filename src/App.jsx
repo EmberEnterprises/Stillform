@@ -1301,9 +1301,47 @@ const scheduleReminder = async (title, body, hour, minute) => {
   } catch {}
 };
 
+const INTEGRATION_STORAGE_KEYS = {
+  calendar: {
+    consent: "stillform_calendar_consent",
+    error: "stillform_calendar_error",
+    retryAt: "stillform_calendar_retry_at",
+    data: [
+      "stillform_calendar_summary",
+      "stillform_calendar_events",
+      "stillform_calendar_updated_at"
+    ]
+  },
+  health: {
+    consent: "stillform_health_consent",
+    error: "stillform_health_error",
+    retryAt: "stillform_health_retry_at",
+    data: [
+      "stillform_health_summary",
+      "stillform_health_snapshot",
+      "stillform_health_updated_at"
+    ]
+  }
+};
+
 // Integration context adapter
 // Single source of truth for calendar/health context across the app.
 const getIntegrationContext = () => {
+  const readConsent = (key) => {
+    try {
+      const v = localStorage.getItem(key);
+      return (v === "granted" || v === "revoked") ? v : "pending";
+    } catch {
+      return "pending";
+    }
+  };
+  const readString = (key) => {
+    try {
+      return localStorage.getItem(key) || null;
+    } catch {
+      return null;
+    }
+  };
   const parseIsoTime = (v) => {
     if (!v) return null;
     try {
@@ -1322,8 +1360,15 @@ const getIntegrationContext = () => {
     if (ageHours <= 72) return { label: "Aging", stale: false };
     return { label: "Stale", stale: true };
   };
+  const calendarConsent = readConsent(INTEGRATION_STORAGE_KEYS.calendar.consent);
+  const healthConsent = readConsent(INTEGRATION_STORAGE_KEYS.health.consent);
+  const calendarError = readString(INTEGRATION_STORAGE_KEYS.calendar.error);
+  const healthError = readString(INTEGRATION_STORAGE_KEYS.health.error);
+  const calendarLastRetryAt = parseIsoTime(readString(INTEGRATION_STORAGE_KEYS.calendar.retryAt));
+  const healthLastRetryAt = parseIsoTime(readString(INTEGRATION_STORAGE_KEYS.health.retryAt));
   const calendar = (() => {
     try {
+      if (calendarConsent === "revoked") return null;
       const summary = localStorage.getItem("stillform_calendar_summary");
       const events = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
       const next = Array.isArray(events) && events.length > 0 ? events[0] : null;
@@ -1354,6 +1399,7 @@ const getIntegrationContext = () => {
 
   const health = (() => {
     try {
+      if (healthConsent === "revoked") return null;
       const summary = localStorage.getItem("stillform_health_summary");
       const snap = JSON.parse(localStorage.getItem("stillform_health_snapshot") || "null");
       const updatedAt = parseIsoTime(localStorage.getItem("stillform_health_updated_at") || snap?.updatedAt || null);
@@ -1398,6 +1444,12 @@ const getIntegrationContext = () => {
   return {
     calendar,
     health,
+    calendarConsent,
+    healthConsent,
+    calendarError,
+    healthError,
+    calendarLastRetryAt,
+    healthLastRetryAt,
     calendarContext,
     healthContext,
     upcomingPressure: calendar && !calendar.stale ? calendar.summary : null,
@@ -6655,14 +6707,67 @@ export default function Stillform() {
     } catch {}
   };
 
+  const setIntegrationConsent = (kind, nextState) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      if (nextState === "granted" || nextState === "revoked" || nextState === "pending") {
+        localStorage.setItem(config.consent, nextState);
+      }
+      if (nextState === "revoked") {
+        config.data.forEach((k) => localStorage.removeItem(k));
+        localStorage.removeItem(config.error);
+      }
+      if (nextState === "granted") {
+        localStorage.removeItem(config.error);
+      }
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      const msg = nextState === "granted"
+        ? `${label} context enabled.`
+        : nextState === "revoked"
+          ? `${label} context revoked and local cache cleared.`
+          : `${label} context reset to pending.`;
+      setIntegrationStatusWithClear(msg);
+    } catch {
+      setIntegrationStatusWithClear("Could not update integration consent.");
+    }
+  };
+
+  const retryIntegrationContext = (kind) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      localStorage.removeItem(config.error);
+      localStorage.setItem(config.retryAt, new Date().toISOString());
+      if (localStorage.getItem(config.consent) !== "granted") {
+        localStorage.setItem(config.consent, "granted");
+      }
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      setIntegrationStatusWithClear(`${label} retry queued. Refreshing status.`);
+    } catch {
+      setIntegrationStatusWithClear("Could not queue integration retry.");
+    }
+  };
+
+  const clearIntegrationError = (kind) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    try {
+      localStorage.removeItem(config.error);
+      refreshSettings();
+      const label = kind === "calendar" ? "Calendar" : "Health";
+      setIntegrationStatusWithClear(`${label} error cleared.`);
+    } catch {
+      setIntegrationStatusWithClear("Could not clear integration error.");
+    }
+  };
+
   const clearIntegrationContextCache = () => {
     const keys = [
-      "stillform_calendar_summary",
-      "stillform_calendar_events",
-      "stillform_calendar_updated_at",
-      "stillform_health_summary",
-      "stillform_health_snapshot",
-      "stillform_health_updated_at"
+      ...INTEGRATION_STORAGE_KEYS.calendar.data,
+      ...INTEGRATION_STORAGE_KEYS.health.data
     ];
     try {
       keys.forEach((k) => localStorage.removeItem(k));
@@ -6671,6 +6776,24 @@ export default function Stillform() {
     } catch {
       setIntegrationStatusWithClear("Could not clear integration context.");
     }
+  };
+
+  const integrationSignalColor = (kind, hasContext) => {
+    const consent = kind === "calendar" ? integrationContext.calendarConsent : integrationContext.healthConsent;
+    const error = kind === "calendar" ? integrationContext.calendarError : integrationContext.healthError;
+    if (error) return "#c05040";
+    if (consent === "revoked") return "var(--text-muted)";
+    if (hasContext) return "var(--amber)";
+    return "var(--text-muted)";
+  };
+
+  const integrationSignalLabel = (kind, hasContext, detail) => {
+    const consent = kind === "calendar" ? integrationContext.calendarConsent : integrationContext.healthConsent;
+    const error = kind === "calendar" ? integrationContext.calendarError : integrationContext.healthError;
+    if (error) return `Error · ${detail}`;
+    if (consent === "revoked") return `Revoked · ${detail}`;
+    if (consent === "pending") return `Pending consent · ${detail}`;
+    return hasContext ? `Connected · ${detail}` : `Awaiting context · ${detail}`;
   };
 
   const setSubscriptionStatusWithClear = (message) => {
@@ -8714,10 +8837,12 @@ export default function Stillform() {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendar ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.calendar
-                      ? `${integrationContext.calendar.stale ? "Stale" : "Connected"} · ${integrationContext.calendar.source} · ${integrationContext.calendar.freshness || "Unknown"}`
-                      : "Not connected"}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("calendar", !!integrationContext.calendar) }}>
+                    {integrationSignalLabel(
+                      "calendar",
+                      !!integrationContext.calendar,
+                      `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`
+                    )}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
@@ -8725,12 +8850,35 @@ export default function Stillform() {
                     ? integrationContext.calendar.summary
                     : "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."}
                 </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendarConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.calendarConsent || "pending"}
+                  </div>
+                </div>
+                {integrationContext.calendarConsent === "revoked" && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Calendar access is revoked. Re-enable to let Stillform use upcoming schedule context.
+                  </div>
+                )}
+                {integrationContext.calendarError && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    Calendar error: {integrationContext.calendarError}
+                  </div>
+                )}
+                {integrationContext.calendarLastRetryAt && (
+                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
+                    Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}
+                  </div>
+                )}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.health ? "var(--amber)" : "var(--text-muted)" }}>
-                    {integrationContext.health
-                      ? `${integrationContext.health.stale ? "Stale" : "Connected"} · ${integrationContext.health.source} · ${integrationContext.health.freshness || "Unknown"}`
-                      : "Not connected"}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("health", !!integrationContext.health) }}>
+                    {integrationSignalLabel(
+                      "health",
+                      !!integrationContext.health,
+                      `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`
+                    )}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -8738,6 +8886,27 @@ export default function Stillform() {
                     ? integrationContext.health.summary
                     : "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."}
                 </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.healthConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                    {integrationContext.healthConsent || "pending"}
+                  </div>
+                </div>
+                {integrationContext.healthConsent === "revoked" && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+                    Health access is revoked. Re-enable to let Stillform use sleep/readiness context.
+                  </div>
+                )}
+                {integrationContext.healthError && (
+                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
+                    Health error: {integrationContext.healthError}
+                  </div>
+                )}
+                {integrationContext.healthLastRetryAt && (
+                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
+                    Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}
+                  </div>
+                )}
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     className="btn btn-ghost"
@@ -8756,6 +8925,64 @@ export default function Stillform() {
                     disabled={!integrationContext.hasAny}
                   >
                     Clear stale context
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => setIntegrationConsent("calendar", "granted")}
+                  >
+                    Enable calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => setIntegrationConsent("health", "granted")}
+                  >
+                    Enable health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => setIntegrationConsent("calendar", "revoked")}
+                  >
+                    Revoke calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => setIntegrationConsent("health", "revoked")}
+                  >
+                    Revoke health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => retryIntegrationContext("calendar")}
+                  >
+                    Retry calendar
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px" }}
+                    onClick={() => retryIntegrationContext("health")}
+                  >
+                    Retry health
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => clearIntegrationError("calendar")}
+                    disabled={!integrationContext.calendarError}
+                  >
+                    Clear calendar error
+                  </button>
+                  <button
+                    className="btn btn-ghost"
+                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                    onClick={() => clearIntegrationError("health")}
+                    disabled={!integrationContext.healthError}
+                  >
+                    Clear health error
                   </button>
                 </div>
                 {integrationContext.hasStale && (

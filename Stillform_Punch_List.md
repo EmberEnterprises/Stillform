@@ -264,6 +264,9 @@
 - [ ] Morning loop displays upcoming pressure window when calendar context is present
 - [ ] Reframe request includes integration context payload (calendar + health) when available
 - [ ] Integration settings copy added (planned/connected/error states) without requiring live provider auth
+- [ ] Integration consent scaffold in Settings (pending / granted / revoked for calendar and health)
+- [ ] Revoke action clears integration cache for the revoked source
+- [ ] Retry action records retry timestamp and clears stale integration error state
 - [ ] Post-launch: provider hookups (Apple/Google calendar + health providers) with explicit consent and revoke paths
 
 ### Pinned human-required actions (can do later if not feeling well)
