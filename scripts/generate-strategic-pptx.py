@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a polished Stillform strategic PowerPoint deck."""
+"""Generate a professional, board-ready Stillform strategic deck."""
 
 from pptx import Presentation
 from pptx.dml.color import RGBColor
@@ -186,7 +186,7 @@ def build_deck(path):
     add_title(
         s,
         "Stillform Strategic Overview",
-        "Preventive risk management for human behavior · science-first operating deck",
+        "Preventive risk management for human behavior",
     )
     add_bullets(
         s,
@@ -204,13 +204,13 @@ def build_deck(path):
 
     # 2 section break
     s = prs.slides.add_slide(blank)
-    add_section_break(s, 2, total, "Operating Thesis", "Who / What / How / Why with zero category drift.")
+    add_section_break(s, 2, total, "Operating Thesis", "Clear category definition and operating thesis.")
 
     # 3 operating definition
     s = prs.slides.add_slide(blank)
     set_background(s)
     add_shell(s, 3, total)
-    add_title(s, "Operating definition", "Core framing constraints")
+    add_title(s, "Operating definition", "Category, mechanism, and strategic position")
     add_table(
         s,
         Inches(0.7),
@@ -221,7 +221,7 @@ def build_deck(path):
             ["Dimension", "Definition", "Why it matters"],
             ["Who", "Everyone building composure as a trainable daily capability.", "Universal requirement, not niche positioning."],
             ["What", "A neuroscience-guided preventive risk management system for behavior.", "Reduces avoidable damage before it compounds."],
-            ["How", "Detect state -> route intervention -> transfer action -> close daily loop -> learn patterns.", "Mechanism-driven architecture, not inspirational content."],
+            ["How", "Detect state -> route intervention -> transfer action -> close daily loop -> learn patterns.", "Mechanism-driven architecture, not inspiration content."],
             ["Why", "Unregulated state degrades judgment, communication, and relationships.", "Cleaner decisions and lower downstream relational/operational cost."],
         ],
         [Inches(1.55), Inches(5.15), Inches(5.3)],
@@ -229,7 +229,7 @@ def build_deck(path):
 
     # 4 section break
     s = prs.slides.add_slide(blank)
-    add_section_break(s, 4, total, "Mechanics + Science", "Mechanism table split into clean slides for readability.")
+    add_section_break(s, 4, total, "Mechanics + Science", "Science is operationalized as product behavior, not decoration.")
 
     # 5 mechanics map I
     s = prs.slides.add_slide(blank)
@@ -341,7 +341,7 @@ def build_deck(path):
 
     # 10 section break
     s = prs.slides.add_slide(blank)
-    add_section_break(s, 10, total, "Business + Distribution", "Operator-grade economics and channel logic.")
+    add_section_break(s, 10, total, "Business + Distribution", "Focused economics and trust-first channel strategy.")
 
     # 11 business model
     s = prs.slides.add_slide(blank)
@@ -358,7 +358,7 @@ def build_deck(path):
             ["Component", "Current position", "Defensibility logic"],
             ["Revenue model", "Single tier ($14.99 / $9.99 annualized)", "Low friction + no upsell trust tax"],
             ["Category", "Preventive risk management for behavior", "Distinct from passive wellness consumption"],
-            ["Distribution", "Coaches, therapist-adjacent, trusted communities", "Trust transfer beats cold paid acquisition"],
+            ["Distribution", "Coaches, therapist-adjacent, trusted communities", "Trust transfer outperforms cold paid acquisition"],
             ["Retention thesis", "Daily loop utility + proof of change + continuity", "Habit + evidence + context memory"],
         ],
         [Inches(2.15), Inches(4.2), Inches(5.65)],
@@ -404,7 +404,7 @@ def build_deck(path):
 
     # 13 section break
     s = prs.slides.add_slide(blank)
-    add_section_break(s, 13, total, "Integrity + Risk", "Release discipline and risk controls as product features.")
+    add_section_break(s, 13, total, "Integrity + Risk", "Release discipline is part of the product, not an afterthought.")
 
     # 14 integrity + risk split
     s = prs.slides.add_slide(blank)
