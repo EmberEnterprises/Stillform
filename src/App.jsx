@@ -7029,11 +7029,14 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> AI sounds like a sharp friend, not a therapist</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Multi-turn conversations fixed — AI actually follows the thread now</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> My Progress — all your data in one place. Sessions, patterns, pulse history, AI notes, and what you know about yourself.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Outcome Engine on Home — choose your focus first (recover composure, stay sharp, or keep momentum).</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Scenario Protocols — one-tap guided route for hard conversations, spikes, conflict reset, and winning moments.</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Proof of change — objective progress panel in My Progress (active days, rated sessions, protocol runs, average gain).</div>
+                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> State-to-Statement — optional post-session bridge from internal clarity to clear external communication.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Morning check-in now includes tension check — tap body areas to flag where you're holding it before your day starts.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Check-in windows tightened — morning 4:30 AM–5:30 PM, evening 6 PM–4 AM. No overlap, no confusion.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Watch & Choose now accessible from home screen under Go Deeper.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Reframe input now shows character count near the limit — keeps you focused on one thought.</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Cloud sync — sign in under Settings to back up your data and access it on any device. Encrypted on your device before upload. We can't read it.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Cloud sync — sign in under Settings to back up your data and access it on any device. Encrypted on your device before upload. We cannot read it.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Share screenshots in Reframe — tap 📎 to upload up to 3 conversation screenshots. The AI reads the actual layout — who said what — so advice goes to you, not the other person.</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "#c05040" }}>★</span> Quick Breathe pill is now draggable — hold and drag to reposition it anywhere on screen. Position saves across sessions.</div>
@@ -7074,7 +7077,6 @@ export default function Stillform() {
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Screen time awareness — context without self-report</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Location-aware AI — work vs home vs commute</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Weather + barometric pressure context</div>
-                    <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> State-to-Statement — help you say what you mean</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Signal Awareness speed tracking</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Cloud sync across devices</div>
                     <div style={{ marginBottom: 4 }}><span style={{ color: "var(--text-muted)" }}>⬡</span> Premium sound packs</div>
