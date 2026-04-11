@@ -9476,6 +9476,10 @@ export default function Stillform() {
                 a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your Pulse entries and session history."
               },
               {
+                q: "What does 'status is junk code for the ego' mean?",
+                a: "Status loops make you optimize for image over integrity. Stillform treats that as noise: if you're spiraling on comparison, hierarchy, or how it looks, the AI brings you back to signal — what matters if nobody is watching, and one concrete next move aligned with your values."
+              },
+              {
                 q: "How does the AI know what I need?",
                 a: "It reads your feel state, your physical state, and what you type. If you're excited, it channels the energy and checks for overcommitment. If you're spiraling, it cuts the loop with one sharp question. If you're processing, it gives you perspectives and names what your brain is adding. You don't choose a mode — it adapts to you."
               },
