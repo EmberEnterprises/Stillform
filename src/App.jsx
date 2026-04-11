@@ -6639,6 +6639,8 @@ export default function Stillform() {
   const widgetLaunch = false;
 
   const [screen, setScreen] = useState(null);
+  const [faqBackScreen, setFaqBackScreen] = useState("home");
+  const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
@@ -6666,6 +6668,36 @@ export default function Stillform() {
     }
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+
+  useEffect(() => {
+    if (preferredCrisisRegion) return;
+    try {
+      const locale = Intl.DateTimeFormat().resolvedOptions().locale || "";
+      const lower = String(locale).toLowerCase();
+      const map = [
+        ["us", "United States"],
+        ["ca", "Canada"],
+        ["gb", "United Kingdom"],
+        ["ie", "Ireland"],
+        ["au", "Australia"],
+        ["nz", "New Zealand"],
+        ["de", "Germany"],
+        ["fr", "France"],
+        ["es", "Spain"],
+        ["jp", "Japan"],
+        ["kr", "South Korea"],
+        ["tr", "Turkey"],
+        ["am", "Armenia"]
+      ];
+      const matched = map.find(([suffix]) => lower.endsWith(`-${suffix}`) || lower.includes(`_${suffix}`));
+      if (matched) setPreferredCrisisRegion(matched[1]);
+    } catch {}
+  }, [preferredCrisisRegion]);
+
+  const openFaq = (backScreen = "home") => {
+    setFaqBackScreen(backScreen);
+    setScreen("faq");
+  };
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = new Date().toISOString().split("T")[0];
@@ -7406,7 +7438,7 @@ export default function Stillform() {
             Still<span>form</span>
           </div>
           <div className="nav-actions">
-            <button onClick={() => setScreen("faq")} style={{
+            <button onClick={() => openFaq("home")} style={{
               background: "none", width: 32, height: 32, borderRadius: "50%",
               display: "flex", alignItems: "center", justifyContent: "center",
               color: "var(--text-muted)", fontSize: 14, cursor: "pointer",
@@ -8999,7 +9031,7 @@ export default function Stillform() {
         {/* FAQ */}
         {screen === "faq" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+            <button className="intervention-back" onClick={() => setScreen(faqBackScreen || "home")}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
             <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 32, fontFamily: "'Cormorant Garamond', serif" }}>
               Composure is being in control of how you show up — in any moment that matters.
@@ -9114,7 +9146,7 @@ export default function Stillform() {
               { region: "Turkey", lines: [{ name: "ALO Psikiyatri", number: "182", note: "" }] },
               { region: "Armenia", lines: [{ name: "Trust Social Work", number: "+374 10 538194", note: "" }] },
               { region: "International", lines: [{ name: "Find your country", number: "findahelpline.com", note: "Directory of crisis lines worldwide" }] }
-            ].map((country, i) => (
+            ].sort((a, b) => (preferredCrisisRegion && a.region === preferredCrisisRegion ? -1 : preferredCrisisRegion && b.region === preferredCrisisRegion ? 1 : 0)).map((country, i) => (
               <div key={i} style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
                 {country.lines.map((line, j) => {
@@ -10158,7 +10190,7 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => setScreen("faq")} style={{
+                <button onClick={() => openFaq("settings")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   fontFamily: "'DM Sans', sans-serif"
