@@ -7354,12 +7354,13 @@ export default function Stillform() {
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
+    integrations: false,
     sound: false,
     logs: false,
     customization: false,
     signal: false,
     more: false,
-    data: true
+    data: false
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -9970,7 +9971,14 @@ export default function Stillform() {
 
             {/* Integrations */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Integrations</div>
+              <button onClick={() => toggleSettingsSection("integrations")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Integrations</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.integrations ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.integrations && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
@@ -10133,6 +10141,7 @@ export default function Stillform() {
                   </div>
                 )}
               </div>
+              )}
             </div>
 
             {/* Subscription status */}
