@@ -3489,6 +3489,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (feelState === "excited" || feelState === "focused") return "hype";
     return "calm"; // default — clarity mode is triggered per-message by input content
   })();
+  const aiToneChoice = (() => {
+    try {
+      const stored = localStorage.getItem("stillform_ai_tone") || "balanced";
+      return VALID_AI_TONE_IDS.has(stored) ? stored : "balanced";
+    } catch {
+      return "balanced";
+    }
+  })();
+  const aiToneLabel = ({
+    balanced: "Balanced",
+    gentle: "Gentle",
+    direct: "Direct",
+    clinical: "Clinical",
+    motivational: "Motivational"
+  })[aiToneChoice] || "Balanced";
   const effectiveMode = autoMode;
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
@@ -4457,6 +4472,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       <div className="disclaimer">
         Your data is encrypted. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+      </div>
+      <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center" }}>
+        <div style={{
+          fontSize: 10,
+          color: "var(--text-muted)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--r)",
+          padding: "4px 10px",
+          fontFamily: "'IBM Plex Mono', monospace"
+        }}>
+          Reframe tone: {aiToneLabel}
+        </div>
       </div>
 
       <>
@@ -10740,22 +10769,6 @@ export default function Stillform() {
                 })}
               </div>
 
-              {/* Notifications — micro-nudges, needs native */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Notifications</div>
-                <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "12px 16px", marginBottom: 4, opacity: 0.3,
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Micro-nudges</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Brief composure prompts throughout the day</div>
-                  </div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
-                </div>
-              </div>
-
               {/* Wearable — grayed, needs native */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Wearable Integration</div>
@@ -10881,7 +10894,7 @@ export default function Stillform() {
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", opacity: 0.6 }}>Data management</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Data management</span>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.data ? "▾" : "▸"}</span>
               </button>
               {settingsSectionOpen.data && (
