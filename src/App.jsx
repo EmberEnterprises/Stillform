@@ -9440,6 +9440,9 @@ export default function Stillform() {
             <h2>Your Data</h2>
             <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups are also stored in our Supabase cloud infrastructure so you can restore data across devices. Data is encrypted on-device before upload.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
+            <h2>Optional Performance Metrics (counts + rates only)</h2>
+            <p>If you enable Performance Metrics in Settings, Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas) so we can verify app performance and reliability.</p>
+            <p>These metrics do not include journal text, AI conversation content, or free-form notes. You can turn this off anytime in Settings, and this handling is covered in this Privacy &amp; Disclaimers view and our full Privacy Policy.</p>
 
             <h2>Assumption of Risk</h2>
             <p>By using Stillform, you acknowledge that you use the app at your own risk. ARA Embers LLC is not liable for any outcomes resulting from the use of this app, including but not limited to decisions made based on AI-generated content, acupressure techniques, or pattern insights.</p>
@@ -10717,7 +10720,7 @@ export default function Stillform() {
                   <div>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      Sends usage metrics only. Never sends journal text or AI conversation content.
+                      Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
                     </div>
                   </div>
                   <button onClick={() => setMetricsOptIn((value) => !value)} style={{
@@ -10734,6 +10737,9 @@ export default function Stillform() {
                   {metricsLastSentAt
                     ? `Last sent: ${new Date(metricsLastSentAt).toLocaleString()}`
                     : "Last sent: not yet"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
+                  Disclosure is documented in Privacy &amp; Disclaimers and must stay aligned with the full Privacy Policy.
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
                   <button onClick={() => pushMetricsSnapshot({ source: "manual" })} disabled={!metricsOptIn || !metricsAuthToken || metricsUploading} style={{

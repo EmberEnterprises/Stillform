@@ -201,7 +201,7 @@
 - [x] SHIP preflight expanded for onboarding/context-tip/export invariants
 
 ### 🧷 User actions (do when you can — not urgent today)
-- [ ] **Termly privacy policy update** to explicitly state encrypted cloud storage (Supabase), auth email usage, and restore flow.
+- [x] **Termly privacy policy update** completed for encrypted cloud storage (Supabase), auth email usage, restore flow, and metrics-only telemetry disclosure (no journal/chat text).
 - [x] **Lemon Squeezy test -> live switch** (user-confirmed Apr 9 via live subscribe + cancel and confirmation emails).
 - [x] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set (user-confirmed Apr 9).
 - [x] **Confirm variant mapping** in Lemon checkout (monthly vs annual) and receipts (user-confirmed Apr 9 via Lemon confirmation emails for both variants).
