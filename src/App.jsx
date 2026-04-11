@@ -3265,6 +3265,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const openingText = isHype
     ? "What are you walking into? Name it and what's making it hard."
     : "What's on your mind?";
+  const [showReframeFirstTip, setShowReframeFirstTip] = useState(() => {
+    try { return localStorage.getItem("stillform_tooltips_reframe_seen") !== "yes"; } catch { return true; }
+  });
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
 
   useEffect(() => {
@@ -5672,6 +5675,9 @@ function MyProgress({ onBack }) {
   const [jTrigger, setJTrigger] = useState("");
   const [jBody, setJBody] = useState("");
   const [jOutcome, setJOutcome] = useState("");
+  const [showPulseContextTip, setShowPulseContextTip] = useState(() => {
+    try { return localStorage.getItem("stillform_tooltip_pulse_seen") !== "yes"; } catch { return true; }
+  });
   const pulsePromptRotations = [
     { trigger: "What triggered this?", notes: "What happened right before this signal?" },
     { trigger: "What were you about to do?", notes: "What decision was in front of you in that moment?" },
@@ -5699,6 +5705,10 @@ function MyProgress({ onBack }) {
     setJOutcome("");
     setPulsePromptIndex((prev) => (prev + 1) % pulsePromptRotations.length);
     setShowNewEntry(true);
+  };
+  const dismissPulseContextTip = () => {
+    setShowPulseContextTip(false);
+    try { localStorage.setItem("stillform_tooltip_pulse_seen", "yes"); } catch {}
   };
   const savePulseEntry = () => {
     if (!jSignal.length && !jTriggerType && !jTrigger.trim()) return;
@@ -6545,6 +6555,16 @@ function MyProgress({ onBack }) {
               </button>
             )}
           </div>
+          {showPulseContextTip && (
+            <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                Pulse works best as a 15-second after-action capture: what activated, what triggered it, and what you chose next.
+              </div>
+              <button onClick={dismissPulseContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                Got it
+              </button>
+            </div>
+          )}
 
           {/* VIEW SINGLE ENTRY */}
           {viewEntry && (() => {
@@ -6786,8 +6806,10 @@ export default function Stillform() {
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
+  const [showHomeContextTip, setShowHomeContextTip] = useState(() => {
+    try { return localStorage.getItem("stillform_tooltip_home_seen") !== "yes"; } catch { return true; }
+  });
   const [screenReady, setScreenReady] = useState(false);
-  const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [ciOpen, setCiOpen] = useState(true);
@@ -6848,6 +6870,10 @@ export default function Stillform() {
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
     setScreen("faq");
+  };
+  const dismissHomeContextTip = () => {
+    setShowHomeContextTip(false);
+    try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
 
   const getLoopNudgeSnapshot = () => {
@@ -7607,221 +7633,53 @@ export default function Stillform() {
         )}
 
         {/* ONBOARDING — first visit only */}
-        {screen === "onboarding" && (() => {
-          const steps = [
-            {
-              icon: "◎",
-              title: "Stillform",
-              subtitle: "A precision composure system.",
-              body: "A channel to self-awareness — and a tool to act on it. Regulate your body first. Reset your thinking. Then approach whatever you're dealing with more clearly.\n\nComposure isn't just for bad moments. Excitement, confidence, a big win — your state can drive impulsive decisions when things are going great too. Bad sleep, a trigger, physical pain, or riding high — the system reads all of it, because your state shapes your actions more than most people realize.\n\nBuilt from lived experience and grounded in proven neuroscience and cognitive research.",
-              note: null
-            },
-            {
-              icon: "◎",
-              label: "The science",
-              title: "Two pathways. Yours is different.",
-              subtitle: "Peer-reviewed neuroscience. Applied.",
-              body: "Your brain regulates through two distinct pathways. Thought-first — your mind fires first. Replaying, analyzing, building a response. Body-first — tension hits first. Jaw, chest, shoulders.\n\nResearch confirms: matching the right tool to your pathway is what makes regulation work. Forcing the wrong one makes it worse. During setup, five quick scenarios determine your default. The system adapts from there.",
-              note: null,
-              research: [
-                { label: "Bottom-up and top-down emotion generation", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC2858766/" },
-                { label: "Cognitive reappraisal neuroimaging meta-analysis", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4193464/" }
-              ]
-            },
-            {
-              icon: "◎",
-              label: "Three tools",
-              title: "Talk. Breathe. Scan.",
-              subtitle: "Each one backed by clinical research.",
-              body: "Reframe — AI-powered reframing. Talk through what's happening. The AI identifies distortions, separates signal from noise, and learns your patterns over time.\n\nBreathe — paced breathing based on how your nervous system actually works. Extended exhale tells your body the threat is over. Measurable shift in under 90 seconds.\n\nBody Scan — six acupressure points. Locate tension, release it, clear the signal. Auto-advances.\n\nThe Bio-Filter checks your physical state first — because biology gets misread as emotion more often than you'd think.",
-              note: "Quick Breathe is always free. Full access requires a subscription.",
-              research: [
-                { label: "Cognitive reappraisal: effects on emotion and physiology", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6188704/" },
-                { label: "Interoceptive awareness for emotion regulation", url: "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2018.00798/full" }
-              ]
-            },
-            {
-              icon: "◈",
-              label: "It learns you",
-              title: "The AI gets sharper.",
-              subtitle: "Nine categories of context. Every session.",
-              body: "The AI tracks what matters — your triggers, your values, your growth, what's happening in your life right now. After each session it writes its own notes. Not transcripts — just what mattered.\n\nIt never says 'I understand how you feel.' It proves it heard you by remembering. After 7 sessions, the system checks in and adjusts based on how you actually use it.",
-              note: null,
-              research: [
-                { label: "Feeling understood in relationships", url: "https://compass.onlinelibrary.wiley.com/doi/10.1111/spc3.12308" },
-                { label: "Validation reduces sympathetic activation", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC9614309/" }
-              ]
-            },
-            {
-              icon: "◎",
-              label: "Daily practice",
-              title: "Morning calibration. In-the-moment reset.",
-              subtitle: "Two habits. That's it.",
-              body: "Morning check-in — two taps. Set your energy level and physical state. The AI uses this as context for every session that day.\n\nPulse — when you select how you're feeling before a session, it logs automatically. View your full history, patterns, and AI session notes in My Progress.\n\nEnd of Day — after 6 PM, close the loop. Three taps: energy, composure, one word. The AI uses yesterday's close as context the next morning.\n\nReframe adapts to your state automatically — if you're spiraling, it cuts the loop. If you're processing, it reframes. If you're riding high, it channels the energy.",
-              note: null,
-              research: [
-                { label: "Affect labeling reduces amygdala reactivity", url: "https://pubmed.ncbi.nlm.nih.gov/17576282/" },
-                { label: "Emotional granularity improves regulation", url: "https://journals.sagepub.com/doi/abs/10.1177/0963721414550708" }
-              ]
-            },
-            {
-              icon: "◎",
-              label: "Your growth",
-              title: "People change. We measure it.",
-              subtitle: "Neuroplasticity tracked, not assumed.",
-              body: "People are always looking for patterns. Why do I keep reacting this way? Why am I off today? The app tracks your signal history over time — emotions, triggers, physical state — and surfaces what you can't see in the moment.\n\nComposure Telemetry — a 12-week visual timeline on My Progress. Every session and every pulse entry lights up. You'll see your practice at a glance.\n\nOnce you can see your patterns clearly, that awareness becomes the power source. Your brain is wiring new responses every time you choose differently. That's neuroplasticity — not as a concept, but as something you can watch happen.\n\nOld patterns that resolve get dropped from your profile. The system evolves because you do.\n\nYour data is encrypted. Local data stays on your device, and optional Cloud Sync stores encrypted backups for restore across devices. Delete everything anytime from Settings. Replay this tutorial anytime.",
-              note: null,
-              research: [
-                { label: "Neuroplasticity and growth mindset", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5836039/" },
-                { label: "Flexible emotion regulation strategies", url: "https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2019.00072/full" }
-              ]
-            }
-          ];
-          const step = steps[onboardStep];
-          const isLast = onboardStep === steps.length - 1;
-          const isFirst = onboardStep === 0;
-
-          // Swipe handling
-          let touchStartX = null;
-          const handleTouchStart = (e) => { touchStartX = e.touches[0].clientX; };
-          const handleTouchEnd = (e) => {
-            if (touchStartX === null) return;
-            const diff = touchStartX - e.changedTouches[0].clientX;
-            touchStartX = null;
-            if (Math.abs(diff) < 50) return;
-            if (diff > 0) {
-              if (isLast) { completeOnboarding(); }
-              else { setOnboardStep(s => s + 1); }
-            } else {
-              if (!isFirst) { setOnboardStep(s => s - 1); }
-            }
-          };
-
-          return (
-            <section
-              onTouchStart={handleTouchStart}
-              onTouchEnd={handleTouchEnd}
-              style={{
+        {screen === "onboarding" && (() => (
+          <section
+            style={{
               maxWidth: 480, margin: "0 auto", padding: "0 24px",
               display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1,
-              touchAction: "pan-y"
+              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1
+            }}
+          >
+            <div style={{ fontSize: 32, marginBottom: 16 }}>◎</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+              Composure architecture
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontSize: 38,
+              fontWeight: 300, lineHeight: 1.1, marginBottom: 8
             }}>
-              {/* Progress dots */}
-              <div style={{ display: "flex", gap: 8, marginBottom: 40 }}>
-                {steps.map((_, i) => (
-                  <div key={i} style={{
-                    width: 8, height: 8, borderRadius: "50%",
-                    background: i === onboardStep ? "var(--amber)" : "var(--border)",
-                    transition: "background 0.3s"
-                  }} />
-                ))}
-              </div>
+              Stillform
+            </h1>
+            <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 20 }}>
+              One daily system: check in, regulate, and choose your next move.
+            </div>
+            <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 14, textAlign: "left" }}>
+              <p style={{ marginBottom: 10 }}>
+                Stillform adapts to your state in the moment. Morning check-in sets context. Reframe, Breathe, and Body Scan help you recover composure fast. End of day closes the loop.
+              </p>
+              <p style={{ marginBottom: 0 }}>
+                Setup personalizes your default pathway (thought-first or body-first) so the right tool shows up first.
+              </p>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
+              Full method + science details live in FAQ and can be replayed anytime from Settings.
+            </div>
 
-              <div style={{ fontSize: 32, marginBottom: 16 }}>{step.icon}</div>
-              {step.label && (
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  {step.label}
-                </div>
-              )}
-              <h1 style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: isFirst ? 42 : 32,
-                fontWeight: 300, lineHeight: 1.1, marginBottom: 8
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
+              <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
+                Begin calibration →
+              </button>
+              <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
+                background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "10px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif"
               }}>
-                {step.title}
-              </h1>
-              <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 24 }}>
-                {step.subtitle}
-              </div>
-              <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12, textAlign: "left" }}>
-                {step.body.split("\n\n").map((para, i) => (
-                  <p key={i} style={{ marginBottom: i < step.body.split("\n\n").length - 1 ? 12 : 0 }}>{para}</p>
-                ))}
-              </div>
-              {step.note && (
-                <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-                  {step.note}
-                </div>
-              )}
-              {step.research && (
-                <div style={{ marginBottom: 12, textAlign: "left", maxWidth: 360, width: "100%" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>Research</div>
-                  {step.research.map((r, i) => (
-                    <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={{
-                      display: "block", fontSize: 11, color: "var(--amber)", opacity: 0.7,
-                      textDecoration: "none", marginBottom: 4, lineHeight: 1.4
-                    }}>
-                      {r.label} ↗
-                    </a>
-                  ))}
-                </div>
-              )}
-
-              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 32, width: "100%", maxWidth: 320 }}>
-                {!isFirst && !isLast && (
-                  <button className="btn btn-ghost" onClick={() => setOnboardStep(s => s - 1)}>
-                    Back
-                  </button>
-                )}
-                {isLast ? (
-                  <>
-                    <button onClick={() => completeOnboarding()} style={{
-                      width: "100%", background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
-                      padding: "16px 24px", fontSize: 16, fontWeight: 500, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif", textAlign: "center"
-                    }}>
-                      Begin Calibration →
-                    </button>
-                    <button onClick={() => setOnboardStep(s => s - 1)} style={{
-                      background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8
-                    }}>
-                      ← Back
-                    </button>
-                    <div style={{ marginTop: 32, padding: "16px 20px", borderTop: "1px solid var(--border)", textAlign: "center" }}>
-                      <p style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginBottom: 8 }}>
-                        Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis:
-                      </p>
-                      <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
-                        background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "8px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s"
-                      }}>
-                        Crisis resources & helplines →
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                  {isFirst ? (
-                    <>
-                      <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
-                        Begin Calibration
-                      </button>
-                      <button className="btn btn-ghost" style={{ marginTop: 8, fontSize: 13 }} onClick={() => setOnboardStep(s => s + 1)}>
-                        How does it work? →
-                      </button>
-                    </>
-                  ) : (
-                    <button className="btn btn-primary" style={{ padding: "14px 32px" }} onClick={() => setOnboardStep(s => s + 1)}>
-                      Next
-                    </button>
-                  )}
-                  </>
-                )}
-              </div>
-
-              {!isFirst && !isLast && (
-                <button onClick={completeOnboarding} style={{
-                  background: "none", border: "none", color: "var(--text-muted)", fontSize: 12,
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 20
-                }}>
-                  Skip — take me to the app
-                </button>
-              )}
-            </section>
-          );
-        })()}
+                Crisis resources & helplines →
+              </button>
+            </div>
+          </section>
+        ))()}
 
         {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
@@ -8424,6 +8282,16 @@ export default function Stillform() {
                   </div>
                 </a>
               </div>
+              {showHomeContextTip && (
+                <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
+                  </div>
+                  <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                    Dismiss tip
+                  </button>
+                </div>
+              )}
 
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
@@ -9379,6 +9247,19 @@ export default function Stillform() {
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
+
+            {/* FAQ (top priority for low-friction support) */}
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>FAQ</div>
+              <button onClick={() => openFaq("settings")} style={{
+                width: "100%",
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                fontFamily: "'DM Sans', sans-serif"
+              }}>
+                Open FAQ →
+              </button>
+            </div>
 
             {/* Language */}
             <div style={{ marginBottom: 28 }}>
@@ -10407,7 +10288,6 @@ export default function Stillform() {
                 </a>
                 <button onClick={() => {
                   try { localStorage.removeItem("stillform_onboarded"); } catch {}
-                  setOnboardStep(0);
                   setScreen("onboarding");
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",

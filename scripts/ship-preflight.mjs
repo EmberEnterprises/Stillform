@@ -23,6 +23,7 @@ const checks = [
   { label: "Sync auth cooldown guard", cmd: "rg", args: ["-n", "syncAuthCooldownSeconds|startSyncAuthCooldown|Too many attempts\\. Please wait", "src/App.jsx"], type: "must-match" },
   { label: "Auth fallback safety guard", cmd: "rg", args: ["-n", "isInvalidCredentialsMessage|Incorrect email or password\\. Please try again\\.", "src/App.jsx"], type: "must-match" },
   { label: "Pulse rotating prompts", cmd: "rg", args: ["-n", "What triggered this\\?|What were you about to do\\?|Who was involved\\?|openNewPulseEntry", "src/App.jsx"], type: "must-match" },
+  { label: "Contextual first-time tips", cmd: "rg", args: ["-n", "showHomeContextTip|showPulseContextTip|stillform_tooltip_home_seen|stillform_tooltip_pulse_seen", "src/App.jsx"], type: "must-match" },
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
