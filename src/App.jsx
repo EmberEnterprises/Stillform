@@ -9181,6 +9181,10 @@ export default function Stillform() {
                 a: "The app notices. If you're typing rapidly — a sign your body is ahead of your thoughts — a gentle nudge appears: 'Drop your shoulders' or 'Unclench your jaw.' It fades after a few seconds. The system watches your body, not just your words."
               },
               {
+                q: "What is visual grounding?",
+                a: "Optional fractal visuals behind breathing sessions that give your eyes a stable anchor while your breath settles. You can turn it on or off in Settings > Visual grounding."
+              },
+              {
                 q: "Is my data private?",
                 a: "Your data is encrypted. Local data is stored on your device, and optional Cloud Sync stores encrypted backups you can restore on another device. The AI receives context to generate a response, then returns output. You can delete your data anytime from Settings."
               },
