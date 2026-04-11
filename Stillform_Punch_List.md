@@ -235,43 +235,43 @@
 ## Added April 10 — Reliability + Launch Hardening
 
 ### Reframe fallback and completion flow
-- [ ] Reframe API fails 3 times -> self-guided fallback appears automatically
-- [ ] Fallback shows 5-step structure (feeling -> brain adding -> friend advice -> one action -> completion)
-- [ ] Fallback session saved in `stillform_sessions` with `selfGuided: true`
-- [ ] "Offline fallback active" message appears without panic-style language
-- [ ] Post-session "Where are you now?" cannot be skipped
+- [x] Reframe API fails 3 times -> self-guided fallback appears automatically
+- [x] Fallback shows 5-step structure (feeling -> brain adding -> friend advice -> one action -> completion)
+- [x] Fallback session saved in `stillform_sessions` with `selfGuided: true`
+- [x] "Offline fallback active" message appears without panic-style language
+- [x] Post-session "Where are you now?" cannot be skipped
 
 ### Morning/Evening Reframe routing
-- [ ] Morning check-in "Set my tone ->" opens Reframe directly
-- [ ] Evening prompt "Talk it out ->" opens Reframe directly
-- [ ] Morning entry produces forward-looking response style
-- [ ] Evening entry produces closure-style response (no new thread opening)
+- [x] Morning check-in "Set my tone ->" opens Reframe directly
+- [x] Evening prompt "Talk it out ->" opens Reframe directly
+- [x] Morning entry produces forward-looking response style
+- [x] Evening entry produces closure-style response (no new thread opening)
 
 ### Paywall hardening
-- [ ] Subscribe button cannot be double-clicked into duplicate checkout launches
-- [ ] Checkout loading state appears ("Opening checkout...")
-- [ ] Missing trial-start guard shows clear message instead of silent failure
+- [x] Subscribe button cannot be double-clicked into duplicate checkout launches
+- [x] Checkout loading state appears ("Opening checkout...")
+- [x] Missing trial-start guard shows clear message instead of silent failure
 - [ ] Monthly/Annual toggle choice is reflected correctly in Lemon checkout (manual verify)
 - [ ] Post-launch: replace any static "X days left" trial display with server-backed dynamic trial-day calculation (UAT static display is acceptable for now)
 
 ### Settings / pricing clarity
-- [ ] No "Premium" gating language appears for included subscriber options
-- [ ] Pricing features mention encrypted cloud backup
+- [x] No "Premium" gating language appears for included subscriber options
+- [x] Pricing features mention encrypted cloud backup
 
 ### Integrations track (aligned to roadmap, can be built in parallel)
-- [ ] Calendar context ingestion scaffold in app (local summary key + AI context field)
-- [ ] Health context ingestion scaffold in app (sleep/HRV/readiness summary key + AI context field)
-- [ ] Morning loop displays upcoming pressure window when calendar context is present
-- [ ] Reframe request includes integration context payload (calendar + health) when available
-- [ ] Integration settings copy added (planned/connected/error states) without requiring live provider auth
-- [ ] Integration consent scaffold in Settings (pending / granted / revoked for calendar and health)
-- [ ] Revoke action clears integration cache for the revoked source
-- [ ] Retry action records retry timestamp and clears stale integration error state
-- [ ] Daily loop adherence telemetry persists check-in and EOD completion history over time
-- [ ] My Progress shows 14-day loop completion metrics (overall + morning + EOD)
-- [ ] Home screen loop intervention nudge appears when 14-day morning/EOD drop-off is high (non-punitive copy + direct resume action + daily dismiss)
-- [ ] Loop intervention telemetry logs shown/actioned/dismissed events and My Progress shows "Nudge recovery (14d)"
-- [ ] Adaptive nudge sensitivity adjusts threshold/min-opens by recent completion and dismissal behavior, and surfaces diagnostics in My Progress
+- [x] Calendar context ingestion scaffold in app (local summary key + AI context field)
+- [x] Health context ingestion scaffold in app (sleep/HRV/readiness summary key + AI context field)
+- [x] Morning loop displays upcoming pressure window when calendar context is present
+- [x] Reframe request includes integration context payload (calendar + health) when available
+- [x] Integration settings copy added (planned/connected/error states) without requiring live provider auth
+- [x] Integration consent scaffold in Settings (pending / granted / revoked for calendar and health)
+- [x] Revoke action clears integration cache for the revoked source
+- [x] Retry action records retry timestamp and clears stale integration error state
+- [x] Daily loop adherence telemetry persists check-in and EOD completion history over time
+- [x] My Progress shows 14-day loop completion metrics (overall + morning + EOD)
+- [x] Home screen loop intervention nudge appears when 14-day morning/EOD drop-off is high (non-punitive copy + direct resume action + daily dismiss)
+- [x] Loop intervention telemetry logs shown/actioned/dismissed events and My Progress shows "Nudge recovery (14d)"
+- [x] Adaptive nudge sensitivity adjusts threshold/min-opens by recent completion and dismissal behavior, and surfaces diagnostics in My Progress
 - [ ] Post-launch: provider hookups (Apple/Google calendar + health providers) with explicit consent and revoke paths
 
 ### Pinned human-required actions (can do later if not feeling well)
@@ -280,23 +280,30 @@
 - [ ] Live-mode checkout tested for monthly + annual variants
 - [ ] Server-side subscription verification planned (webhook + Supabase truth table)
 
+### Added April 11 — Architecture completion (code-side)
+- [x] Onboarding compressed to one-screen composure architecture intro + direct calibration handoff
+- [x] Contextual first-time tip added on Home loop (dismiss + persisted)
+- [x] Contextual first-time tip added in Pulse panel (dismiss + persisted)
+- [x] FAQ moved to top of Settings for low-friction support access
+- [x] Data export activated in Settings (`Export pulse log (PDF)` + `Export session history (CSV)`)
+
 ---
 
 ## SHIP BASELINE — NON-NEGOTIABLE INVARIANTS (Required before every push)
 
 ### Invariant lock (must all be true)
-- [ ] Audience framing is universal: Stillform is for everyone (no niche-only positioning language)
-- [ ] Composure is described as a daily trainable skill, not a trait for specific groups
-- [ ] No copy contradicts trust/integrity posture (no overclaiming, no manipulative urgency)
-- [ ] Ecosystem logic preserved (strengthen existing loops before adding branchy modules)
-- [ ] Public-facing deck/app wording is aligned (no strategy/app mismatch)
+- [x] Audience framing is universal: Stillform is for everyone (no niche-only positioning language)
+- [x] Composure is described as a daily trainable skill, not a trait for specific groups
+- [x] No copy contradicts trust/integrity posture (no overclaiming, no manipulative urgency)
+- [x] Ecosystem logic preserved (strengthen existing loops before adding branchy modules)
+- [x] Public-facing deck/app wording is aligned (no strategy/app mismatch)
 
 ### Execution quality gate (must all be true)
-- [ ] One coherent pass completed (no reactive patch-chain edits left unresolved)
-- [ ] Constraint check performed before implementation (what changes / what does not)
-- [ ] Post-change verification performed against invariants and product purpose
-- [ ] Build passes (`npm run build`)
-- [ ] SHIP preflight passes (`npm run ship:preflight`)
+- [x] One coherent pass completed (no reactive patch-chain edits left unresolved)
+- [x] Constraint check performed before implementation (what changes / what does not)
+- [x] Post-change verification performed against invariants and product purpose
+- [x] Build passes (`npm run build`)
+- [x] SHIP preflight passes (`npm run ship:preflight`)
 
 ### Escalation rule
 - [ ] If any invariant fails, release is blocked and changes are reworked before push

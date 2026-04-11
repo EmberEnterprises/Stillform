@@ -71,66 +71,66 @@
 ## 🟡 BUILD BEFORE LAUNCH (priority order)
 
 ### Morning Check-In → Reframe Flow
-- [ ] "Set my tone" transitions to Reframe MORNING MODE
-- [ ] AI pre-loaded with check-in data
-- [ ] Morning AI: sharp, forward-looking, priming, 90 seconds
-- [ ] Build morning system prompt
+- [x] "Set my tone" transitions to Reframe MORNING MODE
+- [x] AI pre-loaded with check-in data
+- [x] Morning AI: sharp, forward-looking, priming, 90 seconds
+- [x] Build morning system prompt
 
 ### Evening Check-In → Reframe Flow  
-- [ ] "Want to clear anything before bed?" → Yes/No
-- [ ] Yes → Reframe EVENING MODE (closure, not analysis)
-- [ ] Evening AI: short, calming, "put it down" language
-- [ ] Never opens new threads, never says "tell me more"
-- [ ] Build evening system prompt
+- [x] "Want to clear anything before bed?" → Yes/No
+- [x] Yes → Reframe EVENING MODE (closure, not analysis)
+- [x] Evening AI: short, calming, "put it down" language
+- [x] Never opens new threads, never says "tell me more"
+- [x] Build evening system prompt
 
 ### Mandatory Post-Session Rating
-- [ ] Full screen "Where are you now?" after every session
-- [ ] Same chips as entry
-- [ ] NOT skippable — Done button only appears after answer
-- [ ] Save pre/post delta to session history
-- [ ] Feed delta to AI and My Progress
+- [x] Full screen "Where are you now?" after every session
+- [x] Same chips as entry
+- [x] NOT skippable — Done button only appears after answer
+- [x] Save pre/post delta to session history
+- [x] Feed delta to AI and My Progress
 
 ### Offline Reframe Fallback
-- [ ] 3 retries with exponential backoff
-- [ ] After 3 failures → structured self-guided reframe activates
-- [ ] 5-step flow: feeling → brain adding → friend advice → one action → completion
-- [ ] Pull past session evidence from localStorage
-- [ ] Save as self-guided session (flag: "self-guided: true")
+- [x] 3 retries with exponential backoff
+- [x] After 3 failures → structured self-guided reframe activates
+- [x] 5-step flow: feeling → brain adding → friend advice → one action → completion
+- [x] Pull past session evidence from localStorage
+- [x] Save as self-guided session (flag: "self-guided: true")
 
 ### Tutorial Restructure
-- [ ] Cut from 6 slides to 1 slide + assessment
+- [x] Cut from 6 slides to 1 slide + assessment
 - [ ] Move remaining content to promo page
-- [ ] Move remaining content to FAQ
-- [ ] Build contextual tooltips (first-time inline education)
+- [x] Move remaining content to FAQ
+- [x] Build contextual tooltips (first-time inline education)
 - [ ] Skip button stays
-- [ ] Full tutorial replayable from Settings
+- [x] Full tutorial replayable from Settings
 
 ### Pulse Rotating Placeholders
-- [ ] Replace "What happened? Add context..." with specific questions
-- [ ] Rotate: "What triggered this?" / "What were you about to do?" / "Who was involved?"
+- [x] Replace "What happened? Add context..." with specific questions
+- [x] Rotate: "What triggered this?" / "What were you about to do?" / "Who was involved?"
 
 ### FAQ Improvements
-- [ ] Add "?" icon to top nav bar (always visible)
-- [ ] Move FAQ to TOP of Settings (above toggles)
-- [ ] Add visual grounding FAQ entry
-- [ ] Contextual tooltips supplement FAQ inline
+- [x] Add "?" icon to top nav bar (always visible)
+- [x] Move FAQ to TOP of Settings (above toggles)
+- [x] Add visual grounding FAQ entry
+- [x] Contextual tooltips supplement FAQ inline
 
 ### Reframe First-Time Explainer
-- [ ] One line before first input, first time only
-- [ ] "This is an AI that learns your patterns. Say what's on your mind."
-- [ ] Never shows again after first session
+- [x] One line before first input, first time only
+- [x] "This is an AI that learns your patterns. Say what's on your mind."
+- [x] Never shows again after first session
 
 ### User-Facing AI Insights
-- [ ] Second note type: user-facing (filtered through guardrails)
-- [ ] New section in Your Patterns: "What the AI has noticed"
-- [ ] Shows last 3-5 insights
-- [ ] Guardrails: no labels, no judgments, no clinical language, no vulnerabilities
-- [ ] After session 5: one insight shown after post-rating
+- [x] Second note type: user-facing (filtered through guardrails)
+- [x] New section in Your Patterns: "What the AI has noticed"
+- [x] Shows last 3-5 insights
+- [x] Guardrails: no labels, no judgments, no clinical language, no vulnerabilities
+- [x] After session 5: one insight shown after post-rating
 
 ### Crisis Screen Improvements
-- [ ] tel: links for tap-to-call
-- [ ] Geolocation-aware ordering (user's country first)
-- [ ] Full list collapses below under "Other resources"
+- [x] tel: links for tap-to-call
+- [x] Geolocation-aware ordering (user's country first)
+- [x] Full list collapses below under "Other resources"
 
 ---
 
@@ -193,6 +193,11 @@
 - [x] Cloud sync reliability improved (per-user restore + key-level dedupe + conflict upsert target)
 - [x] Paywall edge hardening (checkout lock state, safer errors, inconsistent trial-state guard)
 - [x] Premium-style Cloud Sync placeholder removed from Settings to reduce pricing confusion
+- [x] Tutorial compressed to one-screen intro + direct calibration handoff
+- [x] Contextual first-time tips added on Home and Pulse (dismiss + persisted)
+- [x] FAQ moved to top of Settings for low-friction support
+- [x] Data export activated in Settings (Pulse PDF print view + Session CSV download)
+- [x] SHIP preflight expanded for onboarding/context-tip/export invariants
 
 ### 🧷 User actions (do when you can — not urgent today)
 - [ ] **Termly privacy policy update** to explicitly state encrypted cloud storage (Supabase), auth email usage, and restore flow.
@@ -205,6 +210,7 @@
 ### 🟡 Launch status snapshot
 - **Soft launch:** ready with controlled audience.
 - **Broad launch:** wait for live payment verification + server-side subscription truth + privacy policy publish.
+- **Code-side architecture:** complete for current web scope; remaining blockers are external account/platform actions.
 
 ---
 

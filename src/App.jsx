@@ -7198,6 +7198,7 @@ export default function Stillform() {
   const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
+  const [exportStatus, setExportStatus] = useState("");
   const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
@@ -7421,6 +7422,131 @@ export default function Stillform() {
     }
     setSyncSuccess(message);
     try { window.setTimeout(() => setSyncSuccess(null), 3200); } catch {}
+  };
+
+  const setExportStatusWithClear = (message) => {
+    setExportStatus(message);
+    try { window.setTimeout(() => setExportStatus(""), 3200); } catch {}
+  };
+
+  const getArrayFromStorage = (key) => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  };
+
+  const escapeHtml = (value) => String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  const downloadTextFile = (content, filename, mimeType) => {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = filename;
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  };
+
+  const csvValue = (value) => {
+    const raw = value == null ? "" : String(value);
+    if (/[",\n]/.test(raw)) return `"${raw.replace(/"/g, "\"\"")}"`;
+    return raw;
+  };
+
+  const exportSessionHistoryCsv = () => {
+    const sessions = getArrayFromStorage("stillform_sessions");
+    if (sessions.length === 0) {
+      setExportStatusWithClear("No sessions to export yet.");
+      return;
+    }
+    const headers = [
+      "timestamp",
+      "source",
+      "mode",
+      "entryMode",
+      "tools",
+      "durationSec",
+      "preState",
+      "postState",
+      "delta",
+      "selfGuided",
+      "exitPoint"
+    ];
+    const lines = [
+      headers.join(","),
+      ...sessions.map((session) => [
+        csvValue(session.timestamp),
+        csvValue(session.source),
+        csvValue(session.mode),
+        csvValue(session.entryMode),
+        csvValue(Array.isArray(session.tools) ? session.tools.join("|") : ""),
+        csvValue(session.duration ? Math.round(Number(session.duration) / 1000) : ""),
+        csvValue(session.preState),
+        csvValue(session.postState),
+        csvValue(Number.isFinite(session.delta) ? session.delta : ""),
+        csvValue(session.selfGuided ? "yes" : "no"),
+        csvValue(session.exitPoint)
+      ].join(","))
+    ];
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadTextFile(lines.join("\n"), `stillform-session-history-${stamp}.csv`, "text/csv;charset=utf-8");
+    setExportStatusWithClear(`Session CSV downloaded (${sessions.length} rows).`);
+    try { window.plausible("Session CSV Exported", { props: { rows: sessions.length } }); } catch {}
+  };
+
+  const exportPulseLogPdf = () => {
+    const entries = getArrayFromStorage("stillform_journal");
+    if (entries.length === 0) {
+      setExportStatusWithClear("No pulse entries to export yet.");
+      return;
+    }
+    const win = window.open("", "_blank", "noopener,noreferrer");
+    if (!win) {
+      setExportStatusWithClear("Popup blocked. Allow popups to export PDF.");
+      return;
+    }
+    const rows = entries.map((entry) => {
+      const signal = Array.isArray(entry.signal) && entry.signal.length > 0
+        ? entry.signal.join(", ")
+        : (Array.isArray(entry.emotions) ? entry.emotions.join(", ") : "");
+      const trigger = [entry.triggerType, entry.trigger].filter(Boolean).join(" — ");
+      return `
+        <tr>
+          <td>${escapeHtml(entry.date || "")}</td>
+          <td>${escapeHtml(entry.time || "")}</td>
+          <td>${escapeHtml(signal || "")}</td>
+          <td>${escapeHtml(trigger || "")}</td>
+          <td>${escapeHtml(entry.outcome || "")}</td>
+          <td>${escapeHtml(entry.notes || entry.body || "")}</td>
+        </tr>`;
+    }).join("");
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
+      body{font-family:Arial,sans-serif;background:#fff;color:#111;margin:24px;}
+      h1{font-size:18px;margin:0 0 6px;}
+      p{font-size:12px;color:#555;margin:0 0 16px;}
+      table{width:100%;border-collapse:collapse;font-size:11px;}
+      th,td{border:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:left;}
+      th{background:#f4f4f4;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+    </style></head><body>
+      <h1>Stillform Pulse Log</h1>
+      <p>Exported ${new Date().toLocaleString()} · ${entries.length} entries</p>
+      <table>
+        <thead><tr><th>Date</th><th>Time</th><th>Signal</th><th>Trigger</th><th>Outcome</th><th>Notes</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`);
+    win.document.close();
+    try { win.focus(); win.print(); } catch {}
+    setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
+    try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
   };
 
   const refreshSubscriptionStatus = async () => {
@@ -10171,27 +10297,6 @@ export default function Stillform() {
                 ))}
               </div>
 
-              {/* Export */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Export</div>
-                {[
-                  { label: "Export pulse log (PDF)", desc: "Download your full pulse log" },
-                  { label: "Export session history (CSV)", desc: "Your regulation data for personal records or a provider" }
-                ].map((item, i) => (
-                  <div key={i} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", marginBottom: 4, opacity: 0.75,
-                    display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>{item.label}</div>
-                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{item.desc}</div>
-                    </div>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Coming soon</div>
-                  </div>
-                ))}
-              </div>
-
               {/* Notifications — micro-nudges, needs native */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Notifications</div>
@@ -10265,13 +10370,6 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => openFaq("settings")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  FAQ
-                </button>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
@@ -10332,17 +10430,27 @@ export default function Stillform() {
               </div>
 
               {/* Export */}
-              <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "12px 16px", marginBottom: 8, opacity: 0.4,
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, color: "var(--text-muted)" }}>Export your data</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Download pulse log, sessions, insights as PDF or CSV</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
+                  <button onClick={exportPulseLogPdf} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Export pulse log (PDF)</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Opens a printable document for Save as PDF.</div>
+                  </button>
+                  <button onClick={exportSessionHistoryCsv} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Export session history (CSV)</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Structured session data for personal review or provider share.</div>
+                  </button>
                 </div>
-                <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Coming soon</div>
-              </div>
+                {exportStatus && (
+                  <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>
+                    {exportStatus}
+                  </div>
+                )}
 
               {/* Delete — small, understated, double confirm */}
               <button onClick={() => {
