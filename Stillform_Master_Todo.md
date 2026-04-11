@@ -161,7 +161,7 @@
 
 ## 💰 BUSINESS
 
-- [ ] Switch Lemon Squeezy from test to live (Bobby triggers)
+- [x] Switch Lemon Squeezy from test to live (user-confirmed Apr 9: live subscribe + cancel + confirmation emails)
 - [ ] Google Play Console $25
 - [ ] Copyright filing $65
 - [ ] @stillformapp Instagram
@@ -173,7 +173,7 @@
 ## ❓ OPEN DECISIONS
 
 1. Simplify breathing to 2 options or keep 4 with honest framing?
-2. When to switch Lemon Squeezy test → live?
+2. Confirm monthly + annual live-mode variant pass and update launch checklist closure.
 3. Reddit timing?
 4. TestFlight before or after cloud?
 5. Neuro voice — web first or native first?
@@ -201,8 +201,8 @@
 
 ### 🧷 User actions (do when you can — not urgent today)
 - [ ] **Termly privacy policy update** to explicitly state encrypted cloud storage (Supabase), auth email usage, and restore flow.
-- [ ] **Lemon Squeezy test -> live switch** (replace checkout URL with live URL in app once ready).
-- [ ] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set.
+- [x] **Lemon Squeezy test -> live switch** (user-confirmed Apr 9 via live subscribe + cancel and confirmation emails).
+- [ ] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set (open until both variants are explicitly confirmed).
 - [ ] **Confirm variant mapping** in Lemon checkout (monthly vs annual) and receipts.
 - [ ] **Server-side subscription verification** (webhook + Supabase truth table) for production revenue protection.
 - [ ] **Manual QA on a second device** for cloud restore integrity (sessions, pulse, profiles).
