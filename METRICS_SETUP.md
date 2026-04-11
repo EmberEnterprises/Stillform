@@ -38,7 +38,8 @@ This creates:
 The ingest endpoint:
 
 - requires Supabase auth token (signed-in user)
-- requires `metrics_opt_in: true`
+- enabled by default in-app; users can turn metrics sharing off anytime in Settings
+- ingest endpoint still requires `metrics_opt_in: true` in payload to accept writes
 - sanitizes payload to numeric/boolean metrics fields
 
 ## 3) App behavior

@@ -9440,8 +9440,8 @@ export default function Stillform() {
             <h2>Your Data</h2>
             <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups are also stored in our Supabase cloud infrastructure so you can restore data across devices. Data is encrypted on-device before upload.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
-            <h2>Optional Performance Metrics (counts + rates only)</h2>
-            <p>If you enable Performance Metrics in Settings, Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas) so we can verify app performance and reliability.</p>
+            <h2>Performance Metrics (counts + rates only)</h2>
+            <p>Performance Metrics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas).</p>
             <p>These metrics do not include journal text, AI conversation content, or free-form notes. You can turn this off anytime in Settings, and this handling is covered in this Privacy &amp; Disclaimers view and our full Privacy Policy.</p>
 
             <h2>Assumption of Risk</h2>
@@ -10720,7 +10720,7 @@ export default function Stillform() {
                   <div>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
+                      Enabled by default. Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
                     </div>
                   </div>
                   <button onClick={() => setMetricsOptIn((value) => !value)} style={{
