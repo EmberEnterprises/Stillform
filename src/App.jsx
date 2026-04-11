@@ -3519,6 +3519,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const handleSend = async (retryText) => {
     const textToSend = retryText || input;
     if (!textToSend.trim() || loading) return;
+    const integrationContext = getIntegrationContext();
 
     const userMsg = { role: "user", text: textToSend };
     const prevMessages = retryText ? messages.slice(0, -1) : messages;
