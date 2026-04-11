@@ -1346,6 +1346,82 @@ const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
 const METRICS_SCHEMA_VERSION = 1;
+const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
+const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
+
+const THEME_PRESETS = {
+  dark: {
+    "--bg": "#0A0A0C",
+    "--surface": "#141418",
+    "--surface2": "#1A1A1F",
+    "--border": "rgba(255,255,255,0.07)",
+    "--border-hi": "rgba(255,255,255,0.12)",
+    "--amber": "#C8922A",
+    "--amber-dim": "rgba(200,146,42,0.25)",
+    "--amber-glow": "rgba(200,146,42,0.07)",
+    "--amber-20": "rgba(200,146,42,0.20)",
+    "--text": "#E8EAF0",
+    "--text-dim": "#9496A1",
+    "--text-muted": "#95979f",
+    "--green": "#4a8c6a",
+    "--green-glow": "rgba(74,140,106,0.08)"
+  },
+  midnight: {
+    "--bg": "#070b18",
+    "--surface": "#0f1526",
+    "--surface2": "#141d33",
+    "--border": "rgba(156,184,255,0.18)",
+    "--border-hi": "rgba(173,198,255,0.28)",
+    "--amber": "#8eb5ff",
+    "--amber-dim": "rgba(142,181,255,0.28)",
+    "--amber-glow": "rgba(142,181,255,0.12)",
+    "--amber-20": "rgba(142,181,255,0.20)",
+    "--text": "#e7eefc",
+    "--text-dim": "#9db0d7",
+    "--text-muted": "#8fa4ce",
+    "--green": "#7abfa4",
+    "--green-glow": "rgba(122,191,164,0.12)"
+  },
+  warm: {
+    "--bg": "#150f08",
+    "--surface": "#22170d",
+    "--surface2": "#2a1c10",
+    "--border": "rgba(234,186,124,0.22)",
+    "--border-hi": "rgba(239,199,148,0.30)",
+    "--amber": "#e3a44f",
+    "--amber-dim": "rgba(227,164,79,0.34)",
+    "--amber-glow": "rgba(227,164,79,0.13)",
+    "--amber-20": "rgba(227,164,79,0.23)",
+    "--text": "#f6eee4",
+    "--text-dim": "#d4b895",
+    "--text-muted": "#c8aa86",
+    "--green": "#96b78a",
+    "--green-glow": "rgba(150,183,138,0.12)"
+  },
+  light: {
+    "--bg": "#f6f7fb",
+    "--surface": "#ffffff",
+    "--surface2": "#eef1f8",
+    "--border": "rgba(16,24,40,0.11)",
+    "--border-hi": "rgba(16,24,40,0.19)",
+    "--amber": "#b1700a",
+    "--amber-dim": "rgba(177,112,10,0.30)",
+    "--amber-glow": "rgba(177,112,10,0.10)",
+    "--amber-20": "rgba(177,112,10,0.20)",
+    "--text": "#171b27",
+    "--text-dim": "#5f6473",
+    "--text-muted": "#656b7b",
+    "--green": "#2f7c59",
+    "--green-glow": "rgba(47,124,89,0.12)"
+  }
+};
+
+const applyThemePreset = (themeId) => {
+  if (typeof document === "undefined") return;
+  const preset = THEME_PRESETS[themeId] || THEME_PRESETS.dark;
+  const root = document.documentElement;
+  Object.entries(preset).forEach(([token, value]) => root.style.setProperty(token, value));
+};
 
 const readArrayFromStorage = (key) => {
   try {
@@ -3512,6 +3588,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         body: JSON.stringify({
           input: `INTERNAL — SESSION SUMMARY REQUEST. This is not a user message. Write 2-3 sentences capturing what mattered in this session. Focus on: what they confided, any growth or patterns you noticed, what their current concern is, and what made them feel understood (if anything). Do NOT use clinical labels. Write like a friend's mental note, not a chart entry. Return JSON: { "distortion": null, "reframe": "your session note" }`,
           mode: effectiveMode,
+          aiTone: aiToneChoice,
           history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
           sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()
         })
@@ -3922,6 +3999,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             } catch { return null; }
           })(),
           regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })(),
+          aiTone: aiToneChoice,
           sessionEntryMode: entryMode,
           sessionNotes: (() => {
             try {
@@ -7317,8 +7395,22 @@ export default function Stillform() {
     }
   };
   const [pricingPlan, setPricingPlan] = useState("annual");
-  const [themeChoice, setThemeChoice] = useState(() => { try { return localStorage.getItem("stillform_theme") || "dark"; } catch { return "dark"; } });
-  const [aiToneChoice, setAiToneChoice] = useState(() => { try { return localStorage.getItem("stillform_ai_tone") || "balanced"; } catch { return "balanced"; } });
+  const [themeChoice, setThemeChoice] = useState(() => {
+    try {
+      const stored = localStorage.getItem("stillform_theme") || "dark";
+      return VALID_THEME_IDS.has(stored) ? stored : "dark";
+    } catch {
+      return "dark";
+    }
+  });
+  const [aiToneChoice, setAiToneChoice] = useState(() => {
+    try {
+      const stored = localStorage.getItem("stillform_ai_tone") || "balanced";
+      return VALID_AI_TONE_IDS.has(stored) ? stored : "balanced";
+    } catch {
+      return "balanced";
+    }
+  });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState(null);
   const [openLog, setOpenLog] = useState(null);
@@ -7360,7 +7452,7 @@ export default function Stillform() {
     customization: false,
     signal: false,
     more: false,
-    data: false
+    data: true
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -7370,6 +7462,14 @@ export default function Stillform() {
   const [metricsLastSentAt, setMetricsLastSentAt] = useState(() => {
     try { return localStorage.getItem(METRICS_LAST_SENT_AT_KEY) || ""; } catch { return ""; }
   });
+  useEffect(() => {
+    const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
+    applyThemePreset(themeToApply);
+    if (themeToApply !== themeChoice) {
+      try { localStorage.setItem("stillform_theme", themeToApply); } catch {}
+      setThemeChoice(themeToApply);
+    }
+  }, [themeChoice]);
   const metricsAuthToken = sbGetSession()?.access_token || "";
   const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
@@ -7378,6 +7478,20 @@ export default function Stillform() {
   const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
   const toggleSettingsSection = (key) => {
     setSettingsSectionOpen((current) => ({ ...current, [key]: !current?.[key] }));
+  };
+
+  const setThemeSelection = (nextTheme) => {
+    if (!VALID_THEME_IDS.has(nextTheme)) return;
+    try { localStorage.setItem("stillform_theme", nextTheme); } catch {}
+    setThemeChoice(nextTheme);
+    refreshSettings();
+  };
+
+  const setAiToneSelection = (nextTone) => {
+    if (!VALID_AI_TONE_IDS.has(nextTone)) return;
+    try { localStorage.setItem("stillform_ai_tone", nextTone); } catch {}
+    setAiToneChoice(nextTone);
+    refreshSettings();
   };
 
   useEffect(() => {
@@ -9781,11 +9895,11 @@ export default function Stillform() {
               })()}
             </div>
 
-            {/* Daily Reminder */}
+            {/* Notifications + Reminder */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Daily Reminder</div>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Notifications</div>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                A daily nudge to check in. Delivered as a push notification on iOS and Android.
+                Manage check-in reminder and notification behavior in one place.
               </div>
               {(() => {
                 const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
@@ -9795,7 +9909,7 @@ export default function Stillform() {
                   <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                     <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
-                        <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in</div>
+                        <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in reminder</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
                           {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
                         </div>
@@ -9818,6 +9932,9 @@ export default function Stillform() {
                           position: "absolute", top: 3, left: reminderOn ? 23 : 3, transition: "left 0.2s"
                         }} />
                       </button>
+                    </div>
+                    <div style={{ padding: "10px 18px", borderTop: "0.5px solid var(--border)", fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                      Mobile push notification support depends on device/browser permissions and native shell capabilities.
                     </div>
                     {reminderOn && (
                       <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
@@ -10582,42 +10699,52 @@ export default function Stillform() {
               {/* Theme options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
-                {[
+              {[
                   { id: "dark", label: "Dark" },
                   { id: "midnight", label: "Midnight Blue" },
                   { id: "warm", label: "Warm Amber" },
                   { id: "light", label: "Light" }
-                ].map(t => (
-                  <div key={t.id} style={{
-                    background: t.id === "dark" ? "var(--amber-glow)" : "var(--surface)",
-                    border: `1px solid ${t.id === "dark" ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                    display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>{t.label}</div>
-                  </div>
-                ))}
+                ].map(t => {
+                  const selected = themeChoice === t.id;
+                  return (
+                    <button key={t.id} type="button" onClick={() => setThemeSelection(t.id)} style={{
+                      width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4, cursor: "pointer",
+                      display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
+                      {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* AI Tone options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
                 {[
-                  { id: "default", label: "Balanced (default)" },
+                  { id: "balanced", label: "Balanced (default)" },
                   { id: "gentle", label: "Gentle" },
                   { id: "direct", label: "Direct & blunt" },
                   { id: "clinical", label: "Clinical / technical" },
                   { id: "motivational", label: "Motivational" }
-                ].map(t => (
-                  <div key={t.id} style={{
-                    background: t.id === "default" ? "var(--amber-glow)" : "var(--surface)",
-                    border: `1px solid ${t.id === "default" ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                    display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>{t.label}</div>
-                  </div>
-                ))}
+                ].map(t => {
+                  const selected = aiToneChoice === t.id;
+                  return (
+                    <button key={t.id} type="button" onClick={() => setAiToneSelection(t.id)} style={{
+                      width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
+                      display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                      textAlign: "left", fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
+                      {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Notifications — micro-nudges, needs native */}

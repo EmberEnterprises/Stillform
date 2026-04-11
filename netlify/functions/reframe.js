@@ -448,7 +448,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced" } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -492,6 +492,9 @@ exports.handler = async function(event) {
     if (isScreenshot) {
       contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
     }
+    const inputNormalized = input.toLowerCase().replace(/['']/g, "");
+    const crisisTerms = ["see the point", "no point anymore", "nobody would notice", "nobody would care", "nobody will notice", "nobody will care", "better off without me", "want to die", "wanna die", "kill myself", "end it all", "not worth living", "can't go on", "cant go on", "give up on everything", "no reason to live", "want to disappear", "wanna disappear", "wouldn't miss me", "wouldnt miss me", "ending it", "self harm", "self-harm", "hurt myself", "suicidal", "don't want to be here", "dont want to be here", "rather not be alive", "nothing matters", "no one cares", "no one would care", "what's the point", "whats the point"];
+    const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
     
     // BIO-FILTER FIRST — physical reality overrides everything
     // This must be the first thing the AI reads because it colors every interpretation
@@ -520,6 +523,16 @@ exports.handler = async function(event) {
         "balanced": "USER'S REGULATION TYPE: Balanced. This person uses both pathways. Follow their lead — if they start with thoughts, stay cognitive. If they describe body sensations, go somatic. Don't default to either."
       };
       if (typeMap[regulationType]) contextParts.push(typeMap[regulationType]);
+    }
+    const toneMap = {
+      balanced: "TONE CALIBRATION: Balanced. Keep your default Stillform voice — direct, warm, precise.",
+      gentle: "TONE CALIBRATION: Gentle. Soften edges while staying specific and honest. No sharp phrasing, no cold bluntness.",
+      direct: "TONE CALIBRATION: Direct. Use concise, plain language with minimal cushioning. Stay respectful but cut straight to signal.",
+      clinical: "TONE CALIBRATION: Clinical/technical. Use structured, analytical language while still human. Avoid sterile jargon overload.",
+      motivational: "TONE CALIBRATION: Motivational. Add grounded forward energy and momentum language, but avoid hype clichés."
+    };
+    if (toneMap[aiTone] && !hasCrisisLanguage) {
+      contextParts.push(toneMap[aiTone]);
     }
     if (feelState) {
       const feelMap = {
@@ -610,9 +623,6 @@ WHAT STAYING SHARP LOOKS LIKE:
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     // CRISIS DETECTION — hard-coded, cannot be ignored by the AI
-    const crisisTerms = ["see the point", "no point anymore", "nobody would notice", "nobody would care", "nobody will notice", "nobody will care", "better off without me", "want to die", "wanna die", "kill myself", "end it all", "not worth living", "can't go on", "cant go on", "give up on everything", "no reason to live", "want to disappear", "wanna disappear", "wouldn't miss me", "wouldnt miss me", "ending it", "self harm", "self-harm", "hurt myself", "suicidal", "don't want to be here", "dont want to be here", "rather not be alive", "nothing matters", "no one cares", "no one would care", "what's the point", "whats the point"];
-    const inputNormalized = input.toLowerCase().replace(/['']/g, "");
-    const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
     if (hasCrisisLanguage) {
       systemPrompt = `SAFETY OVERRIDE — THIS IS YOUR HIGHEST PRIORITY:\nThe user's message contains language that may indicate crisis or suicidal ideation. You MUST:\n1. Acknowledge what they said directly — do not deflect or redirect to breathing\n2. Ask clearly: "Are you thinking about hurting yourself?"\n3. Surface resources INLINE in your response: "If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7."\n4. Stay present: "I'm still here. You can keep talking to me too."\n5. Do NOT minimize, do NOT give generic comfort, do NOT skip the resource. This is non-negotiable.\n\n` + systemPrompt;
     }
