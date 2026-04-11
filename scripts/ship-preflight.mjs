@@ -28,6 +28,8 @@ const checks = [
   { label: "Onboarding step wizard removed", cmd: "rg", args: ["-n", "onboardStep|setOnboardStep", "src/App.jsx"], type: "must-not-match" },
   { label: "Settings FAQ priority placement", cmd: "rg", args: ["-n", "FAQ \\(top priority for low-friction support\\)|Open FAQ →", "src/App.jsx"], type: "must-match" },
   { label: "Data export actions active", cmd: "rg", args: ["-n", "exportPulseLogPdf|exportSessionHistoryCsv|Pulse PDF Exported|Session CSV Exported", "src/App.jsx"], type: "must-match" },
+  { label: "Core loop smoke script present", cmd: "rg", args: ["-n", "\"smoke:core-loop\": \"node scripts/core-loop-smoke\\.mjs\"", "package.json"], type: "must-match" },
+  { label: "Launch runbook present", cmd: "rg", args: ["-n", "Stillform Launch-Day Runbook|core-loop-smoke\\.mjs", "docs/LAUNCH_DAY_RUNBOOK.md"], type: "must-match" },
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
