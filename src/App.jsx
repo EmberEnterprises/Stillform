@@ -9477,7 +9477,7 @@ export default function Stillform() {
               },
               {
                 q: "What does 'status is junk code for the ego' mean?",
-                a: "Status loops make you optimize for image over integrity. Stillform treats that as noise: if you're spiraling on comparison, hierarchy, or how it looks, the AI brings you back to signal — what matters if nobody is watching, and one concrete next move aligned with your values."
+                a: "In Stillform, this is handled as a micro-bias check: sometimes your system reads status threat where there is only comparison noise. The AI helps you separate image anxiety from real consequence, then move on signal — what matters if nobody is watching, and one concrete next move aligned with your values."
               },
               {
                 q: "How does the AI know what I need?",
