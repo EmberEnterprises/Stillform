@@ -99,10 +99,22 @@
         window.__pwaInstallPrompt = e;
       });
 
+      // Reliability-first hotfix:
+      // aggressively remove legacy service workers/caches that can strand users on
+      // stale asset manifests and cause blank screen starts after deploys.
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js');
-        });
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          registrations.forEach(function(registration) {
+            registration.unregister();
+          });
+        }).catch(function() {});
+      }
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) {
+            caches.delete(name);
+          });
+        }).catch(function() {});
       }
     </script>
   </head>
