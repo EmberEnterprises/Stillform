@@ -93,6 +93,32 @@
       plausible.init()
     </script>
     <script>
+      (function() {
+        var bootTimeout = setTimeout(function() {
+          if (document.getElementById('root') && document.getElementById('root').children.length === 0) {
+            var fallback = document.createElement('div');
+            fallback.style.minHeight = '100vh';
+            fallback.style.display = 'flex';
+            fallback.style.flexDirection = 'column';
+            fallback.style.alignItems = 'center';
+            fallback.style.justifyContent = 'center';
+            fallback.style.padding = '28px';
+            fallback.style.textAlign = 'center';
+            fallback.style.background = '#0A0A0C';
+            fallback.style.color = '#E8EAF0';
+            fallback.style.fontFamily = "'DM Sans', sans-serif";
+            fallback.innerHTML = "<div style='font-size:28px;font-family:\"Cormorant Garamond\",serif;font-weight:300;color:#C8922A;margin-bottom:10px'>Stillform</div><div style='font-size:14px;color:#9496A1;line-height:1.6;margin-bottom:16px'>Startup took longer than expected. Your data is safe.</div><button id='stillform-reload-btn' style='background:#C8922A;color:#0A0A0C;border:none;border-radius:4px;padding:12px 18px;font-size:14px;cursor:pointer'>Reload app</button>";
+            document.body.innerHTML = '';
+            document.body.appendChild(fallback);
+            var btn = document.getElementById('stillform-reload-btn');
+            if (btn) btn.onclick = function() { window.location.replace('/?refresh=1&ts=' + Date.now()); };
+          }
+        }, 12000);
+        window.addEventListener('load', function() {
+          clearTimeout(bootTimeout);
+        });
+      })();
+
       // Capture PWA install prompt BEFORE React loads
       window.__pwaInstallPrompt = null;
       window.addEventListener('beforeinstallprompt', function(e) {
