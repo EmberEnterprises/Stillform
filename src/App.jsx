@@ -3821,6 +3821,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const handleSend = async (retryText) => {
     const textToSend = retryText || input;
     if (!textToSend.trim() || loading) return;
+    if (error) setError(null);
     const integrationContext = resolveIntegrationContext();
 
     const userMsg = { role: "user", text: textToSend };
@@ -4471,10 +4472,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }}>
           <div style={{ fontSize: 14, color: "#e05", marginBottom: 12, lineHeight: 1.5 }}>{error}</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
-            <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => handleSend(lastInput)}>
+            <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => handleSend(lastInput || input)}>
               ↺ Retry
             </button>
-            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput)}>
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput || input)}>
               Continue offline
             </button>
             <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setError(null)}>
@@ -10265,35 +10266,27 @@ export default function Stillform() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Subscription status</div>
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ fontSize: 13, color: "var(--text)" }}>Local app state</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                  <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
                     {isSubscribed ? "ACTIVE" : "INACTIVE"}
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
-                  {isSubscribed
-                    ? "This device currently has active access."
-                    : (trialExpired ? "Trial expired. Subscription required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
-                </div>
-
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-                  <div style={{ fontSize: 13, color: "var(--text)" }}>Server truth</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
-                    {hasPendingWebhookSync ? "PENDING WEBHOOK" : "READY TO CHECK"}
-                  </div>
-                </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  {isSubscribed
+                    ? "This device has active access."
+                    : (trialExpired ? "Trial expired. Subscription is required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
+                </div>
+                <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
                   {hasPendingWebhookSync
-                    ? "Recent checkout detected. Waiting for webhook confirmation window before downgrading access."
-                    : "Use server refresh if subscription status looks wrong on this device."}
+                    ? "Recent checkout detected. Waiting for webhook confirmation."
+                    : "If access looks wrong, refresh from server."}
                 </div>
                 {subscriptionLastCheckedAt > 0 && (
-                  <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+                  <div style={{ marginTop: 4, fontSize: 10, color: "var(--text-muted)" }}>
                     Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
                   </div>
                 )}
-
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     className="btn btn-ghost"
@@ -10301,7 +10294,7 @@ export default function Stillform() {
                     onClick={refreshSubscriptionStatus}
                     disabled={subscriptionStatusLoading}
                   >
-                    {subscriptionStatusLoading ? "Checking..." : "Refresh status (server)"}
+                    {subscriptionStatusLoading ? "Checking..." : "Refresh from server"}
                   </button>
                 </div>
                 {subscriptionStatusMessage && (
