@@ -10,7 +10,7 @@ const checks = [
   { label: "Protocol launcher helper", cmd: "rg", args: ["-n", "const launchScenarioProtocolById = async", "src/App.jsx"], type: "must-match" },
   { label: "Protocol launcher controller", cmd: "rg", args: ["-n", "const launchScenarioProtocol = async", "src/App.jsx"], type: "must-match" },
   { label: "Morning protocol launch call", cmd: "rg", args: ["-n", "await launchScenarioProtocol\\(recommendedProtocol\\.id\\)", "src/App.jsx"], type: "must-match" },
-  { label: "Integration adapter usage", cmd: "rg", args: ["-n", "getIntegrationContext\\(|calendarContext: integrationContext\\.calendarContext|healthContext: integrationContext\\.healthContext", "src/App.jsx"], type: "must-match" },
+  { label: "Integration adapter usage", cmd: "rg", args: ["-n", "resolveIntegrationContext\\(|calendarContext: integrationContext\\.calendarContext|healthContext: integrationContext\\.healthContext", "src/App.jsx"], type: "must-match" },
   { label: "Integration diagnostics controls", cmd: "rg", args: ["-n", "clearIntegrationContextCache|Refresh status|Clear stale context|hasStale", "src/App.jsx"], type: "must-match" },
   { label: "Integration consent and revoke controls", cmd: "rg", args: ["-n", "INTEGRATION_STORAGE_KEYS|setIntegrationConsent|retryIntegrationContext|Enable calendar|Enable health|Revoke calendar|Revoke health", "src/App.jsx"], type: "must-match" },
   { label: "Integration error and retry visibility", cmd: "rg", args: ["-n", "calendarError|healthError|Calendar retry queued|Health retry queued|Clear calendar error|Clear health error", "src/App.jsx"], type: "must-match" },

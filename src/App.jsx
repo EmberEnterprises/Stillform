@@ -1371,6 +1371,26 @@ const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => 
   }
 };
 
+const EMPTY_INTEGRATION_CONTEXT = Object.freeze({
+  calendar: null,
+  health: null,
+  calendarConsent: "pending",
+  healthConsent: "pending",
+  calendarError: null,
+  healthError: null,
+  calendarLastRetryAt: null,
+  healthLastRetryAt: null,
+  calendarContext: null,
+  healthContext: null,
+  upcomingPressure: null,
+  hasAny: false,
+  hasStale: false,
+  calendarSource: null,
+  healthSource: null,
+  calendarFreshness: null,
+  healthFreshness: null
+});
+
 // Integration context adapter
 // Single source of truth for calendar/health context across the app.
 const getIntegrationContext = () => {
@@ -1507,6 +1527,21 @@ const getIntegrationContext = () => {
     calendarFreshness: calendar?.freshness || null,
     healthFreshness: health?.freshness || null
   };
+};
+
+// Defensive resolver used at call sites so integration context remains safe
+// even if local storage, parsing, or future adapter changes regress.
+const resolveIntegrationContext = () => {
+  try {
+    const ctx = getIntegrationContext();
+    if (!ctx || typeof ctx !== "object") return { ...EMPTY_INTEGRATION_CONTEXT };
+    return {
+      ...EMPTY_INTEGRATION_CONTEXT,
+      ...ctx
+    };
+  } catch {
+    return { ...EMPTY_INTEGRATION_CONTEXT };
+  }
 };
 
 const setPendingSessionEntryContext = (entryMode, entryProtocolId) => {
@@ -3519,7 +3554,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const handleSend = async (retryText) => {
     const textToSend = retryText || input;
     if (!textToSend.trim() || loading) return;
-    const integrationContext = getIntegrationContext();
+    const integrationContext = resolveIntegrationContext();
 
     const userMsg = { role: "user", text: textToSend };
     const prevMessages = retryText ? messages.slice(0, -1) : messages;
@@ -5750,7 +5785,7 @@ function MyProgress({ onBack }) {
     ? (proofRatedSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / proofRatedSessions.length)
     : null;
   const topToolName = topToolEntry ? (toolNames[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
-  const integrationContext = getIntegrationContext();
+  const integrationContext = resolveIntegrationContext();
   const shareCardLines = [
     "Stillform Composure Card",
     `${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
@@ -7022,7 +7057,7 @@ export default function Stillform() {
   const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
-  const integrationContext = getIntegrationContext();
+  const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
   const syncAuthCooldownSeconds = Math.max(0, Math.ceil((syncAuthCooldownUntil - Date.now()) / 1000));
@@ -8329,7 +8364,7 @@ export default function Stillform() {
                   }
                 ];
                 const recommendedProtocol = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
-                const integrationContext = getIntegrationContext();
+                const integrationContext = resolveIntegrationContext();
                 const upcomingPressure = integrationContext.upcomingPressure;
 
                 const saveCheckin = async () => {
