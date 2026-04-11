@@ -25,6 +25,7 @@ const checks = [
   { label: "Pulse rotating prompts", cmd: "rg", args: ["-n", "What triggered this\\?|What were you about to do\\?|Who was involved\\?|openNewPulseEntry", "src/App.jsx"], type: "must-match" },
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
+  { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
   { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" }
 ];
 

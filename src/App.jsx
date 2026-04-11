@@ -3225,6 +3225,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
+  const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
@@ -3236,6 +3237,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [statementCopied, setStatementCopied] = useState(false);
   const [statementCardCopied, setStatementCardCopied] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
+  const [postSessionInsight, setPostSessionInsight] = useState(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
@@ -3311,6 +3313,24 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     const bannedVulnerable = /(suicid|self-harm|sexual|assault|abuse|violence|addict|overdose)/i;
     if (bannedClinical.test(cleaned) || bannedJudgment.test(cleaned) || bannedVulnerable.test(cleaned)) return null;
     return cleaned.length > 260 ? `${cleaned.slice(0, 257)}...` : cleaned;
+  };
+  const getLatestUserFacingInsight = () => {
+    try {
+      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      if (!Array.isArray(sessions) || sessions.length < 5) return null;
+      const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+      if (!Array.isArray(notes) || notes.length === 0) return null;
+      const latest = [...notes].reverse().find((n) => n?.noteType === "user-facing" || !n?.noteType);
+      if (!latest?.note) return null;
+      const safeNote = latest.noteType === "user-facing" ? String(latest.note).trim() : toUserFacingInsight(latest.note);
+      if (!safeNote) return null;
+      return {
+        note: safeNote,
+        timestamp: latest.timestamp || new Date().toISOString()
+      };
+    } catch {
+      return null;
+    }
   };
   const saveSession = (postRating = null) => {
     const elapsed = Date.now() - startTime.current;
@@ -3920,6 +3940,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setStatementCopied(false);
     setStatementCardCopied(false);
     setSessionShareSummary(null);
+    setPostSessionInsight(null);
+    setShowPostInsight(false);
     onComplete(resolvePostReframeRoute());
   };
 
@@ -3929,7 +3951,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setStatementCopied(false);
     setStatementCardCopied(false);
     setSessionShareSummary(null);
+    setPostSessionInsight(null);
+    setShowPostInsight(false);
     onComplete(resolvePostReframeRoute());
+  };
+
+  const continueFromPostInsight = () => {
+    setShowPostInsight(false);
+    setShowStateToStatement(true);
   };
 
   const copyStateToStatement = async () => {
@@ -4039,6 +4068,35 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     );
   }
 
+  if (showPostInsight && postSessionInsight) {
+    return (
+      <div style={{ textAlign: "left", padding: "36px 0 8px" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+          What the AI has noticed
+        </div>
+        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
+          <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
+            {postSessionInsight.note}
+          </div>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
+            {new Date(postSessionInsight.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </div>
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>
+          Guardrails active: insight-only, no labels, no diagnosis.
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <button className="btn btn-primary" onClick={continueFromPostInsight}>
+            Continue
+          </button>
+          <button className="btn btn-ghost" onClick={continueFromPostInsight}>
+            Skip insight
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (showPostRating) {
     const feelChips = [
       { id: "excited", label: "Excited" },
@@ -4078,7 +4136,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           });
           setPostRating(null);
           setShowPostRating(false);
-          setShowStateToStatement(true);
+          const latestInsight = getLatestUserFacingInsight();
+          if (latestInsight) {
+            setPostSessionInsight(latestInsight);
+            setShowPostInsight(true);
+            try { window.plausible("Post Session Insight Shown"); } catch {}
+          } else {
+            setShowStateToStatement(true);
+          }
         }}>
           Done
         </button>
