@@ -7353,6 +7353,14 @@ export default function Stillform() {
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
+  const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
+    sound: false,
+    logs: false,
+    customization: false,
+    signal: false,
+    more: false,
+    data: true
+  }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
   });
@@ -7367,6 +7375,9 @@ export default function Stillform() {
 
   const syncAuthCooldownSeconds = Math.max(0, Math.ceil((syncAuthCooldownUntil - Date.now()) / 1000));
   const pricingAuthCooldownSeconds = Math.max(0, Math.ceil((pricingAuthCooldownUntil - Date.now()) / 1000));
+  const toggleSettingsSection = (key) => {
+    setSettingsSectionOpen((current) => ({ ...current, [key]: !current?.[key] }));
+  };
 
   useEffect(() => {
     if (syncAuthCooldownSeconds <= 0) return;
@@ -10177,8 +10188,14 @@ export default function Stillform() {
 
             {/* Sound */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Sound</div>
-              {(() => {
+              <button onClick={() => toggleSettingsSection("sound")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Sound</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.sound ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.sound && (() => {
                 const current = (() => { try { return localStorage.getItem("stillform_sound_type") || "tone"; } catch { return "tone"; } })();
                 const free = [
                   { id: "tone", label: "Tone", desc: "Oscillator tones that follow your breath" },
@@ -10410,8 +10427,15 @@ export default function Stillform() {
 
             {/* Your Logs */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Your Logs</div>
-
+              <button onClick={() => toggleSettingsSection("logs")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Your Logs</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.logs ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.logs && (
+              <>
               {/* Session Log */}
               <button onClick={() => setOpenLog(openLog === "sessions" ? null : "sessions")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
@@ -10530,15 +10554,21 @@ export default function Stillform() {
                   {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Settings"; } catch { return "Not set up yet"; } })()}
                 </div>
               </div>
+              </>
+              )}
             </div>
-
-            {/* Links */}
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
 
             {/* Customization */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Customization</div>
+              <button onClick={() => toggleSettingsSection("customization")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Customization</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.customization ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.customization && (
+              <>
 
               {/* Theme options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
@@ -10612,8 +10642,6 @@ export default function Stillform() {
                   <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
                 </div>
               </div>
-              </div>
-
               {/* Cloud Sync status */}
               <div style={{ marginBottom: 12 }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Cloud Sync</div>
@@ -10629,11 +10657,21 @@ export default function Stillform() {
                   <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
                 </div>
               </div>
+              </>
+              )}
             </div>
 
             {/* Signal Mapping */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Signal Mapping</div>
+              <button onClick={() => toggleSettingsSection("signal")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 6px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Signal Mapping</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.signal ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.signal && (
+              <>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                 Map where your body responds first — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
               </div>
@@ -10648,11 +10686,20 @@ export default function Stillform() {
                 </button>
                 {/* Tension check moved into morning check-in flow */}
               </div>
+              </>
+              )}
             </div>
 
             {/* More */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>More</div>
+              <button onClick={() => toggleSettingsSection("more")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>More</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.more ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.more && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
@@ -10690,6 +10737,7 @@ export default function Stillform() {
                   Re-run calibration
                 </button>
               </div>
+              )}
             </div>
 
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32, lineHeight: 1.5 }}>
@@ -10700,7 +10748,15 @@ export default function Stillform() {
 
             {/* BACKUP & DATA — buried at very bottom */}
             <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, opacity: 0.6 }}>Data management</div>
+              <button onClick={() => toggleSettingsSection("data")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", opacity: 0.6 }}>Data management</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.data ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.data && (
+              <>
 
               {/* Auto backup */}
               <div style={{
@@ -10830,6 +10886,8 @@ export default function Stillform() {
               }}>
                 Delete all data
               </button>
+              </>
+              )}
             </div>
           </section>
         )}
