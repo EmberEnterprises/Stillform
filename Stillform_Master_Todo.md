@@ -173,7 +173,7 @@
 ## ❓ OPEN DECISIONS
 
 1. Simplify breathing to 2 options or keep 4 with honest framing?
-2. Confirm monthly + annual live-mode variant pass and update launch checklist closure.
+2. Do we want custom receipt/email branding beyond Lemon default sender?
 3. Reddit timing?
 4. TestFlight before or after cloud?
 5. Neuro voice — web first or native first?
@@ -202,8 +202,8 @@
 ### 🧷 User actions (do when you can — not urgent today)
 - [ ] **Termly privacy policy update** to explicitly state encrypted cloud storage (Supabase), auth email usage, and restore flow.
 - [x] **Lemon Squeezy test -> live switch** (user-confirmed Apr 9 via live subscribe + cancel and confirmation emails).
-- [ ] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set (open until both variants are explicitly confirmed).
-- [ ] **Confirm variant mapping** in Lemon checkout (monthly vs annual) and receipts.
+- [x] **Run paywall E2E in live mode**: monthly + annual variant, redirect back to app, subscription state set (user-confirmed Apr 9).
+- [x] **Confirm variant mapping** in Lemon checkout (monthly vs annual) and receipts (user-confirmed Apr 9 via Lemon confirmation emails for both variants).
 - [ ] **Server-side subscription verification** (webhook + Supabase truth table) for production revenue protection.
 - [ ] **Manual QA on a second device** for cloud restore integrity (sessions, pulse, profiles).
 

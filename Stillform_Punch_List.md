@@ -277,7 +277,7 @@
 ### Pinned human-required actions (can do later if not feeling well)
 - [ ] Termly privacy policy published with explicit cloud storage + encrypted backup language
 - [x] Lemon Squeezy moved from test mode to live mode (user-confirmed Apr 9: live subscribe + cancel + confirmation emails)
-- [ ] Live-mode checkout tested for monthly + annual variants (keep open until both variants are explicitly confirmed)
+- [x] Live-mode checkout tested for monthly + annual variants (user-confirmed Apr 9 via Lemon confirmation emails for both variants)
 - [ ] Server-side subscription verification planned (webhook + Supabase truth table)
 
 ### Added April 11 — Architecture completion (code-side)
