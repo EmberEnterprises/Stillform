@@ -1342,6 +1342,158 @@ const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
 const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
 const LOOP_NUDGE_EVENTS_MAX_ITEMS = 180;
+const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
+const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
+const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
+const METRICS_SCHEMA_VERSION = 1;
+
+const readArrayFromStorage = (key) => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(key) || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+const toDayKey = (value) => {
+  if (!value) return null;
+  try {
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return null;
+    return dt.toISOString().slice(0, 10);
+  } catch {
+    return null;
+  }
+};
+
+const withinDays = (value, days) => {
+  if (!value) return false;
+  try {
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return false;
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    return dt.getTime() >= cutoff;
+  } catch {
+    return false;
+  }
+};
+
+const recentDaySet = (items, days = 14) => new Set(
+  (Array.isArray(items) ? items : [])
+    .filter((entry) => withinDays(entry?.date || entry?.timestamp, days))
+    .map((entry) => toDayKey(entry?.date || entry?.timestamp))
+    .filter(Boolean)
+);
+
+const toRate = (value) => {
+  if (!Number.isFinite(value)) return null;
+  const clamped = Math.max(0, Math.min(1, value));
+  return Number(clamped.toFixed(4));
+};
+
+const buildPerformanceMetricsSnapshot = ({ appVersion, packageVersion, isSubscribed }) => {
+  const sessions = readArrayFromStorage("stillform_sessions");
+  const pulseEntries = readArrayFromStorage("stillform_journal");
+  const savedReframes = readArrayFromStorage("stillform_saved_reframes");
+  const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
+  const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
+  const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
+  const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
+  const loopNudgeEvents = readArrayFromStorage(LOOP_NUDGE_EVENTS_KEY);
+
+  const ratedSessions = sessions.filter((session) => {
+    const pre = Number(session?.preRating);
+    const post = Number(session?.postRating);
+    return Number.isFinite(pre) && Number.isFinite(post);
+  });
+  const avgDelta = ratedSessions.length
+    ? Number((ratedSessions.reduce((sum, session) => (
+      sum + (Number(session.postRating) - Number(session.preRating))
+    ), 0) / ratedSessions.length).toFixed(4))
+    : null;
+  const positiveShiftRate = ratedSessions.length
+    ? toRate(ratedSessions.filter((session) => (
+      Number(session.postRating) - Number(session.preRating) > 0
+    )).length / ratedSessions.length)
+    : null;
+  const protocolRunsTotal = sessions.filter((session) => (
+    session?.entryMode && String(session.entryMode).startsWith("protocol-")
+  )).length;
+  const activeDaysTotal = new Set(
+    sessions
+      .map((session) => toDayKey(session?.timestamp))
+      .filter(Boolean)
+  ).size;
+  const activeDays14d = new Set(
+    sessions
+      .filter((session) => withinDays(session?.timestamp, 14))
+      .map((session) => toDayKey(session?.timestamp))
+      .filter(Boolean)
+  ).size;
+  const toolUsage = {};
+  sessions.forEach((session) => {
+    const tools = Array.isArray(session?.tools) ? session.tools : [];
+    tools.forEach((tool) => {
+      const key = String(tool || "").trim().toLowerCase();
+      if (!key) return;
+      toolUsage[key] = (toolUsage[key] || 0) + 1;
+    });
+  });
+
+  const morningOpen14dDays = recentDaySet(morningOpenHistory, 14);
+  const morningDone14dDays = recentDaySet(morningHistory, 14);
+  const eodOpen14dDays = recentDaySet(eodOpenHistory, 14);
+  const eodDone14dDays = recentDaySet(eodHistory, 14);
+  const morning14dCount = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const eod14dCount = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+  const loopCompletionRate14d = toRate((morning14dCount + eod14dCount) / (14 * 2));
+  const morningCompletionRate14d = toRate(morning14dCount / 14);
+  const eodCompletionRate14d = toRate(eod14dCount / 14);
+
+  const loopNudgeShown14d = loopNudgeEvents.filter(
+    (entry) => entry?.event === "shown" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const loopNudgeActioned14d = loopNudgeEvents.filter(
+    (entry) => entry?.event === "actioned" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const loopNudgeDismissed14d = loopNudgeEvents.filter(
+    (entry) => entry?.event === "dismissed" && withinDays(entry?.date || entry?.timestamp, 14)
+  );
+  const recoveredNudges14d = loopNudgeShown14d.filter((entry) => (
+    entry?.type === "morning"
+      ? morningDone14dDays.has(entry?.date)
+      : eodDone14dDays.has(entry?.date)
+  )).length;
+  const nudgeRecoveryRate14d = loopNudgeShown14d.length
+    ? toRate(recoveredNudges14d / loopNudgeShown14d.length)
+    : null;
+
+  return {
+    schema_version: METRICS_SCHEMA_VERSION,
+    generated_at: new Date().toISOString(),
+    app_version: appVersion,
+    package_version: packageVersion,
+    sessions_total: sessions.length,
+    rated_sessions: ratedSessions.length,
+    avg_delta: avgDelta,
+    positive_shift_rate: positiveShiftRate,
+    active_days_total: activeDaysTotal,
+    active_days_14d: activeDays14d,
+    pulse_entries_total: pulseEntries.length,
+    saved_reframes_total: savedReframes.length,
+    protocol_runs_total: protocolRunsTotal,
+    morning_completion_rate_14d: morningCompletionRate14d,
+    eod_completion_rate_14d: eodCompletionRate14d,
+    loop_completion_rate_14d: loopCompletionRate14d,
+    nudge_shown_14d: loopNudgeShown14d.length,
+    nudge_actioned_14d: loopNudgeActioned14d.length,
+    nudge_dismissed_14d: loopNudgeDismissed14d.length,
+    nudge_recovery_rate_14d: nudgeRecoveryRate14d,
+    subscription_active_local: isSubscribed === true,
+    tool_usage: toolUsage
+  };
+};
 
 const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
   try {
@@ -7201,6 +7353,15 @@ export default function Stillform() {
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
+  const [metricsOptIn, setMetricsOptIn] = useState(() => {
+    try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
+  });
+  const [metricsStatus, setMetricsStatus] = useState("");
+  const [metricsUploading, setMetricsUploading] = useState(false);
+  const [metricsLastSentAt, setMetricsLastSentAt] = useState(() => {
+    try { return localStorage.getItem(METRICS_LAST_SENT_AT_KEY) || ""; } catch { return ""; }
+  });
+  const metricsAuthToken = sbGetSession()?.access_token || "";
   const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
@@ -7431,6 +7592,93 @@ export default function Stillform() {
     try { window.setTimeout(() => setExportStatus(""), 3200); } catch {}
   };
 
+  const setMetricsStatusWithClear = (message) => {
+    setMetricsStatus(message);
+    try { window.setTimeout(() => setMetricsStatus(""), 3200); } catch {}
+  };
+
+  const getMetricsSnapshot = () => buildPerformanceMetricsSnapshot({
+    appVersion: APP_VERSION,
+    packageVersion: APP_PACKAGE_VERSION,
+    isSubscribed
+  });
+
+  const copyMetricsSnapshot = async () => {
+    try {
+      const payload = JSON.stringify(getMetricsSnapshot(), null, 2);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(payload);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = payload;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setMetricsStatusWithClear("Metrics snapshot copied.");
+      try { window.plausible("Metrics Snapshot Copied"); } catch {}
+    } catch {
+      setMetricsStatusWithClear("Could not copy metrics snapshot.");
+    }
+  };
+
+  const pushMetricsSnapshot = async ({ source = "manual", silent = false } = {}) => {
+    if (metricsUploading) return false;
+    if (!metricsOptIn) {
+      if (!silent) setMetricsStatusWithClear("Metrics sharing is turned off.");
+      return false;
+    }
+    if (!metricsAuthToken) {
+      if (!silent) setMetricsStatusWithClear("Sign in to send metrics.");
+      return false;
+    }
+    setMetricsUploading(true);
+    try {
+      const snapshot = getMetricsSnapshot();
+      const installId = getOrCreateInstallId();
+      const res = await fetch("/.netlify/functions/metrics-ingest", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${metricsAuthToken}`
+        },
+        body: JSON.stringify({
+          metrics_opt_in: true,
+          source,
+          install_id: installId,
+          snapshot
+        })
+      });
+      if (!res.ok) {
+        const failure = await res.json().catch(() => ({}));
+        throw new Error(failure?.error || `Metrics ingest ${res.status}`);
+      }
+      const response = await res.json().catch(() => ({}));
+      const sentAt = new Date().toISOString();
+      const sentDay = sentAt.slice(0, 10);
+      try {
+        localStorage.setItem(METRICS_LAST_SENT_AT_KEY, sentAt);
+        localStorage.setItem(METRICS_LAST_SENT_DAY_KEY, sentDay);
+      } catch {}
+      setMetricsLastSentAt(sentAt);
+      if (!silent) {
+        setMetricsStatusWithClear(
+          response?.metric_date ? `Metrics sent for ${response.metric_date}.` : "Metrics sent."
+        );
+      }
+      try {
+        window.plausible("Metrics Snapshot Sent", { props: { source } });
+      } catch {}
+      return true;
+    } catch {
+      if (!silent) setMetricsStatusWithClear("Could not send metrics. Try again.");
+      return false;
+    } finally {
+      setMetricsUploading(false);
+    }
+  };
+
   const getArrayFromStorage = (key) => {
     try {
       const parsed = JSON.parse(localStorage.getItem(key) || "[]");
@@ -7550,6 +7798,33 @@ export default function Stillform() {
     setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
     try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
   };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(METRICS_OPT_IN_KEY, metricsOptIn ? "yes" : "no");
+      if (!metricsOptIn) {
+        localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
+      }
+    } catch {}
+  }, [metricsOptIn]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const autoSend = async () => {
+      if (!metricsOptIn || !metricsAuthToken) return;
+      const today = new Date().toISOString().slice(0, 10);
+      const alreadySentToday = (() => {
+        try { return localStorage.getItem(METRICS_LAST_SENT_DAY_KEY) === today; } catch { return false; }
+      })();
+      if (alreadySentToday) return;
+      const ok = await pushMetricsSnapshot({ source: "auto-daily", silent: true });
+      if (!cancelled && ok && screen === "settings") {
+        setMetricsStatusWithClear("Daily metrics synced.");
+      }
+    };
+    autoSend();
+    return () => { cancelled = true; };
+  }, [metricsOptIn, metricsAuthToken, screen]);
 
   const refreshSubscriptionStatus = async () => {
     if (subscriptionStatusLoading) return;
@@ -10433,6 +10708,57 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
               </div>
 
+              {/* Metrics telemetry */}
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "12px 16px", marginBottom: 8
+              }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                      Sends usage metrics only. Never sends journal text or AI conversation content.
+                    </div>
+                  </div>
+                  <button onClick={() => setMetricsOptIn((value) => !value)} style={{
+                    background: metricsOptIn ? "var(--amber-glow)" : "var(--surface)",
+                    border: `1px solid ${metricsOptIn ? "var(--amber-dim)" : "var(--border)"}`,
+                    color: metricsOptIn ? "var(--amber)" : "var(--text-muted)",
+                    borderRadius: "var(--r)", padding: "8px 10px", fontSize: 11, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", flexShrink: 0
+                  }}>
+                    {metricsOptIn ? "On" : "Off"}
+                  </button>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                  {metricsLastSentAt
+                    ? `Last sent: ${new Date(metricsLastSentAt).toLocaleString()}`
+                    : "Last sent: not yet"}
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
+                  <button onClick={() => pushMetricsSnapshot({ source: "manual" })} disabled={!metricsOptIn || !metricsAuthToken || metricsUploading} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
+                    padding: "10px 12px", textAlign: "left", cursor: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? "not-allowed" : "pointer",
+                    color: "var(--text)", fontSize: 12, opacity: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? 0.55 : 1,
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    {metricsUploading ? "Sending metrics..." : "Send metrics now"}
+                  </button>
+                  <button onClick={copyMetricsSnapshot} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
+                    padding: "10px 12px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 12,
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    Copy metrics snapshot (JSON)
+                  </button>
+                </div>
+                {!metricsAuthToken && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                    Sign in to Cloud Sync to send metrics.
+                  </div>
+                )}
+              </div>
+
               {/* Export */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
                   <button onClick={exportPulseLogPdf} style={{
@@ -10455,6 +10781,11 @@ export default function Stillform() {
                     {exportStatus}
                   </div>
                 )}
+                {metricsStatus && (
+                  <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>
+                    {metricsStatus}
+                  </div>
+                )}
 
               {/* Delete — small, understated, double confirm */}
               <button onClick={() => {
@@ -10474,6 +10805,9 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_checkin_history");
                       localStorage.removeItem("stillform_eod_open_history");
                       localStorage.removeItem("stillform_eod_history");
+                      localStorage.removeItem(METRICS_OPT_IN_KEY);
+                      localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
+                      localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
                       localStorage.removeItem("stillform_onboarded");
                       window.location.reload();
                     } catch {}

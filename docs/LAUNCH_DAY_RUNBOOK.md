@@ -86,3 +86,14 @@ Go only if:
 
 If any gate fails: do not launch broad.
 
+---
+
+### 9) Metrics Telemetry Validation (metrics-only)
+
+1. In Settings > Data management, confirm metrics toggle is ON
+2. Tap **Send metrics now**
+3. Confirm success status appears in-app
+4. Verify row appears in `stillform_metrics_daily` for today
+
+Note: this payload is counts/rates only (no journal or AI text content).
+

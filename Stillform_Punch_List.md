@@ -286,6 +286,7 @@
 - [x] Contextual first-time tip added in Pulse panel (dismiss + persisted)
 - [x] FAQ moved to top of Settings for low-friction support access
 - [x] Data export activated in Settings (`Export pulse log (PDF)` + `Export session history (CSV)`)
+- [x] Metrics-only telemetry pipeline added (Settings consent toggle + daily ingest + no text payload policy)
 
 ---
 

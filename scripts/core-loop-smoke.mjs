@@ -32,6 +32,11 @@ const checks = [
     label: "Session CSV export action wired",
     pattern: "exportSessionHistoryCsv|Session CSV Exported",
     path: "src/App.jsx"
+  },
+  {
+    label: "Metrics-only telemetry controls present",
+    pattern: "Performance metrics \\(counts \\+ rates only\\)|metrics-ingest|METRICS_OPT_IN_KEY",
+    path: "src/App.jsx"
   }
 ];
 

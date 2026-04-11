@@ -197,6 +197,7 @@
 - [x] Contextual first-time tips added on Home and Pulse (dismiss + persisted)
 - [x] FAQ moved to top of Settings for low-friction support
 - [x] Data export activated in Settings (Pulse PDF print view + Session CSV download)
+- [x] Metrics-only telemetry layer added (consent toggle + metrics snapshot ingest, no text payloads)
 - [x] SHIP preflight expanded for onboarding/context-tip/export invariants
 
 ### 🧷 User actions (do when you can — not urgent today)
