@@ -5593,12 +5593,34 @@ function MyProgress({ onBack }) {
   const [jTrigger, setJTrigger] = useState("");
   const [jBody, setJBody] = useState("");
   const [jOutcome, setJOutcome] = useState("");
+  const pulsePromptRotations = [
+    { trigger: "What triggered this?", notes: "What happened right before this signal?" },
+    { trigger: "What were you about to do?", notes: "What decision was in front of you in that moment?" },
+    { trigger: "Who was involved?", notes: "What part of the context matters most to remember?" }
+  ];
+  const [pulsePromptIndex, setPulsePromptIndex] = useState(() => {
+    try {
+      const seed = Date.now();
+      return seed % pulsePromptRotations.length;
+    } catch {
+      return 0;
+    }
+  });
   const [journalEntries, setJournalEntries] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
   });
   const signalAreas = ["Jaw","Shoulders","Chest","Gut","Hands","Legs","Head","Throat"];
   const triggerTypes = ["Social demand","Performance pressure","Conflict","Uncertainty","Sensory overload","Transition","Rejection","Fatigue","Physical pain","Other"];
   const outcomeTypes = ["Composed","Talked through","Loop broken","Ready","Incomplete","Reacted","Still processing"];
+  const openNewPulseEntry = () => {
+    setJSignal([]);
+    setJTriggerType("");
+    setJTrigger("");
+    setJBody("");
+    setJOutcome("");
+    setPulsePromptIndex((prev) => (prev + 1) % pulsePromptRotations.length);
+    setShowNewEntry(true);
+  };
   const savePulseEntry = () => {
     if (!jSignal.length && !jTriggerType && !jTrigger.trim()) return;
     const entry = { id: Date.now(), date: new Date().toISOString().split("T")[0], time: new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}), signal: jSignal, trigger: jTrigger.trim(), triggerType: jTriggerType, emotions: [], body: jBody.trim(), outcome: jOutcome, notes: jBody.trim() };
@@ -6432,7 +6454,7 @@ function MyProgress({ onBack }) {
               {journalEntries.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
             {!showNewEntry && !viewEntry && (
-              <button onClick={() => setShowNewEntry(true)} style={{ background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
+              <button onClick={openNewPulseEntry} style={{ background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
                 + Log a pulse
               </button>
             )}
@@ -6475,7 +6497,7 @@ function MyProgress({ onBack }) {
                   {triggerTypes.map(t => <button key={t} onClick={() => setJTriggerType(prev => prev === t ? "" : t)} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jTriggerType === t ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jTriggerType === t ? "var(--amber-dim)" : "var(--border)"}`, color: jTriggerType === t ? "var(--amber)" : "var(--text-dim)" }}>{t}</button>)}
                 </div>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <textarea value={jTrigger} onChange={e => setJTrigger(e.target.value)} placeholder="Add detail..." style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
+                  <textarea value={jTrigger} onChange={e => setJTrigger(e.target.value)} placeholder={pulsePromptRotations[pulsePromptIndex].trigger} style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
                   <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
                 </div>
               </div>
@@ -6490,7 +6512,7 @@ function MyProgress({ onBack }) {
               <div style={{ marginBottom: 16 }}>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Notes <span style={{ opacity: 0.5 }}>— optional</span></div>
                 <div style={{ display: "flex", gap: 6 }}>
-                  <textarea value={jBody} onChange={e => setJBody(e.target.value)} placeholder="What's the context?" style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
+                  <textarea value={jBody} onChange={e => setJBody(e.target.value)} placeholder={pulsePromptRotations[pulsePromptIndex].notes} style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
                   <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
                 </div>
               </div>
@@ -6677,6 +6699,7 @@ export default function Stillform() {
   const [screen, setScreen] = useState(null);
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
+  const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
   const [screenReady, setScreenReady] = useState(false);
   const [onboardStep, setOnboardStep] = useState(0);
   const [setupStep, setSetupStep] = useState(0);
@@ -6729,6 +6752,12 @@ export default function Stillform() {
       if (matched) setPreferredCrisisRegion(matched[1]);
     } catch {}
   }, [preferredCrisisRegion]);
+
+  useEffect(() => {
+    if (screen !== "crisis" && showOtherCrisisResources) {
+      setShowOtherCrisisResources(false);
+    }
+  }, [screen, showOtherCrisisResources]);
 
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
@@ -9167,7 +9196,8 @@ export default function Stillform() {
             <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
-            {[
+            {(() => {
+              const crisisResources = [
               { region: "United States", lines: [{ name: "Suicide & Crisis Lifeline", number: "988", note: "Call or text" }, { name: "Crisis Text Line", number: "Text HOME to 741741", note: "Text-based support" }] },
               { region: "Canada", lines: [{ name: "Suicide & Crisis Lifeline", number: "988", note: "Call or text" }, { name: "Crisis Services Canada", number: "1-833-456-4566", note: "24/7" }] },
               { region: "United Kingdom", lines: [{ name: "Samaritans", number: "116 123", note: "24/7, free" }, { name: "Crisis Text Line", number: "Text SHOUT to 85258", note: "Text-based" }] },
@@ -9182,16 +9212,23 @@ export default function Stillform() {
               { region: "Turkey", lines: [{ name: "ALO Psikiyatri", number: "182", note: "" }] },
               { region: "Armenia", lines: [{ name: "Trust Social Work", number: "+374 10 538194", note: "" }] },
               { region: "International", lines: [{ name: "Find your country", number: "findahelpline.com", note: "Directory of crisis lines worldwide" }] }
-            ].sort((a, b) => (preferredCrisisRegion && a.region === preferredCrisisRegion ? -1 : preferredCrisisRegion && b.region === preferredCrisisRegion ? 1 : 0)).map((country, i) => (
-              <div key={i} style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
-                {country.lines.map((line, j) => {
-                  const isPhone = /^[\d\s\-+]+$/.test(line.number);
-                  const isText = line.number.toLowerCase().startsWith("text");
-                  const isUrl = line.number.includes(".");
-                  const phoneDigits = line.number.replace(/[^\d+]/g, "");
-                  const smsMatch = line.number.match(/\d{5,}/);
-                  return (
+              ];
+              const sortedResources = [...crisisResources].sort((a, b) => (
+                preferredCrisisRegion && a.region === preferredCrisisRegion
+                  ? -1
+                  : preferredCrisisRegion && b.region === preferredCrisisRegion
+                    ? 1
+                    : 0
+              ));
+              const primaryResource = sortedResources[0] || null;
+              const otherResources = sortedResources.slice(1);
+              const renderLine = (line, j) => {
+                const isPhone = /^[\d\s\-+]+$/.test(line.number);
+                const isText = line.number.toLowerCase().startsWith("text");
+                const isUrl = line.number.includes(".");
+                const phoneDigits = line.number.replace(/[^\d+]/g, "");
+                const smsMatch = line.number.match(/\d{5,}/);
+                return (
                   <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
@@ -9209,10 +9246,41 @@ export default function Stillform() {
                       )}
                     </div>
                   </div>
-                  );
-                })}
-              </div>
-            ))}
+                );
+              };
+              return (
+                <>
+                  {primaryResource && (
+                    <div style={{ marginBottom: 16 }}>
+                      <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{primaryResource.region}</div>
+                      {primaryResource.lines.map(renderLine)}
+                    </div>
+                  )}
+
+                  {otherResources.length > 0 && (
+                    <div style={{ marginTop: 14 }}>
+                      <button
+                        onClick={() => setShowOtherCrisisResources(prev => !prev)}
+                        style={{ width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "10px 14px", color: "var(--text)", fontSize: 13, display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                      >
+                        <span>Other resources</span>
+                        <span style={{ color: "var(--text-muted)" }}>{showOtherCrisisResources ? "▾" : "▸"}</span>
+                      </button>
+                      {showOtherCrisisResources && (
+                        <div style={{ marginTop: 10 }}>
+                          {otherResources.map((country, i) => (
+                            <div key={country.region || i} style={{ marginBottom: 16 }}>
+                              <div style={{ fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>{country.region}</div>
+                              {country.lines.map(renderLine)}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </section>
         )}
 
