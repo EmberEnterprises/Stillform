@@ -8,7 +8,7 @@ const buildTime = new Date().toISOString();
 export default defineConfig({
   plugins: [react()],
   define: {
-    __BUILD_TIME__: JSON.stringify(buildTime),
-    __PACKAGE_VERSION__: JSON.stringify(pkg.version)
+    __APP_BUILD_TIME__: JSON.stringify(buildTime),
+    __APP_PACKAGE_VERSION__: JSON.stringify(pkg.version)
   }
 })
