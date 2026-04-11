@@ -3303,6 +3303,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
   const scoreState = (s) => ({ angry:1, anxious:2, flat:2, mixed:3, excited:4, focused:5 }[s] ?? null);
+  const toUserFacingInsight = (rawNote) => {
+    const cleaned = String(rawNote || "").replace(/\s+/g, " ").trim();
+    if (!cleaned) return null;
+    const bannedClinical = /(diagnos|disorder|clinical|patholog|bipolar|borderline|narciss|adhd|ptsd|medicat|prescrib|therapy plan|treatment plan)/i;
+    const bannedJudgment = /(lazy|broken|toxic|dramatic|hopeless|unstable|crazy|weak|failure|attention-seeking)/i;
+    const bannedVulnerable = /(suicid|self-harm|sexual|assault|abuse|violence|addict|overdose)/i;
+    if (bannedClinical.test(cleaned) || bannedJudgment.test(cleaned) || bannedVulnerable.test(cleaned)) return null;
+    return cleaned.length > 260 ? `${cleaned.slice(0, 257)}...` : cleaned;
+  };
   const saveSession = (postRating = null) => {
     const elapsed = Date.now() - startTime.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
@@ -3333,9 +3342,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         if (data?.reframe) {
           try {
             const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
-            notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: data.reframe });
-            // Keep last 20 notes
-            if (notes.length > 20) notes.splice(0, notes.length - 20);
+            notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: data.reframe, noteType: "internal" });
+            const userFacingNote = toUserFacingInsight(data.reframe);
+            if (userFacingNote) {
+              notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: userFacingNote, noteType: "user-facing" });
+            }
+            // Keep last 40 notes across both internal + user-facing tracks
+            if (notes.length > 40) notes.splice(0, notes.length - 40);
             localStorage.setItem("stillform_ai_session_notes", JSON.stringify(notes));
           } catch {}
         }
@@ -3736,8 +3749,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           sessionNotes: (() => {
             try {
               const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
-              if (notes.length === 0) return null;
-              return notes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
+              const internalNotes = (Array.isArray(notes) ? notes : []).filter((n) => n?.noteType !== "user-facing");
+              if (internalNotes.length === 0) return null;
+              return internalNotes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
             } catch { return null; }
           })()
         });
@@ -5799,6 +5813,10 @@ function MyProgress({ onBack }) {
   );
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
+  const aiInternalSessionNotes = (Array.isArray(aiSessionNotes) ? aiSessionNotes : []).filter((n) => n?.noteType !== "user-facing");
+  const aiUserFacingInsights = (Array.isArray(aiSessionNotes) ? aiSessionNotes : []).filter((n) => (
+    n?.noteType === "user-facing" || !n?.noteType
+  ));
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
   const proofRatedSessions = sessions.filter(s => s.preRating && s.postRating && Number.isFinite(s.postRating - s.preRating));
   const proofActiveDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
@@ -6263,7 +6281,7 @@ function MyProgress({ onBack }) {
 
           // Blind spot pattern from AI session notes
           const biasHits = {};
-          aiSessionNotes.forEach(n => {
+          aiInternalSessionNotes.forEach(n => {
             if (!n.note) return;
             const note = n.note.toLowerCase();
             (biasProfile || []).forEach(bias => {
@@ -6407,20 +6425,23 @@ function MyProgress({ onBack }) {
         })()}
 
         {/* AI SESSION NOTES */}
-        {aiSessionNotes.length > 0 && (
+        {aiUserFacingInsights.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("ainotes")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What the AI noticed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiSessionNotes.length} session{aiSessionNotes.length !== 1 ? "s" : ""} logged</div></div>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What the AI has noticed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiUserFacingInsights.length} insight{aiUserFacingInsights.length !== 1 ? "s" : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.ainotes ? "▾" : "▸"}</span>
             </button>
             {openSections.ainotes && (
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
-                {[...aiSessionNotes].reverse().slice(0, 5).map((n, i) => (
+                {[...aiUserFacingInsights].reverse().slice(0, 5).map((n, i) => (
                   <div key={i} style={subRowStyle}>
                     <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{new Date(n.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
                     <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{n.note}</div>
                   </div>
                 ))}
+                <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginTop: 4 }}>
+                  Insight guardrails are active: no labels, no diagnoses, no judgment.
+                </div>
               </div>
             )}
           </div>
