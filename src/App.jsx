@@ -3886,6 +3886,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const requestBody = JSON.stringify({
           input: textToSend,
           images: pendingImages.length > 0 ? pendingImages : undefined,
+          userLocalNowMs: (() => {
+            try { return Date.now(); } catch { return null; }
+          })(),
+          userTimeZone: (() => {
+            try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; }
+          })(),
           mode: (() => {
             // Auto-route to clarity mode if input signals spiraling/looping
             const lower = textToSend.toLowerCase();

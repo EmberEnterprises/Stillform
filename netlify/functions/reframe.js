@@ -452,7 +452,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced" } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null } = JSON.parse(event.body);
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -504,16 +504,23 @@ exports.handler = async function(event) {
     // This must be the first thing the AI reads because it colors every interpretation
     if (bioFilter) contextParts.push(`BIO-FILTER ACTIVE — READ THIS FIRST: User has self-reported being ${bioFilter}. This is the physical foundation of everything they say in this session. Their observations, emotional intensity, interpersonal reads, and cognitive patterns may ALL be amplified or distorted by this physical state. WHEN THEY DESCRIBE OTHER PEOPLE NEGATIVELY AND THIS FILTER IS ACTIVE: connect the dots explicitly — "You're running on [filter] today. Is this really about them, or is your hardware amplifying the signal?" Do this ONCE, clearly. If the filter is "physically activated" (adrenaline, butterflies, energy), do NOT treat this as a problem to solve — it may be excitement or readiness. If depleted, under-rested, or in pain: their ego is in energy-conservation mode. Resistance is NOT defiance — it's a system protecting a limited budget. Never push harder. Lower the stakes.`);
 
-    // Time awareness — AI must know when the user is talking
-    const now = new Date();
+    // Time awareness — prefer user's local device time/timezone
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const parsedUserLocalNow = (() => {
+      if (!Number.isFinite(userLocalNowMs)) return null;
+      const dt = new Date(Number(userLocalNowMs));
+      return Number.isNaN(dt.getTime()) ? null : dt;
+    })();
+    const now = parsedUserLocalNow || new Date();
+    const timeZoneLabel = (typeof userTimeZone === "string" && userTimeZone.trim()) || null;
     const hour = now.getHours();
     let timeOfDay = "morning";
     if (hour >= 12 && hour < 17) timeOfDay = "afternoon";
     else if (hour >= 17 && hour < 21) timeOfDay = "evening";
     else if (hour >= 21 || hour < 5) timeOfDay = "late night";
     else if (hour >= 5 && hour < 8) timeOfDay = "early morning";
-    contextParts.push(`CURRENT TIME: ${days[now.getDay()]} ${timeOfDay} (${now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}). Be aware of when this conversation is happening. Late night sessions hit different than Monday morning ones. 3am anxiety is not the same as 3pm frustration. Let the time inform your tone — don't mention it unless relevant.`);
+    const timeDisplay = now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+    contextParts.push(`CURRENT TIME: ${days[now.getDay()]} ${timeOfDay} (${timeDisplay}${timeZoneLabel ? `, ${timeZoneLabel}` : ""}). Be aware of when this conversation is happening. Late night sessions hit different than Monday morning ones. 3am anxiety is not the same as 3pm frustration. Let the time inform your tone — don't mention it unless relevant.`);
     if (sessionEntryMode === "morning") {
       contextParts.push("MORNING MODE: This session started from the morning check-in. Keep it forward-looking, sharp, and priming-oriented. Do not over-analyze old threads. In 3-5 sentences, help them set tone for the day with one concrete next move they can carry into the next 90 seconds.");
     } else if (sessionEntryMode === "evening") {
