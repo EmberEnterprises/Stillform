@@ -3753,6 +3753,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   };
 
+  const handleDoneForNow = () => {
+    // Preserve thread so accidental "Done for now" never loses context.
+    secureSet(STORAGE_KEY, messages).catch(() => {});
+    setPostRating(null);
+    setShowStateToStatement(false);
+    setShowPostRating(true);
+  };
+
   const getSavedReframes = () => {
     try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === effectiveMode); } catch { return []; }
   };
@@ -4758,12 +4766,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </div>
             )}
             {messages.length > 1 && (
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
-                try { localStorage.removeItem(STORAGE_KEY); } catch {}
-                setPostRating(null);
-                setShowStateToStatement(false);
-                setShowPostRating(true);
-              }}>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={handleDoneForNow}>
                 Done for now
               </button>
             )}
