@@ -152,6 +152,8 @@
 ## 📄 DOCS TO UPDATE (future session)
 
 - [ ] Promo page — add fractal visuals, daily bookends, AI stress-tested, emotion rebalance
+- [ ] Marketing note: add "Difficult Conversation Prep" loop copy (objective clarity, facts-vs-story split, calm direct ask, pushback rehearsal, execution card, post-conversation debrief)
+- [ ] Marketing note: position this as preventive risk management for high-stakes communication (composure under pressure, not therapy replacement)
 - [ ] Privacy policy — review input scanning disclosure for liability guard
 - [ ] Terms of Service — add "not a medical tool, not for use during treatment"
 - [ ] Draft research partnership email (save for later)

@@ -1831,6 +1831,9 @@ const launchScenarioProtocolById = async ({
     if (gateBiometric && !(await gateBiometric())) return false;
     setPathway("clarity");
     setEntry("protocol-clarity", id);
+    try {
+      localStorage.setItem("stillform_reframe_prefill", "I need to prep for a difficult conversation. Help me set one clear objective, separate facts from assumptions, and build a calm, direct ask I can use.");
+    } catch {}
     setActiveTool({ id: "reframe", name: "Reframe", mode: "clarity" });
     setScreen("tool");
     return true;
@@ -3655,6 +3658,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (onSharedTextConsumed) onSharedTextConsumed();
     }
   }, [sharedText]);
+  // Pre-fill from scenario protocols (e.g., difficult conversation prep)
+  useEffect(() => {
+    try {
+      const prefill = localStorage.getItem("stillform_reframe_prefill");
+      if (!prefill) return;
+      setInput(prefill);
+      localStorage.removeItem("stillform_reframe_prefill");
+    } catch {}
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
@@ -3739,6 +3751,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
       setSavedIds(prev => new Set([...prev, idx]));
     } catch {}
+  };
+
+  const handleDoneForNow = () => {
+    // Preserve thread so accidental "Done for now" never loses context.
+    secureSet(STORAGE_KEY, messages).catch(() => {});
+    setPostRating(null);
+    setShowStateToStatement(false);
+    setShowPostRating(true);
   };
 
   const getSavedReframes = () => {
@@ -3866,6 +3886,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const requestBody = JSON.stringify({
           input: textToSend,
           images: pendingImages.length > 0 ? pendingImages : undefined,
+          userLocalNowMs: (() => {
+            try { return Date.now(); } catch { return null; }
+          })(),
+          userTimeZone: (() => {
+            try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; }
+          })(),
           mode: (() => {
             // Auto-route to clarity mode if input signals spiraling/looping
             const lower = textToSend.toLowerCase();
@@ -4746,12 +4772,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </div>
             )}
             {messages.length > 1 && (
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
-                try { localStorage.removeItem(STORAGE_KEY); } catch {}
-                setPostRating(null);
-                setShowStateToStatement(false);
-                setShowPostRating(true);
-              }}>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={handleDoneForNow}>
                 Done for now
               </button>
             )}
@@ -8879,7 +8900,7 @@ export default function Stillform() {
                   {
                     id: "hard-conversation",
                     title: "Hard conversation",
-                    subtitle: "Get clear before sending",
+                    subtitle: "Objective + facts vs story + clear ask",
                     route: "Reframe · Clarity",
                     match: ["composure", "recover"]
                   },
