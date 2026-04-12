@@ -1831,6 +1831,9 @@ const launchScenarioProtocolById = async ({
     if (gateBiometric && !(await gateBiometric())) return false;
     setPathway("clarity");
     setEntry("protocol-clarity", id);
+    try {
+      localStorage.setItem("stillform_reframe_prefill", "I need to prep for a difficult conversation. Help me set one clear objective, separate facts from assumptions, and build a calm, direct ask I can use.");
+    } catch {}
     setActiveTool({ id: "reframe", name: "Reframe", mode: "clarity" });
     setScreen("tool");
     return true;
@@ -3655,6 +3658,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (onSharedTextConsumed) onSharedTextConsumed();
     }
   }, [sharedText]);
+  // Pre-fill from scenario protocols (e.g., difficult conversation prep)
+  useEffect(() => {
+    try {
+      const prefill = localStorage.getItem("stillform_reframe_prefill");
+      if (!prefill) return;
+      setInput(prefill);
+      localStorage.removeItem("stillform_reframe_prefill");
+    } catch {}
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
@@ -8879,7 +8891,7 @@ export default function Stillform() {
                   {
                     id: "hard-conversation",
                     title: "Hard conversation",
-                    subtitle: "Get clear before sending",
+                    subtitle: "Objective + facts vs story + clear ask",
                     route: "Reframe · Clarity",
                     match: ["composure", "recover"]
                   },
