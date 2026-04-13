@@ -27,6 +27,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Onboarding subtitle | CONSTRAINED | `A daily composure practice for real life.` |
 | Onboarding description paragraph 1 | CONSTRAINED | `Stillform is a daily composure tool. It helps you regulate your state before reactions escalate and helps you choose deliberate action under pressure.` |
 | Onboarding description paragraph 2 | CONSTRAINED | `The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.` |
+| FAQ method question | CONSTRAINED | `What is the method behind Stillform?` |
+| FAQ science question | CONSTRAINED | `What science basis does Stillform use?` |
 
 ## Structural Locks
 
@@ -37,6 +39,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - How You Process
    - Signal Profile + Blind Spots
    - Default Protocol
+5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
 
 ## Prohibited Claims
 
