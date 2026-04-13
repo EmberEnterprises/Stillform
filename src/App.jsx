@@ -7977,27 +7977,33 @@ export default function Stillform() {
       setExportStatusWithClear("No pulse entries to export yet.");
       return;
     }
-    const win = window.open("", "_blank", "noopener,noreferrer");
-    if (!win) {
-      setExportStatusWithClear("Popup blocked. Allow popups to export PDF.");
-      return;
-    }
-    const rows = entries.map((entry) => {
+    const toRow = (entry) => {
       const signal = Array.isArray(entry.signal) && entry.signal.length > 0
         ? entry.signal.join(", ")
         : (Array.isArray(entry.emotions) ? entry.emotions.join(", ") : "");
       const trigger = [entry.triggerType, entry.trigger].filter(Boolean).join(" — ");
+      return {
+        date: entry.date || "",
+        time: entry.time || "",
+        signal: signal || "",
+        trigger: trigger || "",
+        outcome: entry.outcome || "",
+        notes: entry.notes || entry.body || ""
+      };
+    };
+    const rows = entries.map((entry) => {
+      const row = toRow(entry);
       return `
         <tr>
-          <td>${escapeHtml(entry.date || "")}</td>
-          <td>${escapeHtml(entry.time || "")}</td>
-          <td>${escapeHtml(signal || "")}</td>
-          <td>${escapeHtml(trigger || "")}</td>
-          <td>${escapeHtml(entry.outcome || "")}</td>
-          <td>${escapeHtml(entry.notes || entry.body || "")}</td>
+          <td>${escapeHtml(row.date)}</td>
+          <td>${escapeHtml(row.time)}</td>
+          <td>${escapeHtml(row.signal)}</td>
+          <td>${escapeHtml(row.trigger)}</td>
+          <td>${escapeHtml(row.outcome)}</td>
+          <td>${escapeHtml(row.notes)}</td>
         </tr>`;
     }).join("");
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
       body{font-family:Arial,sans-serif;background:#fff;color:#111;margin:24px;}
       h1{font-size:18px;margin:0 0 6px;}
       p{font-size:12px;color:#555;margin:0 0 16px;}
@@ -8011,11 +8017,62 @@ export default function Stillform() {
         <thead><tr><th>Date</th><th>Time</th><th>Signal</th><th>Trigger</th><th>Outcome</th><th>Notes</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-    </body></html>`);
-    win.document.close();
-    try { win.focus(); win.print(); } catch {}
-    setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
-    try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
+    </body></html>`;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const fallbackCsv = () => {
+      const headers = ["date", "time", "signal", "trigger", "outcome", "notes"];
+      const lines = [
+        headers.join(","),
+        ...entries.map((entry) => {
+          const row = toRow(entry);
+          return [
+            csvValue(row.date),
+            csvValue(row.time),
+            csvValue(row.signal),
+            csvValue(row.trigger),
+            csvValue(row.outcome),
+            csvValue(row.notes)
+          ].join(",");
+        })
+      ];
+      downloadTextFile(lines.join("\n"), `stillform-pulse-log-${stamp}.csv`, "text/csv;charset=utf-8");
+      setExportStatusWithClear(`Print preview unavailable. Downloaded pulse log CSV (${entries.length} rows).`);
+    };
+    try {
+      const frame = document.createElement("iframe");
+      frame.setAttribute("title", "Stillform Pulse Export");
+      frame.style.position = "fixed";
+      frame.style.width = "0";
+      frame.style.height = "0";
+      frame.style.opacity = "0";
+      frame.style.pointerEvents = "none";
+      frame.style.border = "0";
+      const cleanup = () => {
+        try { frame.remove(); } catch {}
+      };
+      frame.onload = () => {
+        try {
+          const targetWin = frame.contentWindow;
+          if (!targetWin) throw new Error("Print target unavailable");
+          targetWin.focus();
+          targetWin.print();
+          setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
+          try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
+        } catch {
+          fallbackCsv();
+        } finally {
+          window.setTimeout(cleanup, 1200);
+        }
+      };
+      document.body.appendChild(frame);
+      const doc = frame.contentDocument || frame.contentWindow?.document;
+      if (!doc) throw new Error("Export document unavailable");
+      doc.open();
+      doc.write(html);
+      doc.close();
+    } catch {
+      fallbackCsv();
+    }
   };
 
   useEffect(() => {
