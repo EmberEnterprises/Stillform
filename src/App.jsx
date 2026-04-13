@@ -8529,7 +8529,7 @@ export default function Stillform() {
                 },
                 {
                   title: "2) Regulate in the moment",
-                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to stabilize and make your next move."
+                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate under pressure, process wins, and prep difficult moments."
                 },
                 {
                   title: "3) End of day closes the loop",
@@ -8549,12 +8549,6 @@ export default function Stillform() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
               <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15, width: "100%" }} onClick={() => completeOnboarding()}>
                 Begin calibration →
-              </button>
-              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => {
-                try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
-                setScreen(trialExpired ? "pricing" : "home");
-              }}>
-                Skip tutorial for now
               </button>
             </div>
           </section>
