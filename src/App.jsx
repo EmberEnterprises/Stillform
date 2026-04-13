@@ -7096,7 +7096,7 @@ export default function Stillform() {
     return () => clearTimeout(t);
   }, []);
 
-  // Onboarding is available from Settings replay, not forced at startup.
+  // Show onboarding once on fresh installs (or after data reset).
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Subscription & trial tracking
@@ -7435,7 +7435,9 @@ export default function Stillform() {
   useEffect(() => {
     const init = async () => {
       if (!hasSeenOnboarding) {
-        try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+        setScreen("onboarding");
+        setScreenReady(true);
+        return;
       }
 
       try {
@@ -8961,56 +8963,24 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* UAT trial badge */}
-              {!isSubscribed && (
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: uatTrialFreezeActive ? "var(--amber)" : (trialDaysLeft <= 3 ? "#c05040" : "var(--text-muted)") }}>
-                      {uatTrialFreezeActive ? "UAT ACCESS" : "FREE TRIAL"}
-                    </span>
-                    <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                      {uatTrialFreezeActive
-                        ? `Counter paused for UAT · target launch ${uatLaunchTargetLabel}`
-                        : `${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`}
-                    </span>
-                  </div>
-                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+            {/* Subscription banner without countdown */}
+            {!isSubscribed && (
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                    ACCESS
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {uatTrialFreezeActive
+                      ? `UAT access active · target launch ${uatLaunchTargetLabel}`
+                      : "Subscription unlocks full Stillform access."}
+                  </span>
                 </div>
-              )}
-
-              {/* UAT BANNER — compact ecosystem link */}
-              <div style={{ marginBottom: 20 }}>
-                <a
-                  href="/uat-roadmap.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                    textDecoration: "none",
-                    color: "inherit",
-                    background: "var(--surface)",
-                    border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)",
-                    padding: "10px 14px"
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", borderRadius: 4, padding: "2px 8px" }}>EARLY ACCESS</span>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c05040" }}>UPDATED</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                      Ecosystem brief: what Stillform is, who it serves, what's shipped, what's next.
-                    </div>
-                  </div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", whiteSpace: "nowrap" }}>
-                    Open →
-                  </div>
-                </a>
+                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
               </div>
+            )}
+
+              {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
                 <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -9668,7 +9638,7 @@ export default function Stillform() {
               <p>{trialExpired
                 ? "Subscribe to keep using Stillform. Your data is safe — right where you left it."
                 : (uatTrialFreezeActive
-                    ? `UAT access window active until ${uatLaunchTargetLabel}. Trial countdown is paused for tester stability.`
+                    ? `UAT access window active until ${uatLaunchTargetLabel}.`
                     : "Try everything free for 14 days. Composure when you need it — under two minutes.")}
               </p>
             </div>
@@ -10579,8 +10549,8 @@ export default function Stillform() {
                     : (trialExpired
                         ? "Trial expired. Subscription is required for full access."
                         : (uatTrialFreezeActive
-                            ? `UAT access window active until ${uatLaunchTargetLabel}. Counter paused for testers.`
-                            : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`))}
+                            ? `UAT access window active until ${uatLaunchTargetLabel}.`
+                            : "Trial active. Subscription unlocks full access."))}
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
                   {hasPendingWebhookSync
@@ -11155,6 +11125,14 @@ export default function Stillform() {
                   Replay tutorial
                 </button>
                 <button onClick={() => {
+                  try {
+                    localStorage.removeItem("stillform_regulation_type");
+                    localStorage.removeItem("stillform_signal_profile");
+                    localStorage.removeItem("stillform_bias_profile");
+                    localStorage.removeItem("stillform_breath_pattern");
+                    localStorage.removeItem("stillform_bio_filter");
+                  } catch {}
+                  setRegType(null);
                   setSetupStep(0);
                   setAssessmentAnswers([]);
                   setScreen("setup");
@@ -11288,18 +11266,61 @@ export default function Stillform() {
                   const typed = window.prompt("To confirm deletion, type DELETE below:");
                   if (typed === "DELETE") {
                     try {
+                      // Prevent cloud auto-restore from repopulating deleted local data.
+                      try { sbClearSession(); } catch {}
+                      try { sbSignOut().catch(() => {}); } catch {}
+                      setSyncSignedIn(false);
+                      setSyncSuccess(null);
+                      setSyncError(null);
                       localStorage.removeItem("stillform_sessions");
                       localStorage.removeItem("stillform_signal_profile");
                       localStorage.removeItem("stillform_saved_reframes");
                       localStorage.removeItem("stillform_reframe_session_calm");
                       localStorage.removeItem("stillform_reframe_session_clarity");
                       localStorage.removeItem("stillform_reframe_session_hype");
+                      localStorage.removeItem("stillform_reframe_last_mode");
+                      localStorage.removeItem("stillform_reframe_entry_mode");
+                      localStorage.removeItem("stillform_reframe_entry_protocol");
+                      localStorage.removeItem("stillform_reframe_prefill");
                       localStorage.removeItem("stillform_journal");
+                      localStorage.removeItem("stillform_ai_session_notes");
+                      localStorage.removeItem("stillform_bias_profile");
+                      localStorage.removeItem("stillform_regulation_type");
+                      localStorage.removeItem("stillform_breath_pattern");
+                      localStorage.removeItem("stillform_ai_tone");
+                      localStorage.removeItem("stillform_theme");
+                      localStorage.removeItem("stillform_scan_pace");
+                      localStorage.removeItem("stillform_audio");
+                      localStorage.removeItem("stillform_sound_type");
+                      localStorage.removeItem("stillform_screenlight");
+                      localStorage.removeItem("stillform_reducedmotion");
+                      localStorage.removeItem("stillform_visual_grounding");
+                      localStorage.removeItem("stillform_grounding_data");
+                      localStorage.removeItem("stillform_bio_filter");
+                      localStorage.removeItem("stillform_morning_start");
+                      localStorage.removeItem("stillform_evening_start");
+                      localStorage.removeItem("stillform_reminder");
+                      localStorage.removeItem("stillform_reminder_time");
+                      localStorage.removeItem("stillform_tooltip_home_seen");
+                      localStorage.removeItem("stillform_tooltip_pulse_seen");
+                      localStorage.removeItem("stillform_tooltips_reframe_seen");
+                      localStorage.removeItem("stillform_outcome_focus");
+                      localStorage.removeItem("stillform_session_entry_context");
+                      localStorage.removeItem("stillform_checkout_after_login");
+                      localStorage.removeItem("stillform_sb_sync_version");
+                      localStorage.removeItem("stillform_qb_position");
+                      localStorage.removeItem("stillform_milestone_7_seen");
+                      localStorage.removeItem("stillform_trial_start");
+                      localStorage.removeItem("stillform_subscribed");
                       localStorage.removeItem("stillform_checkin_today");
                       localStorage.removeItem("stillform_checkin_open_history");
                       localStorage.removeItem("stillform_checkin_history");
                       localStorage.removeItem("stillform_eod_open_history");
                       localStorage.removeItem("stillform_eod_history");
+                      localStorage.removeItem("stillform_eod_today");
+                      localStorage.removeItem("stillform_loop_nudge_events");
+                      localStorage.removeItem("stillform_loop_nudge_dismissed_day");
+                      localStorage.removeItem("stillform_loop_nudge_dismiss_streak");
                       localStorage.removeItem(METRICS_OPT_IN_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
