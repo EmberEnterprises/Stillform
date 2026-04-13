@@ -7175,6 +7175,8 @@ export default function Stillform() {
   const [showHomeContextTip, setShowHomeContextTip] = useState(() => {
     try { return localStorage.getItem("stillform_tooltip_home_seen") !== "yes"; } catch { return true; }
   });
+  const [tutorialStep, setTutorialStep] = useState(0);
+  const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [screenReady, setScreenReady] = useState(false);
   const [setupStep, setSetupStep] = useState(0);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
@@ -7236,6 +7238,11 @@ export default function Stillform() {
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
     setScreen("faq");
+  };
+  const openTutorial = (backScreen = "home") => {
+    setTutorialStep(0);
+    setTutorialReturnScreen(backScreen || "home");
+    setScreen("tutorial");
   };
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
@@ -8363,6 +8370,63 @@ export default function Stillform() {
           </div>
         </nav>
         )}
+
+        {/* TUTORIAL — guided quickstart */}
+        {screen === "tutorial" && (() => (
+          <section
+            style={{
+              maxWidth: 520, margin: "0 auto", padding: "40px 24px 80px",
+              minHeight: "100vh", position: "relative", zIndex: 1
+            }}
+          >
+            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+              How Stillform works
+            </div>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.15, marginBottom: 10 }}>
+              One system. Three loops.
+            </h1>
+            <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.7 }}>
+              This tutorial is intentionally short and practical so first-time users can start quickly and still understand the full flow.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+              {[
+                {
+                  title: "1) Morning check-in sets context",
+                  body: "A short check-in sets your current state and helps Stillform route the right support first."
+                },
+                {
+                  title: "2) Regulate in the moment",
+                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to stabilize and make your next move."
+                },
+                {
+                  title: "3) End of day closes the loop",
+                  body: "Daily closure captures composure trend signals and keeps progress measurable over time."
+                },
+                {
+                  title: "4) Calibration personalizes defaults",
+                  body: "Calibration maps thought-first/body-first tendencies and sets your default pathway."
+                }
+              ].map((item, idx) => (
+                <div key={idx} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>{item.title}</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>{item.body}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
+              <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15, width: "100%" }} onClick={() => completeOnboarding()}>
+                Begin calibration →
+              </button>
+              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => {
+                try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+                setScreen(trialExpired ? "pricing" : "home");
+              }}>
+                Skip tutorial for now
+              </button>
+            </div>
+          </section>
+        ))()}
 
         {/* ONBOARDING — replay from Settings */}
         {screen === "onboarding" && (() => (
@@ -11115,8 +11179,7 @@ export default function Stillform() {
                   Contact us
                 </a>
                 <button onClick={() => {
-                  try { localStorage.removeItem("stillform_onboarded"); } catch {}
-                  setScreen("onboarding");
+                  setScreen("tutorial");
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
