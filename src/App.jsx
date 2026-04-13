@@ -8513,31 +8513,31 @@ export default function Stillform() {
           >
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              How Stillform works
+              Introduction to Stillform
             </div>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.15, marginBottom: 10 }}>
-              One system. Three loops.
+              A composure system you can actually use daily.
             </h1>
             <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.7 }}>
-              This tutorial is intentionally short and practical so first-time users can start quickly and still understand the full flow.
+              If someone recommended this to you, start here. Stillform helps you catch activation earlier, regulate faster, and choose your next move with intention.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {[
                 {
-                  title: "1) Morning check-in sets context",
-                  body: "A short check-in sets your current state and helps Stillform route the right support first."
+                  title: "1) Morning check-in (30 seconds)",
+                  body: "You set current energy and body signal context so the app responds to your actual state today."
                 },
                 {
-                  title: "2) Regulate in the moment",
-                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate under pressure, process wins, and prep difficult moments."
+                  title: "2) In-the-moment regulation",
+                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose when pressure rises, focus drops, or you need a clean next move."
                 },
                 {
-                  title: "3) End of day closes the loop",
-                  body: "Daily closure captures composure trend signals and keeps progress measurable over time."
+                  title: "3) End-of-day close (15 seconds)",
+                  body: "You log how you carried yourself so the system can track trend quality over time, not just one-off sessions."
                 },
                 {
-                  title: "4) Calibration personalizes defaults",
-                  body: "Calibration maps thought-first/body-first tendencies and sets your default pathway."
+                  title: "4) One-time calibration",
+                  body: "Calibration sets thought-first or body-first defaults so the right starting tool appears faster."
                 }
               ].map((item, idx) => (
                 <div key={idx} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
@@ -8580,14 +8580,14 @@ export default function Stillform() {
               Stillform
             </h1>
             <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 20 }}>
-              Daily composure system for real-life execution.
+              Recommended to you? Here is what it does in plain language.
             </div>
             <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 14, textAlign: "left" }}>
               <p style={{ marginBottom: 10 }}>
-                Stillform is for everyday composure, not only crisis moments. Morning check-in sets context. Reframe, Breathe, Body Scan, and Watch & Choose help you regulate and choose your next move.
+                Stillform is a daily composure tool. It helps you regulate your state before reactions escalate and helps you choose deliberate action under pressure.
               </p>
               <p style={{ marginBottom: 0 }}>
-                Calibration sets your default pathway (thought-first or body-first) so the right tool appears first when pressure rises.
+                The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.
               </p>
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
