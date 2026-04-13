@@ -8445,6 +8445,18 @@ export default function Stillform() {
         const tool = TOOLS.find(t => t.id === redirectTo);
         if (tool) { startTool(tool); return; }
       }
+      if (!redirectTo && activeTool?.setupFlow === "calibration-combined") {
+        if (activeTool?.id === "signals") {
+          setActiveTool({ ...TOOLS.find(t => t.id === "bias"), setupFlow: "calibration-combined" });
+          setScreen("tool");
+          return;
+        }
+        if (activeTool?.id === "bias") {
+          setSetupStep((s) => Math.min(s + 1, 2));
+          setScreen("setup");
+          return;
+        }
+      }
       setScreen("home");
     }};
     switch (activeTool?.id) {
@@ -8639,7 +8651,7 @@ export default function Stillform() {
           const setupSteps = [
             {
               step: 1,
-              label: "Calibration · 1 of 4",
+              label: "Calibration · 1 of 3",
               title: "How You Process",
               subtitle: "When a moment hits, what fires first — your thoughts or your body?",
               body: "Research in neuroscience shows two distinct regulation pathways. Some people process through thoughts first — analyzing, replaying, building a response. Others feel it in the body first — tension, heat, restlessness.\n\nNeither is better. Knowing yours means the system starts with the right tool.\n\nAnswer instinctively. There are no wrong answers.",
@@ -8669,25 +8681,19 @@ export default function Stillform() {
             },
             {
               step: 2,
-              label: "Calibration · 2 of 4",
-              title: "Signal Mapping",
-              subtitle: "Where does your body respond first?",
+              label: "Calibration · 2 of 3",
+              title: "Signal Profile + Blind Spots",
+              subtitle: "Map body signals, then identify recurring thought patterns.",
               body: null,
               cta: null,
-              autoLaunch: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "signals")); }
+              autoLaunch: () => {
+                setScreen("tool");
+                startTool({ ...TOOLS.find(t => t.id === "signals"), setupFlow: "calibration-combined" });
+              }
             },
             {
               step: 3,
-              label: "Calibration · 3 of 4",
-              title: "Blind Spot Profile",
-              subtitle: "What patterns does your thinking run?",
-              body: null,
-              cta: null,
-              autoLaunch: () => { setScreen("tool"); startTool(TOOLS.find(t => t.id === "bias")); }
-            },
-            {
-              step: 4,
-              label: "Calibration · 4 of 4",
+              label: "Calibration · 3 of 3",
               title: "Default Protocol",
               subtitle: "Select your baseline breathing pattern.",
               body: "Quick Reset — 60 seconds. Slows your system down fast. Use when you need to regulate and get back to what you're doing.\n\nDeep Regulate — 3 minutes. Extended exhale cycle. Deeper reset for when you have the time and space.",
