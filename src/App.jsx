@@ -8596,7 +8596,7 @@ export default function Stillform() {
               Stillform
             </h1>
             <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 20 }}>
-              Recommended to you? Here is what it does in plain language.
+              A daily composure practice for real life.
             </div>
             <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 14, textAlign: "left" }}>
               <p style={{ marginBottom: 10 }}>
