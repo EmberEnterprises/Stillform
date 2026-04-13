@@ -3456,7 +3456,14 @@ async function secureSet(key, value) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
-  const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
+  const [activeMode, setActiveMode] = useState(() => {
+    if (mode !== "calm") return mode;
+    try {
+      const last = localStorage.getItem("stillform_reframe_last_mode");
+      if (last === "calm" || last === "clarity" || last === "hype") return last;
+    } catch {}
+    return null;
+  });
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
   const [showPostInsight, setShowPostInsight] = useState(false);
@@ -3518,6 +3525,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try { return localStorage.getItem("stillform_tooltips_reframe_seen") !== "yes"; } catch { return true; }
   });
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
+  const markLastReframeMode = (nextMode) => {
+    try { localStorage.setItem("stillform_reframe_last_mode", nextMode); } catch {}
+  };
 
   useEffect(() => {
     try {
@@ -3736,6 +3746,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     secureGet(STORAGE_KEY).then(saved => {
       setMessages(Array.isArray(saved) ? saved : []);
     }).catch(() => setMessages([]));
+    markLastReframeMode(effectiveMode);
     setSavedIds(new Set());
     setError(null);
   }, [effectiveMode]);
@@ -3770,6 +3781,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   useEffect(() => {
     if (messages.length > 0) {
       secureSet(STORAGE_KEY, messages).catch(() => {});
+      markLastReframeMode(effectiveMode);
     }
   }, [messages]);
 
@@ -3859,15 +3871,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (!textToSend.trim() || loading) return;
     if (error) setError(null);
     const integrationContext = resolveIntegrationContext();
+    const imagesForRequest = pendingImages.length > 0 ? pendingImages : undefined;
 
-    const userMsg = { role: "user", text: textToSend };
+    const userMsg = { role: "user", text: textToSend, imageCount: imagesForRequest?.length || 0 };
     const prevMessages = retryText ? messages.slice(0, -1) : messages;
     const history = [...prevMessages, userMsg];
 
     setMessages(retryText ? [...prevMessages, userMsg] : [...messages, userMsg]);
+    markLastReframeMode(effectiveMode);
     setLastInput(textToSend);
     if (!retryText) setInput("");
-    if (pendingImages.length > 0) setPendingImages([]);
+    if (imagesForRequest?.length) setPendingImages([]);
     setLoading(true);
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
@@ -3886,7 +3900,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       const requestBody = JSON.stringify({
           input: textToSend,
-          images: pendingImages.length > 0 ? pendingImages : undefined,
+          images: imagesForRequest,
           userLocalNowMs: (() => {
             try { return Date.now(); } catch { return null; }
           })(),
@@ -4598,7 +4612,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                         : <span key={j}>{part}</span>
                     )}
                   </div>
-                ) : msg.text}
+                ) : (
+                  <div>
+                    <div>{msg.text}</div>
+                    {msg.imageCount > 0 && (
+                      <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em" }}>
+                        📎 {msg.imageCount} image{msg.imageCount > 1 ? "s" : ""} attached
+                      </div>
+                    )}
+                  </div>
+                )}
                 {msg.role === "ai" && (
                   <button onClick={() => saveReframe(msg, i)} style={{
                     display: "block", marginTop: 8, background: "none", border: "none",
