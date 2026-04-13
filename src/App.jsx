@@ -7573,6 +7573,17 @@ export default function Stillform() {
   // Widget action check — calls native plugin, routes before splash ends
   useEffect(() => {
     const init = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const preview = (params.get("preview") || "").trim().toLowerCase();
+        const previewAllowed = new Set(["tutorial", "onboarding", "home", "settings", "faq", "privacy"]);
+        if (previewAllowed.has(preview)) {
+          setScreen(preview);
+          setScreenReady(true);
+          return;
+        }
+      } catch {}
+
       if (!hasSeenOnboarding) {
         setScreen("tutorial");
         setScreenReady(true);
@@ -8475,7 +8486,7 @@ export default function Stillform() {
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Composure mastery</div>
+            }}>Composure architecture</div>
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
