@@ -8528,17 +8528,17 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 1 of 10",
+              kicker: "Tutorial · 1 of 5",
               title: "Calibration — Build Your Baseline",
               paragraphs: [
-                "Calibration establishes your initial operating profile: How You Process, Signal Profile + Blind Spots, and Default Protocol.",
+                "Calibration establishes your operating profile in one sequence: How You Process, Signal Profile + Blind Spots, and your baseline breathing pattern.",
                 "This profile guides your first recommendations, but it never restricts access. You can launch any tool directly at any time.",
                 "When you need to adjust setup, use Settings → Processing Type, Settings → Signal Mapping, or Re-run calibration.",
                 "Stillform refines recommendations from your actual usage, so guidance tracks how you process over time."
               ]
             },
             {
-              kicker: "Tutorial · 2 of 10",
+              kicker: "Tutorial · 2 of 5",
               title: "Morning Check-In — Set the Day’s Baseline",
               paragraphs: [
                 "Morning Check-In captures your starting state before composure drifts. In under a minute, you log internal state, body context, and expected load.",
@@ -8547,75 +8547,29 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 3 of 10",
-              title: "Daily Regulation Tools — Your Active Layer",
+              kicker: "Tutorial · 3 of 5",
+              title: "Daily Regulation Tools — Active Execution Layer",
               paragraphs: [
-                "After Morning Check-In, use your regulation tools across the day to prepare, stabilize, and reset as needed.",
-                "Each tool targets a different part of the response cycle, so you can match intervention to state quickly.",
-                "Used consistently, this layer protects composure quality under changing demands."
+                "After Morning Check-In, use your regulation tools throughout the day to prepare, stabilize, and reset as needed.",
+                "Reframe clarifies interpretation before reaction hardens. Breathe downshifts physiological activation. Body Scan releases residual tension through guided acupressure.",
+                "Together, they preserve composure quality under changing demands while keeping action deliberate."
               ]
             },
             {
-              kicker: "Tutorial · 4 of 10",
-              title: "Reframe — Convert Reaction into Strategy",
+              kicker: "Tutorial · 4 of 5",
+              title: "End-of-Day + My Progress — Evidence Layer",
               paragraphs: [
-                "Reframe works from your calibration profile, check-in context, and response patterns, so guidance matches how you process under load.",
-                "You describe the moment directly; Reframe identifies where interpretation is narrowing, then presents sharper alternatives you can act on.",
-                "You leave with a clear next move and language you can use immediately."
+                "End-of-Day Close consolidates the day so state residue does not roll forward unchecked.",
+                "My Progress is where sessions, high-signal entries, and pattern insights are consolidated into trend evidence.",
+                "This gives you a clear record of what is changing, where composure is strengthening, and where to recalibrate next."
               ]
             },
             {
-              kicker: "Tutorial · 5 of 10",
-              title: "Breathe — Composure Reset",
-              paragraphs: [
-                "Breathe offers two guided options: Quick Reset (short) and Deep Regulate (longer).",
-                "Both are designed to settle activation and return you to a usable baseline.",
-                "If enabled, fractal visuals provide optional visual grounding during the cycle.",
-                "Outcome: steadier attention and more deliberate responses through the day."
-              ]
-            },
-            {
-              kicker: "Tutorial · 6 of 10",
-              title: "Body Scan — Release What You’re Carrying",
-              paragraphs: [
-                "Body Scan is a guided physical reset for tension your system is still holding.",
-                "You move through proven acupressure points with timed holds to release stored activation directly in the body.",
-                "For you, this means less internal drag, steadier composure, and clearer access to deliberate action."
-              ]
-            },
-            {
-              kicker: "Tutorial · 7 of 10",
-              title: "End-of-Day Close — Consolidate the Day",
-              paragraphs: [
-                "End-of-Day Close is your daily consolidation step.",
-                "You record state, composure quality, and outcome signal in a short evening pass.",
-                "For you, this means less carryover into the next day and stronger continuity in your composure practice."
-              ]
-            },
-            {
-              kicker: "Tutorial · 8 of 10",
-              title: "Pulse — Capture Signal in Context",
-              paragraphs: [
-                "Pulse is your high-signal record within My Progress for moments that matter, captured while context is still accurate.",
-                "You log trigger, state, response, and outcome in seconds.",
-                "For you, this strengthens pattern visibility and improves future recommendations."
-              ]
-            },
-            {
-              kicker: "Tutorial · 9 of 10",
-              title: "My Progress — Verify What Is Changing",
-              paragraphs: [
-                "My Progress is where your sessions, Pulse signal history, and AI pattern insights are consolidated.",
-                "Use it to review trend direction over time: recovery speed, steadiness, and tool usage patterns.",
-                "For you, this turns daily practice into visible evidence so calibration and decisions stay grounded in what is actually changing."
-              ]
-            },
-            {
-              kicker: "Tutorial · 10 of 10",
+              kicker: "Tutorial · 5 of 5",
               title: "Run the Full Loop Daily",
               paragraphs: [
-                "Sequence for first-time setup: How You Process → Signal Profile + Blind Spots → Default Protocol.",
-                "Sequence for daily practice: Morning Check-In → Daily Regulation Tools → End-of-Day Close → Pulse/My Progress."
+                "First-time setup sequence: How You Process → Signal Profile + Blind Spots → Breathe.",
+                "Daily sequence: Morning Check-In → Daily Regulation Tools → End-of-Day Close → My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -8782,14 +8736,6 @@ export default function Stillform() {
                 {
                   q: "Someone you respect challenges your idea in front of the room.",
                   a: { T: "I'm already building a counter-argument in my head", B: "I feel heat in my face and tension in my shoulders" }
-                },
-                {
-                  q: "You just got incredible news you weren't expecting.",
-                  a: { T: "I can't stop thinking about what this means", B: "My heart is pounding and I feel energy everywhere" }
-                },
-                {
-                  q: "You're tired but someone close to you is testing your patience.",
-                  a: { T: "I'm telling myself 'stay calm, this isn't worth it'", B: "I feel the tension building in my jaw" }
                 },
                 {
                   q: "A quiet moment. Nothing is wrong. Just you.",

@@ -1617,3 +1617,31 @@ stillform_sb_session (Supabase auth session)
 ### Launch recommendation snapshot
 - **Soft launch:** GO (controlled audience + close monitoring)
 - **Broad launch:** WAIT until #1, #2, #3 in pinned actions are done
+
+## April 13, 2026 — Tutorial + Onboarding Integrity Pass
+
+### Shipped changes (published to `main`)
+- Tutorial compressed from verbose multi-page stack to concise guided sequence:
+  - Opening page + 5 guided pages (Calibration, Morning Check-In, Daily Regulation Tools, End-of-Day + My Progress, Run the Full Loop)
+- Removed redundant standalone tutorial references that created tool confusion.
+- `How You Process` assessment reduced from 5 scenarios to 3 scenarios to lower first-run repetition while preserving signal quality.
+- Onboarding completion timing fixed:
+  - `stillform_onboarded` now set only after final calibration step (baseline breathing selection), not at Begin Calibration.
+- Home recommendations updated for combined calibration:
+  - Blind Spots no longer surfaced as a separate recommended home item after combined setup.
+- Visual/audit consistency fixes retained:
+  - opening tutorial title no longer all-caps,
+  - Jonny container behavior (`.ai-container` max-height) preserved.
+
+### SHIP checklist audit (this pass)
+1. **UAT dropdown** — N/A (no dropdown content changes in this pass).
+2. **Tutorial** — ✅ Updated and locked to new guided sequence.
+3. **FAQ** — N/A for this pass (FAQ content intentionally deferred for dedicated follow-up).
+4. **Transfer doc** — ✅ Updated (this section).
+5. **Plausible event** — N/A (no new tracked actions introduced).
+6. **Privacy policy** — N/A (no new data collection paths introduced).
+7. **Science sheet** — N/A (no new mechanisms introduced).
+8. **AI prompts** — N/A (no Reframe prompt logic changes in this pass).
+9. **Promo** — N/A (no promo copy changes in this pass).
+10. **Punch list** — N/A (no new post-launch infrastructure task created by this pass).
+11. **Emotion coverage** — N/A (no Pulse/chip distribution changes in this pass).
