@@ -2,6 +2,14 @@
 
 Use this checklist in order. Stop on any failed gate.
 
+### Launch timing note (operator lock)
+
+- Do **not** run broad launch this week.
+- Next feasible target: **Monday, April 20, 2026 (local)** for coordinated launch execution.
+- Until then: keep UAT controlled, stabilize Settings UX, and avoid countdown messaging that creates tester anxiety.
+
+---
+
 ### 1) Code Integrity Gate (required)
 
 Run:

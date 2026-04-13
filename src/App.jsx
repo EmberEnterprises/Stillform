@@ -1346,6 +1346,7 @@ const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
 const METRICS_SCHEMA_VERSION = 1;
+const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
@@ -1831,6 +1832,9 @@ const launchScenarioProtocolById = async ({
     if (gateBiometric && !(await gateBiometric())) return false;
     setPathway("clarity");
     setEntry("protocol-clarity", id);
+    try {
+      localStorage.setItem("stillform_reframe_prefill", "I need to prep for a difficult conversation. Help me set one clear objective, separate facts from assumptions, and build a calm, direct ask I can use.");
+    } catch {}
     setActiveTool({ id: "reframe", name: "Reframe", mode: "clarity" });
     setScreen("tool");
     return true;
@@ -3452,7 +3456,14 @@ async function secureSet(key, value) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
-  const [activeMode, setActiveMode] = useState(mode === "calm" ? null : mode);
+  const [activeMode, setActiveMode] = useState(() => {
+    if (mode !== "calm") return mode;
+    try {
+      const last = localStorage.getItem("stillform_reframe_last_mode");
+      if (last === "calm" || last === "clarity" || last === "hype") return last;
+    } catch {}
+    return null;
+  });
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
   const [showPostInsight, setShowPostInsight] = useState(false);
@@ -3514,6 +3525,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try { return localStorage.getItem("stillform_tooltips_reframe_seen") !== "yes"; } catch { return true; }
   });
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
+  const markLastReframeMode = (nextMode) => {
+    try { localStorage.setItem("stillform_reframe_last_mode", nextMode); } catch {}
+  };
 
   useEffect(() => {
     try {
@@ -3611,13 +3625,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         if (data?.reframe) {
           try {
             const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
-            notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: data.reframe, noteType: "internal" });
             const userFacingNote = toUserFacingInsight(data.reframe);
             if (userFacingNote) {
               notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: userFacingNote, noteType: "user-facing" });
             }
-            // Keep last 40 notes across both internal + user-facing tracks
-            if (notes.length > 40) notes.splice(0, notes.length - 40);
+            // Keep this feed light and useful.
+            if (notes.length > 20) notes.splice(0, notes.length - 20);
             localStorage.setItem("stillform_ai_session_notes", JSON.stringify(notes));
           } catch {}
         }
@@ -3655,6 +3668,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (onSharedTextConsumed) onSharedTextConsumed();
     }
   }, [sharedText]);
+  // Pre-fill from scenario protocols (e.g., difficult conversation prep)
+  useEffect(() => {
+    try {
+      const prefill = localStorage.getItem("stillform_reframe_prefill");
+      if (!prefill) return;
+      setInput(prefill);
+      localStorage.removeItem("stillform_reframe_prefill");
+    } catch {}
+  }, []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [ocrLoading, setOcrLoading] = useState(false);
@@ -3723,6 +3745,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     secureGet(STORAGE_KEY).then(saved => {
       setMessages(Array.isArray(saved) ? saved : []);
     }).catch(() => setMessages([]));
+    markLastReframeMode(effectiveMode);
     setSavedIds(new Set());
     setError(null);
   }, [effectiveMode]);
@@ -3741,6 +3764,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   };
 
+  const handleDoneForNow = () => {
+    // Preserve thread so accidental "Done for now" never loses context.
+    secureSet(STORAGE_KEY, messages).catch(() => {});
+    setPostRating(null);
+    setShowStateToStatement(false);
+    setShowPostRating(true);
+  };
+
   const getSavedReframes = () => {
     try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === effectiveMode); } catch { return []; }
   };
@@ -3749,6 +3780,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   useEffect(() => {
     if (messages.length > 0) {
       secureSet(STORAGE_KEY, messages).catch(() => {});
+      markLastReframeMode(effectiveMode);
     }
   }, [messages]);
 
@@ -3838,15 +3870,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (!textToSend.trim() || loading) return;
     if (error) setError(null);
     const integrationContext = resolveIntegrationContext();
+    const imagesForRequest = pendingImages.length > 0 ? pendingImages : undefined;
 
-    const userMsg = { role: "user", text: textToSend };
+    const userMsg = { role: "user", text: textToSend, imageCount: imagesForRequest?.length || 0 };
     const prevMessages = retryText ? messages.slice(0, -1) : messages;
     const history = [...prevMessages, userMsg];
 
     setMessages(retryText ? [...prevMessages, userMsg] : [...messages, userMsg]);
+    markLastReframeMode(effectiveMode);
     setLastInput(textToSend);
     if (!retryText) setInput("");
-    if (pendingImages.length > 0) setPendingImages([]);
+    if (imagesForRequest?.length) setPendingImages([]);
     setLoading(true);
     setError(null);
     try { window.plausible("Reframe Message", { props: { mode: effectiveMode } }); } catch {}
@@ -3865,7 +3899,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       const requestBody = JSON.stringify({
           input: textToSend,
-          images: pendingImages.length > 0 ? pendingImages : undefined,
+          images: imagesForRequest,
+          userLocalNowMs: (() => {
+            try { return Date.now(); } catch { return null; }
+          })(),
+          userTimeZone: (() => {
+            try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; }
+          })(),
           mode: (() => {
             // Auto-route to clarity mode if input signals spiraling/looping
             const lower = textToSend.toLowerCase();
@@ -4172,6 +4212,33 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return lines.join("\n");
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
+  const finishReframeSession = ({ postState = null, showOptionalWrap = false } = {}) => {
+    saveSession(postState);
+    const pre = scoreState(feelState);
+    const post = scoreState(postState);
+    setSessionShareSummary({
+      timestamp: new Date().toISOString(),
+      preState: feelState || null,
+      postState: postState || null,
+      delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
+    });
+    setPostRating(null);
+    setShowPostRating(false);
+    if (!showOptionalWrap) {
+      setShowPostInsight(false);
+      setShowStateToStatement(false);
+      onComplete(resolvePostReframeRoute());
+      return;
+    }
+    const latestInsight = getLatestUserFacingInsight();
+    if (latestInsight) {
+      setPostSessionInsight(latestInsight);
+      setShowPostInsight(true);
+      try { window.plausible("Post Session Insight Shown"); } catch {}
+    } else {
+      setShowStateToStatement(true);
+    }
+  };
 
   const finishStateToStatement = () => {
     try {
@@ -4374,29 +4441,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           ))}
         </div>
-        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => {
-          const selectedPost = postRating;
-          saveSession(selectedPost);
-          const pre = scoreState(feelState);
-          const post = scoreState(selectedPost);
-          setSessionShareSummary({
-            timestamp: new Date().toISOString(),
-            preState: feelState || null,
-            postState: selectedPost || null,
-            delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
-          });
-          setPostRating(null);
-          setShowPostRating(false);
-          const latestInsight = getLatestUserFacingInsight();
-          if (latestInsight) {
-            setPostSessionInsight(latestInsight);
-            setShowPostInsight(true);
-            try { window.plausible("Post Session Insight Shown"); } catch {}
-          } else {
-            setShowStateToStatement(true);
-          }
-        }}>
-          Done
+        <button
+          className="btn btn-primary"
+          style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
+          disabled={!postRating}
+          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: false })}
+        >
+          Finish session
+        </button>
+        <button
+          className="btn btn-ghost"
+          style={{ marginTop: 10, opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
+          disabled={!postRating}
+          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: true })}
+        >
+          Optional wrap-up (AI note + anchor)
+        </button>
+        <button
+          className="btn btn-ghost"
+          style={{ marginTop: 10 }}
+          onClick={() => finishReframeSession({ postState: null, showOptionalWrap: false })}
+        >
+          Skip rating and finish
         </button>
       </div>
     );
@@ -4571,7 +4637,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                         : <span key={j}>{part}</span>
                     )}
                   </div>
-                ) : msg.text}
+                ) : (
+                  <div>
+                    <div>{msg.text}</div>
+                    {msg.imageCount > 0 && (
+                      <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em" }}>
+                        📎 {msg.imageCount} image{msg.imageCount > 1 ? "s" : ""} attached
+                      </div>
+                    )}
+                  </div>
+                )}
                 {msg.role === "ai" && (
                   <button onClick={() => saveReframe(msg, i)} style={{
                     display: "block", marginTop: 8, background: "none", border: "none",
@@ -4746,12 +4821,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </div>
             )}
             {messages.length > 1 && (
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => {
-                try { localStorage.removeItem(STORAGE_KEY); } catch {}
-                setPostRating(null);
-                setShowStateToStatement(false);
-                setShowPostRating(true);
-              }}>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={handleDoneForNow}>
                 Done for now
               </button>
             )}
@@ -4939,6 +5009,9 @@ function MetacognitionTool({ onComplete }) {
     try { window.plausible?.("Watch & Choose Started"); } catch {}
   }
 
+  const recognizedPatternText = String(responses[2] || "").toLowerCase();
+  const indicatesNewPattern = /\b(no|not really|never|first time|new|don'?t think so|dont think so)\b/.test(recognizedPatternText);
+
   const prompts = [
     {
       label: "Notice",
@@ -4961,9 +5034,15 @@ function MetacognitionTool({ onComplete }) {
     {
       // EQ integration — light, not labeled
       label: "Perspective",
-      question: "What do you actually need right now?",
-      sub: "Not what you think you should do. What does the part of you that's hurting actually need?",
-      placeholder: "What do you need right now?"
+      question: indicatesNewPattern
+        ? "What would help you stay steady in this new moment?"
+        : "What do you actually need right now?",
+      sub: indicatesNewPattern
+        ? "If this feels new, keep it simple: one support, one boundary, one next step."
+        : "Not what you think you should do. What does the part of you that's hurting actually need?",
+      placeholder: indicatesNewPattern
+        ? "I need 60 seconds, one breath cycle, then one clear action..."
+        : "What do you need right now?"
     },
     {
       label: "Choose",
@@ -5039,6 +5118,10 @@ function MetacognitionTool({ onComplete }) {
 
   const prompt = prompts[step];
   const isChoiceStep = step === prompts.length - 1;
+  const markStepNotApplicable = () => {
+    setResponses((r) => ({ ...r, [step]: "[not-applicable]" }));
+    setStep((s) => s + 1);
+  };
 
   return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
@@ -5081,11 +5164,16 @@ function MetacognitionTool({ onComplete }) {
             />
             <MicButton onTranscript={t => setResponses(r => ({ ...r, [step]: (r[step] || "") + (r[step] ? " " : "") + t }))} />
           </div>
-          <button className="btn btn-primary" style={{ width: "100%", marginTop: 16 }}
-            disabled={!(responses[step] || "").trim()}
-            onClick={() => setStep(s => s + 1)}>
-            Next →
-          </button>
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="btn btn-primary" style={{ flex: 1 }}
+              disabled={!(responses[step] || "").trim()}
+              onClick={() => setStep(s => s + 1)}>
+              Next →
+            </button>
+            <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={markStepNotApplicable}>
+              Doesn't apply
+            </button>
+          </div>
         </>
       )}
 
@@ -6122,6 +6210,14 @@ function MyProgress({ onBack }) {
     ? Math.round((recoveredNudges14d / loopNudgeShown14d.length) * 100)
     : null;
   const completionRatio14d = (morningDone14dDays.size + eodDone14dDays.size) / (14 * 2);
+  const loopNudgeDismissStreak = (() => {
+    try {
+      const raw = Number.parseInt(localStorage.getItem(LOOP_NUDGE_DISMISS_STREAK_KEY) || "0", 10);
+      return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    } catch {
+      return 0;
+    }
+  })();
   const adaptiveDropoffThreshold14d = Math.max(
     LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
     Math.min(
@@ -6770,7 +6866,7 @@ function MyProgress({ onBack }) {
             </button>
             {openSections.ainotes && (
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
-                {[...aiUserFacingInsights].reverse().slice(0, 5).map((n, i) => (
+                {[...aiUserFacingInsights].reverse().slice(0, 3).map((n, i) => (
                   <div key={i} style={subRowStyle}>
                     <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{new Date(n.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
                     <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{n.note}</div>
@@ -7000,7 +7096,7 @@ export default function Stillform() {
     return () => clearTimeout(t);
   }, []);
 
-  // Production: show onboarding only once, unless user replays from Settings.
+  // Show onboarding once on fresh installs (or after data reset).
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Subscription & trial tracking
@@ -7015,7 +7111,15 @@ export default function Stillform() {
       return Math.max(0, Math.ceil(14 - elapsed));
     } catch { return 14; }
   })();
-  const trialExpired = trialDaysLeft <= 0 && !isSubscribed;
+  const uatTrialFreezeUntilMs = (() => {
+    const dt = new Date(UAT_TRIAL_FREEZE_UNTIL_ISO);
+    return Number.isNaN(dt.getTime()) ? 0 : dt.getTime();
+  })();
+  const uatTrialFreezeActive = !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
+  const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
+    ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : "launch";
+  const trialExpired = trialDaysLeft <= 0 && !isSubscribed && !uatTrialFreezeActive;
 
   // Check for subscription confirmation from Lemon Squeezy redirect
   useEffect(() => {
@@ -7476,13 +7580,25 @@ export default function Stillform() {
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
+    faq: false,
+    language: false,
+    processing: false,
+    breathing: false,
+    schedule: false,
+    notifications: false,
+    audio: false,
+    scanPace: false,
+    display: false,
+    security: false,
+    cloudsync: false,
     integrations: false,
+    subscription: false,
     sound: false,
     logs: false,
     customization: false,
     signal: false,
     more: false,
-    data: true
+    data: false
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -7914,27 +8030,33 @@ export default function Stillform() {
       setExportStatusWithClear("No pulse entries to export yet.");
       return;
     }
-    const win = window.open("", "_blank", "noopener,noreferrer");
-    if (!win) {
-      setExportStatusWithClear("Popup blocked. Allow popups to export PDF.");
-      return;
-    }
-    const rows = entries.map((entry) => {
+    const toRow = (entry) => {
       const signal = Array.isArray(entry.signal) && entry.signal.length > 0
         ? entry.signal.join(", ")
         : (Array.isArray(entry.emotions) ? entry.emotions.join(", ") : "");
       const trigger = [entry.triggerType, entry.trigger].filter(Boolean).join(" — ");
+      return {
+        date: entry.date || "",
+        time: entry.time || "",
+        signal: signal || "",
+        trigger: trigger || "",
+        outcome: entry.outcome || "",
+        notes: entry.notes || entry.body || ""
+      };
+    };
+    const rows = entries.map((entry) => {
+      const row = toRow(entry);
       return `
         <tr>
-          <td>${escapeHtml(entry.date || "")}</td>
-          <td>${escapeHtml(entry.time || "")}</td>
-          <td>${escapeHtml(signal || "")}</td>
-          <td>${escapeHtml(trigger || "")}</td>
-          <td>${escapeHtml(entry.outcome || "")}</td>
-          <td>${escapeHtml(entry.notes || entry.body || "")}</td>
+          <td>${escapeHtml(row.date)}</td>
+          <td>${escapeHtml(row.time)}</td>
+          <td>${escapeHtml(row.signal)}</td>
+          <td>${escapeHtml(row.trigger)}</td>
+          <td>${escapeHtml(row.outcome)}</td>
+          <td>${escapeHtml(row.notes)}</td>
         </tr>`;
     }).join("");
-    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
+    const html = `<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
       body{font-family:Arial,sans-serif;background:#fff;color:#111;margin:24px;}
       h1{font-size:18px;margin:0 0 6px;}
       p{font-size:12px;color:#555;margin:0 0 16px;}
@@ -7948,11 +8070,62 @@ export default function Stillform() {
         <thead><tr><th>Date</th><th>Time</th><th>Signal</th><th>Trigger</th><th>Outcome</th><th>Notes</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
-    </body></html>`);
-    win.document.close();
-    try { win.focus(); win.print(); } catch {}
-    setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
-    try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
+    </body></html>`;
+    const stamp = new Date().toISOString().slice(0, 10);
+    const fallbackCsv = () => {
+      const headers = ["date", "time", "signal", "trigger", "outcome", "notes"];
+      const lines = [
+        headers.join(","),
+        ...entries.map((entry) => {
+          const row = toRow(entry);
+          return [
+            csvValue(row.date),
+            csvValue(row.time),
+            csvValue(row.signal),
+            csvValue(row.trigger),
+            csvValue(row.outcome),
+            csvValue(row.notes)
+          ].join(",");
+        })
+      ];
+      downloadTextFile(lines.join("\n"), `stillform-pulse-log-${stamp}.csv`, "text/csv;charset=utf-8");
+      setExportStatusWithClear(`Print preview unavailable. Downloaded pulse log CSV (${entries.length} rows).`);
+    };
+    try {
+      const frame = document.createElement("iframe");
+      frame.setAttribute("title", "Stillform Pulse Export");
+      frame.style.position = "fixed";
+      frame.style.width = "0";
+      frame.style.height = "0";
+      frame.style.opacity = "0";
+      frame.style.pointerEvents = "none";
+      frame.style.border = "0";
+      const cleanup = () => {
+        try { frame.remove(); } catch {}
+      };
+      frame.onload = () => {
+        try {
+          const targetWin = frame.contentWindow;
+          if (!targetWin) throw new Error("Print target unavailable");
+          targetWin.focus();
+          targetWin.print();
+          setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
+          try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
+        } catch {
+          fallbackCsv();
+        } finally {
+          window.setTimeout(cleanup, 1200);
+        }
+      };
+      document.body.appendChild(frame);
+      const doc = frame.contentDocument || frame.contentWindow?.document;
+      if (!doc) throw new Error("Export document unavailable");
+      doc.open();
+      doc.write(html);
+      doc.close();
+    } catch {
+      fallbackCsv();
+    }
   };
 
   useEffect(() => {
@@ -8191,7 +8364,7 @@ export default function Stillform() {
         </nav>
         )}
 
-        {/* ONBOARDING — first visit only */}
+        {/* ONBOARDING — replay from Settings */}
         {screen === "onboarding" && (() => (
           <section
             style={{
@@ -8228,13 +8401,6 @@ export default function Stillform() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
               <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
                 Begin calibration →
-              </button>
-              <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
-                background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "10px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}>
-                Crisis resources & helplines →
               </button>
             </div>
           </section>
@@ -8797,50 +8963,24 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* TRIAL BADGE */}
-              {!isSubscribed && trialDaysLeft > 0 && (
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: trialDaysLeft <= 3 ? "#c05040" : "var(--text-muted)" }}>FREE TRIAL</span>
-                    <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
-                  </div>
-                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+            {/* Subscription banner without countdown */}
+            {!isSubscribed && (
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                    ACCESS
+                  </span>
+                  <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {uatTrialFreezeActive
+                      ? `UAT access active · target launch ${uatLaunchTargetLabel}`
+                      : "Subscription unlocks full Stillform access."}
+                  </span>
                 </div>
-              )}
-
-              {/* UAT BANNER — compact ecosystem link */}
-              <div style={{ marginBottom: 20 }}>
-                <a
-                  href="/uat-roadmap.html"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 12,
-                    textDecoration: "none",
-                    color: "inherit",
-                    background: "var(--surface)",
-                    border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)",
-                    padding: "10px 14px"
-                  }}
-                >
-                  <div>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", background: "var(--amber-glow)", borderRadius: 4, padding: "2px 8px" }}>EARLY ACCESS</span>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "#c05040" }}>UPDATED</span>
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                      Ecosystem brief: what Stillform is, who it serves, what's shipped, what's next.
-                    </div>
-                  </div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", whiteSpace: "nowrap" }}>
-                    Open →
-                  </div>
-                </a>
+                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
               </div>
+            )}
+
+              {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
                 <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -8879,7 +9019,7 @@ export default function Stillform() {
                   {
                     id: "hard-conversation",
                     title: "Hard conversation",
-                    subtitle: "Get clear before sending",
+                    subtitle: "Objective + facts vs story + clear ask",
                     route: "Reframe · Clarity",
                     match: ["composure", "recover"]
                   },
@@ -9495,7 +9635,12 @@ export default function Stillform() {
             )}
             <div className="pricing-header">
               <h2>{trialExpired ? "Your subscription has ended." : "Subscribe. Stay only if it works."}</h2>
-              <p>{trialExpired ? "Subscribe to keep using Stillform. Your data is safe — right where you left it." : "Try everything free for 14 days. Composure when you need it — under two minutes."}</p>
+              <p>{trialExpired
+                ? "Subscribe to keep using Stillform. Your data is safe — right where you left it."
+                : (uatTrialFreezeActive
+                    ? `UAT access window active until ${uatLaunchTargetLabel}.`
+                    : "Try everything free for 14 days. Composure when you need it — under two minutes.")}
+              </p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
@@ -9816,126 +9961,181 @@ export default function Stillform() {
 
             {/* FAQ (top priority for low-friction support) */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>FAQ</div>
-              <button onClick={() => openFaq("settings")} style={{
-                width: "100%",
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                fontFamily: "'DM Sans', sans-serif"
+              <button onClick={() => toggleSettingsSection("faq")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                Open FAQ →
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>FAQ</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.faq ? "▾" : "▸"}</span>
               </button>
+              {settingsSectionOpen.faq && (
+                <button onClick={() => openFaq("settings")} style={{
+                  width: "100%",
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Open FAQ →
+                </button>
+              )}
             </div>
 
             {/* Language */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Language</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                Additional languages coming soon.
-              </div>
-              <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+              <button onClick={() => toggleSettingsSection("language")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                English
-              </div>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Language</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.language ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.language && (
+                <>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                    Additional languages coming soon.
+                  </div>
+                  <div style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    English
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Regulation Type */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Processing Type</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                How you naturally process intensity — through thoughts or through your body. This determines which tool appears first. The system checks in after 7 sessions to see if it still fits.
-              </div>
-              {[
-                { id: "thought-first", name: "Thought-first", desc: "I process through my mind — analyzing, replaying, building responses" },
-                { id: "body-first", name: "Body-first", desc: "I feel it physically first — tension, heat, restlessness, then thoughts follow" },
-                { id: "balanced", name: "Balanced", desc: "I use both equally — depends on the moment" }
-              ].map(t => {
-                const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
-                return (
-                  <button key={t.id} onClick={() => {
-                    try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {}
-                  }} style={{
-                    width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
-                    background: isSelected ? "var(--amber-glow)" : "var(--surface)",
-                    border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{t.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{t.desc}</div>
-                  </button>
-                );
-              })}
+              <button onClick={() => toggleSettingsSection("processing")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Processing Type</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.processing ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.processing && (
+                <>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                    How you naturally process intensity — through thoughts or through your body. This determines which tool appears first. The system checks in after 7 sessions to see if it still fits.
+                  </div>
+                  {[
+                    { id: "thought-first", name: "Thought-first", desc: "I process through my mind — analyzing, replaying, building responses" },
+                    { id: "body-first", name: "Body-first", desc: "I feel it physically first — tension, heat, restlessness, then thoughts follow" },
+                    { id: "balanced", name: "Balanced", desc: "I use both equally — depends on the moment" }
+                  ].map(t => {
+                    const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
+                    return (
+                      <button key={t.id} onClick={() => {
+                        try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {}
+                      }} style={{
+                        width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
+                        background: isSelected ? "var(--amber-glow)" : "var(--surface)",
+                        border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{t.name}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{t.desc}</div>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
             {/* Breathing Pattern */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Breathing Pattern</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
-              </div>
-              {[
-                { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
-                { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." }
-              ].map(p => {
-                const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
-                return (
-                  <button key={p.id} onClick={() => {
-                    try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
-                  }} style={{
-                    width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
-                    background: isSelected ? "var(--amber-glow)" : "var(--surface)",
-                    border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
-                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                  }}>
-                    <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
-                    <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4, fontStyle: "italic" }}>{p.use}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{p.why}</div>
-                  </button>
-                );
-              })}
+              <button onClick={() => toggleSettingsSection("breathing")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Breathing Pattern</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.breathing ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.breathing && (
+                <>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                    Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
+                  </div>
+                  {[
+                    { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
+                    { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." }
+                  ].map(p => {
+                    const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
+                    return (
+                      <button key={p.id} onClick={() => {
+                        try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
+                      }} style={{
+                        width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
+                        background: isSelected ? "var(--amber-glow)" : "var(--surface)",
+                        border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
+                        <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4, fontStyle: "italic" }}>{p.use}</div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{p.why}</div>
+                      </button>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
             {/* Check-In Schedule */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Check-In Schedule</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                When morning check-in appears and when end of day begins.
-              </div>
-              {(() => {
-                const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
-                const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1080"); } catch { return 1080; } })();
-                const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-                const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-                return (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
-                      <div style={{ fontSize: 13, color: "var(--text)" }}>Morning starts</div>
-                      <input type="time" value={toTime(morningMin)} onChange={e => { try { localStorage.setItem("stillform_morning_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
-                      <div style={{ fontSize: 13, color: "var(--text)" }}>Evening starts</div>
-                      <input type="time" value={toTime(eveningMin)} onChange={e => { try { localStorage.setItem("stillform_evening_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
-                    </div>
+              <button onClick={() => toggleSettingsSection("schedule")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Check-In Schedule</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.schedule ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.schedule && (
+                <>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                    When morning check-in appears and when end of day begins.
                   </div>
-                );
-              })()}
+                  {(() => {
+                    const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
+                    const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1080"); } catch { return 1080; } })();
+                    const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+                    const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+                    return (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)" }}>Morning starts</div>
+                          <input type="time" value={toTime(morningMin)} onChange={e => { try { localStorage.setItem("stillform_morning_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)" }}>Evening starts</div>
+                          <input type="time" value={toTime(eveningMin)} onChange={e => { try { localStorage.setItem("stillform_evening_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </>
+              )}
             </div>
 
             {/* Notifications + Reminder */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Notifications</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                Manage check-in reminder and notification behavior in one place.
-              </div>
-              {(() => {
+              <button onClick={() => toggleSettingsSection("notifications")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Notifications</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.notifications ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.notifications && (() => {
                 const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
                 const reminderTime = (() => { try { return localStorage.getItem("stillform_reminder_time") || "08:00"; } catch { return "08:00"; } })();
                 const [rHour, rMin] = reminderTime.split(":").map(Number);
                 return (
+                  <div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                      Manage check-in reminder and notification behavior in one place.
+                    </div>
                   <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                     <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
@@ -9984,109 +10184,144 @@ export default function Stillform() {
                       </div>
                     )}
                   </div>
+                  </div>
                 );
               })()}
             </div>
 
             {/* Audio */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Audio</div>
-              <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
+              <button onClick={() => toggleSettingsSection("audio")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
-                </div>
-                <button onClick={() => {
-                  try {
-                    const current = localStorage.getItem("stillform_audio") === "on";
-                    localStorage.setItem("stillform_audio", current ? "off" : "on");
-                    refreshSettings();
-                  } catch {}
-                }} style={{
-                  background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
-                  border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Audio</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.audio ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.audio && (
+                <div style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
-                  <div style={{
-                    width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
-                    left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
-                    transition: "left 0.2s"
-                  }} />
-                </button>
-              </div>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
+                  </div>
+                  <button onClick={() => {
+                    try {
+                      const current = localStorage.getItem("stillform_audio") === "on";
+                      localStorage.setItem("stillform_audio", current ? "off" : "on");
+                      refreshSettings();
+                    } catch {}
+                  }} style={{
+                    background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
+                    border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
+                  }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
+                      left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
+                      transition: "left 0.2s"
+                    }} />
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Body Scan Pace */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>Body Scan Pace</div>
-              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
-              <div style={{ display: "flex", gap: 6 }}>
-                {[
-                  { id: "fast", label: "Fast", desc: "~25s / point" },
-                  { id: "standard", label: "Standard", desc: "~50s / point" },
-                  { id: "slow", label: "Slow", desc: "~90s / point" }
-                ].map(opt => {
-                  const current = (() => { try { return localStorage.getItem("stillform_scan_pace") || "standard"; } catch { return "standard"; } })();
-                  const active = current === opt.id;
-                  return (
-                    <button key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
-                      flex: 1, background: active ? "var(--amber-glow)" : "var(--surface)",
-                      border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer",
-                      textAlign: "center", transition: "all 0.15s",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)"
-                    }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: active ? "var(--amber)" : "var(--text-dim)", fontWeight: active ? 500 : 400 }}>{opt.label}</div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em", marginTop: 3 }}>{opt.desc}</div>
-                    </button>
-                  );
-                })}
-              </div>
+              <button onClick={() => toggleSettingsSection("scanPace")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Body Scan Pace</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.scanPace ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.scanPace && (
+                <>
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    {[
+                      { id: "fast", label: "Fast", desc: "~25s / point" },
+                      { id: "standard", label: "Standard", desc: "~50s / point" },
+                      { id: "slow", label: "Slow", desc: "~90s / point" }
+                    ].map(opt => {
+                      const current = (() => { try { return localStorage.getItem("stillform_scan_pace") || "standard"; } catch { return "standard"; } })();
+                      const active = current === opt.id;
+                      return (
+                        <button key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
+                          flex: 1, background: active ? "var(--amber-glow)" : "var(--surface)",
+                          border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer",
+                          textAlign: "center", transition: "all 0.15s",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)"
+                        }}>
+                          <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: active ? "var(--amber)" : "var(--text-dim)", fontWeight: active ? 500 : 400 }}>{opt.label}</div>
+                          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em", marginTop: 3 }}>{opt.desc}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Display */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Display</div>
-              {[
-                { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
-                { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
-                { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
-              ].map(opt => {
-                const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
-                return (
-                  <div key={opt.key} style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
-                    marginBottom: 8
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
-                    </div>
-                    <button onClick={() => {
-                      try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {}
-                    }} style={{
-                      background: isOn ? "var(--amber)" : "var(--border)",
-                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
-                      position: "relative", transition: "background 0.2s", flexShrink: 0
-                    }}>
-                      <div style={{
-                        width: 18, height: 18, borderRadius: "50%", background: "white",
-                        position: "absolute", top: 3, left: isOn ? 23 : 3, transition: "left 0.2s"
-                      }} />
-                    </button>
-                  </div>
-                );
-              })}
+              <button onClick={() => toggleSettingsSection("display")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Display</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.display ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.display && (
+                <>
+                  {[
+                    { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
+                    { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
+                    { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
+                  ].map(opt => {
+                    const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
+                    return (
+                      <div key={opt.key} style={{
+                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                        padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
+                        marginBottom: 8
+                      }}>
+                        <div>
+                          <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
+                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
+                        </div>
+                        <button onClick={() => {
+                          try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {}
+                        }} style={{
+                          background: isOn ? "var(--amber)" : "var(--border)",
+                          border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                          position: "relative", transition: "background 0.2s", flexShrink: 0
+                        }}>
+                          <div style={{
+                            width: 18, height: 18, borderRadius: "50%", background: "white",
+                            position: "absolute", top: 3, left: isOn ? 23 : 3, transition: "left 0.2s"
+                          }} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
             </div>
 
             {/* Security — only visible in native shell (Face ID / fingerprint) */}
             {isNative() && (
               <div style={{ marginBottom: 28 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Security</div>
-                {(() => {
+                <button onClick={() => toggleSettingsSection("security")} style={{
+                  width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                  display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+                }}>
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Security</span>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.security ? "▾" : "▸"}</span>
+                </button>
+                {settingsSectionOpen.security && (() => {
                   const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
                   return (
                     <div style={{
@@ -10293,7 +10528,14 @@ export default function Stillform() {
 
             {/* Subscription status */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Subscription status</div>
+              <button onClick={() => toggleSettingsSection("subscription")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Subscription status</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.subscription ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.subscription && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
@@ -10304,7 +10546,11 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
                   {isSubscribed
                     ? "This device has active access."
-                    : (trialExpired ? "Trial expired. Subscription is required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
+                    : (trialExpired
+                        ? "Trial expired. Subscription is required for full access."
+                        : (uatTrialFreezeActive
+                            ? `UAT access window active until ${uatLaunchTargetLabel}.`
+                            : "Trial active. Subscription unlocks full access."))}
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
                   {hasPendingWebhookSync
@@ -10332,6 +10578,7 @@ export default function Stillform() {
                   </div>
                 )}
               </div>
+              )}
             </div>
 
             {/* Sound */}
@@ -10394,7 +10641,15 @@ export default function Stillform() {
 
             {/* Cloud Sync */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Cloud Sync</div>
+              <button onClick={() => toggleSettingsSection("cloudsync")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Cloud Sync</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.cloudsync ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.cloudsync && (
+              <>
               {syncSignedIn ? (
                 <div>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
@@ -10570,6 +10825,8 @@ export default function Stillform() {
                     New to Stillform? Enter your email and a password — your account is created automatically.
                   </div>
                 </div>
+              )}
+              </>
               )}
             </div>
 
@@ -10868,6 +11125,14 @@ export default function Stillform() {
                   Replay tutorial
                 </button>
                 <button onClick={() => {
+                  try {
+                    localStorage.removeItem("stillform_regulation_type");
+                    localStorage.removeItem("stillform_signal_profile");
+                    localStorage.removeItem("stillform_bias_profile");
+                    localStorage.removeItem("stillform_breath_pattern");
+                    localStorage.removeItem("stillform_bio_filter");
+                  } catch {}
+                  setRegType(null);
                   setSetupStep(0);
                   setAssessmentAnswers([]);
                   setScreen("setup");
@@ -10888,7 +11153,7 @@ export default function Stillform() {
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
 
-            {/* BACKUP & DATA — buried at very bottom */}
+            {/* BACKUP & DATA — collapsed by default */}
             <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
               <button onClick={() => toggleSettingsSection("data")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
@@ -11001,18 +11266,61 @@ export default function Stillform() {
                   const typed = window.prompt("To confirm deletion, type DELETE below:");
                   if (typed === "DELETE") {
                     try {
+                      // Prevent cloud auto-restore from repopulating deleted local data.
+                      try { sbClearSession(); } catch {}
+                      try { sbSignOut().catch(() => {}); } catch {}
+                      setSyncSignedIn(false);
+                      setSyncSuccess(null);
+                      setSyncError(null);
                       localStorage.removeItem("stillform_sessions");
                       localStorage.removeItem("stillform_signal_profile");
                       localStorage.removeItem("stillform_saved_reframes");
                       localStorage.removeItem("stillform_reframe_session_calm");
                       localStorage.removeItem("stillform_reframe_session_clarity");
                       localStorage.removeItem("stillform_reframe_session_hype");
+                      localStorage.removeItem("stillform_reframe_last_mode");
+                      localStorage.removeItem("stillform_reframe_entry_mode");
+                      localStorage.removeItem("stillform_reframe_entry_protocol");
+                      localStorage.removeItem("stillform_reframe_prefill");
                       localStorage.removeItem("stillform_journal");
+                      localStorage.removeItem("stillform_ai_session_notes");
+                      localStorage.removeItem("stillform_bias_profile");
+                      localStorage.removeItem("stillform_regulation_type");
+                      localStorage.removeItem("stillform_breath_pattern");
+                      localStorage.removeItem("stillform_ai_tone");
+                      localStorage.removeItem("stillform_theme");
+                      localStorage.removeItem("stillform_scan_pace");
+                      localStorage.removeItem("stillform_audio");
+                      localStorage.removeItem("stillform_sound_type");
+                      localStorage.removeItem("stillform_screenlight");
+                      localStorage.removeItem("stillform_reducedmotion");
+                      localStorage.removeItem("stillform_visual_grounding");
+                      localStorage.removeItem("stillform_grounding_data");
+                      localStorage.removeItem("stillform_bio_filter");
+                      localStorage.removeItem("stillform_morning_start");
+                      localStorage.removeItem("stillform_evening_start");
+                      localStorage.removeItem("stillform_reminder");
+                      localStorage.removeItem("stillform_reminder_time");
+                      localStorage.removeItem("stillform_tooltip_home_seen");
+                      localStorage.removeItem("stillform_tooltip_pulse_seen");
+                      localStorage.removeItem("stillform_tooltips_reframe_seen");
+                      localStorage.removeItem("stillform_outcome_focus");
+                      localStorage.removeItem("stillform_session_entry_context");
+                      localStorage.removeItem("stillform_checkout_after_login");
+                      localStorage.removeItem("stillform_sb_sync_version");
+                      localStorage.removeItem("stillform_qb_position");
+                      localStorage.removeItem("stillform_milestone_7_seen");
+                      localStorage.removeItem("stillform_trial_start");
+                      localStorage.removeItem("stillform_subscribed");
                       localStorage.removeItem("stillform_checkin_today");
                       localStorage.removeItem("stillform_checkin_open_history");
                       localStorage.removeItem("stillform_checkin_history");
                       localStorage.removeItem("stillform_eod_open_history");
                       localStorage.removeItem("stillform_eod_history");
+                      localStorage.removeItem("stillform_eod_today");
+                      localStorage.removeItem("stillform_loop_nudge_events");
+                      localStorage.removeItem("stillform_loop_nudge_dismissed_day");
+                      localStorage.removeItem("stillform_loop_nudge_dismiss_streak");
                       localStorage.removeItem(METRICS_OPT_IN_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);

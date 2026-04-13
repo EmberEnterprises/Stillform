@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stillform Strategic Overview</title>
+    <title>Stillform UAT Roadmap</title>
     <style>
       :root {
         --bg: #0e0f11;
@@ -24,7 +24,7 @@
         line-height: 1.6;
       }
       .wrap {
-        max-width: 900px;
+        max-width: 980px;
         margin: 0 auto;
         padding: 32px 20px 80px;
       }
@@ -56,16 +56,8 @@
         background: var(--surface);
         border: 1px solid var(--border);
         border-radius: 16px;
-        padding: 18px 18px 16px;
+        padding: 18px;
         margin-bottom: 14px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-      }
-      @media (max-width: 760px) {
-        .grid { grid-template-columns: 1fr; }
       }
       .slide-title {
         margin: 0 0 10px;
@@ -79,62 +71,6 @@
         padding-left: 18px;
       }
       li { margin: 6px 0; color: var(--text); }
-      .footer {
-        margin-top: 18px;
-        font-size: 12px;
-        color: var(--text-dim);
-      }
-      .divider {
-        margin: 22px 0 10px;
-        font-size: 11px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-dim);
-      }
-      .pill {
-        display: inline-block;
-        border-radius: 999px;
-        border: 1px solid var(--border);
-        background: var(--surface-2);
-        padding: 3px 8px;
-        margin-right: 6px;
-        color: var(--text-dim);
-        font-size: 11px;
-      }
-      .hero {
-        display: grid;
-        grid-template-columns: 1.1fr 0.9fr;
-        gap: 14px;
-        margin-bottom: 14px;
-      }
-      @media (max-width: 760px) {
-        .hero { grid-template-columns: 1fr; }
-      }
-      .metric {
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 10px 12px;
-      }
-      .metric .k {
-        font-size: 10px;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--text-dim);
-        margin-bottom: 4px;
-      }
-      .metric .v {
-        color: var(--amber);
-        font-family: "Cormorant Garamond", Georgia, serif;
-        font-size: 28px;
-        line-height: 1;
-      }
-      .quote {
-        border-left: 3px solid var(--amber);
-        padding-left: 12px;
-        color: var(--text-dim);
-        font-style: italic;
-      }
       .table {
         width: 100%;
         border-collapse: collapse;
@@ -154,567 +90,96 @@
         letter-spacing: 0.08em;
         background: var(--surface-2);
       }
+      .footer {
+        margin-top: 18px;
+        font-size: 12px;
+        color: var(--text-dim);
+      }
     </style>
   </head>
   <body>
     <main class="wrap">
-      <div class="kicker">Stillform · Strategic Deck</div>
-      <h1>Stillform Strategic Overview</h1>
-      <p class="sub">A composure infrastructure company: science-led behavior change for everyday human life.</p>
+      <div class="kicker">Stillform · UAT</div>
+      <h1>Stillform UAT Roadmap</h1>
+      <p class="sub">Only three views: what is launched, what is currently being worked on, and future launch.</p>
 
       <section class="slide">
-        <h2 class="slide-title">Executive definition</h2>
-        <p class="quote">
-          Stillform is a neuroscience-guided preventive risk management system for human behavior.
-          It exists to reduce avoidable damage in communication, decisions, and relationships by training composure as a daily capability.
-        </p>
-        <ul>
-          <li><strong>Category:</strong> Preventive risk management for emotional maturity and decision quality.</li>
-          <li><strong>Primary job:</strong> Detect state early, route the right intervention, and improve behavioral outcomes under load.</li>
-          <li><strong>Design standard:</strong> Mechanism-first product decisions, evidence-backed claims, and trust-by-default operations.</li>
-          <li><strong>Audience:</strong> Everyone — because composure is a universal operating requirement, not a niche trait.</li>
-        </ul>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Mechanics register (science -> product -> signal)</h2>
+        <h2 class="slide-title">Launched</h2>
         <table class="table">
           <thead>
             <tr>
-              <th>Mechanic</th>
-              <th>Scientific basis</th>
-              <th>Product implementation</th>
-              <th>Measured signal</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Affect labeling</td>
-              <td>Labeling emotion reduces amygdala reactivity and engages prefrontal control (Lieberman et al., 2007; Torre &amp; Lieberman, 2018).</td>
-              <td>Pulse emotion chips + post-session state labels.</td>
-              <td>State precision and pre/post shift trends.</td>
-            </tr>
-            <tr>
-              <td>Cognitive reappraisal</td>
-              <td>Reappraisal is a high-evidence emotion-regulation strategy (Ochsner &amp; Gross, 2005; Buhle et al., 2014).</td>
-              <td>Reframe conversation architecture with bias-aware guidance.</td>
-              <td>Session composure delta and repeat trigger handling quality.</td>
-            </tr>
-            <tr>
-              <td>Interoceptive regulation</td>
-              <td>Body-signal awareness supports emotion regulation (Mehling et al., 2012; Critchley &amp; Garfinkel, 2017).</td>
-              <td>Bio-filter + body scan + somatic interrupt.</td>
-              <td>Faster identification of body-driven misreads.</td>
-            </tr>
-            <tr>
-              <td>Autonomic downshift</td>
-              <td>Slow/extended-exhale breathing improves autonomic control and stress markers (Zaccaro et al., 2018; Ma et al., 2017).</td>
-              <td>Paced breathing protocols inside Breathe.</td>
-              <td>Faster time-to-regulation action and lower escalation duration.</td>
-            </tr>
-            <tr>
-              <td>Implementation intentions</td>
-              <td>If-then planning improves follow-through under stress (Gollwitzer, 1999; Gollwitzer &amp; Sheeran, 2006).</td>
-              <td>Two-pathway calibration sets default intervention route.</td>
-              <td>Reduced hesitation between signal and action.</td>
-            </tr>
-            <tr>
-              <td>Window-of-tolerance training</td>
-              <td>Regulation skills widen functional arousal range over time (Siegel, 1999; Thayer &amp; Lane, 2000).</td>
-              <td>Morning baseline + intervention + EOD close loop.</td>
-              <td>Loop adherence, reduced drop-off, improved recovery consistency.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Preventive risk thesis</h2>
-        <p class="quote">
-          Behavioral risk is often state risk first.
-          The avoidable loss usually happens before reflection begins.
-        </p>
-        <ul>
-          <li>People do not mainly fail from lack of intelligence; they fail from state-distorted interpretation.</li>
-          <li>Misattribution is common: biological load is often read as interpersonal threat or personal truth.</li>
-          <li>Without a rapid regulation pathway, cognition is asked to perform while physiology is unstable.</li>
-          <li>Stillform treats composure as risk infrastructure: detect early, regulate fast, act deliberately, learn continuously.</li>
-        </ul>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">App mechanics (end-to-end)</h2>
-        <div class="grid">
-          <div>
-            <div class="divider" style="margin-top:0;">Behavior architecture</div>
-            <ul>
-              <li>Morning baseline: energy + hardware state.</li>
-              <li>In-moment routing by regulation type (thought-first/body-first/balanced).</li>
-              <li>Post-session integration via rating + state-to-statement bridge.</li>
-              <li>Evening closure to reduce overnight carryover.</li>
-            </ul>
-          </div>
-          <div>
-            <div class="divider" style="margin-top:0;">Learning architecture</div>
-            <ul>
-              <li>Context stack: state, bio-filter, type, patterns, recent notes.</li>
-              <li>Session notes compress memory into useful continuity.</li>
-              <li>Patterns surface as neutral observations, never shaming verdicts.</li>
-              <li>Proof layer tracks what shifted, not what was missed.</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Scientific integrity policy (claims discipline)</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Claim area</th>
-              <th>What Stillform can claim</th>
-              <th>What Stillform does not claim</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Regulation effects</td>
-              <td>Built on established mechanisms in affect labeling, reappraisal, interoception, and autonomic regulation.</td>
-              <td>Does not claim diagnosis, treatment, or cure of psychiatric disorders.</td>
-            </tr>
-            <tr>
-              <td>Behavior change</td>
-              <td>Uses repeated daily loop practice to support measurable behavioral maturation.</td>
-              <td>Does not claim instant or guaranteed transformation.</td>
-            </tr>
-            <tr>
-              <td>AI role</td>
-              <td>AI is structured scaffolding for regulation and metacognition.</td>
-              <td>AI is not a clinician and is not positioned as medical advice.</td>
-            </tr>
-            <tr>
-              <td>Evidence quality</td>
-              <td>Public language is downstream of verified product behavior and release-gated checks.</td>
-              <td>No overclaiming beyond measured app behavior.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Infrastructure and trust architecture</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Layer</th>
+              <th>Area</th>
+              <th>What is live</th>
               <th>Why it matters</th>
-              <th>Current state</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Context infrastructure</td>
-              <td>Any input must produce meaningful, traceable output.</td>
-              <td>State, check-ins, patterns, session notes, entry mode, protocol source wired into AI context.</td>
+              <td>Core composure loop</td>
+              <td>Morning check-in, protocol routing, in-session tools, end-of-day close.</td>
+              <td>One consistent daily behavior loop instead of fragmented features.</td>
             </tr>
             <tr>
-              <td>Integration adapter</td>
-              <td>Calendar/health context needs one trustworthy translation layer.</td>
-              <td>Shared adapter with freshness classification (fresh/today/aging/stale).</td>
+              <td>Reframe</td>
+              <td>Mode-aware Reframe with session continuity, tone selection, and retry/offline fallback.</td>
+              <td>Maintains composure during high-load moments with clearer recovery behavior.</td>
             </tr>
             <tr>
-              <td>Subscription truth</td>
-              <td>Revenue trust is product trust.</td>
-              <td>Server-side subscription webhooks/status/linking foundation in place.</td>
+              <td>Subscription trust</td>
+              <td>Server-side subscription status flow (webhook/status/link-account) with in-app refresh.</td>
+              <td>Reduces entitlement mismatch and protects trust in paid access.</td>
             </tr>
             <tr>
-              <td>Release integrity</td>
-              <td>Avoid regressions that silently break trust.</td>
-              <td>SHIP preflight gate (build + structural integrity checks) active.</td>
+              <td>Data + transparency</td>
+              <td>Metrics controls, privacy disclosures, and visible data management controls.</td>
+              <td>Maintains integrity through explicit user control and clear data boundaries.</td>
             </tr>
           </tbody>
         </table>
       </section>
 
       <section class="slide">
-        <h2 class="slide-title">Ecosystem decision: outcome engine integration</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Before</th>
-              <th>Now</th>
-              <th>Why this is stronger</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Outcome Engine existed as a separate Home module after Morning check-in.</td>
-              <td>Outcome intent is selected inside Morning check-in and immediately routes to the recommended protocol.</td>
-              <td>Reduces branching and keeps the product as one operating loop, not parallel lanes.</td>
-            </tr>
-            <tr>
-              <td>Users had to decide intent in one area and launch in another area.</td>
-              <td>Intent and launch happen in one flow: baseline -> intent -> start.</td>
-              <td>Lower cognitive overhead, clearer daily behavior model, less interface noise.</td>
-            </tr>
-            <tr>
-              <td>Home carried extra cards competing with core actions.</td>
-              <td>Home now reinforces existing components rather than adding new branches.</td>
-              <td>Preserves composure-first UX and improves ecosystem coherence.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Who it serves (global fit)</h2>
-        <div class="grid">
-          <ul>
-            <li>Everyone who wants to build composure as a daily skill.</li>
-            <li>People managing stress, uncertainty, conflict, transitions, or recovery periods.</li>
-            <li>Students, parents, professionals, founders, creatives, caregivers, and retirees.</li>
-            <li>Users with health or nervous-system variability who need fast, practical regulation.</li>
-          </ul>
-          <ul>
-            <li>Initial channel focus: executive/performance coaches and therapist-adjacent referrals.</li>
-            <li>Early growth support: high-trust communities where composure is a performance requirement.</li>
-            <li>Not a crisis hotline and not a replacement for medical or mental-health treatment.</li>
-            <li>Designed to build autonomy over time, not create dependency or streak pressure.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Expected outcomes for users</h2>
+        <h2 class="slide-title">Currently being worked on</h2>
         <ul>
-          <li>Faster awareness of state shifts before reaction drives communication or decisions.</li>
-          <li>Practical reset paths in moments of overload, instead of abstract advice.</li>
-          <li>Higher consistency in execution during pressure windows (meetings, conflict, deadlines).</li>
-          <li>Neutral, cumulative proof of change through sessions, ratings, and usage patterns.</li>
-          <li>More agency and cleaner recovery after hard moments, without guilt loops for gaps.</li>
-          <li>Long-term aim: lower awareness latency, better decision quality, and less avoidable relational damage.</li>
+          <li>Difficult Conversation Prep expansion (objective clarity, facts-vs-story, pushback rehearsal, execution card).</li>
+          <li>Settings simplification and friction cuts across high-traffic flows.</li>
+          <li>Reframe quality tuning (sympathy-first response behavior + lighter completion path).</li>
+          <li>Stability hardening from UAT crash reports and export flow edge cases.</li>
+          <li>Metrics trust controls + privacy alignment checks for transparency consistency.</li>
         </ul>
       </section>
 
       <section class="slide">
-        <h2 class="slide-title">Strategic moat and defensibility</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Moat pillar</th>
-              <th>Why competitors struggle</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Two-pathway regulation model</td>
-              <td>Most products are one-size-fits-all content libraries.</td>
-            </tr>
-            <tr>
-              <td>Memory + context continuity</td>
-              <td>Generic chat tools forget trajectory and flatten nuance.</td>
-            </tr>
-            <tr>
-              <td>Trust-by-design language</td>
-              <td>Growth products often drift into overclaiming and guilt loops.</td>
-            </tr>
-            <tr>
-              <td>Infrastructure orientation</td>
-              <td>Most competitors build experiences; fewer build reliable composure infrastructure.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Business model and economics logic</h2>
-        <ul>
-          <li>Single paid tier keeps decision friction low and trust high.</li>
-          <li>No add-on upsells protects brand integrity and reduces churn resentment.</li>
-          <li>High gross margin model: software + API-heavy, low physical overhead.</li>
-          <li>Retention thesis: relationship quality + daily utility + visible self-evidence.</li>
-          <li>Revenue scales through high-fit channels, not broad ad spend first.</li>
-        </ul>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Business plan (operator view)</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Plan component</th>
-              <th>Decision</th>
-              <th>Why this is defensible</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Who</td>
-              <td>Everyone who wants composure as a trainable daily skill.</td>
-              <td>Largest real market with repeatable need across life stages and roles.</td>
-            </tr>
-            <tr>
-              <td>Core problem</td>
-              <td>State-driven reactions cause avoidable personal, relational, and execution damage.</td>
-              <td>High-frequency pain with measurable behavior impact, not just mood impact.</td>
-            </tr>
-            <tr>
-              <td>Product mechanism</td>
-              <td>Morning baseline -> in-moment intervention -> evening close, with continuity memory.</td>
-              <td>System architecture improves behavior in the moment and compounds over time.</td>
-            </tr>
-            <tr>
-              <td>Revenue model</td>
-              <td>Single paid subscription tier with no upsell maze.</td>
-              <td>Lower decision fatigue, stronger trust, cleaner retention signal.</td>
-            </tr>
-            <tr>
-              <td>Distribution</td>
-              <td>High-trust channels first: coaches, practitioner-adjacent referrals, targeted communities.</td>
-              <td>Trust transfer and conversion quality are stronger than broad cold acquisition.</td>
-            </tr>
-            <tr>
-              <td>Retention engine</td>
-              <td>Visible proof of change: loop completion, composure deltas, statement transfer, share card artifacts.</td>
-              <td>Users stay when outcomes are experienced and measured, not merely promised.</td>
-            </tr>
-            <tr>
-              <td>Expansion path</td>
-              <td>Reduce manual burden with consented calendar and health context integrations.</td>
-              <td>Adds context quality while preserving user control and trust boundaries.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Go-to-market ecosystem</h2>
-        <div class="grid">
-          <div>
-            <div class="divider" style="margin-top:0;">Core channels</div>
-            <ul>
-              <li>Community channels (neurodivergent + high-performance audiences)</li>
-              <li>Therapist-adjacent between-session recommendation</li>
-              <li>Executive/performance coaches as force multipliers</li>
-              <li>Selective creator partnerships after conversion proof</li>
-            </ul>
-          </div>
-          <div>
-            <div class="divider" style="margin-top:0;">Channel criteria</div>
-            <ul>
-              <li>Audience already values composure under pressure</li>
-              <li>Trust transfer stronger than cold paid acquisition</li>
-              <li>Clear attribution path and repeatable referral loop</li>
-              <li>No channel that requires compromising product integrity</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Execution phases (non-calendar)</h2>
-        <ul>
-          <li><strong>Phase 1: Proof</strong> - tighten reliability, validate conversion, gather trusted testimonials.</li>
-          <li><strong>Phase 2: Retention</strong> - strengthen daily loop and evidence surfaces for compounding behavior change.</li>
-          <li><strong>Phase 3: Distribution</strong> - scale through coaches, practitioners, and targeted communities.</li>
-          <li><strong>Phase 4: Expansion</strong> - biometrics/calendar/context integrations to reduce user input burden.</li>
-        </ul>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Outcome integration decision (ecosystem logic)</h2>
-        <ul>
-          <li>Outcome intent was moved into Morning Check-In instead of remaining a separate home module.</li>
-          <li>This keeps the daily operating loop unified: morning baseline + intent + launch path in one flow.</li>
-          <li>Result: fewer competing decision blocks on Home and cleaner behavior sequencing.</li>
-          <li>Intent now acts as context for launch routing and later reflection, not a standalone branch.</li>
-        </ul>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Operational risks and mitigations</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Risk</th>
-              <th>Mitigation</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Trust mismatch (copy vs behavior)</td>
-              <td>SHIP gate + privacy-language parity checks before every release.</td>
-            </tr>
-            <tr>
-              <td>Feature sprawl and home-screen overload</td>
-              <td>Ecosystem-first hierarchy: strengthen current loop before adding branches.</td>
-            </tr>
-            <tr>
-              <td>Reliability regressions in complex flows</td>
-              <td>Targeted smoke tests for morning, reframe, paywall, and restore paths each release.</td>
-            </tr>
-            <tr>
-              <td>Weak distribution fit</td>
-              <td>Prioritize high-trust channels (coaches/therapists/communities) before broad spend.</td>
-            </tr>
-            <tr>
-              <td>Evidence/claim drift</td>
-              <td>Keep public language downstream of verified product behavior and measured outcomes.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Execution transparency: completed, tested, and next to launch</h2>
-        <div class="divider" style="margin-top:0;">Completed + tested</div>
+        <h2 class="slide-title">Future launch</h2>
         <table class="table">
           <thead>
             <tr>
               <th>Phase</th>
-              <th>Who</th>
-              <th>What is completed</th>
-              <th>Why this matters</th>
-              <th>How it was tested</th>
+              <th>Next step</th>
+              <th>Readiness signal</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Phase 1 - Proof</td>
-              <td>Paid users and UAT testers entering the paywall</td>
-              <td>Server-side subscription verification (webhook/status/link-account) and in-paywall sign-in/sign-up flow</td>
-              <td>Prevents entitlement mismatch and removes subscription flow confusion</td>
-              <td>Checkout/auth/status paths validated in release flow, plus build and SHIP preflight gate</td>
+              <td>Launch hardening</td>
+              <td>Final entitlement/trial truth checks and post-deploy device sanity pass.</td>
+              <td>Clean subscription refresh behavior and no startup/runtime regressions.</td>
             </tr>
             <tr>
-              <td>Phase 1 to 2 - Daily loop reliability</td>
-              <td>Users navigating pressure windows throughout the day</td>
-              <td>Outcome intent moved into Morning Check-In with scenario routing; EOD close continuity preserved</td>
-              <td>Keeps one coherent composure loop instead of fragmented home modules</td>
-              <td>Morning -> launch -> session -> completion path smoke-tested with protocol metadata capture</td>
+              <td>Distribution prep</td>
+              <td>High-trust channel assets (coach/practitioner/community referrals).</td>
+              <td>Pilot channel conversion and retention quality.</td>
             </tr>
             <tr>
-              <td>Phase 2 - Evidence and transfer</td>
-              <td>Users and coach/partner stakeholders tracking real change</td>
-              <td>State-to-Statement step, Proof of Change panel, and Shareable Composure Card with PDF export</td>
-              <td>Turns internal regulation into visible, practical outcomes and accountability artifacts</td>
-              <td>Session-save, card generation, copy/download/print export paths verified in app and preflight checks</td>
-            </tr>
-            <tr>
-              <td>Phase 2 foundation for Phase 4</td>
-              <td>Users who rely on external context (calendar/health)</td>
-              <td>Shared integration adapter, freshness logic, and integration status visibility in Settings</td>
-              <td>Creates one trusted source of context truth before provider expansion</td>
-              <td>Adapter wiring and freshness usage checked in code and release preflight</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div class="divider">About to launch (next gated phases)</div>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Phase</th>
-              <th>Who</th>
-              <th>What is next</th>
-              <th>Why this is next</th>
-              <th>How launch readiness is verified</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Phase 1 hardening</td>
-              <td>All subscribers and new trial users</td>
-              <td>Dynamic production trial/entitlement truth and final billing-policy compliance checks</td>
-              <td>Trust and platform compliance are required for stable revenue and store approval</td>
-              <td>Server entitlement validation, restore-flow QA, and policy checklist sign-off</td>
-            </tr>
-            <tr>
-              <td>Phase 3 - Distribution</td>
-              <td>Executive coaches, therapist-adjacent partners, and their communities</td>
-              <td>Partner referral assets and channel playbooks tied to composure outcomes</td>
-              <td>High-trust channels match the product's integrity model better than broad cold acquisition</td>
-              <td>Pilot cohort conversion/retention review and partner feedback loop</td>
-            </tr>
-            <tr>
-              <td>Phase 4 - Integrations</td>
-              <td>Users managing high-load schedules and health variability</td>
-              <td>Calendar and health provider hookups, consent/revoke flows, and integration retry/error UX</td>
-              <td>Reduces manual input burden while preserving context quality and user control</td>
-              <td>Permission-state testing, freshness-state QA, and device-level integration checks</td>
-            </tr>
-            <tr>
-              <td>Native launch readiness</td>
-              <td>iOS and Android production users</td>
-              <td>Store submission package, privacy disclosures, signing/versioning, and real-device QA matrix</td>
-              <td>Prevents approval delays and production trust regressions at launch</td>
-              <td>Pre-submit checklist completion across metadata, build signing, and critical path smoke tests</td>
+              <td>Native readiness</td>
+              <td>TestFlight and Play closed-testing execution with store compliance checks.</td>
+              <td>Device QA matrix complete and submission package ready.</td>
             </tr>
           </tbody>
         </table>
       </section>
 
-      <section class="slide">
-        <h2 class="slide-title">Integrity of work (evidence, not claims)</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Integrity promise</th>
-              <th>Current evidence in product</th>
-              <th>How integrity is enforced</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Audience integrity</td>
-              <td>Public positioning is universal: composure infrastructure for everyone.</td>
-              <td>SHIP invariant checks block niche-only framing regressions in deck copy.</td>
-            </tr>
-            <tr>
-              <td>Behavior integrity</td>
-              <td>Core app remains one loop ecosystem, not feature sprawl.</td>
-              <td>Roadmap and release decisions prioritize loop coherence before new branches.</td>
-            </tr>
-            <tr>
-              <td>Measurement integrity</td>
-              <td>Loop completion, drop-off, and nudge recovery metrics are visible and testable.</td>
-              <td>Preflight checks require telemetry and evidence surfaces to remain present.</td>
-            </tr>
-            <tr>
-              <td>Trust integrity</td>
-              <td>Subscription truth, consent controls, and cloud restore diagnostics are implemented.</td>
-              <td>Release gate includes subscription and integration diagnostic checks.</td>
-            </tr>
-            <tr>
-              <td>Execution integrity</td>
-              <td>Every release pass runs build + SHIP preflight before push.</td>
-              <td>Push is blocked when structural, invariant, or release-safety checks fail.</td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section class="slide">
-        <h2 class="slide-title">Tester ask (what feedback matters most)</h2>
-        <p>Use this exact format for tester feedback (no vague reactions):</p>
-        <ul>
-          <li><strong>Real moment:</strong> What happened, which tool you used, and what changed in the next 10 minutes.</li>
-          <li><strong>Behavior delta:</strong> Before vs after (reaction speed, tone, decision quality, escalation risk).</li>
-          <li><strong>Friction map:</strong> Exact screen + step where you hesitated, backtracked, or felt confused.</li>
-          <li><strong>Reliability report:</strong> Any lag, failure, or instability (device, OS, timestamp, what broke).</li>
-          <li><strong>Language quality:</strong> Quote exact wording that felt clear vs generic/performative.</li>
-          <li><strong>Daily adoption:</strong> What would make you open this tomorrow without a reminder?</li>
-          <li><strong>Outcome score (1-5):</strong> Did the app help prevent a worse outcome in a real situation?</li>
-        </ul>
-      </section>
-
-      <div class="divider">Key expectations</div>
-      <span class="pill">Composure as a learned skill</span>
-      <span class="pill">Evidence over vibes</span>
-      <span class="pill">Integrity as release gate</span>
-      <span class="pill">Ecosystem over feature pile</span>
-
-      <p class="footer">Stillform is not trying to win the attention economy. It is trying to lower avoidable damage in real lives by making composure trainable, measurable, and trustworthy under pressure.</p>
+      <p class="footer">Stillform is a composure tool for everyone. This UAT page is intentionally narrowed to execution status only.</p>
     </main>
   </body>
-  </html>
+</html>
