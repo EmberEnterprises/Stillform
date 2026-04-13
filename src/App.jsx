@@ -4809,6 +4809,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           )}
         </div>
+        {messages.length === 0 && !loading && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 10 }}>
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 13, color: "var(--text-dim)" }}
+              onClick={() => {
+                setError(null);
+                setInput("");
+                onComplete();
+              }}
+            >
+              Skip for now
+            </button>
+          </div>
+        )}
       </div>
       {messages.length > 0 && (
         <div style={{ marginTop: 16 }}>
