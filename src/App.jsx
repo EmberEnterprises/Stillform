@@ -8546,9 +8546,15 @@ export default function Stillform() {
                 </div>
               ))}
             </div>
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
+              Method, science basis, and boundaries are documented in FAQ and Privacy &amp; Disclaimers.
+            </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
               <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15, width: "100%" }} onClick={() => completeOnboarding()}>
                 Begin calibration →
+              </button>
+              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("tutorial")}>
+                Open FAQ
               </button>
             </div>
           </section>
@@ -9960,6 +9966,14 @@ export default function Stillform() {
               {
                 q: "What is Stillform?",
                 a: "A composure system. Breathing, body scan, and AI-powered reframing — built for your morning practice, for the moments that test you, and for the moments when you're winning. Composure matters most when things are going well."
+              },
+              {
+                q: "What is the method behind Stillform?",
+                a: "One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan, Watch & Choose) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first."
+              },
+              {
+                q: "What science basis does Stillform use?",
+                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, metacognitive labeling in Watch & Choose, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
               },
               {
                 q: "Who is this for?",
