@@ -7578,6 +7578,10 @@ export default function Stillform() {
         const preview = (params.get("preview") || "").trim().toLowerCase();
         const previewAllowed = new Set(["tutorial", "onboarding", "home", "settings", "faq", "privacy"]);
         if (previewAllowed.has(preview)) {
+          if (preview === "tutorial") {
+            setTutorialStep(0);
+            setTutorialReturnScreen("home");
+          }
           setScreen(preview);
           setScreenReady(true);
           return;
@@ -7585,6 +7589,8 @@ export default function Stillform() {
       } catch {}
 
       if (!hasSeenOnboarding) {
+        setTutorialStep(0);
+        setTutorialReturnScreen("home");
         setScreen("tutorial");
         setScreenReady(true);
         return;
@@ -8527,77 +8533,226 @@ export default function Stillform() {
         )}
 
         {/* TUTORIAL — guided quickstart */}
-        {screen === "tutorial" && (() => (
-          <section
-            style={{
-              maxWidth: 520, margin: "0 auto", padding: "40px 24px 80px",
-              minHeight: "100vh", position: "relative", zIndex: 1
-            }}
-          >
-            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
-            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              Opening page
-            </div>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.15, marginBottom: 10 }}>
-              STILLFORM
-            </h1>
-            <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.8 }}>
-              The most composed person in the room is not the loudest.
-              <br />
-              They are not the most certain.
-              <br />
-              They are simply the most present.
-              <br />
-              Stillform was built for them.
-              <br />
-              And for everyone who intends to become them.
-              <br />
-              A system for the people who understand that how you carry yourself
-              <br />
-              — in pressure, in joy, in grief, in ambition —
-              <br />
-              is the most important thing you will ever develop.
-              <br />
-              Welcome to your practice.
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-              {[
+        {screen === "tutorial" && (() => {
+          const tutorialPages = [
+            {
+              kicker: "Opening page",
+              title: "STILLFORM",
+              openingLines: [
+                "Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.",
+                "Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.",
+                "Stillform. Composure Architecture."
+              ]
+            },
+            {
+              kicker: "Tutorial · 1 of 4",
+              title: "System sequence",
+              subtitle: "Setup once, then run daily.",
+              sections: [
                 {
-                  title: "1) Morning check-in (30 seconds)",
-                  body: "You set current energy and body signal context so the app responds to your actual state today."
-                },
-                {
-                  title: "2) In-the-moment regulation",
-                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose when pressure rises, focus drops, or you need a clean next move."
-                },
-                {
-                  title: "3) End-of-day close (15 seconds)",
-                  body: "You log how you carried yourself so the system can track trend quality over time, not just one-off sessions."
-                },
-                {
-                  title: "4) One-time calibration",
-                  body: "Calibration sets thought-first or body-first defaults so the right starting tool appears faster."
+                  name: "What this is",
+                  what: "A two-layer operating model: one setup pass, then a repeatable daily loop.",
+                  how: "Complete setup first. Then run Morning Check-In, in-the-moment tools, and End-of-Day Close daily.",
+                  gain: "Lower friction under load and cleaner decision quality across the day."
                 }
-              ].map((item, idx) => (
-                <div key={idx} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
-                  <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>{item.title}</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>{item.body}</div>
+              ]
+            },
+            {
+              kicker: "Tutorial · 2 of 4",
+              title: "Setup tool (combined)",
+              subtitle: "Calibration Profile now combines setup layers to reduce bulk.",
+              sections: [
+                {
+                  name: "Calibration Profile",
+                  what: "A combined setup pass: How You Process + Map Your Signals + Know Your Blind Spots.",
+                  how: "Complete the guided flow in sequence; the app now chains Signal Profile and Blind Spots automatically.",
+                  gain: "Faster routing to the right entry point and better pattern precision from day one."
+                },
+                {
+                  name: "Default Protocol",
+                  what: "Your baseline breathing protocol.",
+                  how: "Choose Quick Reset or Deep Regulate in setup step 3.",
+                  gain: "One-tap regulation baseline that matches your day and available time."
+                }
+              ]
+            },
+            {
+              kicker: "Tutorial · 3 of 4",
+              title: "Daily execution tools",
+              subtitle: "Every tool has a specific role in the loop.",
+              sections: [
+                {
+                  name: "Morning Check-In",
+                  what: "Daily baseline context.",
+                  how: "Set energy and body-state context before you start the day.",
+                  gain: "Guidance tuned to today’s actual state."
+                },
+                {
+                  name: "Tension Check",
+                  what: "10-second body activation snapshot.",
+                  how: "Run a quick scan and select activation level by area.",
+                  gain: "Faster signal detection before escalation."
+                },
+                {
+                  name: "Reframe",
+                  what: "Cognitive regulation and perspective reset.",
+                  how: "Describe the situation directly; the tool responds in mode-specific guidance.",
+                  gain: "Reduced cognitive loop time and clearer next moves."
+                },
+                {
+                  name: "Breathe",
+                  what: "Breath-led nervous-system regulation.",
+                  how: "Run Quick Reset or Deep Regulate when activation rises.",
+                  gain: "Faster physiological downshift and improved response control."
+                },
+                {
+                  name: "Body Scan",
+                  what: "Targeted physical release via guided acupressure points.",
+                  how: "Follow the point sequence and hold timing.",
+                  gain: "Clears stored physical activation that distorts decision quality."
+                },
+                {
+                  name: "Watch & Choose",
+                  what: "Metacognitive pattern interruption.",
+                  how: "Notice → Name → Recognize → Perspective → Choose.",
+                  gain: "Higher-quality decisions under cognitive pressure."
+                }
+              ]
+            },
+            {
+              kicker: "Tutorial · 4 of 4",
+              title: "Close and track progress",
+              subtitle: "End the day cleanly and verify trend direction.",
+              sections: [
+                {
+                  name: "End-of-Day Close",
+                  what: "Loop completion and daily consolidation.",
+                  how: "Complete the short close protocol in the evening window.",
+                  gain: "Less pattern drift and stronger carryover into tomorrow."
+                },
+                {
+                  name: "Pulse",
+                  what: "High-signal after-action capture.",
+                  how: "Record brief event, trigger, and state context in seconds.",
+                  gain: "Improves pattern recognition and future routing quality."
+                },
+                {
+                  name: "My Progress",
+                  what: "Trend view across sessions and loops.",
+                  how: "Review timeline and insights regularly.",
+                  gain: "Objective evidence of steadiness, recovery, and decision consistency."
+                }
+              ],
+              footer: "If you want to know more about the app, please go to our FAQ page."
+            }
+          ];
+
+          const safeStep = Math.max(0, Math.min(tutorialStep, tutorialPages.length - 1));
+          const page = tutorialPages[safeStep];
+          const isLastStep = safeStep === tutorialPages.length - 1;
+          const returnTo = tutorialReturnScreen || "home";
+          const renderInfoCard = (item, idx) => (
+            <div key={`${item.name}-${idx}`} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
+              <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>{item.name}</div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 4 }}>
+                <strong style={{ color: "var(--text)" }}>What this is:</strong> {item.what}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 4 }}>
+                <strong style={{ color: "var(--text)" }}>How to do it:</strong> {item.how}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                <strong style={{ color: "var(--text)" }}>What you gain:</strong> {item.gain}
+              </div>
+            </div>
+          );
+
+          return (
+            <section
+              style={{
+                maxWidth: 520, margin: "0 auto", padding: "40px 24px 80px",
+                minHeight: "100vh", position: "relative", zIndex: 1
+              }}
+            >
+              <button
+                className="intervention-back"
+                onClick={() => {
+                  if (safeStep > 0) {
+                    setTutorialStep((s) => Math.max(0, s - 1));
+                    return;
+                  }
+                  setScreen(returnTo);
+                }}
+              >
+                ← Back
+              </button>
+              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                {page.kicker}
+              </div>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.15, marginBottom: 14 }}>
+                {page.title}
+              </h1>
+              {Array.isArray(page.openingLines) && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
+                  {page.openingLines.map((line, idx) => (
+                    <p key={`${line}-${idx}`} style={{ fontSize: 14, color: idx === page.openingLines.length - 1 ? "var(--amber)" : "var(--text-dim)", lineHeight: 1.8, margin: 0, fontStyle: idx === page.openingLines.length - 1 ? "italic" : "normal" }}>
+                      {line}
+                    </p>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
-              Method, science basis, and boundaries are documented in FAQ and Privacy &amp; Disclaimers.
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", maxWidth: 360 }}>
-              <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15, width: "100%" }} onClick={() => completeOnboarding()}>
-                Begin calibration →
-              </button>
-              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("tutorial")}>
-                Open FAQ
-              </button>
-            </div>
-          </section>
-        ))()}
+              )}
+              {page.subtitle && (
+                <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.7 }}>
+                  {page.subtitle}
+                </p>
+              )}
+              {Array.isArray(page.sections) && page.sections.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
+                  {page.sections.map(renderInfoCard)}
+                </div>
+              )}
+              {page.footer && (
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
+                  {page.footer}
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 6, justifyContent: "center", marginBottom: 18 }}>
+                {tutorialPages.map((_, idx) => (
+                  <div key={idx} style={{
+                    width: idx === safeStep ? 18 : 8,
+                    height: 8,
+                    borderRadius: 99,
+                    background: idx === safeStep ? "var(--amber)" : "var(--border)",
+                    transition: "all 0.2s"
+                  }} />
+                ))}
+              </div>
+              {!isLastStep && (
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: "16px 24px", fontSize: 15, width: "100%", maxWidth: 360 }}
+                  onClick={() => setTutorialStep((s) => Math.min(s + 1, tutorialPages.length - 1))}
+                >
+                  Next →
+                </button>
+              )}
+              {isLastStep && (
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: "16px 24px", fontSize: 15, width: "100%", maxWidth: 360 }}
+                  onClick={() => {
+                    if (returnTo === "settings") {
+                      setScreen("settings");
+                      return;
+                    }
+                    completeOnboarding();
+                  }}
+                >
+                  {returnTo === "settings" ? "Return to settings" : "Begin calibration →"}
+                </button>
+              )}
+            </section>
+          );
+        })()}
 
         {/* ONBOARDING — replay from Settings */}
         {screen === "onboarding" && (() => (
@@ -11542,7 +11697,7 @@ export default function Stillform() {
                   Contact us
                 </a>
                 <button onClick={() => {
-                  setScreen("tutorial");
+                  openTutorial("settings");
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
