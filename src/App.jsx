@@ -11285,12 +11285,6 @@ export default function Stillform() {
               )}
             </div>
 
-            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32, lineHeight: 1.5 }}>
-              Stillform · ARA Embers LLC · v{APP_VERSION}
-              <br />
-              Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
-            </div>
-
             {/* BACKUP & DATA — collapsed by default */}
             <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
               <button onClick={() => toggleSettingsSection("data")} style={{
@@ -11533,6 +11527,11 @@ export default function Stillform() {
                 </button>
               </div>
               )}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 28, lineHeight: 1.5 }}>
+              Stillform · ARA Embers LLC · v{APP_VERSION}
+              <br />
+              Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>
         )}
