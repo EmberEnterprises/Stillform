@@ -23,6 +23,258 @@ function checkRateLimit(ip) {
   return true;
 }
 
+const SCIENCE_MECHANISMS = {
+  calm: {
+    body_first_reset: {
+      id: "body_first_reset",
+      label: "Interoceptive labeling + downshift",
+      rationale: "User signal includes physiological activation; begin with body signal labeling, then reappraise.",
+      nextStep: "Exhale longer than you inhale once, then name the loudest feeling in five words."
+    },
+    social_appraisal: {
+      id: "social_appraisal",
+      label: "Social appraisal calibration",
+      rationale: "User signal is interpersonal; separate direct evidence from inferred intent, then set boundary.",
+      nextStep: "Write one boundary sentence you can use verbatim in your next interaction."
+    },
+    signal_noise: {
+      id: "signal_noise",
+      label: "Signal/noise separation",
+      rationale: "User signal is mixed; separate objective facts from stress-added story before action.",
+      nextStep: "List one fact and one story your brain is adding, then act from the fact."
+    }
+  },
+  clarity: {
+    defusion: {
+      id: "defusion",
+      label: "Cognitive defusion",
+      rationale: "User reports repetitive loop language; create distance from thought-content and regain control.",
+      nextStep: "Prefix the loop thought with 'My mind is telling me...' and then choose one concrete task."
+    },
+    probability: {
+      id: "probability",
+      label: "Probability calibration",
+      rationale: "User language signals catastrophic forecasting; compare worst-case to most-likely outcome.",
+      nextStep: "Write the worst case, most likely case, and your first response if either happens."
+    },
+    evidence_weighting: {
+      id: "evidence_weighting",
+      label: "Evidence-weighted reframe",
+      rationale: "User signal is analytical but sticky; rebalance toward disconfirming evidence.",
+      nextStep: "Name one piece of evidence that supports your fear and one that does not."
+    }
+  },
+  hype: {
+    arousal_reappraisal: {
+      id: "arousal_reappraisal",
+      label: "Arousal reappraisal + implementation intention",
+      rationale: "User is preparing for performance pressure; convert activation into readiness and script a single anchor.",
+      nextStep: "Set an if-then anchor: 'If nerves spike, then I plant my feet and deliver my first line slowly.'"
+    },
+    assertive_focus: {
+      id: "assertive_focus",
+      label: "Assertive framing + attentional narrowing",
+      rationale: "User is entering a difficult interaction; narrow to one objective and one boundary line.",
+      nextStep: "Define one objective for the interaction and one sentence that protects your boundary."
+    }
+  }
+};
+
+const REFRAME_RESPONSE_SCHEMA = `OUTPUT CONTRACT — HARD REQUIREMENT:
+Return ONLY valid JSON with this exact shape:
+{
+  "distortion": "string or null",
+  "mechanism": "string",
+  "reframe": "3-5 sentence response",
+  "next_step": "single actionable step sentence",
+  "question": "single optional short question or null"
+}
+Rules:
+- Keep reframe to 3-5 sentences, no lists.
+- At most one question mark total across "reframe" and "question".
+- "next_step" must be concrete and executable in <=90 seconds.
+- No markdown fences. JSON only.`;
+
+const QUALITY_RETRY_PROMPT = `QUALITY RETRY OVERRIDE:
+Your previous output failed validation. Repair it to pass all constraints while preserving meaning.
+- Must satisfy OUTPUT CONTRACT exactly.
+- Remove banned phrases and therapy filler.
+- Keep one mechanism only; do not switch frameworks.
+- Keep response specific to user signal and mode.
+Return only valid JSON.`;
+
+const BANNED_REFRAME_PATTERNS = [
+  /[Ii]t'?s understandable( that)?/,
+  /[Tt]hat'?s understandable/,
+  /completely valid/gi,
+  /that'?s valid/gi,
+  /your feelings? (are|is) valid/gi,
+  /[Yy]ou'?re navigating a lot/,
+  /[Yy]ou have a lot on your plate/,
+  /give yourself permission/gi,
+  /[Mm]ake sure to prioritize/,
+  /your needs are important/gi,
+  /that must be (really |so )?(hard|difficult|tough|overwhelming)/gi,
+  /I can (see|understand) why/gi,
+  /[Ii]t makes sense that/,
+  /[Oo]f course you/
+];
+
+function sanitizeReframeText(value) {
+  if (typeof value !== "string") return "";
+  return value
+    .replace(/[Ii]t'?s understandable( that)?/g, "That tracks —")
+    .replace(/[Tt]hat'?s understandable/g, "That tracks.")
+    .replace(/[Uu]nderstandably[,.]?/g, "")
+    .replace(/completely valid/gi, "real")
+    .replace(/that'?s valid/gi, "that's real")
+    .replace(/your feelings? (are|is) valid/gi, "that's a real signal")
+    .replace(/[Yy]ou'?re navigating a lot/g, "You're carrying a lot right now")
+    .replace(/[Yy]ou have a lot on your plate/g, "There's a lot in motion")
+    .replace(/give yourself permission/gi, "")
+    .replace(/[Mm]ake sure to prioritize/g, "Focus on")
+    .replace(/your needs are important/gi, "")
+    .replace(/that must be (really |so )?(hard|difficult|tough|overwhelming)/gi, "")
+    .replace(/I can (see|understand) why/gi, "")
+    .replace(/[Ii]t makes sense that/g, "")
+    .replace(/[Oo]f course you/g, "")
+    .replace(/\.\s{2,}/g, ". ")
+    .replace(/,\s{2,}/g, ", ")
+    .trim();
+}
+
+function estimateSentenceCount(text) {
+  if (!text || typeof text !== "string") return 0;
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0).length;
+}
+
+function parseModelPayload(rawText) {
+  const text = typeof rawText === "string" ? rawText : "";
+  const clean = text.replace(/```json|```/g, "").trim();
+  try {
+    return JSON.parse(clean);
+  } catch {
+    return { distortion: null, reframe: clean };
+  }
+}
+
+function pickScienceRoute({ mode, input, feelState = null, checkinContext = null, signalProfile = null, biasProfile = null }) {
+  const lower = String(input || "").toLowerCase();
+  const socialPattern = /(partner|boss|friend|coworker|manager|team|message|text|email|conversation|argu|fight|dismiss|ignored|judg)/.test(lower);
+  const bodyPattern = /(chest|heart|breath|jaw|tension|stomach|body|shak|panic|pulse|tight|overwhelm|freeze)/.test(lower) || ["anxious", "angry", "mixed"].includes(feelState);
+  const loopPattern = /(can't stop|cant stop|loop|replay|over and over|won't stop|wont stop|stuck in my head|spiral)/.test(lower);
+  const catastrophePattern = /(ruined|disaster|always|never|everything is over|worst case|fucked|fail)/.test(lower);
+  const performancePattern = /(interview|presentation|speech|meeting|stage|pitch|performance|walk into|show up|prepare|prep)/.test(lower);
+  const confrontationPattern = /(difficult conversation|confront|boundary|ask|negotiat|hard talk|stand up)/.test(lower);
+
+  if (mode === "clarity") {
+    if (loopPattern) return SCIENCE_MECHANISMS.clarity.defusion;
+    if (catastrophePattern) return SCIENCE_MECHANISMS.clarity.probability;
+    return SCIENCE_MECHANISMS.clarity.evidence_weighting;
+  }
+
+  if (mode === "hype") {
+    if (performancePattern) return SCIENCE_MECHANISMS.hype.arousal_reappraisal;
+    return SCIENCE_MECHANISMS.hype.assertive_focus;
+  }
+
+  if (bodyPattern) return SCIENCE_MECHANISMS.calm.body_first_reset;
+  if (socialPattern) return SCIENCE_MECHANISMS.calm.social_appraisal;
+  // Use context if explicit profile data exists but user text is sparse.
+  if (typeof signalProfile === "string" && signalProfile.trim()) return SCIENCE_MECHANISMS.calm.body_first_reset;
+  if (typeof biasProfile === "string" && biasProfile.trim()) return SCIENCE_MECHANISMS.calm.signal_noise;
+  if (typeof checkinContext === "string" && checkinContext.toLowerCase().includes("high tension")) return SCIENCE_MECHANISMS.calm.body_first_reset;
+  if (confrontationPattern) return SCIENCE_MECHANISMS.calm.social_appraisal;
+  return SCIENCE_MECHANISMS.calm.signal_noise;
+}
+
+function buildSciencePrompt(route) {
+  return `SCIENCE ROUTING — HARD REQUIREMENT:
+Primary mechanism: ${route.label}
+Mechanism id: ${route.id}
+Why this route: ${route.rationale}
+Execution sequence:
+1) Name user's immediate signal.
+2) Separate objective signal from stress-added noise.
+3) Give one mechanism-congruent action.
+Do not mechanism-shop. Use exactly this mechanism in this response.`;
+}
+
+function normalizeReframePayload(parsed, route) {
+  const safe = parsed && typeof parsed === "object" ? parsed : {};
+  const distortion = typeof safe.distortion === "string" && safe.distortion.trim()
+    ? safe.distortion.trim()
+    : null;
+  const mechanism = typeof safe.mechanism === "string" && safe.mechanism.trim()
+    ? safe.mechanism.trim()
+    : (route?.id || "signal_noise");
+  const reframe = sanitizeReframeText(typeof safe.reframe === "string" ? safe.reframe : "");
+  const nextStepRaw = typeof safe.next_step === "string" ? safe.next_step : (route?.nextStep || "");
+  const next_step = sanitizeReframeText(nextStepRaw);
+  const question = typeof safe.question === "string" && safe.question.trim()
+    ? sanitizeReframeText(safe.question.trim())
+    : null;
+  return { distortion, mechanism, reframe, next_step, question };
+}
+
+function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLanguage = false } = {}) {
+  const reasons = [];
+  const reframe = String(payload?.reframe || "").trim();
+  if (!reframe) reasons.push("missing reframe");
+  if (reframe.length < 40 && !isSummaryRequest) reasons.push("reframe too short");
+  if (reframe.length > 900) reasons.push("reframe too long");
+  const sentenceCount = estimateSentenceCount(reframe);
+  const maxSentences = hasCrisisLanguage ? 6 : 5;
+  if (!isSummaryRequest && (sentenceCount < 2 || sentenceCount > maxSentences)) reasons.push("invalid sentence count");
+  if (!isSummaryRequest && (!payload?.mechanism || typeof payload.mechanism !== "string")) reasons.push("missing mechanism");
+  if (!isSummaryRequest && (!payload?.next_step || payload.next_step.length < 10)) reasons.push("missing actionable next_step");
+  if (!isSummaryRequest) {
+    const questionCount = `${reframe} ${payload?.question || ""}`.split("?").length - 1;
+    if (questionCount > 1) reasons.push("too many questions");
+  }
+  if (BANNED_REFRAME_PATTERNS.some((pattern) => pattern.test(reframe))) reasons.push("contains banned phrase");
+  return { ok: reasons.length === 0, reasons };
+}
+
+function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false }) {
+  if (isSummaryRequest) {
+    return {
+      distortion: null,
+      mechanism: "session_summary_fallback",
+      reframe: "Session centered on an activated signal and a need for composure under pressure. The user sought clearer signal/noise separation, then a concrete next move. Momentum improved once the response narrowed to one immediate action.",
+      next_step: "Capture one line about what helped most this session.",
+      question: null
+    };
+  }
+
+  if (hasCrisisLanguage) {
+    return {
+      distortion: null,
+      mechanism: "crisis_safety_override",
+      reframe: "You're not overreacting — this needs immediate support. Are you thinking about hurting yourself right now? If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7. I'm still here — keep talking to me.",
+      next_step: "If danger is immediate, call or text 988 now.",
+      question: "Are you in immediate danger right now?"
+    };
+  }
+
+  const modeAnchor = {
+    calm: "We separate what happened from what your stress system is adding, then move one step at a time.",
+    clarity: "We cut the loop by naming the thought-pattern, then act on evidence instead of repetition.",
+    hype: "We convert activation into readiness and lock onto one execution anchor."
+  }[mode] || "We separate signal from noise, then move on one concrete action.";
+
+  return {
+    distortion: null,
+    mechanism: route?.id || "signal_noise",
+    reframe: `Your signal is real, and it needs precision more than pressure. ${modeAnchor} Mechanism for this moment: ${route?.label || "Signal/noise separation"}. Stay with one lane until your system settles.`,
+    next_step: route?.nextStep || "Take one deliberate breath and choose one action you can complete in the next 90 seconds.",
+    question: null
+  };
+}
+
 const CALM_SYSTEM = `You are a composure companion in Stillform. People come to you in any state — anger, anxiety, grief, excitement, frustration, shame, overwhelm, sensory overload, or something they can't name yet. They may be in crisis or they may just need to recalibrate. Meet them where they are.
 
 HARD RULES — non-negotiable, override everything:
@@ -499,6 +751,17 @@ exports.handler = async function(event) {
     const inputNormalized = input.toLowerCase().replace(/['']/g, "");
     const crisisTerms = ["see the point", "no point anymore", "nobody would notice", "nobody would care", "nobody will notice", "nobody will care", "better off without me", "want to die", "wanna die", "kill myself", "end it all", "not worth living", "can't go on", "cant go on", "give up on everything", "no reason to live", "want to disappear", "wanna disappear", "wouldn't miss me", "wouldnt miss me", "ending it", "self harm", "self-harm", "hurt myself", "suicidal", "don't want to be here", "dont want to be here", "rather not be alive", "nothing matters", "no one cares", "no one would care", "what's the point", "whats the point"];
     const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
+    const isInternalSummaryRequest = /^internal\s+[—-]\s+session summary request/i.test(trimmedInput);
+    const scienceRoute = isInternalSummaryRequest
+      ? null
+      : pickScienceRoute({
+          mode,
+          input: trimmedInput,
+          feelState,
+          checkinContext,
+          signalProfile,
+          biasProfile
+        });
     
     // BIO-FILTER FIRST — physical reality overrides everything
     // This must be the first thing the AI reads because it colors every interpretation
@@ -631,6 +894,11 @@ WHAT STAYING SHARP LOOKS LIKE:
 - Match the depth they're bringing — if they go deeper, go with them`);
     }
 
+    if (scienceRoute) {
+      contextParts.push(buildSciencePrompt(scienceRoute));
+      contextParts.push(REFRAME_RESPONSE_SCHEMA);
+    }
+
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
     // CRISIS DETECTION — hard-coded, cannot be ignored by the AI
@@ -652,63 +920,91 @@ WHAT STAYING SHARP LOOKS LIKE:
       systemPrompt = `LIABILITY GUARD — ABSOLUTE PROHIBITION:\nThe user's message touches on ${domains} topics. You MUST NOT give specific ${domains} advice, suggestions, recommendations, or action steps in these domains. NO specific products, services, medications, dosages, legal strategies, financial instruments, loans, or treatment plans. Your ONLY job is to: 1) Validate the stress they're feeling, 2) Help them regulate enough to think clearly, 3) If appropriate, say: "That's outside what I can help with directly — but I can help you get clear enough to make that call yourself or talk to someone who specializes in this." VIOLATION OF THIS RULE EXPOSES THE COMPANY TO LEGAL LIABILITY.\n\n` + systemPrompt;
     }
 
-    const controller = new AbortController();
-    const apiTimeout = setTimeout(() => controller.abort(), 20000);
+    const requestCompletion = async (activeSystemPrompt, activeMessages) => {
+      const controller = new AbortController();
+      const apiTimeout = setTimeout(() => controller.abort(), 20000);
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model: "gpt-4o",
+            max_tokens: 500,
+            messages: [
+              { role: "system", content: activeSystemPrompt },
+              ...activeMessages
+            ]
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error("API error:", JSON.stringify(data));
+          throw new Error(data.error?.message || "API error " + response.status);
+        }
+        return data.choices?.[0]?.message?.content || "";
+      } finally {
+        clearTimeout(apiTimeout);
+      }
+    };
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
-      signal: controller.signal,
+    let parsed = null;
+    let retryUsed = false;
+    let fallbackUsed = false;
+    let lastValidation = { ok: false, reasons: ["no response"] };
+    let previousRaw = "";
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const attemptSystemPrompt = attempt === 0
+        ? systemPrompt
+        : `${systemPrompt}\n\n${QUALITY_RETRY_PROMPT}\nValidation failures: ${lastValidation.reasons.join("; ")}`;
+      const attemptMessages = attempt === 0
+        ? messages
+        : [
+            ...messages,
+            { role: "assistant", content: previousRaw || "{}" },
+            { role: "user", content: `INTERNAL QA RETRY: Repair previous response. Failures: ${lastValidation.reasons.join("; ")}.` }
+          ];
+
+      const raw = await requestCompletion(attemptSystemPrompt, attemptMessages);
+      previousRaw = raw;
+      const normalized = normalizeReframePayload(parseModelPayload(raw), scienceRoute);
+      lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage });
+      if (lastValidation.ok) {
+        parsed = normalized;
+        retryUsed = attempt > 0;
+        break;
+      }
+      retryUsed = true;
+    }
+
+    if (!parsed) {
+      fallbackUsed = true;
+      parsed = buildDeterministicFallback({
+        mode,
+        route: scienceRoute,
+        input: trimmedInput,
+        isSummaryRequest: isInternalSummaryRequest,
+        hasCrisisLanguage
+      });
+    }
+
+    parsed.reframe = sanitizeReframeText(parsed.reframe);
+    if (parsed.next_step) parsed.next_step = sanitizeReframeText(parsed.next_step);
+    if (parsed.question) parsed.question = sanitizeReframeText(parsed.question);
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
       body: JSON.stringify({
-        model: "gpt-4o",
-        max_tokens: 500,
-        messages: [
-          { role: "system", content: systemPrompt },
-          ...messages
-        ]
+        ...parsed,
+        scienceRoute: scienceRoute?.id || null,
+        qualityRetryUsed: retryUsed,
+        deterministicFallbackUsed: fallbackUsed,
+        crisisDetected: hasCrisisLanguage,
+        liabilityGuard: hasFinancial || hasMedical || hasLegal
       })
-    });
-    clearTimeout(apiTimeout);
-
-    const data = await response.json();
-    if (!response.ok) { console.error("API error:", JSON.stringify(data)); throw new Error(data.error?.message || "API error " + response.status); }
-
-    const text = data.choices?.[0]?.message?.content || "";
-    const clean = text.replace(/```json|```/g, "").trim();
-
-    let parsed;
-    try {
-      parsed = JSON.parse(clean);
-    } catch {
-      // GPT didn't return valid JSON — wrap plain text as reframe
-      parsed = { distortion: null, reframe: clean };
-    }
-
-    // POST-PROCESSING: catch banned phrases the model ignored
-    // These are hard replacements — model instructions alone aren't reliable enough
-    if (parsed.reframe) {
-      parsed.reframe = parsed.reframe
-        .replace(/[Ii]t'?s understandable( that)?/g, "That tracks —")
-        .replace(/[Tt]hat'?s understandable/g, "That tracks.")
-        .replace(/[Uu]nderstandably[,.]?/g, "")
-        .replace(/completely valid/gi, "real")
-        .replace(/that'?s valid/gi, "that's real")
-        .replace(/your feelings? (are|is) valid/gi, "that's a real signal")
-        .replace(/[Yy]ou'?re navigating a lot/g, "You're carrying a lot right now")
-        .replace(/[Yy]ou have a lot on your plate/g, "There's a lot in motion")
-        .replace(/give yourself permission/gi, "")
-        .replace(/[Mm]ake sure to prioritize/g, "Focus on")
-        .replace(/your needs are important/gi, "")
-        .replace(/that must be (really |so )?(hard|difficult|tough|overwhelming)/gi, "")
-        .replace(/I can (see|understand) why/gi, "")
-        .replace(/[Ii]t makes sense that/g, "")
-        .replace(/[Oo]f course you/g, "")
-        .replace(/\.\s{2,}/g, ". ")
-        .replace(/,\s{2,}/g, ", ")
-        .trim();
-    }
-
-    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ...parsed, crisisDetected: hasCrisisLanguage, liabilityGuard: hasFinancial || hasMedical || hasLegal }) };
+    };
   } catch (err) {
     console.error("Error:", err.message);
     const msg = err.name === "AbortError" ? "Request timed out. Try again." : (err.message || "Something went wrong.");
