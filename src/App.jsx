@@ -8525,103 +8525,78 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 1 of 4",
-              title: "System sequence",
-              subtitle: "Setup once, then run daily.",
-              sections: [
-                {
-                  name: "What this is",
-                  what: "A two-layer operating model: one setup pass, then a repeatable daily loop.",
-                  how: "Complete setup first. Then run Morning Check-In, in-the-moment tools, and End-of-Day Close daily.",
-                  gain: "Lower friction under load and cleaner decision quality across the day."
-                }
+              kicker: "Tutorial · 1 of 6",
+              title: "Calibration — Build Your Baseline",
+              paragraphs: [
+                "Calibration establishes your initial operating profile: How You Process, Signal Profile + Blind Spots, and Default Protocol.",
+                "This profile guides your first recommendations, but it never restricts access. You can launch any tool directly at any time.",
+                "When you need to adjust setup, use Settings → Processing Type, Settings → Signal Mapping, or Re-run calibration.",
+                "Stillform refines recommendations from your actual usage, so guidance tracks how you process over time."
               ]
             },
             {
-              kicker: "Tutorial · 2 of 4",
-              title: "Setup tool (combined)",
-              subtitle: "Calibration Profile now combines setup layers to reduce bulk.",
-              sections: [
-                {
-                  name: "Calibration Profile",
-                  what: "A combined setup pass: How You Process + Map Your Signals + Know Your Blind Spots.",
-                  how: "Complete the guided flow in sequence; the app now chains Signal Profile and Blind Spots automatically.",
-                  gain: "Faster routing to the right entry point and better pattern precision from day one."
-                },
-                {
-                  name: "Default Protocol",
-                  what: "Your baseline breathing protocol.",
-                  how: "Choose Quick Reset or Deep Regulate in setup step 3.",
-                  gain: "One-tap regulation baseline that matches your day and available time."
-                }
+              kicker: "Tutorial · 2 of 6",
+              title: "Morning Check-In — Set the Day’s Baseline",
+              paragraphs: [
+                "Morning Check-In captures your starting state before pressure compounds. In under a minute, you log internal state, body context, and expected load.",
+                "Stillform layers in relevant calendar and health context, then adjusts recommendations to match current reality.",
+                "Used daily, it improves early awareness, reduces preventable escalation, and sharpens decision quality."
               ]
             },
             {
-              kicker: "Tutorial · 3 of 4",
-              title: "Daily execution tools",
-              subtitle: "Every tool has a specific role in the loop.",
-              sections: [
-                {
-                  name: "Morning Check-In",
-                  what: "Daily baseline context.",
-                  how: "Set energy and body-state context before you start the day.",
-                  gain: "Guidance tuned to today’s actual state."
-                },
+              kicker: "Tutorial · 3 of 6",
+              title: "Daily Tools — Prepare, Regulate, Recover",
+              paragraphs: [
+                "These tools are available across the full day: before pressure, during load, and after intensity.",
+                "You can open any tool at any time. Stillform adapts recommendations from how you actually respond."
+              ],
+              detailCards: [
                 {
                   name: "Tension Check",
-                  what: "10-second body activation snapshot.",
-                  how: "Run a quick scan and select activation level by area.",
-                  gain: "Faster signal detection before escalation."
-                },
-                {
-                  name: "Reframe",
-                  what: "Cognitive regulation and perspective reset.",
-                  how: "Describe the situation directly; the tool responds in mode-specific guidance.",
-                  gain: "Reduced cognitive loop time and clearer next moves."
+                  text: "A rapid body-state scan that catches activation early. Early interoceptive detection improves intervention timing and reduces escalation."
                 },
                 {
                   name: "Breathe",
-                  what: "Breath-led nervous-system regulation.",
-                  how: "Run Quick Reset or Deep Regulate when activation rises.",
-                  gain: "Faster physiological downshift and improved response control."
+                  text: "Guided cadence breathing lowers autonomic load quickly. Longer exhale patterns increase parasympathetic activation and improve recovery control."
                 },
                 {
                   name: "Body Scan",
-                  what: "Targeted physical release via guided acupressure points.",
-                  how: "Follow the point sequence and hold timing.",
-                  gain: "Clears stored physical activation that distorts decision quality."
+                  text: "Targeted somatic release clears residual tension. Reducing muscular guarding lowers stress carryover into cognition and behavior."
+                },
+                {
+                  name: "Reframe",
+                  text: "Structured cognitive reappraisal updates interpretation before reaction hardens. This reduces threat-biased thinking and restores response flexibility."
                 },
                 {
                   name: "Watch & Choose",
-                  what: "Metacognitive pattern interruption.",
-                  how: "Notice → Name → Recognize → Perspective → Choose.",
-                  gain: "Higher-quality decisions under cognitive pressure."
+                  text: "Metacognitive labeling interrupts autopilot and restores deliberate action selection. Naming patterns increases executive control under pressure."
                 }
               ]
             },
             {
-              kicker: "Tutorial · 4 of 4",
-              title: "Close and track progress",
-              subtitle: "End the day cleanly and verify trend direction.",
-              sections: [
-                {
-                  name: "End-of-Day Close",
-                  what: "Loop completion and daily consolidation.",
-                  how: "Complete the short close protocol in the evening window.",
-                  gain: "Less pattern drift and stronger carryover into tomorrow."
-                },
-                {
-                  name: "Pulse",
-                  what: "High-signal after-action capture.",
-                  how: "Record brief event, trigger, and state context in seconds.",
-                  gain: "Improves pattern recognition and future routing quality."
-                },
-                {
-                  name: "My Progress",
-                  what: "Trend view across sessions and loops.",
-                  how: "Review timeline and insights regularly.",
-                  gain: "Objective evidence of steadiness, recovery, and decision consistency."
-                }
+              kicker: "Tutorial · 4 of 6",
+              title: "End-of-Day Close — Consolidate the Day",
+              paragraphs: [
+                "End-of-Day Close completes the loop before cognitive residue carries forward. In a brief evening pass, you record state, composure quality, and outcome signal from the day.",
+                "That closeout strengthens pattern retention, reduces next-day drift, and improves readiness for the next cycle.",
+                "Completed consistently, it turns daily experience into usable learning instead of repeated noise."
+              ]
+            },
+            {
+              kicker: "Tutorial · 5 of 6",
+              title: "Pulse — Capture Signal, Track Progress",
+              paragraphs: [
+                "Pulse records high-signal moments: trigger, state, response, and outcome.",
+                "This creates usable data for pattern recognition and tighter future recommendations.",
+                "Over time, Pulse and My Progress show recovery speed, steadiness, and decision consistency."
+              ]
+            },
+            {
+              kicker: "Tutorial · 6 of 6",
+              title: "Run the Full Loop Daily",
+              paragraphs: [
+                "Sequence for first-time setup: How You Process → Signal Profile + Blind Spots → Default Protocol.",
+                "Sequence for daily practice: Morning Check-In → Daily Tools throughout the day → End-of-Day Close → Pulse."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -8631,17 +8606,11 @@ export default function Stillform() {
           const page = tutorialPages[safeStep];
           const isLastStep = safeStep === tutorialPages.length - 1;
           const returnTo = tutorialReturnScreen || "home";
-          const renderInfoCard = (item, idx) => (
+          const renderDetailCard = (item, idx) => (
             <div key={`${item.name}-${idx}`} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
               <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>{item.name}</div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 4 }}>
-                <strong style={{ color: "var(--text)" }}>What this is:</strong> {item.what}
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 4 }}>
-                <strong style={{ color: "var(--text)" }}>How to do it:</strong> {item.how}
-              </div>
               <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                <strong style={{ color: "var(--text)" }}>What you gain:</strong> {item.gain}
+                {item.text}
               </div>
             </div>
           );
@@ -8685,9 +8654,18 @@ export default function Stillform() {
                   {page.subtitle}
                 </p>
               )}
-              {Array.isArray(page.sections) && page.sections.length > 0 && (
+              {Array.isArray(page.paragraphs) && page.paragraphs.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
+                  {page.paragraphs.map((line, idx) => (
+                    <p key={`${page.title}-paragraph-${idx}`} style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, margin: 0 }}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              )}
+              {Array.isArray(page.detailCards) && page.detailCards.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
-                  {page.sections.map(renderInfoCard)}
+                  {page.detailCards.map(renderDetailCard)}
                 </div>
               )}
               {page.footer && (

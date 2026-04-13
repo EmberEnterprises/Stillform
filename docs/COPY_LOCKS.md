@@ -19,8 +19,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Blind Spots` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
-| Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
-| Tutorial page titles | LOCKED | `System sequence` / `Setup tool (combined)` / `Daily execution tools` / `Close and track progress` |
+| Tutorial progression labels | LOCKED | `Tutorial · 1 of 6` / `Tutorial · 2 of 6` / `Tutorial · 3 of 6` / `Tutorial · 4 of 6` / `Tutorial · 5 of 6` / `Tutorial · 6 of 6` |
+| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Morning Check-In — Set the Day’s Baseline` / `Daily Tools — Prepare, Regulate, Recover` / `End-of-Day Close — Consolidate the Day` / `Pulse — Capture Signal, Track Progress` / `Run the Full Loop Daily` |
 | Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
 
 ## Constrained Anchors
@@ -45,7 +45,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - Signal Profile + Blind Spots
    - Default Protocol
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
-6. Tutorial content cards preserve the triplet structure: `What this is` / `How to do it` / `What you gain`.
+6. Tutorial uses concise paragraph blocks with exact tool naming and science-grounded detail cards where needed.
 
 ## Prohibited Claims
 
