@@ -8447,8 +8447,8 @@ export default function Stillform() {
           return;
         }
         if (activeTool?.id === "bias") {
-          setSetupStep((s) => Math.min(s + 1, 2));
-          setScreen("setup");
+          finalizeOnboarding();
+          goHomeSafely();
           return;
         }
       }
@@ -8536,7 +8536,7 @@ export default function Stillform() {
               kicker: "Tutorial · 1 of 5",
               title: "Calibration — Build Your Baseline",
               paragraphs: [
-                "Calibration establishes your operating profile in one sequence: How You Process, Signal Profile + Blind Spots, and your baseline breathing pattern.",
+                "Calibration establishes your operating profile in one sequence: How You Process, then Signal Profile + Blind Spots.",
                 "This profile guides your first recommendations, but it never restricts access. You can launch any tool directly at any time.",
                 "When you need to adjust setup, use Settings → Processing Type, Settings → Signal Mapping, or Re-run calibration.",
                 "Stillform refines recommendations from your actual usage, so guidance tracks how you process over time."
@@ -8573,7 +8573,7 @@ export default function Stillform() {
               kicker: "Tutorial · 5 of 5",
               title: "Run the Full Loop Daily",
               paragraphs: [
-                "First-time setup sequence: How You Process → Signal Profile + Blind Spots → Breathe.",
+                "First-time setup sequence: How You Process → Signal Profile + Blind Spots.",
                 "Daily sequence: Morning Check-In → Daily Regulation Tools → End-of-Day Close → My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
@@ -8728,7 +8728,7 @@ export default function Stillform() {
           const setupSteps = [
             {
               step: 1,
-              label: "Calibration · 1 of 3",
+              label: "Calibration · 1 of 2",
               title: "How You Process",
               subtitle: "When a moment hits, what fires first — your thoughts or your body?",
               body: "Research in neuroscience shows two distinct regulation pathways. Some people process through thoughts first — analyzing, replaying, building a response. Others feel it in the body first — tension, heat, restlessness.\n\nNeither is better. Knowing yours means the system starts with the right tool.\n\nAnswer instinctively. There are no wrong answers.",
@@ -8750,7 +8750,7 @@ export default function Stillform() {
             },
             {
               step: 2,
-              label: "Calibration · 2 of 3",
+              label: "Calibration · 2 of 2",
               title: "Signal Profile + Blind Spots",
               subtitle: "Map body signals, then identify recurring thought patterns.",
               body: null,
@@ -8759,21 +8759,11 @@ export default function Stillform() {
                 setScreen("tool");
                 startTool({ ...TOOLS.find(t => t.id === "signals"), setupFlow: "calibration-combined" });
               }
-            },
-            {
-              step: 3,
-              label: "Calibration · 3 of 3",
-              title: "Default Protocol",
-              subtitle: "Select your baseline breathing pattern.",
-              body: "Quick Reset — 60 seconds. Slows your system down fast. Use when you need to regulate and get back to what you're doing.\n\nDeep Regulate — 3 minutes. Extended exhale cycle. Deeper reset for when you have the time and space.",
-              cta: null,
-              patterns: ["quick", "deep"]
             }
           ];
 
           const current = setupSteps[setupStep];
           const isLast = setupStep === setupSteps.length - 1;
-          const savedPattern = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
 
           // Assessment state (uses component-level assessmentAnswers)
           const currentScenario = current.isAssessment ? (current.scenarios[assessmentAnswers.length] || null) : null;
@@ -8792,11 +8782,6 @@ export default function Stillform() {
             "thought-first": { name: "Thought-first", desc: "You tend to process through your mind first. Reframe will be your primary tool." },
             "body-first": { name: "Body-first", desc: "You tend to feel it in the body first. Breathe will be your primary tool." },
             "balanced": { name: "Balanced", desc: "You process through both equally. We'll start with both available and learn which you reach for." }
-          };
-
-          const patternLabels = {
-            quick: { name: "Quick Reset", detail: "60 seconds · Fast regulation" },
-            deep: { name: "Deep Regulate", detail: "3 minutes · Extended exhale cycle" }
           };
 
           return (
@@ -8881,27 +8866,6 @@ export default function Stillform() {
                       This isn't permanent. The system learns from how you actually use it and will check in after 7 sessions.
                     </div>
                   </div>
-                </div>
-              )}
-
-              {/* Step 3 — pattern picker */}
-              {isLast && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 28 }}>
-                  {Object.entries(patternLabels).map(([id, p]) => (
-                    <button key={id} onClick={() => {
-                      try { localStorage.setItem("stillform_breath_pattern", id); refreshSettings(); } catch {}
-                    }} style={{
-                      width: "100%", background: savedPattern === id ? "var(--amber-glow)" : "var(--surface)",
-                      border: `0.5px solid ${savedPattern === id ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r)", padding: "14px 18px", cursor: "pointer",
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
-                      WebkitTapHighlightColor: "transparent"
-                    }}>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: savedPattern === id ? "var(--amber)" : "var(--text)", fontWeight: savedPattern === id ? 500 : 400 }}>{p.name}</div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.08em" }}>{p.detail}</div>
-                    </button>
-                  ))}
                 </div>
               )}
 

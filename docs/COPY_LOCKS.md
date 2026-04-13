@@ -43,7 +43,6 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 4. Setup keeps combined calibration sequencing:
    - How You Process
    - Signal Profile + Blind Spots
-   - Default Protocol
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
 6. Tutorial uses five concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 
