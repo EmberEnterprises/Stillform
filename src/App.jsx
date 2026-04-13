@@ -8513,13 +8513,29 @@ export default function Stillform() {
           >
             <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
             <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              Introduction to Stillform
+              Opening page
             </div>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.15, marginBottom: 10 }}>
-              A composure system you can actually use daily.
+              STILLFORM
             </h1>
-            <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.7 }}>
-              If someone recommended this to you, start here. Stillform helps you catch activation earlier, regulate faster, and choose your next move with intention.
+            <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20, lineHeight: 1.8 }}>
+              The most composed person in the room is not the loudest.
+              <br />
+              They are not the most certain.
+              <br />
+              They are simply the most present.
+              <br />
+              Stillform was built for them.
+              <br />
+              And for everyone who intends to become them.
+              <br />
+              A system for the people who understand that how you carry yourself
+              <br />
+              — in pressure, in joy, in grief, in ambition —
+              <br />
+              is the most important thing you will ever develop.
+              <br />
+              Welcome to your practice.
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
               {[
