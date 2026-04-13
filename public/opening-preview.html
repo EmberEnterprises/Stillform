@@ -5,48 +5,50 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Stillform — Opening Preview</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&family=DM+Sans:wght@300;400;500&family=IBM+Plex+Mono:wght@300;400&display=swap');
+
     :root {
       --bg: #0A0A0C;
       --surface: #141418;
+      --surface2: #1A1A1F;
       --border: rgba(255,255,255,0.08);
       --amber: #C8922A;
       --text: #E8EAF0;
-      --text-dim: #A2A6B3;
-      --muted: #8C909C;
-      --r: 8px;
+      --text-dim: #9496A1;
+      --text-muted: #95979f;
+      --amber-dim: rgba(200,146,42,0.25);
+      --r: 6px;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      font-family: 'DM Sans', sans-serif;
       display: flex;
       justify-content: center;
       min-height: 100vh;
-      padding: 24px;
+      padding: 40px 24px 80px;
     }
     .phone {
       width: 100%;
-      max-width: 430px;
-      background: linear-gradient(180deg, #0B0B0E 0%, #0A0A0C 100%);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 20px 24px;
+      max-width: 520px;
+      background: transparent;
     }
     .eyebrow {
       font-size: 11px;
-      letter-spacing: .14em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--amber);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+      font-family: 'IBM Plex Mono', monospace;
     }
     h1 {
-      margin: 0 0 18px;
-      font-family: "Cormorant Garamond", Georgia, serif;
-      font-size: 44px;
-      font-weight: 400;
-      letter-spacing: .04em;
+      margin-bottom: 12px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 42px;
+      font-weight: 300;
+      line-height: 1.1;
+      letter-spacing: 0.04em;
     }
     .copy {
       color: var(--text-dim);
@@ -55,38 +57,32 @@
       margin-bottom: 22px;
       white-space: pre-line;
     }
-    .method {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 12px 14px;
-      font-size: 13px;
-      color: var(--text-dim);
-      margin-bottom: 20px;
-    }
-    .method strong { color: var(--text); }
-    .btns {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .btn {
-      width: 100%;
-      border-radius: 10px;
-      padding: 14px 16px;
-      font-size: 15px;
-      cursor: pointer;
-      border: 1px solid transparent;
+    .line {
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 18px;
     }
     .btn-primary {
+      width: 100%;
+      border-radius: var(--r);
+      padding: 16px 24px;
+      font-size: 15px;
+      cursor: pointer;
+      border: none;
       background: var(--amber);
-      color: #111;
-      font-weight: 600;
+      color: #0A0A0C;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
     }
-    .btn-ghost {
-      background: transparent;
-      border-color: var(--border);
-      color: var(--text-dim);
+    .note {
+      margin-top: 10px;
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      font-family: 'IBM Plex Mono', monospace;
     }
   </style>
 </head>
@@ -105,15 +101,10 @@ A system for the people who understand that how you carry yourself
 is the most important thing you will ever develop.
 Welcome to your practice.</div>
 
-    <div class="method">
-      <strong>How it works:</strong> Morning context → in-the-moment regulation → end-of-day close.
-      One-time calibration personalizes your default pathway.
-    </div>
+    <div class="line">Opening preview only · intro + tutorial intentionally separated</div>
 
-    <div class="btns">
-      <button class="btn btn-primary">Begin calibration →</button>
-      <button class="btn btn-ghost">Open FAQ</button>
-    </div>
+    <button class="btn-primary">Begin calibration →</button>
+    <div class="note">No FAQ CTA on opening screen</div>
   </main>
 </body>
 </html>
