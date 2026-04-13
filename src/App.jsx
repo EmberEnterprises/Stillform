@@ -7096,7 +7096,7 @@ export default function Stillform() {
     return () => clearTimeout(t);
   }, []);
 
-  // Production: show onboarding only once, unless user replays from Settings.
+  // Onboarding is available from Settings replay, not forced at startup.
   const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Subscription & trial tracking
@@ -7435,9 +7435,7 @@ export default function Stillform() {
   useEffect(() => {
     const init = async () => {
       if (!hasSeenOnboarding) {
-        setScreen("onboarding");
-        setScreenReady(true);
-        return;
+        try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
       }
 
       try {
@@ -8364,7 +8362,7 @@ export default function Stillform() {
         </nav>
         )}
 
-        {/* ONBOARDING — first visit only */}
+        {/* ONBOARDING — replay from Settings */}
         {screen === "onboarding" && (() => (
           <section
             style={{
@@ -8401,13 +8399,6 @@ export default function Stillform() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
               <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
                 Begin calibration →
-              </button>
-              <button onClick={() => { completeOnboarding(); setScreen("crisis"); }} style={{
-                background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "10px 16px", fontSize: 12, color: "var(--text-dim)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}>
-                Crisis resources & helplines →
               </button>
             </div>
           </section>
