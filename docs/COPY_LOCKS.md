@@ -19,6 +19,9 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Blind Spots` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
+| Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
+| Tutorial page titles | LOCKED | `System sequence` / `Setup tool (combined)` / `Daily execution tools` / `Close and track progress` |
+| Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
 
 ## Constrained Anchors
 
@@ -29,6 +32,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Onboarding description paragraph 2 | CONSTRAINED | `The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.` |
 | FAQ method question | CONSTRAINED | `What is the method behind Stillform?` |
 | FAQ science question | CONSTRAINED | `What science basis does Stillform use?` |
+| FAQ method answer | CONSTRAINED | `One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan, Watch & Choose) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first.` |
+| FAQ science answer | CONSTRAINED | `Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, metacognitive labeling in Watch & Choose, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment.` |
 
 ## Structural Locks
 
@@ -40,6 +45,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - Signal Profile + Blind Spots
    - Default Protocol
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
+6. Tutorial content cards preserve the triplet structure: `What this is` / `How to do it` / `What you gain`.
 
 ## Prohibited Claims
 
