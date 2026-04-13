@@ -1350,6 +1350,15 @@ const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
+function toLocalDateKey(input = new Date()) {
+  const dt = input instanceof Date ? input : new Date(input);
+  if (Number.isNaN(dt.getTime())) return toLocalDateKey(new Date());
+  const yyyy = dt.getFullYear();
+  const mm = String(dt.getMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
@@ -7373,7 +7382,7 @@ export default function Stillform() {
   };
 
   const getLoopNudgeSnapshot = () => {
-    const todayIso = new Date().toISOString().split("T")[0];
+    const todayIso = toLocalDateKey();
     const parseLoopHistory = (key) => {
       try {
         const parsed = JSON.parse(localStorage.getItem(key) || "[]");
@@ -9193,14 +9202,14 @@ export default function Stillform() {
                 const morningEnd = 1050; // 5:30 PM
                 if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
                 
-                const today = now.toISOString().split("T")[0];
+                const today = toLocalDateKey(now);
                 // EOD done suppresses morning check-in only if EOD was completed TODAY
                 // (edge case: someone does EOD very early morning — rare but valid)
                 const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
                 if (eodDoneToday) return null;
 
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
-                const isCheckedIn = ciSaved || checkedIn;
+                const isCheckedIn = !ciOpen && (ciSaved || checkedIn);
 
                 const protocols = [
                   {
@@ -9575,7 +9584,7 @@ export default function Stillform() {
                 const morningCap = 240; // 4:00 AM — EOD window closes
                 const inEodWindow = currentMinutes >= eveningStart || currentMinutes < morningCap;
                 if (!inEodWindow) return null;
-                const today = now.toISOString().split("T")[0];
+                const today = toLocalDateKey(now);
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodSaved && !eodOpen) return (
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
