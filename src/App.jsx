@@ -3625,13 +3625,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         if (data?.reframe) {
           try {
             const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
-            notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: data.reframe, noteType: "internal" });
             const userFacingNote = toUserFacingInsight(data.reframe);
             if (userFacingNote) {
               notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: userFacingNote, noteType: "user-facing" });
             }
-            // Keep last 40 notes across both internal + user-facing tracks
-            if (notes.length > 40) notes.splice(0, notes.length - 40);
+            // Keep this feed light and useful.
+            if (notes.length > 20) notes.splice(0, notes.length - 20);
             localStorage.setItem("stillform_ai_session_notes", JSON.stringify(notes));
           } catch {}
         }
@@ -4213,6 +4212,33 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return lines.join("\n");
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
+  const finishReframeSession = ({ postState = null, showOptionalWrap = false } = {}) => {
+    saveSession(postState);
+    const pre = scoreState(feelState);
+    const post = scoreState(postState);
+    setSessionShareSummary({
+      timestamp: new Date().toISOString(),
+      preState: feelState || null,
+      postState: postState || null,
+      delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
+    });
+    setPostRating(null);
+    setShowPostRating(false);
+    if (!showOptionalWrap) {
+      setShowPostInsight(false);
+      setShowStateToStatement(false);
+      onComplete(resolvePostReframeRoute());
+      return;
+    }
+    const latestInsight = getLatestUserFacingInsight();
+    if (latestInsight) {
+      setPostSessionInsight(latestInsight);
+      setShowPostInsight(true);
+      try { window.plausible("Post Session Insight Shown"); } catch {}
+    } else {
+      setShowStateToStatement(true);
+    }
+  };
 
   const finishStateToStatement = () => {
     try {
@@ -4415,29 +4441,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           ))}
         </div>
-        <button className="btn btn-primary" style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }} disabled={!postRating} onClick={() => {
-          const selectedPost = postRating;
-          saveSession(selectedPost);
-          const pre = scoreState(feelState);
-          const post = scoreState(selectedPost);
-          setSessionShareSummary({
-            timestamp: new Date().toISOString(),
-            preState: feelState || null,
-            postState: selectedPost || null,
-            delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
-          });
-          setPostRating(null);
-          setShowPostRating(false);
-          const latestInsight = getLatestUserFacingInsight();
-          if (latestInsight) {
-            setPostSessionInsight(latestInsight);
-            setShowPostInsight(true);
-            try { window.plausible("Post Session Insight Shown"); } catch {}
-          } else {
-            setShowStateToStatement(true);
-          }
-        }}>
-          Done
+        <button
+          className="btn btn-primary"
+          style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
+          disabled={!postRating}
+          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: false })}
+        >
+          Finish session
+        </button>
+        <button
+          className="btn btn-ghost"
+          style={{ marginTop: 10, opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
+          disabled={!postRating}
+          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: true })}
+        >
+          Optional wrap-up (AI note + anchor)
+        </button>
+        <button
+          className="btn btn-ghost"
+          style={{ marginTop: 10 }}
+          onClick={() => finishReframeSession({ postState: null, showOptionalWrap: false })}
+        >
+          Skip rating and finish
         </button>
       </div>
     );
@@ -4984,6 +5009,9 @@ function MetacognitionTool({ onComplete }) {
     try { window.plausible?.("Watch & Choose Started"); } catch {}
   }
 
+  const recognizedPatternText = String(responses[2] || "").toLowerCase();
+  const indicatesNewPattern = /\b(no|not really|never|first time|new|don'?t think so|dont think so)\b/.test(recognizedPatternText);
+
   const prompts = [
     {
       label: "Notice",
@@ -5006,9 +5034,15 @@ function MetacognitionTool({ onComplete }) {
     {
       // EQ integration — light, not labeled
       label: "Perspective",
-      question: "What do you actually need right now?",
-      sub: "Not what you think you should do. What does the part of you that's hurting actually need?",
-      placeholder: "What do you need right now?"
+      question: indicatesNewPattern
+        ? "What would help you stay steady in this new moment?"
+        : "What do you actually need right now?",
+      sub: indicatesNewPattern
+        ? "If this feels new, keep it simple: one support, one boundary, one next step."
+        : "Not what you think you should do. What does the part of you that's hurting actually need?",
+      placeholder: indicatesNewPattern
+        ? "I need 60 seconds, one breath cycle, then one clear action..."
+        : "What do you need right now?"
     },
     {
       label: "Choose",
@@ -5084,6 +5118,10 @@ function MetacognitionTool({ onComplete }) {
 
   const prompt = prompts[step];
   const isChoiceStep = step === prompts.length - 1;
+  const markStepNotApplicable = () => {
+    setResponses((r) => ({ ...r, [step]: "[not-applicable]" }));
+    setStep((s) => s + 1);
+  };
 
   return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
@@ -5126,11 +5164,16 @@ function MetacognitionTool({ onComplete }) {
             />
             <MicButton onTranscript={t => setResponses(r => ({ ...r, [step]: (r[step] || "") + (r[step] ? " " : "") + t }))} />
           </div>
-          <button className="btn btn-primary" style={{ width: "100%", marginTop: 16 }}
-            disabled={!(responses[step] || "").trim()}
-            onClick={() => setStep(s => s + 1)}>
-            Next →
-          </button>
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="btn btn-primary" style={{ flex: 1 }}
+              disabled={!(responses[step] || "").trim()}
+              onClick={() => setStep(s => s + 1)}>
+              Next →
+            </button>
+            <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={markStepNotApplicable}>
+              Doesn't apply
+            </button>
+          </div>
         </>
       )}
 
@@ -6823,7 +6866,7 @@ function MyProgress({ onBack }) {
             </button>
             {openSections.ainotes && (
               <div style={{ display: "flex", flexDirection: "column", gap: 4, marginTop: 4 }}>
-                {[...aiUserFacingInsights].reverse().slice(0, 5).map((n, i) => (
+                {[...aiUserFacingInsights].reverse().slice(0, 3).map((n, i) => (
                   <div key={i} style={subRowStyle}>
                     <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4 }}>{new Date(n.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>
                     <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{n.note}</div>
