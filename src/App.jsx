@@ -4620,7 +4620,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
                 {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-                    This is an AI that learns your patterns. Say what's on your mind — it gets sharper the more you use it.
+                    This AI adapts to your real patterns over time. Speak plainly about the moment you're in; precision improves with repetition.
                   </div>
                 )}
                 {openingText}
@@ -7210,7 +7210,7 @@ function QBPill({ onPress }) {
         transform: dragging ? "scale(1.05)" : "scale(1)"
       }}
     >
-      ◎ Quick Breathe
+      ◎ Regulation Reset
     </div>
   );
 }
@@ -7574,7 +7574,7 @@ export default function Stillform() {
   useEffect(() => {
     const init = async () => {
       if (!hasSeenOnboarding) {
-        setScreen("onboarding");
+        setScreen("tutorial");
         setScreenReady(true);
         return;
       }
@@ -8529,7 +8529,7 @@ export default function Stillform() {
                 },
                 {
                   title: "2) Regulate in the moment",
-                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate under pressure, process wins, and prep difficult moments."
+                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate pressure, consolidate wins, and prepare difficult conversations with composure."
                 },
                 {
                   title: "3) End of day closes the loop",
@@ -9174,7 +9174,7 @@ export default function Stillform() {
               {showHomeContextTip && (
                 <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
+                    Morning check-in sets your operating context. Reframe, Breathe, or Body Scan handle in-the-moment regulation. End of day closes the loop for trend accuracy.
                   </div>
                   <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     Dismiss tip
