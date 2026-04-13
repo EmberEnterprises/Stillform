@@ -6167,6 +6167,14 @@ function MyProgress({ onBack }) {
     ? Math.round((recoveredNudges14d / loopNudgeShown14d.length) * 100)
     : null;
   const completionRatio14d = (morningDone14dDays.size + eodDone14dDays.size) / (14 * 2);
+  const loopNudgeDismissStreak = (() => {
+    try {
+      const raw = Number.parseInt(localStorage.getItem(LOOP_NUDGE_DISMISS_STREAK_KEY) || "0", 10);
+      return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    } catch {
+      return 0;
+    }
+  })();
   const adaptiveDropoffThreshold14d = Math.max(
     LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
     Math.min(
