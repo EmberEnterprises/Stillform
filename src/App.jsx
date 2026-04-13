@@ -5206,34 +5206,108 @@ function SignalMapTool({ onComplete }) {
     "Surge of energy", "Sudden urgency", "Restless focus", "Butterflies", "Lightness"
   ];
 
-  const triggers = [
-    // High — positive activation
-    "Big win or unexpected good news", "Excitement before something important",
-    "Riding high — risk of overcommitting", "Creative flow or peak performance state",
-    "Recognition or praise", "A big opportunity opening up",
-    // Situational
-    "Work / deadlines", "Conflict / confrontation", "Being put on the spot", "Public speaking / performing",
-    "Difficult conversations", "Being judged or evaluated", "Waiting for results or news",
-    "High-stakes decision", "Negotiation or competition",
-    // Emotional
-    "Rejection or abandonment", "Feeling disrespected", "Jealousy", "Guilt or shame from the past",
-    "Grief / loss / anniversaries", "Feeling invisible or unheard",
-    // Relational
-    "Family dynamics", "Romantic relationship tension", "Parenting moments", "Social situations / networking",
-    "Supporting someone else through something hard",
-    // Physical / environmental
-    "Chronic pain flares", "Sleep deprivation", "Sensory overload (noise, light, crowds)",
-    "Hormonal changes", "Hunger or blood sugar drops",
-    // Cognitive
-    "Money / financial pressure", "Self-worth / impostor feelings", "Uncertainty / not knowing",
-    "Being alone with your thoughts", "Comparison to others", "Unfinished tasks piling up",
-    "Making a decision with incomplete information"
+  const triggerGroups = [
+    {
+      id: "work",
+      label: "Work & performance pressure",
+      options: [
+        "Work / deadlines",
+        "Being put on the spot",
+        "Public speaking / performing",
+        "Waiting for results or news",
+        "High-stakes decision",
+        "Negotiation or competition",
+        "Money / financial pressure"
+      ]
+    },
+    {
+      id: "relational",
+      label: "Relationships & social dynamics",
+      options: [
+        "Conflict / confrontation",
+        "Difficult conversations",
+        "Being judged or evaluated",
+        "Feeling disrespected",
+        "Feeling invisible or unheard",
+        "Rejection or abandonment",
+        "Family dynamics",
+        "Romantic relationship tension",
+        "Parenting moments",
+        "Supporting someone else through something hard"
+      ]
+    },
+    {
+      id: "internal",
+      label: "Internal narrative patterns",
+      options: [
+        "Self-worth / impostor feelings",
+        "Comparison to others",
+        "Uncertainty / not knowing",
+        "Guilt or shame from the past",
+        "Grief / loss / anniversaries",
+        "Jealousy",
+        "Being alone with your thoughts",
+        "Unfinished tasks piling up"
+      ]
+    },
+    {
+      id: "body",
+      label: "Body & environment load",
+      options: [
+        "Chronic pain flares",
+        "Sleep deprivation",
+        "Sensory overload (noise, light, crowds)",
+        "Hormonal changes",
+        "Hunger or blood sugar drops"
+      ]
+    },
+    {
+      id: "positive",
+      label: "Positive over-activation",
+      options: [
+        "Big win or unexpected good news",
+        "Excitement before something important",
+        "Creative flow or peak performance state",
+        "Recognition or praise"
+      ]
+    }
   ];
+  const triggerMigrationMap = {
+    "Riding high — risk of overcommitting": "Excitement before something important",
+    "A big opportunity opening up": "Big win or unexpected good news",
+    "Social situations / networking": "Being judged or evaluated",
+    "Making a decision with incomplete information": "High-stakes decision"
+  };
+  const triggerOptionSet = new Set(triggerGroups.flatMap(group => group.options));
+  const [openTriggerGroups, setOpenTriggerGroups] = useState(() => ({
+    work: true,
+    relational: false,
+    internal: false,
+    body: false,
+    positive: false
+  }));
 
   const save = (key, value) => {
     const updated = { ...signals, [key]: value };
     setSignals(updated);
     try { localStorage.setItem("stillform_signal_profile", JSON.stringify(updated)); } catch {}
+  };
+
+  useEffect(() => {
+    const current = Array.isArray(signals.triggers) ? signals.triggers : [];
+    if (!current.length) return;
+    const normalized = current
+      .map((item) => triggerMigrationMap[item] || item)
+      .filter((item, idx, arr) => triggerOptionSet.has(item) && arr.indexOf(item) === idx);
+    const changed = normalized.length !== current.length || normalized.some((item, idx) => item !== current[idx]);
+    if (changed) save("triggers", normalized);
+  }, []);
+
+  const selectedTriggers = Array.isArray(signals.triggers)
+    ? signals.triggers.filter((item, idx, arr) => triggerOptionSet.has(item) && arr.indexOf(item) === idx)
+    : [];
+  const toggleTriggerGroup = (groupId) => {
+    setOpenTriggerGroups((current) => ({ ...current, [groupId]: !current?.[groupId] }));
   };
 
   const steps = [
@@ -5313,28 +5387,62 @@ function SignalMapTool({ onComplete }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Most people don't recognize half their triggers. Scroll through — tap any that feel familiar, even slightly. You might be surprised.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Choose what fits now. Categories keep this focused and easier to scan.</p>
         <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 12, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
-        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          {triggers.map(t => {
-            const selected = (signals.triggers || []).includes(t);
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+          {selectedTriggers.length} selected
+        </p>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {triggerGroups.map((group) => {
+            const selectedInGroup = group.options.filter((item) => selectedTriggers.includes(item)).length;
             return (
-              <button key={t} onClick={() => {
-                const current = signals.triggers || [];
-                const updated = selected ? current.filter(x => x !== t) : [...current, t];
-                save("triggers", updated);
-              }} style={{
-                background: selected ? "var(--amber-glow)" : "var(--surface)",
-                border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
-                borderRadius: "var(--r-lg)", padding: "8px 16px", fontSize: 13, cursor: "pointer",
-                color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
-              }}>{t}</button>
+              <div key={group.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
+                <button onClick={() => toggleTriggerGroup(group.id)} style={{
+                  width: "100%", background: "none", border: "none", padding: "10px 12px",
+                  cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 12, color: "var(--text)" }}>{group.label}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    {selectedInGroup > 0 ? `${selectedInGroup} selected` : ""} {openTriggerGroups[group.id] ? "▾" : "▸"}
+                  </span>
+                </button>
+                {openTriggerGroups[group.id] && (
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, padding: "0 12px 12px" }}>
+                    {group.options.map((option) => {
+                      const selected = selectedTriggers.includes(option);
+                      return (
+                        <button key={option} onClick={() => {
+                          const updated = selected
+                            ? selectedTriggers.filter((value) => value !== option)
+                            : [...selectedTriggers, option];
+                          save("triggers", updated);
+                        }} style={{
+                          background: selected ? "var(--amber-glow)" : "var(--surface2)",
+                          border: `1px solid ${selected ? "var(--amber)" : "var(--border)"}`,
+                          borderRadius: "var(--r-lg)", padding: "8px 12px", fontSize: 12, cursor: "pointer",
+                          color: selected ? "var(--amber)" : "var(--text-dim)", transition: "all 0.2s"
+                        }}>
+                          {option}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
+        {!!selectedTriggers.length && (
+          <button onClick={() => save("triggers", [])} style={{
+            width: "100%", marginTop: 10, background: "none", border: "1px solid var(--border)",
+            borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text-muted)", fontSize: 12,
+            fontFamily: "'DM Sans', sans-serif", cursor: "pointer"
+          }}>
+            Clear trigger selections
+          </button>
+        )}
         <button className="btn btn-primary" style={{ width: "100%", marginTop: 20 }}
-          disabled={!(signals.triggers || []).length}
+          disabled={!selectedTriggers.length}
           onClick={() => setStep(4)}>Done →</button>
       </div>
     ),
@@ -5358,7 +5466,7 @@ function SignalMapTool({ onComplete }) {
             <strong style={{ color: "var(--text)" }}>State-shift signals:</strong> {(signals.preSensations || []).join(", ")}
           </div>
           <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
-            <strong style={{ color: "var(--text)" }}>Common triggers:</strong> {(signals.triggers || []).join(", ")}
+            <strong style={{ color: "var(--text)" }}>Common triggers:</strong> {selectedTriggers.length ? selectedTriggers.join(", ") : "None selected yet"}
           </div>
         </div>
         <button className="btn btn-primary" onClick={onComplete}>Done</button>
@@ -7605,7 +7713,7 @@ export default function Stillform() {
     customization: false,
     signal: false,
     more: false,
-    data: false
+    data: true
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -11165,7 +11273,7 @@ export default function Stillform() {
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Data management</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Data management (exports + reset)</span>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.data ? "▾" : "▸"}</span>
               </button>
               {settingsSectionOpen.data && (
