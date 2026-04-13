@@ -11153,63 +11153,6 @@ export default function Stillform() {
               )}
             </div>
 
-            {/* More */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("more")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>More</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.more ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.more && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => setScreen("privacy")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Privacy & Disclaimers
-                </button>
-                <a href="mailto:ARAembersllc@proton.me" style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Contact us
-                </a>
-                <button onClick={() => {
-                  setScreen("tutorial");
-                }} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Replay tutorial
-                </button>
-                <button onClick={() => {
-                  try {
-                    localStorage.removeItem("stillform_regulation_type");
-                    localStorage.removeItem("stillform_signal_profile");
-                    localStorage.removeItem("stillform_bias_profile");
-                    localStorage.removeItem("stillform_breath_pattern");
-                    localStorage.removeItem("stillform_bio_filter");
-                  } catch {}
-                  setRegType(null);
-                  setSetupStep(0);
-                  setAssessmentAnswers([]);
-                  setScreen("setup");
-                }} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Re-run calibration
-                </button>
-              </div>
-              )}
-            </div>
-
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 32, lineHeight: 1.5 }}>
               Stillform · ARA Embers LLC · v{APP_VERSION}
               <br />
@@ -11400,6 +11343,63 @@ export default function Stillform() {
                 Delete all data
               </button>
               </>
+              )}
+            </div>
+
+            {/* More */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("more")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>More</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.more ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.more && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => setScreen("privacy")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Privacy & Disclaimers
+                </button>
+                <a href="mailto:ARAembersllc@proton.me" style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Contact us
+                </a>
+                <button onClick={() => {
+                  setScreen("tutorial");
+                }} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Replay tutorial
+                </button>
+                <button onClick={() => {
+                  try {
+                    localStorage.removeItem("stillform_regulation_type");
+                    localStorage.removeItem("stillform_signal_profile");
+                    localStorage.removeItem("stillform_bias_profile");
+                    localStorage.removeItem("stillform_breath_pattern");
+                    localStorage.removeItem("stillform_bio_filter");
+                  } catch {}
+                  setRegType(null);
+                  setSetupStep(0);
+                  setAssessmentAnswers([]);
+                  setScreen("setup");
+                }} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Re-run calibration
+                </button>
+              </div>
               )}
             </div>
           </section>
