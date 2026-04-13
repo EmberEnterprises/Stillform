@@ -4241,7 +4241,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return lines.join("\n");
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
-  const finishReframeSession = ({ postState = null, showOptionalWrap = false } = {}) => {
+  const finishReframeSession = ({ postState = null, skipPostWrap = false } = {}) => {
     saveSession(postState);
     const pre = scoreState(feelState);
     const post = scoreState(postState);
@@ -4253,7 +4253,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     });
     setPostRating(null);
     setShowPostRating(false);
-    if (!showOptionalWrap) {
+    if (skipPostWrap) {
       setShowPostInsight(false);
       setShowStateToStatement(false);
       onComplete(resolvePostReframeRoute());
@@ -4474,22 +4474,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           className="btn btn-primary"
           style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
           disabled={!postRating}
-          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: false })}
+          onClick={() => finishReframeSession({ postState: postRating })}
         >
           Finish session
         </button>
         <button
           className="btn btn-ghost"
-          style={{ marginTop: 10, opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
-          disabled={!postRating}
-          onClick={() => finishReframeSession({ postState: postRating, showOptionalWrap: true })}
-        >
-          Optional wrap-up (AI note + anchor)
-        </button>
-        <button
-          className="btn btn-ghost"
           style={{ marginTop: 10 }}
-          onClick={() => finishReframeSession({ postState: null, showOptionalWrap: false })}
+          onClick={() => finishReframeSession({ postState: null, skipPostWrap: true })}
         >
           Skip rating and finish
         </button>
@@ -9635,8 +9627,8 @@ export default function Stillform() {
 
                 const tools = [
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
-                  { id: "meta", label: "Watch & Choose", rec: false },
                 ];
+                if (tools.length === 0) return null;
 
                 return (
                   <div style={{ marginBottom: 24 }}>
@@ -10060,11 +10052,11 @@ export default function Stillform() {
               },
               {
                 q: "What is the method behind Stillform?",
-                a: "One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan, Watch & Choose) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first."
+                a: "One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first."
               },
               {
                 q: "What science basis does Stillform use?",
-                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, metacognitive labeling in Watch & Choose, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
+                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
               },
               {
                 q: "Who is this for?",
@@ -10097,10 +10089,6 @@ export default function Stillform() {
               {
                 q: "What is the Pulse?",
                 a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
-              },
-              {
-                q: "What is Watch & Choose?",
-                a: "A five-step tool that walks you through catching a thought pattern in real time — notice it in your body, name the thought, recognize the pattern, find what you actually need, then choose what to do next. Access it from Go Deeper on the home screen."
               },
               {
                 q: "How does Pulse work?",

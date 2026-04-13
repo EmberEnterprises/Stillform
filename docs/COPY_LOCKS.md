@@ -32,8 +32,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Onboarding description paragraph 2 | CONSTRAINED | `The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.` |
 | FAQ method question | CONSTRAINED | `What is the method behind Stillform?` |
 | FAQ science question | CONSTRAINED | `What science basis does Stillform use?` |
-| FAQ method answer | CONSTRAINED | `One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan, Watch & Choose) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first.` |
-| FAQ science answer | CONSTRAINED | `Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, metacognitive labeling in Watch & Choose, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment.` |
+| FAQ method answer | CONSTRAINED | `One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first.` |
+| FAQ science answer | CONSTRAINED | `Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment.` |
 
 ## Structural Locks
 
@@ -45,7 +45,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - Signal Profile + Blind Spots
    - Default Protocol
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
-6. Tutorial uses five concise guided pages after the opening page, with exact tool naming and no redundant standalone Watch & Choose slide.
+6. Tutorial uses five concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 
 ## Prohibited Claims
 
