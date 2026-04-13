@@ -34,6 +34,7 @@ const checks = [
   { label: "Data export actions active", cmd: "rg", args: ["-n", "exportPulseLogPdf|exportSessionHistoryCsv|Pulse PDF Exported|Session CSV Exported", "src/App.jsx"], type: "must-match" },
   { label: "Core loop smoke script present", cmd: "rg", args: ["-n", "\"smoke:core-loop\": \"node scripts/core-loop-smoke\\.mjs\"", "package.json"], type: "must-match" },
   { label: "Launch runbook present", cmd: "rg", args: ["-n", "Stillform Launch-Day Runbook|core-loop-smoke\\.mjs", "docs/LAUNCH_DAY_RUNBOOK.md"], type: "must-match" },
+  { label: "Copy lock manifest present", cmd: "rg", args: ["-n", "Stillform Copy Locks|LOCKED|Tutorial FAQ guidance sentence", "docs/COPY_LOCKS.md"], type: "must-match" },
   { label: "Metrics telemetry controls", cmd: "rg", args: ["-n", "Performance metrics \\(counts \\+ rates only\\)|METRICS_OPT_IN_KEY|metrics-ingest|Metrics Snapshot Sent", "src/App.jsx"], type: "must-match" },
   { label: "Metrics ingest function present", cmd: "rg", args: ["-n", "metrics_opt_in must be true|upsertMetricsSnapshot|metric_date", "netlify/functions/metrics-ingest.js"], type: "must-match" },
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
