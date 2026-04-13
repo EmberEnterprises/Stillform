@@ -1346,6 +1346,7 @@ const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
 const METRICS_SCHEMA_VERSION = 1;
+const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
@@ -7036,7 +7037,15 @@ export default function Stillform() {
       return Math.max(0, Math.ceil(14 - elapsed));
     } catch { return 14; }
   })();
-  const trialExpired = trialDaysLeft <= 0 && !isSubscribed;
+  const uatTrialFreezeUntilMs = (() => {
+    const dt = new Date(UAT_TRIAL_FREEZE_UNTIL_ISO);
+    return Number.isNaN(dt.getTime()) ? 0 : dt.getTime();
+  })();
+  const uatTrialFreezeActive = !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
+  const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
+    ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    : "launch";
+  const trialExpired = trialDaysLeft <= 0 && !isSubscribed && !uatTrialFreezeActive;
 
   // Check for subscription confirmation from Lemon Squeezy redirect
   useEffect(() => {
@@ -7497,7 +7506,9 @@ export default function Stillform() {
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
+    notifications: true,
     integrations: false,
+    subscription: false,
     sound: false,
     logs: false,
     customization: false,
@@ -8818,12 +8829,18 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* TRIAL BADGE */}
-              {!isSubscribed && trialDaysLeft > 0 && (
+              {/* UAT trial badge */}
+              {!isSubscribed && (
                 <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: trialDaysLeft <= 3 ? "#c05040" : "var(--text-muted)" }}>FREE TRIAL</span>
-                    <span style={{ fontSize: 12, color: "var(--text-dim)" }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} remaining</span>
+                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: uatTrialFreezeActive ? "var(--amber)" : (trialDaysLeft <= 3 ? "#c05040" : "var(--text-muted)") }}>
+                      {uatTrialFreezeActive ? "UAT ACCESS" : "FREE TRIAL"}
+                    </span>
+                    <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                      {uatTrialFreezeActive
+                        ? `Counter paused for UAT · target launch ${uatLaunchTargetLabel}`
+                        : `${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining`}
+                    </span>
                   </div>
                   <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
                 </div>
@@ -9516,7 +9533,12 @@ export default function Stillform() {
             )}
             <div className="pricing-header">
               <h2>{trialExpired ? "Your subscription has ended." : "Subscribe. Stay only if it works."}</h2>
-              <p>{trialExpired ? "Subscribe to keep using Stillform. Your data is safe — right where you left it." : "Try everything free for 14 days. Composure when you need it — under two minutes."}</p>
+              <p>{trialExpired
+                ? "Subscribe to keep using Stillform. Your data is safe — right where you left it."
+                : (uatTrialFreezeActive
+                    ? `UAT access window active until ${uatLaunchTargetLabel}. Trial countdown is paused for tester stability.`
+                    : "Try everything free for 14 days. Composure when you need it — under two minutes.")}
+              </p>
             </div>
             <div className="pricing-cards">
               <div className="pricing-card featured" style={{ maxWidth: 360, margin: "0 auto" }}>
@@ -9948,15 +9970,22 @@ export default function Stillform() {
 
             {/* Notifications + Reminder */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>Notifications</div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                Manage check-in reminder and notification behavior in one place.
-              </div>
-              {(() => {
+              <button onClick={() => toggleSettingsSection("notifications")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Notifications</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.notifications ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.notifications && (() => {
                 const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
                 const reminderTime = (() => { try { return localStorage.getItem("stillform_reminder_time") || "08:00"; } catch { return "08:00"; } })();
                 const [rHour, rMin] = reminderTime.split(":").map(Number);
                 return (
+                  <div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                      Manage check-in reminder and notification behavior in one place.
+                    </div>
                   <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                     <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
@@ -10004,6 +10033,7 @@ export default function Stillform() {
                         }} />
                       </div>
                     )}
+                  </div>
                   </div>
                 );
               })()}
@@ -10314,7 +10344,14 @@ export default function Stillform() {
 
             {/* Subscription status */}
             <div style={{ marginBottom: 28 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Subscription status</div>
+              <button onClick={() => toggleSettingsSection("subscription")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Subscription status</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.subscription ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.subscription && (
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                   <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
@@ -10325,7 +10362,11 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
                   {isSubscribed
                     ? "This device has active access."
-                    : (trialExpired ? "Trial expired. Subscription is required for full access." : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`)}
+                    : (trialExpired
+                        ? "Trial expired. Subscription is required for full access."
+                        : (uatTrialFreezeActive
+                            ? `UAT access window active until ${uatLaunchTargetLabel}. Counter paused for testers.`
+                            : `Trial active · ${trialDaysLeft} day${trialDaysLeft !== 1 ? "s" : ""} remaining.`))}
                 </div>
                 <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
                   {hasPendingWebhookSync
@@ -10353,6 +10394,7 @@ export default function Stillform() {
                   </div>
                 )}
               </div>
+              )}
             </div>
 
             {/* Sound */}

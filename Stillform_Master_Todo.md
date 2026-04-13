@@ -211,9 +211,10 @@
 - [ ] **Manual QA on a second device** for cloud restore integrity (sessions, pulse, profiles).
 
 ### 🟡 Launch status snapshot
-- **Soft launch:** ready with controlled audience.
-- **Broad launch:** wait for live payment verification + server-side subscription truth + privacy policy publish.
+- **Soft launch:** hold until **Mon Apr 20, 2026** (family-week buffer; no broad launch this week).
+- **Broad launch:** wait for live payment verification + server-side subscription truth + privacy policy publish + post-soft-launch sanity window.
 - **Code-side architecture:** complete for current web scope; remaining blockers are external account/platform actions.
+- **UAT subscription display note:** countdown is frozen for UAT clarity (no live day decrement shown to testers).
 
 ---
 
