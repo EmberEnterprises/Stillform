@@ -4714,7 +4714,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   transition: "color 0.2s"
                 }}
               >
-                This isn't helping → try breathing instead
+                I want a different response
               </button>
             </div>
           )}

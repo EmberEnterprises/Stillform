@@ -117,8 +117,82 @@ const BANNED_REFRAME_PATTERNS = [
   /that must be (really |so )?(hard|difficult|tough|overwhelming)/gi,
   /I can (see|understand) why/gi,
   /[Ii]t makes sense that/,
-  /[Oo]f course you/
+  /[Oo]f course you/,
+  /Keeping it light can be a good way to unwind/gi,
+  /if there'?s anything specific on your mind/gi,
+  /we can pick it apart together/gi,
+  /flyby thoughts?/gi,
+  /\bchat about\b/gi,
+  /\bunpack\b/gi,
+  /\bdive in\b/gi
 ];
+
+const GENERIC_GARBAGE_PATTERNS = [
+  /sounds like something'?s circling in your mind/gi,
+  /hasn'?t landed yet/gi,
+  /pinpoint the key thought/gi,
+  /taking up space/gi,
+  /keeping it light can be a good way to unwind/gi,
+  /if there'?s anything specific on your mind/gi,
+  /we can (pick it apart together|just enjoy)/gi,
+  /flyby thoughts?/gi,
+  /chat about/gi
+];
+
+const FRIENDLY_SOFT_ENTRY_PATTERNS = [
+  /\bhi+\b/i,
+  /\bhey+\b/i,
+  /\bhello+\b/i,
+  /\byo+\b/i,
+  /\bwhat'?s up\b/i,
+  /\blol\b/i,
+  /\bhaha+\b/i,
+  /\bjust checking in\b/i,
+  /\bhang(?:ing)? out\b/i,
+  /\bsnoot\b/i,
+  /\bsnit\b/i
+];
+
+const GENERIC_GARBAGE_SNIPPETS = [
+  "sounds like something's circling in your mind",
+  "hasn't landed yet",
+  "pinpoint the key thought",
+  "taking up space",
+  "keeping it light can be a good way to unwind",
+  "if there's anything specific on your mind",
+  "we can pick it apart together",
+  "flyby thoughts",
+  "chat about"
+];
+
+const GENERIC_NEXT_STEP_SNIPPETS = [
+  "just chat about anything",
+  "anything specific on your mind",
+  "talk about whatever",
+  "say anything"
+];
+
+function hasAnyPattern(text, patterns) {
+  const value = String(text || "");
+  return patterns.some((pattern) => {
+    if (!(pattern instanceof RegExp)) return false;
+    pattern.lastIndex = 0;
+    return pattern.test(value);
+  });
+}
+
+function normalizeForSnippetMatch(text) {
+  return String(text || "")
+    .toLowerCase()
+    .replace(/[’`]/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function hasAnySnippet(text, snippets) {
+  const normalized = normalizeForSnippetMatch(text);
+  return snippets.some((snippet) => normalized.includes(snippet));
+}
 
 function sanitizeReframeText(value) {
   if (typeof value !== "string") return "";
@@ -191,6 +265,13 @@ function pickScienceRoute({ mode, input, feelState = null, checkinContext = null
   return SCIENCE_MECHANISMS.calm.signal_noise;
 }
 
+function detectSoftEntry(input) {
+  const text = String(input || "").trim();
+  if (!text) return false;
+  const lowered = text.toLowerCase();
+  return hasAnyPattern(lowered, FRIENDLY_SOFT_ENTRY_PATTERNS);
+}
+
 function buildSciencePrompt(route) {
   return `SCIENCE ROUTING — HARD REQUIREMENT:
 Primary mechanism: ${route.label}
@@ -223,6 +304,7 @@ function normalizeReframePayload(parsed, route) {
 function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLanguage = false } = {}) {
   const reasons = [];
   const reframe = String(payload?.reframe || "").trim();
+  const nextStep = String(payload?.next_step || "").trim();
   if (!reframe) reasons.push("missing reframe");
   if (reframe.length < 40 && !isSummaryRequest) reasons.push("reframe too short");
   if (reframe.length > 900) reasons.push("reframe too long");
@@ -230,16 +312,19 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
   const maxSentences = hasCrisisLanguage ? 6 : 5;
   if (!isSummaryRequest && (sentenceCount < 2 || sentenceCount > maxSentences)) reasons.push("invalid sentence count");
   if (!isSummaryRequest && (!payload?.mechanism || typeof payload.mechanism !== "string")) reasons.push("missing mechanism");
-  if (!isSummaryRequest && (!payload?.next_step || payload.next_step.length < 10)) reasons.push("missing actionable next_step");
+  if (!isSummaryRequest && (!nextStep || nextStep.length < 10)) reasons.push("missing actionable next_step");
   if (!isSummaryRequest) {
     const questionCount = `${reframe} ${payload?.question || ""}`.split("?").length - 1;
     if (questionCount > 1) reasons.push("too many questions");
   }
-  if (BANNED_REFRAME_PATTERNS.some((pattern) => pattern.test(reframe))) reasons.push("contains banned phrase");
+  if (hasAnySnippet(reframe, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic garbage phrasing");
+  if (hasAnySnippet(nextStep, GENERIC_NEXT_STEP_SNIPPETS)) reasons.push("generic next_step");
+  if (hasAnyPattern(reframe, GENERIC_GARBAGE_PATTERNS)) reasons.push("generic garbage phrasing");
+  if (hasAnyPattern(reframe, BANNED_REFRAME_PATTERNS)) reasons.push("contains banned phrase");
   return { ok: reasons.length === 0, reasons };
 }
 
-function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false }) {
+function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false }) {
   if (isSummaryRequest) {
     return {
       distortion: null,
@@ -257,6 +342,16 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
       reframe: "You're not overreacting — this needs immediate support. Are you thinking about hurting yourself right now? If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7. I'm still here — keep talking to me.",
       next_step: "If danger is immediate, call or text 988 now.",
       question: "Are you in immediate danger right now?"
+    };
+  }
+
+  if (isSoftEntry) {
+    return {
+      distortion: null,
+      mechanism: "friendly_soft_entry",
+      reframe: "Glad you dropped in. This space is for hard days and ordinary moments, so we can start light and still keep it useful. If you want, give me one thing from today that had your attention and we’ll work it with you.",
+      next_step: "Name one small moment from today that you want to make sense of.",
+      question: "What stood out most from your day?"
     };
   }
 
@@ -752,6 +847,7 @@ exports.handler = async function(event) {
     const crisisTerms = ["see the point", "no point anymore", "nobody would notice", "nobody would care", "nobody will notice", "nobody will care", "better off without me", "want to die", "wanna die", "kill myself", "end it all", "not worth living", "can't go on", "cant go on", "give up on everything", "no reason to live", "want to disappear", "wanna disappear", "wouldn't miss me", "wouldnt miss me", "ending it", "self harm", "self-harm", "hurt myself", "suicidal", "don't want to be here", "dont want to be here", "rather not be alive", "nothing matters", "no one cares", "no one would care", "what's the point", "whats the point"];
     const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
     const isInternalSummaryRequest = /^internal\s+[—-]\s+session summary request/i.test(trimmedInput);
+    const isSoftEntry = !isInternalSummaryRequest && detectSoftEntry(trimmedInput);
     const scienceRoute = isInternalSummaryRequest
       ? null
       : pickScienceRoute({
@@ -897,6 +993,10 @@ WHAT STAYING SHARP LOOKS LIKE:
     if (scienceRoute) {
       contextParts.push(buildSciencePrompt(scienceRoute));
       contextParts.push(REFRAME_RESPONSE_SCHEMA);
+      contextParts.push("ENTRY GUARD: Do not assume something is wrong just because the user opened Reframe. If the input is casual or playful, stay friendly and useful without forcing a problem-state frame.");
+      if (isSoftEntry) {
+        contextParts.push("SOFT ENTRY MODE: The user may be opening gently or playfully. Do NOT force a problem-state framing. Keep tone friendly, grounded, and welcoming while still useful. No clinical language, no escalation language, no generic filler.");
+      }
     }
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
@@ -985,7 +1085,8 @@ WHAT STAYING SHARP LOOKS LIKE:
         route: scienceRoute,
         input: trimmedInput,
         isSummaryRequest: isInternalSummaryRequest,
-        hasCrisisLanguage
+        hasCrisisLanguage,
+        isSoftEntry
       });
     }
 
