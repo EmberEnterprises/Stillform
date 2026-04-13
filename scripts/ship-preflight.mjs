@@ -36,7 +36,7 @@ const checks = [
   { label: "Preview routes include tutorial surfaces", cmd: "rg", args: ["-n", "new Set\\(\\[\"tutorial\", \"onboarding\", \"home\", \"settings\", \"faq\", \"privacy\"\\]\\)", "src/App.jsx"], type: "must-match" },
   { label: "Onboarding compressed architecture", cmd: "rg", args: ["-n", "Composure architecture|Begin calibration →", "src/App.jsx"], type: "must-match" },
   { label: "Onboarding step wizard removed", cmd: "rg", args: ["-n", "onboardStep|setOnboardStep", "src/App.jsx"], type: "must-not-match" },
-  { label: "Settings FAQ priority placement", cmd: "rg", args: ["-n", "FAQ \\(top priority for low-friction support\\)|Open FAQ →", "src/App.jsx"], type: "must-match" },
+  { label: "Settings FAQ top card placement", cmd: "rg", args: ["-n", "Method, science, and boundaries|Open →", "src/App.jsx"], type: "must-match" },
   { label: "Data export actions active", cmd: "rg", args: ["-n", "exportPulseLogPdf|exportSessionHistoryCsv|Pulse PDF Exported|Session CSV Exported", "src/App.jsx"], type: "must-match" },
   { label: "Core loop smoke script present", cmd: "rg", args: ["-n", "\"smoke:core-loop\": \"node scripts/core-loop-smoke\\.mjs\"", "package.json"], type: "must-match" },
   { label: "Launch runbook present", cmd: "rg", args: ["-n", "Stillform Launch-Day Runbook|core-loop-smoke\\.mjs", "docs/LAUNCH_DAY_RUNBOOK.md"], type: "must-match" },

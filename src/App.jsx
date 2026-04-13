@@ -1151,14 +1151,6 @@ const TOOLS = [
     desc: "Learn the thinking patterns that run on autopilot when you're stressed.",
     time: "5 min",
     level: 3
-  },
-  {
-    id: "meta",
-    icon: "❖",
-    name: "Watch & Choose",
-    desc: "Catch the spiral in real time. Name it. Choose your next move.",
-    time: "3 min",
-    level: 4
   }
 ];
 
@@ -3513,6 +3505,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
+  const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -4241,7 +4234,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return lines.join("\n");
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
-  const finishReframeSession = ({ postState = null, skipPostWrap = false } = {}) => {
+  const finishReframeSession = ({ postState = null } = {}) => {
     saveSession(postState);
     const pre = scoreState(feelState);
     const post = scoreState(postState);
@@ -4253,12 +4246,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     });
     setPostRating(null);
     setShowPostRating(false);
-    if (skipPostWrap) {
-      setShowPostInsight(false);
-      setShowStateToStatement(false);
-      onComplete(resolvePostReframeRoute());
-      return;
-    }
     const latestInsight = getLatestUserFacingInsight();
     if (latestInsight) {
       setPostSessionInsight(latestInsight);
@@ -4303,6 +4290,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     onComplete(resolvePostReframeRoute());
   };
 
+  const handleMergedWatchChooseComplete = (redirectTo) => {
+    if (!redirectTo || redirectTo === "reframe-calm" || redirectTo === "reframe") {
+      setShowWatchChooseFlow(false);
+      return;
+    }
+    if (redirectTo === "breathe" || redirectTo === "scan" || redirectTo === "crisis") {
+      onComplete(redirectTo);
+      return;
+    }
+    setShowWatchChooseFlow(false);
+  };
+
   const continueFromPostInsight = () => {
     setShowPostInsight(false);
     setShowStateToStatement(true);
@@ -4327,6 +4326,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       try { window.plausible("State to Statement Card Copied"); } catch {}
     } catch {}
   };
+
+  if (showWatchChooseFlow) {
+    return (
+      <div style={{ paddingTop: 12 }}>
+        <MetacognitionTool onComplete={handleMergedWatchChooseComplete} />
+      </div>
+    );
+  }
 
   if (showStateToStatement) {
     return (
@@ -4481,9 +4488,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <button
           className="btn btn-ghost"
           style={{ marginTop: 10 }}
-          onClick={() => finishReframeSession({ postState: null, skipPostWrap: true })}
+          onClick={() => finishReframeSession({ postState: null })}
         >
-          Skip rating and finish
+          Skip rating and continue
         </button>
       </div>
     );
@@ -4573,6 +4580,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }}>
           Reframe tone: {aiToneLabel}
         </div>
+      </div>
+      <div style={{ marginTop: -2, marginBottom: 10, display: "flex", justifyContent: "flex-end" }}>
+        <button
+          className="btn btn-ghost"
+          style={{ fontSize: 11, padding: "6px 10px" }}
+          onClick={() => setShowWatchChooseFlow(true)}
+        >
+          Reframe watch sequence →
+        </button>
       </div>
 
       <>
@@ -5042,7 +5058,7 @@ function MetacognitionTool({ onComplete }) {
   const startTrackedRef = useRef(false);
   if (step === 0 && !startTrackedRef.current) {
     startTrackedRef.current = true;
-    try { window.plausible?.("Watch & Choose Started"); } catch {}
+    try { window.plausible?.("Reframe Watch Sequence Started"); } catch {}
   }
 
   const recognizedPatternText = String(responses[2] || "").toLowerCase();
@@ -5115,7 +5131,7 @@ function MetacognitionTool({ onComplete }) {
           source: "metacognition",
           responses
         });
-        try { window.plausible?.("Watch & Choose Autonomous"); } catch {}
+        try { window.plausible?.("Reframe Watch Sequence Autonomous"); } catch {}
       } catch {}
       setStep(prompts.length);
     }}
@@ -6221,7 +6237,7 @@ function MyProgress({ onBack }) {
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
 
-  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Watch & Choose" };
+  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Reframe · Watch Sequence" };
   const toolCounts = {};
   sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
   const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
@@ -6838,7 +6854,7 @@ function MyProgress({ onBack }) {
           // Recommendation — one thing based on data, factual only
           let recommendation = null;
           if (underusedHighPerformer) {
-            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", meta: "Watch & Choose" };
+            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence" };
             recommendation = `${toolLabels[underusedHighPerformer.id] || underusedHighPerformer.id} shows your strongest avg shift (+${underusedHighPerformer.avgShift.toFixed(1)}) but accounts for ${underusedHighPerformer.pct}% of sessions.`;
           } else if (shiftTrend !== null && shiftTrend > 0.3) {
             recommendation = `Avg composure shift increased by +${shiftTrend.toFixed(1)} compared to last week.`;
@@ -6893,7 +6909,7 @@ function MyProgress({ onBack }) {
                     <div>
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
-                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", meta: "Watch & Choose", signals: "Map Signals", bias: "Blind Spots" };
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence", signals: "Map Signals", bias: "Blind Spots" };
                         const shift = t.avgShift ?? 0;
                         const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
@@ -7717,8 +7733,6 @@ export default function Stillform() {
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
-    faq: false,
-    language: false,
     processing: false,
     breathing: false,
     schedule: false,
@@ -8449,7 +8463,6 @@ export default function Stillform() {
       case "checkin": return <BodyCheckInTool {...props} />;
 
       case "bias": return <MicroBiasTool {...props} />;
-      case "meta": return <MetacognitionTool {...props} />;
       default:
         // Safety net — unknown tool or activeTool not yet flushed, go home
         if (activeTool?.id) {
@@ -10245,50 +10258,29 @@ export default function Stillform() {
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
-            {/* FAQ (top priority for low-friction support) */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("faq")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>FAQ</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.faq ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.faq && (
-                <button onClick={() => openFaq("settings")} style={{
-                  width: "100%",
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Open FAQ →
-                </button>
-              )}
-            </div>
-
-            {/* Language */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("language")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Language</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.language ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.language && (
-                <>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                    Additional languages coming soon.
-                  </div>
-                  <div style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    English
-                  </div>
-                </>
-              )}
-            </div>
+            <button
+              onClick={() => openFaq("settings")}
+              style={{
+                width: "100%",
+                background: "var(--surface)",
+                border: "1px solid var(--amber-dim)",
+                borderRadius: "var(--r-lg)",
+                padding: "14px 18px",
+                marginBottom: 26,
+                textAlign: "left",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>FAQ</div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Method, science, and boundaries</div>
+              </div>
+              <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
+            </button>
 
             {/* Regulation Type */}
             <div style={{ marginBottom: 28 }}>
