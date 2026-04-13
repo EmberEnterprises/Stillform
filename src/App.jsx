@@ -4620,7 +4620,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
                 {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-                    This AI adapts to your real patterns over time. Speak plainly about the moment you're in; precision improves with repetition.
+                    This is an AI that learns your patterns. Say what's on your mind — it gets sharper the more you use it.
                   </div>
                 )}
                 {openingText}
@@ -7210,7 +7210,7 @@ function QBPill({ onPress }) {
         transform: dragging ? "scale(1.05)" : "scale(1)"
       }}
     >
-      ◎ Regulation Reset
+      ◎ Quick Breathe
     </div>
   );
 }
@@ -8529,7 +8529,7 @@ export default function Stillform() {
                 },
                 {
                   title: "2) Regulate in the moment",
-                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate pressure, consolidate wins, and prepare difficult conversations with composure."
+                  body: "Use Reframe, Breathe, Body Scan, or Watch & Choose to regulate under pressure, process wins, and prep difficult moments."
                 },
                 {
                   title: "3) End of day closes the loop",
@@ -8574,23 +8574,26 @@ export default function Stillform() {
               Stillform
             </h1>
             <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 20 }}>
-              One daily system: check in, regulate, and choose your next move.
+              Daily composure system for real-life execution.
             </div>
             <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 14, textAlign: "left" }}>
               <p style={{ marginBottom: 10 }}>
-                Stillform adapts to your state in the moment. Morning check-in sets context. Reframe, Breathe, and Body Scan help you recover composure fast. End of day closes the loop.
+                Stillform is for everyday composure, not only crisis moments. Morning check-in sets context. Reframe, Breathe, Body Scan, and Watch & Choose help you regulate and choose your next move.
               </p>
               <p style={{ marginBottom: 0 }}>
-                Setup personalizes your default pathway (thought-first or body-first) so the right tool shows up first.
+                Calibration sets your default pathway (thought-first or body-first) so the right tool appears first when pressure rises.
               </p>
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
-              Full method + science details live in FAQ and can be replayed anytime from Settings.
+              Method, science basis, and boundaries are documented in FAQ and Privacy & Disclaimers.
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
               <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
                 Begin calibration →
+              </button>
+              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
+                Open FAQ
               </button>
             </div>
           </section>
@@ -9174,7 +9177,7 @@ export default function Stillform() {
               {showHomeContextTip && (
                 <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Morning check-in sets your operating context. Reframe, Breathe, or Body Scan handle in-the-moment regulation. End of day closes the loop for trend accuracy.
+                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
                   </div>
                   <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     Dismiss tip
