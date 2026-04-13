@@ -89,8 +89,8 @@ const styles = `
     font-family: 'Cormorant Garamond', serif;
     font-weight: 300;
     font-size: 18px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-transform: none;
     color: var(--text);
     user-select: none;
     -webkit-user-select: none;
@@ -544,7 +544,7 @@ const styles = `
   .ai-container {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 280px);
+    max-height: 480px;
     min-height: 300px;
   }
 
@@ -8346,14 +8346,17 @@ export default function Stillform() {
   }, []);
   const [uatTestAgain, setUatTestAgain] = useState(null);
 
-  const completeOnboarding = () => {
-    try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
-    try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
-    try { window.plausible("Onboarding Complete"); } catch {}
+  const beginCalibrationFlow = () => {
     // Route to calibration assessment, not home
     setSetupStep(0);
     setAssessmentAnswers([]);
     setScreen("setup");
+  };
+
+  const finalizeOnboarding = () => {
+    try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
+    try { window.plausible("Onboarding Complete"); } catch {}
   };
 
   // Scroll to top on every screen change + analytics
@@ -8517,7 +8520,7 @@ export default function Stillform() {
           const tutorialPages = [
             {
               kicker: "Opening page",
-              title: "STILLFORM",
+              title: "Stillform",
               openingLines: [
                 "Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.",
                 "Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.",
@@ -8525,7 +8528,7 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 1 of 6",
+              kicker: "Tutorial · 1 of 10",
               title: "Calibration — Build Your Baseline",
               paragraphs: [
                 "Calibration establishes your initial operating profile: How You Process, Signal Profile + Blind Spots, and Default Protocol.",
@@ -8535,68 +8538,84 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 2 of 6",
+              kicker: "Tutorial · 2 of 10",
               title: "Morning Check-In — Set the Day’s Baseline",
               paragraphs: [
-                "Morning Check-In captures your starting state before pressure compounds. In under a minute, you log internal state, body context, and expected load.",
+                "Morning Check-In captures your starting state before composure drifts. In under a minute, you log internal state, body context, and expected load.",
                 "Stillform layers in relevant calendar and health context, then adjusts recommendations to match current reality.",
                 "Used daily, it improves early awareness, reduces preventable escalation, and sharpens decision quality."
               ]
             },
             {
-              kicker: "Tutorial · 3 of 6",
-              title: "Daily Tools — Prepare, Regulate, Recover",
+              kicker: "Tutorial · 3 of 10",
+              title: "Daily Regulation Tools — Your Active Layer",
               paragraphs: [
-                "These tools are available across the full day: before pressure, during load, and after intensity.",
-                "You can open any tool at any time. Stillform adapts recommendations from how you actually respond."
-              ],
-              detailCards: [
-                {
-                  name: "Tension Check",
-                  text: "A rapid body-state scan that catches activation early. Early interoceptive detection improves intervention timing and reduces escalation."
-                },
-                {
-                  name: "Breathe",
-                  text: "Guided cadence breathing lowers autonomic load quickly. Longer exhale patterns increase parasympathetic activation and improve recovery control."
-                },
-                {
-                  name: "Body Scan",
-                  text: "Targeted somatic release clears residual tension. Reducing muscular guarding lowers stress carryover into cognition and behavior."
-                },
-                {
-                  name: "Reframe",
-                  text: "Structured cognitive reappraisal updates interpretation before reaction hardens. This reduces threat-biased thinking and restores response flexibility."
-                },
-                {
-                  name: "Watch & Choose",
-                  text: "Metacognitive labeling interrupts autopilot and restores deliberate action selection. Naming patterns increases executive control under pressure."
-                }
+                "After Morning Check-In, use your regulation tools across the day to prepare, stabilize, and reset as needed.",
+                "Each tool targets a different part of the response cycle, so you can match intervention to state quickly.",
+                "Used consistently, this layer protects composure quality under changing demands."
               ]
             },
             {
-              kicker: "Tutorial · 4 of 6",
+              kicker: "Tutorial · 4 of 10",
+              title: "Reframe — Convert Reaction into Strategy",
+              paragraphs: [
+                "Reframe works from your calibration profile, check-in context, and response patterns, so guidance matches how you process under load.",
+                "You describe the moment directly; Reframe identifies where interpretation is narrowing, then presents sharper alternatives you can act on.",
+                "You leave with a clear next move and language you can use immediately."
+              ]
+            },
+            {
+              kicker: "Tutorial · 5 of 10",
+              title: "Breathe — Composure Reset",
+              paragraphs: [
+                "Breathe offers two guided options: Quick Reset (short) and Deep Regulate (longer).",
+                "Both are designed to settle activation and return you to a usable baseline.",
+                "If enabled, fractal visuals provide optional visual grounding during the cycle.",
+                "Outcome: steadier attention and more deliberate responses through the day."
+              ]
+            },
+            {
+              kicker: "Tutorial · 6 of 10",
+              title: "Body Scan — Release What You’re Carrying",
+              paragraphs: [
+                "Body Scan is a guided physical reset for tension your system is still holding.",
+                "You move through proven acupressure points with timed holds to release stored activation directly in the body.",
+                "For you, this means less internal drag, steadier composure, and clearer access to deliberate action."
+              ]
+            },
+            {
+              kicker: "Tutorial · 7 of 10",
               title: "End-of-Day Close — Consolidate the Day",
               paragraphs: [
-                "End-of-Day Close completes the loop before cognitive residue carries forward. In a brief evening pass, you record state, composure quality, and outcome signal from the day.",
-                "That closeout strengthens pattern retention, reduces next-day drift, and improves readiness for the next cycle.",
-                "Completed consistently, it turns daily experience into usable learning instead of repeated noise."
+                "End-of-Day Close is your daily consolidation step.",
+                "You record state, composure quality, and outcome signal in a short evening pass.",
+                "For you, this means less carryover into the next day and stronger continuity in your composure practice."
               ]
             },
             {
-              kicker: "Tutorial · 5 of 6",
-              title: "Pulse — Capture Signal, Track Progress",
+              kicker: "Tutorial · 8 of 10",
+              title: "Pulse — Capture Signal in Context",
               paragraphs: [
-                "Pulse records high-signal moments: trigger, state, response, and outcome.",
-                "This creates usable data for pattern recognition and tighter future recommendations.",
-                "Over time, Pulse and My Progress show recovery speed, steadiness, and decision consistency."
+                "Pulse is your high-signal record within My Progress for moments that matter, captured while context is still accurate.",
+                "You log trigger, state, response, and outcome in seconds.",
+                "For you, this strengthens pattern visibility and improves future recommendations."
               ]
             },
             {
-              kicker: "Tutorial · 6 of 6",
+              kicker: "Tutorial · 9 of 10",
+              title: "My Progress — Verify What Is Changing",
+              paragraphs: [
+                "My Progress is where your sessions, Pulse signal history, and AI pattern insights are consolidated.",
+                "Use it to review trend direction over time: recovery speed, steadiness, and tool usage patterns.",
+                "For you, this turns daily practice into visible evidence so calibration and decisions stay grounded in what is actually changing."
+              ]
+            },
+            {
+              kicker: "Tutorial · 10 of 10",
               title: "Run the Full Loop Daily",
               paragraphs: [
                 "Sequence for first-time setup: How You Process → Signal Profile + Blind Spots → Default Protocol.",
-                "Sequence for daily practice: Morning Check-In → Daily Tools throughout the day → End-of-Day Close → Pulse."
+                "Sequence for daily practice: Morning Check-In → Daily Regulation Tools → End-of-Day Close → Pulse/My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -8606,15 +8625,6 @@ export default function Stillform() {
           const page = tutorialPages[safeStep];
           const isLastStep = safeStep === tutorialPages.length - 1;
           const returnTo = tutorialReturnScreen || "home";
-          const renderDetailCard = (item, idx) => (
-            <div key={`${item.name}-${idx}`} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
-              <div style={{ fontSize: 13, color: "var(--text)", fontWeight: 500, marginBottom: 6 }}>{item.name}</div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                {item.text}
-              </div>
-            </div>
-          );
-
           return (
             <section
               style={{
@@ -8663,11 +8673,6 @@ export default function Stillform() {
                   ))}
                 </div>
               )}
-              {Array.isArray(page.detailCards) && page.detailCards.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 18 }}>
-                  {page.detailCards.map(renderDetailCard)}
-                </div>
-              )}
               {page.footer && (
                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
                   {page.footer}
@@ -8702,7 +8707,7 @@ export default function Stillform() {
                       setScreen("settings");
                       return;
                     }
-                    completeOnboarding();
+                    beginCalibrationFlow();
                   }}
                 >
                   {returnTo === "settings" ? "Return to settings" : "Begin calibration →"}
@@ -8747,7 +8752,7 @@ export default function Stillform() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
-              <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => completeOnboarding()}>
+              <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => beginCalibrationFlow()}>
                 Begin calibration →
               </button>
               <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
@@ -8997,7 +9002,12 @@ export default function Stillform() {
                 {/* Non-assessment steps */}
                 {!current.isAssessment && (
                   <button onClick={() => {
-                    if (isLast) { goHomeSafely(); } else { setSetupStep(s => s + 1); }
+                    if (isLast) {
+                      finalizeOnboarding();
+                      goHomeSafely();
+                    } else {
+                      setSetupStep(s => s + 1);
+                    }
                   }} style={{
                     background: "none", border: "none", cursor: "pointer",
                     fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
@@ -9679,7 +9689,6 @@ export default function Stillform() {
 
                 const tools = [
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
-                  ...(!biasDone ? [{ id: "bias", label: "Blind Spots", rec: true }] : []),
                   { id: "meta", label: "Watch & Choose", rec: false },
                 ];
 
@@ -9691,7 +9700,7 @@ export default function Stillform() {
                     </div>
                     {calibrationComplete && (
                       <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, fontStyle: "italic" }}>
-                        Calibration complete. Update signal mapping, blind spots, or processing type anytime in Settings.
+                        Calibration complete. Update signal mapping or processing type anytime in Settings.
                       </div>
                     )}
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>

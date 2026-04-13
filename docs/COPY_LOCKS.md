@@ -19,8 +19,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Blind Spots` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
-| Tutorial progression labels | LOCKED | `Tutorial · 1 of 6` / `Tutorial · 2 of 6` / `Tutorial · 3 of 6` / `Tutorial · 4 of 6` / `Tutorial · 5 of 6` / `Tutorial · 6 of 6` |
-| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Morning Check-In — Set the Day’s Baseline` / `Daily Tools — Prepare, Regulate, Recover` / `End-of-Day Close — Consolidate the Day` / `Pulse — Capture Signal, Track Progress` / `Run the Full Loop Daily` |
+| Tutorial progression labels | LOCKED | `Tutorial · 1 of 10` / `Tutorial · 2 of 10` / `Tutorial · 3 of 10` / `Tutorial · 4 of 10` / `Tutorial · 5 of 10` / `Tutorial · 6 of 10` / `Tutorial · 7 of 10` / `Tutorial · 8 of 10` / `Tutorial · 9 of 10` / `Tutorial · 10 of 10` |
+| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Morning Check-In — Set the Day’s Baseline` / `Daily Regulation Tools — Your Active Layer` / `Reframe — Convert Reaction into Strategy` / `Breathe — Composure Reset` / `Body Scan — Release What You’re Carrying` / `End-of-Day Close — Consolidate the Day` / `Pulse — Capture Signal in Context` / `My Progress — Verify What Is Changing` / `Run the Full Loop Daily` |
 | Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
 
 ## Constrained Anchors
@@ -45,7 +45,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - Signal Profile + Blind Spots
    - Default Protocol
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
-6. Tutorial uses concise paragraph blocks with exact tool naming and science-grounded detail cards where needed.
+6. Tutorial uses concise paragraph blocks with exact tool naming and no redundant standalone Watch & Choose slide.
 
 ## Prohibited Claims
 
