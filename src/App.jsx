@@ -7305,6 +7305,7 @@ export default function Stillform() {
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [screenReady, setScreenReady] = useState(false);
   const [setupStep, setSetupStep] = useState(0);
+  const setupAutoLaunchStepRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [ciOpen, setCiOpen] = useState(true);
   const [ciEnergy, setCiEnergy] = useState(null);
@@ -8354,6 +8355,7 @@ export default function Stillform() {
 
   const beginCalibrationFlow = () => {
     // Route to calibration assessment, not home
+    setupAutoLaunchStepRef.current = null;
     setSetupStep(0);
     setAssessmentAnswers([]);
     setScreen("setup");
@@ -8723,8 +8725,6 @@ export default function Stillform() {
 
         {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
-          const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
-
           const setupSteps = [
             {
               step: 1,
@@ -8871,9 +8871,8 @@ export default function Stillform() {
 
               {/* CTA — autoLaunch fires once when step renders */}
               {current.autoLaunch && (() => {
-                // Use a module-level flag to prevent re-fire on re-render
-                if (!window.__sfAutoLaunched || window.__sfAutoLaunched !== setupStep) {
-                  window.__sfAutoLaunched = setupStep;
+                if (setupAutoLaunchStepRef.current !== setupStep) {
+                  setupAutoLaunchStepRef.current = setupStep;
                   setTimeout(() => { current.autoLaunch(); }, 50);
                 }
                 return null;
@@ -8984,7 +8983,7 @@ export default function Stillform() {
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                   Let's calibrate your system first.
                 </div>
-                <button onClick={() => { setSetupStep(0); setAssessmentAnswers([]); setScreen("setup"); }} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
+                <button onClick={() => beginCalibrationFlow()} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
                   Begin Calibration →
                 </button>
               </section>
@@ -11557,13 +11556,10 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_regulation_type");
                     localStorage.removeItem("stillform_signal_profile");
                     localStorage.removeItem("stillform_bias_profile");
-                    localStorage.removeItem("stillform_breath_pattern");
                     localStorage.removeItem("stillform_bio_filter");
                   } catch {}
                   setRegType(null);
-                  setSetupStep(0);
-                  setAssessmentAnswers([]);
-                  setScreen("setup");
+                  beginCalibrationFlow();
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
