@@ -1346,6 +1346,7 @@ const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
 const METRICS_SCHEMA_VERSION = 1;
+const SESSION_STORAGE_KEY = "stillform_sessions";
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
@@ -1441,6 +1442,24 @@ const readArrayFromStorage = (key) => {
     return [];
   }
 };
+
+const getSessionsFromStorage = () => readArrayFromStorage(SESSION_STORAGE_KEY);
+
+const setSessionsInStorage = (sessions) => {
+  try {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(Array.isArray(sessions) ? sessions : []));
+  } catch {}
+};
+
+const appendSessionToStorage = (entry) => {
+  if (!entry) return getSessionCountFromStorage();
+  const sessions = getSessionsFromStorage();
+  sessions.push(entry);
+  setSessionsInStorage(sessions);
+  return sessions.length;
+};
+
+const getSessionCountFromStorage = () => getSessionsFromStorage().length;
 
 const toDayKey = (value) => {
   if (!value) return null;
@@ -1591,6 +1610,11 @@ const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
   } catch {}
 };
 
+const trackMorningStart = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, entry, LOOP_HISTORY_MAX_ITEMS);
+const trackMorningComplete = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.morning, entry, LOOP_HISTORY_MAX_ITEMS);
+const trackEodStart = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, entry, LOOP_HISTORY_MAX_ITEMS);
+const trackEodComplete = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.eod, entry, LOOP_HISTORY_MAX_ITEMS);
+
 const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => {
   try {
     const current = JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]");
@@ -1607,6 +1631,12 @@ const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => 
   } catch {
     return false;
   }
+};
+
+const trackLoopNudgeTelemetry = (eventName, payload) => {
+  try {
+    window.plausible(eventName, { props: payload });
+  } catch {}
 };
 
 const EMPTY_INTEGRATION_CONTEXT = Object.freeze({
@@ -1900,9 +1930,8 @@ function PhysiologicalSighTool({ onComplete }) {
     const elapsed = Date.now() - startTime.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const ctx = contextEntryRef.current || {};
-      sessions.push({
+      appendSessionToStorage({
         timestamp: new Date().toISOString(),
         duration: elapsed,
         durationFormatted: fmt(elapsed),
@@ -1912,7 +1941,6 @@ function PhysiologicalSighTool({ onComplete }) {
         entryMode: ctx.entryMode || null,
         entryProtocolId: ctx.entryProtocolId || null
       });
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
       try { window.plausible("Breathing Completed", { props: { duration: fmt(elapsed) } }); } catch {}
     } catch {}
     return elapsed;
@@ -1955,7 +1983,7 @@ function PhysiologicalSighTool({ onComplete }) {
     if (!sighSavedRef.current) { sighSavedRef.current = true; sighElapsedRef.current = saveSession(); }
     const elapsed = sighElapsedRef.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
-    const count = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })();
+    const count = getSessionCountFromStorage();
     return (
       <div className="complete">
         <div className="complete-icon">✓</div>
@@ -2073,9 +2101,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const saveSession = (tools, exitPoint) => {
     const elapsed = Date.now() - startTime.current;
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const ctx = contextEntryRef.current || {};
-      sessions.push({
+      appendSessionToStorage({
         timestamp: new Date().toISOString(),
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
@@ -2085,11 +2112,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
         entryMode: ctx.entryMode || null,
         entryProtocolId: ctx.entryProtocolId || null
       });
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
     return elapsed;
   };
-  const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
+  const getSessionCount = () => getSessionCountFromStorage();
 
   // --- BREATHE ---
   const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
@@ -2595,12 +2621,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
                 try {
                   localStorage.setItem("stillform_last_shift", JSON.stringify(delta));
                   // Save ratings back into the most recent session record
-                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  const sessions = getSessionsFromStorage();
                   if (sessions.length > 0) {
                     sessions[sessions.length - 1].preRating = preRating || null;
                     sessions[sessions.length - 1].postRating = n;
                     sessions[sessions.length - 1].delta = delta;
-                    localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+                    setSessionsInStorage(sessions);
                   }
                 } catch {}
               }} style={{
@@ -2682,9 +2708,8 @@ function BodyScanTool({ onComplete }) {
   const saveSession = () => {
     const elapsed = Date.now() - startTime.current;
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const ctx = contextEntryRef.current || {};
-      sessions.push({
+      appendSessionToStorage({
         timestamp: new Date().toISOString(),
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
@@ -2694,12 +2719,11 @@ function BodyScanTool({ onComplete }) {
         entryMode: ctx.entryMode || null,
         entryProtocolId: ctx.entryProtocolId || null
       });
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
       try { window.plausible("Body Scan Completed"); } catch {}
     } catch {}
     return elapsed;
   };
-  const getSessionCount = () => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } };
+  const getSessionCount = () => getSessionCountFromStorage();
 
   const areas = [
     {
@@ -3587,7 +3611,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const getLatestUserFacingInsight = () => {
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+      const sessions = getSessionsFromStorage();
       if (!Array.isArray(sessions) || sessions.length < 5) return null;
       const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
       if (!Array.isArray(notes) || notes.length === 0) return null;
@@ -3607,12 +3631,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     const elapsed = Date.now() - startTime.current;
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, entryProtocolId: entryProtocolId || null, preRating: scoreState(feelState), preState: feelState || null };
       if (postRating) { entry.postRating = scoreState(postRating); entry.postState = postRating; }
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
-      sessions.push(entry);
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
+      appendSessionToStorage(entry);
       // Background cloud sync — non-blocking
       if (sbIsSignedIn()) sbSyncUp().catch(() => {});
     } catch {}
@@ -3628,7 +3650,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           mode: effectiveMode,
           aiTone: aiToneChoice,
           history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
-          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()
+          sessionCount: getSessionCountFromStorage()
         })
       }).then(r => r.json()).then(data => {
         if (data?.reframe) {
@@ -3811,7 +3833,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const buildOfflineFallback = (textToSend) => {
     const priorWins = (() => {
       try {
-        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+        const sessions = getSessionsFromStorage();
         return sessions.filter(s => typeof s.delta === "number" && s.delta > 0).slice(-3);
       } catch { return []; }
     })();
@@ -3840,8 +3862,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const saveSelfGuidedSession = () => {
     try {
       const elapsedMs = Date.now() - startTime.current;
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-      sessions.push({
+      appendSessionToStorage({
         timestamp: new Date().toISOString(),
         duration: elapsedMs,
         durationFormatted: `${Math.max(1, Math.round(elapsedMs / 1000))}s`,
@@ -3853,7 +3874,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         selfGuided: true,
         preState: feelState || null
       });
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
   };
 
@@ -3983,7 +4003,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           calendarContext: integrationContext.calendarContext,
           healthContext: integrationContext.healthContext,
-          sessionCount: (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })(),
+          sessionCount: getSessionCountFromStorage(),
           feelState: feelState,
           bioFilter: (() => {
             try {
@@ -4023,7 +4043,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           priorToolContext: (() => {
             try {
-              const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+              const sessions = getSessionsFromStorage();
               if (sessions.length === 0) return null;
               const last = sessions[sessions.length - 1];
               if (!last?.tools?.length) return null;
@@ -4483,7 +4503,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       {/* Ghost echo — faint past resilience */}
       {(() => {
         try {
-          const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+          const sessions = getSessionsFromStorage();
           const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
           if (wins.length === 0) return null;
           const win = wins[Math.floor(Math.random() * wins.length)];
@@ -4618,7 +4638,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 </div>
               )}
               <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
-                {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
+                {(() => { try { return getSessionsFromStorage().filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
                     This is an AI that learns your patterns. Say what's on your mind — it gets sharper the more you use it.
                   </div>
@@ -5081,8 +5101,7 @@ function MetacognitionTool({ onComplete }) {
     { label: "Sit with it", desc: "I see it. That's enough.", action: () => {
       // Save as metacognition session
       try {
-        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-        sessions.push({
+        appendSessionToStorage({
           timestamp: new Date().toISOString(),
           duration: 0,
           tools: ["metacognition"],
@@ -5090,15 +5109,13 @@ function MetacognitionTool({ onComplete }) {
           source: "metacognition",
           responses
         });
-        localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
       } catch {}
       setStep(prompts.length);
     }},
     { label: "Talk it through", desc: "Use Reframe", action: () => onComplete("reframe-calm") },
     { label: "Move on", desc: "No tools needed", action: () => {
       try {
-        const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
-        sessions.push({
+        appendSessionToStorage({
           timestamp: new Date().toISOString(),
           duration: 0,
           tools: ["metacognition"],
@@ -5106,7 +5123,6 @@ function MetacognitionTool({ onComplete }) {
           source: "metacognition",
           responses
         });
-        localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
         try { window.plausible?.("Watch & Choose Autonomous"); } catch {}
       } catch {}
       setStep(prompts.length);
@@ -5117,7 +5133,7 @@ function MetacognitionTool({ onComplete }) {
   if (step >= prompts.length) {
     const autonomousCount = (() => {
       try {
-        return JSON.parse(localStorage.getItem("stillform_sessions") || "[]")
+        return getSessionsFromStorage()
           .filter(s => s.source === "metacognition" && (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated")).length;
       } catch { return 0; }
     })();
@@ -5717,9 +5733,8 @@ function PanicMode({ onComplete }) {
     const elapsed = Date.now() - startTime.current;
     setRegulationTime(elapsed);
     try {
-      const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
       const ctx = contextEntryRef.current || {};
-      sessions.push({
+      appendSessionToStorage({
         timestamp: new Date().toISOString(),
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
@@ -5729,7 +5744,6 @@ function PanicMode({ onComplete }) {
         entryMode: ctx.entryMode || null,
         entryProtocolId: ctx.entryProtocolId || null
       });
-      localStorage.setItem("stillform_sessions", JSON.stringify(sessions));
     } catch {}
     return elapsed;
   };
@@ -5886,7 +5900,7 @@ function PanicMode({ onComplete }) {
         </div>
         {(() => {
           try {
-            const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+            const sessions = getSessionsFromStorage();
             if (sessions.length > 1) {
               return <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24 }}>
                 Session #{sessions.length}.
@@ -6210,7 +6224,7 @@ function MyProgress({ onBack }) {
     setViewEntry(null);
   };
 
-  const sessions = (() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch { return []; } })();
+  const sessions = getSessionsFromStorage();
   const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
@@ -6280,39 +6294,11 @@ function MyProgress({ onBack }) {
   // Additional data sources
   const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
-  const morningOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morningStart) || "[]"); } catch { return []; } })();
-  const morningHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.morning) || "[]"); } catch { return []; } })();
-  const eodOpenHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eodStart) || "[]"); } catch { return []; } })();
-  const eodHistory = (() => { try { return JSON.parse(localStorage.getItem(LOOP_HISTORY_KEYS.eod) || "[]"); } catch { return []; } })();
-  const loopNudgeEvents = (() => { try { return JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]"); } catch { return []; } })();
-  const withinDays = (isoDate, days) => {
-    if (!isoDate) return false;
-    try {
-      const d = new Date(isoDate);
-      if (Number.isNaN(d.getTime())) return false;
-      const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
-      return d.getTime() >= cutoff;
-    } catch {
-      return false;
-    }
-  };
-  const toDayKey = (entry) => {
-    const raw = entry?.date || entry?.timestamp;
-    if (!raw) return null;
-    try {
-      const d = new Date(raw);
-      if (Number.isNaN(d.getTime())) return null;
-      return d.toISOString().slice(0, 10);
-    } catch {
-      return null;
-    }
-  };
-  const recentDaySet = (items) => new Set(
-    (Array.isArray(items) ? items : [])
-      .filter((entry) => withinDays(entry?.date || entry?.timestamp, 14))
-      .map(toDayKey)
-      .filter(Boolean)
-  );
+  const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
+  const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
+  const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
+  const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
+  const loopNudgeEvents = readArrayFromStorage(LOOP_NUDGE_EVENTS_KEY);
   const morningOpen14dDays = recentDaySet(morningOpenHistory);
   const morningDone14dDays = recentDaySet(morningHistory);
   const eodOpen14dDays = recentDaySet(eodOpenHistory);
@@ -7376,6 +7362,13 @@ export default function Stillform() {
     setTutorialReturnScreen(backScreen || "home");
     setScreen("tutorial");
   };
+  const goHomeSafely = (defer = false) => {
+    if (defer) {
+      setTimeout(() => setScreen("home"), 0);
+      return;
+    }
+    setScreen("home");
+  };
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
@@ -7542,18 +7535,14 @@ export default function Stillform() {
       sensitivityLabel
     });
     if (tracked) {
-      try {
-        window.plausible("Loop Nudge Shown", {
-          props: {
-            type: activeLoopNudge.id,
-            dropoff_pct: activeLoopNudge.dropoffPct,
-            opens_14d: activeLoopNudge.opens,
-            adaptive_dropoff_threshold: adaptiveDropoffThreshold,
-            adaptive_min_opens: adaptiveMinOpens,
-            sensitivity: sensitivityLabel.toLowerCase()
-          }
-        });
-      } catch {}
+      trackLoopNudgeTelemetry("Loop Nudge Shown", {
+        type: activeLoopNudge.id,
+        dropoff_pct: activeLoopNudge.dropoffPct,
+        opens_14d: activeLoopNudge.opens,
+        adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+        adaptive_min_opens: adaptiveMinOpens,
+        sensitivity: sensitivityLabel.toLowerCase()
+      });
     }
   }, [screen, loopNudgeDismissedDay, loopNudgeDismissStreak, ciOpen, ciSaved, eodOpen, eodSaved]);
   const [activeTool, setActiveTool] = useState(null);
@@ -8107,15 +8096,6 @@ export default function Stillform() {
     }
   };
 
-  const getArrayFromStorage = (key) => {
-    try {
-      const parsed = JSON.parse(localStorage.getItem(key) || "[]");
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  };
-
   const escapeHtml = (value) => String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
@@ -8140,7 +8120,7 @@ export default function Stillform() {
   };
 
   const exportSessionHistoryCsv = () => {
-    const sessions = getArrayFromStorage("stillform_sessions");
+    const sessions = getSessionsFromStorage();
     if (sessions.length === 0) {
       setExportStatusWithClear("No sessions to export yet.");
       return;
@@ -8181,7 +8161,7 @@ export default function Stillform() {
   };
 
   const exportPulseLogPdf = () => {
-    const entries = getArrayFromStorage("stillform_journal");
+    const entries = readArrayFromStorage("stillform_journal");
     if (entries.length === 0) {
       setExportStatusWithClear("No pulse entries to export yet.");
       return;
@@ -8434,7 +8414,7 @@ export default function Stillform() {
           setEodSaved(false);
           setEodPromptDismissed(false);
           setEodOpen(true);
-          setScreen("home");
+          goHomeSafely();
           return;
         }
         if (redirectTo === "reframe") {
@@ -8463,7 +8443,7 @@ export default function Stillform() {
           return;
         }
       }
-      setScreen("home");
+      goHomeSafely();
     }};
     switch (activeTool?.id) {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} quickStart={activeTool?.quickStart} />;
@@ -8478,7 +8458,7 @@ export default function Stillform() {
       default:
         // Safety net — unknown tool or activeTool not yet flushed, go home
         if (activeTool?.id) {
-          setTimeout(() => setScreen("home"), 0);
+          goHomeSafely(true);
         }
         return null;
     }
@@ -8511,7 +8491,7 @@ export default function Stillform() {
         {/* NAV — hidden during onboarding */}
         {screen !== "onboarding" && (
         <nav className="nav">
-          <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => setScreen("home")}>
+          <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => goHomeSafely()}>
             Still<span>form</span>
           </div>
           <div className="nav-actions">
@@ -8887,7 +8867,7 @@ export default function Stillform() {
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => { if (setupStep > 0) { setSetupStep(s => s - 1); } else { setScreen("home"); } }}>← Back</button>
+              <button className="intervention-back" onClick={() => { if (setupStep > 0) { setSetupStep(s => s - 1); } else { goHomeSafely(); } }}>← Back</button>
 
               {/* System calibration header */}
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
@@ -9039,7 +9019,7 @@ export default function Stillform() {
                 {/* Non-assessment steps */}
                 {!current.isAssessment && (
                   <button onClick={() => {
-                    if (isLast) { setScreen("home"); } else { setSetupStep(s => s + 1); }
+                    if (isLast) { goHomeSafely(); } else { setSetupStep(s => s + 1); }
                   }} style={{
                     background: "none", border: "none", cursor: "pointer",
                     fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
@@ -9080,14 +9060,13 @@ export default function Stillform() {
               const tool = TOOLS.find(t => t.id === redirectTo);
               if (tool) { startTool(tool); return; }
             }
-            setScreen("home");
+            goHomeSafely();
           }} />
         )}
 
         {/* HOME — different for first-time vs returning users */}
         {screen === "home" && (() => {
-          let sessionCount = 0;
-          try { sessionCount = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch {}
+          const sessionCount = getSessionCountFromStorage();
 
           // No regulation type set? Route to calibration
           if (!regType) {
@@ -9114,8 +9093,7 @@ export default function Stillform() {
 
           /* ── RETURNING USER: clean, one dominant action ── */
           // Calculate milestones
-          let sessions = [];
-          try { sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]"); } catch {}
+          const sessions = getSessionsFromStorage();
           const lastSession = sessions.length > 0 ? new Date(sessions[sessions.length - 1].timestamp) : null;
           const daysSinceLastSession = lastSession ? Math.floor((Date.now() - lastSession.getTime()) / (1000 * 60 * 60 * 24)) : 0;
           const milestone7 = sessionCount === 7 && !localStorage.getItem("stillform_milestone_7_seen");
@@ -9163,19 +9141,15 @@ export default function Stillform() {
               sensitivityLabel
             });
             if (tracked) {
-              try {
-                window.plausible("Loop Nudge Dismissed", {
-                  props: {
-                    type: activeLoopNudge.id,
-                    dropoff_pct: activeLoopNudge.dropoffPct,
-                    opens_14d: activeLoopNudge.opens,
-                    dismiss_streak: nextDismissStreak,
-                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
-                    adaptive_min_opens: adaptiveMinOpens,
-                    sensitivity: sensitivityLabel.toLowerCase()
-                  }
-                });
-              } catch {}
+              trackLoopNudgeTelemetry("Loop Nudge Dismissed", {
+                type: activeLoopNudge.id,
+                dropoff_pct: activeLoopNudge.dropoffPct,
+                opens_14d: activeLoopNudge.opens,
+                dismiss_streak: nextDismissStreak,
+                adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                adaptive_min_opens: adaptiveMinOpens,
+                sensitivity: sensitivityLabel.toLowerCase()
+              });
             }
           };
           const handleLoopNudgeAction = () => {
@@ -9193,39 +9167,35 @@ export default function Stillform() {
               sensitivityLabel
             });
             if (tracked) {
-              try {
-                window.plausible("Loop Nudge Actioned", {
-                  props: {
-                    type: activeLoopNudge.id,
-                    dropoff_pct: activeLoopNudge.dropoffPct,
-                    opens_14d: activeLoopNudge.opens,
-                    adaptive_dropoff_threshold: adaptiveDropoffThreshold,
-                    adaptive_min_opens: adaptiveMinOpens,
-                    sensitivity: sensitivityLabel.toLowerCase()
-                  }
-                });
-              } catch {}
+              trackLoopNudgeTelemetry("Loop Nudge Actioned", {
+                type: activeLoopNudge.id,
+                dropoff_pct: activeLoopNudge.dropoffPct,
+                opens_14d: activeLoopNudge.opens,
+                adaptive_dropoff_threshold: adaptiveDropoffThreshold,
+                adaptive_min_opens: adaptiveMinOpens,
+                sensitivity: sensitivityLabel.toLowerCase()
+              });
             }
             try { localStorage.setItem(LOOP_NUDGE_DISMISS_STREAK_KEY, "0"); } catch {}
             setLoopNudgeDismissStreak(0);
             if (activeLoopNudge.id === "morning") {
               try {
-                appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                trackMorningStart({
                   date: todayIso,
                   timestamp: new Date().toISOString(),
                   source: "nudge"
-                }, LOOP_HISTORY_MAX_ITEMS);
+                });
               } catch {}
               setCiSaved(false);
               setCiOpen(true);
               return;
             }
             try {
-              appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+              trackEodStart({
                 date: todayIso,
                 timestamp: new Date().toISOString(),
                 source: "nudge"
-              }, LOOP_HISTORY_MAX_ITEMS);
+              });
             } catch {}
             setEodSaved(false);
             setEodOpen(true);
@@ -9255,12 +9225,12 @@ export default function Stillform() {
                       : "I've noticed something. You've been here 7 times now — and the way you're using the tools might be telling you something about how you actually process. Is what you're reaching for working?"}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); setScreen("home"); }} style={{
+                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); goHomeSafely(); }} style={{
                       flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
                       borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
                     }}>Working well</button>
-                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); setScreen("home"); }} style={{
+                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); goHomeSafely(); }} style={{
                       flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
                       borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
@@ -9443,12 +9413,12 @@ export default function Stillform() {
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
                     }));
-                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.morning, {
+                    trackMorningComplete({
                       date: today,
                       timestamp: new Date().toISOString(),
                       energy: ciEnergy || "steady",
                       tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
-                    }, LOOP_HISTORY_MAX_ITEMS);
+                    });
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
                   } catch {}
@@ -9466,11 +9436,11 @@ export default function Stillform() {
                   <div style={{ marginBottom: 20 }}>
                     <button onClick={() => {
                       try {
-                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                        trackMorningStart({
                           date: today,
                           timestamp: new Date().toISOString(),
                           source: "update"
-                        }, LOOP_HISTORY_MAX_ITEMS);
+                        });
                       } catch {}
                       setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
                     }} style={{
@@ -9485,11 +9455,11 @@ export default function Stillform() {
                 if (!ciOpen) return (
                   <button onClick={() => {
                     try {
-                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.morningStart, {
+                      trackMorningStart({
                         date: today,
                         timestamp: new Date().toISOString(),
                         source: "open"
-                      }, LOOP_HISTORY_MAX_ITEMS);
+                      });
                     } catch {}
                     setCiOpen(true);
                   }} style={{
@@ -9690,7 +9660,7 @@ export default function Stillform() {
               {/* STREAK — only if exists */}
               {(() => {
                 try {
-                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                  const sessions = getSessionsFromStorage();
                   if (sessions.length === 0) return null;
                   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
                   let streak = 0;
@@ -9790,11 +9760,11 @@ export default function Stillform() {
                     ) : (
                       <button onClick={() => {
                         try {
-                          appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                          trackEodStart({
                             date: today,
                             timestamp: new Date().toISOString(),
                             source: "update"
-                          }, LOOP_HISTORY_MAX_ITEMS);
+                          });
                         } catch {}
                         setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
                       }} style={{
@@ -9808,11 +9778,11 @@ export default function Stillform() {
                   <div style={{ marginBottom: 20, textAlign: "center" }}>
                     <button onClick={() => {
                       try {
-                        appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                        trackEodStart({
                           date: today,
                           timestamp: new Date().toISOString(),
                           source: "update"
-                        }, LOOP_HISTORY_MAX_ITEMS);
+                        });
                       } catch {}
                       setEodOpen(true);
                     }} style={{
@@ -9832,11 +9802,11 @@ export default function Stillform() {
                       word: eodWord || null,
                       morningEnergy: morningData?.energy || null
                     }));
-                    appendDailyLoopHistory(LOOP_HISTORY_KEYS.eod, {
+                    trackEodComplete({
                       date: today,
                       timestamp: new Date().toISOString(),
                       composure: eodComposure || "mostly"
-                    }, LOOP_HISTORY_MAX_ITEMS);
+                    });
                   } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
@@ -9847,11 +9817,11 @@ export default function Stillform() {
                 if (!eodOpen && !eodDone) return (
                   <button onClick={() => {
                     try {
-                      appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, {
+                      trackEodStart({
                         date: today,
                         timestamp: new Date().toISOString(),
                         source: "open"
-                      }, LOOP_HISTORY_MAX_ITEMS);
+                      });
                     } catch {}
                     setEodOpen(true);
                   }} style={{
@@ -9932,7 +9902,7 @@ export default function Stillform() {
         {screen === "tool" && activeTool && (
           <section className="intervention">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <button className="intervention-back" onClick={() => setScreen("home")} style={{ marginBottom: 0 }}>
+              <button className="intervention-back" onClick={() => goHomeSafely()} style={{ marginBottom: 0 }}>
                 ← Back
               </button>
               <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
@@ -9957,7 +9927,7 @@ export default function Stillform() {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => setScreen("home")} />
+          <MyProgress onBack={() => goHomeSafely()} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
@@ -9965,7 +9935,7 @@ export default function Stillform() {
         {/* PRICING */}
         {screen === "pricing" && (
           <section className="pricing">
-            {!trialExpired && <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>}
+            {!trialExpired && <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>}
             {!syncSignedIn && (
               <div style={{
                 maxWidth: 420,
@@ -10104,7 +10074,7 @@ export default function Stillform() {
         {/* PRIVACY */}
         {screen === "privacy" && (
           <section className="privacy">
-            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1>Privacy & Disclaimers</h1>
             <div className="privacy-date">Effective April 01, 2026 · ARA Embers LLC</div>
             <p style={{ marginBottom: 24 }}><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>View full Privacy Policy</a></p>
@@ -10255,7 +10225,7 @@ export default function Stillform() {
         {/* CRISIS RESOURCES — international hotlines */}
         {screen === "crisis" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
             <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
@@ -10351,7 +10321,7 @@ export default function Stillform() {
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
-            <button className="intervention-back" onClick={() => setScreen("home")}>← Back</button>
+            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
             {/* FAQ (top priority for low-friction support) */}
@@ -11245,14 +11215,14 @@ export default function Stillform() {
                 <div>
                   <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_sessions") || "[]").length; } catch { return 0; } })()} sessions
+                    {getSessionCountFromStorage()} sessions
                   </div>
                 </div>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
               </button>
               {openLog === "sessions" && (() => {
                 try {
-                  const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]").slice().reverse();
+                  const sessions = getSessionsFromStorage().slice().reverse();
                   if (sessions.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No sessions yet.</div>;
                   const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
                   return (
