@@ -132,6 +132,8 @@ const GENERIC_GARBAGE_PATTERNS = [
   /hasn'?t landed yet/gi,
   /pinpoint the key thought/gi,
   /taking up space/gi,
+  /glad you dropped in/gi,
+  /this space is for hard days and ordinary moments/gi,
   /keeping it light can be a good way to unwind/gi,
   /if there'?s anything specific on your mind/gi,
   /we can (pick it apart together|just enjoy)/gi,
@@ -158,6 +160,8 @@ const GENERIC_GARBAGE_SNIPPETS = [
   "hasn't landed yet",
   "pinpoint the key thought",
   "taking up space",
+  "glad you dropped in",
+  "this space is for hard days and ordinary moments",
   "keeping it light can be a good way to unwind",
   "if there's anything specific on your mind",
   "we can pick it apart together",
@@ -171,6 +175,8 @@ const GENERIC_NEXT_STEP_SNIPPETS = [
   "talk about whatever",
   "say anything"
 ];
+
+const SOFT_ENTRY_LOCKED_REFRAME = "Hey good to see you. How are you doing?";
 
 function hasAnyPattern(text, patterns) {
   const value = String(text || "");
@@ -349,7 +355,7 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
     return {
       distortion: null,
       mechanism: "friendly_soft_entry",
-      reframe: "Glad you dropped in. This space is for hard days and ordinary moments, so we can start light and still keep it useful. If you want, give me one thing from today that had your attention and we’ll work it with you.",
+      reframe: SOFT_ENTRY_LOCKED_REFRAME,
       next_step: "Name one small moment from today that you want to make sense of.",
       question: "What stood out most from your day?"
     };
@@ -1088,6 +1094,12 @@ WHAT STAYING SHARP LOOKS LIKE:
         hasCrisisLanguage,
         isSoftEntry
       });
+    }
+
+    if (isSoftEntry && !isInternalSummaryRequest && !hasCrisisLanguage) {
+      parsed.distortion = null;
+      parsed.mechanism = "friendly_soft_entry";
+      parsed.reframe = SOFT_ENTRY_LOCKED_REFRAME;
     }
 
     parsed.reframe = sanitizeReframeText(parsed.reframe);

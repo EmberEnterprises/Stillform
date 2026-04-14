@@ -5009,7 +5009,7 @@ function MicroBiasTool({ onComplete }) {
         {identified.length === 0 && (
           <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>You didn't identify with any of these right now. That may change — biases show up differently under stress.</p>
         )}
-        <button className="btn btn-ghost" onClick={onComplete}>Done</button>
+        <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
       </div>
     );
   }
@@ -5517,7 +5517,7 @@ function SignalMapTool({ onComplete }) {
             <strong style={{ color: "var(--text)" }}>Common triggers:</strong> {selectedTriggers.length ? selectedTriggers.join(", ") : "None selected yet"}
           </div>
         </div>
-        <button className="btn btn-primary" onClick={onComplete}>Done</button>
+        <button className="btn btn-primary" onClick={() => onComplete()}>Done</button>
       </div>
     )
   ];

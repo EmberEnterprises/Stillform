@@ -45,6 +45,7 @@ const checks = [
   { label: "Metrics ingest function present", cmd: "rg", args: ["-n", "metrics_opt_in must be true|upsertMetricsSnapshot|metric_date", "netlify/functions/metrics-ingest.js"], type: "must-match" },
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
+  { label: "Soft-entry greeting lock", cmd: "rg", args: ["-n", "Hey good to see you\\. How are you doing\\?", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
   { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" }
 ];
