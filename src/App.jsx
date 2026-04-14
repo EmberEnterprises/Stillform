@@ -6249,16 +6249,6 @@ function MyProgress({ onBack }) {
   const topEmotionEntry = Object.entries(emotionFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
   // --- TREND ANALYSIS ---
-  // Day-of-week trigger clustering from journal
-  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-  const dayTriggerCounts = {};
-  journalEntries.forEach(e => {
-    if (!e.id) return;
-    const d = new Date(e.id);
-    if (isNaN(d)) return;
-    const day = dayNames[d.getDay()];
-    dayTriggerCounts[day] = (dayTriggerCounts[day] || 0) + 1;
-  });
   // Signal area frequency from journal
   const signalFreq = {};
   journalEntries.forEach(e => (e.signal || []).forEach(s => { signalFreq[s] = (signalFreq[s] || 0) + 1; }));
