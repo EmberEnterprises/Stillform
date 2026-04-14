@@ -22,7 +22,6 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Reframe soft-entry greeting | LOCKED | `Hey good to see you. How are you doing?` |
 | Pulse progress-layer descriptor | LOCKED | `Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.` |
 | Science evidence section title | LOCKED | `Science Evidence` |
-| Focus check label | LOCKED | `Focus Check (Go / No-Go)` |
 | Tutorial progression labels | LOCKED | `Tutorial · 1 of 5` / `Tutorial · 2 of 5` / `Tutorial · 3 of 5` / `Tutorial · 4 of 5` / `Tutorial · 5 of 5` |
 | Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Morning Check-In — Set the Day’s Baseline` / `Daily Regulation Tools — Active Execution Layer` / `End-of-Day + My Progress — Evidence Layer` / `Run the Full Loop Daily` |
 | Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
@@ -50,7 +49,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
 6. Tutorial uses five concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 7. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
-8. Focus Check appears inside My Progress evidence (not as a standalone home tool).
+8. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
+9. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
 
 ## Prohibited Claims
 

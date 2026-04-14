@@ -6231,14 +6231,16 @@ function CheckInWidget({ onComplete }) {
   );
 }
 
-function MyProgress({ onBack }) {
-  const [openSections, setOpenSections] = useState({});
-  const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
-  const [shareCardStatus, setShareCardStatus] = useState("");
-  const [viewEntry, setViewEntry] = useState(null);
-  const [journalEntries, setJournalEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
-  });
+const getFocusCheckHistoryFromStorage = () => {
+  try {
+    const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+    return Array.isArray(history) ? history : [];
+  } catch {
+    return [];
+  }
+};
+
+function FocusCheckValidation({ onBack }) {
   const [focusCheckMode, setFocusCheckMode] = useState("idle");
   const [focusCheckTrials, setFocusCheckTrials] = useState([]);
   const [focusCheckIndex, setFocusCheckIndex] = useState(0);
@@ -6253,44 +6255,15 @@ function MyProgress({ onBack }) {
     totalNoGo: 0,
     reactionTimes: []
   });
-  const [focusCheckSummary, setFocusCheckSummary] = useState(() => {
-    try {
-      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
-      return Array.isArray(history) && history.length ? history[history.length - 1] : null;
-    } catch {
-      return null;
-    }
+  const [latestSummary, setLatestSummary] = useState(() => {
+    const history = getFocusCheckHistoryFromStorage();
+    return history.length ? history[history.length - 1] : null;
   });
-
   const currentFocusTrial = focusCheckTrials[focusCheckIndex] || null;
-  const latestFocusHistory = (() => {
-    try {
-      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
-      return Array.isArray(history) ? history : [];
-    } catch {
-      return [];
-    }
+  const previousSummary = (() => {
+    const history = getFocusCheckHistoryFromStorage();
+    return history.length > 1 ? history[history.length - 2] : null;
   })();
-  const previousFocusSummary = latestFocusHistory.length > 1 ? latestFocusHistory[latestFocusHistory.length - 2] : null;
-  const focusAccuracyDelta = (
-    focusCheckSummary
-    && previousFocusSummary
-    && Number.isFinite(focusCheckSummary.accuracy)
-    && Number.isFinite(previousFocusSummary.accuracy)
-  ) ? focusCheckSummary.accuracy - previousFocusSummary.accuracy : null;
-  const focusInhibitionDelta = (
-    focusCheckSummary
-    && previousFocusSummary
-    && Number.isFinite(focusCheckSummary.inhibition)
-    && Number.isFinite(previousFocusSummary.inhibition)
-  ) ? focusCheckSummary.inhibition - previousFocusSummary.inhibition : null;
-  const focusReactionDelta = (
-    focusCheckSummary
-    && previousFocusSummary
-    && Number.isFinite(focusCheckSummary.avgReactionMs)
-    && Number.isFinite(previousFocusSummary.avgReactionMs)
-  ) ? focusCheckSummary.avgReactionMs - previousFocusSummary.avgReactionMs : null;
-
   const startFocusCheck = () => {
     const trials = Array.from({ length: 30 }, (_, idx) => {
       const type = Math.random() < 0.7 ? "go" : "nogo";
@@ -6313,15 +6286,6 @@ function MyProgress({ onBack }) {
     });
     setFocusCheckMode("running");
   };
-
-  const resetFocusCheck = () => {
-    setFocusCheckMode("idle");
-    setFocusCheckTrials([]);
-    setFocusCheckIndex(0);
-    setFocusCheckResponded(false);
-    setFocusCheckTrialStartedAt(0);
-  };
-
   const submitFocusResponse = () => {
     if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
     const rt = Math.max(0, Date.now() - focusCheckTrialStartedAt);
@@ -6337,7 +6301,6 @@ function MyProgress({ onBack }) {
       setFocusCheckResponded(false);
     }, 80);
   };
-
   useEffect(() => {
     if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
     setFocusCheckTrialStartedAt(Date.now());
@@ -6350,7 +6313,6 @@ function MyProgress({ onBack }) {
     }, 1000);
     return () => window.clearTimeout(timer);
   }, [focusCheckMode, focusCheckIndex, currentFocusTrial?.id, focusCheckResponded]);
-
   useEffect(() => {
     if (focusCheckMode !== "running") return;
     if (focusCheckIndex < focusCheckTrials.length) return;
@@ -6372,27 +6334,137 @@ function MyProgress({ onBack }) {
       falseAlarms: focusCheckStats.falseAlarms
     };
     try {
-      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
-      const next = [...(Array.isArray(history) ? history : []), entry].slice(-20);
+      const history = getFocusCheckHistoryFromStorage();
+      const next = [...history, entry].slice(-20);
       localStorage.setItem("stillform_focus_check_history", JSON.stringify(next));
-      setFocusCheckSummary(entry);
+      setLatestSummary(entry);
     } catch {
-      setFocusCheckSummary(entry);
+      setLatestSummary(entry);
     }
     try { window.plausible("Focus Check Completed"); } catch {}
     setFocusCheckMode("complete");
   }, [focusCheckMode, focusCheckIndex, focusCheckTrials.length, focusCheckStats]);
-
   useEffect(() => {
-    if (focusCheckMode !== "running") return;
+    if (focusCheckMode !== "running") return undefined;
     const onKeyDown = (event) => {
-      if (event.code !== "Space" && event.key !== " ") return;
+      if (event.key !== " " && event.key !== "Enter") return;
       event.preventDefault();
       submitFocusResponse();
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [focusCheckMode, submitFocusResponse]);
+  return (
+    <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px" }}>
+      <button className="intervention-back" onClick={onBack}>← Back</button>
+      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Focus Check</h1>
+      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
+        30-second Go/No-Go validation. Tap for GO, hold for NO-GO.
+      </div>
+      <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
+        {focusCheckMode === "running" && currentFocusTrial && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+              Trial {Math.min(focusCheckIndex + 1, focusCheckTrials.length)} / {focusCheckTrials.length}
+            </div>
+            <div style={{ fontSize: 32, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
+              {currentFocusTrial.label}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
+              {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
+            </div>
+            <button
+              onClick={submitFocusResponse}
+              disabled={focusCheckResponded}
+              style={{
+                background: focusCheckResponded ? "var(--surface2)" : "var(--amber-glow)",
+                border: "0.5px solid var(--amber-dim)",
+                borderRadius: "var(--r-sm)",
+                padding: "10px 16px",
+                fontSize: 12,
+                color: focusCheckResponded ? "var(--text-muted)" : "var(--amber)",
+                cursor: focusCheckResponded ? "not-allowed" : "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              {focusCheckResponded ? "Recorded" : "Respond"}
+            </button>
+            <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)" }}>Keyboard: Space or Enter</div>
+          </div>
+        )}
+        {focusCheckMode !== "running" && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+              {latestSummary ? "Latest run saved. Run again anytime." : "No run yet. Start when ready."}
+            </div>
+            <button
+              onClick={startFocusCheck}
+              style={{
+                background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
+                padding: "9px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
+              }}
+            >
+              Start 30s
+            </button>
+          </div>
+        )}
+      </div>
+      {latestSummary && (
+        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.accuracy ?? "N/A"}%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.inhibition ?? "N/A"}%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.avgReactionMs ? `${latestSummary.avgReactionMs}ms` : "N/A"}</div>
+            </div>
+          </div>
+          {previousSummary && (
+            <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)" }}>
+              Delta vs prior: accuracy {latestSummary.accuracy - (previousSummary.accuracy || 0) >= 0 ? "+" : ""}{latestSummary.accuracy - (previousSummary.accuracy || 0)} pts · inhibition {latestSummary.inhibition - (previousSummary.inhibition || 0) >= 0 ? "+" : ""}{latestSummary.inhibition - (previousSummary.inhibition || 0)} pts
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MyProgress({ onBack }) {
+  const [openSections, setOpenSections] = useState({});
+  const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
+  const [shareCardStatus, setShareCardStatus] = useState("");
+  const [viewEntry, setViewEntry] = useState(null);
+  const [journalEntries, setJournalEntries] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+  });
+  const latestFocusHistory = getFocusCheckHistoryFromStorage();
+  const focusCheckSummary = latestFocusHistory.length ? latestFocusHistory[latestFocusHistory.length - 1] : null;
+  const previousFocusSummary = latestFocusHistory.length > 1 ? latestFocusHistory[latestFocusHistory.length - 2] : null;
+  const focusAccuracyDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.accuracy)
+    && Number.isFinite(previousFocusSummary.accuracy)
+  ) ? focusCheckSummary.accuracy - previousFocusSummary.accuracy : null;
+  const focusInhibitionDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.inhibition)
+    && Number.isFinite(previousFocusSummary.inhibition)
+  ) ? focusCheckSummary.inhibition - previousFocusSummary.inhibition : null;
+  const focusReactionDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.avgReactionMs)
+    && Number.isFinite(previousFocusSummary.avgReactionMs)
+  ) ? focusCheckSummary.avgReactionMs - previousFocusSummary.avgReactionMs : null;
 
   const sessions = getSessionsFromStorage();
   const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
@@ -6912,81 +6984,32 @@ function MyProgress({ onBack }) {
                       {" "}Built from existing sessions, deltas, and loop completion — no extra workflow required.
                     </div>
                   </div>
-                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                      <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
-                          Go/No-Go focus check
+                  {focusCheckSummary && (
+                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                        Focus Check (Go / No-Go)
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
+                          <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.accuracy ?? "N/A"}%</div>
                         </div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                          Optional 30-second inhibition read. Tap for GO. Hold on NO-GO.
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
+                          <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.inhibition ?? "N/A"}%</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
+                          <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.avgReactionMs ? `${focusCheckSummary.avgReactionMs}ms` : "N/A"}</div>
                         </div>
                       </div>
-                      {focusCheckMode !== "running" && (
-                        <button
-                          onClick={startFocusCheck}
-                          style={{
-                            background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
-                            padding: "8px 11px", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
-                          }}
-                        >
-                          Start 30s
-                        </button>
+                      {previousFocusSummary && (
+                        <div style={{ marginTop: 2, fontSize: 11, color: "var(--text-dim)" }}>
+                          Delta: accuracy {focusAccuracyDelta >= 0 ? "+" : ""}{focusAccuracyDelta} pts · inhibition {focusInhibitionDelta >= 0 ? "+" : ""}{focusInhibitionDelta} pts · reaction {focusReactionDelta <= 0 ? "" : "+"}{focusReactionDelta}ms
+                        </div>
                       )}
                     </div>
-                    {focusCheckMode === "running" && currentFocusTrial && (
-                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 12px", textAlign: "center" }}>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-                          Trial {Math.min(focusCheckIndex + 1, focusCheckTrials.length)} / {focusCheckTrials.length}
-                        </div>
-                        <div style={{ fontSize: 26, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
-                          {currentFocusTrial.label}
-                        </div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
-                          {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
-                        </div>
-                        <button
-                          onClick={submitFocusResponse}
-                          disabled={focusCheckResponded}
-                          style={{
-                            background: focusCheckResponded ? "var(--surface)" : "var(--amber-glow)",
-                            border: "0.5px solid var(--amber-dim)",
-                            borderRadius: "var(--r-sm)",
-                            padding: "8px 14px",
-                            fontSize: 11,
-                            color: focusCheckResponded ? "var(--text-muted)" : "var(--amber)",
-                            cursor: focusCheckResponded ? "not-allowed" : "pointer",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}
-                        >
-                          {focusCheckResponded ? "Recorded" : "Respond"}
-                        </button>
-                      </div>
-                    )}
-                    {focusCheckSummary && (
-                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px" }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-                          <div>
-                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
-                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.accuracy ?? "N/A"}%</div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
-                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.inhibition ?? "N/A"}%</div>
-                          </div>
-                          <div>
-                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
-                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.avgReactionMs ? `${focusCheckSummary.avgReactionMs}ms` : "N/A"}</div>
-                          </div>
-                        </div>
-                        {previousFocusSummary && (
-                          <div style={{ marginTop: 7, fontSize: 11, color: "var(--text-dim)" }}>
-                            Delta: accuracy {focusCheckSummary.accuracy - (previousFocusSummary.accuracy || 0) >= 0 ? "+" : ""}{focusCheckSummary.accuracy - (previousFocusSummary.accuracy || 0)} pts · inhibition {focusCheckSummary.inhibition - (previousFocusSummary.inhibition || 0) >= 0 ? "+" : ""}{focusCheckSummary.inhibition - (previousFocusSummary.inhibition || 0)} pts
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  )}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
@@ -10034,6 +10057,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+                <button onClick={() => setScreen("focus-check")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Quick Check</button>
                 <button onClick={async () => { if (await biometric.gate()) setScreen("progress"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -10074,6 +10098,11 @@ export default function Stillform() {
         {/* MY PROGRESS */}
         {screen === "progress" && (
           <MyProgress onBack={() => goHomeSafely()} />
+        )}
+
+        {/* FOCUS CHECK */}
+        {screen === "focus-check" && (
+          <FocusCheckValidation onBack={() => goHomeSafely()} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
@@ -10852,6 +10881,19 @@ export default function Stillform() {
             </div>
 
             {settingsSectionOpen.advanced && (<>
+            <div style={{ marginBottom: 20 }}>
+              <button onClick={() => setScreen("focus-check")} style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                display: "flex", justifyContent: "space-between", alignItems: "center"
+              }}>
+                <div>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Run Focus Check (30s)</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Optional Go/No-Go validation run.</div>
+                </div>
+                <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
+              </button>
+            </div>
             {/* Integrations */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("integrations")} style={{
