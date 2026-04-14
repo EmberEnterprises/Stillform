@@ -5996,7 +5996,14 @@ const getFocusCheckHistoryFromStorage = () => {
   }
 };
 
-function FocusCheckValidation({ onBack }) {
+function FocusCheckValidation({
+  onBack,
+  onCompleteRun = null,
+  autoReturnToCaller = false,
+  hideBack = false,
+  autoStart = false,
+  compact = false
+}) {
   const [focusCheckMode, setFocusCheckMode] = useState("idle");
   const [focusCheckTrials, setFocusCheckTrials] = useState([]);
   const [focusCheckIndex, setFocusCheckIndex] = useState(0);
@@ -6015,6 +6022,7 @@ function FocusCheckValidation({ onBack }) {
     const history = getFocusCheckHistoryFromStorage();
     return history.length ? history[history.length - 1] : null;
   });
+  const autoStartedRef = useRef(false);
   const currentFocusTrial = focusCheckTrials[focusCheckIndex] || null;
   const previousSummary = (() => {
     const history = getFocusCheckHistoryFromStorage();
@@ -6098,8 +6106,15 @@ function FocusCheckValidation({ onBack }) {
       setLatestSummary(entry);
     }
     try { window.plausible("Focus Check Completed"); } catch {}
+    if (typeof onCompleteRun === "function") {
+      try { onCompleteRun(entry); } catch {}
+      if (autoReturnToCaller) {
+        setFocusCheckMode("idle");
+        return;
+      }
+    }
     setFocusCheckMode("complete");
-  }, [focusCheckMode, focusCheckIndex, focusCheckTrials.length, focusCheckStats]);
+  }, [focusCheckMode, focusCheckIndex, focusCheckTrials.length, focusCheckStats, onCompleteRun, autoReturnToCaller]);
   useEffect(() => {
     if (focusCheckMode !== "running") return undefined;
     const onKeyDown = (event) => {
@@ -6110,14 +6125,22 @@ function FocusCheckValidation({ onBack }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [focusCheckMode, submitFocusResponse]);
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    startFocusCheck();
+  }, [autoStart]);
+  const containerStyle = compact
+    ? { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }
+    : { maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px" };
   return (
-    <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px" }}>
-      <button className="intervention-back" onClick={onBack}>← Back</button>
-      <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Focus Check</h1>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-        30-second Go/No-Go validation. Tap for GO, hold for NO-GO.
+    <section style={containerStyle}>
+      {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
+      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Focus Check</h1>}
+      <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
+        30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
       </div>
-      <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
+      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
         {focusCheckMode === "running" && currentFocusTrial && (
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
@@ -6148,7 +6171,7 @@ function FocusCheckValidation({ onBack }) {
             <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)" }}>Keyboard: Space or Enter</div>
           </div>
         )}
-        {focusCheckMode !== "running" && (
+        {focusCheckMode !== "running" && !autoStart && (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
             <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
               {latestSummary ? "Latest run saved. Run again anytime." : "No run yet. Start when ready."}
@@ -7277,6 +7300,12 @@ export default function Stillform() {
   });
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
+  const [tutorialGoNoGoEntry, setTutorialGoNoGoEntry] = useState(null);
+  const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
+  const [tutorialFocusBrief, setTutorialFocusBrief] = useState(() => {
+    const history = getFocusCheckHistoryFromStorage();
+    return history.length ? history[history.length - 1] : null;
+  });
   const [screenReady, setScreenReady] = useState(false);
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
@@ -7343,7 +7372,17 @@ export default function Stillform() {
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(backScreen || "home");
+    try {
+      const history = getFocusCheckHistoryFromStorage();
+      setTutorialFocusBrief(history.length ? history[history.length - 1] : null);
+    } catch {
+      setTutorialFocusBrief(null);
+    }
     setScreen("tutorial");
+  };
+  const openFocusCheck = (backScreen = "home") => {
+    setFocusCheckReturnScreen(backScreen || "home");
+    setScreen("focus-check");
   };
   const goHomeSafely = (defer = false) => {
     if (defer) {
@@ -8520,6 +8559,15 @@ export default function Stillform() {
             },
             {
               kicker: "Tutorial · 2 of 5",
+              title: "Go / No-Go Quick Check — Time to First Value",
+              focusCheckTTFV: true,
+              paragraphs: [
+                "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
+                "This is not diagnosis. It is a fast operational baseline to anchor today’s composure decisions."
+              ]
+            },
+            {
+              kicker: "Tutorial · 3 of 5",
               title: "Morning Check-In — Set the Day’s Baseline",
               paragraphs: [
                 "Morning Check-In captures your starting state before composure drifts. In under a minute, you log internal state, body context, and expected load.",
@@ -8528,7 +8576,7 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 3 of 5",
+              kicker: "Tutorial · 4 of 5",
               title: "Daily Regulation Tools — Active Execution Layer",
               paragraphs: [
                 "After Morning Check-In, use your regulation tools throughout the day to prepare, stabilize, and reset as needed.",
@@ -8537,20 +8585,11 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 4 of 5",
-              title: "End-of-Day + My Progress — Evidence Layer",
-              paragraphs: [
-                "End-of-Day Close consolidates the day so state residue does not roll forward unchecked.",
-                "My Progress is where sessions, high-signal entries, and pattern insights are consolidated into trend evidence.",
-                "This gives you a clear record of what is changing, where composure is strengthening, and where to recalibrate next."
-              ]
-            },
-            {
               kicker: "Tutorial · 5 of 5",
               title: "Run the Full Loop Daily",
               paragraphs: [
                 "First-time setup sequence: How You Process → Signal Profile + Blind Spots.",
-                "Daily sequence: Morning Check-In → Daily Regulation Tools → End-of-Day Close → My Progress."
+                "Daily sequence: Go / No-Go Quick Check → Morning Check-In → Daily Regulation Tools → End-of-Day Close → My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -8608,6 +8647,47 @@ export default function Stillform() {
                   ))}
                 </div>
               )}
+              {page.focusCheckTTFV && (
+                <div style={{ marginBottom: 18 }}>
+                  {!tutorialFocusBrief ? (
+                    <FocusCheckValidation
+                      hideBack
+                      autoStart
+                      compact
+                      onCompleteRun={(entry) => {
+                        setTutorialFocusBrief(entry);
+                      }}
+                      autoReturnToCaller
+                    />
+                  ) : (
+                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                        Post-Check Briefing
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
+                          <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{tutorialFocusBrief.accuracy ?? "N/A"}%</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
+                          <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{tutorialFocusBrief.inhibition ?? "N/A"}%</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
+                          <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{tutorialFocusBrief.avgReactionMs ? `${tutorialFocusBrief.avgReactionMs}ms` : "N/A"}</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                        Accuracy reflects attentional consistency. Inhibition reflects response control under conflict. Avg RT reflects processing tempo under speed demand.
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                        This is your baseline performance signature for today. Stillform uses this with signal mapping and check-ins to adapt routing and track transfer over time.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               {page.footer && (
                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
                   {page.footer}
@@ -8628,6 +8708,7 @@ export default function Stillform() {
                 <button
                   className="btn btn-primary"
                   style={{ padding: "16px 24px", fontSize: 15, width: "100%", maxWidth: 360 }}
+                  disabled={page.focusCheckTTFV && !tutorialFocusBrief}
                   onClick={() => setTutorialStep((s) => Math.min(s + 1, tutorialPages.length - 1))}
                 >
                   Next →
@@ -9763,7 +9844,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                <button onClick={() => setScreen("focus-check")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Quick Check</button>
+                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Quick Check</button>
                 <button onClick={async () => { if (await biometric.gate()) setScreen("progress"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -9808,7 +9889,7 @@ export default function Stillform() {
 
         {/* FOCUS CHECK */}
         {screen === "focus-check" && (
-          <FocusCheckValidation onBack={() => goHomeSafely()} />
+          <FocusCheckValidation onBack={() => setScreen(focusCheckReturnScreen || "home")} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
@@ -10588,7 +10669,7 @@ export default function Stillform() {
 
             {settingsSectionOpen.advanced && (<>
             <div style={{ marginBottom: 20 }}>
-              <button onClick={() => setScreen("focus-check")} style={{
+              <button onClick={() => openFocusCheck("settings")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                 display: "flex", justifyContent: "space-between", alignItems: "center"
