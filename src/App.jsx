@@ -1138,9 +1138,9 @@ const TOOLS = [
   {
     id: "bias",
     icon: "⬡",
-    name: "Know Your Blind Spots",
-    desc: "Learn the thinking patterns that run on autopilot when you're stressed.",
-    time: "5 min",
+    name: "Pattern Check",
+    desc: "Spot recurring interpretation patterns so you can choose with more clarity.",
+    time: "2 min",
     level: 3
   }
 ];
@@ -4025,7 +4025,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try {
               const biases = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null");
               if (!biases?.length) return null;
-              return `User's identified cognitive blind spots: ${biases.join(", ")}`;
+              return `User's identified decision patterns: ${biases.join(", ")}`;
             } catch { return null; }
           })(),
           priorToolContext: (() => {
@@ -4927,79 +4927,44 @@ function MicroBiasTool({ onComplete }) {
   const [identified, setIdentified] = useState([]);
   const [done, setDone] = useState(false);
 
-  const biases = [
+  const patterns = [
     {
-      name: "Confirmation Bias",
-      what: "Your brain seeks evidence that confirms what you already believe — and filters out what doesn't.",
-      example: "You're convinced your partner is pulling away. You notice every short text and missed call. You don't notice the three kind things they did today.",
-      question: "When you're upset, do you find yourself only seeing evidence that supports the worst interpretation?"
+      name: "Confirmation Loop",
+      what: "Once your brain lands on a story, it can keep collecting proof for that story while missing what doesn't fit.",
+      example: "You're sure someone is upset with you. You notice every short reply and miss the neutral or warm moments.",
+      question: "When you're activated, does your attention narrow around one interpretation?"
     },
     {
-      name: "Fundamental Attribution Error",
-      what: "When someone else does something wrong, you blame their character. When you do something wrong, you blame the situation.",
-      example: "They cut you off in traffic — they're reckless. You cut someone off — you were late for something important.",
-      question: "Do you tend to judge others by their actions but judge yourself by your intentions?"
+      name: "Threat Weighting",
+      what: "Your system can assign extra weight to risk cues and less weight to stabilizing cues, especially under pressure.",
+      example: "Nine pieces of the day go fine, one part feels off, and your attention stays on the one.",
+      question: "Do single negatives tend to dominate your read of the situation?"
     },
     {
-      name: "Negativity Bias",
-      what: "Your brain gives more weight to bad experiences than good ones. One criticism outweighs ten compliments.",
-      example: "Nine people loved your presentation. One person looked bored. You go home thinking about the one.",
-      question: "Does one negative thing tend to overshadow multiple positive things?"
+      name: "Fast Conclusions",
+      what: "Under load, the mind can jump from signal to conclusion before enough evidence is in.",
+      example: "A delayed response quickly turns into a complete story about what it means.",
+      question: "Do you sometimes reach conclusions before the full picture is available?"
     },
     {
-      name: "Optimism Bias",
-      what: "Your brain underestimates risk and overestimates how well things will go. You skip preparation because it 'feels fine.'",
-      example: "You don't study for the interview because you're confident. You don't have the hard conversation because you assume it'll work itself out. It doesn't.",
-      question: "Do you sometimes skip preparation or avoid hard steps because you assume things will just work out?"
-    },
-    {
-      name: "Sunk Cost Fallacy",
-      what: "You keep investing in something — a relationship, a job, a decision — because of what you've already put in, not because it's still right.",
-      example: "You stay in a situation that's hurting you because 'I've already given it three years.'",
-      question: "Have you ever stayed in something too long because leaving would mean admitting the investment was wasted?"
-    },
-    {
-      name: "Self-Serving Bias",
-      what: "You take credit for successes and externalize blame for failures. Your brain protects your self-image.",
-      example: "The project succeeded — you led it. The project failed — the team dropped the ball.",
-      question: "When something goes wrong, is your first instinct to look outward for the cause?"
-    },
-    {
-      name: "Anchoring",
-      what: "The first piece of information you receive carries disproportionate weight in every decision after.",
-      example: "Someone told you you're 'too much' at age 12. You're 35 and still shrinking yourself in rooms.",
-      question: "Is there an old belief or early experience that still shapes how you see yourself — even though everything has changed since then?"
-    },
-    {
-      name: "Spotlight Effect",
-      what: "You overestimate how much other people notice or care about your mistakes.",
-      example: "You said something awkward in a meeting. You replay it for days. Nobody else remembers.",
-      question: "Do you assume people are thinking about your mistakes as much as you are?"
-    },
-    {
-      name: "Planning Fallacy",
-      what: "You consistently underestimate how long things take, how much energy they'll require, or how many things can go wrong.",
-      example: "You say yes to five things this week because each one 'only takes an hour.' By Wednesday you're drowning.",
-      question: "Do you regularly underestimate how long things take or overcommit because each thing seems small on its own?"
-    },
-    {
-      name: "Halo Effect",
-      what: "One positive impression about a person colors everything else. You trust their judgment, overlook red flags, or defer to them because they got one thing right.",
-      example: "Your new manager seems sharp and confident, so you assume their plan is solid. You don't push back. The plan was wrong.",
-      question: "Do you sometimes give people too much credit across the board because of one strong impression?"
+      name: "Overcontrol Mode",
+      what: "When uncertainty rises, you may tighten control quickly to reduce discomfort.",
+      example: "You start planning every branch and script every line before a conversation begins.",
+      question: "When uncertainty is high, do you default to over-planning before acting?"
     }
   ];
 
   const handleResponse = (recognized) => {
+    const nextIdentified = recognized ? [...identified, patterns[current].name] : identified;
     if (recognized) {
-      setIdentified(prev => [...prev, biases[current].name]);
+      setIdentified(nextIdentified);
     }
-    if (current < biases.length - 1) {
+    if (current < patterns.length - 1) {
       setCurrent(c => c + 1);
     } else {
-      // Save identified biases
+      // Save identified patterns
       try {
-        localStorage.setItem("stillform_bias_profile", JSON.stringify(identified));
+        localStorage.setItem("stillform_bias_profile", JSON.stringify(nextIdentified));
       } catch {}
       setDone(true);
     }
@@ -5010,58 +4975,58 @@ function MicroBiasTool({ onComplete }) {
       <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
-          Awareness is the intervention.
+          Pattern baseline captured.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
-          You don't need to fix these. Just knowing they're there changes how you act on them. The AI in Reframe is also watching for these patterns in your conversations.
+          This is not a diagnosis. It is a starting map for decision patterns that can appear under load. Reframe uses this signal alongside your check-ins and language to improve pattern recognition over time.
         </p>
         {identified.length > 0 && (
           <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized</div>
+            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized today</div>
             {identified.map((b, i) => (
               <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
             ))}
           </div>
         )}
         {identified.length === 0 && (
-          <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>You didn't identify with any of these right now. That may change — biases show up differently under stress.</p>
+          <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>No strong match right now. That is normal. Patterns can shift by context and intensity.</p>
         )}
         <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
       </div>
     );
   }
 
-  const bias = biases[current];
+  const pattern = patterns[current];
   return (
     <div style={{ maxWidth: 420, margin: "0 auto" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
-        {current + 1} of {biases.length}
+        Pattern Check · {current + 1} of {patterns.length}
       </div>
 
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>
-        {bias.name}
+        {pattern.name}
       </h2>
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
-        <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>{bias.what}</div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, fontStyle: "italic" }}>{bias.example}</div>
+        <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>{pattern.what}</div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
       </div>
 
       <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 24 }}>
-        {bias.question}
+        {pattern.question}
       </p>
 
       <div style={{ display: "flex", gap: 10 }}>
         <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
-          Yes, I see this
+          Shows up for me
         </button>
         <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
-          Not really
+          Not today
         </button>
       </div>
 
       <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
-        {biases.map((_, i) => (
+        {patterns.map((_, i) => (
           <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
         ))}
       </div>
@@ -6953,7 +6918,7 @@ function MyProgress({ onBack }) {
                     <div>
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
-                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence", signals: "Map Signals", bias: "Blind Spots" };
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence", signals: "Map Signals", bias: "Pattern Check" };
                         const shift = t.avgShift ?? 0;
                         const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
@@ -8530,7 +8495,7 @@ export default function Stillform() {
               kicker: "Tutorial · 1 of 4",
               title: "Calibration — Build Your Baseline",
               paragraphs: [
-                "Calibration establishes your operating profile in one sequence: How You Process, then Signal Profile + Blind Spots.",
+                "Calibration establishes your operating profile in one sequence: How You Process, then Signal Profile + Pattern Check.",
                 "It sets your starting recommendations while preserving full tool access, and adapts as real usage data accumulates."
               ]
             },
@@ -8555,7 +8520,7 @@ export default function Stillform() {
               kicker: "Tutorial · 4 of 4",
               title: "Run the Full Loop Daily",
               paragraphs: [
-                "First-time setup sequence: How You Process → Signal Profile + Blind Spots.",
+                "First-time setup sequence: How You Process → Signal Profile + Pattern Check.",
                 "Daily sequence: Go / No-Go Quick Check → Morning + Daily Tools → End-of-Day Close → My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
@@ -8773,8 +8738,8 @@ export default function Stillform() {
             {
               step: 2,
               label: "Calibration · 2 of 2",
-              title: "Signal Profile + Blind Spots",
-              subtitle: "Map body signals, then identify recurring thought patterns.",
+              title: "Signal Profile + Pattern Check",
+              subtitle: "Map body signals, then set a baseline for recurring interpretation patterns.",
               body: null,
               cta: null,
               autoLaunch: () => {
@@ -10080,7 +10045,7 @@ export default function Stillform() {
               },
               {
                 q: "Does the AI learn about me?",
-                a: "Yes. It reads your Pulse, signal profile, blind spots, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
+                a: "Yes. It reads your Pulse, signal profile, pattern check baseline, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
               },
               {
                 q: "What's the AI's limitation?",

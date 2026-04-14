@@ -17,7 +17,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Tutorial opening support line | LOCKED | `Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.` |
 | Tutorial opening close | LOCKED | `Stillform. Composure Architecture.` |
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
-| Combined setup step title | LOCKED | `Signal Profile + Blind Spots` |
+| Combined setup step title | LOCKED | `Signal Profile + Pattern Check` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
 | Reframe soft-entry greeting | LOCKED | `Hey good to see you. How are you doing?` |
 | Pulse progress-layer descriptor | LOCKED | `Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.` |
@@ -45,7 +45,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 3. First-run flow routes to tutorial before setup.
 4. Setup keeps combined calibration sequencing:
    - How You Process
-   - Signal Profile + Blind Spots
+   - Signal Profile + Pattern Check
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
 6. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 7. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.

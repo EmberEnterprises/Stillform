@@ -35,7 +35,7 @@ const checks = [
   { label: "Tutorial opening lock copy", cmd: "rg", args: ["-n", "Composure is a full-spectrum practice\\.|Stillform\\. Composure Architecture\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ guidance sentence", cmd: "rg", args: ["-n", "If you want to know more about the app, please go to our FAQ page\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ button removed", cmd: "rg", args: ["-n", "openFaq\\(\"tutorial\"\\)", "src/App.jsx"], type: "must-not-match" },
-  { label: "Combined setup profile flow", cmd: "rg", args: ["-n", "Signal Profile \\+ Blind Spots|setupFlow: \"calibration-combined\"", "src/App.jsx"], type: "must-match" },
+  { label: "Combined setup profile flow", cmd: "rg", args: ["-n", "Signal Profile \\+ Pattern Check|setupFlow: \"calibration-combined\"", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial multi-page progression", cmd: "rg", args: ["-n", "Tutorial · 1 of 4|Tutorial · 2 of 4|Tutorial · 3 of 4|Tutorial · 4 of 4", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial page titles locked", cmd: "rg", args: ["-n", "title: \"Calibration — Build Your Baseline\"|title: \"Go / No-Go Quick Check — Time to First Value\"|title: \"Morning \\+ Daily Tools — Active Execution Layer\"|title: \"Run the Full Loop Daily\"", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial focus check briefing lock", cmd: "rg", args: ["-n", "Post-Check Briefing|Go / No-Go Quick Check → Morning \\+ Daily Tools → End-of-Day Close → My Progress", "src/App.jsx"], type: "must-match" },
