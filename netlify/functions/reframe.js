@@ -840,7 +840,7 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null } = JSON.parse(event.body);
+    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null, scienceEvidence = null } = JSON.parse(event.body);
     const conversationTurn = Array.isArray(history) ? Math.max(1, history.length + 1) : 1;
 
     // Input validation
@@ -995,6 +995,16 @@ exports.handler = async function(event) {
 
     // AI session notes — compressed history from previous sessions
     if (sessionNotes && sessionCount >= 3) contextParts.push(`YOUR PREVIOUS SESSION NOTES (written by you after past sessions):\n${sessionNotes}\nThese are your own observations. Use them to show continuity — reference growth, recurring themes, or context from previous conversations. Never say "my notes show" — just demonstrate that you remember.`);
+    if (scienceEvidence && typeof scienceEvidence === "object") {
+      const lines = [];
+      if (Number.isFinite(scienceEvidence.acuteShiftRate30d)) lines.push(`Acute shift rate (30d): ${scienceEvidence.acuteShiftRate30d}%`);
+      if (Number.isFinite(scienceEvidence.recoverySpeedMinutes30d)) lines.push(`Recovery speed (30d): ${scienceEvidence.recoverySpeedMinutes30d} min`);
+      if (Number.isFinite(scienceEvidence.loopReliability14d)) lines.push(`Loop reliability (14d): ${scienceEvidence.loopReliability14d}`);
+      if (Number.isFinite(scienceEvidence.transferScore14d)) lines.push(`Transfer score (14d): ${scienceEvidence.transferScore14d}`);
+      if (lines.length > 0) {
+        contextParts.push(`SCIENCE EVIDENCE LAYER (derived from user's existing app behavior, not self-claims): ${lines.join(" | ")}. Use this to calibrate confidence and coaching intensity. If reliability is low, keep direction narrower and simpler. If transfer is high, reinforce what is working and protect consistency.`);
+      }
+    }
 
     // Throttle intelligence based on session count
     if (sessionCount < 3) {

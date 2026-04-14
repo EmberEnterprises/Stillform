@@ -3998,6 +3998,45 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           calendarContext: integrationContext.calendarContext,
           healthContext: integrationContext.healthContext,
           sessionCount: getSessionCountFromStorage(),
+          scienceEvidence: (() => {
+            try {
+              const sessions = getSessionsFromStorage();
+              const rated = sessions.filter((s) => Number.isFinite(s?.preRating) && Number.isFinite(s?.postRating));
+              const recent30 = rated.filter((s) => withinDays(s?.timestamp, 30));
+              const improved30 = recent30.filter((s) => (s.postRating - s.preRating) > 0).length;
+              const acuteShiftRate30d = recent30.length ? Math.round((improved30 / recent30.length) * 100) : null;
+              const highActivationRecoveries = recent30.filter((s) => (
+                Number.isFinite(s.preRating)
+                && Number.isFinite(s.postRating)
+                && s.preRating <= 2
+                && s.postRating >= 3
+              ));
+              const avgRecoveryMinutes30d = highActivationRecoveries.length
+                ? Math.round(highActivationRecoveries.reduce((sum, s) => sum + (Number(s.duration) || 0), 0) / highActivationRecoveries.length / 60)
+                : null;
+              const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
+              const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
+              const morning14d = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+              const eod14d = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
+              const loopCompletion14d = Math.round(((morning14d + eod14d) / (14 * 2)) * 100);
+              const recent14Rated = rated.filter((s) => withinDays(s?.timestamp, 14));
+              const transferDays = new Set(
+                recent14Rated
+                  .filter((s) => Number.isFinite(s.preRating) && Number.isFinite(s.postRating) && (s.postRating - s.preRating) >= 1)
+                  .map((s) => (String(s.timestamp || "").slice(0, 10)))
+                  .filter(Boolean)
+              );
+              const transferScore14d = Math.round((transferDays.size / 14) * 100);
+              return {
+                acuteShiftRate30d,
+                avgRecoveryMinutes30d,
+                loopCompletion14d,
+                transferScore14d
+              };
+            } catch {
+              return null;
+            }
+          })(),
           feelState: feelState,
           bioFilter: (() => {
             try {
@@ -6593,6 +6632,42 @@ function MyProgress({ onBack }) {
             0,
             Math.min(100, Math.round((loopCompletion14d * 0.65) + (recoveryBaseline * 0.35)))
           );
+          const recent30Rated = ratingDeltaSessions.filter((s) => withinDays(s.timestamp, 30));
+          const positiveRecent30 = recent30Rated.filter((s) => (s.postRating - s.preRating) > 0).length;
+          const acuteShiftRate30d = recent30Rated.length
+            ? Math.round((positiveRecent30 / recent30Rated.length) * 100)
+            : null;
+          const recoveredFromHighActivation = recent30Rated.filter((s) => (
+            Number(s.preRating) <= 2
+            && Number(s.postRating) >= 3
+            && Number.isFinite(s.duration)
+            && Number(s.duration) > 0
+          ));
+          const recoverySpeedMinutes = recoveredFromHighActivation.length
+            ? (recoveredFromHighActivation.reduce((sum, s) => sum + Number(s.duration || 0), 0) / recoveredFromHighActivation.length / 60)
+            : null;
+          const ratedDays14Map = recent30Rated
+            .filter((s) => withinDays(s.timestamp, 14))
+            .reduce((map, s) => {
+              const day = String(s.timestamp || "").slice(0, 10);
+              if (!day) return map;
+              if (!map[day]) map[day] = [];
+              map[day].push(s.postRating - s.preRating);
+              return map;
+            }, {});
+          const ratedDays14 = Object.keys(ratedDays14Map).length;
+          const transferPositiveDays14 = Object.values(ratedDays14Map).filter((deltas) => {
+            if (!Array.isArray(deltas) || deltas.length === 0) return false;
+            const avg = deltas.reduce((sum, value) => sum + value, 0) / deltas.length;
+            return avg >= 0;
+          }).length;
+          const transferScore14d = ratedDays14 ? Math.round((transferPositiveDays14 / ratedDays14) * 100) : null;
+          const scienceEvidenceRead = (() => {
+            if (acuteShiftRate30d === null || transferScore14d === null) return "building baseline";
+            if (acuteShiftRate30d >= 70 && transferScore14d >= 70) return "strong carryover";
+            if (acuteShiftRate30d >= 55 && transferScore14d >= 55) return "stable trend";
+            return "tighten execution";
+          })();
           const renderTrendSparkline = (values) => {
             if (!Array.isArray(values) || values.length < 2) {
               return (
@@ -6655,6 +6730,33 @@ function MyProgress({ onBack }) {
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
                     Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
                     {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
+                  </div>
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                      Science evidence
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 8 }}>
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Acute shift rate (30d)</div>
+                        <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 3 }}>{acuteShiftRate30d === null ? "N/A" : `${acuteShiftRate30d}%`}</div>
+                      </div>
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Recovery speed</div>
+                        <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 3 }}>{recoverySpeedMinutes === null ? "N/A" : `${recoverySpeedMinutes.toFixed(1)}m`}</div>
+                      </div>
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Loop reliability (14d)</div>
+                        <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 3 }}>{reliabilityScore}%</div>
+                      </div>
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Transfer score (14d)</div>
+                        <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 3 }}>{transferScore14d === null ? "N/A" : `${transferScore14d}%`}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                      Readout: <span style={{ color: "var(--text)" }}>{scienceEvidenceRead}</span>.
+                      {" "}Built from existing sessions, deltas, and loop completion — no extra workflow required.
+                    </div>
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
@@ -11392,7 +11494,6 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reminder");
                       localStorage.removeItem("stillform_reminder_time");
                       localStorage.removeItem("stillform_tooltip_home_seen");
-                      localStorage.removeItem("stillform_tooltip_pulse_seen");
                       localStorage.removeItem("stillform_tooltips_reframe_seen");
                       localStorage.removeItem("stillform_outcome_focus");
                       localStorage.removeItem("stillform_session_entry_context");
