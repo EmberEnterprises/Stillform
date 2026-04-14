@@ -1136,15 +1136,6 @@ const TOOLS = [
     level: 2
   },
   {
-    id: "checkin",
-    icon: "◈",
-    name: "Tension Check",
-    desc: "10-second body scan. Are you holding tension you haven't noticed?",
-    time: "10 sec",
-    level: 2
-  },
-
-  {
     id: "bias",
     icon: "⬡",
     name: "Know Your Blind Spots",
@@ -1833,15 +1824,6 @@ const consumePendingSessionEntryContext = (maxAgeMs = 2 * 60 * 60 * 1000) => {
   }
 };
 
-const attachPendingSessionEntryContext = (entry) => {
-  const ctx = consumePendingSessionEntryContext();
-  if (!ctx) return entry;
-  const next = { ...entry };
-  if (ctx.entryMode) next.entryMode = ctx.entryMode;
-  if (ctx.entryProtocolId) next.entryProtocolId = ctx.entryProtocolId;
-  return next;
-};
-
 const launchScenarioProtocolById = async ({
   protocolId,
   setPathway,
@@ -2112,24 +2094,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   // --- BREATHE ---
   const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
   const [patternId, setPatternId] = useState(savedPatternId);
-  const [showPatternPicker, setShowPatternPicker] = useState(false);
   const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
   const phases = pattern.phases;
 
-  const selectPattern = (id) => {
-    setPatternId(id);
-    try { localStorage.setItem("stillform_breath_pattern", id); } catch {}
-    setShowPatternPicker(false);
-    setStarted(true);
-    setRunning(true);
-    watchBridge.startBreathing(id);
-  };
-
   const [started, setStarted] = useState(false);
-  const breathPrompts = [
-    { id: "quick", label: "Quick reset", desc: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
-    { id: "deep", label: "Deep regulate", desc: "3 minutes. Deeper reset when you have the space.", why: "Extended exhale cycle. Gives your nervous system time to fully downregulate." }
-  ];
 
   const totalCycles = 3; // 3 cycles then check in — don't force more
   const [phaseIdx, setPhaseIdx] = useState(0);
@@ -2255,7 +2223,6 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const [groundData, setGroundData] = useState([]);
   const [showGroundWrite, setShowGroundWrite] = useState(false);
 
-  const circleClass = `breath-circle ${phaseIdx === 0 ? "expand" : phaseIdx === 2 ? "contract" : "hold"}`;
   const progress = ((cycle - 1) * phases.length + phaseIdx) / (totalCycles * phases.length);
   const bgtBreathScale = (phaseIdx === 0 || phaseIdx === 1) ? 1 : 0;
   const bgtVisualGrounding = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
@@ -3635,7 +3602,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
     // Post-session AI summary — background call, non-blocking
     if (messages.length >= 2) {
-      const convo = messages.map(m => `${m.role === "ai" ? "Stillform" : "User"}: ${m.text}`).join("\n");
       fetch("/.netlify/functions/reframe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -5592,92 +5558,6 @@ function SignalMapTool({ onComplete }) {
   );
 }
 
-function BodyCheckInTool({ onComplete }) {
-  const areas = [
-    { id: "jaw", label: "Jaw" },
-    { id: "shoulders", label: "Shoulders" },
-    { id: "chest", label: "Chest" },
-    { id: "gut", label: "Gut" }
-  ];
-  const [levels, setLevels] = useState({});
-  const [done, setDone] = useState(false);
-  const [currentIdx, setCurrentIdx] = useState(0);
-
-  const handleTap = (areaId, level) => {
-    const updated = { ...levels, [areaId]: level };
-    setLevels(updated);
-    if (currentIdx < areas.length - 1) {
-      setTimeout(() => setCurrentIdx(i => i + 1), 300);
-    } else {
-      // Tension data — handled by morning check-in now
-      setTimeout(() => setDone(true), 300);
-    }
-  };
-
-  if (done) {
-    const highest = Object.entries(levels).sort((a, b) => b[1] - a[1])[0];
-    const highArea = areas.find(a => a.id === highest[0]);
-    const needsHelp = highest[1] >= 2;
-    return (
-      <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
-        <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Checked in.</h2>
-        {needsHelp ? (
-          <>
-            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>
-              Your {highArea.label.toLowerCase()} is holding activation. Want to address it?
-            </p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              <button className="btn btn-primary" onClick={() => onComplete("scan")}>Body Scan →</button>
-              <button className="btn btn-ghost" onClick={() => onComplete("breathe")}>Breathe</button>
-              <button className="btn btn-ghost" style={{ color: "var(--text-muted)", fontSize: 13 }} onClick={onComplete}>Close</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 24 }}>Low activation across the board. System baseline.</p>
-            <button className="btn btn-ghost" onClick={onComplete}>Done</button>
-          </>
-        )}
-      </div>
-    );
-  }
-
-  const area = areas[currentIdx];
-  return (
-    <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>
-        Quick scan — {currentIdx + 1} of {areas.length}
-      </div>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 32 }}>
-        {area.label}
-      </h2>
-      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
-        {[
-          { level: 0, label: "Composed", color: "var(--green)" },
-          { level: 1, label: "Mild", color: "var(--amber-dim)" },
-          { level: 2, label: "Tense", color: "var(--amber)" },
-          { level: 3, label: "High", color: "#c05040" }
-        ].map(opt => (
-          <button key={opt.level} onClick={() => handleTap(area.id, opt.level)} style={{
-            background: levels[area.id] === opt.level ? "var(--surface2)" : "var(--surface)",
-            border: `1px solid ${levels[area.id] === opt.level ? opt.color : "var(--border)"}`,
-            borderRadius: "var(--r-lg)", padding: "14px 6px", flex: 1, cursor: "pointer", transition: "all 0.2s",
-            textAlign: "center"
-          }}>
-            <div style={{ fontSize: 13, color: levels[area.id] === opt.level ? opt.color : "var(--text-dim)" }}>{opt.label}</div>
-          </button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 24 }}>
-        {areas.map((_, i) => (
-          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= currentIdx ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function FractalBreathCanvas({ breathScale = 0.5 }) {
   const canvasRef = useRef(null);
   const animRef = useRef(null);
@@ -6107,130 +5987,6 @@ function PanicMode({ onComplete }) {
   );
 }
 
-function CheckInWidget({ onComplete }) {
-  const [step, setStep] = useState(0);
-  const [sleep, setSleep] = useState(7);
-  const [energy, setEnergy] = useState("ok");
-  const [mood, setMood] = useState("");
-  const [stressEvent, setStressEvent] = useState("");
-  const [notes, setNotes] = useState("");
-  const [dismissed, setDismissed] = useState(false);
-
-  const save = () => {
-    const today = new Date().toISOString().slice(0, 10);
-    const checkin = { date: today, sleep, energy, mood: mood || "not set", stressEvent: stressEvent || null, notes: notes || null };
-    try { localStorage.setItem("stillform_checkin_today", JSON.stringify(checkin)); } catch {}
-    onComplete();
-  };
-
-  if (dismissed) return null;
-
-  // Step 0: prompt
-  if (step === 0) return (
-    <div style={{ marginBottom: 20, padding: "14px 18px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: "var(--text)", marginBottom: 2 }}>Quick check-in</div>
-          <div style={{ fontSize: 11, color: "var(--text-dim)" }}>30 seconds. Helps the AI give better advice.</div>
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          <button onClick={() => setStep(1)} style={{
-            background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r)",
-            padding: "6px 14px", fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-          }}>Start</button>
-          <button onClick={() => setDismissed(true)} style={{
-            background: "none", border: "1px solid var(--border)", borderRadius: "var(--r)",
-            padding: "6px 10px", fontSize: 11, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-          }}>Skip</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  // Step 1: Sleep
-  if (step === 1) return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>1 of 3 · Sleep</div>
-      <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 12 }}>How many hours did you sleep?</div>
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <input type="range" min="0" max="12" step="0.5" value={sleep} onChange={e => setSleep(parseFloat(e.target.value))}
-          style={{ flex: 1, accentColor: "var(--amber)" }} />
-        <div style={{ fontSize: 18, color: "var(--amber)", fontWeight: 500, minWidth: 40, textAlign: "center" }}>{sleep}h</div>
-      </div>
-      <button onClick={() => setStep(2)} style={{
-        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
-        padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-      }}>Next</button>
-    </div>
-  );
-
-  // Step 2: Energy + Mood
-  if (step === 2) return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>2 of 3 · Energy & mood</div>
-      <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 10 }}>Energy right now?</div>
-      <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
-        {["low", "ok", "high"].map(e => (
-          <button key={e} onClick={() => setEnergy(e)} style={{
-            flex: 1, padding: "8px", borderRadius: "var(--r-lg)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-            fontSize: 13, border: `1px solid ${energy === e ? "var(--amber)" : "var(--border)"}`,
-            background: energy === e ? "var(--amber-glow)" : "transparent",
-            color: energy === e ? "var(--amber)" : "var(--text-dim)", transition: "all 0.15s"
-          }}>{e.charAt(0).toUpperCase() + e.slice(1)}</button>
-        ))}
-      </div>
-      <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Mood in a word?</div>
-      <div style={{ display: "flex", gap: 6 }}>
-        <input value={mood} onChange={e => setMood(e.target.value)} placeholder="calm, anxious, flat, wired..."
-          style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-          }} />
-        <MicButton onTranscript={t => setMood(t)} />
-      </div>
-      <button onClick={() => setStep(3)} style={{
-        width: "100%", marginTop: 12, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
-        padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-      }}>Next</button>
-    </div>
-  );
-
-  // Step 3: Stress + save
-  return (
-    <div style={{ marginBottom: 20, padding: "16px 18px", background: "var(--surface)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>3 of 3 · Context</div>
-      <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Anything stressing you today?</div>
-      <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-        <input value={stressEvent} onChange={e => setStressEvent(e.target.value)} placeholder="Optional — one line"
-          style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-          }} />
-        <MicButton onTranscript={t => setStressEvent(prev => prev + (prev ? " " : "") + t)} />
-      </div>
-      <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 8 }}>Anything else? Caffeine, meals, pain level?</div>
-      <div style={{ display: "flex", gap: 6 }}>
-        <input value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional"
-          style={{
-            flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-            padding: "10px 14px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-          }} />
-        <MicButton onTranscript={t => setNotes(prev => prev + (prev ? " " : "") + t)} />
-      </div>
-      <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-        <button onClick={save} style={{
-          flex: 1, background: "var(--amber)", color: "#0e0f11", border: "none", borderRadius: "var(--r-lg)",
-          padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-        }}>Save check-in</button>
-        <button onClick={() => { setStep(0); setDismissed(true); }} style={{
-          background: "none", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-          padding: "10px 14px", fontSize: 12, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-        }}>Skip</button>
-      </div>
-    </div>
-  );
-}
-
 const getFocusCheckHistoryFromStorage = () => {
   try {
     const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
@@ -6480,7 +6236,6 @@ function MyProgress({ onBack }) {
   const avgDelta = sessionsWithRatings.length > 0
     ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
     : null;
-  const positiveShifts = sessionsWithRatings.filter(s => (s.delta || 0) > 0).length;
 
   const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
   let streak = 0;
@@ -6504,23 +6259,17 @@ function MyProgress({ onBack }) {
     const day = dayNames[d.getDay()];
     dayTriggerCounts[day] = (dayTriggerCounts[day] || 0) + 1;
   });
-  const topDayEntry = Object.entries(dayTriggerCounts).sort((a, b) => b[1] - a[1])[0] || null;
-  const topDayCount = topDayEntry?.[1] || 0;
-
   // Signal area frequency from journal
   const signalFreq = {};
   journalEntries.forEach(e => (e.signal || []).forEach(s => { signalFreq[s] = (signalFreq[s] || 0) + 1; }));
-  const topSignalEntry = Object.entries(signalFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
   // Trigger type frequency
   const triggerFreq = {};
   journalEntries.forEach(e => { if (e.triggerType) triggerFreq[e.triggerType] = (triggerFreq[e.triggerType] || 0) + 1; });
-  const topTriggerEntry = Object.entries(triggerFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
   // Outcome distribution
   const outcomeFreq = {};
   journalEntries.forEach(e => { if (e.outcome) outcomeFreq[e.outcome] = (outcomeFreq[e.outcome] || 0) + 1; });
-  const topOutcomeEntry = Object.entries(outcomeFreq).sort((a, b) => b[1] - a[1])[0] || null;
 
   // Session improvement trend — compare first half vs second half avg delta
   const halfLen = Math.floor(sessionsWithRatings.length / 2);
@@ -6529,7 +6278,6 @@ function MyProgress({ onBack }) {
   const firstAvg = firstHalf.length ? firstHalf.reduce((s, e) => s + (e.delta || 0), 0) / firstHalf.length : null;
   const secondAvg = secondHalf.length ? secondHalf.reduce((s, e) => s + (e.delta || 0), 0) / secondHalf.length : null;
   const improving = firstAvg !== null && secondAvg !== null && secondAvg > firstAvg;
-  const trendDiff = firstAvg !== null && secondAvg !== null ? (secondAvg - firstAvg).toFixed(1) : null;
 
   const hasPatterns = journalEntries.length >= 3 || sessionsWithRatings.length >= 5;
 
@@ -6578,32 +6326,6 @@ function MyProgress({ onBack }) {
       return 0;
     }
   })();
-  const adaptiveDropoffThreshold14d = Math.max(
-    LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND,
-    Math.min(
-      LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND,
-      LOOP_NUDGE_DROPOFF_THRESHOLD
-      + (completionRatio14d >= 0.75 ? 8 : 0)
-      - (completionRatio14d <= 0.35 ? 8 : 0)
-      - (loopNudgeDismissStreak >= 2 ? 4 : 0)
-    )
-  );
-  const adaptiveMinOpens14d = Math.max(
-    LOOP_NUDGE_MIN_OPENS_LOWER_BOUND,
-    Math.min(
-      LOOP_NUDGE_MIN_OPENS_UPPER_BOUND,
-      LOOP_NUDGE_MIN_OPENS
-      + (completionRatio14d >= 0.75 ? 1 : 0)
-      - (completionRatio14d <= 0.35 ? 1 : 0)
-    )
-  );
-  const adaptiveNudgeSensitivityLabel = (
-    adaptiveDropoffThreshold14d <= LOOP_NUDGE_DROPOFF_THRESHOLD - 6
-      ? "high support"
-      : adaptiveDropoffThreshold14d >= LOOP_NUDGE_DROPOFF_THRESHOLD + 6
-        ? "quiet mode"
-        : "balanced"
-  );
   const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
   const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
   const aiInternalSessionNotes = (Array.isArray(aiSessionNotes) ? aiSessionNotes : []).filter((n) => n?.noteType !== "user-facing");
@@ -6699,7 +6421,6 @@ function MyProgress({ onBack }) {
   const cardStyle = { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px 16px", textAlign: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
   const rowStyle = { width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)" };
   const subRowStyle = { background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px" };
-  const monoLabel = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 };
 
   return (
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
@@ -7131,7 +6852,6 @@ function MyProgress({ onBack }) {
               avgShift: v.shifts.length ? (v.shifts.reduce((a, b) => a + b, 0) / v.shifts.length) : null
             }))
             .sort((a, b) => (b.avgShift || 0) - (a.avgShift || 0));
-          const topTool = toolList[0];
           const underusedHighPerformer = toolList.find(t => t.avgShift > 1.5 && t.pct < 30 && t.count >= 2);
 
           // Day-of-week pattern
@@ -7557,9 +7277,6 @@ export default function Stillform() {
     syncSubscriptionTruth();
     return () => { cancelled = true; };
   }, [syncSignedIn, subscriptionCheckTick]);
-
-  // Check widget launch flag synchronously (works on web only)
-  const widgetLaunch = false;
 
   const [screen, setScreen] = useState(null);
   const [faqBackScreen, setFaqBackScreen] = useState("home");
@@ -8730,7 +8447,6 @@ export default function Stillform() {
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
       case "signals": return <SignalMapTool {...props} />;
-      case "checkin": return <BodyCheckInTool {...props} />;
 
       case "bias": return <MicroBiasTool {...props} />;
       default:
