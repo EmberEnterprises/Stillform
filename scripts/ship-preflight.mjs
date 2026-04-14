@@ -22,8 +22,9 @@ const checks = [
   { label: "Cloud restore controls", cmd: "rg", args: ["-n", "Restore now|Restoring\\.|Restored .* items from cloud|setSyncFeedbackWithClear", "src/App.jsx"], type: "must-match" },
   { label: "Sync auth cooldown guard", cmd: "rg", args: ["-n", "syncAuthCooldownSeconds|startSyncAuthCooldown|Too many attempts\\. Please wait", "src/App.jsx"], type: "must-match" },
   { label: "Auth fallback safety guard", cmd: "rg", args: ["-n", "isInvalidCredentialsMessage|Incorrect email or password\\. Please try again\\.", "src/App.jsx"], type: "must-match" },
-  { label: "Pulse rotating prompts", cmd: "rg", args: ["-n", "What triggered this\\?|What were you about to do\\?|Who was involved\\?|openNewPulseEntry", "src/App.jsx"], type: "must-match" },
-  { label: "Contextual first-time tips", cmd: "rg", args: ["-n", "showHomeContextTip|showPulseContextTip|stillform_tooltip_home_seen|stillform_tooltip_pulse_seen", "src/App.jsx"], type: "must-match" },
+  { label: "Pulse is progress-layer only", cmd: "rg", args: ["-n", "Pulse is fed by completed tools and check-ins\\. It lives here as part of My Progress\\.|No pulse data yet\\. Complete check-ins and tools to start your progress signal\\.", "src/App.jsx"], type: "must-match" },
+  { label: "Pulse manual logging removed", cmd: "rg", args: ["-n", "\\+ Log a pulse|openNewPulseEntry|What triggered this\\?|showPulseContextTip", "src/App.jsx"], type: "must-not-match" },
+  { label: "Contextual first-time tips", cmd: "rg", args: ["-n", "showHomeContextTip|stillform_tooltip_home_seen", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial opening lock copy", cmd: "rg", args: ["-n", "Composure is a full-spectrum practice\\.|Stillform\\. Composure Architecture\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ guidance sentence", cmd: "rg", args: ["-n", "If you want to know more about the app, please go to our FAQ page\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ button removed", cmd: "rg", args: ["-n", "openFaq\\(\"tutorial\"\\)", "src/App.jsx"], type: "must-not-match" },
@@ -46,6 +47,7 @@ const checks = [
   { label: "Crisis other resources collapse", cmd: "rg", args: ["-n", "showOtherCrisisResources|Other resources", "src/App.jsx"], type: "must-match" },
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
   { label: "Soft-entry greeting lock", cmd: "rg", args: ["-n", "Hey good to see you\\. How are you doing\\?", "netlify/functions/reframe.js"], type: "must-match" },
+  { label: "Voice contract runtime guards", cmd: "rg", args: ["-n", "validateVoiceContract|VOICE_CONTRACT_BANNED_PATTERNS|voiceValidationFailed|voiceRepairUsed|voiceFallbackUsed", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
   { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" }
 ];

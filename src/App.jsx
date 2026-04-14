@@ -3502,6 +3502,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [statementTone, setStatementTone] = useState("calm");
   const [statementCopied, setStatementCopied] = useState(false);
   const [statementCardCopied, setStatementCardCopied] = useState(false);
+  const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
@@ -4125,6 +4126,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       if (parsed.crisisDetected) { try { window.plausible("Crisis Detection Triggered"); } catch {} }
       if (parsed.liabilityGuard) { try { window.plausible("Liability Guard Triggered"); } catch {} }
+      if (parsed.voiceValidationFailed) {
+        try {
+          window.plausible("Reframe Voice Guard Triggered", {
+            props: {
+              repaired: parsed.voiceRepairUsed ? "yes" : "no",
+              fallback: parsed.voiceFallbackUsed ? "yes" : "no"
+            }
+          });
+        } catch {}
+      }
       setMessages(prev => [...prev, {
         role: "ai",
         text: parsed.reframe,
@@ -4273,6 +4284,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setStatementTone("calm");
     setStatementCopied(false);
     setStatementCardCopied(false);
+    setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
@@ -4284,6 +4296,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setShowStateToStatement(false);
     setStatementCopied(false);
     setStatementCardCopied(false);
+    setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
@@ -4304,6 +4317,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const continueFromPostInsight = () => {
     setShowPostInsight(false);
+    setStateToStatementExpanded(false);
     setShowStateToStatement(true);
   };
 
@@ -4342,82 +4356,92 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           State to statement
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          Optional: turn this session into a clear external message. Anchor only, not a script.
-        </div>
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-          {[
-            { id: "calm", label: "Calm" },
-            { id: "firm", label: "Firm" },
-            { id: "warm", label: "Warm" },
-            { id: "concise", label: "Short" }
-          ].map(tone => (
-            <button
-              key={tone.id}
-              onClick={() => setStatementTone(tone.id)}
-              style={{
-                background: statementTone === tone.id ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${statementTone === tone.id ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 16,
-                padding: "6px 12px",
-                fontSize: 12,
-                color: statementTone === tone.id ? "var(--amber)" : "var(--text-muted)",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}
-            >
-              {tone.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
-          <input
-            type="text"
-            value={statementAudience}
-            onChange={(e) => setStatementAudience(e.target.value)}
-            placeholder="Audience (e.g., partner, manager, team)"
-            style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-          />
-          <textarea
-            value={statementNeed}
-            onChange={(e) => setStatementNeed(e.target.value)}
-            placeholder="Core message: what needs to be understood?"
-            rows={3}
-            style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
-          />
-          <textarea
-            value={statementAsk}
-            onChange={(e) => setStatementAsk(e.target.value)}
-            placeholder="Specific ask or boundary"
-            rows={2}
-            style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
-          />
-        </div>
-
-        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
-            Session card preview
-          </div>
-          <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-            {buildStateToStatementCard()}
-          </pre>
+          Close this session first. If you want, you can also add a clear external anchor.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={finishStateToStatement}>
             Finish session
           </button>
-          <button className="btn btn-ghost" onClick={copyStateToStatement}>
-            {statementCopied ? "Copied" : "Copy anchor"}
-          </button>
-          <button className="btn btn-ghost" onClick={copyStateToStatementCard}>
-            {statementCardCopied ? "Card copied" : "Copy session card"}
+          <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
+            {stateToStatementExpanded ? "Hide external anchor" : "Add external anchor"}
           </button>
           <button className="btn btn-ghost" onClick={skipStateToStatement}>
             Skip for now
           </button>
         </div>
+
+        {stateToStatementExpanded && (
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+              {[
+                { id: "calm", label: "Calm" },
+                { id: "firm", label: "Firm" },
+                { id: "warm", label: "Warm" },
+                { id: "concise", label: "Short" }
+              ].map(tone => (
+                <button
+                  key={tone.id}
+                  onClick={() => setStatementTone(tone.id)}
+                  style={{
+                    background: statementTone === tone.id ? "var(--amber-glow)" : "transparent",
+                    border: `1px solid ${statementTone === tone.id ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 16,
+                    padding: "6px 12px",
+                    fontSize: 12,
+                    color: statementTone === tone.id ? "var(--amber)" : "var(--text-muted)",
+                    cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}
+                >
+                  {tone.label}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
+              <input
+                type="text"
+                value={statementAudience}
+                onChange={(e) => setStatementAudience(e.target.value)}
+                placeholder="Audience (e.g., partner, manager, team)"
+                style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
+              />
+              <textarea
+                value={statementNeed}
+                onChange={(e) => setStatementNeed(e.target.value)}
+                placeholder="Core message: what needs to be understood?"
+                rows={3}
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
+              />
+              <textarea
+                value={statementAsk}
+                onChange={(e) => setStatementAsk(e.target.value)}
+                placeholder="Specific ask or boundary"
+                rows={2}
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
+              />
+            </div>
+
+            <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+                Session card preview
+              </div>
+              <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
+                {buildStateToStatementCard()}
+              </pre>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-ghost" onClick={copyStateToStatement}>
+                {statementCopied ? "Copied" : "Copy anchor"}
+              </button>
+              <button className="btn btn-ghost" onClick={copyStateToStatementCard}>
+                {statementCardCopied ? "Card copied" : "Copy session card"}
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -6172,65 +6196,10 @@ function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   const [shareCardStatus, setShareCardStatus] = useState("");
-  const [showNewEntry, setShowNewEntry] = useState(false);
   const [viewEntry, setViewEntry] = useState(null);
-  const [jSignal, setJSignal] = useState([]);
-  const [jTriggerType, setJTriggerType] = useState("");
-  const [jTrigger, setJTrigger] = useState("");
-  const [jBody, setJBody] = useState("");
-  const [jOutcome, setJOutcome] = useState("");
-  const [showPulseContextTip, setShowPulseContextTip] = useState(() => {
-    try { return localStorage.getItem("stillform_tooltip_pulse_seen") !== "yes"; } catch { return true; }
-  });
-  const pulsePromptRotations = [
-    { trigger: "What triggered this?", notes: "What happened right before this signal?" },
-    { trigger: "What were you about to do?", notes: "What decision was in front of you in that moment?" },
-    { trigger: "Who was involved?", notes: "What part of the context matters most to remember?" }
-  ];
-  const [pulsePromptIndex, setPulsePromptIndex] = useState(() => {
-    try {
-      const seed = Date.now();
-      return seed % pulsePromptRotations.length;
-    } catch {
-      return 0;
-    }
-  });
   const [journalEntries, setJournalEntries] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
   });
-  const signalAreas = ["Jaw","Shoulders","Chest","Gut","Hands","Legs","Head","Throat"];
-  const triggerTypes = ["Social demand","Performance pressure","Conflict","Uncertainty","Sensory overload","Transition","Rejection","Fatigue","Physical pain","Other"];
-  const outcomeTypes = ["Composed","Talked through","Loop broken","Ready","Incomplete","Reacted","Still processing"];
-  const openNewPulseEntry = () => {
-    setJSignal([]);
-    setJTriggerType("");
-    setJTrigger("");
-    setJBody("");
-    setJOutcome("");
-    setPulsePromptIndex((prev) => (prev + 1) % pulsePromptRotations.length);
-    setShowNewEntry(true);
-  };
-  const dismissPulseContextTip = () => {
-    setShowPulseContextTip(false);
-    try { localStorage.setItem("stillform_tooltip_pulse_seen", "yes"); } catch {}
-  };
-  const savePulseEntry = () => {
-    if (!jSignal.length && !jTriggerType && !jTrigger.trim()) return;
-    const entry = { id: Date.now(), date: new Date().toISOString().split("T")[0], time: new Date().toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}), signal: jSignal, trigger: jTrigger.trim(), triggerType: jTriggerType, emotions: [], body: jBody.trim(), outcome: jOutcome, notes: jBody.trim() };
-    const updated = [entry, ...journalEntries];
-    setJournalEntries(updated);
-    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
-    try { window.plausible("Pulse Entry"); } catch {}
-    setJSignal([]); setJTrigger(""); setJTriggerType(""); setJBody(""); setJOutcome("");
-    setShowNewEntry(false);
-  };
-  const deletePulseEntry = (id) => {
-    if (!window.confirm("Delete this entry?")) return;
-    const updated = journalEntries.filter(e => e.id !== id);
-    setJournalEntries(updated);
-    try { localStorage.setItem("stillform_journal", JSON.stringify(updated)); } catch {}
-    setViewEntry(null);
-  };
 
   const sessions = getSessionsFromStorage();
   const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
@@ -7033,22 +7002,12 @@ function MyProgress({ onBack }) {
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Pulse</div>
               {journalEntries.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
-            {!showNewEntry && !viewEntry && (
-              <button onClick={openNewPulseEntry} style={{ background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12, color: "var(--amber)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>
-                + Log a pulse
-              </button>
-            )}
           </div>
-          {showPulseContextTip && (
-            <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                Pulse works best as a 15-second after-action capture: what activated, what triggered it, and what you chose next.
-              </div>
-              <button onClick={dismissPulseContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                Got it
-              </button>
+          <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+              Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.
             </div>
-          )}
+          </div>
 
           {/* VIEW SINGLE ENTRY */}
           {viewEntry && (() => {
@@ -7064,60 +7023,14 @@ function MyProgress({ onBack }) {
                 {(e.triggerType || e.trigger) && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Trigger</div><div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div></div>}
                 {e.outcome && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Outcome</div><div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div></div>}
                 {e.notes && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Notes</div><div style={valueStyle}>{e.notes}</div></div>}
-                <button onClick={() => deletePulseEntry(e.id)} style={{ marginTop: 8, background: "none", border: "0.5px solid rgba(200,60,60,0.3)", borderRadius: "var(--r)", padding: "8px 14px", fontSize: 11, color: "rgba(200,80,80,0.7)", cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace" }}>Delete entry</button>
               </div>
             );
           })()}
 
-          {/* NEW ENTRY FORM */}
-          {showNewEntry && !viewEntry && (
-            <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 16 }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 16 }}>New Entry</div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Signal — where did it activate?</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                  {signalAreas.map(area => <button key={area} onClick={() => setJSignal(prev => prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area])} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jSignal.includes(area) ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jSignal.includes(area) ? "var(--amber-dim)" : "var(--border)"}`, color: jSignal.includes(area) ? "var(--amber)" : "var(--text-dim)" }}>{area}</button>)}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Trigger</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 8 }}>
-                  {triggerTypes.map(t => <button key={t} onClick={() => setJTriggerType(prev => prev === t ? "" : t)} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jTriggerType === t ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jTriggerType === t ? "var(--amber-dim)" : "var(--border)"}`, color: jTriggerType === t ? "var(--amber)" : "var(--text-dim)" }}>{t}</button>)}
-                </div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <textarea value={jTrigger} onChange={e => setJTrigger(e.target.value)} placeholder={pulsePromptRotations[pulsePromptIndex].trigger} style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
-                  <MicButton onTranscript={t => setJTrigger(prev => prev + (prev ? " " : "") + t)} />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Outcome</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
-                  {outcomeTypes.map(o => <button key={o} onClick={() => setJOutcome(prev => prev === o ? "" : o)} style={{ padding: "5px 10px", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", background: jOutcome === o ? "var(--amber-glow)" : "var(--surface2)", border: `0.5px solid ${jOutcome === o ? "var(--amber-dim)" : "var(--border)"}`, color: jOutcome === o ? "var(--amber)" : "var(--text-dim)" }}>{o}</button>)}
-                </div>
-              </div>
-
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>Notes <span style={{ opacity: 0.5 }}>— optional</span></div>
-                <div style={{ display: "flex", gap: 6 }}>
-                  <textarea value={jBody} onChange={e => setJBody(e.target.value)} placeholder={pulsePromptRotations[pulsePromptIndex].notes} style={{ flex: 1, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "8px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif", resize: "none", minHeight: 44, lineHeight: 1.5 }} />
-                  <MicButton onTranscript={t => setJBody(prev => prev + (prev ? " " : "") + t)} />
-                </div>
-              </div>
-
-              <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={savePulseEntry} disabled={!jSignal.length && !jTriggerType && !jTrigger.trim()} style={{ flex: 1, background: (jSignal.length || jTriggerType || jTrigger.trim()) ? "var(--amber)" : "var(--surface2)", color: (jSignal.length || jTriggerType || jTrigger.trim()) ? "#0A0A0C" : "var(--text-muted)", border: "none", borderRadius: "var(--r)", padding: "10px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Save</button>
-                <button onClick={() => { setShowNewEntry(false); setJSignal([]); setJTrigger(""); setJTriggerType(""); setJBody(""); setJOutcome(""); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px", fontSize: 12, color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Cancel</button>
-              </div>
-            </div>
-          )}
-
           {/* ENTRY LIST */}
-          {!viewEntry && !showNewEntry && (
+          {!viewEntry && (
             journalEntries.length === 0 ? (
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", padding: "16px 0" }}>No entries yet. Pulse logs automatically when you select a feel state before a session.</div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", padding: "16px 0" }}>No pulse data yet. Complete check-ins and tools to start your progress signal.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 {[...journalEntries].reverse().map((e, i) => (
@@ -10040,7 +9953,7 @@ export default function Stillform() {
               },
               {
                 q: "What does the AI actually do?",
-                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your Pulse entries and session history."
+                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your signal history and session patterns."
               },
               {
                 q: "What does 'status is junk code for the ego' mean?",
@@ -10064,11 +9977,11 @@ export default function Stillform() {
               },
               {
                 q: "What is the Pulse?",
-                a: "A quick after-action record. What happened, what you felt, how it landed — logged in about 15 seconds. The AI uses these to spot your patterns over time."
+                a: "Pulse is your progress signal layer. It is generated from your completed check-ins and regulation tools, then surfaced in My Progress so you can track patterns over time."
               },
               {
                 q: "How does Pulse work?",
-                a: "When you select how you're feeling before a session, it logs automatically. Your full Pulse history lives in My Progress — along with AI session notes, pattern analysis, and everything the app has learned about you."
+                a: "Pulse updates from your check-ins and completed regulation sessions. Your full Pulse history lives in My Progress — along with AI session notes, pattern analysis, and everything the app has learned about you."
               },
               {
                 q: "What is Composure Telemetry?",

@@ -178,6 +178,20 @@ const GENERIC_NEXT_STEP_SNIPPETS = [
 
 const SOFT_ENTRY_LOCKED_REFRAME = "Hey good to see you. How are you doing?";
 
+const VOICE_CONTRACT_BANNED_PATTERNS = [
+  /\bthis space is for\b/gi,
+  /\bglad you dropped in\b/gi,
+  /\bconsidering (these )?dynamics\b/gi,
+  /\bwhat comes up for you\b/gi,
+  /\bhow does that land in your body\b/gi,
+  /\blet'?s unpack\b/gi,
+  /\bhold space\b/gi,
+  /\bdeep breath and\b/gi,
+  /\bi understand how you feel\b/gi,
+  /\bit sounds like you'?re\b/gi,
+  /\byou'?re navigating a lot\b/gi
+];
+
 function hasAnyPattern(text, patterns) {
   const value = String(text || "");
   return patterns.some((pattern) => {
@@ -330,6 +344,27 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
   return { ok: reasons.length === 0, reasons };
 }
 
+function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry = false, hasCrisisLanguage = false, conversationTurn = 1 } = {}) {
+  if (isSummaryRequest) return { ok: true, reasons: [] };
+  const reasons = [];
+  const reframe = String(payload?.reframe || "").trim();
+  if (!reframe) return { ok: false, reasons: ["empty voice payload"] };
+
+  if (hasAnyPattern(reframe, VOICE_CONTRACT_BANNED_PATTERNS)) reasons.push("voice contract banned phrase");
+
+  const sentenceCount = estimateSentenceCount(reframe);
+  if (!hasCrisisLanguage && conversationTurn <= 2 && sentenceCount > 3) {
+    reasons.push("early-turn response too long");
+  }
+  if (!hasCrisisLanguage && reframe.length > 420) {
+    reasons.push("voice payload too long");
+  }
+  if (isSoftEntry && normalizeForSnippetMatch(reframe) !== normalizeForSnippetMatch(SOFT_ENTRY_LOCKED_REFRAME)) {
+    reasons.push("soft-entry line drift");
+  }
+  return { ok: reasons.length === 0, reasons };
+}
+
 function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false }) {
   if (isSummaryRequest) {
     return {
@@ -370,7 +405,7 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
   return {
     distortion: null,
     mechanism: route?.id || "signal_noise",
-    reframe: `Your signal is real, and it needs precision more than pressure. ${modeAnchor} Mechanism for this moment: ${route?.label || "Signal/noise separation"}. Stay with one lane until your system settles.`,
+    reframe: `Your signal is real, and your system is loud right now. ${modeAnchor} Keep it simple and run one clean step before you add more.`,
     next_step: route?.nextStep || "Take one deliberate breath and choose one action you can complete in the next 90 seconds.",
     question: null
   };
@@ -806,6 +841,7 @@ exports.handler = async function(event) {
 
   try {
     const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null } = JSON.parse(event.body);
+    const conversationTurn = Array.isArray(history) ? Math.max(1, history.length + 1) : 1;
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -1057,7 +1093,10 @@ WHAT STAYING SHARP LOOKS LIKE:
     let parsed = null;
     let retryUsed = false;
     let fallbackUsed = false;
+    let voiceRepairUsed = false;
+    let voiceFallbackUsed = false;
     let lastValidation = { ok: false, reasons: ["no response"] };
+    let lastVoiceValidation = { ok: false, reasons: ["no response"] };
     let previousRaw = "";
 
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -1076,16 +1115,25 @@ WHAT STAYING SHARP LOOKS LIKE:
       previousRaw = raw;
       const normalized = normalizeReframePayload(parseModelPayload(raw), scienceRoute);
       lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage });
-      if (lastValidation.ok) {
+      lastVoiceValidation = validateVoiceContract(normalized, {
+        isSummaryRequest: isInternalSummaryRequest,
+        isSoftEntry,
+        hasCrisisLanguage,
+        conversationTurn
+      });
+      if (lastValidation.ok && lastVoiceValidation.ok) {
         parsed = normalized;
         retryUsed = attempt > 0;
+        voiceRepairUsed = attempt > 0;
         break;
       }
       retryUsed = true;
+      voiceRepairUsed = true;
     }
 
     if (!parsed) {
       fallbackUsed = true;
+      voiceFallbackUsed = true;
       parsed = buildDeterministicFallback({
         mode,
         route: scienceRoute,
@@ -1114,6 +1162,10 @@ WHAT STAYING SHARP LOOKS LIKE:
         scienceRoute: scienceRoute?.id || null,
         qualityRetryUsed: retryUsed,
         deterministicFallbackUsed: fallbackUsed,
+        voiceValidationFailed: !lastVoiceValidation.ok,
+        voiceFailureReasons: lastVoiceValidation.reasons || [],
+        voiceRepairUsed,
+        voiceFallbackUsed,
         crisisDetected: hasCrisisLanguage,
         liabilityGuard: hasFinancial || hasMedical || hasLegal
       })
