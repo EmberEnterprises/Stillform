@@ -8751,6 +8751,13 @@ export default function Stillform() {
 
           const current = setupSteps[setupStep];
           const isLast = setupStep === setupSteps.length - 1;
+          if (current?.autoLaunch) {
+            if (setupAutoLaunchStepRef.current !== setupStep) {
+              setupAutoLaunchStepRef.current = setupStep;
+              setTimeout(() => { current.autoLaunch(); }, 0);
+            }
+            return null;
+          }
 
           // Assessment state (uses component-level assessmentAnswers)
           const currentScenario = current.isAssessment ? (current.scenarios[assessmentAnswers.length] || null) : null;
@@ -8856,14 +8863,6 @@ export default function Stillform() {
                 </div>
               )}
 
-              {/* CTA — autoLaunch fires once when step renders */}
-              {current.autoLaunch && (() => {
-                if (setupAutoLaunchStepRef.current !== setupStep) {
-                  setupAutoLaunchStepRef.current = setupStep;
-                  setTimeout(() => { current.autoLaunch(); }, 50);
-                }
-                return null;
-              })()}
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {current.cta && (
                   <button className="btn btn-primary" style={{ padding: "16px 24px", fontSize: 15 }}

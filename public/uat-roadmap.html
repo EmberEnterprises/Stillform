@@ -65,6 +65,26 @@
         text-transform: uppercase;
         color: var(--text-dim);
       }
+      .jump-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 0 0 18px;
+      }
+      .jump-links a {
+        color: var(--amber);
+        text-decoration: none;
+        border: 1px solid rgba(201, 147, 58, 0.28);
+        background: var(--amber-glow);
+        border-radius: 999px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+      }
+      .jump-links a:hover {
+        border-color: rgba(201, 147, 58, 0.48);
+      }
       .block {
         background: var(--surface);
         border: 1px solid var(--border);
@@ -164,12 +184,55 @@
     <main class="wrap">
       <div class="kicker">Stillform · UAT Status</div>
       <h1>Stillform UAT Status Board</h1>
-      <p class="sub">Execution only: what is done (launched), what is currently being worked on, and what is queued for future launch.</p>
+      <p class="sub">Execution only: quick links for what was removed, what is live, and what is being prepared for launch.</p>
       <p class="updated">Updated: Apr 13, 2026</p>
+      <nav class="jump-links" aria-label="UAT status quick links">
+        <a href="#removed">What was removed</a>
+        <a href="#live">What is live</a>
+        <a href="#planned">Launch planning</a>
+      </nav>
 
-      <section class="block">
+      <section class="block" id="removed">
         <div class="block-head">
-          <h2>What’s Done (Launched)</h2>
+          <h2>What Was Removed / Retired</h2>
+          <span class="badge done">Removed</span>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Removed item</th>
+              <th>Replaced by</th>
+              <th>Why it was removed</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Standalone Watch &amp; Choose tool surface</td>
+              <td>Reframe watch sequence inside Reframe</td>
+              <td>Reduced tool sprawl and kept cognitive work in one place.</td>
+            </tr>
+            <tr>
+              <td>Manual Pulse logging UI</td>
+              <td>Pulse generated from completed tools and check-ins in My Progress</td>
+              <td>Pulse is now data interpretation only, not a separate action burden.</td>
+            </tr>
+            <tr>
+              <td>Optional tutorial live tests (Breathe/Reframe)</td>
+              <td>Compressed onboarding to core tutorial flow + required Go/No-Go check</td>
+              <td>Lowered onboarding load and reduced setup fatigue.</td>
+            </tr>
+            <tr>
+              <td>Blind Spots wording in calibration flow</td>
+              <td>Pattern Check baseline language</td>
+              <td>Softened accusatory framing while keeping pattern integrity.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="block" id="live">
+        <div class="block-head">
+          <h2>What Is Live</h2>
           <span class="badge done">Launched</span>
         </div>
         <table class="table">
@@ -210,9 +273,9 @@
         </table>
       </section>
 
-      <section class="block">
+      <section class="block" id="planned">
         <div class="block-head">
-          <h2>Currently Being Worked On</h2>
+          <h2>Planning / Pre-Launch Work</h2>
           <span class="badge progress">In progress</span>
         </div>
         <div class="in-progress-grid">
@@ -235,7 +298,7 @@
         </div>
       </section>
 
-      <section class="block">
+      <section class="block" id="future">
         <div class="block-head">
           <h2>Future Launch</h2>
           <span class="badge future">Queued</span>
