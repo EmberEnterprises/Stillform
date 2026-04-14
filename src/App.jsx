@@ -3230,7 +3230,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6239,6 +6239,160 @@ function MyProgress({ onBack }) {
   const [journalEntries, setJournalEntries] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
   });
+  const [focusCheckMode, setFocusCheckMode] = useState("idle");
+  const [focusCheckTrials, setFocusCheckTrials] = useState([]);
+  const [focusCheckIndex, setFocusCheckIndex] = useState(0);
+  const [focusCheckResponded, setFocusCheckResponded] = useState(false);
+  const [focusCheckTrialStartedAt, setFocusCheckTrialStartedAt] = useState(0);
+  const [focusCheckStats, setFocusCheckStats] = useState({
+    hits: 0,
+    misses: 0,
+    falseAlarms: 0,
+    correctRejects: 0,
+    totalGo: 0,
+    totalNoGo: 0,
+    reactionTimes: []
+  });
+  const [focusCheckSummary, setFocusCheckSummary] = useState(() => {
+    try {
+      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+      return Array.isArray(history) && history.length ? history[history.length - 1] : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const currentFocusTrial = focusCheckTrials[focusCheckIndex] || null;
+  const latestFocusHistory = (() => {
+    try {
+      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+      return Array.isArray(history) ? history : [];
+    } catch {
+      return [];
+    }
+  })();
+  const previousFocusSummary = latestFocusHistory.length > 1 ? latestFocusHistory[latestFocusHistory.length - 2] : null;
+  const focusAccuracyDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.accuracy)
+    && Number.isFinite(previousFocusSummary.accuracy)
+  ) ? focusCheckSummary.accuracy - previousFocusSummary.accuracy : null;
+  const focusInhibitionDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.inhibition)
+    && Number.isFinite(previousFocusSummary.inhibition)
+  ) ? focusCheckSummary.inhibition - previousFocusSummary.inhibition : null;
+  const focusReactionDelta = (
+    focusCheckSummary
+    && previousFocusSummary
+    && Number.isFinite(focusCheckSummary.avgReactionMs)
+    && Number.isFinite(previousFocusSummary.avgReactionMs)
+  ) ? focusCheckSummary.avgReactionMs - previousFocusSummary.avgReactionMs : null;
+
+  const startFocusCheck = () => {
+    const trials = Array.from({ length: 30 }, (_, idx) => {
+      const type = Math.random() < 0.7 ? "go" : "nogo";
+      return { id: `${Date.now()}-${idx}`, type, label: type === "go" ? "GO" : "NO-GO" };
+    });
+    const totalGo = trials.filter((t) => t.type === "go").length;
+    const totalNoGo = trials.length - totalGo;
+    setFocusCheckTrials(trials);
+    setFocusCheckIndex(0);
+    setFocusCheckResponded(false);
+    setFocusCheckTrialStartedAt(Date.now());
+    setFocusCheckStats({
+      hits: 0,
+      misses: 0,
+      falseAlarms: 0,
+      correctRejects: 0,
+      totalGo,
+      totalNoGo,
+      reactionTimes: []
+    });
+    setFocusCheckMode("running");
+  };
+
+  const resetFocusCheck = () => {
+    setFocusCheckMode("idle");
+    setFocusCheckTrials([]);
+    setFocusCheckIndex(0);
+    setFocusCheckResponded(false);
+    setFocusCheckTrialStartedAt(0);
+  };
+
+  const submitFocusResponse = () => {
+    if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
+    const rt = Math.max(0, Date.now() - focusCheckTrialStartedAt);
+    setFocusCheckResponded(true);
+    setFocusCheckStats((prev) => {
+      if (currentFocusTrial.type === "go") {
+        return { ...prev, hits: prev.hits + 1, reactionTimes: [...prev.reactionTimes, rt] };
+      }
+      return { ...prev, falseAlarms: prev.falseAlarms + 1 };
+    });
+    window.setTimeout(() => {
+      setFocusCheckIndex((prev) => prev + 1);
+      setFocusCheckResponded(false);
+    }, 80);
+  };
+
+  useEffect(() => {
+    if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
+    setFocusCheckTrialStartedAt(Date.now());
+    const timer = window.setTimeout(() => {
+      setFocusCheckStats((prev) => {
+        if (currentFocusTrial.type === "go") return { ...prev, misses: prev.misses + 1 };
+        return { ...prev, correctRejects: prev.correctRejects + 1 };
+      });
+      setFocusCheckIndex((prev) => prev + 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [focusCheckMode, focusCheckIndex, currentFocusTrial?.id, focusCheckResponded]);
+
+  useEffect(() => {
+    if (focusCheckMode !== "running") return;
+    if (focusCheckIndex < focusCheckTrials.length) return;
+    const avgReactionMs = focusCheckStats.reactionTimes.length
+      ? Math.round(focusCheckStats.reactionTimes.reduce((sum, value) => sum + value, 0) / focusCheckStats.reactionTimes.length)
+      : null;
+    const accuracy = focusCheckTrials.length
+      ? Math.round(((focusCheckStats.hits + focusCheckStats.correctRejects) / focusCheckTrials.length) * 100)
+      : null;
+    const inhibition = focusCheckStats.totalNoGo
+      ? Math.round((focusCheckStats.correctRejects / focusCheckStats.totalNoGo) * 100)
+      : null;
+    const entry = {
+      timestamp: new Date().toISOString(),
+      trials: focusCheckTrials.length,
+      accuracy,
+      inhibition,
+      avgReactionMs,
+      falseAlarms: focusCheckStats.falseAlarms
+    };
+    try {
+      const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+      const next = [...(Array.isArray(history) ? history : []), entry].slice(-20);
+      localStorage.setItem("stillform_focus_check_history", JSON.stringify(next));
+      setFocusCheckSummary(entry);
+    } catch {
+      setFocusCheckSummary(entry);
+    }
+    try { window.plausible("Focus Check Completed"); } catch {}
+    setFocusCheckMode("complete");
+  }, [focusCheckMode, focusCheckIndex, focusCheckTrials.length, focusCheckStats]);
+
+  useEffect(() => {
+    if (focusCheckMode !== "running") return;
+    const onKeyDown = (event) => {
+      if (event.code !== "Space" && event.key !== " ") return;
+      event.preventDefault();
+      submitFocusResponse();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [focusCheckMode, submitFocusResponse]);
 
   const sessions = getSessionsFromStorage();
   const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
@@ -6733,7 +6887,7 @@ function MyProgress({ onBack }) {
                   </div>
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                      Science evidence
+                      Science Evidence
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 8 }}>
                       <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
@@ -6757,6 +6911,81 @@ function MyProgress({ onBack }) {
                       Readout: <span style={{ color: "var(--text)" }}>{scienceEvidenceRead}</span>.
                       {" "}Built from existing sessions, deltas, and loop completion — no extra workflow required.
                     </div>
+                  </div>
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                      <div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+                          Go/No-Go focus check
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                          Optional 30-second inhibition read. Tap for GO. Hold on NO-GO.
+                        </div>
+                      </div>
+                      {focusCheckMode !== "running" && (
+                        <button
+                          onClick={startFocusCheck}
+                          style={{
+                            background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
+                            padding: "8px 11px", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
+                          }}
+                        >
+                          Start 30s
+                        </button>
+                      )}
+                    </div>
+                    {focusCheckMode === "running" && currentFocusTrial && (
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 12px", textAlign: "center" }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+                          Trial {Math.min(focusCheckIndex + 1, focusCheckTrials.length)} / {focusCheckTrials.length}
+                        </div>
+                        <div style={{ fontSize: 26, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
+                          {currentFocusTrial.label}
+                        </div>
+                        <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 8 }}>
+                          {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
+                        </div>
+                        <button
+                          onClick={submitFocusResponse}
+                          disabled={focusCheckResponded}
+                          style={{
+                            background: focusCheckResponded ? "var(--surface)" : "var(--amber-glow)",
+                            border: "0.5px solid var(--amber-dim)",
+                            borderRadius: "var(--r-sm)",
+                            padding: "8px 14px",
+                            fontSize: 11,
+                            color: focusCheckResponded ? "var(--text-muted)" : "var(--amber)",
+                            cursor: focusCheckResponded ? "not-allowed" : "pointer",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          {focusCheckResponded ? "Recorded" : "Respond"}
+                        </button>
+                      </div>
+                    )}
+                    {focusCheckSummary && (
+                      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                          <div>
+                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
+                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.accuracy ?? "N/A"}%</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
+                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.inhibition ?? "N/A"}%</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
+                            <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{focusCheckSummary.avgReactionMs ? `${focusCheckSummary.avgReactionMs}ms` : "N/A"}</div>
+                          </div>
+                        </div>
+                        {previousFocusSummary && (
+                          <div style={{ marginTop: 7, fontSize: 11, color: "var(--text-dim)" }}>
+                            Delta: accuracy {focusCheckSummary.accuracy - (previousFocusSummary.accuracy || 0) >= 0 ? "+" : ""}{focusCheckSummary.accuracy - (previousFocusSummary.accuracy || 0)} pts · inhibition {focusCheckSummary.inhibition - (previousFocusSummary.inhibition || 0) >= 0 ? "+" : ""}{focusCheckSummary.inhibition - (previousFocusSummary.inhibition || 0)} pts
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
@@ -7765,7 +7994,8 @@ export default function Stillform() {
     customization: false,
     signal: false,
     more: false,
-    data: true
+    data: false,
+    advanced: false
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -10586,7 +10816,7 @@ export default function Stillform() {
                     }}>
                       <div>
                         <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and Pulse</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress</div>
                       </div>
                       <button onClick={() => {
                         biometric.setEnabled(!bioOn);
@@ -10607,6 +10837,21 @@ export default function Stillform() {
               </div>
             )}
 
+            {/* Advanced controls */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("advanced")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Advanced controls</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.advanced ? "▾" : "▸"}</span>
+              </button>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                Integrations, sync diagnostics, data exports, and account operations.
+              </div>
+            </div>
+
+            {settingsSectionOpen.advanced && (<>
             {/* Integrations */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("integrations")} style={{
@@ -11475,6 +11720,7 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_entry_protocol");
                       localStorage.removeItem("stillform_reframe_prefill");
                       localStorage.removeItem("stillform_journal");
+                      localStorage.removeItem("stillform_focus_check_history");
                       localStorage.removeItem("stillform_ai_session_notes");
                       localStorage.removeItem("stillform_bias_profile");
                       localStorage.removeItem("stillform_regulation_type");
@@ -11584,6 +11830,7 @@ export default function Stillform() {
               </div>
               )}
             </div>
+            </>)}
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 28, lineHeight: 1.5 }}>
               Stillform · ARA Embers LLC · v{APP_VERSION}
               <br />
