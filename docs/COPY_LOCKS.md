@@ -22,9 +22,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Reframe soft-entry greeting | LOCKED | `Hey good to see you. How are you doing?` |
 | Pulse progress-layer descriptor | LOCKED | `Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.` |
 | Science evidence section title | LOCKED | `Science Evidence` |
-| Tutorial progression labels | LOCKED | `Tutorial · 1 of 5` / `Tutorial · 2 of 5` / `Tutorial · 3 of 5` / `Tutorial · 4 of 5` / `Tutorial · 5 of 5` |
-| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Go / No-Go Quick Check — Time to First Value` / `Morning Check-In — Set the Day’s Baseline` / `Daily Regulation Tools — Active Execution Layer` / `Run the Full Loop Daily` |
-| Tutorial optional live test labels | LOCKED | `Optional live test — Breathe (20s)` / `Optional live test — Reframe (1 turn)` |
+| Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
+| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Go / No-Go Quick Check — Time to First Value` / `Morning + Daily Tools — Active Execution Layer` / `Run the Full Loop Daily` |
 | Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
 
 ## Constrained Anchors
@@ -48,12 +47,11 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - How You Process
    - Signal Profile + Blind Spots
 5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
-6. Tutorial uses five concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
+6. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 7. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
 8. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
 9. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
 10. Tutorial includes a Go / No-Go TTFV step with an on-page Post-Check Briefing before proceeding.
-11. Tutorial optional live previews for Breathe/Reframe are explicitly marked educational and not required.
 
 ## Prohibited Claims
 

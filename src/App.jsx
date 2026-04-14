@@ -1325,7 +1325,6 @@ const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
 const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
 const LOOP_NUDGE_EVENTS_MAX_ITEMS = 180;
-const TUTORIAL_INSTRUMENT_KEY = "stillform_tutorial_instruments";
 const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
@@ -1424,18 +1423,6 @@ const readArrayFromStorage = (key) => {
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
-  }
-};
-
-const appendTutorialInstrument = (entry) => {
-  if (!entry || typeof entry !== "object") return false;
-  try {
-    const existing = readArrayFromStorage(TUTORIAL_INSTRUMENT_KEY);
-    existing.push(entry);
-    localStorage.setItem(TUTORIAL_INSTRUMENT_KEY, JSON.stringify(existing.slice(-50)));
-    return true;
-  } catch {
-    return false;
   }
 };
 
@@ -3210,7 +3197,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_tutorial_instruments"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6228,287 +6215,6 @@ function FocusCheckValidation({
   );
 }
 
-function TutorialBreatheMicroLab({ onComplete }) {
-  const [phase, setPhase] = useState("prep"); // prep | running | post
-  const [preActivation, setPreActivation] = useState(null);
-  const [postActivation, setPostActivation] = useState(null);
-  const [secondsLeft, setSecondsLeft] = useState(20);
-
-  useEffect(() => {
-    if (phase !== "running") return undefined;
-    if (secondsLeft <= 0) {
-      setPhase("post");
-      return undefined;
-    }
-    const timer = window.setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => window.clearTimeout(timer);
-  }, [phase, secondsLeft]);
-
-  const startRun = () => {
-    if (!Number.isFinite(preActivation)) return;
-    setPostActivation(null);
-    setSecondsLeft(20);
-    setPhase("running");
-  };
-
-  const saveBrief = () => {
-    if (!Number.isFinite(preActivation) || !Number.isFinite(postActivation)) return;
-    const entry = {
-      type: "tutorial-breathe-micro",
-      timestamp: new Date().toISOString(),
-      preActivation,
-      postActivation,
-      delta: postActivation - preActivation,
-      durationSec: 20
-    };
-    try { window.plausible("Tutorial Breathe Micro Completed", { props: { delta: entry.delta } }); } catch {}
-    onComplete?.(entry);
-  };
-
-  const cue = (secondsLeft % 8) >= 4 ? "Inhale" : "Exhale";
-  return (
-    <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-        Optional live test — Breathe (20s)
-      </div>
-      {phase === "prep" && (
-        <>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-            Set a quick pre-rating, run one short cycle, then rate again. This shows immediate physiological shift.
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => setPreActivation(n)} style={{
-                background: preActivation === n ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${preActivation === n ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "5px 12px", fontSize: 11, cursor: "pointer",
-                color: preActivation === n ? "var(--amber)" : "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
-              }}>
-                Activation {n}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={startRun}
-            disabled={!Number.isFinite(preActivation)}
-            style={{
-              background: Number.isFinite(preActivation) ? "var(--amber)" : "var(--surface2)",
-              color: Number.isFinite(preActivation) ? "#0A0A0C" : "var(--text-muted)",
-              border: "none", borderRadius: "var(--r)", padding: "9px 12px", fontSize: 12, cursor: Number.isFinite(preActivation) ? "pointer" : "not-allowed",
-              fontFamily: "'DM Sans', sans-serif", alignSelf: "flex-start"
-            }}
-          >
-            Start 20s Breathe
-          </button>
-        </>
-      )}
-      {phase === "running" && (
-        <div style={{ background: "var(--surface2)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "16px 12px", textAlign: "center" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
-            {secondsLeft}s remaining
-          </div>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 30, color: "var(--amber)" }}>{cue}</div>
-        </div>
-      )}
-      {phase === "post" && (
-        <>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-            Rate activation again after the cycle.
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => setPostActivation(n)} style={{
-                background: postActivation === n ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${postActivation === n ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "5px 12px", fontSize: 11, cursor: "pointer",
-                color: postActivation === n ? "var(--amber)" : "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
-              }}>
-                Activation {n}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={saveBrief}
-            disabled={!Number.isFinite(postActivation)}
-            style={{
-              background: Number.isFinite(postActivation) ? "var(--amber)" : "var(--surface2)",
-              color: Number.isFinite(postActivation) ? "#0A0A0C" : "var(--text-muted)",
-              border: "none", borderRadius: "var(--r)", padding: "9px 12px", fontSize: 12, cursor: Number.isFinite(postActivation) ? "pointer" : "not-allowed",
-              fontFamily: "'DM Sans', sans-serif", alignSelf: "flex-start"
-            }}
-          >
-            Save Breathe Brief
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
-function TutorialReframeMicroLab({ onComplete }) {
-  const scenarioOptions = [
-    "I keep assuming this conversation will go badly before it starts.",
-    "One setback today makes me feel like the whole day is off-track.",
-    "I'm taking one comment as proof that I'm not doing enough."
-  ];
-  const [scenario, setScenario] = useState(scenarioOptions[0]);
-  const [preClarity, setPreClarity] = useState(null);
-  const [postClarity, setPostClarity] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [response, setResponse] = useState(null);
-  const buildFallback = () => ({
-    distortion: "Forecasting certainty from limited evidence",
-    mechanism: "evidence_weighting",
-    reframe: "Treat this as a signal to slow interpretation, not as a final verdict. One moment can inform your next step without defining your entire outcome.",
-    next_step: "Name one verified fact, one assumption, and one concrete action you can take in the next 10 minutes."
-  });
-  const runPreview = async () => {
-    if (!Number.isFinite(preClarity) || !scenario.trim()) return;
-    setLoading(true);
-    setResponse(null);
-    setPostClarity(null);
-    const fallback = buildFallback();
-    let settled = false;
-    try {
-      const controller = new AbortController();
-      const timeout = window.setTimeout(() => controller.abort(), 9000);
-      const res = await fetch("/.netlify/functions/reframe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        signal: controller.signal,
-        body: JSON.stringify({
-          input: scenario.trim(),
-          mode: "clarity",
-          history: [],
-          sessionCount: getSessionCountFromStorage(),
-          tutorialPreview: true
-        })
-      });
-      window.clearTimeout(timeout);
-      const data = await res.json();
-      if (data?.reframe) {
-        setResponse({
-          distortion: data.distortion || fallback.distortion,
-          mechanism: data.mechanism || fallback.mechanism,
-          reframe: data.reframe,
-          next_step: data.next_step || fallback.next_step,
-          fallback: false
-        });
-        settled = true;
-      }
-    } catch {}
-    if (!settled) setResponse({ ...fallback, fallback: true });
-    setLoading(false);
-  };
-  const saveBrief = () => {
-    if (!Number.isFinite(preClarity) || !Number.isFinite(postClarity) || !response) return;
-    const entry = {
-      type: "tutorial-reframe-micro",
-      timestamp: new Date().toISOString(),
-      scenario,
-      preClarity,
-      postClarity,
-      delta: postClarity - preClarity,
-      distortion: response.distortion,
-      mechanism: response.mechanism,
-      usedFallback: !!response.fallback
-    };
-    try { window.plausible("Tutorial Reframe Micro Completed", { props: { delta: entry.delta } }); } catch {}
-    onComplete?.(entry);
-  };
-  return (
-    <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-        Optional live test — Reframe (1 turn)
-      </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-        One short live turn. This preview uses the same Reframe engine, then asks for post-clarity rating.
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        {scenarioOptions.map((option) => (
-          <button key={option} onClick={() => setScenario(option)} style={{
-            textAlign: "left", background: scenario === option ? "var(--amber-glow)" : "var(--surface2)",
-            border: `1px solid ${scenario === option ? "var(--amber-dim)" : "var(--border)"}`, borderRadius: "var(--r)",
-            padding: "8px 10px", fontSize: 12, color: scenario === option ? "var(--text)" : "var(--text-dim)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-          }}>
-            {option}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <button key={n} onClick={() => setPreClarity(n)} style={{
-            background: preClarity === n ? "var(--amber-glow)" : "transparent",
-            border: `1px solid ${preClarity === n ? "var(--amber-dim)" : "var(--border)"}`,
-            borderRadius: 20, padding: "5px 12px", fontSize: 11, cursor: "pointer",
-            color: preClarity === n ? "var(--amber)" : "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
-          }}>
-            Clarity {n}
-          </button>
-        ))}
-      </div>
-      <button
-        onClick={runPreview}
-        disabled={!Number.isFinite(preClarity) || loading}
-        style={{
-          background: Number.isFinite(preClarity) && !loading ? "var(--amber)" : "var(--surface2)",
-          color: Number.isFinite(preClarity) && !loading ? "#0A0A0C" : "var(--text-muted)",
-          border: "none", borderRadius: "var(--r)", padding: "9px 12px", fontSize: 12, cursor: Number.isFinite(preClarity) && !loading ? "pointer" : "not-allowed",
-          fontFamily: "'DM Sans', sans-serif", alignSelf: "flex-start"
-        }}
-      >
-        {loading ? "Running..." : "Run 1-turn Reframe"}
-      </button>
-      {response && (
-        <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 7 }}>
-          <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-            <strong style={{ color: "var(--text)" }}>Pattern:</strong> {response.distortion}
-          </div>
-          <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-            <strong style={{ color: "var(--text)" }}>Reframe:</strong> {response.reframe}
-          </div>
-          <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-            <strong style={{ color: "var(--text)" }}>Next step:</strong> {response.next_step}
-          </div>
-          {response.fallback && (
-            <div style={{ fontSize: 10, color: "var(--text-muted)", lineHeight: 1.5 }}>
-              Connection fallback used for this preview; full Reframe remains available in the live tool.
-            </div>
-          )}
-        </div>
-      )}
-      {response && (
-        <>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[1, 2, 3, 4, 5].map((n) => (
-              <button key={n} onClick={() => setPostClarity(n)} style={{
-                background: postClarity === n ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${postClarity === n ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "5px 12px", fontSize: 11, cursor: "pointer",
-                color: postClarity === n ? "var(--amber)" : "var(--text-muted)", fontFamily: "'DM Sans', sans-serif"
-              }}>
-                Post clarity {n}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={saveBrief}
-            disabled={!Number.isFinite(postClarity)}
-            style={{
-              background: Number.isFinite(postClarity) ? "var(--amber)" : "var(--surface2)",
-              color: Number.isFinite(postClarity) ? "#0A0A0C" : "var(--text-muted)",
-              border: "none", borderRadius: "var(--r)", padding: "9px 12px", fontSize: 12, cursor: Number.isFinite(postClarity) ? "pointer" : "not-allowed",
-              fontFamily: "'DM Sans', sans-serif", alignSelf: "flex-start"
-            }}
-          >
-            Save Reframe Brief
-          </button>
-        </>
-      )}
-    </div>
-  );
-}
-
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -7596,8 +7302,6 @@ export default function Stillform() {
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
-  const [tutorialBreatheBrief, setTutorialBreatheBrief] = useState(null);
-  const [tutorialReframeBrief, setTutorialReframeBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
@@ -7665,8 +7369,6 @@ export default function Stillform() {
     setTutorialStep(0);
     setTutorialReturnScreen(backScreen || "home");
     setTutorialFocusBrief(null);
-    setTutorialBreatheBrief(null);
-    setTutorialReframeBrief(null);
     setScreen("tutorial");
   };
   const openFocusCheck = (backScreen = "home") => {
@@ -8837,17 +8539,15 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 1 of 5",
+              kicker: "Tutorial · 1 of 4",
               title: "Calibration — Build Your Baseline",
               paragraphs: [
                 "Calibration establishes your operating profile in one sequence: How You Process, then Signal Profile + Blind Spots.",
-                "This profile guides your first recommendations, but it never restricts access. You can launch any tool directly at any time.",
-                "When you need to adjust setup, use Settings → Processing Type, Settings → Signal Mapping, or Re-run calibration.",
-                "Stillform refines recommendations from your actual usage, so guidance tracks how you process over time."
+                "It sets your starting recommendations while preserving full tool access, and adapts as real usage data accumulates."
               ]
             },
             {
-              kicker: "Tutorial · 2 of 5",
+              kicker: "Tutorial · 2 of 4",
               title: "Go / No-Go Quick Check — Time to First Value",
               focusCheckTTFV: true,
               paragraphs: [
@@ -8856,31 +8556,19 @@ export default function Stillform() {
               ]
             },
             {
-              kicker: "Tutorial · 3 of 5",
-              title: "Morning Check-In — Set the Day’s Baseline",
+              kicker: "Tutorial · 3 of 4",
+              title: "Morning + Daily Tools — Active Execution Layer",
               paragraphs: [
-                "Morning Check-In captures your starting state before composure drifts. In under a minute, you log internal state, body context, and expected load.",
-                "Stillform layers in relevant calendar and health context, then adjusts recommendations to match current reality.",
-                "Used daily, it improves early awareness, reduces preventable escalation, and sharpens decision quality."
+                "Morning Check-In captures state and context early so drift is caught before escalation.",
+                "Use Reframe, Breathe, and Body Scan through the day to prepare, stabilize, and reset without breaking execution."
               ]
             },
             {
-              kicker: "Tutorial · 4 of 5",
-              title: "Daily Regulation Tools — Active Execution Layer",
-              optionalLiveTests: true,
-              paragraphs: [
-                "After Morning Check-In, use your regulation tools throughout the day to prepare, stabilize, and reset as needed.",
-                "Reframe clarifies interpretation before reaction hardens. Breathe downshifts physiological activation. Body Scan releases residual tension through guided acupressure.",
-                "Together, they preserve composure quality under changing demands while keeping action deliberate.",
-                "Below are optional live previews for Breathe and Reframe. They are educational demos, not required steps."
-              ]
-            },
-            {
-              kicker: "Tutorial · 5 of 5",
+              kicker: "Tutorial · 4 of 4",
               title: "Run the Full Loop Daily",
               paragraphs: [
                 "First-time setup sequence: How You Process → Signal Profile + Blind Spots.",
-                "Daily sequence: Go / No-Go Quick Check → Morning Check-In → Daily Regulation Tools → End-of-Day Close → My Progress."
+                "Daily sequence: Go / No-Go Quick Check → Morning + Daily Tools → End-of-Day Close → My Progress."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -8947,13 +8635,6 @@ export default function Stillform() {
                       compact
                       onCompleteRun={(entry) => {
                         setTutorialFocusBrief(entry);
-                        appendTutorialInstrument({
-                          type: "tutorial-go-nogo-ttfv",
-                          timestamp: entry?.timestamp || new Date().toISOString(),
-                          accuracy: entry?.accuracy ?? null,
-                          inhibition: entry?.inhibition ?? null,
-                          avgReactionMs: entry?.avgReactionMs ?? null
-                        });
                       }}
                       autoReturnToCaller
                     />
@@ -8982,50 +8663,6 @@ export default function Stillform() {
                       <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
                         This is your baseline performance signature for today. Stillform uses this with signal mapping and check-ins to adapt routing and track transfer over time.
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-              {page.optionalLiveTests && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-                  {!tutorialBreatheBrief ? (
-                    <TutorialBreatheMicroLab
-                      onComplete={(entry) => {
-                        setTutorialBreatheBrief(entry);
-                        appendTutorialInstrument(entry);
-                      }}
-                    />
-                  ) : (
-                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 14px" }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
-                        Breathe Brief Saved
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                        Activation {tutorialBreatheBrief.preActivation} → {tutorialBreatheBrief.postActivation} ({tutorialBreatheBrief.delta >= 0 ? "+" : ""}{tutorialBreatheBrief.delta}).
-                      </div>
-                      <button onClick={() => setTutorialBreatheBrief(null)} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                        Re-run
-                      </button>
-                    </div>
-                  )}
-                  {!tutorialReframeBrief ? (
-                    <TutorialReframeMicroLab
-                      onComplete={(entry) => {
-                        setTutorialReframeBrief(entry);
-                        appendTutorialInstrument(entry);
-                      }}
-                    />
-                  ) : (
-                    <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 14px" }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
-                        Reframe Brief Saved
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                        Clarity {tutorialReframeBrief.preClarity} → {tutorialReframeBrief.postClarity} ({tutorialReframeBrief.delta >= 0 ? "+" : ""}{tutorialReframeBrief.delta}).
-                      </div>
-                      <button onClick={() => setTutorialReframeBrief(null)} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                        Re-run
-                      </button>
                     </div>
                   )}
                 </div>
@@ -11892,7 +11529,6 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_prefill");
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_focus_check_history");
-                      localStorage.removeItem("stillform_tutorial_instruments");
                       localStorage.removeItem("stillform_ai_session_notes");
                       localStorage.removeItem("stillform_bias_profile");
                       localStorage.removeItem("stillform_regulation_type");
