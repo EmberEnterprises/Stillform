@@ -1535,6 +1535,11 @@ stillform_sb_session (Supabase auth session)
 9. Promo — updated if worth marketing
 10. Punch list — testable item added
 11. Emotion coverage — verify positive/negative/neutral balance if touching Pulse/chips
+12. Scope lock — restate the exact request as “in scope / out of scope” before editing
+13. Single-change discipline — do not make adjacent or “while I’m here” edits outside scope
+14. Evidence gate — show exact changed lines + exact test evidence tied to the request
+15. Push gate — no push without explicit user approval in the current thread
+16. Clarification gate — if requirement is ambiguous, pause and ask before writing code
 
 ### Pushing rules
 - Never push without Arlin's explicit go. No exceptions except clear crash fixes.
