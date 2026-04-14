@@ -185,11 +185,12 @@
       <div class="kicker">Stillform · UAT Status</div>
       <h1>Stillform UAT Status Board</h1>
       <p class="sub">Execution only: quick links for what was removed, what is live, and what is being prepared for launch.</p>
-      <p class="updated">Updated: Apr 13, 2026</p>
+      <p class="updated">Updated: Apr 14, 2026</p>
       <nav class="jump-links" aria-label="UAT status quick links">
         <a href="#removed">What was removed</a>
         <a href="#live">What is live</a>
         <a href="#planned">Launch planning</a>
+        <a href="#issues">Current issue list</a>
       </nav>
 
       <section class="block" id="removed">
@@ -296,6 +297,59 @@
             <p>SHIP gate reruns and end-to-end sanity checks on current release branch/main.</p>
           </article>
         </div>
+      </section>
+
+      <section class="block" id="issues">
+        <div class="block-head">
+          <h2>Current UAT Issue List</h2>
+          <span class="badge progress">Actively fixing</span>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Issue</th>
+              <th>Status</th>
+              <th>Implementation focus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Quick Breathe interaction feels unreliable</td>
+              <td>In progress</td>
+              <td>Stabilize tap-vs-drag behavior so it does not misfire or reposition unexpectedly.</td>
+            </tr>
+            <tr>
+              <td>Reframe external anchor flow is unclear</td>
+              <td>In progress</td>
+              <td>Simplify post-session anchor to a cleaner, single-field action.</td>
+            </tr>
+            <tr>
+              <td>Go/No-Go naming mismatch</td>
+              <td>In progress</td>
+              <td>Unify naming across tutorial, home, settings, and progress surfaces.</td>
+            </tr>
+            <tr>
+              <td>Body Scan point location clarity</td>
+              <td>In progress</td>
+              <td>Improve in-app SVG guidance to make the target point explicit before hold begins.</td>
+            </tr>
+            <tr>
+              <td>Back navigation requires top scroll</td>
+              <td>In progress</td>
+              <td>Add bottom back affordance and right-swipe back on key long screens.</td>
+            </tr>
+            <tr>
+              <td>Delete-all leaves residual AI observations</td>
+              <td>In progress</td>
+              <td>Ensure local wipe clears every stillform_* key and performs cloud-data delete before sign-out.</td>
+            </tr>
+            <tr>
+              <td>Screenshot structural liability clarity</td>
+              <td>In progress</td>
+              <td>Add explicit screenshot-analysis boundary language in Privacy + FAQ.</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="block" id="future">

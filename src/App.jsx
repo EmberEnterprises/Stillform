@@ -2851,6 +2851,59 @@ function BodyScanTool({ onComplete }) {
   const area = scaledAreas[currentArea];
   const holdTarget = area.holdSeconds;
   const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
+  const renderAreaOverview = (areaName) => {
+    const highlightStyle = { fill: "rgba(201,147,58,0.28)", stroke: "var(--amber)", strokeWidth: 1 };
+    return (
+      <svg viewBox="0 0 180 200" width="140" height="140" style={{ overflow: "visible" }} aria-label={`${areaName} body map`}>
+        <circle cx="90" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
+        <path d="M70 42 L62 74 L66 150 L82 194" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
+        <path d="M110 42 L118 74 L114 150 L98 194" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
+        <path d="M66 72 L114 72 L108 126 L72 126 Z" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.1" />
+        <path d="M62 74 L40 102" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
+        <path d="M118 74 L140 102" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
+        <path d="M40 102 L38 150" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
+        <path d="M140 102 L142 150" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
+        {areaName === "Jaw & Face" && (
+          <>
+            <ellipse cx="90" cy="30" rx="15" ry="9" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Face + jaw region</text>
+          </>
+        )}
+        {areaName === "Shoulders & Neck" && (
+          <>
+            <rect x="58" y="44" width="64" height="16" rx="8" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Shoulders + neck region</text>
+          </>
+        )}
+        {areaName === "Chest & Breath" && (
+          <>
+            <rect x="74" y="74" width="32" height="26" rx="10" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Chest + breath region</text>
+          </>
+        )}
+        {areaName === "Hands & Arms" && (
+          <>
+            <rect x="31" y="114" width="16" height="22" rx="7" {...highlightStyle} />
+            <rect x="133" y="114" width="16" height="22" rx="7" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Hands + forearms region</text>
+          </>
+        )}
+        {areaName === "Gut & Core" && (
+          <>
+            <rect x="74" y="100" width="32" height="24" rx="10" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Gut + core region</text>
+          </>
+        )}
+        {areaName === "Legs & Feet" && (
+          <>
+            <rect x="70" y="144" width="14" height="36" rx="7" {...highlightStyle} />
+            <rect x="96" y="144" width="14" height="36" rx="7" {...highlightStyle} />
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Legs + feet region</text>
+          </>
+        )}
+      </svg>
+    );
+  };
 
   const scanSavedRef = useRef(false);
   const scanElapsedRef = useRef(0);
@@ -2904,6 +2957,9 @@ function BodyScanTool({ onComplete }) {
           {i !== currentArea && <div className="scan-area-prompt">{i < currentArea ? "✓ Complete" : a.prompt}</div>}
           {i === currentArea && phase === "scan" && (
             <>
+              <div style={{ display: "flex", justifyContent: "center", marginTop: 10, marginBottom: 10, opacity: 0.95 }}>
+                {renderAreaOverview(a.name)}
+              </div>
               <div className="scan-area-prompt" style={{ marginTop: 8 }}>{a.prompt}</div>
               <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
               <div className="tension-bar">
@@ -2929,6 +2985,12 @@ function BodyScanTool({ onComplete }) {
           )}
           {i === currentArea && phase === "pressure" && (
             <>
+              <div style={{ marginTop: 12, marginBottom: 6, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.06em", textTransform: "uppercase" }}>
+                Step {currentArea + 1} of {scaledAreas.length}
+              </div>
+              <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, marginBottom: 6 }}>
+                Press the <span style={{ color: "var(--amber)" }}>amber point</span> shown below.
+              </div>
               {/* Acupressure point diagram */}
               <div style={{ display: "flex", justifyContent: "center", marginTop: 16, marginBottom: 8 }}>
                 <svg viewBox="0 0 160 160" width="140" height="140" style={{ overflow: "visible" }}>
@@ -3044,6 +3106,9 @@ function BodyScanTool({ onComplete }) {
                     <text x="80" y="148" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">ST36 · below kneecap</text>
                   </>}
                 </svg>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+                Visual legend: amber circle = where to apply pressure.
               </div>
 
               <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "16px 20px" }}>
@@ -3296,6 +3361,29 @@ const sbSyncDown = async () => {
   try { window.plausible?.("Cloud Sync Down",{props:{keys:restored}}); } catch {}
   return {ok:errors.length===0,restored,errors};
 };
+const sbDeleteCloudData = async () => {
+  if (!sbIsSignedIn()) return { ok: false, reason: "not_signed_in" };
+  const user = sbGetUser();
+  if (!user?.id) return { ok: false, reason: "no_user_id" };
+  const errors = [];
+  try {
+    await sbFetch(`/rest/v1/user_data?user_id=eq.${encodeURIComponent(user.id)}`, {
+      method: "DELETE",
+      headers: { Prefer: "return=minimal" }
+    });
+  } catch (e) {
+    errors.push(`user_data:${e?.message || "delete_failed"}`);
+  }
+  try {
+    await sbFetch(`/rest/v1/backups?user_id=eq.${encodeURIComponent(user.id)}`, {
+      method: "DELETE",
+      headers: { Prefer: "return=minimal" }
+    });
+  } catch (e) {
+    errors.push(`backups:${e?.message || "delete_failed"}`);
+  }
+  return { ok: errors.length === 0, errors };
+};
 const sbPreUpdateBackup = async () => {
   if (!sbIsSignedIn()) return {ok:false};
   const user=sbGetUser();
@@ -3460,12 +3548,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
   const [entryProtocolId, setEntryProtocolId] = useState(null);
-  const [statementAudience, setStatementAudience] = useState("");
-  const [statementNeed, setStatementNeed] = useState("");
-  const [statementAsk, setStatementAsk] = useState("");
-  const [statementTone, setStatementTone] = useState("calm");
-  const [statementCopied, setStatementCopied] = useState(false);
-  const [statementCardCopied, setStatementCardCopied] = useState(false);
+  const [externalAnchorDraft, setExternalAnchorDraft] = useState("");
+  const [externalAnchorCopied, setExternalAnchorCopied] = useState(false);
   const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
@@ -4203,39 +4287,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
-  const buildStateToStatementAnchor = () => {
-    const toneLabel = {
-      calm: "Calm and clear",
-      firm: "Firm boundary",
-      warm: "Warm and direct",
-      concise: "Short and explicit"
-    }[statementTone] || "Calm and clear";
-    const lines = [`${toneLabel}:`];
-    if (statementAudience.trim()) lines.push(`Audience: ${statementAudience.trim()}`);
-    if (statementNeed.trim()) lines.push(`Message: ${statementNeed.trim()}`);
-    if (statementAsk.trim()) lines.push(`Ask: ${statementAsk.trim()}`);
-    return lines.join("\n");
-  };
-
-  const buildStateToStatementCard = () => {
-    const modeLabel = { calm: "Talk it out", clarity: "Break the loop", hype: "Get ready" }[effectiveMode] || "Reframe";
-    const timestamp = sessionShareSummary?.timestamp
-      ? new Date(sessionShareSummary.timestamp)
-      : new Date();
-    const delta = sessionShareSummary?.delta;
-    const lines = [
-      "Stillform Session Card",
-      `${timestamp.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`,
-      "",
-      `Tool: ${modeLabel}`,
-      `State shift: ${delta === null || delta === undefined ? "N/A" : `${delta >= 0 ? "+" : ""}${delta}`}`,
-      `From: ${sessionShareSummary?.preState || "Not set"}`,
-      `To: ${sessionShareSummary?.postState || "Not set"}`,
-      "",
-      "External anchor:",
-      buildStateToStatementAnchor()
-    ];
-    return lines.join("\n");
+  const buildExternalAnchorCopy = () => {
+    const clean = externalAnchorDraft.trim();
+    if (!clean) return "";
+    return `External anchor:\n${clean}`;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
   const finishReframeSession = ({ postState = null } = {}) => {
@@ -4264,19 +4319,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       window.plausible("State to Statement Completed", {
         props: {
-          tone: statementTone,
-          has_message: statementNeed.trim() ? "yes" : "no",
-          has_ask: statementAsk.trim() ? "yes" : "no"
+          has_anchor: externalAnchorDraft.trim() ? "yes" : "no"
         }
       });
     } catch {}
     setShowStateToStatement(false);
-    setStatementAudience("");
-    setStatementNeed("");
-    setStatementAsk("");
-    setStatementTone("calm");
-    setStatementCopied(false);
-    setStatementCardCopied(false);
+    setExternalAnchorDraft("");
+    setExternalAnchorCopied(false);
     setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
@@ -4287,8 +4336,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const skipStateToStatement = () => {
     try { window.plausible("State to Statement Skipped"); } catch {}
     setShowStateToStatement(false);
-    setStatementCopied(false);
-    setStatementCardCopied(false);
+    setExternalAnchorCopied(false);
+    setExternalAnchorDraft("");
     setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
@@ -4311,26 +4360,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const continueFromPostInsight = () => {
     setShowPostInsight(false);
     setStateToStatementExpanded(false);
+    setExternalAnchorCopied(false);
+    setExternalAnchorDraft("");
     setShowStateToStatement(true);
   };
 
-  const copyStateToStatement = async () => {
-    const text = buildStateToStatementAnchor();
+  const copyExternalAnchor = async () => {
+    const text = buildExternalAnchorCopy();
     if (!text.trim()) return;
     try {
       if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
-      setStatementCopied(true);
-      try { window.plausible("State to Statement Copied"); } catch {}
-    } catch {}
-  };
-
-  const copyStateToStatementCard = async () => {
-    const text = buildStateToStatementCard();
-    if (!text.trim()) return;
-    try {
-      if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
-      setStatementCardCopied(true);
-      try { window.plausible("State to Statement Card Copied"); } catch {}
+      setExternalAnchorCopied(true);
+      try { window.plausible("State to Statement Anchor Copied"); } catch {}
     } catch {}
   };
 
@@ -4346,10 +4387,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          State to statement
+          Session close
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          Close this session first. If you want, you can also add a clear external anchor.
+          Close this session now. If useful, add one external line you can use outside the app.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -4357,7 +4398,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             Finish session
           </button>
           <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
-            {stateToStatementExpanded ? "Hide external anchor" : "Add external anchor"}
+            {stateToStatementExpanded ? "Hide external line" : "Add external line"}
           </button>
           <button className="btn btn-ghost" onClick={skipStateToStatement}>
             Skip for now
@@ -4366,71 +4407,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {stateToStatementExpanded && (
           <div style={{ marginTop: 16 }}>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-              {[
-                { id: "calm", label: "Calm" },
-                { id: "firm", label: "Firm" },
-                { id: "warm", label: "Warm" },
-                { id: "concise", label: "Short" }
-              ].map(tone => (
-                <button
-                  key={tone.id}
-                  onClick={() => setStatementTone(tone.id)}
-                  style={{
-                    background: statementTone === tone.id ? "var(--amber-glow)" : "transparent",
-                    border: `1px solid ${statementTone === tone.id ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 16,
-                    padding: "6px 12px",
-                    fontSize: 12,
-                    color: statementTone === tone.id ? "var(--amber)" : "var(--text-muted)",
-                    cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}
-                >
-                  {tone.label}
-                </button>
-              ))}
+            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
+              External line (optional)
             </div>
-
-            <div style={{ display: "grid", gap: 10, marginBottom: 12 }}>
-              <input
-                type="text"
-                value={statementAudience}
-                onChange={(e) => setStatementAudience(e.target.value)}
-                placeholder="Audience (e.g., partner, manager, team)"
-                style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-              />
-              <textarea
-                value={statementNeed}
-                onChange={(e) => setStatementNeed(e.target.value)}
-                placeholder="Core message: what needs to be understood?"
-                rows={3}
-                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
-              />
-              <textarea
-                value={statementAsk}
-                onChange={(e) => setStatementAsk(e.target.value)}
-                placeholder="Specific ask or boundary"
-                rows={2}
-                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical" }}
-              />
-            </div>
-
-            <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
-                Session card preview
-              </div>
-              <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontSize: 12, lineHeight: 1.6, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-                {buildStateToStatementCard()}
-              </pre>
-            </div>
+            <textarea
+              value={externalAnchorDraft}
+              onChange={(e) => setExternalAnchorDraft(e.target.value)}
+              placeholder="One sentence you can use outside this app."
+              rows={3}
+              style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
+            />
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button className="btn btn-ghost" onClick={copyStateToStatement}>
-                {statementCopied ? "Copied" : "Copy anchor"}
-              </button>
-              <button className="btn btn-ghost" onClick={copyStateToStatementCard}>
-                {statementCardCopied ? "Card copied" : "Copy session card"}
+              <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
+                {externalAnchorCopied ? "Copied" : "Copy external line"}
               </button>
             </div>
           </div>
@@ -6089,7 +6079,7 @@ function FocusCheckValidation({
   return (
     <section style={containerStyle}>
       {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
-      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Focus Check</h1>}
+      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Go / No-Go Quick Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
       </div>
@@ -6674,7 +6664,7 @@ function MyProgress({ onBack }) {
                   {focusCheckSummary && (
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                        Focus Check (Go / No-Go)
+                        Go / No-Go Quick Check
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                         <div>
@@ -7110,9 +7100,10 @@ function QBPill({ onPress }) {
 
   const [pos, setPos] = useState(getSavedPos);
   const [dragging, setDragging] = useState(false);
-  const [didDrag, setDidDrag] = useState(false);
   const startRef = useRef(null);
   const posRef = useRef(pos);
+  const pointerIdRef = useRef(null);
+  const draggedRef = useRef(false);
   posRef.current = pos;
 
   const clamp = (p) => ({
@@ -7121,30 +7112,57 @@ function QBPill({ onPress }) {
   });
 
   const onPointerDown = (e) => {
-    e.preventDefault();
-    setDragging(true);
-    setDidDrag(false);
-    startRef.current = { px: e.clientX - posRef.current.x, py: e.clientY - posRef.current.y };
-    
-    const onMove = (me) => {
-      const next = clamp({ x: me.clientX - startRef.current.px, y: me.clientY - startRef.current.py });
-      setPos(next);
-      setDidDrag(true);
+    if (e.button !== undefined && e.button !== 0) return;
+    pointerIdRef.current = e.pointerId;
+    draggedRef.current = false;
+    setDragging(false);
+    startRef.current = {
+      px: e.clientX - posRef.current.x,
+      py: e.clientY - posRef.current.y,
+      sx: e.clientX,
+      sy: e.clientY
     };
-    const onUp = () => {
-      setDragging(false);
+    try { e.currentTarget.setPointerCapture?.(e.pointerId); } catch {}
+  };
+
+  const onPointerMove = (e) => {
+    if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+    if (!startRef.current) return;
+    const moveDistance = Math.hypot(e.clientX - startRef.current.sx, e.clientY - startRef.current.sy);
+    if (moveDistance < 6 && !dragging) return;
+    if (!dragging) setDragging(true);
+    draggedRef.current = true;
+    const next = clamp({ x: e.clientX - startRef.current.px, y: e.clientY - startRef.current.py });
+    setPos(next);
+  };
+
+  const onPointerUp = (e) => {
+    if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+    try { e.currentTarget.releasePointerCapture?.(e.pointerId); } catch {}
+    pointerIdRef.current = null;
+    startRef.current = null;
+    if (draggedRef.current || dragging) {
       try { localStorage.setItem(storageKey, JSON.stringify(posRef.current)); } catch {}
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-    };
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerup", onUp);
+    } else {
+      onPress();
+    }
+    setDragging(false);
+  };
+
+  const onPointerCancel = (e) => {
+    if (pointerIdRef.current !== null && e.pointerId !== pointerIdRef.current) return;
+    pointerIdRef.current = null;
+    startRef.current = null;
+    draggedRef.current = false;
+    setDragging(false);
   };
 
   return (
     <div
       onPointerDown={onPointerDown}
-      onClick={() => { if (!didDrag) onPress(); }}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerCancel}
       style={{
         position: "fixed", left: pos.x, top: pos.y, zIndex: 200,
         background: "var(--bg)", border: "1px solid var(--amber-dim)",
@@ -7154,7 +7172,8 @@ function QBPill({ onPress }) {
         boxShadow: dragging ? "0 8px 24px rgba(0,0,0,0.5)" : "0 2px 12px rgba(0,0,0,0.3)",
         transition: dragging ? "none" : "box-shadow 0.2s",
         userSelect: "none", WebkitUserSelect: "none",
-        transform: dragging ? "scale(1.05)" : "scale(1)"
+        transform: dragging ? "scale(1.05)" : "scale(1)",
+        touchAction: "none"
       }}
     >
       ◎ Quick Breathe
@@ -7335,10 +7354,94 @@ export default function Stillform() {
     }
     setScreen("home");
   };
+  const handleScreenBack = () => {
+    if (screen === "tutorial") {
+      if (tutorialStep > 0) {
+        setTutorialStep((s) => Math.max(0, s - 1));
+      } else {
+        setScreen(tutorialReturnScreen || "home");
+      }
+      return;
+    }
+    if (screen === "setup") {
+      if (setupStep > 0) {
+        setSetupStep((s) => Math.max(0, s - 1));
+      } else {
+        goHomeSafely();
+      }
+      return;
+    }
+    if (screen === "faq") {
+      setScreen(faqBackScreen || "home");
+      return;
+    }
+    if (screen === "focus-check") {
+      setScreen(focusCheckReturnScreen || "home");
+      return;
+    }
+    if (screen === "tool") {
+      goHomeSafely();
+      return;
+    }
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing") {
+      goHomeSafely();
+      return;
+    }
+  };
+  const showBottomBack = ["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
+
+  useEffect(() => {
+    const swipeEnabledScreens = new Set(["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
+    if (!swipeEnabledScreens.has(screen)) return;
+    let touchStart = null;
+    const interactiveTags = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]);
+
+    const onTouchStart = (event) => {
+      if (!event.touches || event.touches.length !== 1) return;
+      const target = event.target;
+      if (target instanceof HTMLElement) {
+        if (interactiveTags.has(target.tagName) || target.closest("input, textarea, select, button, a, [role='button']")) return;
+      }
+      const t = event.touches[0];
+      touchStart = { x: t.clientX, y: t.clientY, ts: Date.now() };
+    };
+
+    const onTouchEnd = (event) => {
+      if (!touchStart || !event.changedTouches || event.changedTouches.length !== 1) return;
+      const t = event.changedTouches[0];
+      const dx = t.clientX - touchStart.x;
+      const dy = t.clientY - touchStart.y;
+      const dt = Date.now() - touchStart.ts;
+      touchStart = null;
+
+      if (dt > 700) return;
+      if (Math.abs(dx) < 70) return;
+      if (Math.abs(dy) > 90) return;
+      if (Math.abs(dx) < Math.abs(dy) * 1.1) return;
+
+      if (dx > 0) {
+        handleScreenBack();
+        return;
+      }
+      if (dx < 0 && screen === "tutorial") {
+        const tutorialLastStep = 4;
+        if (tutorialStep >= tutorialLastStep) return;
+        if (tutorialStep === 2 && !tutorialFocusBrief) return;
+        setTutorialStep((s) => Math.min(tutorialLastStep, s + 1));
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
@@ -8921,6 +9024,31 @@ export default function Stillform() {
           );
         })()}
 
+        {showBottomBack && (
+          <button
+            onClick={handleScreenBack}
+            style={{
+              position: "fixed",
+              left: "50%",
+              transform: "translateX(-50%)",
+              bottom: 14,
+              zIndex: 210,
+              background: "var(--bg)",
+              border: "1px solid var(--border)",
+              borderRadius: 999,
+              padding: "9px 14px",
+              color: "var(--text)",
+              fontSize: 12,
+              letterSpacing: "0.06em",
+              fontFamily: "'DM Sans', sans-serif",
+              cursor: "pointer",
+              boxShadow: "0 6px 16px rgba(0,0,0,0.35)"
+            }}
+          >
+            ← Back
+          </button>
+        )}
+
         {/* FLOATING RESET — accessible from any screen except active tool sessions */}
         {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
@@ -9775,7 +9903,7 @@ export default function Stillform() {
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
-                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Quick Check</button>
+                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
                 <button onClick={async () => { if (await biometric.gate()) setScreen("progress"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
@@ -9995,6 +10123,11 @@ export default function Stillform() {
             <p>Performance Metrics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas).</p>
             <p>These metrics do not include journal text, AI conversation content, or free-form notes. You can turn this off anytime in Settings, and this handling is covered in this Privacy &amp; Disclaimers view and our full Privacy Policy.</p>
 
+            <h2>Screenshot &amp; Image Analysis Boundaries</h2>
+            <p>When you attach screenshots in Reframe, the image is sent to the AI model for interpretation so Stillform can parse layout context and message sequence. Image interpretation can be incomplete or incorrect. You are responsible for reviewing output before acting.</p>
+            <p>Stillform does not guarantee factual accuracy of screenshot-derived interpretation, does not provide legal or clinical judgment from images, and should not be used as a sole basis for high-risk personal, legal, medical, safety, or financial decisions.</p>
+            <p>Use screenshot analysis as composure support only. If a situation has material consequences, verify facts independently and consult qualified professionals.</p>
+
             <h2>Assumption of Risk</h2>
             <p>By using Stillform, you acknowledge that you use the app at your own risk. ARA Embers LLC is not liable for any outcomes resulting from the use of this app, including but not limited to decisions made based on AI-generated content, acupressure techniques, or pattern insights.</p>
 
@@ -10016,7 +10149,7 @@ export default function Stillform() {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for your morning practice, for the moments that test you, and for the moments when you're winning. Composure matters most when things are going well."
+                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for morning practice, difficult moments, momentum, and daily execution. Composure matters all the time."
               },
               {
                 q: "What is the method behind Stillform?",
@@ -10100,7 +10233,7 @@ export default function Stillform() {
               },
               {
                 q: "Can I upload screenshots to Reframe?",
-                a: "Yes. Tap 📎 to share up to 3 conversation screenshots at once. The AI reads the actual layout — bubble position, who said what — so it gives you advice based on your situation, not the other person's words. Images are sent directly to the AI and nothing is stored."
+                a: "Yes. Tap 📎 to share up to 3 screenshots at once. The AI reads layout context (for example message order and attribution) to improve coaching relevance. Screenshot interpretation can still be wrong, and should not be treated as legal, medical, or definitive factual analysis. Use it as composure support and verify critical facts independently."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
@@ -10606,8 +10739,8 @@ export default function Stillform() {
                 display: "flex", justifyContent: "space-between", alignItems: "center"
               }}>
                 <div>
-                  <div style={{ fontSize: 13, color: "var(--text)" }}>Run Focus Check (30s)</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Optional Go/No-Go validation run.</div>
+                  <div style={{ fontSize: 13, color: "var(--text)" }}>Run Go / No-Go Quick Check (30s)</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Optional 30-second inhibition and accuracy validation.</div>
                 </div>
                 <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
               </button>
@@ -11458,14 +11591,15 @@ export default function Stillform() {
                 )}
 
               {/* Delete — small, understated, double confirm */}
-              <button onClick={() => {
+              <button onClick={async () => {
                 if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
                   const typed = window.prompt("To confirm deletion, type DELETE below:");
                   if (typed === "DELETE") {
                     try {
-                      // Prevent cloud auto-restore from repopulating deleted local data.
+                      // Delete cloud payload first so signed-in users don't rehydrate stale artifacts.
+                      try { await sbDeleteCloudData().catch(() => {}); } catch {}
+                      try { await sbSignOut().catch(() => {}); } catch {}
                       try { sbClearSession(); } catch {}
-                      try { sbSignOut().catch(() => {}); } catch {}
                       setSyncSignedIn(false);
                       setSyncSuccess(null);
                       setSyncError(null);
@@ -11522,6 +11656,13 @@ export default function Stillform() {
                       localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
                       localStorage.removeItem("stillform_onboarded");
+                      localStorage.removeItem("stillform_sb_session");
+                      localStorage.removeItem("stillform_app_version");
+                      localStorage.removeItem("stillform_install_id");
+                      // Hard catch-all to guarantee no stale stillform_* keys survive.
+                      Object.keys(localStorage).forEach((key) => {
+                        if (key.startsWith("stillform_")) localStorage.removeItem(key);
+                      });
                       window.location.reload();
                     } catch {}
                   }
