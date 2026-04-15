@@ -1347,6 +1347,8 @@ const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
 const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
 const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
+const UAT_BOARD_UPDATED_LABEL = "Updated Apr 15";
+const UAT_BOARD_LAUNCH_ETA_LABEL = "May 10";
 const UAT_FEEDBACK_TEXT_MIN = 8;
 const UAT_FEEDBACK_TEXT_MAX = 1000;
 const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
@@ -6306,7 +6308,7 @@ function FocusCheckValidation({
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
         <br />
-        Use this right before high-stakes tasks to verify inhibitory control and cognitive readiness.
+        This checks response inhibition so you can confirm cognitive readiness before a high-stakes decision, message, or meeting.
       </div>
       <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
         {focusCheckMode === "running" && currentFocusTrial && (
@@ -9747,44 +9749,151 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Access / UAT banner */}
-            {!isSubscribed && (
+            {/* Home UAT status banner (home-only) */}
+            {uatTrialFreezeActive && (
               <div
                 style={{
                   marginBottom: 12,
+                  position: "relative",
                   display: "flex",
-                  justifyContent: "space-between",
+                  justifyContent: "center",
                   alignItems: "center",
                   background: "var(--surface)",
                   border: "0.5px solid var(--border)",
                   borderRadius: "var(--r)",
-                  padding: "10px 16px",
-                  animation: uatTrialFreezeActive && !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
-                  boxShadow: uatTrialFreezeActive ? "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)" : "none"
+                  padding: "10px 14px",
+                  animation: !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)"
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                    {uatTrialFreezeActive ? "UAT" : "ACCESS"}
-                  </span>
-                  <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {uatTrialFreezeActive
-                      ? `UAT updates live · launch target ${uatLaunchTargetLabel}`
-                      : "Subscription unlocks full Stillform access."}
-                  </span>
-                </div>
-                {uatTrialFreezeActive ? (
+                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center", gap: 8 }}>
                   <button
                     onClick={openUatBoardHomeOnly}
-                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                    aria-label="Open UAT board"
                   >
-                    Open UAT board →
+                    →
                   </button>
-                ) : (
-                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
-                )}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                    UAT
+                  </div>
+                </div>
+                <div style={{ textAlign: "center", lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
+                </div>
               </div>
             )}
+
+            {!isSubscribed && !uatTrialFreezeActive && (
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  Subscription unlocks full Stillform access.
+                </span>
+                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+              </div>
+            )}
+
+            {uatTrialFreezeActive && (() => {
+              const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
+              const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
+              const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
+              return (
+                <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      UAT feedback
+                    </div>
+                    <button
+                      onClick={openUatBoardHomeOnly}
+                      style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 10, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", padding: 0 }}
+                    >
+                      Open board →
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                    Tell us what is unclear. Plain language is best. We use this to update the SHIP list.
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                    {UAT_QUESTION_OPTIONS.map((item) => {
+                      const active = item.id === selectedQuestion?.id;
+                      const shortLabelMap = {
+                        confusing: "Confusing",
+                        friction: "Friction",
+                        missing: "Missing clarity",
+                        working: "Working well"
+                      };
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setUatQuestionId(item.id)}
+                          style={{
+                            background: active ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 999,
+                            padding: "5px 11px",
+                            fontSize: 11,
+                            color: active ? "var(--amber)" : "var(--text-muted)",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          {shortLabelMap[item.id] || item.prompt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <textarea
+                    value={uatQuestionText}
+                    onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
+                    placeholder={selectedQuestion?.placeholder || "Write your feedback in plain language."}
+                    style={{
+                      width: "100%",
+                      minHeight: 92,
+                      background: "var(--surface2)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      padding: "10px 12px",
+                      color: "var(--text)",
+                      fontSize: 12,
+                      lineHeight: 1.55,
+                      fontFamily: "'DM Sans', sans-serif",
+                      resize: "vertical",
+                      outline: "none"
+                    }}
+                  />
+                  <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                      {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                    </div>
+                    <button
+                      onClick={submitUatFeedback}
+                      disabled={uatSubmitting || tooShort}
+                      style={{
+                        background: "var(--amber)",
+                        color: "#0A0A0C",
+                        border: "none",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 12px",
+                        fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
+                        opacity: uatSubmitting || tooShort ? 0.55 : 1
+                      }}
+                    >
+                      {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                    </button>
+                  </div>
+                  {uatFeedbackStatus && (
+                    <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                      {uatFeedbackStatus}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
               {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
@@ -10386,113 +10495,9 @@ export default function Stillform() {
                 );
               })()}
 
-              {(() => {
-                const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
-                const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
-                const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
-                return (
-                  <div style={{ marginBottom: 16, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                        UAT question
-                      </div>
-                      <button
-                        onClick={openUatBoardHomeOnly}
-                        style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 10, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", padding: 0 }}
-                      >
-                        Open board →
-                      </button>
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                      Tell us what is unclear. Plain language is best. We use this to update the SHIP list.
-                    </div>
-                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                      {UAT_QUESTION_OPTIONS.map((item) => {
-                        const active = item.id === selectedQuestion?.id;
-                        const shortLabelMap = {
-                          confusing: "Confusing",
-                          friction: "Friction",
-                          missing: "Missing clarity",
-                          working: "Working well"
-                        };
-                        return (
-                          <button
-                            key={item.id}
-                            onClick={() => setUatQuestionId(item.id)}
-                            style={{
-                              background: active ? "var(--amber-glow)" : "transparent",
-                              border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                              borderRadius: 999,
-                              padding: "5px 11px",
-                              fontSize: 11,
-                              color: active ? "var(--amber)" : "var(--text-muted)",
-                              cursor: "pointer",
-                              fontFamily: "'DM Sans', sans-serif"
-                            }}
-                          >
-                            {shortLabelMap[item.id] || item.prompt}
-                          </button>
-                        );
-                      })}
-                    </div>
-                    <textarea
-                      value={uatQuestionText}
-                      onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
-                      placeholder={selectedQuestion?.placeholder || "Write your feedback in plain language."}
-                      style={{
-                        width: "100%",
-                        minHeight: 92,
-                        background: "var(--surface2)",
-                        border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)",
-                        padding: "10px 12px",
-                        color: "var(--text)",
-                        fontSize: 12,
-                        lineHeight: 1.55,
-                        fontFamily: "'DM Sans', sans-serif",
-                        resize: "vertical",
-                        outline: "none"
-                      }}
-                    />
-                    <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                        {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
-                      </div>
-                      <button
-                        onClick={submitUatFeedback}
-                        disabled={uatSubmitting || tooShort}
-                        style={{
-                          background: "var(--amber)",
-                          color: "#0A0A0C",
-                          border: "none",
-                          borderRadius: "var(--r-sm)",
-                          padding: "8px 12px",
-                          fontSize: 11,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          letterSpacing: "0.08em",
-                          textTransform: "uppercase",
-                          cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
-                          opacity: uatSubmitting || tooShort ? 0.55 : 1
-                        }}
-                      >
-                        {uatSubmitting ? "Sending…" : "Send UAT feedback"}
-                      </button>
-                    </div>
-                    {uatFeedbackStatus && (
-                      <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                        {uatFeedbackStatus}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
               {/* BOTTOM LINKS — minimal */}
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 6 }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", lineHeight: 1.5, maxWidth: 320 }}>
-                  Go / No-Go is a 30-second inhibition check. Use it before a high-stakes task to confirm you’re cognitively ready.
-                </div>
               </div>
 
             </section>
