@@ -32,6 +32,29 @@
         margin: 0 auto;
         padding: 34px 20px 80px;
       }
+      .back-row {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin: 0 0 14px;
+      }
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--amber);
+        text-decoration: none;
+        border: 1px solid rgba(201, 147, 58, 0.28);
+        background: var(--amber-glow);
+        border-radius: 999px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 10px;
+      }
+      .back-link:hover {
+        border-color: rgba(201, 147, 58, 0.48);
+      }
       .kicker {
         display: inline-flex;
         align-items: center;
@@ -185,6 +208,9 @@
         .wrap {
           padding: 22px 12px 56px;
         }
+        .back-row {
+          margin-bottom: 12px;
+        }
         .block {
           padding: 14px;
         }
@@ -231,6 +257,11 @@
   </head>
   <body>
     <main class="wrap">
+      <div class="back-row">
+        <a class="back-link" href="/" onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+          ← Back to app
+        </a>
+      </div>
       <div class="kicker">Stillform · UAT Status</div>
       <h1>Stillform UAT Status Board</h1>
       <p class="sub">Execution only: quick links for what is live, what is in progress, and what is queued for launch.</p>
@@ -512,6 +543,11 @@
         </table>
       </section>
 
+      <div class="back-row" style="margin-top: 8px;">
+        <a class="back-link" href="/" onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+          ← Back to app
+        </a>
+      </div>
       <p class="footer">Stillform is a composure tool for everyone. This UAT page is intentionally narrowed to execution status only.</p>
     </main>
   </body>
