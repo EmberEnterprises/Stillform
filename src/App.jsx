@@ -1332,6 +1332,9 @@ const METRICS_SCHEMA_VERSION = 1;
 const SESSION_STORAGE_KEY = "stillform_sessions";
 const COMMUNICATION_EVENTS_KEY = "stillform_communication_events";
 const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
+const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
+const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
+const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
@@ -1451,6 +1454,14 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   const bounded = events.slice(-maxItems);
   try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
   return bounded.length;
+};
+
+const getCommunicationDraftSignals = (value) => {
+  const text = String(value || "").trim();
+  const wordCount = text ? text.split(/\s+/).filter(Boolean).length : 0;
+  const textLength = text.length;
+  const meaningful = textLength >= COMMUNICATION_MEANINGFUL_CHARS_MIN || wordCount >= COMMUNICATION_MEANINGFUL_WORDS_MIN;
+  return { textLength, wordCount, meaningful };
 };
 
 const getSessionCountFromStorage = () => getSessionsFromStorage().length;
@@ -3565,7 +3576,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
+  const [communicationSkipReason, setCommunicationSkipReason] = useState(null);
   const communicationDraftLoggedRef = useRef(false);
+  const communicationOpportunityLoggedRef = useRef(false);
+  const communicationExpandedRef = useRef(false);
+  const stateToStatementSessionIdRef = useRef(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [feelState, setFeelState] = useState(() => {
@@ -4300,29 +4315,75 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
+  const COMMUNICATION_ACTIONS = {
+    opportunity: "state-to-statement-opportunity",
+    expanded: "state-to-statement-expanded",
+    drafted: "state-to-statement-drafted",
+    copied: "state-to-statement-copied",
+    shared: "state-to-statement-shared",
+    sentConfirmed: "state-to-statement-sent-confirmed",
+    completedWithDraft: "state-to-statement-completed-with-draft",
+    completedWithoutDraft: "state-to-statement-completed-without-draft",
+    skipped: "state-to-statement-skipped"
+  };
+  const COMMUNICATION_SKIP_REASONS = [
+    { id: "not-needed", label: "Not needed for this event" },
+    { id: "private-processing", label: "Keeping it internal for now" },
+    { id: "send-later", label: "Will send later outside app" }
+  ];
+  const getStateToStatementSessionId = () => {
+    if (!stateToStatementSessionIdRef.current) {
+      stateToStatementSessionIdRef.current = `sts_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+    return stateToStatementSessionIdRef.current;
+  };
+  const resetStateToStatementTracking = () => {
+    communicationDraftLoggedRef.current = false;
+    communicationOpportunityLoggedRef.current = false;
+    communicationExpandedRef.current = false;
+    stateToStatementSessionIdRef.current = null;
+    setCommunicationSkipReason(null);
+  };
   const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
     return `State to Statement:\n${clean}`;
   };
-  const logCommunicationAction = (action) => {
-    const clean = externalAnchorDraft.trim();
-    if (!clean) return false;
+  const logCommunicationEvent = (eventAction, options = {}) => {
     const stamp = new Date().toISOString();
-    appendCommunicationEvent({
+    const clean = externalAnchorDraft.trim();
+    const draftSignals = getCommunicationDraftSignals(clean);
+    const entry = {
       id: `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      schemaVersion: COMMUNICATION_EVENT_SCHEMA_VERSION,
       timestamp: stamp,
       date: toLocalDateKey(stamp),
-      action,
+      action: eventAction,
       source: "reframe-state-to-statement",
       sessionTimestamp: sessionShareSummary?.timestamp || null,
-      textLength: clean.length
+      stateToStatementSessionId: getStateToStatementSessionId(),
+      textLength: draftSignals.textLength,
+      wordCount: draftSignals.wordCount,
+      meaningfulDraft: draftSignals.meaningful ? "yes" : "no",
+      skipReason: options.skipReason || communicationSkipReason || null,
+      metadata: options.metadata || null
+    };
+    appendCommunicationEvent(entry);
+    return entry;
+  };
+  const markStateToStatementOpportunity = ({ source = "unknown" } = {}) => {
+    if (communicationOpportunityLoggedRef.current) return;
+    communicationOpportunityLoggedRef.current = true;
+    logCommunicationEvent(COMMUNICATION_ACTIONS.opportunity, {
+      metadata: { source }
     });
-    return true;
   };
   const ensureDraftLogged = () => {
     if (communicationDraftLoggedRef.current) return;
-    if (logCommunicationAction("drafted")) communicationDraftLoggedRef.current = true;
+    const clean = externalAnchorDraft.trim();
+    if (!clean) return;
+    logCommunicationEvent(COMMUNICATION_ACTIONS.drafted);
+    communicationDraftLoggedRef.current = true;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
   const finishReframeSession = ({ postState = null } = {}) => {
@@ -4344,16 +4405,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       setShowPostInsight(true);
       try { window.plausible("Post Session Insight Shown"); } catch {}
     } else {
+      resetStateToStatementTracking();
+      markStateToStatementOpportunity({ source: "reframe-finish-no-insight" });
       setShowStateToStatement(true);
     }
   };
 
   const finishStateToStatement = () => {
     ensureDraftLogged();
+    const hasDraft = externalAnchorDraft.trim().length > 0;
+    logCommunicationEvent(hasDraft ? COMMUNICATION_ACTIONS.completedWithDraft : COMMUNICATION_ACTIONS.completedWithoutDraft);
     try {
       window.plausible("State to Statement Completed", {
         props: {
-          has_anchor: externalAnchorDraft.trim() ? "yes" : "no"
+          has_anchor: hasDraft ? "yes" : "no"
         }
       });
     } catch {}
@@ -4365,11 +4430,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
-    communicationDraftLoggedRef.current = false;
+    resetStateToStatementTracking();
     onComplete(resolvePostReframeRoute());
   };
 
-  const skipStateToStatement = () => {
+  const skipStateToStatement = (reason = null) => {
+    const chosenReason = reason || communicationSkipReason || "not-needed";
+    setCommunicationSkipReason(chosenReason);
+    logCommunicationEvent(COMMUNICATION_ACTIONS.skipped, { skipReason: chosenReason });
     try { window.plausible("State to Statement Skipped"); } catch {}
     setShowStateToStatement(false);
     setExternalAnchorCopied(false);
@@ -4379,7 +4447,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
-    communicationDraftLoggedRef.current = false;
+    resetStateToStatementTracking();
     onComplete(resolvePostReframeRoute());
   };
 
@@ -4401,7 +4469,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorCopied(false);
     setExternalAnchorSent(false);
     setExternalAnchorDraft("");
+    resetStateToStatementTracking();
+    markStateToStatementOpportunity({ source: "post-insight-continue" });
     setShowStateToStatement(true);
+  };
+
+  const toggleStateToStatementExpanded = () => {
+    setStateToStatementExpanded((prev) => {
+      const next = !prev;
+      if (next && !communicationExpandedRef.current) {
+        communicationExpandedRef.current = true;
+        logCommunicationEvent(COMMUNICATION_ACTIONS.expanded);
+      }
+      return next;
+    });
   };
 
   const copyExternalAnchor = async () => {
@@ -4410,7 +4491,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
       ensureDraftLogged();
-      logCommunicationAction("copied");
+      logCommunicationEvent(COMMUNICATION_ACTIONS.copied);
       setExternalAnchorCopied(true);
       try { window.plausible("State to Statement Anchor Copied"); } catch {}
     } catch {}
@@ -4422,7 +4503,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (navigator?.share) {
         await navigator.share({ text });
         ensureDraftLogged();
-        logCommunicationAction("shared");
+        logCommunicationEvent(COMMUNICATION_ACTIONS.shared);
         try { window.plausible("State to Statement Anchor Shared"); } catch {}
         return;
       }
@@ -4434,7 +4515,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const markExternalAnchorSent = () => {
     if (!externalAnchorDraft.trim()) return;
     ensureDraftLogged();
-    logCommunicationAction("sent-confirmed");
+    logCommunicationEvent(COMMUNICATION_ACTIONS.sentConfirmed);
     setExternalAnchorSent(true);
     try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
@@ -4461,10 +4542,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <button className="btn btn-primary" onClick={finishStateToStatement}>
             Finish session
           </button>
-          <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
-            {stateToStatementExpanded ? "Hide State to Statement" : "Open State to Statement"}
+          <button className="btn btn-ghost" onClick={toggleStateToStatementExpanded}>
+            {stateToStatementExpanded ? "Hide state to statement" : "Add state to statement"}
           </button>
-          <button className="btn btn-ghost" onClick={skipStateToStatement}>
+          <button className="btn btn-ghost" onClick={() => skipStateToStatement(communicationSkipReason || "not-needed")}>
             Skip for now
           </button>
         </div>
@@ -4479,6 +4560,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               onChange={(e) => {
                 setExternalAnchorDraft(e.target.value);
                 setExternalAnchorSent(false);
+                setCommunicationSkipReason(null);
               }}
               placeholder="Draft one clear message you can send now."
               rows={3}
@@ -4490,7 +4572,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorCopied ? "Copied" : "Copy anchor"}
+                {externalAnchorCopied ? "Copied" : "Copy statement"}
               </button>
               <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
                 Share
@@ -4498,6 +4580,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
                 {externalAnchorSent ? "Sent logged" : "Mark sent"}
               </button>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
+                Skip reason (for data quality)
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {COMMUNICATION_SKIP_REASONS.map((item) => (
+                  <button
+                    key={item.id}
+                    className="btn btn-ghost"
+                    onClick={() => setCommunicationSkipReason(item.id)}
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 10px",
+                      borderColor: communicationSkipReason === item.id ? "var(--amber-dim)" : "var(--border)",
+                      color: communicationSkipReason === item.id ? "var(--amber)" : "var(--text-dim)"
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -6651,12 +6755,49 @@ function MyProgress({ onBack }) {
           const transferScore14d = ratedDays14 ? Math.round((transferPositiveDays14 / ratedDays14) * 100) : null;
           const communicationEvents = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
           const communicationEvents30d = communicationEvents.filter((entry) => withinDays(entry?.timestamp || entry?.date, 30));
-          const drafted30d = communicationEvents30d.filter((entry) => entry?.action === "drafted").length;
-          const copied30d = communicationEvents30d.filter((entry) => entry?.action === "copied").length;
-          const shared30d = communicationEvents30d.filter((entry) => entry?.action === "shared").length;
-          const sentConfirmed30d = communicationEvents30d.filter((entry) => entry?.action === "sent-confirmed").length;
+          const communicationActionSet = {
+            opportunity: new Set(["state-to-statement-opportunity", "opportunity", "presented"]),
+            expanded: new Set(["state-to-statement-expanded", "expanded"]),
+            drafted: new Set(["state-to-statement-drafted", "drafted"]),
+            copied: new Set(["state-to-statement-copied", "copied"]),
+            shared: new Set(["state-to-statement-shared", "shared"]),
+            sentConfirmed: new Set(["state-to-statement-sent-confirmed", "sent-confirmed"]),
+            completedWithDraft: new Set(["state-to-statement-completed-with-draft"]),
+            completedWithoutDraft: new Set(["state-to-statement-completed-without-draft"]),
+            skipped: new Set(["state-to-statement-skipped", "skipped"])
+          };
+          const withNormalizedAction = communicationEvents30d.map((entry) => {
+            const raw = String(entry?.action || "");
+            const match = Object.entries(communicationActionSet).find(([, values]) => values.has(raw));
+            return { ...entry, normalizedAction: match?.[0] || raw };
+          });
+          const opportunityEvents30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "opportunity");
+          const expanded30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "expanded").length;
+          const draftedEntries30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "drafted");
+          const drafted30d = draftedEntries30d.length;
+          const meaningfulDrafted30d = draftedEntries30d.filter((entry) => entry?.meaningfulDraft === "yes").length;
+          const copied30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "copied").length;
+          const shared30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "shared").length;
+          const sentConfirmed30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "sentConfirmed").length;
+          const skippedEntries30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "skipped");
+          const skipped30d = skippedEntries30d.length;
+          const completedWithoutDraft30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "completedWithoutDraft").length;
+          const opportunity30d = opportunityEvents30d.length;
+          const uptakeRate30d = opportunity30d > 0 ? Math.round((expanded30d / opportunity30d) * 100) : null;
+          const meaningfulDraftRate30d = drafted30d > 0 ? Math.round((meaningfulDrafted30d / drafted30d) * 100) : null;
           const followThrough30d = drafted30d > 0 ? Math.round((sentConfirmed30d / drafted30d) * 100) : null;
-          const lastSentConfirmedEvent = [...communicationEvents].reverse().find((entry) => entry?.action === "sent-confirmed");
+          const lastSentConfirmedEvent = [...withNormalizedAction].reverse().find((entry) => entry?.normalizedAction === "sentConfirmed");
+          const skipReasonCounts = skippedEntries30d.reduce((acc, entry) => {
+            const key = entry?.skipReason || "not-needed";
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+          }, {});
+          const topSkipReason = Object.entries(skipReasonCounts).sort((a, b) => b[1] - a[1])[0] || null;
+          const skipReasonLabelMap = {
+            "not-needed": "Not needed for this event",
+            "private-processing": "Keeping it internal for now",
+            "send-later": "Will send later outside app"
+          };
           const scienceEvidenceRead = (() => {
             if (acuteShiftRate30d === null || transferScore14d === null) return "building baseline";
             if (acuteShiftRate30d >= 70 && transferScore14d >= 70) return "strong carryover";
@@ -6785,11 +6926,23 @@ function MyProgress({ onBack }) {
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                       <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Opportunities (30d)</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{opportunity30d}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Voluntary uptake</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{uptakeRate30d === null ? "N/A" : `${uptakeRate30d}%`}</div>
+                      </div>
+                      <div>
                         <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Drafted (30d)</div>
                         <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{drafted30d}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sent (30d)</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Meaningful drafts</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{meaningfulDraftRate30d === null ? "N/A" : `${meaningfulDraftRate30d}%`}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sent confirmed</div>
                         <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{sentConfirmed30d}</div>
                       </div>
                       <div>
@@ -6799,7 +6952,14 @@ function MyProgress({ onBack }) {
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
                       Copy/share actions (30d): <span style={{ color: "var(--text)" }}>{copied30d + shared30d}</span>
+                      {" · "}Skipped: <span style={{ color: "var(--text)" }}>{skipped30d}</span>
+                      {" · "}Completed without draft: <span style={{ color: "var(--text)" }}>{completedWithoutDraft30d}</span>
                     </div>
+                    {topSkipReason && (
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                        Most common skip reason: <span style={{ color: "var(--text)" }}>{skipReasonLabelMap[topSkipReason[0]] || topSkipReason[0]}</span>
+                      </div>
+                    )}
                     {lastSentConfirmedEvent && (
                       <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
                         Last sent confirmation: <span style={{ color: "var(--text)" }}>{new Date(lastSentConfirmedEvent.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
