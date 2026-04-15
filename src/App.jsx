@@ -9766,14 +9766,7 @@ export default function Stillform() {
                   boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)"
                 }}
               >
-                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center", gap: 8 }}>
-                  <button
-                    onClick={openUatBoardHomeOnly}
-                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
-                    aria-label="Open UAT board"
-                  >
-                    →
-                  </button>
+                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center" }}>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
                     UAT
                   </div>
@@ -9782,6 +9775,13 @@ export default function Stillform() {
                   <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
                 </div>
+                <button
+                  onClick={openUatBoardHomeOnly}
+                  style={{ position: "absolute", right: 12, background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                  aria-label="Open UAT board"
+                >
+                  →
+                </button>
               </div>
             )}
 
@@ -9812,7 +9812,7 @@ export default function Stillform() {
                     </button>
                   </div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                    Tell us what is unclear. Plain language is best. We use this to update the SHIP list.
+                    Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
                   </div>
                   <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
                     {UAT_QUESTION_OPTIONS.map((item) => {
