@@ -7337,6 +7337,11 @@ export default function Stillform() {
     setFaqBackScreen(backScreen);
     setScreen("faq");
   };
+  const openUatBoard = () => {
+    if (typeof window !== "undefined") {
+      window.location.assign("/uat-roadmap.html#issues");
+    }
+  };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(backScreen || "home");
@@ -10366,6 +10371,29 @@ export default function Stillform() {
               <div>
                 <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>FAQ</div>
                 <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Method, science, and boundaries</div>
+              </div>
+              <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
+            </button>
+            <button
+              onClick={openUatBoard}
+              style={{
+                width: "100%",
+                background: "var(--surface)",
+                border: "1px solid var(--border)",
+                borderRadius: "var(--r-lg)",
+                padding: "14px 18px",
+                marginBottom: 26,
+                textAlign: "left",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>UAT</div>
+                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Open UAT status board and current issue list</div>
               </div>
               <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
             </button>
