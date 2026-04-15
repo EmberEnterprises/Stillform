@@ -7389,6 +7389,7 @@ export default function Stillform() {
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
+  const [homeProgressExpanded, setHomeProgressExpanded] = useState(false);
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
@@ -10040,10 +10041,93 @@ export default function Stillform() {
                 );
               })()}
 
+              {/* BOTTOM MY PROGRESS SURFACE — expandable */}
+              {(() => {
+                const daySet = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean));
+                let streakCount = 0;
+                for (let i = 0; i < 365; i++) {
+                  const d = new Date();
+                  d.setDate(d.getDate() - i);
+                  if (daySet.has(d.toISOString().slice(0, 10))) streakCount++;
+                  else break;
+                }
+                const toolCounts = sessions.reduce((acc, s) => {
+                  const id = s.tool;
+                  if (!id) return acc;
+                  acc[id] = (acc[id] || 0) + 1;
+                  return acc;
+                }, {});
+                const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
+                const topToolMap = { breathe: "Breathe", reframe: "Reframe", scan: "Body Scan", panic: "Panic", sigh: "Sigh" };
+                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
+                return (
+                  <div style={{ marginBottom: 16 }}>
+                    <button
+                      onClick={() => setHomeProgressExpanded(prev => !prev)}
+                      style={{
+                        width: "100%",
+                        textAlign: "left",
+                        background: "var(--surface)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        padding: "16px 18px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        cursor: "pointer"
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
+                      </div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1 }}>
+                        {homeProgressExpanded ? "−" : "+"}
+                      </div>
+                    </button>
+                    {homeProgressExpanded && (
+                      <div style={{ marginTop: 8, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: 12 }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
+                          <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{sessionCount}</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Sessions</div>
+                          </div>
+                          <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{streakCount}</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Day streak</div>
+                          </div>
+                          <div style={{ gridColumn: "1 / -1", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
+                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "var(--amber)", lineHeight: 1.2 }}>{mostUsedLabel}</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Most used</div>
+                          </div>
+                        </div>
+                        <button
+                          onClick={async () => { if (await biometric.gate()) setScreen("progress"); }}
+                          style={{
+                            width: "100%",
+                            background: "none",
+                            border: "0.5px solid var(--amber-dim)",
+                            borderRadius: "var(--r-sm)",
+                            color: "var(--amber)",
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            fontSize: 10,
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            padding: "10px 12px",
+                            cursor: "pointer"
+                          }}
+                        >
+                          Open full My Progress →
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* BOTTOM LINKS — minimal */}
-              <div style={{ display: "flex", gap: 16, justifyContent: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
-                <button onClick={async () => { if (await biometric.gate()) setScreen("progress"); }} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>My Progress</button>
               </div>
 
             </section>
