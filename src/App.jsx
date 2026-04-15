@@ -1352,6 +1352,11 @@ const UAT_BOARD_LAUNCH_ETA_LABEL = "May 10";
 const UAT_FEEDBACK_TEXT_MIN = 8;
 const UAT_FEEDBACK_TEXT_MAX = 1000;
 const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
+const UAT_FEEDBACK_HISTORY_KEY = "stillform_uat_feedback_history";
+const UAT_FEEDBACK_HISTORY_MAX_ITEMS = 30;
+const SHARE_QR_TARGET_URL = "https://stillformapp.com";
+const SHARE_QR_IMAGE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=${encodeURIComponent(SHARE_QR_TARGET_URL)}`;
+const UAT_FEEDBACK_FLASH_LABEL = "UAT FEEDBACK";
 const UAT_QUESTION_OPTIONS = [
   { id: "confusing", prompt: "What felt confusing today?", placeholder: "Example: The button text was unclear." },
   { id: "friction", prompt: "What felt heavy or annoying?", placeholder: "Example: Too many taps to finish this step." },
@@ -1499,6 +1504,41 @@ const getUatFeedbackDraft = () => {
   } catch {
     return { questionId: UAT_QUESTION_OPTIONS[0]?.id || "confusing", text: "" };
   }
+};
+
+const getUatFeedbackHistoryFromStorage = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(UAT_FEEDBACK_HISTORY_KEY) || "[]");
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((entry) => entry && typeof entry === "object")
+      .map((entry) => ({
+        id: String(entry.id || ""),
+        submittedAt: String(entry.submittedAt || ""),
+        questionId: String(entry.questionId || ""),
+        text: String(entry.text || "")
+      }))
+      .filter((entry) => entry.id && entry.submittedAt && entry.text)
+      .slice(0, UAT_FEEDBACK_HISTORY_MAX_ITEMS);
+  } catch {
+    return [];
+  }
+};
+
+const appendUatFeedbackHistory = (entry, maxItems = UAT_FEEDBACK_HISTORY_MAX_ITEMS) => {
+  if (!entry) return getUatFeedbackHistoryFromStorage();
+  const current = getUatFeedbackHistoryFromStorage();
+  const next = [
+    {
+      id: String(entry.id || `${Date.now()}`),
+      submittedAt: String(entry.submittedAt || new Date().toISOString()),
+      questionId: String(entry.questionId || ""),
+      text: String(entry.text || "")
+    },
+    ...current
+  ].slice(0, maxItems);
+  try { localStorage.setItem(UAT_FEEDBACK_HISTORY_KEY, JSON.stringify(next)); } catch {}
+  return next;
 };
 
 const getSessionCountFromStorage = () => getSessionsFromStorage().length;
@@ -8156,6 +8196,9 @@ export default function Stillform() {
   const [uatQuestionText, setUatQuestionText] = useState(initialUatFeedbackDraft.text || "");
   const [uatFeedbackStatus, setUatFeedbackStatus] = useState("");
   const [uatSubmitting, setUatSubmitting] = useState(false);
+  const [showUatFeedbackPanel, setShowUatFeedbackPanel] = useState(false);
+  const [uatFeedbackHistoryOpen, setUatFeedbackHistoryOpen] = useState(false);
+  const [uatFeedbackHistory, setUatFeedbackHistory] = useState(() => getUatFeedbackHistoryFromStorage());
   useEffect(() => {
     const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
     applyThemePreset(themeToApply);
@@ -8422,6 +8465,16 @@ export default function Stillform() {
     try { window.setTimeout(() => setUatFeedbackStatus(""), 4200); } catch {}
   };
 
+  const toggleUatFeedbackHistoryOpen = () => {
+    setUatFeedbackHistoryOpen((value) => {
+      const next = !value;
+      if (next) {
+        setUatFeedbackHistory(getUatFeedbackHistoryFromStorage());
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     try {
       localStorage.setItem(UAT_FEEDBACK_DRAFT_KEY, JSON.stringify({
@@ -8475,6 +8528,15 @@ export default function Stillform() {
           text: ""
         }));
       } catch {}
+      const historyEntry = {
+        id: `uat_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        submittedAt: new Date().toISOString(),
+        questionId: selectedQuestionId,
+        text: trimmed.slice(0, UAT_FEEDBACK_TEXT_MAX)
+      };
+      const updatedHistory = appendUatFeedbackHistory(historyEntry, UAT_FEEDBACK_HISTORY_MAX_ITEMS);
+      setUatFeedbackHistory(updatedHistory);
+      setUatFeedbackHistoryOpen(true);
       setUatFeedbackStatusWithClear("Thanks. Your UAT feedback was sent.");
       try { window.plausible("UAT Feedback Submitted", { props: { question: selectedQuestionId } }); } catch {}
     } catch {
@@ -9798,94 +9860,154 @@ export default function Stillform() {
               const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
               const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
               const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
+              const shortLabelMap = {
+                confusing: "Confusing",
+                friction: "Friction",
+                missing: "Missing clarity",
+                working: "Working well"
+              };
               return (
                 <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                      UAT feedback
-                    </div>
-                    <button
-                      onClick={openUatBoardHomeOnly}
-                      style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 10, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", padding: 0 }}
-                    >
-                      Open board →
-                    </button>
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                    Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                    {UAT_QUESTION_OPTIONS.map((item) => {
-                      const active = item.id === selectedQuestion?.id;
-                      const shortLabelMap = {
-                        confusing: "Confusing",
-                        friction: "Friction",
-                        missing: "Missing clarity",
-                        working: "Working well"
-                      };
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => setUatQuestionId(item.id)}
-                          style={{
-                            background: active ? "var(--amber-glow)" : "transparent",
-                            border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                            borderRadius: 999,
-                            padding: "5px 11px",
-                            fontSize: 11,
-                            color: active ? "var(--amber)" : "var(--text-muted)",
-                            cursor: "pointer",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}
-                        >
-                          {shortLabelMap[item.id] || item.prompt}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <textarea
-                    value={uatQuestionText}
-                    onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
-                    placeholder={selectedQuestion?.placeholder || "Write your feedback in plain language."}
+                  <button
+                    onClick={() => setShowUatFeedbackPanel((value) => !value)}
                     style={{
                       width: "100%",
-                      minHeight: 92,
-                      background: "var(--surface2)",
-                      border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r)",
-                      padding: "10px 12px",
-                      color: "var(--text)",
-                      fontSize: 12,
-                      lineHeight: 1.55,
-                      fontFamily: "'DM Sans', sans-serif",
-                      resize: "vertical",
-                      outline: "none"
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      textAlign: "left",
+                      cursor: "pointer",
+                      marginBottom: showUatFeedbackPanel ? 10 : 0
                     }}
-                  />
-                  <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                      {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", animation: !reducedMotion ? "pulse 1.2s ease-in-out infinite" : "none" }}>
+                        {UAT_FEEDBACK_FLASH_LABEL}
+                      </div>
+                      <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                        {showUatFeedbackPanel ? "▾" : "▸"}
+                      </div>
                     </div>
+                  </button>
+
+                  {showUatFeedbackPanel && (
+                    <>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                        Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                        {UAT_QUESTION_OPTIONS.map((item) => {
+                          const active = item.id === selectedQuestion?.id;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => setUatQuestionId(item.id)}
+                              style={{
+                                background: active ? "var(--amber-glow)" : "transparent",
+                                border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                                borderRadius: 999,
+                                padding: "5px 11px",
+                                fontSize: 11,
+                                color: active ? "var(--amber)" : "var(--text-muted)",
+                                cursor: "pointer",
+                                fontFamily: "'DM Sans', sans-serif"
+                              }}
+                            >
+                              {shortLabelMap[item.id] || item.prompt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <textarea
+                        value={uatQuestionText}
+                        onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
+                        placeholder={selectedQuestion?.placeholder || "Write your feedback."}
+                        style={{
+                          width: "100%",
+                          minHeight: 92,
+                          background: "var(--surface2)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          padding: "10px 12px",
+                          color: "var(--text)",
+                          fontSize: 12,
+                          lineHeight: 1.55,
+                          fontFamily: "'DM Sans', sans-serif",
+                          resize: "vertical",
+                          outline: "none"
+                        }}
+                      />
+                      <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                          {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                        </div>
+                        <button
+                          onClick={submitUatFeedback}
+                          disabled={uatSubmitting || tooShort}
+                          style={{
+                            background: "var(--amber)",
+                            color: "#0A0A0C",
+                            border: "none",
+                            borderRadius: "var(--r-sm)",
+                            padding: "8px 12px",
+                            fontSize: 11,
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
+                            opacity: uatSubmitting || tooShort ? 0.55 : 1
+                          }}
+                        >
+                          {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  <div style={{ marginTop: showUatFeedbackPanel ? 10 : 8 }}>
                     <button
-                      onClick={submitUatFeedback}
-                      disabled={uatSubmitting || tooShort}
+                      onClick={toggleUatFeedbackHistoryOpen}
                       style={{
-                        background: "var(--amber)",
-                        color: "#0A0A0C",
-                        border: "none",
+                        width: "100%",
+                        background: "none",
+                        border: "0.5px solid var(--border)",
                         borderRadius: "var(--r-sm)",
-                        padding: "8px 12px",
+                        color: "var(--text-dim)",
                         fontSize: 11,
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        letterSpacing: "0.08em",
-                        textTransform: "uppercase",
-                        cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
-                        opacity: uatSubmitting || tooShort ? 0.55 : 1
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        padding: "8px 10px",
+                        textAlign: "left",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
                       }}
                     >
-                      {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                      <span>Submitted feedback history</span>
+                      <span style={{ color: "var(--text-muted)" }}>{uatFeedbackHistoryOpen ? "▾" : "▸"}</span>
                     </button>
+                    {uatFeedbackHistoryOpen && (
+                      <div style={{ marginTop: 8, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px", maxHeight: 220, overflowY: "auto" }}>
+                        {uatFeedbackHistory.length === 0 ? (
+                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No feedback submitted yet.</div>
+                        ) : (
+                          uatFeedbackHistory.map((entry) => {
+                            const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";
+                            return (
+                              <div key={entry.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
+                                  <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{questionLabel}</span>
+                                  <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{new Date(entry.submittedAt).toLocaleString()}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{entry.text}</div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
                   </div>
+
                   {uatFeedbackStatus && (
                     <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
                       {uatFeedbackStatus}
@@ -9894,6 +10016,36 @@ export default function Stillform() {
                 </div>
               );
             })()}
+
+            <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                  Share Stillform
+                </div>
+                <a
+                  href={SHARE_QR_TARGET_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}
+                >
+                  Open link ↗
+                </a>
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                Use this QR when meeting someone in person.
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
+                <img
+                  src={SHARE_QR_IMAGE_URL}
+                  alt={`QR code for ${SHARE_QR_TARGET_URL}`}
+                  style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }}
+                  loading="lazy"
+                />
+              </div>
+              <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>
+                {SHARE_QR_TARGET_URL}
+              </div>
+            </div>
 
               {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
