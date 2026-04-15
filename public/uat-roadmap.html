@@ -135,6 +135,7 @@
         width: 100%;
         border-collapse: collapse;
         font-size: 13px;
+        table-layout: fixed;
       }
       .table th,
       .table td {
@@ -142,6 +143,8 @@
         padding: 9px 10px;
         text-align: left;
         vertical-align: top;
+        word-break: break-word;
+        overflow-wrap: anywhere;
       }
       .table th {
         color: var(--amber);
@@ -178,6 +181,52 @@
         font-size: 12px;
         color: var(--text-dim);
       }
+      @media (max-width: 760px) {
+        .wrap {
+          padding: 22px 12px 56px;
+        }
+        .block {
+          padding: 14px;
+        }
+        .block-head {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .table thead {
+          display: none;
+        }
+        .table,
+        .table tbody,
+        .table tr,
+        .table td {
+          display: block;
+          width: 100%;
+        }
+        .table tr {
+          margin-bottom: 10px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: var(--surface-2);
+          overflow: hidden;
+        }
+        .table td {
+          border: none;
+          border-bottom: 1px solid var(--border);
+          padding: 9px 10px 10px;
+        }
+        .table td:last-child {
+          border-bottom: none;
+        }
+        .table td::before {
+          content: attr(data-label);
+          display: block;
+          margin-bottom: 4px;
+          font-size: 10px;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: var(--amber);
+        }
+      }
     </style>
   </head>
   <body>
@@ -208,24 +257,24 @@
           </thead>
           <tbody>
             <tr>
-              <td>Standalone Watch &amp; Choose tool surface</td>
-              <td>Reframe watch sequence inside Reframe</td>
-              <td>Reduced tool sprawl and kept cognitive work in one place.</td>
+              <td data-label="Removed item">Standalone Watch &amp; Choose tool surface</td>
+              <td data-label="Replaced by">Reframe watch sequence inside Reframe</td>
+              <td data-label="Why it was removed">Reduced tool sprawl and kept cognitive work in one place.</td>
             </tr>
             <tr>
-              <td>Manual Pulse logging UI</td>
-              <td>Pulse generated from completed tools and check-ins in My Progress</td>
-              <td>Pulse is now data interpretation only, not a separate action burden.</td>
+              <td data-label="Removed item">Manual Pulse logging UI</td>
+              <td data-label="Replaced by">Pulse generated from completed tools and check-ins in My Progress</td>
+              <td data-label="Why it was removed">Pulse is now data interpretation only, not a separate action burden.</td>
             </tr>
             <tr>
-              <td>Optional tutorial live tests (Breathe/Reframe)</td>
-              <td>Compressed onboarding to core tutorial flow + required Go/No-Go check</td>
-              <td>Lowered onboarding load and reduced setup fatigue.</td>
+              <td data-label="Removed item">Optional tutorial live tests (Breathe/Reframe)</td>
+              <td data-label="Replaced by">Compressed onboarding to core tutorial flow + required Go/No-Go check</td>
+              <td data-label="Why it was removed">Lowered onboarding load and reduced setup fatigue.</td>
             </tr>
             <tr>
-              <td>Blind Spots wording in calibration flow</td>
-              <td>Pattern Check baseline language</td>
-              <td>Softened accusatory framing while keeping pattern integrity.</td>
+              <td data-label="Removed item">Blind Spots wording in calibration flow</td>
+              <td data-label="Replaced by">Pattern Check baseline language</td>
+              <td data-label="Why it was removed">Softened accusatory framing while keeping pattern integrity.</td>
             </tr>
           </tbody>
         </table>
@@ -247,28 +296,28 @@
           </thead>
           <tbody>
             <tr>
-              <td>Core composure loop</td>
-              <td>Done</td>
-              <td>Morning check-in, protocol routing, in-session tools, end-of-day close.</td>
-              <td>One consistent daily behavior system instead of fragmented features.</td>
+              <td data-label="Workstream">Core composure loop</td>
+              <td data-label="Status">Done</td>
+              <td data-label="What is live">Morning check-in, protocol routing, in-session tools, end-of-day close.</td>
+              <td data-label="User impact">One consistent daily behavior system instead of fragmented features.</td>
             </tr>
             <tr>
-              <td>Reframe stabilization</td>
-              <td>Done</td>
-              <td>Mode-aware continuity, sympathy-first tuning, retry/offline handling, stronger completion flow.</td>
-              <td>Higher trust and lower friction in high-activation moments.</td>
+              <td data-label="Workstream">Reframe stabilization</td>
+              <td data-label="Status">Done</td>
+              <td data-label="What is live">Mode-aware continuity, sympathy-first tuning, retry/offline handling, stronger completion flow.</td>
+              <td data-label="User impact">Higher trust and lower friction in high-activation moments.</td>
             </tr>
             <tr>
-              <td>Settings + data control</td>
-              <td>Done</td>
-              <td>Collapsible settings sections, clearer Data Management, export controls, deletion hardening.</td>
-              <td>Cleaner navigation and better control over local data.</td>
+              <td data-label="Workstream">Settings + data control</td>
+              <td data-label="Status">Done</td>
+              <td data-label="What is live">Collapsible settings sections, clearer Data Management, export controls, deletion hardening.</td>
+              <td data-label="User impact">Cleaner navigation and better control over local data.</td>
             </tr>
             <tr>
-              <td>Transparency + metrics</td>
-              <td>Done</td>
-              <td>Metrics controls, disclosure language, and privacy-policy alignment.</td>
-              <td>Honest operational telemetry without capturing free-form text content.</td>
+              <td data-label="Workstream">Transparency + metrics</td>
+              <td data-label="Status">Done</td>
+              <td data-label="What is live">Metrics controls, disclosure language, and privacy-policy alignment.</td>
+              <td data-label="User impact">Honest operational telemetry without capturing free-form text content.</td>
             </tr>
           </tbody>
         </table>
@@ -314,39 +363,39 @@
           </thead>
           <tbody>
             <tr>
-              <td>Quick Breathe interaction feels unreliable</td>
-              <td>In progress</td>
-              <td>Stabilize tap-vs-drag behavior so it does not misfire or reposition unexpectedly.</td>
+              <td data-label="Issue">Quick Breathe interaction feels unreliable</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Stabilize tap-vs-drag behavior so it does not misfire or reposition unexpectedly.</td>
             </tr>
             <tr>
-              <td>Reframe external anchor flow is unclear</td>
-              <td>In progress</td>
-              <td>Simplify post-session anchor to a cleaner, single-field action.</td>
+              <td data-label="Issue">Reframe external anchor flow is unclear</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Simplify post-session anchor to a cleaner, single-field action.</td>
             </tr>
             <tr>
-              <td>Go/No-Go naming mismatch</td>
-              <td>In progress</td>
-              <td>Unify naming across tutorial, home, settings, and progress surfaces.</td>
+              <td data-label="Issue">Go/No-Go naming mismatch</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Unify naming across tutorial, home, settings, and progress surfaces.</td>
             </tr>
             <tr>
-              <td>Body Scan point location clarity</td>
-              <td>In progress</td>
-              <td>Improve in-app SVG guidance to make the target point explicit before hold begins.</td>
+              <td data-label="Issue">Body Scan point location clarity</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Improve in-app SVG guidance to make the target point explicit before hold begins.</td>
             </tr>
             <tr>
-              <td>Back navigation requires top scroll</td>
-              <td>In progress</td>
-              <td>Add bottom back affordance and right-swipe back on key long screens.</td>
+              <td data-label="Issue">Back navigation requires top scroll</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Add bottom back affordance and right-swipe back on key long screens.</td>
             </tr>
             <tr>
-              <td>Delete-all leaves residual AI observations</td>
-              <td>In progress</td>
-              <td>Ensure local wipe clears every stillform_* key and performs cloud-data delete before sign-out.</td>
+              <td data-label="Issue">Delete-all leaves residual AI observations</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Ensure local wipe clears every stillform_* key and performs cloud-data delete before sign-out.</td>
             </tr>
             <tr>
-              <td>Screenshot structural liability clarity</td>
-              <td>In progress</td>
-              <td>Add explicit screenshot-analysis boundary language in Privacy + FAQ.</td>
+              <td data-label="Issue">Screenshot structural liability clarity</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Add explicit screenshot-analysis boundary language in Privacy + FAQ.</td>
             </tr>
           </tbody>
         </table>
@@ -367,39 +416,39 @@
           </thead>
           <tbody>
             <tr>
-              <td>Launch hardening</td>
-              <td>Final post-deploy device pass for startup, entitlement truth, and data reset integrity.</td>
-              <td>No startup regressions, no entitlement mismatch, no stale-state restore issues.</td>
+              <td data-label="Phase">Launch hardening</td>
+              <td data-label="Next step">Final post-deploy device pass for startup, entitlement truth, and data reset integrity.</td>
+              <td data-label="Readiness signal">No startup regressions, no entitlement mismatch, no stale-state restore issues.</td>
             </tr>
             <tr>
-              <td>Distribution prep</td>
-              <td>Referral and practitioner launch channels with trust-first onboarding copy.</td>
-              <td>Clean tester handoff feedback and stable early retention behavior.</td>
+              <td data-label="Phase">Distribution prep</td>
+              <td data-label="Next step">Referral and practitioner launch channels with trust-first onboarding copy.</td>
+              <td data-label="Readiness signal">Clean tester handoff feedback and stable early retention behavior.</td>
             </tr>
             <tr>
-              <td>Native readiness</td>
-              <td>TestFlight + Play closed-testing package and submission compliance checks.</td>
-              <td>Device matrix complete and submission artifacts signed off.</td>
+              <td data-label="Phase">Native readiness</td>
+              <td data-label="Next step">TestFlight + Play closed-testing package and submission compliance checks.</td>
+              <td data-label="Readiness signal">Device matrix complete and submission artifacts signed off.</td>
             </tr>
             <tr>
-              <td>Wearables / watch layer</td>
-              <td>Apple Watch and Wear OS companion flows for quick interventions, state capture, and glanceable composure cues.</td>
-              <td>Companion prototypes validated and mobile-watch sync latency within target.</td>
+              <td data-label="Phase">Wearables / watch layer</td>
+              <td data-label="Next step">Apple Watch and Wear OS companion flows for quick interventions, state capture, and glanceable composure cues.</td>
+              <td data-label="Readiness signal">Companion prototypes validated and mobile-watch sync latency within target.</td>
             </tr>
             <tr>
-              <td>Health integrations depth</td>
-              <td>Expand Apple Health / Google Fit context ingestion for readiness and recovery-informed prompting.</td>
-              <td>Permission model stable, context quality verified, and no regressions in privacy controls.</td>
+              <td data-label="Phase">Health integrations depth</td>
+              <td data-label="Next step">Expand Apple Health / Google Fit context ingestion for readiness and recovery-informed prompting.</td>
+              <td data-label="Readiness signal">Permission model stable, context quality verified, and no regressions in privacy controls.</td>
             </tr>
             <tr>
-              <td>Communication integrations</td>
-              <td>State to Statement handoff actions for Slack, email, and messaging workflows.</td>
-              <td>External action reliability validated and follow-through telemetry matches user intent.</td>
+              <td data-label="Phase">Communication integrations</td>
+              <td data-label="Next step">State to Statement handoff actions for Slack, email, and messaging workflows.</td>
+              <td data-label="Readiness signal">External action reliability validated and follow-through telemetry matches user intent.</td>
             </tr>
             <tr>
-              <td>Context-trigger automation</td>
-              <td>Event-driven nudges combining calendar pressure windows, wearable signals, and loop adherence patterns.</td>
-              <td>Nudge precision improves recovery metrics without over-triggering or alert fatigue.</td>
+              <td data-label="Phase">Context-trigger automation</td>
+              <td data-label="Next step">Event-driven nudges combining calendar pressure windows, wearable signals, and loop adherence patterns.</td>
+              <td data-label="Readiness signal">Nudge precision improves recovery metrics without over-triggering or alert fatigue.</td>
             </tr>
           </tbody>
         </table>
