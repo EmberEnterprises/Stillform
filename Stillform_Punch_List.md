@@ -1,6 +1,89 @@
 # STILLFORM — PUNCH LIST
-### Every change made in Session 4 (April 7-8, 2026)
-### Test each item. Check it off when verified on live site.
+### Living SHIP list across sessions (April 7, 2026 onward)
+### Test each item. Check it off only when verified on live site.
+
+---
+
+## SHIP MODE — ACCOMMODATING CURRENT APP STAGE
+
+- **Live now (must verify now):** implemented and expected in production app behavior.
+- **In-app UAT (verify before launch):** implemented but still under focused UAT verification.
+- **Post-launch / external dependency:** intentionally tracked here but not a blocker for current in-app UAT pass.
+- **Discipline:** no item is “done” until live-tested and checked off.
+
+---
+
+## CORE SHIP GATE (11 ITEMS — RUN BEFORE ANY PUSH)
+
+1. [ ] UAT dropdown — updated if user-visible change
+2. [ ] Tutorial — updated if new feature
+3. [ ] FAQ — updated if it changes how something works
+4. [ ] Transfer doc — updated every session
+5. [ ] Plausible event — added if trackable
+6. [ ] Privacy policy — updated if new data collected
+7. [ ] Science sheet — updated if research-backed
+8. [ ] AI prompts — updated if affects Reframe context
+9. [ ] Promo — updated if worth marketing
+10. [ ] Punch list — testable item added
+11. [ ] Emotion coverage — verify positive/negative/neutral balance if touching Pulse/chips
+
+---
+
+## BACKFILLED ITEMS — IMPLEMENTED BUT PREVIOUSLY MISSING FROM THIS SHIP LIST
+
+### UAT + feedback operations
+- [ ] Home UAT banner: flashing **UAT FEEDBACK** behavior + collapsed panel interaction
+- [ ] Home UAT feedback panel: expandable history/dropdown for prior submissions
+- [ ] UAT feedback backend fallback: Netlify Blobs write path when Supabase table is unavailable
+- [ ] UAT roadmap page includes back-to-app buttons at top and bottom
+- [ ] Home UAT banner CTA arrow aligned to right-side layout as requested
+
+### Home clarity + navigation decisions
+- [ ] Go/No-Go tool has explicit explanatory text under entry point
+- [ ] My Progress “Most used” defaults to **N/A** for first-time users
+- [ ] QR sharing moved to **Settings → More** and removed from Home
+- [ ] My Progress pin interaction backfilled as icon-led action pattern (no separate pin-open status button)
+
+### AI quality and intention-integrity work
+- [ ] Reframe AI intention-fit validation pass added (anchors responses to user language)
+- [ ] Reframe voice guardrails tuned to reduce over-sanitized/generic outputs
+- [ ] Reframe retry quality prompt combines failure reasons for higher-specificity regeneration
+- [ ] Deterministic fallback responses now include user-input specificity
+
+### “Teach how they process” system (processing pedagogy)
+- [ ] Tool-entry processing primers added to Reframe, Breathe, and Body Scan
+- [ ] Required post-tool debrief gate (20-second low-friction capture) added to tool completion flow
+- [ ] Tool debrief storage/sync wiring added and included in full local data delete
+- [ ] My Progress includes **Processing Mastery** metrics (pattern accuracy, switch agility, debrief capture)
+- [ ] My Progress includes weekly reflection synthesis block from recent usage/debrief data
+
+### Onboarding personalization + comfort
+- [ ] Onboarding includes visual customization options (theme selection)
+- [ ] Onboarding includes reduced-motion option
+- [ ] Onboarding includes visual-grounding option
+
+---
+
+## AUDIT REMEDIATION TRACK (ALSO REQUESTED)
+
+### High priority — operational trust/compliance
+- [x] UAT centralized storage is operational in prod (no `storage: "local-only"` on intended centralized path)
+- [x] Add quick verification endpoint/process so centralized storage mode is visible (`supabase` / `netlify-blobs` / `local-only`)
+- [x] Run one live UAT submit verification after fix and record returned storage mode
+- [x] Evidence (Apr 13, 2026): `POST https://stillformapp.com/.netlify/functions/uat-feedback` returned `{"ok":true,"id":1,"storage":"supabase"}`
+- [x] If fallback mode is intentional, confirm and document primary mode expectation explicitly (Primary = Supabase; fallback = Netlify Blobs; local-only = emergency fail-safe)
+- [x] Privacy/runtime alignment fixed: public privacy page matches runtime provider usage (OpenAI GPT-4o)
+
+### Medium priority — reliability and delivery safety
+- [ ] UAT fallback complexity documented with explicit operational visibility + retrieval checks
+- [ ] Begin App.jsx modularization phase 1 (home/UAT surfaces, Reframe UI/state, settings/data-management)
+- [ ] Confirm modularization goal met: reduced regression blast radius for high-churn zones
+
+### Near-term (this week)
+- [ ] Add CI gate that runs build + `ship:preflight` + `smoke:core-loop` on PR/push
+
+### Low / watchlist
+- [ ] Track dependency freshness debt and schedule upgrade cadence
 
 ---
 
