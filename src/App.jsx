@@ -4579,6 +4579,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     );
   }
 
+  const requestDifferentResponse = () => {
+    if (loading) return;
+    const hasConversationContext = messages.some((m) => m.role === "user") || Boolean(lastInput?.trim());
+    if (!hasConversationContext) return;
+    try { window.plausible("Reframe Different Response Requested", { props: { mode: effectiveMode } }); } catch {}
+    handleSend("Give me a different response to what I just shared. Keep it specific and practical.");
+  };
+
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
 
@@ -4785,7 +4793,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
             <div style={{ padding: "8px 0 4px 44px" }}>
               <button
-                onClick={() => { saveSession(); onComplete("breathe"); }}
+                onClick={requestDifferentResponse}
                 style={{
                   background: "none",
                   border: "none",
