@@ -104,25 +104,40 @@ export async function handler(event) {
       return json(400, { error: "install_id is required when not authenticated" });
     }
 
-    const row = await insertUatFeedback({
-      userId,
-      installId,
-      sourceScreen: sanitizeSourceScreen(payload?.source_screen),
-      questionId,
-      questionPrompt: sanitizeQuestionPrompt(payload?.question_prompt),
-      feedbackText,
-      appVersion: sanitizeVersion(payload?.app_version),
-      packageVersion: sanitizeVersion(payload?.package_version),
-      metadata: {
-        submitted_at: payload?.submitted_at || null,
-        ua: event.headers?.["user-agent"] || event.headers?.["User-Agent"] || null
-      }
-    });
+    try {
+      const row = await insertUatFeedback({
+        userId,
+        installId,
+        sourceScreen: sanitizeSourceScreen(payload?.source_screen),
+        questionId,
+        questionPrompt: sanitizeQuestionPrompt(payload?.question_prompt),
+        feedbackText,
+        appVersion: sanitizeVersion(payload?.app_version),
+        packageVersion: sanitizeVersion(payload?.package_version),
+        metadata: {
+          submitted_at: payload?.submitted_at || null,
+          ua: event.headers?.["user-agent"] || event.headers?.["User-Agent"] || null
+        }
+      });
 
-    return json(200, {
-      ok: true,
-      id: row?.id || null
-    });
+      return json(200, {
+        ok: true,
+        id: row?.id || null,
+        storage: "supabase"
+      });
+    } catch (writeError) {
+      const message = String(writeError?.message || "");
+      const tableMissing = message.includes("PGRST205") || message.includes("stillform_uat_feedback");
+      if (tableMissing) {
+        return json(202, {
+          ok: true,
+          id: null,
+          storage: "local-only",
+          warning: "uat_feedback_table_missing"
+        });
+      }
+      throw writeError;
+    }
   } catch (error) {
     return json(500, { error: error?.message || "uat feedback ingest failed" });
   }
