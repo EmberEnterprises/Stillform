@@ -10591,7 +10591,21 @@ export default function Stillform() {
                         <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
                       </div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1 }}>
-                        {homeProgressPinned ? "📌" : (homeProgressExpanded ? "−" : "+")}
+                        {homeProgressPinned ? (
+                          <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            focusable="false"
+                            style={{ display: "block" }}
+                          >
+                            <path
+                              fill="var(--amber)"
+                              d="M14 4V2h-4v2H5v2l2 3v5l-1 1v1h5v6h2v-6h5v-1l-1-1V9l2-3V4z"
+                            />
+                          </svg>
+                        ) : (homeProgressExpanded ? "−" : "+")}
                       </div>
                     </button>
                     <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
