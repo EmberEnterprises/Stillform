@@ -147,13 +147,17 @@ const FRIENDLY_SOFT_ENTRY_PATTERNS = [
   /\bhello+\b/i,
   /\byo+\b/i,
   /\bwhat'?s up\b/i,
-  /\blol\b/i,
-  /\bhaha+\b/i,
   /\bjust checking in\b/i,
-  /\bhang(?:ing)? out\b/i,
-  /\bsnoot\b/i,
-  /\bsnit\b/i
+  /\bhang(?:ing)? out\b/i
 ];
+
+const SOFT_ENTRY_BLOCK_PATTERNS = [
+  /\b(but|because|issue|problem|stuck|loop|looping|anxious|angry|panic|panicking|overwhelm|overwhelmed|frustrat|fight|argu|boss|manager|work|urgent|help|need|can't|cant|won't|wont)\b/i,
+  /\b(shit|fuck|fucked|damn|crisis|suicid|hurt myself|kill myself)\b/i
+];
+
+const SOFT_ENTRY_MAX_CHARS = 80;
+const SOFT_ENTRY_MAX_WORDS = 12;
 
 const GENERIC_GARBAGE_SNIPPETS = [
   "sounds like something's circling in your mind",
@@ -289,7 +293,11 @@ function detectSoftEntry(input) {
   const text = String(input || "").trim();
   if (!text) return false;
   const lowered = text.toLowerCase();
-  return hasAnyPattern(lowered, FRIENDLY_SOFT_ENTRY_PATTERNS);
+  const wordCount = lowered.split(/\s+/).filter(Boolean).length;
+  if (text.length > SOFT_ENTRY_MAX_CHARS || wordCount > SOFT_ENTRY_MAX_WORDS) return false;
+  if (!hasAnyPattern(lowered, FRIENDLY_SOFT_ENTRY_PATTERNS)) return false;
+  if (hasAnyPattern(lowered, SOFT_ENTRY_BLOCK_PATTERNS)) return false;
+  return true;
 }
 
 function buildSciencePrompt(route) {

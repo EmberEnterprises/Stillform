@@ -672,6 +672,17 @@ const styles = `
     100% { text-shadow: 0 0 12px rgba(201,147,58,0.2); }
   }
 
+  @keyframes uatBannerFlash {
+    0%, 100% {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 rgba(201,147,58,0);
+      border-color: var(--amber-dim);
+    }
+    50% {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 18px rgba(201,147,58,0.18);
+      border-color: rgba(201,147,58,0.6);
+    }
+  }
+
   /* BODY SCAN */
   .scan-body {
     display: flex;
@@ -1332,7 +1343,21 @@ const METRICS_SCHEMA_VERSION = 1;
 const SESSION_STORAGE_KEY = "stillform_sessions";
 const COMMUNICATION_EVENTS_KEY = "stillform_communication_events";
 const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
+const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
+const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
+const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
+const UAT_BOARD_UPDATED_LABEL = "Updated Apr 15";
+const UAT_BOARD_LAUNCH_ETA_LABEL = "May 10";
+const UAT_FEEDBACK_TEXT_MIN = 8;
+const UAT_FEEDBACK_TEXT_MAX = 1000;
+const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
+const UAT_QUESTION_OPTIONS = [
+  { id: "confusing", prompt: "What felt confusing today?", placeholder: "Example: The button text was unclear." },
+  { id: "friction", prompt: "What felt heavy or annoying?", placeholder: "Example: Too many taps to finish this step." },
+  { id: "missing", prompt: "What should be clearer or easier?", placeholder: "Example: Add one line explaining why this tool exists." },
+  { id: "working", prompt: "What worked well for you?", placeholder: "Example: The reframe flow felt direct and calm." }
+];
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
@@ -1451,6 +1476,29 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   const bounded = events.slice(-maxItems);
   try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
   return bounded.length;
+};
+
+const getCommunicationDraftSignals = (value) => {
+  const text = String(value || "").trim();
+  const wordCount = text ? text.split(/\s+/).filter(Boolean).length : 0;
+  const textLength = text.length;
+  const meaningful = textLength >= COMMUNICATION_MEANINGFUL_CHARS_MIN || wordCount >= COMMUNICATION_MEANINGFUL_WORDS_MIN;
+  return { textLength, wordCount, meaningful };
+};
+
+const getUatFeedbackDraft = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(UAT_FEEDBACK_DRAFT_KEY) || "null");
+    if (!parsed || typeof parsed !== "object") return { questionId: UAT_QUESTION_OPTIONS[0]?.id || "confusing", text: "" };
+    const fallbackQuestionId = UAT_QUESTION_OPTIONS[0]?.id || "confusing";
+    const questionId = UAT_QUESTION_OPTIONS.some((item) => item.id === parsed.questionId)
+      ? parsed.questionId
+      : fallbackQuestionId;
+    const text = String(parsed.text || "").slice(0, UAT_FEEDBACK_TEXT_MAX);
+    return { questionId, text };
+  } catch {
+    return { questionId: UAT_QUESTION_OPTIONS[0]?.id || "confusing", text: "" };
+  }
 };
 
 const getSessionCountFromStorage = () => getSessionsFromStorage().length;
@@ -3565,7 +3613,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
+  const [communicationSkipReason, setCommunicationSkipReason] = useState(null);
   const communicationDraftLoggedRef = useRef(false);
+  const communicationOpportunityLoggedRef = useRef(false);
+  const communicationExpandedRef = useRef(false);
+  const stateToStatementSessionIdRef = useRef(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [feelState, setFeelState] = useState(() => {
@@ -4300,29 +4352,75 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
+  const COMMUNICATION_ACTIONS = {
+    opportunity: "state-to-statement-opportunity",
+    expanded: "state-to-statement-expanded",
+    drafted: "state-to-statement-drafted",
+    copied: "state-to-statement-copied",
+    shared: "state-to-statement-shared",
+    sentConfirmed: "state-to-statement-sent-confirmed",
+    completedWithDraft: "state-to-statement-completed-with-draft",
+    completedWithoutDraft: "state-to-statement-completed-without-draft",
+    skipped: "state-to-statement-skipped"
+  };
+  const COMMUNICATION_SKIP_REASONS = [
+    { id: "not-needed", label: "Not needed for this event" },
+    { id: "private-processing", label: "Keeping it internal for now" },
+    { id: "send-later", label: "Will send later outside app" }
+  ];
+  const getStateToStatementSessionId = () => {
+    if (!stateToStatementSessionIdRef.current) {
+      stateToStatementSessionIdRef.current = `sts_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    }
+    return stateToStatementSessionIdRef.current;
+  };
+  const resetStateToStatementTracking = () => {
+    communicationDraftLoggedRef.current = false;
+    communicationOpportunityLoggedRef.current = false;
+    communicationExpandedRef.current = false;
+    stateToStatementSessionIdRef.current = null;
+    setCommunicationSkipReason(null);
+  };
   const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
     return `State to Statement:\n${clean}`;
   };
-  const logCommunicationAction = (action) => {
-    const clean = externalAnchorDraft.trim();
-    if (!clean) return false;
+  const logCommunicationEvent = (eventAction, options = {}) => {
     const stamp = new Date().toISOString();
-    appendCommunicationEvent({
+    const clean = externalAnchorDraft.trim();
+    const draftSignals = getCommunicationDraftSignals(clean);
+    const entry = {
       id: `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      schemaVersion: COMMUNICATION_EVENT_SCHEMA_VERSION,
       timestamp: stamp,
       date: toLocalDateKey(stamp),
-      action,
+      action: eventAction,
       source: "reframe-state-to-statement",
       sessionTimestamp: sessionShareSummary?.timestamp || null,
-      textLength: clean.length
+      stateToStatementSessionId: getStateToStatementSessionId(),
+      textLength: draftSignals.textLength,
+      wordCount: draftSignals.wordCount,
+      meaningfulDraft: draftSignals.meaningful ? "yes" : "no",
+      skipReason: options.skipReason || communicationSkipReason || null,
+      metadata: options.metadata || null
+    };
+    appendCommunicationEvent(entry);
+    return entry;
+  };
+  const markStateToStatementOpportunity = ({ source = "unknown" } = {}) => {
+    if (communicationOpportunityLoggedRef.current) return;
+    communicationOpportunityLoggedRef.current = true;
+    logCommunicationEvent(COMMUNICATION_ACTIONS.opportunity, {
+      metadata: { source }
     });
-    return true;
   };
   const ensureDraftLogged = () => {
     if (communicationDraftLoggedRef.current) return;
-    if (logCommunicationAction("drafted")) communicationDraftLoggedRef.current = true;
+    const clean = externalAnchorDraft.trim();
+    if (!clean) return;
+    logCommunicationEvent(COMMUNICATION_ACTIONS.drafted);
+    communicationDraftLoggedRef.current = true;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
   const finishReframeSession = ({ postState = null } = {}) => {
@@ -4344,16 +4442,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       setShowPostInsight(true);
       try { window.plausible("Post Session Insight Shown"); } catch {}
     } else {
+      resetStateToStatementTracking();
+      markStateToStatementOpportunity({ source: "reframe-finish-no-insight" });
       setShowStateToStatement(true);
     }
   };
 
   const finishStateToStatement = () => {
     ensureDraftLogged();
+    const hasDraft = externalAnchorDraft.trim().length > 0;
+    logCommunicationEvent(hasDraft ? COMMUNICATION_ACTIONS.completedWithDraft : COMMUNICATION_ACTIONS.completedWithoutDraft);
     try {
       window.plausible("State to Statement Completed", {
         props: {
-          has_anchor: externalAnchorDraft.trim() ? "yes" : "no"
+          has_anchor: hasDraft ? "yes" : "no"
         }
       });
     } catch {}
@@ -4365,11 +4467,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
-    communicationDraftLoggedRef.current = false;
+    resetStateToStatementTracking();
     onComplete(resolvePostReframeRoute());
   };
 
-  const skipStateToStatement = () => {
+  const skipStateToStatement = (reason = null) => {
+    const chosenReason = reason || communicationSkipReason || "not-needed";
+    setCommunicationSkipReason(chosenReason);
+    logCommunicationEvent(COMMUNICATION_ACTIONS.skipped, { skipReason: chosenReason });
     try { window.plausible("State to Statement Skipped"); } catch {}
     setShowStateToStatement(false);
     setExternalAnchorCopied(false);
@@ -4379,7 +4484,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
-    communicationDraftLoggedRef.current = false;
+    resetStateToStatementTracking();
     onComplete(resolvePostReframeRoute());
   };
 
@@ -4401,7 +4506,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorCopied(false);
     setExternalAnchorSent(false);
     setExternalAnchorDraft("");
+    resetStateToStatementTracking();
+    markStateToStatementOpportunity({ source: "post-insight-continue" });
     setShowStateToStatement(true);
+  };
+
+  const toggleStateToStatementExpanded = () => {
+    setStateToStatementExpanded((prev) => {
+      const next = !prev;
+      if (next && !communicationExpandedRef.current) {
+        communicationExpandedRef.current = true;
+        logCommunicationEvent(COMMUNICATION_ACTIONS.expanded);
+      }
+      return next;
+    });
   };
 
   const copyExternalAnchor = async () => {
@@ -4410,7 +4528,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
       ensureDraftLogged();
-      logCommunicationAction("copied");
+      logCommunicationEvent(COMMUNICATION_ACTIONS.copied);
       setExternalAnchorCopied(true);
       try { window.plausible("State to Statement Anchor Copied"); } catch {}
     } catch {}
@@ -4422,7 +4540,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (navigator?.share) {
         await navigator.share({ text });
         ensureDraftLogged();
-        logCommunicationAction("shared");
+        logCommunicationEvent(COMMUNICATION_ACTIONS.shared);
         try { window.plausible("State to Statement Anchor Shared"); } catch {}
         return;
       }
@@ -4434,7 +4552,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const markExternalAnchorSent = () => {
     if (!externalAnchorDraft.trim()) return;
     ensureDraftLogged();
-    logCommunicationAction("sent-confirmed");
+    logCommunicationEvent(COMMUNICATION_ACTIONS.sentConfirmed);
     setExternalAnchorSent(true);
     try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
@@ -4461,10 +4579,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <button className="btn btn-primary" onClick={finishStateToStatement}>
             Finish session
           </button>
-          <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
-            {stateToStatementExpanded ? "Hide State to Statement" : "Open State to Statement"}
+          <button className="btn btn-ghost" onClick={toggleStateToStatementExpanded}>
+            {stateToStatementExpanded ? "Hide state to statement" : "Add state to statement"}
           </button>
-          <button className="btn btn-ghost" onClick={skipStateToStatement}>
+          <button className="btn btn-ghost" onClick={() => skipStateToStatement(communicationSkipReason || "not-needed")}>
             Skip for now
           </button>
         </div>
@@ -4479,6 +4597,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               onChange={(e) => {
                 setExternalAnchorDraft(e.target.value);
                 setExternalAnchorSent(false);
+                setCommunicationSkipReason(null);
               }}
               placeholder="Draft one clear message you can send now."
               rows={3}
@@ -4490,7 +4609,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorCopied ? "Copied" : "Copy anchor"}
+                {externalAnchorCopied ? "Copied" : "Copy statement"}
               </button>
               <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
                 Share
@@ -4498,6 +4617,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
                 {externalAnchorSent ? "Sent logged" : "Mark sent"}
               </button>
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
+                Skip reason (for data quality)
+              </div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {COMMUNICATION_SKIP_REASONS.map((item) => (
+                  <button
+                    key={item.id}
+                    className="btn btn-ghost"
+                    onClick={() => setCommunicationSkipReason(item.id)}
+                    style={{
+                      fontSize: 11,
+                      padding: "6px 10px",
+                      borderColor: communicationSkipReason === item.id ? "var(--amber-dim)" : "var(--border)",
+                      color: communicationSkipReason === item.id ? "var(--amber)" : "var(--text-dim)"
+                    }}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -4578,6 +4719,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       </div>
     );
   }
+
+  const requestDifferentResponse = () => {
+    if (loading) return;
+    const hasConversationContext = messages.some((m) => m.role === "user") || Boolean(lastInput?.trim());
+    if (!hasConversationContext) return;
+    try { window.plausible("Reframe Different Response Requested", { props: { mode: effectiveMode } }); } catch {}
+    handleSend("Give me a different response to what I just shared. Keep it specific and practical.");
+  };
 
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
@@ -4785,7 +4934,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
             <div style={{ padding: "8px 0 4px 44px" }}>
               <button
-                onClick={() => { saveSession(); onComplete("breathe"); }}
+                onClick={requestDifferentResponse}
                 style={{
                   background: "none",
                   border: "none",
@@ -6158,6 +6307,8 @@ function FocusCheckValidation({
       {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Go / No-Go Quick Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
+        <br />
+        This checks response inhibition so you can confirm cognitive readiness before a high-stakes decision, message, or meeting.
       </div>
       <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
         {focusCheckMode === "running" && currentFocusTrial && (
@@ -6643,12 +6794,49 @@ function MyProgress({ onBack }) {
           const transferScore14d = ratedDays14 ? Math.round((transferPositiveDays14 / ratedDays14) * 100) : null;
           const communicationEvents = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
           const communicationEvents30d = communicationEvents.filter((entry) => withinDays(entry?.timestamp || entry?.date, 30));
-          const drafted30d = communicationEvents30d.filter((entry) => entry?.action === "drafted").length;
-          const copied30d = communicationEvents30d.filter((entry) => entry?.action === "copied").length;
-          const shared30d = communicationEvents30d.filter((entry) => entry?.action === "shared").length;
-          const sentConfirmed30d = communicationEvents30d.filter((entry) => entry?.action === "sent-confirmed").length;
+          const communicationActionSet = {
+            opportunity: new Set(["state-to-statement-opportunity", "opportunity", "presented"]),
+            expanded: new Set(["state-to-statement-expanded", "expanded"]),
+            drafted: new Set(["state-to-statement-drafted", "drafted"]),
+            copied: new Set(["state-to-statement-copied", "copied"]),
+            shared: new Set(["state-to-statement-shared", "shared"]),
+            sentConfirmed: new Set(["state-to-statement-sent-confirmed", "sent-confirmed"]),
+            completedWithDraft: new Set(["state-to-statement-completed-with-draft"]),
+            completedWithoutDraft: new Set(["state-to-statement-completed-without-draft"]),
+            skipped: new Set(["state-to-statement-skipped", "skipped"])
+          };
+          const withNormalizedAction = communicationEvents30d.map((entry) => {
+            const raw = String(entry?.action || "");
+            const match = Object.entries(communicationActionSet).find(([, values]) => values.has(raw));
+            return { ...entry, normalizedAction: match?.[0] || raw };
+          });
+          const opportunityEvents30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "opportunity");
+          const expanded30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "expanded").length;
+          const draftedEntries30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "drafted");
+          const drafted30d = draftedEntries30d.length;
+          const meaningfulDrafted30d = draftedEntries30d.filter((entry) => entry?.meaningfulDraft === "yes").length;
+          const copied30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "copied").length;
+          const shared30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "shared").length;
+          const sentConfirmed30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "sentConfirmed").length;
+          const skippedEntries30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "skipped");
+          const skipped30d = skippedEntries30d.length;
+          const completedWithoutDraft30d = withNormalizedAction.filter((entry) => entry.normalizedAction === "completedWithoutDraft").length;
+          const opportunity30d = opportunityEvents30d.length;
+          const uptakeRate30d = opportunity30d > 0 ? Math.round((expanded30d / opportunity30d) * 100) : null;
+          const meaningfulDraftRate30d = drafted30d > 0 ? Math.round((meaningfulDrafted30d / drafted30d) * 100) : null;
           const followThrough30d = drafted30d > 0 ? Math.round((sentConfirmed30d / drafted30d) * 100) : null;
-          const lastSentConfirmedEvent = [...communicationEvents].reverse().find((entry) => entry?.action === "sent-confirmed");
+          const lastSentConfirmedEvent = [...withNormalizedAction].reverse().find((entry) => entry?.normalizedAction === "sentConfirmed");
+          const skipReasonCounts = skippedEntries30d.reduce((acc, entry) => {
+            const key = entry?.skipReason || "not-needed";
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+          }, {});
+          const topSkipReason = Object.entries(skipReasonCounts).sort((a, b) => b[1] - a[1])[0] || null;
+          const skipReasonLabelMap = {
+            "not-needed": "Not needed for this event",
+            "private-processing": "Keeping it internal for now",
+            "send-later": "Will send later outside app"
+          };
           const scienceEvidenceRead = (() => {
             if (acuteShiftRate30d === null || transferScore14d === null) return "building baseline";
             if (acuteShiftRate30d >= 70 && transferScore14d >= 70) return "strong carryover";
@@ -6777,11 +6965,23 @@ function MyProgress({ onBack }) {
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                       <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Opportunities (30d)</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{opportunity30d}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Voluntary uptake</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{uptakeRate30d === null ? "N/A" : `${uptakeRate30d}%`}</div>
+                      </div>
+                      <div>
                         <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Drafted (30d)</div>
                         <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{drafted30d}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sent (30d)</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Meaningful drafts</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{meaningfulDraftRate30d === null ? "N/A" : `${meaningfulDraftRate30d}%`}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sent confirmed</div>
                         <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{sentConfirmed30d}</div>
                       </div>
                       <div>
@@ -6791,7 +6991,14 @@ function MyProgress({ onBack }) {
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
                       Copy/share actions (30d): <span style={{ color: "var(--text)" }}>{copied30d + shared30d}</span>
+                      {" · "}Skipped: <span style={{ color: "var(--text)" }}>{skipped30d}</span>
+                      {" · "}Completed without draft: <span style={{ color: "var(--text)" }}>{completedWithoutDraft30d}</span>
                     </div>
+                    {topSkipReason && (
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                        Most common skip reason: <span style={{ color: "var(--text)" }}>{skipReasonLabelMap[topSkipReason[0]] || topSkipReason[0]}</span>
+                      </div>
+                    )}
                     {lastSentConfirmedEvent && (
                       <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
                         Last sent confirmation: <span style={{ color: "var(--text)" }}>{new Date(lastSentConfirmedEvent.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
@@ -7457,6 +7664,9 @@ export default function Stillform() {
       window.location.assign("/uat-roadmap.html#issues");
     }
   };
+  const openUatBoardHomeOnly = () => {
+    if (screen === "home") openUatBoard();
+  };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(backScreen || "home");
@@ -7941,6 +8151,11 @@ export default function Stillform() {
   const [metricsLastSentAt, setMetricsLastSentAt] = useState(() => {
     try { return localStorage.getItem(METRICS_LAST_SENT_AT_KEY) || ""; } catch { return ""; }
   });
+  const initialUatFeedbackDraft = getUatFeedbackDraft();
+  const [uatQuestionId, setUatQuestionId] = useState(initialUatFeedbackDraft.questionId || (UAT_QUESTION_OPTIONS[0]?.id || "confusing"));
+  const [uatQuestionText, setUatQuestionText] = useState(initialUatFeedbackDraft.text || "");
+  const [uatFeedbackStatus, setUatFeedbackStatus] = useState("");
+  const [uatSubmitting, setUatSubmitting] = useState(false);
   useEffect(() => {
     const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
     applyThemePreset(themeToApply);
@@ -8200,6 +8415,73 @@ export default function Stillform() {
   const setMetricsStatusWithClear = (message) => {
     setMetricsStatus(message);
     try { window.setTimeout(() => setMetricsStatus(""), 3200); } catch {}
+  };
+
+  const setUatFeedbackStatusWithClear = (message) => {
+    setUatFeedbackStatus(message);
+    try { window.setTimeout(() => setUatFeedbackStatus(""), 4200); } catch {}
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(UAT_FEEDBACK_DRAFT_KEY, JSON.stringify({
+        questionId: uatQuestionId,
+        text: String(uatQuestionText || "").slice(0, UAT_FEEDBACK_TEXT_MAX)
+      }));
+    } catch {}
+  }, [uatQuestionId, uatQuestionText]);
+
+  const submitUatFeedback = async () => {
+    if (uatSubmitting) return;
+    const selectedQuestionId = UAT_QUESTION_OPTIONS.some((item) => item.id === uatQuestionId)
+      ? uatQuestionId
+      : (UAT_QUESTION_OPTIONS[0]?.id || "confusing");
+    const trimmed = String(uatQuestionText || "").trim();
+    if (trimmed.length < UAT_FEEDBACK_TEXT_MIN) {
+      setUatFeedbackStatusWithClear("Please add a little more detail so we can act on it.");
+      return;
+    }
+    setUatSubmitting(true);
+    try {
+      const installId = getOrCreateInstallId();
+      const payload = {
+        install_id: installId,
+        source_screen: "home",
+        question_id: selectedQuestionId,
+        question_prompt: (UAT_QUESTION_OPTIONS.find((item) => item.id === selectedQuestionId)?.prompt) || null,
+        feedback_text: trimmed.slice(0, UAT_FEEDBACK_TEXT_MAX),
+        app_version: APP_VERSION,
+        package_version: APP_PACKAGE_VERSION,
+        submitted_at: new Date().toISOString()
+      };
+      const endpoint = "/.netlify/functions/uat-feedback";
+      const authToken = sbGetSession()?.access_token;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const failure = await response.json().catch(() => ({}));
+        throw new Error(failure?.error || `UAT feedback ${response.status}`);
+      }
+      setUatQuestionText("");
+      try {
+        localStorage.setItem(UAT_FEEDBACK_DRAFT_KEY, JSON.stringify({
+          questionId: selectedQuestionId,
+          text: ""
+        }));
+      } catch {}
+      setUatFeedbackStatusWithClear("Thanks. Your UAT feedback was sent.");
+      try { window.plausible("UAT Feedback Submitted", { props: { question: selectedQuestionId } }); } catch {}
+    } catch {
+      setUatFeedbackStatusWithClear("Could not send right now. Draft saved on this device.");
+    } finally {
+      setUatSubmitting(false);
+    }
   };
 
   const getMetricsSnapshot = () => buildPerformanceMetricsSnapshot({
@@ -9467,31 +9749,151 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Access banner */}
-            {!isSubscribed && (
-              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                    ACCESS
-                  </span>
-                  <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {uatTrialFreezeActive
-                      ? `UAT access active · target launch ${uatLaunchTargetLabel}`
-                      : "Subscription unlocks full Stillform access."}
-                  </span>
-                </div>
-                {uatTrialFreezeActive ? (
+            {/* Home UAT status banner (home-only) */}
+            {uatTrialFreezeActive && (
+              <div
+                style={{
+                  marginBottom: 12,
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  padding: "10px 14px",
+                  animation: !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)"
+                }}
+              >
+                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center", gap: 8 }}>
                   <button
-                    onClick={openUatBoard}
-                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                    onClick={openUatBoardHomeOnly}
+                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                    aria-label="Open UAT board"
                   >
-                    UAT updates →
+                    →
                   </button>
-                ) : (
-                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
-                )}
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                    UAT
+                  </div>
+                </div>
+                <div style={{ textAlign: "center", lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
+                </div>
               </div>
             )}
+
+            {!isSubscribed && !uatTrialFreezeActive && (
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  Subscription unlocks full Stillform access.
+                </span>
+                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+              </div>
+            )}
+
+            {uatTrialFreezeActive && (() => {
+              const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
+              const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
+              const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
+              return (
+                <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      UAT feedback
+                    </div>
+                    <button
+                      onClick={openUatBoardHomeOnly}
+                      style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 10, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", padding: 0 }}
+                    >
+                      Open board →
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                    Tell us what is unclear. Plain language is best. We use this to update the SHIP list.
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                    {UAT_QUESTION_OPTIONS.map((item) => {
+                      const active = item.id === selectedQuestion?.id;
+                      const shortLabelMap = {
+                        confusing: "Confusing",
+                        friction: "Friction",
+                        missing: "Missing clarity",
+                        working: "Working well"
+                      };
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setUatQuestionId(item.id)}
+                          style={{
+                            background: active ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 999,
+                            padding: "5px 11px",
+                            fontSize: 11,
+                            color: active ? "var(--amber)" : "var(--text-muted)",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          {shortLabelMap[item.id] || item.prompt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <textarea
+                    value={uatQuestionText}
+                    onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
+                    placeholder={selectedQuestion?.placeholder || "Write your feedback in plain language."}
+                    style={{
+                      width: "100%",
+                      minHeight: 92,
+                      background: "var(--surface2)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      padding: "10px 12px",
+                      color: "var(--text)",
+                      fontSize: 12,
+                      lineHeight: 1.55,
+                      fontFamily: "'DM Sans', sans-serif",
+                      resize: "vertical",
+                      outline: "none"
+                    }}
+                  />
+                  <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                      {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                    </div>
+                    <button
+                      onClick={submitUatFeedback}
+                      disabled={uatSubmitting || tooShort}
+                      style={{
+                        background: "var(--amber)",
+                        color: "#0A0A0C",
+                        border: "none",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 12px",
+                        fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: "0.08em",
+                        textTransform: "uppercase",
+                        cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
+                        opacity: uatSubmitting || tooShort ? 0.55 : 1
+                      }}
+                    >
+                      {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                    </button>
+                  </div>
+                  {uatFeedbackStatus && (
+                    <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                      {uatFeedbackStatus}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
               {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
@@ -9813,42 +10215,6 @@ export default function Stillform() {
                 )}
               </div>
 
-              {/* STREAK — only if exists */}
-              {(() => {
-                try {
-                  const sessions = getSessionsFromStorage();
-                  if (sessions.length === 0) return null;
-                  const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
-                  let streak = 0;
-                  for (let i = 0; i < 365; i++) {
-                    const d = new Date(); d.setDate(d.getDate() - i);
-                    if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
-                  }
-                  const improving = (() => {
-                    const rated = sessions.filter(s => s.preRating && s.postRating);
-                    if (rated.length < 8) return false;
-                    const early = rated.slice(0, 5).map(s => s.duration).filter(d => d > 0);
-                    const recent = rated.slice(-5).map(s => s.duration).filter(d => d > 0);
-                    const earlyAvg = early.length ? early.reduce((a, b) => a + b, 0) / early.length : 0;
-                    const recentAvg = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
-                    return recentAvg < earlyAvg * 0.85 && earlyAvg > 0;
-                  })();
-                  return (
-                    <div style={{ marginBottom: 40, display: "flex", alignItems: "center", gap: 24 }}>
-                      <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{sessions.length}</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Sessions</div>
-                      </div>
-                      {streak > 1 && <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{streak}</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Day streak</div>
-                      </div>}
-                      {improving && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: "0.1em" }}>↑ Trending faster</div>}
-                    </div>
-                  );
-                } catch { return null; }
-              })()}
-
               {/* GO DEEPER — secondary, below the line */}
               {(() => {
                 const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
@@ -10046,13 +10412,23 @@ export default function Stillform() {
                   else break;
                 }
                 const toolCounts = sessions.reduce((acc, s) => {
-                  const id = s.tool;
-                  if (!id) return acc;
-                  acc[id] = (acc[id] || 0) + 1;
+                  (s.tools || []).forEach((id) => {
+                    if (!id) return;
+                    acc[id] = (acc[id] || 0) + 1;
+                  });
                   return acc;
                 }, {});
                 const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
-                const topToolMap = { breathe: "Breathe", reframe: "Reframe", scan: "Body Scan", panic: "Panic", sigh: "Sigh" };
+                const topToolMap = {
+                  breathe: "Breathe",
+                  ground: "Breathe",
+                  reframe: "Reframe",
+                  metacognition: "Reframe · Watch Sequence",
+                  "body-scan": "Body Scan",
+                  scan: "Body Scan",
+                  panic: "Panic",
+                  sigh: "Sigh"
+                };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
                 return (
                   <div style={{ marginBottom: 16 }}>
@@ -10590,30 +10966,6 @@ export default function Stillform() {
               </div>
               <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
             </button>
-            <button
-              onClick={openUatBoard}
-              style={{
-                width: "100%",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--r-lg)",
-                padding: "14px 18px",
-                marginBottom: 26,
-                textAlign: "left",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center"
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>UAT</div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Open UAT status board and current issue list</div>
-              </div>
-              <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
-            </button>
-
             {/* Regulation Type */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("processing")} style={{

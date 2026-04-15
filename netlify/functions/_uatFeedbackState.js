@@ -1,0 +1,85 @@
+import { sbAdminFetch } from "./_subscriptionState.js";
+
+export const UAT_FEEDBACK_TABLE = "stillform_uat_feedback";
+const ALLOWED_QUESTION_IDS = new Set(["confusing", "friction", "missing", "working"]);
+
+const asText = (value, maxLen = 200) => {
+  if (value == null) return null;
+  const next = String(value).trim();
+  if (!next) return null;
+  return next.slice(0, maxLen);
+};
+
+const asLongText = (value, min = 8, max = 1000) => {
+  const text = String(value || "").trim();
+  if (!text) return null;
+  if (text.length < min) return null;
+  return text.slice(0, max);
+};
+
+const asInstallId = (value) => {
+  const text = asText(value, 120);
+  if (!text) return null;
+  if (!/^[a-z0-9._:-]+$/i.test(text)) return null;
+  return text;
+};
+
+const asQuestionId = (value) => {
+  const text = asText(value, 40);
+  if (!text) return "confusing";
+  return ALLOWED_QUESTION_IDS.has(text) ? text : "confusing";
+};
+
+const asSourceScreen = (value) => {
+  const text = asText(value, 40);
+  if (!text) return "home";
+  return text;
+};
+
+export const sanitizeUatFeedbackPayload = ({
+  userId = null,
+  installId = null,
+  sourceScreen = "home",
+  questionId = "confusing",
+  questionPrompt = null,
+  feedbackText = "",
+  appVersion = null,
+  packageVersion = null,
+  metadata = null
+} = {}) => {
+  const safeFeedbackText = asLongText(feedbackText, 8, 1000);
+  if (!safeFeedbackText) {
+    throw new Error("feedback_text must be at least 8 characters");
+  }
+  const safeUserId = asText(userId, 120);
+  const safeInstallId = asInstallId(installId);
+  if (!safeUserId && !safeInstallId) {
+    throw new Error("user_id or install_id is required");
+  }
+  return {
+    user_id: safeUserId,
+    install_id: safeInstallId,
+    source_screen: asSourceScreen(sourceScreen),
+    question_id: asQuestionId(questionId),
+    question_prompt: asText(questionPrompt, 140),
+    feedback_text: safeFeedbackText,
+    app_version: asText(appVersion, 40),
+    package_version: asText(packageVersion, 40),
+    metadata: (metadata && typeof metadata === "object" && !Array.isArray(metadata))
+      ? metadata
+      : {}
+  };
+};
+
+export const insertUatFeedback = async (payload) => {
+  const safe = sanitizeUatFeedbackPayload(payload || {});
+  const rows = await sbAdminFetch(
+    `/rest/v1/${UAT_FEEDBACK_TABLE}`,
+    {
+      method: "POST",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(safe)
+    }
+  );
+  return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
+};
