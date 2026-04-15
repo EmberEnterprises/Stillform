@@ -7596,7 +7596,12 @@ export default function Stillform() {
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
-  const [homeProgressExpanded, setHomeProgressExpanded] = useState(false);
+  const [homeProgressPinned, setHomeProgressPinned] = useState(() => {
+    try { return localStorage.getItem("stillform_home_progress_pinned") === "yes"; } catch { return false; }
+  });
+  const [homeProgressExpanded, setHomeProgressExpanded] = useState(() => {
+    try { return localStorage.getItem("stillform_home_progress_pinned") === "yes"; } catch { return false; }
+  });
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
@@ -7654,6 +7659,14 @@ export default function Stillform() {
       setShowOtherCrisisResources(false);
     }
   }, [screen, showOtherCrisisResources]);
+
+  useEffect(() => {
+    try {
+      if (homeProgressPinned) localStorage.setItem("stillform_home_progress_pinned", "yes");
+      else localStorage.removeItem("stillform_home_progress_pinned");
+    } catch {}
+    if (homeProgressPinned) setHomeProgressExpanded(true);
+  }, [homeProgressPinned]);
 
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
@@ -10429,11 +10442,14 @@ export default function Stillform() {
                   panic: "Panic",
                   sigh: "Sigh"
                 };
-                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
+                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
                 return (
                   <div style={{ marginBottom: 16 }}>
                     <button
-                      onClick={() => setHomeProgressExpanded(prev => !prev)}
+                      onClick={() => {
+                        if (homeProgressPinned) return;
+                        setHomeProgressExpanded(prev => !prev);
+                      }}
                       style={{
                         width: "100%",
                         textAlign: "left",
@@ -10452,9 +10468,29 @@ export default function Stillform() {
                         <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
                       </div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1 }}>
-                        {homeProgressExpanded ? "−" : "+"}
+                        {homeProgressPinned ? "📌" : (homeProgressExpanded ? "−" : "+")}
                       </div>
                     </button>
+                    <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 6 }}>
+                      <button
+                        onClick={() => setHomeProgressPinned((prev) => !prev)}
+                        style={{
+                          background: "none",
+                          border: "0.5px solid var(--amber-dim)",
+                          borderRadius: "999px",
+                          color: homeProgressPinned ? "var(--amber)" : "var(--text-dim)",
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 9,
+                          letterSpacing: "0.1em",
+                          textTransform: "uppercase",
+                          padding: "6px 10px",
+                          cursor: "pointer"
+                        }}
+                        aria-pressed={homeProgressPinned}
+                      >
+                        {homeProgressPinned ? "Pinned open" : "Pin open"}
+                      </button>
+                    </div>
                     {homeProgressExpanded && (
                       <div style={{ marginTop: 8, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: 12 }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
