@@ -1332,7 +1332,7 @@ const METRICS_SCHEMA_VERSION = 1;
 const SESSION_STORAGE_KEY = "stillform_sessions";
 const COMMUNICATION_EVENTS_KEY = "stillform_communication_events";
 const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
-const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
+const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
@@ -7326,7 +7326,7 @@ export default function Stillform() {
   })();
   const uatTrialFreezeActive = !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
   const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
-    ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "launch";
   const trialExpired = trialDaysLeft <= 0 && !isSubscribed && !uatTrialFreezeActive;
 
