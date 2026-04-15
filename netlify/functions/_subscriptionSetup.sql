@@ -32,3 +32,10 @@ create index if not exists idx_stillform_subscription_state_lemon_subscription_i
 
 create index if not exists idx_stillform_subscription_state_updated_at
   on public.stillform_subscription_state (updated_at desc);
+
+-- Security baseline: backend-only table (written/read via service-role functions)
+alter table public.stillform_subscription_state enable row level security;
+alter table public.stillform_subscription_state force row level security;
+
+revoke all on table public.stillform_subscription_state from anon, authenticated;
+grant all on table public.stillform_subscription_state to service_role;

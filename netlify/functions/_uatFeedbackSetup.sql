@@ -26,3 +26,10 @@ create index if not exists idx_stillform_uat_feedback_user_id
 
 create index if not exists idx_stillform_uat_feedback_install_id
   on public.stillform_uat_feedback (install_id);
+
+-- Security baseline: backend-only table (written/read via service-role functions)
+alter table public.stillform_uat_feedback enable row level security;
+alter table public.stillform_uat_feedback force row level security;
+
+revoke all on table public.stillform_uat_feedback from anon, authenticated;
+grant all on table public.stillform_uat_feedback to service_role;

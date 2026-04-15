@@ -42,3 +42,10 @@ create index if not exists idx_stillform_metrics_daily_metric_date
 
 create index if not exists idx_stillform_metrics_daily_user_id
   on public.stillform_metrics_daily (user_id);
+
+-- Security baseline: backend-only table (written/read via service-role functions)
+alter table public.stillform_metrics_daily enable row level security;
+alter table public.stillform_metrics_daily force row level security;
+
+revoke all on table public.stillform_metrics_daily from anon, authenticated;
+grant all on table public.stillform_metrics_daily to service_role;
