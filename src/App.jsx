@@ -7393,7 +7393,7 @@ export default function Stillform() {
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
-  const [ciOpen, setCiOpen] = useState(true);
+  const [ciOpen, setCiOpen] = useState(false);
   const [ciEnergy, setCiEnergy] = useState(null);
   const [ciBio, setCiBio] = useState(new Set());
   const [ciTension, setCiTension] = useState({});
@@ -9526,7 +9526,7 @@ export default function Stillform() {
                 if (eodDoneToday) return null;
 
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
-                const isCheckedIn = !ciOpen && (ciSaved || checkedIn);
+                const isCheckedIn = ciSaved || checkedIn;
 
                 const protocols = [
                   {
@@ -9588,24 +9588,24 @@ export default function Stillform() {
                   await launchScenarioProtocol(recommendedProtocol.id);
                 };
 
-                if (isCheckedIn) return (
-                  <div style={{ marginBottom: 20 }}>
-                    <button onClick={() => {
-                      try {
-                        trackMorningStart({
-                          date: today,
-                          timestamp: new Date().toISOString(),
-                          source: "update"
-                        });
-                      } catch {}
-                      setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
-                    }} style={{
-                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer", padding: 0
-                    }}>
-                      ✓ Checked in · tap to update
-                    </button>
-                  </div>
+                if (isCheckedIn && !ciOpen) return (
+                  <button onClick={() => {
+                    try {
+                      trackMorningStart({
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "update"
+                      });
+                    } catch {}
+                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
+                  }} style={{
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    textAlign: "left", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Checked in · tap to update</div>
+                  </button>
                 );
 
                 if (!ciOpen) return (
@@ -9903,48 +9903,42 @@ export default function Stillform() {
                 const today = toLocalDateKey(now);
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodSaved && !eodOpen) return (
-                  <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    {!eodPromptDismissed ? (
-                      <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", textAlign: "center" }}>
-                        <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.6 }}>Anything you want to clear before bed?</div>
-                        <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
-                          <button className="btn btn-primary" style={{ fontSize: 13, padding: "8px 18px" }} onClick={() => { setEodPromptDismissed(true); try { localStorage.setItem("stillform_reframe_entry_mode", "evening"); } catch {} setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" }); setScreen("tool"); }}>Talk it out →</button>
-                          <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 14px" }} onClick={() => setEodPromptDismissed(true)}>I'm good</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button onClick={() => {
-                        try {
-                          trackEodStart({
-                            date: today,
-                            timestamp: new Date().toISOString(),
-                            source: "update"
-                          });
-                        } catch {}
-                        setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
-                      }} style={{
-                        background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
-                      }}>✓ Day closed · tap to update</button>
-                    )}
-                  </div>
+                  <button onClick={() => {
+                    try {
+                      trackEodStart({
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "update"
+                      });
+                    } catch {}
+                    setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
+                  }} style={{
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    textAlign: "left", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
+                  </button>
                 );
                 if (eodDone && !eodOpen) return (
-                  <div style={{ marginBottom: 20, textAlign: "center" }}>
-                    <button onClick={() => {
-                      try {
-                        trackEodStart({
-                          date: today,
-                          timestamp: new Date().toISOString(),
-                          source: "update"
-                        });
-                      } catch {}
-                      setEodOpen(true);
-                    }} style={{
-                      background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", cursor: "pointer"
-                    }}>✓ Day closed · tap to update</button>
-                  </div>
+                  <button onClick={() => {
+                    try {
+                      trackEodStart({
+                        date: today,
+                        timestamp: new Date().toISOString(),
+                        source: "update"
+                      });
+                    } catch {}
+                    setEodOpen(true);
+                  }} style={{
+                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    textAlign: "left", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
+                  </button>
                 );
 
                 const saveEod = () => {
