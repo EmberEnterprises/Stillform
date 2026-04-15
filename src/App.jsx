@@ -4303,7 +4303,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
-    return `Additional anchor:\n${clean}`;
+    return `State to Statement:\n${clean}`;
   };
   const logCommunicationAction = (action) => {
     const clean = externalAnchorDraft.trim();
@@ -4451,7 +4451,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          Additional anchor
+          State to Statement
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
           Close the session. If helpful, capture one clear line you can send while you're regulated.
@@ -4462,7 +4462,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             Finish session
           </button>
           <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
-            {stateToStatementExpanded ? "Hide additional anchor" : "Add additional anchor"}
+            {stateToStatementExpanded ? "Hide State to Statement" : "Open State to Statement"}
           </button>
           <button className="btn btn-ghost" onClick={skipStateToStatement}>
             Skip for now
@@ -4484,6 +4484,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               rows={3}
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
+            <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
+              Purpose: convert your regulated state into one clear message you can send outside Stillform (Slack, email, text, or talking point).
+            </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
@@ -8729,7 +8732,8 @@ export default function Stillform() {
               title: "Morning + Daily Tools — Active Execution Layer",
               paragraphs: [
                 "Morning Check-In captures state and context early so drift is caught before escalation.",
-                "Use Reframe, Breathe, and Body Scan through the day to prepare, stabilize, and reset without breaking execution."
+                "Use Reframe, Breathe, and Body Scan through the day to prepare, stabilize, and reset without breaking execution.",
+                "After Reframe, State to Statement helps you convert that regulated state into one clear message you can send outside the app."
               ]
             },
             {
@@ -10271,6 +10275,10 @@ export default function Stillform() {
               {
                 q: "What science basis does Stillform use?",
                 a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
+              },
+              {
+                q: "What is State to Statement?",
+                a: "State to Statement appears after Reframe. It helps you convert your regulated internal state into one clear external message you can use in Slack, email, text, or a talking point. You can copy it, share it, and mark it sent. Follow-through is tracked in My Progress under Composure → Communication."
               },
               {
                 q: "Who is this for?",
