@@ -10178,13 +10178,23 @@ export default function Stillform() {
                   else break;
                 }
                 const toolCounts = sessions.reduce((acc, s) => {
-                  const id = s.tool;
-                  if (!id) return acc;
-                  acc[id] = (acc[id] || 0) + 1;
+                  (s.tools || []).forEach((id) => {
+                    if (!id) return;
+                    acc[id] = (acc[id] || 0) + 1;
+                  });
                   return acc;
                 }, {});
                 const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
-                const topToolMap = { breathe: "Breathe", reframe: "Reframe", scan: "Body Scan", panic: "Panic", sigh: "Sigh" };
+                const topToolMap = {
+                  breathe: "Breathe",
+                  ground: "Breathe",
+                  reframe: "Reframe",
+                  metacognition: "Reframe · Watch Sequence",
+                  "body-scan": "Body Scan",
+                  scan: "Body Scan",
+                  panic: "Panic",
+                  sigh: "Sigh"
+                };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
                 return (
                   <div style={{ marginBottom: 16 }}>
