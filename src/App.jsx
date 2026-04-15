@@ -9981,42 +9981,6 @@ export default function Stillform() {
                 )}
               </div>
 
-              {/* STREAK — only if exists */}
-              {(() => {
-                try {
-                  const sessions = getSessionsFromStorage();
-                  if (sessions.length === 0) return null;
-                  const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
-                  let streak = 0;
-                  for (let i = 0; i < 365; i++) {
-                    const d = new Date(); d.setDate(d.getDate() - i);
-                    if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
-                  }
-                  const improving = (() => {
-                    const rated = sessions.filter(s => s.preRating && s.postRating);
-                    if (rated.length < 8) return false;
-                    const early = rated.slice(0, 5).map(s => s.duration).filter(d => d > 0);
-                    const recent = rated.slice(-5).map(s => s.duration).filter(d => d > 0);
-                    const earlyAvg = early.length ? early.reduce((a, b) => a + b, 0) / early.length : 0;
-                    const recentAvg = recent.length ? recent.reduce((a, b) => a + b, 0) / recent.length : 0;
-                    return recentAvg < earlyAvg * 0.85 && earlyAvg > 0;
-                  })();
-                  return (
-                    <div style={{ marginBottom: 40, display: "flex", alignItems: "center", gap: 24 }}>
-                      <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{sessions.length}</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Sessions</div>
-                      </div>
-                      {streak > 1 && <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 28, fontWeight: 300, color: "var(--amber)", lineHeight: 1 }}>{streak}</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 4 }}>Day streak</div>
-                      </div>}
-                      {improving && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)", letterSpacing: "0.1em" }}>↑ Trending faster</div>}
-                    </div>
-                  );
-                } catch { return null; }
-              })()}
-
               {/* GO DEEPER — secondary, below the line */}
               {(() => {
                 const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
