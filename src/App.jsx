@@ -8176,6 +8176,7 @@ export default function Stillform() {
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
   const [exportStatus, setExportStatus] = useState("");
+  const [settingsShareQrOpen, setSettingsShareQrOpen] = useState(false);
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
     processing: false,
     breathing: false,
@@ -10029,36 +10030,6 @@ export default function Stillform() {
                 </div>
               );
             })()}
-
-            <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px" }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                  Share Stillform
-                </div>
-                <a
-                  href={SHARE_QR_TARGET_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}
-                >
-                  Open link ↗
-                </a>
-              </div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                Use this QR when meeting someone in person.
-              </div>
-              <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
-                <img
-                  src={SHARE_QR_IMAGE_URL}
-                  alt={`QR code for ${SHARE_QR_TARGET_URL}`}
-                  style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }}
-                  loading="lazy"
-                />
-              </div>
-              <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>
-                {SHARE_QR_TARGET_URL}
-              </div>
-            </div>
 
               {/* Roadmap link intentionally hidden from home surface */}
               {showHomeContextTip && (
@@ -12513,6 +12484,45 @@ export default function Stillform() {
                 }}>
                   Re-run calibration
                 </button>
+                <button onClick={() => setSettingsShareQrOpen((prev) => !prev)} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "center", justifyContent: "space-between"
+                }}>
+                  <span>Share app link (QR)</span>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsShareQrOpen ? "▾" : "▸"}</span>
+                </button>
+                {settingsShareQrOpen && (
+                  <div style={{ marginTop: 4, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                        Share Stillform
+                      </div>
+                      <a
+                        href={SHARE_QR_TARGET_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}
+                      >
+                        Open link ↗
+                      </a>
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                      Use this QR when meeting someone in person.
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
+                      <img
+                        src={SHARE_QR_IMAGE_URL}
+                        alt={`QR code for ${SHARE_QR_TARGET_URL}`}
+                        style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }}
+                        loading="lazy"
+                      />
+                    </div>
+                    <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>
+                      {SHARE_QR_TARGET_URL}
+                    </div>
+                  </div>
+                )}
               </div>
               )}
             </div>
