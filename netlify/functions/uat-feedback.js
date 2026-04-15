@@ -1,10 +1,20 @@
 import { insertUatFeedback } from "./_uatFeedbackState.js";
+import { getStore } from "@netlify/blobs";
 
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
 const FEEDBACK_TEXT_MIN = 8;
 const FEEDBACK_TEXT_MAX = 1000;
 const QUESTION_IDS = new Set(["confusing", "friction", "missing", "working"]);
+const UAT_BLOBS_STORE = "stillform-uat-feedback";
+
+async function writeUatFeedbackToBlobs(payload) {
+  const store = getStore(UAT_BLOBS_STORE);
+  const entryId = `uat_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  const key = `entries/${entryId}.json`;
+  await store.set(key, JSON.stringify(payload));
+  return entryId;
+}
 
 function json(statusCode, body) {
   return {
@@ -103,20 +113,26 @@ export async function handler(event) {
     if (!userId && !installId) {
       return json(400, { error: "install_id is required when not authenticated" });
     }
+    const sourceScreen = sanitizeSourceScreen(payload?.source_screen);
+    const questionPrompt = sanitizeQuestionPrompt(payload?.question_prompt);
+    const appVersion = sanitizeVersion(payload?.app_version);
+    const packageVersion = sanitizeVersion(payload?.package_version);
+    const submittedAt = payload?.submitted_at || null;
+    const userAgent = event.headers?.["user-agent"] || event.headers?.["User-Agent"] || null;
 
     try {
       const row = await insertUatFeedback({
         userId,
         installId,
-        sourceScreen: sanitizeSourceScreen(payload?.source_screen),
+        sourceScreen,
         questionId,
-        questionPrompt: sanitizeQuestionPrompt(payload?.question_prompt),
+        questionPrompt,
         feedbackText,
-        appVersion: sanitizeVersion(payload?.app_version),
-        packageVersion: sanitizeVersion(payload?.package_version),
+        appVersion,
+        packageVersion,
         metadata: {
-          submitted_at: payload?.submitted_at || null,
-          ua: event.headers?.["user-agent"] || event.headers?.["User-Agent"] || null
+          submitted_at: submittedAt,
+          ua: userAgent
         }
       });
 
@@ -129,12 +145,35 @@ export async function handler(event) {
       const message = String(writeError?.message || "");
       const tableMissing = message.includes("PGRST205") || message.includes("stillform_uat_feedback");
       if (tableMissing) {
-        return json(202, {
-          ok: true,
-          id: null,
-          storage: "local-only",
-          warning: "uat_feedback_table_missing"
-        });
+        try {
+          const entryId = await writeUatFeedbackToBlobs({
+            id: null,
+            received_at: new Date().toISOString(),
+            submitted_at: submittedAt || new Date().toISOString(),
+            user_id: userId,
+            install_id: installId,
+            source_screen: sourceScreen,
+            question_id: questionId,
+            question_prompt: questionPrompt,
+            feedback_text: feedbackText,
+            app_version: appVersion,
+            package_version: packageVersion,
+            user_agent: userAgent
+          });
+          return json(200, {
+            ok: true,
+            id: entryId,
+            storage: "netlify-blobs",
+            warning: "uat_feedback_table_missing"
+          });
+        } catch {
+          return json(202, {
+            ok: true,
+            id: null,
+            storage: "local-only",
+            warning: "uat_feedback_table_missing"
+          });
+        }
       }
       throw writeError;
     }
