@@ -9453,7 +9453,7 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Subscription banner without countdown */}
+            {/* Access banner */}
             {!isSubscribed && (
               <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -9466,7 +9466,16 @@ export default function Stillform() {
                       : "Subscription unlocks full Stillform access."}
                   </span>
                 </div>
-                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+                {uatTrialFreezeActive ? (
+                  <button
+                    onClick={openUatBoard}
+                    style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+                  >
+                    UAT updates →
+                  </button>
+                ) : (
+                  <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+                )}
               </div>
             )}
 
