@@ -7381,6 +7381,9 @@ export default function Stillform() {
   const [showHomeContextTip, setShowHomeContextTip] = useState(() => {
     try { return localStorage.getItem("stillform_tooltip_home_seen") !== "yes"; } catch { return true; }
   });
+  const [milestone7Seen, setMilestone7Seen] = useState(() => {
+    try { return localStorage.getItem("stillform_milestone_7_seen") === "yes"; } catch { return false; }
+  });
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
@@ -9229,7 +9232,7 @@ export default function Stillform() {
           const sessions = getSessionsFromStorage();
           const lastSession = sessions.length > 0 ? new Date(sessions[sessions.length - 1].timestamp) : null;
           const daysSinceLastSession = lastSession ? Math.floor((Date.now() - lastSession.getTime()) / (1000 * 60 * 60 * 24)) : 0;
-          const milestone7 = sessionCount === 7 && !localStorage.getItem("stillform_milestone_7_seen");
+          const milestone7 = sessionCount === 7 && !milestone7Seen;
           const isAbsent = daysSinceLastSession >= 14 && sessionCount > 0;
 
           // Check 7-day streak
@@ -9355,19 +9358,29 @@ export default function Stillform() {
                   <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
                     {hasStreak
                       ? "You've been here every day this week. You're building something. How's it feeling?"
-                      : "I've noticed something. You've been here 7 times now — and the way you're using the tools might be telling you something about how you actually process. Is what you're reaching for working?"}
+                      : "You've completed 7 sessions. This is the point to check whether your current processing route still fits. Keep current route if it's working, or review processing type in Settings and change it."}
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); goHomeSafely(); }} style={{
+                    <button onClick={() => {
+                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                      setMilestone7Seen(true);
+                      try { window.plausible("7 Session Milestone Kept Route"); } catch {}
+                    }} style={{
                       flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
                       borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
-                    }}>Working well</button>
-                    <button onClick={() => { localStorage.setItem("stillform_milestone_7_seen", "yes"); goHomeSafely(); }} style={{
+                    }}>Keep current route</button>
+                    <button onClick={() => {
+                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                      setMilestone7Seen(true);
+                      setSettingsSectionOpen((current) => ({ ...current, processing: true }));
+                      setScreen("settings");
+                      try { window.plausible("7 Session Milestone Review Route"); } catch {}
+                    }} style={{
                       flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
                       borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif"
-                    }}>Let me try different</button>
+                    }}>Review processing type</button>
                   </div>
                 </div>
               )}
