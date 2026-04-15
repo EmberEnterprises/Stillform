@@ -10581,7 +10581,7 @@ export default function Stillform() {
                   panic: "Panic",
                   sigh: "Sigh"
                 };
-                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
+                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
                 return (
                   <div style={{ marginBottom: 16 }}>
                     <button
