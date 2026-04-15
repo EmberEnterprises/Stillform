@@ -1346,6 +1346,8 @@ const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
 const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
 const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
 const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
+const TOOL_DEBRIEF_STORAGE_KEY = "stillform_tool_debriefs";
+const TOOL_DEBRIEF_MAX_ITEMS = 320;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
 const UAT_BOARD_UPDATED_LABEL = "Updated Apr 15";
 const UAT_BOARD_LAUNCH_ETA_LABEL = "May 10";
@@ -1365,6 +1367,79 @@ const UAT_QUESTION_OPTIONS = [
 ];
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
+const TOOL_ENTRY_PRIMER_COPY = {
+  "thought-first": {
+    reframe: "Start with one concrete signal, then separate facts from story.",
+    breathe: "Use breath first to cut cognitive noise before analysis.",
+    scan: "Use body data to interrupt over-processing before you interpret."
+  },
+  "body-first": {
+    reframe: "Name the body signal first, then translate it into language.",
+    breathe: "Downshift physiology first; your cognition clears after the body settles.",
+    scan: "Track where activation lives physically before deciding what it means."
+  },
+  balanced: {
+    reframe: "Stabilize and label in sequence: signal first, then clear language.",
+    breathe: "Use this as your reset gate before deciding your next move.",
+    scan: "Map physical signals, then choose the smallest deliberate adjustment."
+  }
+};
+const TOOL_DEBRIEF_COPY = {
+  breathe: {
+    prompt: "What shifted most during regulation?",
+    "thought-first": [
+      "My thinking slowed enough to choose one priority.",
+      "I noticed drift early and redirected before spiraling.",
+      "I can separate urgency from importance now."
+    ],
+    "body-first": [
+      "My body settled before my thoughts changed.",
+      "Breath lowered activation enough to stay deliberate.",
+      "I can feel where tension releases first."
+    ],
+    balanced: [
+      "My body and thinking aligned after this round.",
+      "I can move from signal to decision with less friction.",
+      "I recovered enough to act without rushing."
+    ]
+  },
+  scan: {
+    prompt: "What did the scan teach you about your pattern?",
+    "thought-first": [
+      "Body signals were clearer than my assumptions.",
+      "Physical mapping reduced mental over-interpretation.",
+      "I can use signal data before analysis now."
+    ],
+    "body-first": [
+      "I identified exactly where activation concentrates first.",
+      "Naming the region made regulation faster.",
+      "My body gave usable information before language."
+    ],
+    balanced: [
+      "The scan helped me synchronize body and meaning.",
+      "I can map signal, then choose action more quickly.",
+      "I caught escalation earlier than usual."
+    ]
+  },
+  reframe: {
+    prompt: "What processing move will you repeat next time?",
+    "thought-first": [
+      "I separated facts from story before reacting.",
+      "I named a distortion and chose one next step.",
+      "I can keep language precise under pressure."
+    ],
+    "body-first": [
+      "I translated activation into clear words without flooding.",
+      "I stayed grounded while naming what is true.",
+      "I can convert signal into one clean action."
+    ],
+    balanced: [
+      "I regulated first, then chose language deliberately.",
+      "I held context without overexplaining.",
+      "I can move from signal to statement with integrity."
+    ]
+  }
+};
 
 function toLocalDateKey(input = new Date()) {
   const dt = input instanceof Date ? input : new Date(input);
@@ -1481,6 +1556,69 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   const bounded = events.slice(-maxItems);
   try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
   return bounded.length;
+};
+
+const getToolDebriefsFromStorage = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(TOOL_DEBRIEF_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((entry) => entry && typeof entry === "object") : [];
+  } catch {
+    return [];
+  }
+};
+
+const appendToolDebriefToStorage = (entry, maxItems = TOOL_DEBRIEF_MAX_ITEMS) => {
+  if (!entry) return getToolDebriefsFromStorage();
+  const existing = getToolDebriefsFromStorage();
+  const next = [entry, ...existing].slice(0, maxItems);
+  try { localStorage.setItem(TOOL_DEBRIEF_STORAGE_KEY, JSON.stringify(next)); } catch {}
+  return next;
+};
+
+const normalizeSessionToolId = (toolId) => {
+  const id = String(toolId || "").trim().toLowerCase();
+  if (!id) return null;
+  if (id === "body-scan") return "scan";
+  if (id === "ground" || id === "sigh") return "breathe";
+  if (id === "metacognition") return "reframe";
+  return id;
+};
+
+const getPrimarySessionToolId = (session) => {
+  const tools = Array.isArray(session?.tools) ? session.tools : [];
+  for (const raw of tools) {
+    const normalized = normalizeSessionToolId(raw);
+    if (!normalized) continue;
+    if (normalized === "reframe" || normalized === "breathe" || normalized === "scan") {
+      return normalized;
+    }
+  }
+  return null;
+};
+
+const getToolFamily = (normalizedToolId) => {
+  if (normalizedToolId === "reframe") return "cognitive";
+  if (normalizedToolId === "breathe" || normalizedToolId === "scan") return "somatic";
+  return null;
+};
+
+const getToolEntryPrimer = (toolId, regulationType) => {
+  const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
+  if (!["reframe", "breathe", "scan"].includes(normalizedTool)) return null;
+  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "balanced";
+  return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || TOOL_ENTRY_PRIMER_COPY.balanced[normalizedTool] || null;
+};
+
+const getToolDebriefPromptSet = (toolId, regulationType) => {
+  const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
+  const config = TOOL_DEBRIEF_COPY[normalizedTool] || TOOL_DEBRIEF_COPY.reframe;
+  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "balanced";
+  return {
+    prompt: config.prompt,
+    options: Array.isArray(config[normalizedType]) && config[normalizedType].length
+      ? config[normalizedType]
+      : config.balanced
+  };
 };
 
 const getCommunicationDraftSignals = (value) => {
@@ -2159,6 +2297,15 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const [postRating, setPostRating] = useState(null);
   const [bioFilter, setBioFilter] = useState(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
+  const [debriefTarget, setDebriefTarget] = useState(null);
+  const regulationType = (() => {
+    try {
+      const value = localStorage.getItem("stillform_regulation_type");
+      return value === "thought-first" || value === "body-first" ? value : "balanced";
+    } catch {
+      return "balanced";
+    }
+  })();
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
@@ -2186,6 +2333,25 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     return elapsed;
   };
   const getSessionCount = () => getSessionCountFromStorage();
+  const queueDebriefAndComplete = (redirectTo = null, source = "breathe-ground") => {
+    setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const completeDebriefGate = (reflectionText) => {
+    appendToolDebriefToStorage({
+      id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: new Date().toISOString(),
+      date: toLocalDateKey(),
+      toolId: "breathe",
+      toolFamily: getToolFamily("breathe"),
+      regulationType,
+      source: debriefTarget?.source || "breathe-ground",
+      reflectionText: String(reflectionText || "").trim(),
+      route: debriefTarget?.redirectTo || null
+    });
+    const nextRoute = debriefTarget?.redirectTo || undefined;
+    setDebriefTarget(null);
+    onComplete(nextRoute);
+  };
 
   // --- BREATHE ---
   const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
@@ -2326,6 +2492,15 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const groundSavedRef = useRef(false);
   const groundElapsedRef = useRef(0);
   const groundAutoRef = useRef(false);
+  if (debriefTarget) {
+    return (
+      <ToolDebriefGate
+        toolId="breathe"
+        regulationType={regulationType}
+        onContinue={completeDebriefGate}
+      />
+    );
+  }
   if (groundDone) {
     if (!groundSavedRef.current) {
       groundSavedRef.current = true;
@@ -2369,10 +2544,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
           </div>
         )}
         <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
-          <button className="btn btn-primary" onClick={() => onComplete("reframe-calm")}>
+          <button className="btn btn-primary" onClick={() => queueDebriefAndComplete("reframe-calm", "grounding-complete-continue")}>
             Continue to Reframe →
           </button>
-          <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>
+          <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => queueDebriefAndComplete(undefined, "grounding-complete-exit")}>
             Exit session
           </button>
         </div>
@@ -2729,7 +2904,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
                 {delta <= 0 ? (
                   <>
                     <button className="btn btn-primary" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Try again</button>
-                    <button className="btn btn-ghost" onClick={onComplete}>Done for now</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-done-for-now")}>Done for now</button>
                   </>
                 ) : (
                   <>
@@ -2737,8 +2912,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
                     <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
                       Moving to grounding…
                     </div>
-                    <button className="btn btn-ghost" onClick={() => onComplete("reframe-calm")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
-                    <button className="btn btn-ghost" onClick={onComplete} style={{ color: "var(--text-muted)", fontSize: 12 }}>Exit session</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("reframe-calm", "post-rate-skip-to-reframe")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-exit")} style={{ color: "var(--text-muted)", fontSize: 12 }}>Exit session</button>
                   </>
                 )}
               </div>
@@ -2754,6 +2929,15 @@ function BodyScanTool({ onComplete }) {
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
+  const [debriefTarget, setDebriefTarget] = useState(null);
+  const regulationType = (() => {
+    try {
+      const value = localStorage.getItem("stillform_regulation_type");
+      return value === "thought-first" || value === "body-first" ? value : "balanced";
+    } catch {
+      return "balanced";
+    }
+  })();
   const formatTime = (ms) => {
     const totalSec = Math.round(ms / 1000);
     const min = Math.floor(totalSec / 60);
@@ -2779,6 +2963,25 @@ function BodyScanTool({ onComplete }) {
     return elapsed;
   };
   const getSessionCount = () => getSessionCountFromStorage();
+  const queueDebriefAndComplete = (redirectTo = null, source = "body-scan") => {
+    setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const completeDebriefGate = (reflectionText) => {
+    appendToolDebriefToStorage({
+      id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: new Date().toISOString(),
+      date: toLocalDateKey(),
+      toolId: "scan",
+      toolFamily: getToolFamily("scan"),
+      regulationType,
+      source: debriefTarget?.source || "body-scan",
+      reflectionText: String(reflectionText || "").trim(),
+      route: debriefTarget?.redirectTo || null
+    });
+    const nextRoute = debriefTarget?.redirectTo || undefined;
+    setDebriefTarget(null);
+    onComplete(nextRoute);
+  };
 
   const areas = [
     {
@@ -3007,9 +3210,18 @@ function BodyScanTool({ onComplete }) {
   const scanSavedRef = useRef(false);
   const scanElapsedRef = useRef(0);
   const scanAutoRef = useRef(false);
+  if (debriefTarget) {
+    return (
+      <ToolDebriefGate
+        toolId="scan"
+        regulationType={regulationType}
+        onContinue={completeDebriefGate}
+      />
+    );
+  }
   if (done) {
     if (!scanSavedRef.current) { scanSavedRef.current = true; scanElapsedRef.current = saveSession(); }
-    if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => onComplete("reframe-calm"), 2000); }
+    if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => queueDebriefAndComplete("reframe-calm", "scan-complete-auto"), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
     const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
@@ -3041,7 +3253,7 @@ function BodyScanTool({ onComplete }) {
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
           MOVING TO REFRAME…
         </div>
-        <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => onComplete()}>Exit session</button>
+        <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => queueDebriefAndComplete(undefined, "scan-complete-exit")}>Exit session</button>
         
       </div>
     );
@@ -3286,6 +3498,96 @@ function BodyScanTool({ onComplete }) {
   );
 }
 
+function ToolDebriefGate({ toolId, regulationType, onContinue }) {
+  const promptSet = getToolDebriefPromptSet(toolId, regulationType);
+  const [selected, setSelected] = useState("");
+  const [secondsLeft, setSecondsLeft] = useState(20);
+
+  useEffect(() => {
+    setSecondsLeft(20);
+    setSelected("");
+  }, [toolId, regulationType]);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const timer = setTimeout(() => setSecondsLeft((prev) => Math.max(0, prev - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft]);
+
+  const options = Array.isArray(promptSet?.options) ? promptSet.options : [];
+  const continueEnabled = secondsLeft === 0 && !!selected;
+
+  return (
+    <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
+      <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "18px 16px" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+          Lock in how you processed
+        </div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+          {promptSet?.prompt || "Choose one line that best fits this session."}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
+          20-second capture required before exit.
+        </div>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
+          {options.map((option) => (
+            <button
+              key={option}
+              onClick={() => setSelected(option)}
+              style={{
+                textAlign: "left",
+                background: selected === option ? "var(--amber-glow)" : "var(--surface2)",
+                border: `0.5px solid ${selected === option ? "var(--amber-dim)" : "var(--border)"}`,
+                borderRadius: "var(--r-sm)",
+                padding: "10px 12px",
+                color: selected === option ? "var(--amber)" : "var(--text-dim)",
+                cursor: "pointer",
+                fontSize: 12,
+                lineHeight: 1.45,
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              {option}
+            </button>
+          ))}
+          <button
+            onClick={() => setSelected("I need another pass to lock this in.")}
+            style={{
+              textAlign: "left",
+              background: selected === "I need another pass to lock this in." ? "var(--amber-glow)" : "var(--surface2)",
+              border: `0.5px solid ${selected === "I need another pass to lock this in." ? "var(--amber-dim)" : "var(--border)"}`,
+              borderRadius: "var(--r-sm)",
+              padding: "10px 12px",
+              color: selected === "I need another pass to lock this in." ? "var(--amber)" : "var(--text-dim)",
+              cursor: "pointer",
+              fontSize: 12,
+              lineHeight: 1.45,
+              fontFamily: "'DM Sans', sans-serif"
+            }}
+          >
+            I need another pass to lock this in.
+          </button>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: secondsLeft > 0 ? "var(--text-muted)" : "var(--amber)", letterSpacing: "0.08em" }}>
+            {secondsLeft > 0 ? `READY IN ${secondsLeft}s` : "READY"}
+          </div>
+          <button
+            className="btn btn-primary"
+            disabled={!continueEnabled}
+            onClick={() => continueEnabled && onContinue(selected)}
+            style={{ opacity: continueEnabled ? 1 : 0.45, cursor: continueEnabled ? "pointer" : "not-allowed" }}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Speech-to-text hook — uses Web Speech API (free, built into browsers)
 function useSpeechToText(onResult) {
   const [listening, setListening] = useState(false);
@@ -3358,7 +3660,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -3660,6 +3962,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const stateToStatementSessionIdRef = useRef(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
+  const [debriefTarget, setDebriefTarget] = useState(null);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -3696,6 +3999,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     motivational: "Motivational"
   })[aiToneChoice] || "Balanced";
   const effectiveMode = autoMode;
+  const regulationType = (() => {
+    try {
+      const value = localStorage.getItem("stillform_regulation_type");
+      return value === "thought-first" || value === "body-first" ? value : "balanced";
+    } catch {
+      return "balanced";
+    }
+  })();
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
   const openingText = isHype
@@ -4463,6 +4774,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     communicationDraftLoggedRef.current = true;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
+  const queueDebriefAndComplete = (redirectTo = null, source = "reframe") => {
+    setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const completeDebriefGate = (reflectionText) => {
+    appendToolDebriefToStorage({
+      id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: new Date().toISOString(),
+      date: toLocalDateKey(),
+      toolId: "reframe",
+      toolFamily: getToolFamily("reframe"),
+      regulationType,
+      source: debriefTarget?.source || "reframe",
+      reflectionText: String(reflectionText || "").trim(),
+      route: debriefTarget?.redirectTo || null
+    });
+    const nextRoute = debriefTarget?.redirectTo || undefined;
+    setDebriefTarget(null);
+    onComplete(nextRoute);
+  };
   const finishReframeSession = ({ postState = null } = {}) => {
     saveSession(postState);
     const pre = scoreState(feelState);
@@ -4508,7 +4838,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setPostSessionInsight(null);
     setShowPostInsight(false);
     resetStateToStatementTracking();
-    onComplete(resolvePostReframeRoute());
+    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-complete");
   };
 
   const skipStateToStatement = (reason = null) => {
@@ -4525,7 +4855,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setPostSessionInsight(null);
     setShowPostInsight(false);
     resetStateToStatementTracking();
-    onComplete(resolvePostReframeRoute());
+    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-skip");
   };
 
   const handleMergedWatchChooseComplete = (redirectTo) => {
@@ -4596,6 +4926,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorSent(true);
     try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
+
+  if (debriefTarget) {
+    return (
+      <ToolDebriefGate
+        toolId="reframe"
+        regulationType={regulationType}
+        onContinue={completeDebriefGate}
+      />
+    );
+  }
 
   if (showWatchChooseFlow) {
     return (
@@ -6563,6 +6903,137 @@ function MyProgress({ onBack }) {
     ? (proofRatedSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / proofRatedSessions.length)
     : null;
   const topToolName = topToolEntry ? (toolNames[topToolEntry[0]] || topToolEntry[0]) : "Mixed";
+  const toolDebriefs = getToolDebriefsFromStorage();
+  const normalizedRegulationType = regulationType === "thought-first" || regulationType === "body-first"
+    ? regulationType
+    : "balanced";
+  const recent30ToolSessions = sessions
+    .filter((session) => withinDays(session?.timestamp, 30))
+    .map((session) => {
+      const primaryToolId = getPrimarySessionToolId(session);
+      const toolFamily = getToolFamily(primaryToolId);
+      return { ...session, primaryToolId, toolFamily };
+    })
+    .filter((session) => session.toolFamily);
+  const defaultToolFamily = (() => {
+    if (normalizedRegulationType === "thought-first") return "cognitive";
+    if (normalizedRegulationType === "body-first") return "somatic";
+    if (!recent30ToolSessions.length) return null;
+    const familyCounts = recent30ToolSessions.reduce((acc, session) => {
+      acc[session.toolFamily] = (acc[session.toolFamily] || 0) + 1;
+      return acc;
+    }, {});
+    const sorted = Object.entries(familyCounts).sort((a, b) => b[1] - a[1]);
+    if (!sorted.length) return null;
+    if (sorted.length > 1 && sorted[0][1] === sorted[1][1]) return null;
+    return sorted[0][0];
+  })();
+  const defaultPatternAccuracy30d = defaultToolFamily && recent30ToolSessions.length
+    ? Math.round((recent30ToolSessions.filter((session) => session.toolFamily === defaultToolFamily).length / recent30ToolSessions.length) * 100)
+    : null;
+  const defaultPatternLabel = defaultToolFamily === "cognitive"
+    ? "Cognitive-first"
+    : defaultToolFamily === "somatic"
+      ? "Somatic-first"
+      : "No dominant default";
+  const switchAgility30d = (() => {
+    const dayFamilies = {};
+    recent30ToolSessions.forEach((session) => {
+      const day = toDayKey(session?.timestamp);
+      if (!day) return;
+      if (!dayFamilies[day]) dayFamilies[day] = new Set();
+      dayFamilies[day].add(session.toolFamily);
+    });
+    const sets = Object.values(dayFamilies);
+    if (!sets.length) return null;
+    const switchedDays = sets.filter((set) => set.size > 1).length;
+    return Math.round((switchedDays / sets.length) * 100);
+  })();
+  const debriefCoverage30d = (() => {
+    const debriefs30d = toolDebriefs.filter((entry) => withinDays(entry?.timestamp || entry?.date, 30));
+    if (recent30ToolSessions.length === 0) return null;
+    return Math.min(100, Math.round((debriefs30d.length / recent30ToolSessions.length) * 100));
+  })();
+  const recent7ToolSessions = sessions
+    .filter((session) => withinDays(session?.timestamp, 7))
+    .map((session) => {
+      const primaryToolId = getPrimarySessionToolId(session);
+      const toolFamily = getToolFamily(primaryToolId);
+      return { ...session, primaryToolId, toolFamily };
+    });
+  const weeklyToolCounts = {};
+  recent7ToolSessions.forEach((session) => {
+    if (!session.primaryToolId) return;
+    weeklyToolCounts[session.primaryToolId] = (weeklyToolCounts[session.primaryToolId] || 0) + 1;
+  });
+  const weeklyTopToolEntry = Object.entries(weeklyToolCounts).sort((a, b) => b[1] - a[1])[0] || null;
+  const weeklyTopToolLabelMap = {
+    reframe: "Reframe",
+    breathe: "Breathe",
+    scan: "Body Scan",
+    "body-scan": "Body Scan"
+  };
+  const weeklyTopToolLabel = weeklyTopToolEntry
+    ? (weeklyTopToolLabelMap[weeklyTopToolEntry[0]] || weeklyTopToolEntry[0])
+    : null;
+  const weeklyAvgShift = (() => {
+    const rated = sessions.filter((session) => (
+      withinDays(session?.timestamp, 7)
+      && Number.isFinite(Number(session?.preRating))
+      && Number.isFinite(Number(session?.postRating))
+    ));
+    if (!rated.length) return null;
+    const sum = rated.reduce((total, session) => total + (Number(session.postRating) - Number(session.preRating)), 0);
+    return sum / rated.length;
+  })();
+  const weeklySwitchAgility = (() => {
+    const dayFamilies = {};
+    recent7ToolSessions.forEach((session) => {
+      if (!session.toolFamily) return;
+      const day = toDayKey(session?.timestamp);
+      if (!day) return;
+      if (!dayFamilies[day]) dayFamilies[day] = new Set();
+      dayFamilies[day].add(session.toolFamily);
+    });
+    const sets = Object.values(dayFamilies);
+    if (!sets.length) return null;
+    const switchedDays = sets.filter((set) => set.size > 1).length;
+    return Math.round((switchedDays / sets.length) * 100);
+  })();
+  const weeklyDebriefs = toolDebriefs.filter((entry) => withinDays(entry?.timestamp || entry?.date, 7));
+  const weeklyTopDebrief = (() => {
+    if (!weeklyDebriefs.length) return null;
+    const counts = {};
+    weeklyDebriefs.forEach((entry) => {
+      const text = String(entry?.reflectionText || "").trim();
+      if (!text) return;
+      counts[text] = (counts[text] || 0) + 1;
+    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1])[0] || null;
+    if (!top) return null;
+    return { text: top[0], count: top[1] };
+  })();
+  const weeklyReflectionSummary = (() => {
+    const lines = [];
+    if (recent7ToolSessions.length > 0) {
+      lines.push(`${recent7ToolSessions.length} tool session${recent7ToolSessions.length !== 1 ? "s" : ""} in the last 7 days.`);
+    } else {
+      lines.push("No completed tool sessions in the last 7 days.");
+    }
+    if (weeklyTopToolLabel) {
+      lines.push(`Most used this week: ${weeklyTopToolLabel}.`);
+    }
+    if (Number.isFinite(weeklyAvgShift)) {
+      lines.push(`Average composure gain this week: ${weeklyAvgShift >= 0 ? "+" : ""}${weeklyAvgShift.toFixed(1)}.`);
+    }
+    if (Number.isFinite(weeklySwitchAgility)) {
+      lines.push(`Switch agility this week: ${weeklySwitchAgility}%.`);
+    }
+    if (weeklyTopDebrief?.text) {
+      lines.push(`Most repeated lock-in: "${weeklyTopDebrief.text}"${weeklyTopDebrief.count > 1 ? ` (${weeklyTopDebrief.count}x)` : ""}.`);
+    }
+    return lines;
+  })();
   const integrationContext = resolveIntegrationContext();
   const shareCardLines = [
     "Stillform Composure Card",
@@ -6704,6 +7175,51 @@ function MyProgress({ onBack }) {
           <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{eodToday.composure || "—"}</div>
           <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Yesterday's composure</div>
         </div>}
+        </div>
+
+        {/* PROCESSING MASTERY */}
+        <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+            Processing Mastery
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+            {normalizedRegulationType === "thought-first"
+              ? "Default pattern = cognitive first. Accuracy tracks how often your completed sessions align to that under pressure."
+              : normalizedRegulationType === "body-first"
+                ? "Default pattern = somatic first. Accuracy tracks how often your completed sessions align to that under pressure."
+                : "Balanced profile. Accuracy appears once your usage reveals a stable default pattern."}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Default pattern accuracy</div>
+              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{defaultPatternAccuracy30d === null ? "N/A" : `${defaultPatternAccuracy30d}%`}</div>
+            </div>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Switch agility</div>
+              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{switchAgility30d === null ? "N/A" : `${switchAgility30d}%`}</div>
+            </div>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Debrief capture (30d)</div>
+              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+            Built from completed tool sessions and lock-in captures.
+          </div>
+        </div>
+
+        {/* WEEKLY REFLECTION */}
+        <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+            Weekly reflection
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {weeklyReflectionSummary.map((line, idx) => (
+              <div key={`weekly-reflection-${idx}`} style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55 }}>
+                {line}
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* PULSE HEAT MAP — composure telemetry */}
@@ -10753,6 +11269,28 @@ export default function Stillform() {
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
               Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </div>
+            {(() => {
+              const primer = getToolEntryPrimer(activeTool?.id, regType);
+              if (!primer) return null;
+              return (
+                <div
+                  style={{
+                    marginBottom: 12,
+                    background: "var(--surface)",
+                    border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)",
+                    padding: "10px 12px"
+                  }}
+                >
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
+                    Processing primer
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    {primer}
+                  </div>
+                </div>
+              );
+            })()}
             {renderTool()}
           </section>
         )}
@@ -12435,6 +12973,7 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_focus_check_history");
                       localStorage.removeItem("stillform_communication_events");
+                      localStorage.removeItem("stillform_tool_debriefs");
                       localStorage.removeItem("stillform_ai_session_notes");
                       localStorage.removeItem("stillform_bias_profile");
                       localStorage.removeItem("stillform_regulation_type");
