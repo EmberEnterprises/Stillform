@@ -11,7 +11,7 @@
 
 [[redirects]]
   from = "/favicon.ico"
-  to = "/icon.svg"
+  to = "/icon-192.png"
   status = 200
 
 # Bootstrap files should always come fresh to avoid stale PWA startup loops.
