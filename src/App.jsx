@@ -6649,7 +6649,7 @@ function MyProgress({ onBack }) {
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
       <button className="intervention-back" onClick={onBack}>← Back</button>
       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>Everything you've built. Every session counted.</p>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>This tracks how your processing pattern performs over time — not just activity, but transfer under pressure.</p>
 
       {sessions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
@@ -8229,6 +8229,11 @@ export default function Stillform() {
     refreshSettings();
   };
 
+  const setDisplayPreference = (storageKey, isOn) => {
+    try { localStorage.setItem(storageKey, isOn ? "on" : "off"); } catch {}
+    refreshSettings();
+  };
+
   const setAiToneSelection = (nextTone) => {
     if (!VALID_AI_TONE_IDS.has(nextTone)) return;
     try { localStorage.setItem("stillform_ai_tone", nextTone); } catch {}
@@ -9268,6 +9273,84 @@ export default function Stillform() {
                 The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.
               </p>
             </div>
+            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12, textAlign: "left" }}>
+              Stillform learns how you process under pressure, then teaches you how to use that pattern deliberately.
+            </div>
+            {(() => {
+              const reducedMotionOn = (() => { try { return localStorage.getItem("stillform_reducedmotion") === "on"; } catch { return false; } })();
+              const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
+              const themeOptions = [
+                { id: "dark", label: "Dark" },
+                { id: "warm", label: "Warm" },
+                { id: "light", label: "Light" }
+              ];
+              return (
+                <div style={{ width: "100%", maxWidth: 360, marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", textAlign: "left" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+                    Visual comfort
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 8 }}>
+                    If this feels too dark, set your display now. You can change this anytime in Settings.
+                  </div>
+                  <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                    {themeOptions.map((opt) => {
+                      const active = themeChoice === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => setThemeSelection(opt.id)}
+                          style={{
+                            flex: 1,
+                            background: active ? "var(--amber-glow)" : "var(--surface2)",
+                            border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: "var(--r-sm)",
+                            padding: "8px 6px",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 12,
+                            color: active ? "var(--amber)" : "var(--text-dim)"
+                          }}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                    <button
+                      onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
+                      style={{
+                        background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
+                        border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 6px",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 11,
+                        color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
+                      }}
+                    >
+                      Reduced motion {reducedMotionOn ? "On" : "Off"}
+                    </button>
+                    <button
+                      onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
+                      style={{
+                        background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
+                        border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 6px",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 11,
+                        color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
+                      }}
+                    >
+                      Visual grounding {visualGroundingOn ? "On" : "Off"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
               Method, science basis, and boundaries are documented in FAQ and Privacy & Disclaimers.
             </div>
@@ -10557,8 +10640,21 @@ export default function Stillform() {
                   sigh: "Sigh"
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
+                const processingCue = regType === "thought-first"
+                  ? "Start with signal clarity, not full analysis."
+                  : regType === "body-first"
+                    ? "Start with body downshift, then language."
+                    : "Stabilize first, then separate fact from story.";
                 return (
                   <div style={{ marginBottom: 16 }}>
+                    <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)" }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+                        Today's processing cue
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                        {processingCue}
+                      </div>
+                    </div>
                     <button
                       onClick={() => setHomeProgressExpanded(prev => !prev)}
                       style={{
