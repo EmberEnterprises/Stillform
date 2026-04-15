@@ -101,6 +101,8 @@ Your previous output failed validation. Repair it to pass all constraints while 
 - Remove banned phrases and therapy filler.
 - Keep one mechanism only; do not switch frameworks.
 - Keep response specific to user signal and mode.
+- Mirror at least two exact user words (or one quoted phrase) from the latest user input.
+- Do not fallback to generic empathy wrappers.
 Return only valid JSON.`;
 
 const BANNED_REFRAME_PATTERNS = [
@@ -185,16 +187,16 @@ const SOFT_ENTRY_LOCKED_REFRAME = "Hey good to see you. How are you doing?";
 const VOICE_CONTRACT_BANNED_PATTERNS = [
   /\bthis space is for\b/gi,
   /\bglad you dropped in\b/gi,
-  /\bconsidering (these )?dynamics\b/gi,
   /\bwhat comes up for you\b/gi,
   /\bhow does that land in your body\b/gi,
-  /\blet'?s unpack\b/gi,
-  /\bhold space\b/gi,
-  /\bdeep breath and\b/gi,
   /\bi understand how you feel\b/gi,
-  /\bit sounds like you'?re\b/gi,
   /\byou'?re navigating a lot\b/gi
 ];
+
+const INTENTION_ANCHOR_MIN_INPUT_LEN = 48;
+const INTENTION_ANCHOR_STOPWORDS = new Set([
+  "about","above","after","again","against","almost","also","always","among","another","because","being","below","between","could","every","first","found","great","having","maybe","might","other","really","should","still","their","there","these","thing","those","through","today","under","until","while","would","where","which","whole","therefore","however","yourself","myself","ourselves","itself","himself","herself","it","this","that","with","from","into","onto","just","like","want","wants","wanted","have","has","had","been","were","they","them","what","when","then","than","feel","feels","felt","more","less"
+]);
 
 function hasAnyPattern(text, patterns) {
   const value = String(text || "");
@@ -216,6 +218,38 @@ function normalizeForSnippetMatch(text) {
 function hasAnySnippet(text, snippets) {
   const normalized = normalizeForSnippetMatch(text);
   return snippets.some((snippet) => normalized.includes(snippet));
+}
+
+function extractQuotedAnchors(input) {
+  const text = String(input || "");
+  const matches = text.match(/"([^"]{4,80})"/g) || [];
+  return matches
+    .map((part) => part.replace(/^"|"$/g, "").trim().toLowerCase())
+    .filter(Boolean)
+    .slice(0, 3);
+}
+
+function extractSignalAnchors(input) {
+  const text = String(input || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9'\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  if (!text) return [];
+
+  const quoted = extractQuotedAnchors(input);
+  const tokens = text
+    .split(" ")
+    .map((token) => token.replace(/^'+|'+$/g, ""))
+    .filter((token) => token.length >= 5 && !INTENTION_ANCHOR_STOPWORDS.has(token));
+  const merged = [...quoted, ...tokens];
+  return [...new Set(merged)].slice(0, 10);
+}
+
+function buildInputSignalSnippet(input, maxLen = 130) {
+  const text = String(input || "").replace(/\s+/g, " ").trim();
+  if (!text) return null;
+  return text.length <= maxLen ? text : `${text.slice(0, maxLen - 1)}…`;
 }
 
 function sanitizeReframeText(value) {
@@ -352,7 +386,31 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
   return { ok: reasons.length === 0, reasons };
 }
 
-function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry = false, hasCrisisLanguage = false, conversationTurn = 1 } = {}) {
+function validateIntentionFit(payload, { input = "", isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false } = {}) {
+  if (isSummaryRequest || hasCrisisLanguage || isSoftEntry) return { ok: true, reasons: [], anchors: [] };
+
+  const reasons = [];
+  const anchors = extractSignalAnchors(input);
+  const reframe = normalizeForSnippetMatch(payload?.reframe || "");
+  const nextStep = normalizeForSnippetMatch(payload?.next_step || "");
+  const inputText = String(input || "").trim();
+
+  if (inputText.length >= INTENTION_ANCHOR_MIN_INPUT_LEN && anchors.length > 0) {
+    const hasAnchorHit = anchors.some((anchor) => {
+      const normalizedAnchor = normalizeForSnippetMatch(anchor);
+      return normalizedAnchor && (reframe.includes(normalizedAnchor) || nextStep.includes(normalizedAnchor));
+    });
+    if (!hasAnchorHit) reasons.push("missing user-language anchor");
+  }
+
+  if (reframe === normalizeForSnippetMatch("Your signal is real, and your system is loud right now. We separate what happened from what your stress system is adding, then move one step at a time. Keep it simple and run one clean step before you add more.")) {
+    reasons.push("generic deterministic line");
+  }
+
+  return { ok: reasons.length === 0, reasons, anchors };
+}
+
+function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry = false, hasCrisisLanguage = false } = {}) {
   if (isSummaryRequest) return { ok: true, reasons: [] };
   const reasons = [];
   const reframe = String(payload?.reframe || "").trim();
@@ -360,16 +418,10 @@ function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry 
 
   if (hasAnyPattern(reframe, VOICE_CONTRACT_BANNED_PATTERNS)) reasons.push("voice contract banned phrase");
 
-  const sentenceCount = estimateSentenceCount(reframe);
-  if (!hasCrisisLanguage && conversationTurn <= 2 && sentenceCount > 3) {
-    reasons.push("early-turn response too long");
-  }
-  if (!hasCrisisLanguage && reframe.length > 420) {
+  if (!hasCrisisLanguage && reframe.length > 560) {
     reasons.push("voice payload too long");
   }
-  if (isSoftEntry && normalizeForSnippetMatch(reframe) !== normalizeForSnippetMatch(SOFT_ENTRY_LOCKED_REFRAME)) {
-    reasons.push("soft-entry line drift");
-  }
+  if (isSoftEntry && estimateSentenceCount(reframe) > 3) reasons.push("soft-entry overbuild");
   return { ok: reasons.length === 0, reasons };
 }
 
@@ -409,11 +461,13 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
     clarity: "We cut the loop by naming the thought-pattern, then act on evidence instead of repetition.",
     hype: "We convert activation into readiness and lock onto one execution anchor."
   }[mode] || "We separate signal from noise, then move on one concrete action.";
+  const snippet = buildInputSignalSnippet(input);
+  const signalLead = snippet ? `You said "${snippet}". ` : "";
 
   return {
     distortion: null,
     mechanism: route?.id || "signal_noise",
-    reframe: `Your signal is real, and your system is loud right now. ${modeAnchor} Keep it simple and run one clean step before you add more.`,
+    reframe: `${signalLead}Your signal is real, and your system is loud right now. ${modeAnchor} Keep it simple and run one clean step before you add more.`,
     next_step: route?.nextStep || "Take one deliberate breath and choose one action you can complete in the next 90 seconds.",
     question: null
   };
@@ -849,7 +903,6 @@ exports.handler = async function(event) {
 
   try {
     const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null, scienceEvidence = null } = JSON.parse(event.body);
-    const conversationTurn = Array.isArray(history) ? Math.max(1, history.length + 1) : 1;
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
@@ -1115,18 +1168,20 @@ WHAT STAYING SHARP LOOKS LIKE:
     let voiceFallbackUsed = false;
     let lastValidation = { ok: false, reasons: ["no response"] };
     let lastVoiceValidation = { ok: false, reasons: ["no response"] };
+    let lastIntentionValidation = { ok: false, reasons: ["no response"], anchors: [] };
     let previousRaw = "";
+    let lastFailureReasons = ["no response"];
 
     for (let attempt = 0; attempt < 2; attempt++) {
       const attemptSystemPrompt = attempt === 0
         ? systemPrompt
-        : `${systemPrompt}\n\n${QUALITY_RETRY_PROMPT}\nValidation failures: ${lastValidation.reasons.join("; ")}`;
+        : `${systemPrompt}\n\n${QUALITY_RETRY_PROMPT}\nValidation failures: ${lastFailureReasons.join("; ")}`;
       const attemptMessages = attempt === 0
         ? messages
         : [
             ...messages,
             { role: "assistant", content: previousRaw || "{}" },
-            { role: "user", content: `INTERNAL QA RETRY: Repair previous response. Failures: ${lastValidation.reasons.join("; ")}.` }
+            { role: "user", content: `INTERNAL QA RETRY: Repair previous response. Failures: ${lastFailureReasons.join("; ")}.` }
           ];
 
       const raw = await requestCompletion(attemptSystemPrompt, attemptMessages);
@@ -1136,10 +1191,20 @@ WHAT STAYING SHARP LOOKS LIKE:
       lastVoiceValidation = validateVoiceContract(normalized, {
         isSummaryRequest: isInternalSummaryRequest,
         isSoftEntry,
-        hasCrisisLanguage,
-        conversationTurn
+        hasCrisisLanguage
       });
-      if (lastValidation.ok && lastVoiceValidation.ok) {
+      lastIntentionValidation = validateIntentionFit(normalized, {
+        input: trimmedInput,
+        isSummaryRequest: isInternalSummaryRequest,
+        hasCrisisLanguage,
+        isSoftEntry
+      });
+      lastFailureReasons = [
+        ...(lastValidation.reasons || []),
+        ...(lastVoiceValidation.reasons || []),
+        ...(lastIntentionValidation.reasons || [])
+      ];
+      if (lastValidation.ok && lastVoiceValidation.ok && lastIntentionValidation.ok) {
         parsed = normalized;
         retryUsed = attempt > 0;
         voiceRepairUsed = attempt > 0;
@@ -1162,12 +1227,6 @@ WHAT STAYING SHARP LOOKS LIKE:
       });
     }
 
-    if (isSoftEntry && !isInternalSummaryRequest && !hasCrisisLanguage) {
-      parsed.distortion = null;
-      parsed.mechanism = "friendly_soft_entry";
-      parsed.reframe = SOFT_ENTRY_LOCKED_REFRAME;
-    }
-
     parsed.reframe = sanitizeReframeText(parsed.reframe);
     if (parsed.next_step) parsed.next_step = sanitizeReframeText(parsed.next_step);
     if (parsed.question) parsed.question = sanitizeReframeText(parsed.question);
@@ -1182,6 +1241,9 @@ WHAT STAYING SHARP LOOKS LIKE:
         deterministicFallbackUsed: fallbackUsed,
         voiceValidationFailed: !lastVoiceValidation.ok,
         voiceFailureReasons: lastVoiceValidation.reasons || [],
+        intentionValidationFailed: !lastIntentionValidation.ok,
+        intentionFailureReasons: lastIntentionValidation.reasons || [],
+        intentionAnchors: lastIntentionValidation.anchors || [],
         voiceRepairUsed,
         voiceFallbackUsed,
         crisisDetected: hasCrisisLanguage,
