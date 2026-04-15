@@ -1330,6 +1330,8 @@ const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
 const METRICS_SCHEMA_VERSION = 1;
 const SESSION_STORAGE_KEY = "stillform_sessions";
+const COMMUNICATION_EVENTS_KEY = "stillform_communication_events";
+const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-04-20T23:59:59";
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
@@ -1440,6 +1442,15 @@ const appendSessionToStorage = (entry) => {
   sessions.push(entry);
   setSessionsInStorage(sessions);
   return sessions.length;
+};
+
+const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
+  if (!entry) return 0;
+  const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
+  events.push(entry);
+  const bounded = events.slice(-maxItems);
+  try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
+  return bounded.length;
 };
 
 const getSessionCountFromStorage = () => getSessionsFromStorage().length;
@@ -3259,7 +3270,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -3550,9 +3561,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [entryProtocolId, setEntryProtocolId] = useState(null);
   const [externalAnchorDraft, setExternalAnchorDraft] = useState("");
   const [externalAnchorCopied, setExternalAnchorCopied] = useState(false);
+  const [externalAnchorSent, setExternalAnchorSent] = useState(false);
   const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
+  const communicationDraftLoggedRef = useRef(false);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [feelState, setFeelState] = useState(() => {
@@ -4287,10 +4300,29 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
 
-  const buildExternalAnchorCopy = () => {
+  const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
-    return `External anchor:\n${clean}`;
+    return `Additional anchor:\n${clean}`;
+  };
+  const logCommunicationAction = (action) => {
+    const clean = externalAnchorDraft.trim();
+    if (!clean) return false;
+    const stamp = new Date().toISOString();
+    appendCommunicationEvent({
+      id: `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      timestamp: stamp,
+      date: toLocalDateKey(stamp),
+      action,
+      source: "reframe-state-to-statement",
+      sessionTimestamp: sessionShareSummary?.timestamp || null,
+      textLength: clean.length
+    });
+    return true;
+  };
+  const ensureDraftLogged = () => {
+    if (communicationDraftLoggedRef.current) return;
+    if (logCommunicationAction("drafted")) communicationDraftLoggedRef.current = true;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
   const finishReframeSession = ({ postState = null } = {}) => {
@@ -4303,6 +4335,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       postState: postState || null,
       delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
     });
+    communicationDraftLoggedRef.current = false;
     setPostRating(null);
     setShowPostRating(false);
     const latestInsight = getLatestUserFacingInsight();
@@ -4316,6 +4349,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
 
   const finishStateToStatement = () => {
+    ensureDraftLogged();
     try {
       window.plausible("State to Statement Completed", {
         props: {
@@ -4326,10 +4360,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setShowStateToStatement(false);
     setExternalAnchorDraft("");
     setExternalAnchorCopied(false);
+    setExternalAnchorSent(false);
     setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
+    communicationDraftLoggedRef.current = false;
     onComplete(resolvePostReframeRoute());
   };
 
@@ -4338,10 +4374,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setShowStateToStatement(false);
     setExternalAnchorCopied(false);
     setExternalAnchorDraft("");
+    setExternalAnchorSent(false);
     setStateToStatementExpanded(false);
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
+    communicationDraftLoggedRef.current = false;
     onComplete(resolvePostReframeRoute());
   };
 
@@ -4361,18 +4399,44 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setShowPostInsight(false);
     setStateToStatementExpanded(false);
     setExternalAnchorCopied(false);
+    setExternalAnchorSent(false);
     setExternalAnchorDraft("");
     setShowStateToStatement(true);
   };
 
   const copyExternalAnchor = async () => {
-    const text = buildExternalAnchorCopy();
+    const text = buildAdditionalAnchorCopy();
     if (!text.trim()) return;
     try {
       if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      ensureDraftLogged();
+      logCommunicationAction("copied");
       setExternalAnchorCopied(true);
       try { window.plausible("State to Statement Anchor Copied"); } catch {}
     } catch {}
+  };
+  const shareExternalAnchor = async () => {
+    const text = buildAdditionalAnchorCopy();
+    if (!text.trim()) return;
+    try {
+      if (navigator?.share) {
+        await navigator.share({ text });
+        ensureDraftLogged();
+        logCommunicationAction("shared");
+        try { window.plausible("State to Statement Anchor Shared"); } catch {}
+        return;
+      }
+    } catch (err) {
+      if (err?.name === "AbortError") return;
+    }
+    await copyExternalAnchor();
+  };
+  const markExternalAnchorSent = () => {
+    if (!externalAnchorDraft.trim()) return;
+    ensureDraftLogged();
+    logCommunicationAction("sent-confirmed");
+    setExternalAnchorSent(true);
+    try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
 
   if (showWatchChooseFlow) {
@@ -4387,10 +4451,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          Session close
+          Additional anchor
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          Close this session now. If useful, add one external line you can use outside the app.
+          Close the session. If helpful, capture one clear line you can send while you're regulated.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -4398,7 +4462,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             Finish session
           </button>
           <button className="btn btn-ghost" onClick={() => setStateToStatementExpanded((v) => !v)}>
-            {stateToStatementExpanded ? "Hide external line" : "Add external line"}
+            {stateToStatementExpanded ? "Hide additional anchor" : "Add additional anchor"}
           </button>
           <button className="btn btn-ghost" onClick={skipStateToStatement}>
             Skip for now
@@ -4408,19 +4472,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {stateToStatementExpanded && (
           <div style={{ marginTop: 16 }}>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-              External line (optional)
+              State-to-Statement (optional)
             </div>
             <textarea
               value={externalAnchorDraft}
-              onChange={(e) => setExternalAnchorDraft(e.target.value)}
-              placeholder="One sentence you can use outside this app."
+              onChange={(e) => {
+                setExternalAnchorDraft(e.target.value);
+                setExternalAnchorSent(false);
+              }}
+              placeholder="Draft one clear message you can send now."
               rows={3}
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorCopied ? "Copied" : "Copy external line"}
+                {externalAnchorCopied ? "Copied" : "Copy anchor"}
+              </button>
+              <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
+                Share
+              </button>
+              <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
+                {externalAnchorSent ? "Sent logged" : "Mark sent"}
               </button>
             </div>
           </div>
@@ -6565,6 +6638,14 @@ function MyProgress({ onBack }) {
             return avg >= 0;
           }).length;
           const transferScore14d = ratedDays14 ? Math.round((transferPositiveDays14 / ratedDays14) * 100) : null;
+          const communicationEvents = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
+          const communicationEvents30d = communicationEvents.filter((entry) => withinDays(entry?.timestamp || entry?.date, 30));
+          const drafted30d = communicationEvents30d.filter((entry) => entry?.action === "drafted").length;
+          const copied30d = communicationEvents30d.filter((entry) => entry?.action === "copied").length;
+          const shared30d = communicationEvents30d.filter((entry) => entry?.action === "shared").length;
+          const sentConfirmed30d = communicationEvents30d.filter((entry) => entry?.action === "sent-confirmed").length;
+          const followThrough30d = drafted30d > 0 ? Math.round((sentConfirmed30d / drafted30d) * 100) : null;
+          const lastSentConfirmedEvent = [...communicationEvents].reverse().find((entry) => entry?.action === "sent-confirmed");
           const scienceEvidenceRead = (() => {
             if (acuteShiftRate30d === null || transferScore14d === null) return "building baseline";
             if (acuteShiftRate30d >= 70 && transferScore14d >= 70) return "strong carryover";
@@ -6687,6 +6768,33 @@ function MyProgress({ onBack }) {
                       )}
                     </div>
                   )}
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                      Composure → Communication
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Drafted (30d)</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{drafted30d}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Sent (30d)</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{sentConfirmed30d}</div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Follow-through</div>
+                        <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{followThrough30d === null ? "N/A" : `${followThrough30d}%`}</div>
+                      </div>
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                      Copy/share actions (30d): <span style={{ color: "var(--text)" }}>{copied30d + shared30d}</span>
+                    </div>
+                    {lastSentConfirmedEvent && (
+                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                        Last sent confirmation: <span style={{ color: "var(--text)" }}>{new Date(lastSentConfirmedEvent.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                      </div>
+                    )}
+                  </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
@@ -11643,6 +11751,7 @@ export default function Stillform() {
                       localStorage.removeItem("stillform_reframe_prefill");
                       localStorage.removeItem("stillform_journal");
                       localStorage.removeItem("stillform_focus_check_history");
+                      localStorage.removeItem("stillform_communication_events");
                       localStorage.removeItem("stillform_ai_session_notes");
                       localStorage.removeItem("stillform_bias_profile");
                       localStorage.removeItem("stillform_regulation_type");
