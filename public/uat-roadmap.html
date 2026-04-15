@@ -234,7 +234,7 @@
       <div class="kicker">Stillform · UAT Status</div>
       <h1>Stillform UAT Status Board</h1>
       <p class="sub">Execution only: quick links for what is live, what is in progress, and what is queued for launch.</p>
-      <p class="updated">Updated: Apr 15, 2026</p>
+      <p class="updated">Updated: Apr 13, 2026</p>
       <nav class="jump-links" aria-label="UAT status quick links">
         <a href="#live">What is live</a>
         <a href="#planned">Launch planning</a>
@@ -276,6 +276,11 @@
               <td data-label="What is live">Metrics controls, disclosure language, and privacy-policy alignment.</td>
               <td data-label="User impact">Honest operational telemetry without capturing free-form text content.</td>
             </tr>
+            <tr>
+              <td data-label="Workstream">Home progress parity + Reframe continuity</td>
+              <td data-label="What is live">Home most-used metric now mirrors My Progress logic, duplicate sessions counter removed, and “I want a different response” stays inside Reframe.</td>
+              <td data-label="User impact">No conflicting home analytics and no accidental tool-switch when requesting another response.</td>
+            </tr>
           </tbody>
         </table>
       </section>
@@ -287,20 +292,20 @@
         </div>
         <div class="in-progress-grid">
           <article class="work-card">
-            <h3>Difficult Conversation Prep expansion</h3>
-            <p>Tightening objective clarity, facts-vs-story separation, and calm ask execution output.</p>
+            <h3>Home-only UAT visibility cleanup</h3>
+            <p>Keep UAT entry point on home only, remove duplicate Settings entry, and keep banner prominence where testers actually look first.</p>
           </article>
           <article class="work-card">
-            <h3>UAT issue burn-down</h3>
-            <p>Rolling stabilization on edge-case crashes and mobile flow regressions reported by testers.</p>
+            <h3>Plain-language UAT question intake</h3>
+            <p>Add direct question capture under My Progress so testers can submit friction in plain language without leaving the app.</p>
           </article>
           <article class="work-card">
-            <h3>Reframe quality refinement</h3>
-            <p>Continued tone and structure tuning for user-first composure outcomes.</p>
+            <h3>Go/No-Go clarity pass</h3>
+            <p>Add clear copy under the home Go/No-Go entry explaining what it measures and when to run it.</p>
           </article>
           <article class="work-card">
-            <h3>Launch readiness verification</h3>
-            <p>SHIP gate reruns and end-to-end sanity checks on current release branch/main.</p>
+            <h3>UAT board currency discipline</h3>
+            <p>Refresh board wording/status to reflect current SHIP execution state so testers are not reading stale issue lists.</p>
           </article>
           <article class="work-card">
             <h3>Executive coaching framework parity review</h3>
@@ -324,6 +329,26 @@
           </thead>
           <tbody>
             <tr>
+              <td data-label="Issue">Home UAT appears in two places</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Keep UAT access on home only and remove duplicate Settings card.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">UAT banner did not visibly flash</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Apply clear flash behavior on home UAT banner while honoring reduced-motion preference.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">No plain-language UAT question intake below My Progress</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Add in-app UAT question capture with plain prompts and draft-safe behavior.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">Go/No-Go purpose unclear on home</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Add one-line plain-language description under Go/No-Go home entry.</td>
+            </tr>
+            <tr>
               <td data-label="Issue">Quick Breathe interaction feels unreliable</td>
               <td data-label="Status">In progress</td>
               <td data-label="Implementation focus">Stabilize tap-vs-drag behavior so it does not misfire or reposition unexpectedly.</td>
@@ -332,21 +357,6 @@
               <td data-label="Issue">Reframe external anchor flow is unclear</td>
               <td data-label="Status">In progress</td>
               <td data-label="Implementation focus">Simplify post-session anchor to a cleaner, single-field action.</td>
-            </tr>
-            <tr>
-              <td data-label="Issue">Go/No-Go naming mismatch</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Unify naming across tutorial, home, settings, and progress surfaces.</td>
-            </tr>
-            <tr>
-              <td data-label="Issue">Body Scan point location clarity</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Improve in-app SVG guidance to make the target point explicit before hold begins.</td>
-            </tr>
-            <tr>
-              <td data-label="Issue">Back navigation requires top scroll</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Add bottom back affordance and right-swipe back on key long screens.</td>
             </tr>
             <tr>
               <td data-label="Issue">Delete-all leaves residual AI observations</td>
