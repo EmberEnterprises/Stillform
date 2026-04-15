@@ -672,6 +672,17 @@ const styles = `
     100% { text-shadow: 0 0 12px rgba(201,147,58,0.2); }
   }
 
+  @keyframes uatBannerFlash {
+    0%, 100% {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 rgba(201,147,58,0);
+      border-color: var(--amber-dim);
+    }
+    50% {
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 18px rgba(201,147,58,0.18);
+      border-color: rgba(201,147,58,0.6);
+    }
+  }
+
   /* BODY SCAN */
   .scan-body {
     display: flex;
@@ -1336,6 +1347,15 @@ const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
 const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
 const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
+const UAT_FEEDBACK_TEXT_MIN = 8;
+const UAT_FEEDBACK_TEXT_MAX = 1000;
+const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
+const UAT_QUESTION_OPTIONS = [
+  { id: "confusing", prompt: "What felt confusing today?", placeholder: "Example: The button text was unclear." },
+  { id: "friction", prompt: "What felt heavy or annoying?", placeholder: "Example: Too many taps to finish this step." },
+  { id: "missing", prompt: "What should be clearer or easier?", placeholder: "Example: Add one line explaining why this tool exists." },
+  { id: "working", prompt: "What worked well for you?", placeholder: "Example: The reframe flow felt direct and calm." }
+];
 const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 
@@ -1462,6 +1482,21 @@ const getCommunicationDraftSignals = (value) => {
   const textLength = text.length;
   const meaningful = textLength >= COMMUNICATION_MEANINGFUL_CHARS_MIN || wordCount >= COMMUNICATION_MEANINGFUL_WORDS_MIN;
   return { textLength, wordCount, meaningful };
+};
+
+const getUatFeedbackDraft = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(UAT_FEEDBACK_DRAFT_KEY) || "null");
+    if (!parsed || typeof parsed !== "object") return { questionId: UAT_QUESTION_OPTIONS[0]?.id || "confusing", text: "" };
+    const fallbackQuestionId = UAT_QUESTION_OPTIONS[0]?.id || "confusing";
+    const questionId = UAT_QUESTION_OPTIONS.some((item) => item.id === parsed.questionId)
+      ? parsed.questionId
+      : fallbackQuestionId;
+    const text = String(parsed.text || "").slice(0, UAT_FEEDBACK_TEXT_MAX);
+    return { questionId, text };
+  } catch {
+    return { questionId: UAT_QUESTION_OPTIONS[0]?.id || "confusing", text: "" };
+  }
 };
 
 const getSessionCountFromStorage = () => getSessionsFromStorage().length;
@@ -6270,6 +6305,8 @@ function FocusCheckValidation({
       {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Go / No-Go Quick Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
+        <br />
+        Use this right before high-stakes tasks to verify inhibitory control and cognitive readiness.
       </div>
       <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
         {focusCheckMode === "running" && currentFocusTrial && (
@@ -7625,6 +7662,9 @@ export default function Stillform() {
       window.location.assign("/uat-roadmap.html#issues");
     }
   };
+  const openUatBoardHomeOnly = () => {
+    if (screen === "home") openUatBoard();
+  };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(backScreen || "home");
@@ -8109,6 +8149,11 @@ export default function Stillform() {
   const [metricsLastSentAt, setMetricsLastSentAt] = useState(() => {
     try { return localStorage.getItem(METRICS_LAST_SENT_AT_KEY) || ""; } catch { return ""; }
   });
+  const initialUatFeedbackDraft = getUatFeedbackDraft();
+  const [uatQuestionId, setUatQuestionId] = useState(initialUatFeedbackDraft.questionId || (UAT_QUESTION_OPTIONS[0]?.id || "confusing"));
+  const [uatQuestionText, setUatQuestionText] = useState(initialUatFeedbackDraft.text || "");
+  const [uatFeedbackStatus, setUatFeedbackStatus] = useState("");
+  const [uatSubmitting, setUatSubmitting] = useState(false);
   useEffect(() => {
     const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
     applyThemePreset(themeToApply);
@@ -8368,6 +8413,73 @@ export default function Stillform() {
   const setMetricsStatusWithClear = (message) => {
     setMetricsStatus(message);
     try { window.setTimeout(() => setMetricsStatus(""), 3200); } catch {}
+  };
+
+  const setUatFeedbackStatusWithClear = (message) => {
+    setUatFeedbackStatus(message);
+    try { window.setTimeout(() => setUatFeedbackStatus(""), 4200); } catch {}
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(UAT_FEEDBACK_DRAFT_KEY, JSON.stringify({
+        questionId: uatQuestionId,
+        text: String(uatQuestionText || "").slice(0, UAT_FEEDBACK_TEXT_MAX)
+      }));
+    } catch {}
+  }, [uatQuestionId, uatQuestionText]);
+
+  const submitUatFeedback = async () => {
+    if (uatSubmitting) return;
+    const selectedQuestionId = UAT_QUESTION_OPTIONS.some((item) => item.id === uatQuestionId)
+      ? uatQuestionId
+      : (UAT_QUESTION_OPTIONS[0]?.id || "confusing");
+    const trimmed = String(uatQuestionText || "").trim();
+    if (trimmed.length < UAT_FEEDBACK_TEXT_MIN) {
+      setUatFeedbackStatusWithClear("Please add a little more detail so we can act on it.");
+      return;
+    }
+    setUatSubmitting(true);
+    try {
+      const installId = getOrCreateInstallId();
+      const payload = {
+        install_id: installId,
+        source_screen: "home",
+        question_id: selectedQuestionId,
+        question_prompt: (UAT_QUESTION_OPTIONS.find((item) => item.id === selectedQuestionId)?.prompt) || null,
+        feedback_text: trimmed.slice(0, UAT_FEEDBACK_TEXT_MAX),
+        app_version: APP_VERSION,
+        package_version: APP_PACKAGE_VERSION,
+        submitted_at: new Date().toISOString()
+      };
+      const endpoint = "/.netlify/functions/uat-feedback";
+      const authToken = sbGetSession()?.access_token;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!response.ok) {
+        const failure = await response.json().catch(() => ({}));
+        throw new Error(failure?.error || `UAT feedback ${response.status}`);
+      }
+      setUatQuestionText("");
+      try {
+        localStorage.setItem(UAT_FEEDBACK_DRAFT_KEY, JSON.stringify({
+          questionId: selectedQuestionId,
+          text: ""
+        }));
+      } catch {}
+      setUatFeedbackStatusWithClear("Thanks. Your UAT feedback was sent.");
+      try { window.plausible("UAT Feedback Submitted", { props: { question: selectedQuestionId } }); } catch {}
+    } catch {
+      setUatFeedbackStatusWithClear("Could not send right now. Draft saved on this device.");
+    } finally {
+      setUatSubmitting(false);
+    }
   };
 
   const getMetricsSnapshot = () => buildPerformanceMetricsSnapshot({
@@ -9635,25 +9747,38 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Access banner */}
+            {/* Access / UAT banner */}
             {!isSubscribed && (
-              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+              <div
+                style={{
+                  marginBottom: 12,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  padding: "10px 16px",
+                  animation: uatTrialFreezeActive && !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
+                  boxShadow: uatTrialFreezeActive ? "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)" : "none"
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                    ACCESS
+                    {uatTrialFreezeActive ? "UAT" : "ACCESS"}
                   </span>
                   <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
                     {uatTrialFreezeActive
-                      ? `UAT access active · target launch ${uatLaunchTargetLabel}`
+                      ? `UAT updates live · launch target ${uatLaunchTargetLabel}`
                       : "Subscription unlocks full Stillform access."}
                   </span>
                 </div>
                 {uatTrialFreezeActive ? (
                   <button
-                    onClick={openUatBoard}
+                    onClick={openUatBoardHomeOnly}
                     style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
                   >
-                    UAT updates →
+                    Open UAT board →
                   </button>
                 ) : (
                   <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
@@ -10261,9 +10386,113 @@ export default function Stillform() {
                 );
               })()}
 
+              {(() => {
+                const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
+                const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
+                const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
+                return (
+                  <div style={{ marginBottom: 16, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                        UAT question
+                      </div>
+                      <button
+                        onClick={openUatBoardHomeOnly}
+                        style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 10, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase", padding: 0 }}
+                      >
+                        Open board →
+                      </button>
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                      Tell us what is unclear. Plain language is best. We use this to update the SHIP list.
+                    </div>
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                      {UAT_QUESTION_OPTIONS.map((item) => {
+                        const active = item.id === selectedQuestion?.id;
+                        const shortLabelMap = {
+                          confusing: "Confusing",
+                          friction: "Friction",
+                          missing: "Missing clarity",
+                          working: "Working well"
+                        };
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setUatQuestionId(item.id)}
+                            style={{
+                              background: active ? "var(--amber-glow)" : "transparent",
+                              border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                              borderRadius: 999,
+                              padding: "5px 11px",
+                              fontSize: 11,
+                              color: active ? "var(--amber)" : "var(--text-muted)",
+                              cursor: "pointer",
+                              fontFamily: "'DM Sans', sans-serif"
+                            }}
+                          >
+                            {shortLabelMap[item.id] || item.prompt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <textarea
+                      value={uatQuestionText}
+                      onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
+                      placeholder={selectedQuestion?.placeholder || "Write your feedback in plain language."}
+                      style={{
+                        width: "100%",
+                        minHeight: 92,
+                        background: "var(--surface2)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        padding: "10px 12px",
+                        color: "var(--text)",
+                        fontSize: 12,
+                        lineHeight: 1.55,
+                        fontFamily: "'DM Sans', sans-serif",
+                        resize: "vertical",
+                        outline: "none"
+                      }}
+                    />
+                    <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                        {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                      </div>
+                      <button
+                        onClick={submitUatFeedback}
+                        disabled={uatSubmitting || tooShort}
+                        style={{
+                          background: "var(--amber)",
+                          color: "#0A0A0C",
+                          border: "none",
+                          borderRadius: "var(--r-sm)",
+                          padding: "8px 12px",
+                          fontSize: 11,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: "0.08em",
+                          textTransform: "uppercase",
+                          cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
+                          opacity: uatSubmitting || tooShort ? 0.55 : 1
+                        }}
+                      >
+                        {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                      </button>
+                    </div>
+                    {uatFeedbackStatus && (
+                      <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                        {uatFeedbackStatus}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* BOTTOM LINKS — minimal */}
-              <div style={{ display: "flex", justifyContent: "center" }}>
+              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: 6 }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", textAlign: "center", lineHeight: 1.5, maxWidth: 320 }}>
+                  Go / No-Go is a 30-second inhibition check. Use it before a high-stakes task to confirm you’re cognitively ready.
+                </div>
               </div>
 
             </section>
@@ -10732,30 +10961,6 @@ export default function Stillform() {
               </div>
               <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
             </button>
-            <button
-              onClick={openUatBoard}
-              style={{
-                width: "100%",
-                background: "var(--surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--r-lg)",
-                padding: "14px 18px",
-                marginBottom: 26,
-                textAlign: "left",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center"
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>UAT</div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Open UAT status board and current issue list</div>
-              </div>
-              <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
-            </button>
-
             {/* Regulation Type */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("processing")} style={{
