@@ -8648,8 +8648,8 @@ export default function Stillform() {
     return () => clearTimeout(t);
   }, []);
 
-  // Show onboarding once on fresh installs (or after data reset).
-  const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
+  // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
+  const hasCompletedFirstRunFlow = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
   
   // Subscription & trial tracking
   const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
@@ -8729,7 +8729,7 @@ export default function Stillform() {
   });
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
-  const [setupBridgeTutorialReturnScreen, setSetupBridgeTutorialReturnScreen] = useState("home");
+  const [setupBridgeOrigin, setSetupBridgeOrigin] = useState("home");
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
@@ -8864,8 +8864,12 @@ export default function Stillform() {
     if (screen === "home") openUatBoard();
   };
   const resolveTutorialReturnScreen = (target) => (target === "settings" ? "settings" : "home");
-  const openSetupBridge = (tutorialBackScreen = "home") => {
-    setSetupBridgeTutorialReturnScreen(resolveTutorialReturnScreen(tutorialBackScreen));
+  const resolveSetupBridgeOrigin = (origin) => {
+    if (origin === "tutorial" || origin === "settings" || origin === "home") return origin;
+    return "home";
+  };
+  const openSetupBridge = (origin = "home") => {
+    setSetupBridgeOrigin(resolveSetupBridgeOrigin(origin));
     setScreen("onboarding");
   };
   const openTutorial = (backScreen = "home") => {
@@ -8903,9 +8907,18 @@ export default function Stillform() {
       return;
     }
     if (screen === "onboarding") {
-      setTutorialReturnScreen(resolveTutorialReturnScreen(setupBridgeTutorialReturnScreen));
-      setTutorialStep(4);
-      setScreen("tutorial");
+      const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
+      if (origin === "settings") {
+        setScreen("settings");
+        return;
+      }
+      if (origin === "tutorial") {
+        setTutorialReturnScreen("home");
+        setTutorialStep(4);
+        setScreen("tutorial");
+        return;
+      }
+      goHomeSafely();
       return;
     }
     if (screen === "faq") {
@@ -8978,7 +8991,7 @@ export default function Stillform() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeTutorialReturnScreen, setupStep, faqBackScreen, focusCheckReturnScreen]);
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
@@ -9177,13 +9190,16 @@ export default function Stillform() {
             setTutorialStep(0);
             setTutorialReturnScreen("home");
           }
+          if (preview === "onboarding") {
+            setSetupBridgeOrigin("home");
+          }
           setScreen(preview);
           setScreenReady(true);
           return;
         }
       } catch {}
 
-      if (!hasSeenOnboarding) {
+      if (!hasCompletedFirstRunFlow) {
         setTutorialStep(0);
         setTutorialReturnScreen("home");
         setScreen("tutorial");
@@ -9215,7 +9231,7 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams(window.location.search);
       const share = params.get("share");
-      if (share && hasSeenOnboarding) {
+      if (share && hasCompletedFirstRunFlow) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
@@ -9229,7 +9245,7 @@ export default function Stillform() {
             try {
               const url = new URL(data.url);
               const s = url.searchParams.get("share");
-              if (s && hasSeenOnboarding) {
+              if (s && hasCompletedFirstRunFlow) {
                 setSharedText(decodeURIComponent(s));
                 setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
                 setScreen("tool");
@@ -10168,8 +10184,11 @@ export default function Stillform() {
     }
   };
 
-  const beginCalibrationFlow = () => {
+  const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
     // Route to calibration assessment, not home
+    if (bridgeOrigin !== null) {
+      setSetupBridgeOrigin(resolveSetupBridgeOrigin(bridgeOrigin));
+    }
     setupAutoLaunchStepRef.current = null;
     setSetupStep(0);
     setAssessmentAnswers([]);
@@ -10519,7 +10538,7 @@ export default function Stillform() {
                       setScreen("settings");
                       return;
                     }
-                    openSetupBridge(returnTo);
+                    openSetupBridge("tutorial");
                   }}
                 >
                   {returnTo === "settings" ? "Return to settings" : "Continue →"}
@@ -10638,7 +10657,7 @@ export default function Stillform() {
               <button
                 className="btn btn-primary"
                 style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                onClick={() => beginCalibrationFlow()}
+                onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
               >
                 Continue to calibration
               </button>
@@ -10934,7 +10953,7 @@ export default function Stillform() {
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                   Let's calibrate your system first.
                 </div>
-                <button onClick={() => beginCalibrationFlow()} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
+                <button onClick={() => beginCalibrationFlow({ bridgeOrigin: "home" })} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
                   Begin Calibration →
                 </button>
               </section>
@@ -13922,7 +13941,7 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_bio_filter");
                   } catch {}
                   setRegType(null);
-                  beginCalibrationFlow();
+                  beginCalibrationFlow({ bridgeOrigin: "settings" });
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
