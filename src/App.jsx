@@ -10089,6 +10089,15 @@ export default function Stillform() {
   }, []);
   const [uatTestAgain, setUatTestAgain] = useState(null);
 
+  const isSignalProfileConfigured = () => {
+    try {
+      const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+      return Array.isArray(profile?.firstAreas) && profile.firstAreas.length > 0;
+    } catch {
+      return false;
+    }
+  };
+
   const beginCalibrationFlow = () => {
     // Route to calibration assessment, not home
     setupAutoLaunchStepRef.current = null;
@@ -10189,6 +10198,12 @@ export default function Stillform() {
           goHomeSafely();
           return;
         }
+      }
+      if (!redirectTo && activeTool?.returnTo) {
+        const returnScreen = activeTool.returnTo;
+        setActiveTool(null);
+        setScreen(returnScreen);
+        return;
       }
       goHomeSafely();
     }};
@@ -10444,142 +10459,126 @@ export default function Stillform() {
           );
         })()}
 
-        {/* ONBOARDING — first run + replay from Settings */}
-        {screen === "onboarding" && (() => (
-          <section
-            style={{
-              maxWidth: 480, margin: "0 auto", padding: "0 24px",
-              display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-              minHeight: "100vh", textAlign: "center", position: "relative", zIndex: 1
-            }}
-          >
-            <div style={{ fontSize: 32, marginBottom: 16 }}>◎</div>
-            <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              Composure architecture
-            </div>
-            <h1 style={{
-              fontFamily: "'Cormorant Garamond', serif", fontSize: 38,
-              fontWeight: 300, lineHeight: 1.1, marginBottom: 8
-            }}>
-              Stillform
-            </h1>
-            <div style={{ fontSize: 15, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 20 }}>
-              A daily composure practice for real life.
-            </div>
-            <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 14, textAlign: "left" }}>
-              <p style={{ marginBottom: 10 }}>
-                Stillform is a daily composure tool. It helps you regulate your state before reactions escalate and helps you choose deliberate action under pressure.
-              </p>
-              <p style={{ marginBottom: 0 }}>
-                The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.
-              </p>
-            </div>
-            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, maxWidth: 360, marginBottom: 12, textAlign: "left" }}>
-              Stillform learns how you process under pressure, then teaches you how to use that pattern deliberately.
-            </div>
-            {(() => {
-              const reducedMotionOn = (() => { try { return localStorage.getItem("stillform_reducedmotion") === "on"; } catch { return false; } })();
-              const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
-              const themeOptions = [
-                { id: "dark", label: "Dark" },
-                { id: "midnight", label: "Midnight Blue" },
-                { id: "warm", label: "Warm" },
-                { id: "light", label: "Light" }
-              ];
-              return (
-                <div style={{ width: "100%", maxWidth: 360, marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", textAlign: "left" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
-                    Visual comfort
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 8 }}>
-                    If this feels too dark, set your display now. You can change this anytime in Settings.
-                  </div>
-                  <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                    {themeOptions.map((opt) => {
-                      const active = themeChoice === opt.id;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => setThemeSelection(opt.id)}
-                          style={{
-                            flex: 1,
-                            background: active ? "var(--amber-glow)" : "var(--surface2)",
-                            border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                            borderRadius: "var(--r-sm)",
-                            padding: "8px 6px",
-                            cursor: "pointer",
-                            fontFamily: "'DM Sans', sans-serif",
-                            fontSize: 12,
-                            color: active ? "var(--amber)" : "var(--text-dim)"
-                          }}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
-                    <button
-                      onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
-                      style={{
-                        background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
-                        border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 6px",
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 11,
-                        color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
-                      }}
-                    >
-                      Reduced motion {reducedMotionOn ? "On" : "Off"}
-                    </button>
-                    <button
-                      onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
-                      style={{
-                        background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
-                        border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 6px",
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif",
-                        fontSize: 11,
-                        color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
-                      }}
-                    >
-                      Visual grounding {visualGroundingOn ? "On" : "Off"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })()}
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
-              Method, science basis, and boundaries are documented in FAQ and Privacy & Disclaimers.
-            </div>
+        {/* ONBOARDING — setup bridge between tutorial and calibration */}
+        {screen === "onboarding" && (() => {
+          const reducedMotionOn = (() => { try { return localStorage.getItem("stillform_reducedmotion") === "on"; } catch { return false; } })();
+          const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
+          const signalMappingConfigured = isSignalProfileConfigured();
+          const themeOptions = [
+            { id: "dark", label: "Dark" },
+            { id: "midnight", label: "Midnight Blue" },
+            { id: "warm", label: "Warm" },
+            { id: "light", label: "Light" }
+          ];
+          return (
+            <section
+              style={{
+                maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px",
+                minHeight: "100vh", position: "relative", zIndex: 1
+              }}
+            >
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 36,
+                fontWeight: 300, lineHeight: 1.12, marginBottom: 20
+              }}>
+                Set up your customizations and map your signals
+              </h1>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
-              {!hasSeenOnboarding ? (
-                <>
-                  <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => beginCalibrationFlow()}>
-                    Begin calibration →
+              <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", textAlign: "left" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  Visual customization
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 6 }}>Theme</div>
+                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                  {themeOptions.map((opt) => {
+                    const active = themeChoice === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        onClick={() => setThemeSelection(opt.id)}
+                        style={{
+                          flex: 1,
+                          background: active ? "var(--amber-glow)" : "var(--surface2)",
+                          border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: "var(--r-sm)",
+                          padding: "8px 6px",
+                          cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 12,
+                          color: active ? "var(--amber)" : "var(--text-dim)"
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                  <button
+                    onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
+                    style={{
+                      background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
+                      border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 6px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 11,
+                      color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
+                    }}
+                  >
+                    Reduced motion {reducedMotionOn ? "On" : "Off"}
                   </button>
-                </>
-              ) : (
-                <>
-                  <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => setScreen("settings")}>
-                    Return to settings
+                  <button
+                    onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
+                    style={{
+                      background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
+                      border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 6px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 11,
+                      color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
+                    }}
+                  >
+                    Visual grounding {visualGroundingOn ? "On" : "Off"}
                   </button>
-                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => goHomeSafely()}>
-                    Go to home
-                  </button>
-                </>
-              )}
-            </div>
-          </section>
-        ))()}
+                </div>
+              </div>
+
+              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px", textAlign: "left" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  Signal mapping
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
+                  Status: {signalMappingConfigured ? "configured" : "not configured"}
+                </div>
+                <button
+                  className="btn btn-ghost"
+                  style={{ width: "100%" }}
+                  onClick={() => {
+                    startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "onboarding" });
+                  }}
+                >
+                  Map signals now
+                </button>
+              </div>
+
+              <button
+                className="btn btn-primary"
+                style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                onClick={() => beginCalibrationFlow()}
+              >
+                Continue to calibration
+              </button>
+            </section>
+          );
+        })()}
 
         {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
+          const signalMappingConfigured = isSignalProfileConfigured();
           const setupSteps = [
             {
               step: 1,
@@ -10607,12 +10606,15 @@ export default function Stillform() {
               step: 2,
               label: "Calibration · 2 of 2",
               title: "Signal Profile + Pattern Check",
-              subtitle: "Map body signals, then set a baseline for recurring interpretation patterns.",
+              subtitle: signalMappingConfigured
+                ? "Signal mapping already configured. Continue to Pattern Check baseline."
+                : "Map body signals, then set a baseline for recurring interpretation patterns.",
               body: null,
               cta: null,
               autoLaunch: () => {
+                const firstToolId = signalMappingConfigured ? "bias" : "signals";
                 setScreen("tool");
-                startTool({ ...TOOLS.find(t => t.id === "signals"), setupFlow: "calibration-combined" });
+                startTool({ ...TOOLS.find(t => t.id === firstToolId), setupFlow: "calibration-combined" });
               }
             }
           ];

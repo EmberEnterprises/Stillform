@@ -24,15 +24,18 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Science evidence section title | LOCKED | `Science Evidence` |
 | Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
 | Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Go / No-Go Quick Check — Time to First Value` / `Morning + Daily Tools — Active Execution Layer` / `Run the Full Loop Daily` |
-| Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Begin calibration →` (or `Return to settings` on replay) |
+| Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Continue →` (or `Return to settings` on replay) |
+| Setup bridge title | LOCKED | `Set up your customizations and map your signals` |
+| Setup bridge signal action | LOCKED | `Map signals now` |
+| Setup bridge primary CTA | LOCKED | `Continue to calibration` |
 
 ## Constrained Anchors
 
 | Surface | Status | Current copy |
 |---|---|---|
-| Onboarding subtitle | CONSTRAINED | `A daily composure practice for real life.` |
-| Onboarding description paragraph 1 | CONSTRAINED | `Stillform is a daily composure tool. It helps you regulate your state before reactions escalate and helps you choose deliberate action under pressure.` |
-| Onboarding description paragraph 2 | CONSTRAINED | `The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway.` |
+| Setup bridge visual block title | CONSTRAINED | `Visual customization` |
+| Setup bridge signal block title | CONSTRAINED | `Signal mapping` |
+| Setup bridge signal status labels | CONSTRAINED | `Status: configured` / `Status: not configured` |
 | FAQ method question | CONSTRAINED | `What is the method behind Stillform?` |
 | FAQ science question | CONSTRAINED | `What science basis does Stillform use?` |
 | FAQ method answer | CONSTRAINED | `One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first.` |
@@ -43,15 +46,17 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 1. Tutorial uses multi-page progressive disclosure (not single-page compression).
 2. FAQ in tutorial is guidance text at tutorial end (not a tutorial FAQ CTA button).
 3. First-run flow routes to tutorial before setup.
-4. Setup keeps combined calibration sequencing:
+4. First-run flow is tutorial → setup bridge → setup calibration.
+5. Setup keeps combined calibration sequencing:
    - How You Process
    - Signal Profile + Pattern Check
-5. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
-6. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
-7. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
-8. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
-9. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
-10. Tutorial includes a Go / No-Go TTFV step with an on-page Post-Check Briefing before proceeding.
+6. Calibration step 2 may skip signal mapping when profile is already configured, then proceed directly to Pattern Check.
+7. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
+8. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
+9. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
+10. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
+11. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
+12. Tutorial includes a Go / No-Go TTFV step with an on-page Post-Check Briefing before proceeding.
 
 ## Prohibited Claims
 
