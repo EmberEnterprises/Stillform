@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { runPortableRipgrep } from "./_patternChecks.mjs";
 
 const checks = [
   {
@@ -44,7 +44,7 @@ let failed = false;
 
 for (const check of checks) {
   process.stdout.write(`\n== ${check.label} ==\n`);
-  const res = spawnSync("rg", ["-n", check.pattern, check.path], { stdio: "inherit", shell: false });
+  const res = runPortableRipgrep(["-n", check.pattern, check.path]);
   if (res.status !== 0) {
     failed = true;
     process.stdout.write(`\n✗ ${check.label} failed\n`);
