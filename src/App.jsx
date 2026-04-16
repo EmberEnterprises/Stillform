@@ -8171,7 +8171,25 @@ export default function Stillform() {
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
-  const [homeProgressExpanded, setHomeProgressExpanded] = useState(false);
+  const [homeProgressPinned, setHomeProgressPinned] = useState(() => {
+    try {
+      const modern = localStorage.getItem("stillform_home_progress_pinned_v2");
+      if (modern === "yes" || modern === "no") return modern === "yes";
+      return localStorage.getItem("stillform_home_progress_pinned") === "yes";
+    } catch {
+      return false;
+    }
+  });
+  const [homeProgressExpanded, setHomeProgressExpanded] = useState(() => {
+    try {
+      const pinned = localStorage.getItem("stillform_home_progress_pinned_v2") === "yes"
+        || localStorage.getItem("stillform_home_progress_pinned") === "yes";
+      if (pinned) return true;
+      return localStorage.getItem("stillform_home_progress_expanded") === "yes";
+    } catch {
+      return false;
+    }
+  });
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
@@ -8233,6 +8251,21 @@ export default function Stillform() {
   useEffect(() => {
     try { localStorage.removeItem("stillform_home_progress_pinned"); } catch {}
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("stillform_home_progress_pinned_v2", homeProgressPinned ? "yes" : "no");
+    } catch {}
+    if (homeProgressPinned && !homeProgressExpanded) {
+      setHomeProgressExpanded(true);
+    }
+  }, [homeProgressPinned, homeProgressExpanded]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("stillform_home_progress_expanded", homeProgressExpanded ? "yes" : "no");
+    } catch {}
+  }, [homeProgressExpanded]);
 
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
@@ -11308,6 +11341,7 @@ export default function Stillform() {
                   : regType === "body-first"
                     ? "Start with body downshift, then language."
                     : "Stabilize first, then separate fact from story.";
+                const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
                 return (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)" }}>
@@ -11319,7 +11353,13 @@ export default function Stillform() {
                       </div>
                     </div>
                     <button
-                      onClick={() => setHomeProgressExpanded(prev => !prev)}
+                      onClick={() => {
+                        if (homeProgressPinned) {
+                          setHomeProgressExpanded(true);
+                          return;
+                        }
+                        setHomeProgressExpanded((prev) => !prev);
+                      }}
                       style={{
                         width: "100%",
                         textAlign: "left",
@@ -11336,12 +11376,48 @@ export default function Stillform() {
                       <div>
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
                         <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
+                        {homeProgressPinned && (
+                          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginTop: 6 }}>
+                            Pinned open
+                          </div>
+                        )}
                       </div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1 }}>
-                        {homeProgressExpanded ? "−" : "+"}
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        <button
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            setHomeProgressPinned((current) => {
+                              const next = !current;
+                              if (next) setHomeProgressExpanded(true);
+                              return next;
+                            });
+                          }}
+                          aria-label={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress open"}
+                          title={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress open"}
+                          style={{
+                            border: "0.5px solid var(--amber-dim)",
+                            background: homeProgressPinned ? "var(--amber-glow)" : "transparent",
+                            color: "var(--amber)",
+                            width: 28,
+                            height: 28,
+                            borderRadius: "50%",
+                            cursor: "pointer",
+                            fontSize: 14,
+                            lineHeight: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 0
+                          }}
+                        >
+                          📌
+                        </button>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1, opacity: homeProgressPinned ? 0.45 : 1 }}>
+                          {showHomeProgressDetails ? "−" : "+"}
+                        </div>
                       </div>
                     </button>
-                    {homeProgressExpanded && (
+                    {showHomeProgressDetails && (
                       <div style={{ marginTop: 8, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: 12 }}>
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
