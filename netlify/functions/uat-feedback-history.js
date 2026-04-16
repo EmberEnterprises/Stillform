@@ -1,22 +1,12 @@
-import { listUatFeedbackHistory } from "./_uatFeedbackState.js";
+import { listGlobalUatFeedbackHistory } from "./_uatFeedbackState.js";
 import {
   jsonResponse,
-  parseBearer,
-  getUserFromToken,
   rejectDisallowedOrigin
 } from "./_httpSecurity.js";
 
 const CORS_OPTIONS = { methods: "GET, OPTIONS" };
 
-const sanitizeInstallId = (value) => {
-  if (!value) return null;
-  const next = String(value).trim();
-  if (!next) return null;
-  if (!/^[a-z0-9._:-]+$/i.test(next)) return null;
-  return next.slice(0, 120);
-};
-
-const sanitizeLimit = (value, fallback = 20, max = 50) => {
+const sanitizeLimit = (value, fallback = 30, max = 100) => {
   const n = Number(value);
   if (!Number.isFinite(n)) return fallback;
   return Math.max(1, Math.min(max, Math.floor(n)));
@@ -30,17 +20,8 @@ export async function handler(event) {
   if (originBlocked) return originBlocked;
 
   try {
-    const token = parseBearer(event.headers?.authorization || event.headers?.Authorization || "");
-    const user = await getUserFromToken(token).catch(() => null);
-    const userId = user?.id || null;
-
-    const installId = sanitizeInstallId(event.queryStringParameters?.install_id);
-    const limit = sanitizeLimit(event.queryStringParameters?.limit, 20, 50);
-    if (!userId && !installId) {
-      return jsonResponse(event, 400, { error: "install_id or authenticated user is required" }, CORS_OPTIONS);
-    }
-
-    const rows = await listUatFeedbackHistory({ userId, installId, limit });
+    const limit = sanitizeLimit(event.queryStringParameters?.limit, 30, 100);
+    const rows = await listGlobalUatFeedbackHistory({ limit });
     return jsonResponse(event, 200, {
       ok: true,
       history: rows.map((row) => ({
@@ -49,9 +30,7 @@ export async function handler(event) {
         source_screen: row?.source_screen || "home",
         question_id: row?.question_id || "confusing",
         question_prompt: row?.question_prompt || null,
-        feedback_text: row?.feedback_text || "",
-        install_id: row?.install_id || null,
-        user_id: row?.user_id || null
+        feedback_text: row?.feedback_text || ""
       }))
     }, CORS_OPTIONS);
   } catch (error) {

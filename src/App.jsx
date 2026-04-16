@@ -9021,16 +9021,10 @@ export default function Stillform() {
     if (uatFeedbackHistorySyncing) return;
     setUatFeedbackHistorySyncing(true);
     try {
-      const installId = getOrCreateInstallId();
       const params = new URLSearchParams();
-      if (installId) params.set("install_id", installId);
       params.set("limit", String(UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS));
-      const authToken = sbGetSession()?.access_token;
       const response = await fetch(`/.netlify/functions/uat-feedback-history?${params.toString()}`, {
-        method: "GET",
-        headers: {
-          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
-        }
+        method: "GET"
       });
       if (!response.ok) {
         const failure = await response.json().catch(() => ({}));
@@ -9040,11 +9034,10 @@ export default function Stillform() {
       const cloudEntries = (Array.isArray(data?.history) ? data.history : [])
         .map((entry) => normalizeUatFeedbackHistoryEntry(entry))
         .filter(Boolean);
-      const localEntries = getUatFeedbackHistoryFromStorage();
-      syncUatFeedbackHistoryState([...cloudEntries, ...localEntries]);
+      syncUatFeedbackHistoryState(cloudEntries);
     } catch {
       if (!silent) {
-        setUatFeedbackStatusWithClear("Could not load cloud feedback history right now.");
+        setUatFeedbackStatusWithClear("Could not load shared feedback feed right now.");
       }
       setUatFeedbackHistory(getUatFeedbackHistoryFromStorage());
     } finally {
@@ -9056,7 +9049,7 @@ export default function Stillform() {
     setUatFeedbackHistoryOpen((value) => {
       const next = !value;
       if (next) {
-        setUatFeedbackHistory(getUatFeedbackHistoryFromStorage());
+        setUatFeedbackHistory([]);
         void refreshUatFeedbackHistory({ silent: true });
       }
       return next;
@@ -10650,18 +10643,18 @@ export default function Stillform() {
                         alignItems: "center"
                       }}
                     >
-                      <span>Submitted feedback history</span>
+                      <span>Shared UAT feed (all testers)</span>
                       <span style={{ color: "var(--text-muted)" }}>{uatFeedbackHistoryOpen ? "▾" : "▸"}</span>
                     </button>
                     {uatFeedbackHistoryOpen && (
                       <div style={{ marginTop: 8, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px", maxHeight: 220, overflowY: "auto" }}>
                         {uatFeedbackHistorySyncing && (
                           <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>
-                            Syncing cloud history…
+                            Syncing shared feed…
                           </div>
                         )}
                         {uatFeedbackHistory.length === 0 ? (
-                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No feedback found yet on this install/account.</div>
+                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No shared UAT feedback yet.</div>
                         ) : (
                           uatFeedbackHistory.map((entry) => {
                             const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";

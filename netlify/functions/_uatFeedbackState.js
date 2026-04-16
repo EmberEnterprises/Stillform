@@ -124,3 +124,13 @@ export const listUatFeedbackHistory = async ({
     .sort((a, b) => new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime())
     .slice(0, safeLimit);
 };
+
+export const listGlobalUatFeedbackHistory = async ({
+  limit = 30
+} = {}) => {
+  const safeLimit = sanitizeLimit(limit, 30, 100);
+  const rows = await sbAdminFetch(
+    `/rest/v1/${UAT_FEEDBACK_TABLE}?select=id,created_at,source_screen,question_id,question_prompt,feedback_text,install_id,user_id&order=created_at.desc&limit=${safeLimit}`
+  );
+  return Array.isArray(rows) ? rows.slice(0, safeLimit) : [];
+};
