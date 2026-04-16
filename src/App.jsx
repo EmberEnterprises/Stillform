@@ -9910,10 +9910,10 @@ export default function Stillform() {
                       setScreen("settings");
                       return;
                     }
-                    beginCalibrationFlow();
+                    setScreen("onboarding");
                   }}
                 >
-                  {returnTo === "settings" ? "Return to settings" : "Begin calibration →"}
+                  {returnTo === "settings" ? "Return to settings" : "Continue →"}
                 </button>
               )}
             </section>
