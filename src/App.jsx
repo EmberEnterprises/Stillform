@@ -1649,22 +1649,43 @@ const getPendingNextMoveFollowUpSession = (sessions = getSessionsFromStorage()) 
 };
 
 const saveSessionNextMoveFollowUp = (sessionTimestamp, { didIt, helped } = {}) => {
-  if (!sessionTimestamp || typeof didIt !== "boolean") return null;
+  const didItCompleted = didIt === true;
+  const didItDeferred = didIt === null;
+  const didItRejected = didIt === false;
+  if (!sessionTimestamp || (!didItCompleted && !didItDeferred && !didItRejected)) return null;
   return updateSessionByTimestamp(sessionTimestamp, (session) => {
     const existingNextMove = session?.nextMove;
     if (!existingNextMove || typeof existingNextMove !== "object") return session;
     const stamp = new Date().toISOString();
+    const existingFollowUp = existingNextMove.followUp || {};
+    if (didItDeferred) {
+      return {
+        ...session,
+        nextMove: {
+          ...existingNextMove,
+          followUp: {
+            ...existingFollowUp,
+            status: "pending",
+            dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString(),
+            promptedAt: existingFollowUp.promptedAt || stamp,
+            answeredAt: null,
+            didIt: null,
+            helped: null
+          }
+        }
+      };
+    }
     return {
       ...session,
       nextMove: {
         ...existingNextMove,
         followUp: {
-          ...(existingNextMove.followUp || {}),
+          ...existingFollowUp,
           status: "answered",
-          promptedAt: existingNextMove?.followUp?.promptedAt || stamp,
+          promptedAt: existingFollowUp.promptedAt || stamp,
           answeredAt: stamp,
-          didIt,
-          helped: typeof helped === "boolean" ? helped : null
+          didIt: didItCompleted ? true : false,
+          helped: didItCompleted && typeof helped === "boolean" ? helped : null
         }
       }
     };
@@ -2481,6 +2502,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     setNextMoveTarget(null);
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move");
   };
+  const handleNextMoveSkip = () => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move-skip");
+  };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -2642,6 +2669,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
       <NextMoveStep
         description="Choose one concrete action while this reset is still fresh."
         onConfirm={handleNextMoveConfirm}
+        onSkip={handleNextMoveSkip}
       />
     );
   }
@@ -3140,6 +3168,12 @@ function BodyScanTool({ onComplete }) {
     setNextMoveTarget(null);
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move");
   };
+  const handleNextMoveSkip = () => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move-skip");
+  };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -3389,6 +3423,7 @@ function BodyScanTool({ onComplete }) {
       <NextMoveStep
         description="Choose one concrete action before leaving Body Scan."
         onConfirm={handleNextMoveConfirm}
+        onSkip={handleNextMoveSkip}
       />
     );
   }
@@ -3777,9 +3812,11 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
 
 function NextMoveStep({
   onConfirm,
+  onSkip,
   title = "Next Move",
   description = "Choose one concrete action before you leave this session.",
-  confirmLabel = "Save next move"
+  confirmLabel = "Save next move",
+  skipLabel = "Skip for now"
 }) {
   const [selectedActionId, setSelectedActionId] = useState(null);
   const [customAction, setCustomAction] = useState("");
@@ -3870,6 +3907,15 @@ function NextMoveStep({
         >
           {confirmLabel}
         </button>
+        {typeof onSkip === "function" && (
+          <button
+            className="btn btn-ghost"
+            onClick={onSkip}
+            style={{ width: "100%", marginTop: 8 }}
+          >
+            {skipLabel}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -3886,15 +3932,23 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
     setHelped(null);
   }, [sessionTimestamp]);
 
+  useEffect(() => {
+    if (didIt !== "yes") setHelped(null);
+  }, [didIt]);
+
   if (!sessionTimestamp) return null;
 
-  const submitReady = didIt !== null && helped !== null;
+  const helpedRequired = didIt === "yes";
+  const submitReady = didIt !== null && (!helpedRequired || helped !== null);
   const handleSubmit = () => {
     if (!submitReady || typeof onSubmit !== "function") return;
+    const didItCompleted = didIt === "yes";
     onSubmit({
       sessionTimestamp,
-      didIt: didIt === "yes",
-      helped: helped === "yes" ? true : helped === "no" ? false : null
+      didIt: didItCompleted ? true : null,
+      helped: didItCompleted
+        ? (helped === "yes" ? true : helped === "no" ? false : null)
+        : null
     });
   };
 
@@ -3937,7 +3991,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
       </div>
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did it help?</div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", opacity: helpedRequired ? 1 : 0.5 }}>
           {[
             { id: "yes", label: "Yes" },
             { id: "no", label: "No" },
@@ -3947,7 +4001,10 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setHelped(item.id)}
+                onClick={() => {
+                  if (!helpedRequired) return;
+                  setHelped(item.id);
+                }}
                 style={{
                   background: active ? "var(--amber-glow)" : "transparent",
                   border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
@@ -3955,7 +4012,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
                   padding: "5px 11px",
                   fontSize: 11,
                   color: active ? "var(--amber)" : "var(--text-muted)",
-                  cursor: "pointer",
+                  cursor: helpedRequired ? "pointer" : "not-allowed",
                   fontFamily: "'DM Sans', sans-serif"
                 }}
               >
@@ -3964,6 +4021,11 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
             );
           })}
         </div>
+        {!helpedRequired && (
+          <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+            Optional until you complete the action.
+          </div>
+        )}
       </div>
       <button
         className="btn btn-primary"
@@ -7601,7 +7663,7 @@ function MyProgress({ onBack }) {
             </div>
             <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-                Catching patterns sooner
+                Check-in consistency
               </div>
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {loopCompletion14d}% loop consistency (14d)
@@ -7846,7 +7908,7 @@ function MyProgress({ onBack }) {
             <div style={{ marginBottom: 12 }}>
               <button onClick={() => toggle("proof")} style={rowStyle}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof of change</div>
+                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof snapshot</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
                     {activeDays} active day{activeDays !== 1 ? "s" : ""} · {protocolRuns} protocol run{protocolRuns !== 1 ? "s" : ""}
                   </div>
@@ -8574,6 +8636,27 @@ function QBPill({ onPress }) {
 }
 
 export default function Stillform() {
+  const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
+  const readFirstRunStage = () => {
+    try {
+      const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
+      return raw === "bridge" || raw === "calibration" ? raw : "tutorial";
+    } catch {
+      return "tutorial";
+    }
+  };
+  const setFirstRunStage = (stage) => {
+    try {
+      if (stage === "bridge" || stage === "calibration") {
+        localStorage.setItem(FIRST_RUN_STAGE_KEY, stage);
+      } else {
+        localStorage.removeItem(FIRST_RUN_STAGE_KEY);
+      }
+    } catch {}
+  };
+  const isFirstRunComplete = () => {
+    try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; }
+  };
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
@@ -8586,9 +8669,8 @@ export default function Stillform() {
     return () => clearTimeout(t);
   }, []);
 
-  // Show onboarding once on fresh installs (or after data reset).
-  const hasSeenOnboarding = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  
+  // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
+  // While incomplete, FIRST_RUN_STAGE_KEY keeps cold-start recovery within that sequence.
   // Subscription & trial tracking
   const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
@@ -8667,6 +8749,7 @@ export default function Stillform() {
   });
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
+  const [setupBridgeOrigin, setSetupBridgeOrigin] = useState("home");
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
@@ -8719,12 +8802,7 @@ export default function Stillform() {
 
   useEffect(() => {
     if (screen !== "home") return;
-    const refreshPendingNextMove = () => {
-      setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
-    };
-    refreshPendingNextMove();
-    const timer = setInterval(refreshPendingNextMove, 60000);
-    return () => clearInterval(timer);
+    setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
   }, [screen]);
 
   const handleNextMoveFollowUpSubmit = ({ sessionTimestamp, didIt, helped }) => {
@@ -8734,8 +8812,10 @@ export default function Stillform() {
     try {
       window.plausible("Next Move Follow-Up Saved", {
         props: {
-          did_it: didIt ? "yes" : "no",
-          helped: helped === true ? "yes" : helped === false ? "no" : "not-sure"
+          did_it: didIt === true ? "yes" : didIt === false ? "no" : "not-yet",
+          helped: didIt === true
+            ? (helped === true ? "yes" : helped === false ? "no" : "not-sure")
+            : "not-yet"
         }
       });
     } catch {}
@@ -8804,6 +8884,18 @@ export default function Stillform() {
     if (screen === "home") openUatBoard();
   };
   const resolveTutorialReturnScreen = (target) => (target === "settings" ? "settings" : "home");
+  const resolveSetupBridgeOrigin = (origin) => {
+    if (origin === "tutorial" || origin === "settings" || origin === "home") return origin;
+    return "home";
+  };
+  const openSetupBridge = (origin = "home") => {
+    const resolvedOrigin = resolveSetupBridgeOrigin(origin);
+    setSetupBridgeOrigin(resolvedOrigin);
+    if (!isFirstRunComplete()) {
+      setFirstRunStage("bridge");
+    }
+    setScreen("onboarding");
+  };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(resolveTutorialReturnScreen(backScreen));
@@ -8834,8 +8926,23 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
-        goHomeSafely();
+        setScreen("onboarding");
       }
+      return;
+    }
+    if (screen === "onboarding") {
+      const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
+      if (origin === "settings") {
+        setScreen("settings");
+        return;
+      }
+      if (origin === "tutorial") {
+        setTutorialReturnScreen("home");
+        setTutorialStep(4);
+        setScreen("tutorial");
+        return;
+      }
+      goHomeSafely();
       return;
     }
     if (screen === "faq") {
@@ -8855,14 +8962,14 @@ export default function Stillform() {
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
 
   useEffect(() => {
-    const swipeEnabledScreens = new Set(["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
+    const swipeEnabledScreens = new Set(["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
     if (!swipeEnabledScreens.has(screen)) return;
     let touchStart = null;
     const interactiveTags = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]);
@@ -8908,7 +9015,7 @@ export default function Stillform() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupStep, faqBackScreen, focusCheckReturnScreen]);
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
@@ -9107,13 +9214,29 @@ export default function Stillform() {
             setTutorialStep(0);
             setTutorialReturnScreen("home");
           }
+          if (preview === "onboarding") {
+            setSetupBridgeOrigin("home");
+          }
           setScreen(preview);
           setScreenReady(true);
           return;
         }
       } catch {}
 
-      if (!hasSeenOnboarding) {
+      if (!isFirstRunComplete()) {
+        const firstRunStage = readFirstRunStage();
+        if (firstRunStage === "calibration") {
+          setSetupBridgeOrigin("tutorial");
+          setScreen("setup");
+          setScreenReady(true);
+          return;
+        }
+        if (firstRunStage === "bridge") {
+          setSetupBridgeOrigin("tutorial");
+          setScreen("onboarding");
+          setScreenReady(true);
+          return;
+        }
         setTutorialStep(0);
         setTutorialReturnScreen("home");
         setScreen("tutorial");
@@ -9145,7 +9268,7 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams(window.location.search);
       const share = params.get("share");
-      if (share && hasSeenOnboarding) {
+      if (share && isFirstRunComplete()) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
@@ -9159,7 +9282,7 @@ export default function Stillform() {
             try {
               const url = new URL(data.url);
               const s = url.searchParams.get("share");
-              if (s && hasSeenOnboarding) {
+              if (s && isFirstRunComplete()) {
                 setSharedText(decodeURIComponent(s));
                 setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
                 setScreen("tool");
@@ -10098,8 +10221,15 @@ export default function Stillform() {
     }
   };
 
-  const beginCalibrationFlow = () => {
+  const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
     // Route to calibration assessment, not home
+    if (bridgeOrigin !== null) {
+      const resolvedOrigin = resolveSetupBridgeOrigin(bridgeOrigin);
+      setSetupBridgeOrigin(resolvedOrigin);
+      if (!isFirstRunComplete()) {
+        setFirstRunStage("calibration");
+      }
+    }
     setupAutoLaunchStepRef.current = null;
     setSetupStep(0);
     setAssessmentAnswers([]);
@@ -10108,6 +10238,7 @@ export default function Stillform() {
 
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    setFirstRunStage(null);
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
   };
@@ -10449,7 +10580,7 @@ export default function Stillform() {
                       setScreen("settings");
                       return;
                     }
-                    setScreen("onboarding");
+                    openSetupBridge("tutorial");
                   }}
                 >
                   {returnTo === "settings" ? "Return to settings" : "Continue →"}
@@ -10568,7 +10699,7 @@ export default function Stillform() {
               <button
                 className="btn btn-primary"
                 style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                onClick={() => beginCalibrationFlow()}
+                onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
               >
                 Continue to calibration
               </button>
@@ -10650,7 +10781,7 @@ export default function Stillform() {
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => { if (setupStep > 0) { setSetupStep(s => s - 1); } else { goHomeSafely(); } }}>← Back</button>
+              <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
 
               {/* System calibration header */}
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
@@ -10864,7 +10995,7 @@ export default function Stillform() {
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                   Let's calibrate your system first.
                 </div>
-                <button onClick={() => beginCalibrationFlow()} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
+                <button onClick={() => openSetupBridge("home")} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
                   Begin Calibration →
                 </button>
               </section>
@@ -13488,14 +13619,14 @@ export default function Stillform() {
               {settingsSectionOpen.customization && (
               <>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Set colors and motion here anytime, or replay onboarding for a full visual comfort walkthrough.
+                Set colors and motion here anytime, or replay the setup bridge for a full visual comfort walkthrough.
               </div>
-              <button onClick={() => setScreen("onboarding")} style={{
+              <button onClick={() => openSetupBridge("settings")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "12px 16px", marginBottom: 10, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
               }}>
-                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay onboarding visual comfort →</div>
+                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge visual comfort →</div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
               </button>
 
@@ -13788,6 +13919,7 @@ export default function Stillform() {
                       localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
                       localStorage.removeItem("stillform_onboarded");
+                      localStorage.removeItem(FIRST_RUN_STAGE_KEY);
                       localStorage.removeItem("stillform_sb_session");
                       localStorage.removeItem("stillform_app_version");
                       localStorage.removeItem("stillform_install_id");
@@ -13852,7 +13984,7 @@ export default function Stillform() {
                     localStorage.removeItem("stillform_bio_filter");
                   } catch {}
                   setRegType(null);
-                  beginCalibrationFlow();
+                  beginCalibrationFlow({ bridgeOrigin: "settings" });
                 }} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
