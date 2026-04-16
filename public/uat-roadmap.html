@@ -264,8 +264,8 @@
       </div>
       <div class="kicker">Stillform · UAT Status</div>
       <h1>Stillform UAT Status Board</h1>
-      <p class="sub">Execution only: quick links for what is live, what is in progress, and what is queued for launch.</p>
-      <p class="updated">Updated: Apr 15, 2026</p>
+      <p class="sub">Execution only: quick links for what is live, what is in progress, and what is queued for launch. Status is updated during implementation and revalidated before every push to main.</p>
+      <p class="updated">Updated: Apr 16, 2026</p>
       <nav class="jump-links" aria-label="UAT status quick links">
         <a href="#live">What is live</a>
         <a href="#planned">Launch planning</a>
@@ -318,29 +318,25 @@
 
       <section class="block" id="planned">
         <div class="block-head">
-          <h2>Planning / Pre-Launch Work</h2>
+          <h2>Active Follow-Ups</h2>
           <span class="badge progress">In progress</span>
         </div>
         <div class="in-progress-grid">
           <article class="work-card">
-            <h3>Home-only UAT visibility cleanup</h3>
-            <p>Keep UAT entry point on home only, remove duplicate Settings entry, and keep banner prominence where testers actually look first.</p>
-          </article>
-          <article class="work-card">
-            <h3>Plain-language UAT question intake</h3>
-            <p>Add direct question capture under My Progress so testers can submit friction in plain language without leaving the app.</p>
-          </article>
-          <article class="work-card">
-            <h3>Go/No-Go clarity pass</h3>
-            <p>Add clear copy under the home Go/No-Go entry explaining what it measures and when to run it.</p>
-          </article>
-          <article class="work-card">
-            <h3>UAT board currency discipline</h3>
-            <p>Refresh board wording/status to reflect current SHIP execution state so testers are not reading stale issue lists.</p>
+            <h3>Perception vs. accuracy model layer</h3>
+            <p>Add a dedicated pass for statement timing/disclosure calibration, external perception prediction, and recovery-debt telemetry.</p>
           </article>
           <article class="work-card">
             <h3>Executive coaching framework parity review</h3>
             <p>Decision deferred: map what is already covered vs. missing across Ladder of Inference, ITC, Feed-Forward, SCARF, and executive presence controls.</p>
+          </article>
+          <article class="work-card">
+            <h3>Post-deploy manual verification loop</h3>
+            <p>Run final device sanity checks after each release and confirm UAT board timestamps and issue statuses stay current.</p>
+          </article>
+          <article class="work-card">
+            <h3>UAT board discipline lock</h3>
+            <p>Operational rule: update this board as changes land and re-check status before every publish to main.</p>
           </article>
         </div>
       </section>
@@ -348,7 +344,7 @@
       <section class="block" id="issues">
         <div class="block-head">
           <h2>Current UAT Issue List</h2>
-          <span class="badge progress">In progress</span>
+          <span class="badge done">Most closed</span>
         </div>
         <table class="table">
           <thead>
@@ -361,58 +357,68 @@
           <tbody>
             <tr>
               <td data-label="Issue">Home UAT appears in two places</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Keep UAT access on home only and remove duplicate Settings card.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">UAT entry now routes from home only.</td>
             </tr>
             <tr>
               <td data-label="Issue">UAT banner did not visibly flash</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Apply clear flash behavior on home UAT banner while honoring reduced-motion preference.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Flash behavior is active with reduced-motion-safe fallback.</td>
             </tr>
             <tr>
               <td data-label="Issue">No plain-language UAT question intake below My Progress</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Add in-app UAT question capture with plain prompts and draft-safe behavior.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Question capture is live with draft-safe submission behavior.</td>
             </tr>
             <tr>
               <td data-label="Issue">Go/No-Go purpose unclear on home</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Add one-line plain-language description under Go/No-Go home entry.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Home copy now includes explicit Go/No-Go purpose guidance.</td>
             </tr>
             <tr>
               <td data-label="Issue">Home UAT banner formatting not matching SHIP request</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Format home banner as left UAT label + centered updated date + launch ETA line, with clean arrow CTA.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Banner layout now follows SHIP format (label/date/ETA/CTA).</td>
             </tr>
             <tr>
               <td data-label="Issue">UAT feedback needs separate home banner</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Separate UAT status and UAT feedback into two distinct home banners for clarity.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Status and feedback are separated for clarity on home.</td>
             </tr>
             <tr>
               <td data-label="Issue">Go/No-Go purpose clarity needed inside tool</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Place explicit purpose explanation directly under the Go/No-Go tool header.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Purpose explanation is now under the tool header.</td>
             </tr>
             <tr>
               <td data-label="Issue">Quick Breathe interaction feels unreliable</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Stabilize tap-vs-drag behavior so it does not misfire or reposition unexpectedly.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Tap/drag behavior was stabilized to prevent accidental repositioning.</td>
             </tr>
             <tr>
               <td data-label="Issue">Reframe external anchor flow is unclear</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Simplify post-session anchor to a cleaner, single-field action.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Post-session State-to-Statement flow simplified and clarified.</td>
             </tr>
             <tr>
               <td data-label="Issue">Delete-all leaves residual AI observations</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Ensure local wipe clears every stillform_* key and performs cloud-data delete before sign-out.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Delete-all now clears local keys and performs cloud-data deletion before sign-out.</td>
             </tr>
             <tr>
               <td data-label="Issue">Screenshot structural liability clarity</td>
-              <td data-label="Status">In progress</td>
-              <td data-label="Implementation focus">Add explicit screenshot-analysis boundary language in Privacy + FAQ.</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Privacy + FAQ now include screenshot-analysis boundary language.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">UAT feedback history disappears after local/account reset</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">Home history now merges local entries with cloud-backed Supabase history.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">Privacy/security baseline hardening</td>
+              <td data-label="Status">Completed (live)</td>
+              <td data-label="Implementation focus">RLS/grants hardening, CORS tightening, email minimization, and CI security gate shipped.</td>
             </tr>
             <tr>
               <td data-label="Issue">Perception vs accuracy delta is not explicitly modeled</td>

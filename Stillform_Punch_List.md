@@ -75,12 +75,12 @@
 - [x] Privacy/runtime alignment fixed: public privacy page matches runtime provider usage (OpenAI GPT-4o)
 
 ### Medium priority — reliability and delivery safety
-- [ ] UAT fallback complexity documented with explicit operational visibility + retrieval checks
+- [x] UAT fallback complexity documented with explicit operational visibility + retrieval checks (`docs/SECURITY_HARDENING_RUNBOOK.md` + cloud history retrieval endpoint)
 - [ ] Begin App.jsx modularization phase 1 (home/UAT surfaces, Reframe UI/state, settings/data-management)
 - [ ] Confirm modularization goal met: reduced regression blast radius for high-churn zones
 
 ### Near-term (this week)
-- [ ] Add CI gate that runs build + `ship:preflight` + `smoke:core-loop` on PR/push
+- [x] Add CI gate that runs build + `ship:preflight` + `smoke:core-loop` on PR/push (`.github/workflows/security-gate.yml` + `security:smoke`)
 
 ### Low / watchlist
 - [ ] Track dependency freshness debt and schedule upgrade cadence
