@@ -1,6 +1,9 @@
+import { createHash } from "node:crypto";
+
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 export const SUBSCRIPTION_TABLE = "stillform_subscription_state";
+const HASH_PEPPER = process.env.SUBSCRIPTION_EMAIL_HASH_PEPPER || "";
 
 export const sbAdminFetch = async (path, opts = {}) => {
   if (!SUPABASE_SERVICE_ROLE_KEY) throw new Error("SUPABASE_SERVICE_ROLE_KEY is missing");
@@ -30,6 +33,23 @@ const toIso = (value) => {
 };
 
 const nowIso = () => new Date().toISOString();
+
+const normalizeEmail = (value) => {
+  if (!value) return null;
+  const next = String(value).trim().toLowerCase();
+  if (!next || !next.includes("@")) return null;
+  return next.slice(0, 320);
+};
+
+const sha256 = async (text) =>
+  createHash("sha256").update(String(text || "")).digest("hex");
+
+const hashEmail = async (email) => {
+  const normalized = normalizeEmail(email);
+  if (!normalized) return null;
+  const material = HASH_PEPPER ? `${normalized}|${HASH_PEPPER}` : normalized;
+  return sha256(material);
+};
 
 const computeIsSubscribed = ({ status, lemonStatus, endsAt, eventName }) => {
   const normalizedEvent = String(eventName || "").toLowerCase();
@@ -68,6 +88,20 @@ const writeIdentityRow = async (identityKey, base) => {
   return Array.isArray(rows) && rows.length ? rows[0] : null;
 };
 
+const stripLegacyEmail = async (identityKeys = []) => {
+  const uniqueKeys = [...new Set(identityKeys.filter(Boolean))];
+  if (!uniqueKeys.length) return;
+  const encoded = uniqueKeys.map((key) => `"${String(key).replace(/"/g, '\\"')}"`).join(",");
+  await sbAdminFetch(
+    `/rest/v1/${SUBSCRIPTION_TABLE}?identity_key=in.(${encoded})`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ user_email: null })
+    }
+  ).catch(() => null);
+};
+
 export const upsertSubscriptionStatus = async ({
   userId = null,
   installId = null,
@@ -88,6 +122,8 @@ export const upsertSubscriptionStatus = async ({
   const isSubscribed = computeIsSubscribed({ status: effectiveStatus, lemonStatus, endsAt, eventName });
   const updatedAt = nowIso();
   const statusExpiresAt = buildStatusExpiresAt({ status: effectiveStatus, endsAt });
+  const normalizedEmail = normalizeEmail(userEmail);
+  const userEmailHash = await hashEmail(normalizedEmail);
 
   const identityKeys = [
     identityKeyFrom("user", userId),
@@ -103,7 +139,8 @@ export const upsertSubscriptionStatus = async ({
     install_id: installId || null,
     lemon_customer_id: lemonCustomerId || null,
     lemon_subscription_id: lemonSubscriptionId || null,
-    user_email: userEmail || null,
+    user_email: null,
+    user_email_hash: userEmailHash,
     plan_variant: variantName || null,
     product_name: productName || null,
     status: effectiveStatus,
@@ -123,13 +160,14 @@ export const upsertSubscriptionStatus = async ({
     const row = await writeIdentityRow(key, base);
     if (row) writes.push(row);
   }
+  await stripLegacyEmail(identityKeys);
   return writes;
 };
 
 const readStateByIdentity = async (identityKey) => {
   if (!identityKey) return null;
   const rows = await sbAdminFetch(
-    `/rest/v1/${SUBSCRIPTION_TABLE}?identity_key=eq.${encodeURIComponent(identityKey)}&select=identity_key,user_id,install_id,lemon_customer_id,lemon_subscription_id,user_email,plan_variant,product_name,status,lemon_status,is_subscribed,status_expires_at,trial_ends_at,renews_at,ends_at,updated_at&limit=1`
+    `/rest/v1/${SUBSCRIPTION_TABLE}?identity_key=eq.${encodeURIComponent(identityKey)}&select=identity_key,user_id,install_id,lemon_customer_id,lemon_subscription_id,user_email_hash,plan_variant,product_name,status,lemon_status,is_subscribed,status_expires_at,trial_ends_at,renews_at,ends_at,updated_at&limit=1`
   );
   return Array.isArray(rows) && rows.length ? rows[0] : null;
 };

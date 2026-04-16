@@ -8,6 +8,7 @@ create table if not exists public.stillform_subscription_state (
   lemon_customer_id text null,
   lemon_subscription_id text null,
   user_email text null,
+  user_email_hash text null,
   plan_variant text null,
   product_name text null,
   status text null,
@@ -29,6 +30,9 @@ create index if not exists idx_stillform_subscription_state_install_id
 
 create index if not exists idx_stillform_subscription_state_lemon_subscription_id
   on public.stillform_subscription_state (lemon_subscription_id);
+
+create index if not exists idx_stillform_subscription_state_user_email_hash
+  on public.stillform_subscription_state (user_email_hash);
 
 create index if not exists idx_stillform_subscription_state_updated_at
   on public.stillform_subscription_state (updated_at desc);

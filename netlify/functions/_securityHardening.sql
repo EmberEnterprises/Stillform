@@ -19,6 +19,13 @@ alter table if exists public.stillform_metrics_daily force row level security;
 alter table if exists public.stillform_subscription_state enable row level security;
 alter table if exists public.stillform_subscription_state force row level security;
 
+alter table if exists public.stillform_subscription_state
+  add column if not exists user_email_hash text null;
+
+update public.stillform_subscription_state
+set user_email = null
+where user_email is not null;
+
 revoke all on table public.stillform_uat_feedback from public, anon, authenticated;
 revoke all on table public.stillform_metrics_daily from public, anon, authenticated;
 revoke all on table public.stillform_subscription_state from public, anon, authenticated;
