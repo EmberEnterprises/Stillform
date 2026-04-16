@@ -1347,6 +1347,18 @@ const COMMUNICATION_EVENTS_MAX_ITEMS = 240;
 const COMMUNICATION_EVENT_SCHEMA_VERSION = 2;
 const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
 const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
+const NEXT_MOVE_FOLLOW_UP_DELAY_MS = 1000 * 60 * 60 * 2;
+const NEXT_MOVE_ACTION_OPTIONS = [
+  { id: "send-message", label: "Send message" },
+  { id: "ask-clarifying-question", label: "Ask clarifying question" },
+  { id: "hold-boundary", label: "Hold boundary" },
+  { id: "delay-response", label: "Delay response" },
+  { id: "custom", label: "Custom action" }
+];
+const NEXT_MOVE_ACTION_LABELS = NEXT_MOVE_ACTION_OPTIONS.reduce((acc, item) => {
+  acc[item.id] = item.label;
+  return acc;
+}, {});
 const TOOL_DEBRIEF_STORAGE_KEY = "stillform_tool_debriefs";
 const TOOL_DEBRIEF_MAX_ITEMS = 320;
 const UAT_TRIAL_FREEZE_UNTIL_ISO = "2026-05-10T23:59:59";
@@ -1558,6 +1570,105 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   const bounded = events.slice(-maxItems);
   try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
   return bounded.length;
+};
+
+const updateSessionByTimestamp = (sessionTimestamp, updater) => {
+  if (!sessionTimestamp || typeof updater !== "function") return null;
+  const sessions = getSessionsFromStorage();
+  const index = sessions.findIndex((session) => session?.timestamp === sessionTimestamp);
+  if (index < 0) return null;
+  const current = sessions[index];
+  const updated = updater(current);
+  if (!updated || typeof updated !== "object") return null;
+  sessions[index] = updated;
+  setSessionsInStorage(sessions);
+  return updated;
+};
+
+const saveSessionNextMove = (sessionTimestamp, nextMove) => {
+  if (!sessionTimestamp || !nextMove || typeof nextMove !== "object") return null;
+  return updateSessionByTimestamp(sessionTimestamp, (session) => {
+    const actionId = String(nextMove.actionId || "").trim();
+    if (!actionId) return session;
+    const customText = String(nextMove.customText || "").trim().slice(0, 180);
+    const fallbackLabel = NEXT_MOVE_ACTION_LABELS[actionId] || "Custom action";
+    const label = String(nextMove.label || (actionId === "custom" ? customText : fallbackLabel)).trim() || fallbackLabel;
+    const createdAt = String(nextMove.createdAt || new Date().toISOString());
+    const dueAt = String(nextMove?.followUp?.dueAt || new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString());
+    return {
+      ...session,
+      nextMove: {
+        id: String(nextMove.id || `nextmove_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`),
+        actionId,
+        label,
+        customText: actionId === "custom" ? customText : null,
+        createdAt,
+        followUp: {
+          status: "pending",
+          dueAt,
+          promptedAt: null,
+          answeredAt: null,
+          didIt: null,
+          helped: null
+        }
+      }
+    };
+  });
+};
+
+const getNextMoveLabel = (nextMove) => {
+  if (!nextMove || typeof nextMove !== "object") return "";
+  const customText = String(nextMove.customText || "").trim();
+  if (nextMove.actionId === "custom" && customText) return customText;
+  const fallback = NEXT_MOVE_ACTION_LABELS[String(nextMove.actionId || "").trim()] || "";
+  return String(nextMove.label || fallback).trim();
+};
+
+const getPendingNextMoveFollowUpSession = (sessions = getSessionsFromStorage()) => {
+  const list = Array.isArray(sessions) ? sessions : [];
+  const now = Date.now();
+  for (let i = list.length - 1; i >= 0; i -= 1) {
+    const session = list[i];
+    if (!session || typeof session !== "object") continue;
+    const nextMove = session?.nextMove;
+    if (!nextMove || typeof nextMove !== "object") continue;
+    const followUp = nextMove?.followUp || {};
+    if (followUp?.status && followUp.status !== "pending") continue;
+    const dueAtMs = new Date(followUp?.dueAt || 0).getTime();
+    const dueAt = Number.isFinite(dueAtMs) ? dueAtMs : 0;
+    if (dueAt > now) continue;
+    const tools = Array.isArray(session?.tools) ? session.tools : [];
+    const includesSupportedTool = tools.some((toolId) => {
+      const normalized = normalizeSessionToolId(toolId);
+      return normalized === "reframe" || normalized === "breathe" || normalized === "scan";
+    });
+    if (!includesSupportedTool) continue;
+    return session;
+  }
+  return null;
+};
+
+const saveSessionNextMoveFollowUp = (sessionTimestamp, { didIt, helped } = {}) => {
+  if (!sessionTimestamp || typeof didIt !== "boolean") return null;
+  return updateSessionByTimestamp(sessionTimestamp, (session) => {
+    const existingNextMove = session?.nextMove;
+    if (!existingNextMove || typeof existingNextMove !== "object") return session;
+    const stamp = new Date().toISOString();
+    return {
+      ...session,
+      nextMove: {
+        ...existingNextMove,
+        followUp: {
+          ...(existingNextMove.followUp || {}),
+          status: "answered",
+          promptedAt: existingNextMove?.followUp?.promptedAt || stamp,
+          answeredAt: stamp,
+          didIt,
+          helped: typeof helped === "boolean" ? helped : null
+        }
+      }
+    };
+  });
 };
 
 const getToolDebriefsFromStorage = () => {
@@ -2317,6 +2428,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const [bioFilter, setBioFilter] = useState(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
+  const [nextMoveTarget, setNextMoveTarget] = useState(null);
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
@@ -2328,6 +2440,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
+  const latestSessionTimestampRef = useRef(null);
   const formatTime = (ms) => {
     const totalSec = Math.round(ms / 1000);
     const min = Math.floor(totalSec / 60);
@@ -2336,10 +2449,11 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   };
   const saveSession = (tools, exitPoint) => {
     const elapsed = Date.now() - startTime.current;
+    const timestamp = new Date().toISOString();
     try {
       const ctx = contextEntryRef.current || {};
       appendSessionToStorage({
-        timestamp: new Date().toISOString(),
+        timestamp,
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
         tools,
@@ -2349,11 +2463,23 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
         entryProtocolId: ctx.entryProtocolId || null
       });
     } catch {}
-    return elapsed;
+    return { elapsed, timestamp };
   };
   const getSessionCount = () => getSessionCountFromStorage();
-  const queueDebriefAndComplete = (redirectTo = null, source = "breathe-ground") => {
+  const queueDebriefAndCompleteNow = (redirectTo = null, source = "breathe-ground") => {
     setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const queueDebriefAndComplete = (redirectTo = null, source = "breathe-ground") => {
+    setNextMoveTarget({ redirectTo: redirectTo || null, source });
+  };
+  const handleNextMoveConfirm = (nextMove) => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    if (latestSessionTimestampRef.current) {
+      saveSessionNextMove(latestSessionTimestampRef.current, nextMove);
+    }
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move");
   };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
@@ -2511,6 +2637,14 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const groundSavedRef = useRef(false);
   const groundElapsedRef = useRef(0);
   const groundAutoRef = useRef(false);
+  if (nextMoveTarget) {
+    return (
+      <NextMoveStep
+        description="Choose one concrete action while this reset is still fresh."
+        onConfirm={handleNextMoveConfirm}
+      />
+    );
+  }
   if (debriefTarget) {
     return (
       <ToolDebriefGate
@@ -2523,7 +2657,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   if (groundDone) {
     if (!groundSavedRef.current) {
       groundSavedRef.current = true;
-      groundElapsedRef.current = saveSession(["breathe", "ground"], "grounding-complete");
+      const saved = saveSession(["breathe", "ground"], "grounding-complete");
+      groundElapsedRef.current = saved?.elapsed || 0;
+      latestSessionTimestampRef.current = saved?.timestamp || null;
     }
     if (!groundAutoRef.current) {
       groundAutoRef.current = true;
@@ -2845,7 +2981,11 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
             }}>
               Keep going
             </button>
-            <button className="btn btn-ghost" onClick={() => { saveSession(["breathe"], "breathing-only"); setPhase("post-rate"); }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
+            <button className="btn btn-ghost" onClick={() => {
+              const saved = saveSession(["breathe"], "breathing-only");
+              latestSessionTimestampRef.current = saved?.timestamp || null;
+              setPhase("post-rate");
+            }} style={{ color: "var(--text-dim)", fontSize: 13 }}>
               Stop here
             </button>
           </div>
@@ -2947,8 +3087,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
 function BodyScanTool({ onComplete }) {
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
+  const latestSessionTimestampRef = useRef(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
+  const [nextMoveTarget, setNextMoveTarget] = useState(null);
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
@@ -2965,10 +3107,11 @@ function BodyScanTool({ onComplete }) {
   };
   const saveSession = () => {
     const elapsed = Date.now() - startTime.current;
+    const timestamp = new Date().toISOString();
     try {
       const ctx = contextEntryRef.current || {};
       appendSessionToStorage({
-        timestamp: new Date().toISOString(),
+        timestamp,
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
         tools: ["body-scan"],
@@ -2979,11 +3122,23 @@ function BodyScanTool({ onComplete }) {
       });
       try { window.plausible("Body Scan Completed"); } catch {}
     } catch {}
-    return elapsed;
+    return { elapsed, timestamp };
   };
   const getSessionCount = () => getSessionCountFromStorage();
-  const queueDebriefAndComplete = (redirectTo = null, source = "body-scan") => {
+  const queueDebriefAndCompleteNow = (redirectTo = null, source = "body-scan") => {
     setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const queueDebriefAndComplete = (redirectTo = null, source = "body-scan") => {
+    setNextMoveTarget({ redirectTo: redirectTo || null, source });
+  };
+  const handleNextMoveConfirm = (nextMove) => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    if (latestSessionTimestampRef.current) {
+      saveSessionNextMove(latestSessionTimestampRef.current, nextMove);
+    }
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move");
   };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
@@ -3229,6 +3384,14 @@ function BodyScanTool({ onComplete }) {
   const scanSavedRef = useRef(false);
   const scanElapsedRef = useRef(0);
   const scanAutoRef = useRef(false);
+  if (nextMoveTarget) {
+    return (
+      <NextMoveStep
+        description="Choose one concrete action before leaving Body Scan."
+        onConfirm={handleNextMoveConfirm}
+      />
+    );
+  }
   if (debriefTarget) {
     return (
       <ToolDebriefGate
@@ -3239,7 +3402,12 @@ function BodyScanTool({ onComplete }) {
     );
   }
   if (done) {
-    if (!scanSavedRef.current) { scanSavedRef.current = true; scanElapsedRef.current = saveSession(); }
+    if (!scanSavedRef.current) {
+      scanSavedRef.current = true;
+      const saved = saveSession();
+      scanElapsedRef.current = saved?.elapsed || 0;
+      latestSessionTimestampRef.current = saved?.timestamp || null;
+    }
     if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => queueDebriefAndComplete("reframe-calm", "scan-complete-auto"), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
@@ -3603,6 +3771,208 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function NextMoveStep({
+  onConfirm,
+  title = "Next Move",
+  description = "Choose one concrete action before you leave this session.",
+  confirmLabel = "Save next move"
+}) {
+  const [selectedActionId, setSelectedActionId] = useState(null);
+  const [customAction, setCustomAction] = useState("");
+  const selectedAction = NEXT_MOVE_ACTION_OPTIONS.find((item) => item.id === selectedActionId) || null;
+  const cleanedCustomAction = String(customAction || "").trim().slice(0, 180);
+  const ready = !!selectedActionId && (selectedActionId !== "custom" || cleanedCustomAction.length > 0);
+
+  const handleConfirm = () => {
+    if (!ready || typeof onConfirm !== "function") return;
+    const label = selectedActionId === "custom"
+      ? cleanedCustomAction
+      : (selectedAction?.label || NEXT_MOVE_ACTION_LABELS[selectedActionId] || "Next move");
+    onConfirm({
+      id: `nextmove_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      actionId: selectedActionId,
+      label,
+      customText: selectedActionId === "custom" ? cleanedCustomAction : null,
+      createdAt: new Date().toISOString(),
+      followUp: {
+        dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString()
+      }
+    });
+  };
+
+  return (
+    <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
+      <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "18px 16px" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+          {title}
+        </div>
+        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+          {description}
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+          {NEXT_MOVE_ACTION_OPTIONS.map((item) => {
+            const active = selectedActionId === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setSelectedActionId(item.id)}
+                style={{
+                  background: active ? "var(--amber-glow)" : "var(--surface2)",
+                  border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 999,
+                  padding: "7px 12px",
+                  color: active ? "var(--amber)" : "var(--text-dim)",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+        {selectedActionId === "custom" && (
+          <div style={{ marginBottom: 14 }}>
+            <textarea
+              value={customAction}
+              onChange={(event) => setCustomAction(String(event.target.value || "").slice(0, 180))}
+              placeholder="Name one specific action you will take."
+              rows={3}
+              style={{
+                width: "100%",
+                background: "var(--surface2)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "10px 12px",
+                color: "var(--text)",
+                fontSize: 12,
+                lineHeight: 1.5,
+                fontFamily: "'DM Sans', sans-serif",
+                resize: "vertical",
+                outline: "none"
+              }}
+            />
+            <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)", textAlign: "right" }}>
+              {Math.max(0, 180 - String(customAction || "").length)} characters left
+            </div>
+          </div>
+        )}
+        <button
+          className="btn btn-primary"
+          disabled={!ready}
+          onClick={handleConfirm}
+          style={{ width: "100%", opacity: ready ? 1 : 0.45, cursor: ready ? "pointer" : "not-allowed" }}
+        >
+          {confirmLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function NextMoveFollowUpCard({ session, onSubmit }) {
+  const [didIt, setDidIt] = useState(null);
+  const [helped, setHelped] = useState(null);
+  const sessionTimestamp = String(session?.timestamp || "");
+  const nextMoveLabel = getNextMoveLabel(session?.nextMove) || "that next move";
+
+  useEffect(() => {
+    setDidIt(null);
+    setHelped(null);
+  }, [sessionTimestamp]);
+
+  if (!sessionTimestamp) return null;
+
+  const submitReady = didIt !== null && helped !== null;
+  const handleSubmit = () => {
+    if (!submitReady || typeof onSubmit !== "function") return;
+    onSubmit({
+      sessionTimestamp,
+      didIt: didIt === "yes",
+      helped: helped === "yes" ? true : helped === "no" ? false : null
+    });
+  };
+
+  return (
+    <div style={{ marginBottom: 16, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
+      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+        Next Move follow-up
+      </div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+        You chose: <span style={{ color: "var(--text)" }}>{nextMoveLabel}</span>
+      </div>
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did you do it?</div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[
+            { id: "yes", label: "Yes" },
+            { id: "not-yet", label: "Not yet" }
+          ].map((item) => {
+            const active = didIt === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setDidIt(item.id)}
+                style={{
+                  background: active ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 999,
+                  padding: "5px 11px",
+                  fontSize: 11,
+                  color: active ? "var(--amber)" : "var(--text-muted)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did it help?</div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {[
+            { id: "yes", label: "Yes" },
+            { id: "no", label: "No" },
+            { id: "not-sure", label: "Not sure yet" }
+          ].map((item) => {
+            const active = helped === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setHelped(item.id)}
+                style={{
+                  background: active ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 999,
+                  padding: "5px 11px",
+                  fontSize: 11,
+                  color: active ? "var(--amber)" : "var(--text-muted)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      <button
+        className="btn btn-primary"
+        disabled={!submitReady}
+        onClick={handleSubmit}
+        style={{ width: "100%", opacity: submitReady ? 1 : 0.45, cursor: submitReady ? "pointer" : "not-allowed" }}
+      >
+        Save follow-up
+      </button>
     </div>
   );
 }
@@ -3979,9 +4349,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const communicationOpportunityLoggedRef = useRef(false);
   const communicationExpandedRef = useRef(false);
   const stateToStatementSessionIdRef = useRef(null);
+  const latestSessionTimestampRef = useRef(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [debriefTarget, setDebriefTarget] = useState(null);
+  const [nextMoveTarget, setNextMoveTarget] = useState(null);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override
     try {
@@ -4106,9 +4478,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const saveSession = (postRating = null) => {
     const elapsed = Date.now() - startTime.current;
+    const timestamp = new Date().toISOString();
     const fmt = (ms) => { const s = Math.round(ms / 1000); const m = Math.floor(s / 60); return m > 0 ? `${m}m ${s % 60}s` : `${s % 60}s`; };
     try {
-      const entry = { timestamp: new Date().toISOString(), duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, entryProtocolId: entryProtocolId || null, preRating: scoreState(feelState), preState: feelState || null };
+      const entry = { timestamp, duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, entryProtocolId: entryProtocolId || null, preRating: scoreState(feelState), preState: feelState || null };
       if (postRating) { entry.postRating = scoreState(postRating); entry.postState = postRating; }
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
       appendSessionToStorage(entry);
@@ -4143,6 +4516,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }
       }).catch(() => {});
     }
+    return { elapsed, timestamp };
   };
 
   const [messages, setMessages] = useState([]);
@@ -4793,8 +5167,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     communicationDraftLoggedRef.current = true;
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
-  const queueDebriefAndComplete = (redirectTo = null, source = "reframe") => {
+  const queueDebriefAndCompleteNow = (redirectTo = null, source = "reframe") => {
     setDebriefTarget({ redirectTo: redirectTo || null, source });
+  };
+  const queueDebriefAndComplete = (redirectTo = null, source = "reframe") => {
+    setNextMoveTarget({ redirectTo: redirectTo || null, source });
+  };
+  const handleNextMoveConfirm = (nextMove) => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    if (latestSessionTimestampRef.current) {
+      saveSessionNextMove(latestSessionTimestampRef.current, nextMove);
+    }
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "reframe-next-move");
   };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
@@ -4813,11 +5199,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     onComplete(nextRoute);
   };
   const finishReframeSession = ({ postState = null } = {}) => {
-    saveSession(postState);
+    const saved = saveSession(postState);
+    latestSessionTimestampRef.current = saved?.timestamp || null;
     const pre = scoreState(feelState);
     const post = scoreState(postState);
     setSessionShareSummary({
-      timestamp: new Date().toISOString(),
+      timestamp: saved?.timestamp || new Date().toISOString(),
       preState: feelState || null,
       postState: postState || null,
       delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
@@ -4946,6 +5333,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
 
+  if (nextMoveTarget) {
+    return (
+      <NextMoveStep
+        description="Choose one concrete action to carry this reframe into real life."
+        onConfirm={handleNextMoveConfirm}
+      />
+    );
+  }
   if (debriefTarget) {
     return (
       <ToolDebriefGate
@@ -8216,6 +8611,31 @@ export default function Stillform() {
     }
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+  const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
+
+  useEffect(() => {
+    if (screen !== "home") return;
+    const refreshPendingNextMove = () => {
+      setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
+    };
+    refreshPendingNextMove();
+    const timer = setInterval(refreshPendingNextMove, 60000);
+    return () => clearInterval(timer);
+  }, [screen]);
+
+  const handleNextMoveFollowUpSubmit = ({ sessionTimestamp, didIt, helped }) => {
+    const updated = saveSessionNextMoveFollowUp(sessionTimestamp, { didIt, helped });
+    if (!updated) return;
+    setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
+    try {
+      window.plausible("Next Move Follow-Up Saved", {
+        props: {
+          did_it: didIt ? "yes" : "no",
+          helped: helped === true ? "yes" : helped === false ? "no" : "not-sure"
+        }
+      });
+    } catch {}
+  };
 
   useEffect(() => {
     if (preferredCrisisRegion) return;
@@ -10808,6 +11228,12 @@ export default function Stillform() {
                     Dismiss tip
                   </button>
                 </div>
+              )}
+              {pendingNextMoveFollowUpSession && (
+                <NextMoveFollowUpCard
+                  session={pendingNextMoveFollowUpSession}
+                  onSubmit={handleNextMoveFollowUpSubmit}
+                />
               )}
 
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
