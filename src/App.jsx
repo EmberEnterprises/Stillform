@@ -1373,6 +1373,8 @@ const UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS = 30;
 const SHARE_QR_TARGET_URL = "https://stillformapp.com";
 const SHARE_QR_IMAGE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=${encodeURIComponent(SHARE_QR_TARGET_URL)}`;
 const UAT_FEEDBACK_FLASH_LABEL = "UAT FEEDBACK";
+const UAT_MODE_QUERY_PARAM = "uat";
+const UAT_MODE_STORAGE_KEY = "stillform_uat_mode";
 const UAT_QUESTION_OPTIONS = [
   { id: "confusing", prompt: "What felt confusing today?", placeholder: "Example: The button text was unclear." },
   { id: "friction", prompt: "What felt heavy or annoying?", placeholder: "Example: Too many taps to finish this step." },
@@ -4555,15 +4557,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
     // Post-session AI summary — background call, non-blocking
     if (messages.length >= 2) {
+      const authToken = sbGetSession()?.access_token || "";
+      const installId = getOrCreateInstallId();
       fetch("/.netlify/functions/reframe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify({
           input: `INTERNAL — SESSION SUMMARY REQUEST. This is not a user message. Write 2-3 sentences capturing what mattered in this session. Focus on: what they confided, any growth or patterns you noticed, what their current concern is, and what made them feel understood (if anything). Do NOT use clinical labels. Write like a friend's mental note, not a chart entry. Return JSON: { "distortion": null, "reframe": "your session note" }`,
           mode: effectiveMode,
           aiTone: aiToneChoice,
           history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
-          sessionCount: getSessionCountFromStorage()
+          sessionCount: getSessionCountFromStorage(),
+          install_id: installId,
+          user_id: sbGetUser()?.id || null
         })
       }).then(r => r.json()).then(data => {
         if (data?.reframe) {
@@ -8689,7 +8698,24 @@ export default function Stillform() {
     const dt = new Date(UAT_TRIAL_FREEZE_UNTIL_ISO);
     return Number.isNaN(dt.getTime()) ? 0 : dt.getTime();
   })();
-  const uatTrialFreezeActive = !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
+  const uatModeEnabled = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const query = (params.get(UAT_MODE_QUERY_PARAM) || "").trim().toLowerCase();
+      if (query === "1" || query === "true" || query === "on") {
+        localStorage.setItem(UAT_MODE_STORAGE_KEY, "yes");
+        return true;
+      }
+      if (query === "0" || query === "false" || query === "off") {
+        localStorage.removeItem(UAT_MODE_STORAGE_KEY);
+        return false;
+      }
+      return localStorage.getItem(UAT_MODE_STORAGE_KEY) === "yes";
+    } catch {
+      return false;
+    }
+  })();
+  const uatTrialFreezeActive = uatModeEnabled && !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
   const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
     ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "launch";
@@ -9777,8 +9803,10 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams();
       params.set("limit", String(UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS));
+      const authToken = sbGetSession()?.access_token || "";
       const response = await fetch(`/.netlify/functions/uat-feedback-history?${params.toString()}`, {
-        method: "GET"
+        method: "GET",
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
       });
       if (!response.ok) {
         const failure = await response.json().catch(() => ({}));
@@ -11246,7 +11274,7 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Home UAT status banner (home-only) */}
+            {/* Home UAT status banner (UAT mode only) */}
             {uatTrialFreezeActive && (
               <div
                 style={{

@@ -1,6 +1,8 @@
 import { listGlobalUatFeedbackHistory } from "./_uatFeedbackState.js";
 import {
   jsonResponse,
+  parseBearer,
+  getUserFromToken,
   rejectDisallowedOrigin
 } from "./_httpSecurity.js";
 
@@ -20,6 +22,11 @@ export async function handler(event) {
   if (originBlocked) return originBlocked;
 
   try {
+    const token = parseBearer(event.headers?.authorization || event.headers?.Authorization || "");
+    const user = await getUserFromToken(token).catch(() => null);
+    if (!user?.id) {
+      return jsonResponse(event, 401, { error: "Unauthorized" }, CORS_OPTIONS);
+    }
     const limit = sanitizeLimit(event.queryStringParameters?.limit, 30, 100);
     const rows = await listGlobalUatFeedbackHistory({ limit });
     return jsonResponse(event, 200, {
