@@ -18,12 +18,14 @@ Run:
 npm run build
 npm run ship:preflight
 node scripts/core-loop-smoke.mjs
+npm run security:smoke
 ```
 
 Expected:
 - Build passes
 - SHIP preflight passes
 - Core loop smoke prints all checks as `✓`
+- Security smoke passes
 
 ---
 

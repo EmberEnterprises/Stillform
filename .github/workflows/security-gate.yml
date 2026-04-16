@@ -1,0 +1,36 @@
+name: Security Gate
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - cursor/**
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Ship preflight
+        run: npm run ship:preflight
+
+      - name: Core loop smoke
+        run: npm run smoke:core-loop
+
+      - name: Security smoke checks
+        run: npm run security:smoke

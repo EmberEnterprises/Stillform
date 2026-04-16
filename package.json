@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "ship:preflight": "node scripts/ship-preflight.mjs",
-    "smoke:core-loop": "node scripts/core-loop-smoke.mjs"
+    "smoke:core-loop": "node scripts/core-loop-smoke.mjs",
+    "security:smoke": "node scripts/security-smoke.mjs"
   },
   "dependencies": {
     "@aparajita/capacitor-biometric-auth": "^10.0.0",
