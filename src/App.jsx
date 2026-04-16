@@ -2481,6 +2481,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
     setNextMoveTarget(null);
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move");
   };
+  const handleNextMoveSkip = () => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move-skip");
+  };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -2642,6 +2648,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
       <NextMoveStep
         description="Choose one concrete action while this reset is still fresh."
         onConfirm={handleNextMoveConfirm}
+        onSkip={handleNextMoveSkip}
       />
     );
   }
@@ -3140,6 +3147,12 @@ function BodyScanTool({ onComplete }) {
     setNextMoveTarget(null);
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move");
   };
+  const handleNextMoveSkip = () => {
+    const target = nextMoveTarget;
+    if (!target) return;
+    setNextMoveTarget(null);
+    queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move-skip");
+  };
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -3389,6 +3402,7 @@ function BodyScanTool({ onComplete }) {
       <NextMoveStep
         description="Choose one concrete action before leaving Body Scan."
         onConfirm={handleNextMoveConfirm}
+        onSkip={handleNextMoveSkip}
       />
     );
   }
@@ -3777,9 +3791,11 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
 
 function NextMoveStep({
   onConfirm,
+  onSkip,
   title = "Next Move",
   description = "Choose one concrete action before you leave this session.",
-  confirmLabel = "Save next move"
+  confirmLabel = "Save next move",
+  skipLabel = "Skip for now"
 }) {
   const [selectedActionId, setSelectedActionId] = useState(null);
   const [customAction, setCustomAction] = useState("");
@@ -3870,6 +3886,15 @@ function NextMoveStep({
         >
           {confirmLabel}
         </button>
+        {typeof onSkip === "function" && (
+          <button
+            className="btn btn-ghost"
+            onClick={onSkip}
+            style={{ width: "100%", marginTop: 8 }}
+          >
+            {skipLabel}
+          </button>
+        )}
       </div>
     </div>
   );
@@ -3886,15 +3911,23 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
     setHelped(null);
   }, [sessionTimestamp]);
 
+  useEffect(() => {
+    if (didIt !== "yes") setHelped(null);
+  }, [didIt]);
+
   if (!sessionTimestamp) return null;
 
-  const submitReady = didIt !== null && helped !== null;
+  const helpedRequired = didIt === "yes";
+  const submitReady = didIt !== null && (!helpedRequired || helped !== null);
   const handleSubmit = () => {
     if (!submitReady || typeof onSubmit !== "function") return;
+    const didItBoolean = didIt === "yes";
     onSubmit({
       sessionTimestamp,
-      didIt: didIt === "yes",
-      helped: helped === "yes" ? true : helped === "no" ? false : null
+      didIt: didItBoolean,
+      helped: didItBoolean
+        ? (helped === "yes" ? true : helped === "no" ? false : null)
+        : null
     });
   };
 
@@ -3937,7 +3970,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
       </div>
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did it help?</div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", opacity: helpedRequired ? 1 : 0.5 }}>
           {[
             { id: "yes", label: "Yes" },
             { id: "no", label: "No" },
@@ -3947,7 +3980,10 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setHelped(item.id)}
+                onClick={() => {
+                  if (!helpedRequired) return;
+                  setHelped(item.id);
+                }}
                 style={{
                   background: active ? "var(--amber-glow)" : "transparent",
                   border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
@@ -3955,7 +3991,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
                   padding: "5px 11px",
                   fontSize: 11,
                   color: active ? "var(--amber)" : "var(--text-muted)",
-                  cursor: "pointer",
+                  cursor: helpedRequired ? "pointer" : "not-allowed",
                   fontFamily: "'DM Sans', sans-serif"
                 }}
               >
@@ -3964,6 +4000,11 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
             );
           })}
         </div>
+        {!helpedRequired && (
+          <div style={{ marginTop: 6, fontSize: 10, color: "var(--text-muted)" }}>
+            Optional until you complete the action.
+          </div>
+        )}
       </div>
       <button
         className="btn btn-primary"
@@ -7601,7 +7642,7 @@ function MyProgress({ onBack }) {
             </div>
             <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-                Catching patterns sooner
+                Check-in consistency
               </div>
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {loopCompletion14d}% loop consistency (14d)
@@ -7846,7 +7887,7 @@ function MyProgress({ onBack }) {
             <div style={{ marginBottom: 12 }}>
               <button onClick={() => toggle("proof")} style={rowStyle}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof of change</div>
+                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof snapshot</div>
                   <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
                     {activeDays} active day{activeDays !== 1 ? "s" : ""} · {protocolRuns} protocol run{protocolRuns !== 1 ? "s" : ""}
                   </div>
@@ -8719,12 +8760,7 @@ export default function Stillform() {
 
   useEffect(() => {
     if (screen !== "home") return;
-    const refreshPendingNextMove = () => {
-      setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
-    };
-    refreshPendingNextMove();
-    const timer = setInterval(refreshPendingNextMove, 60000);
-    return () => clearInterval(timer);
+    setPendingNextMoveFollowUpSession(getPendingNextMoveFollowUpSession());
   }, [screen]);
 
   const handleNextMoveFollowUpSubmit = ({ sessionTimestamp, didIt, helped }) => {

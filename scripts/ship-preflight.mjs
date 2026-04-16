@@ -25,7 +25,7 @@ const checks = [
   { label: "Auth fallback safety guard", cmd: "rg", args: ["-n", "isInvalidCredentialsMessage|Incorrect email or password\\. Please try again\\.", "src/App.jsx"], type: "must-match" },
   { label: "Pulse is progress-layer only", cmd: "rg", args: ["-n", "Pulse is fed by completed tools and check-ins\\. It lives here as part of My Progress\\.|No pulse data yet\\. Complete check-ins and tools to start your progress signal\\.", "src/App.jsx"], type: "must-match" },
   { label: "Pulse manual logging removed", cmd: "rg", args: ["-n", "\\+ Log a pulse|openNewPulseEntry|What triggered this\\?|showPulseContextTip|stillform_tooltip_pulse_seen", "src/App.jsx"], type: "must-not-match" },
-  { label: "Science evidence integrated in progress", cmd: "rg", args: ["-n", "Science Evidence|Acute shift rate \\(30d\\)|Recovery speed|Transfer score \\(14d\\)", "src/App.jsx"], type: "must-match" },
+  { label: "Science evidence integrated in progress", cmd: "rg", args: ["-n", "Science Evidence|Acute shift rate \\(30d\\)|Recovery speed|Transfer score \\(14d\\)|Proof snapshot", "src/App.jsx"], type: "must-match" },
   { label: "Science evidence sent to reframe context", cmd: "rg", args: ["-n", "scienceEvidence: \\(\\(\\) => \\{", "src/App.jsx"], type: "must-match" },
   { label: "Science evidence consumed in reframe function", cmd: "rg", args: ["-n", "SCIENCE EVIDENCE SNAPSHOT|scienceEvidence = null", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Go/No-Go focus check integrated", cmd: "rg", args: ["-n", "Go/No-Go focus check|stillform_focus_check_history|Focus Check Completed", "src/App.jsx"], type: "must-match" },

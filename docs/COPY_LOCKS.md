@@ -28,6 +28,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Setup bridge title | LOCKED | `Set up your customizations and map your signals` |
 | Setup bridge signal action | LOCKED | `Map signals now` |
 | Setup bridge primary CTA | LOCKED | `Continue to calibration` |
+| Proof area 2 title | LOCKED | `Check-in consistency` |
 
 ## Constrained Anchors
 
