@@ -1373,6 +1373,8 @@ const UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS = 30;
 const SHARE_QR_TARGET_URL = "https://stillformapp.com";
 const SHARE_QR_IMAGE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=${encodeURIComponent(SHARE_QR_TARGET_URL)}`;
 const UAT_FEEDBACK_FLASH_LABEL = "UAT FEEDBACK";
+const UAT_MODE_QUERY_PARAM = "uat";
+const UAT_MODE_STORAGE_KEY = "stillform_uat_mode";
 const UAT_QUESTION_OPTIONS = [
   { id: "confusing", prompt: "What felt confusing today?", placeholder: "Example: The button text was unclear." },
   { id: "friction", prompt: "What felt heavy or annoying?", placeholder: "Example: Too many taps to finish this step." },
@@ -4192,7 +4194,7 @@ const sbSyncDown = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
   const user = sbGetUser();
   if (!user?.id) return {ok:false,reason:"no_user_id"};
-  let restored=0; const errors=[]; const restoredKeys = new Set();
+  let restored=0; const errors=[]; let undecryptable=0; const restoredKeys = new Set();
   try {
     const rows=await sbFetch(`/rest/v1/user_data?select=data_key,encrypted_blob,updated_at&user_id=eq.${encodeURIComponent(user.id)}&order=updated_at.desc`);
     if (!rows?.length) return {ok:true,restored:0};
@@ -4204,6 +4206,8 @@ const sbSyncDown = async () => {
           localStorage.setItem(row.data_key,typeof dec==="string"?dec:JSON.stringify(dec));
           restored++;
           restoredKeys.add(row.data_key);
+        } else {
+          undecryptable++;
         }
       } catch {
         errors.push(row.data_key);
@@ -4211,7 +4215,7 @@ const sbSyncDown = async () => {
     }
   } catch(e) { return {ok:false,reason:e.message}; }
   try { window.plausible?.("Cloud Sync Down",{props:{keys:restored}}); } catch {}
-  return {ok:errors.length===0,restored,errors};
+  return {ok:errors.length===0 && undecryptable===0,restored,undecryptable,errors};
 };
 const sbDeleteCloudData = async () => {
   if (!sbIsSignedIn()) return { ok: false, reason: "not_signed_in" };
@@ -4553,15 +4557,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
     // Post-session AI summary — background call, non-blocking
     if (messages.length >= 2) {
+      const authToken = sbGetSession()?.access_token || "";
+      const installId = getOrCreateInstallId();
       fetch("/.netlify/functions/reframe", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        },
         body: JSON.stringify({
           input: `INTERNAL — SESSION SUMMARY REQUEST. This is not a user message. Write 2-3 sentences capturing what mattered in this session. Focus on: what they confided, any growth or patterns you noticed, what their current concern is, and what made them feel understood (if anything). Do NOT use clinical labels. Write like a friend's mental note, not a chart entry. Return JSON: { "distortion": null, "reframe": "your session note" }`,
           mode: effectiveMode,
           aiTone: aiToneChoice,
           history: messages.map(m => ({ role: m.role === "ai" ? "assistant" : "user", content: m.text })),
-          sessionCount: getSessionCountFromStorage()
+          sessionCount: getSessionCountFromStorage(),
+          install_id: installId,
+          user_id: sbGetUser()?.id || null
         })
       }).then(r => r.json()).then(data => {
         if (data?.reframe) {
@@ -8687,7 +8698,24 @@ export default function Stillform() {
     const dt = new Date(UAT_TRIAL_FREEZE_UNTIL_ISO);
     return Number.isNaN(dt.getTime()) ? 0 : dt.getTime();
   })();
-  const uatTrialFreezeActive = !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
+  const uatModeEnabled = (() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const query = (params.get(UAT_MODE_QUERY_PARAM) || "").trim().toLowerCase();
+      if (query === "1" || query === "true" || query === "on") {
+        localStorage.setItem(UAT_MODE_STORAGE_KEY, "yes");
+        return true;
+      }
+      if (query === "0" || query === "false" || query === "off") {
+        localStorage.removeItem(UAT_MODE_STORAGE_KEY);
+        return false;
+      }
+      return localStorage.getItem(UAT_MODE_STORAGE_KEY) === "yes";
+    } catch {
+      return false;
+    }
+  })();
+  const uatTrialFreezeActive = uatModeEnabled && !isSubscribed && Date.now() < uatTrialFreezeUntilMs;
   const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
     ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "launch";
@@ -9775,8 +9803,10 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams();
       params.set("limit", String(UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS));
+      const authToken = sbGetSession()?.access_token || "";
       const response = await fetch(`/.netlify/functions/uat-feedback-history?${params.toString()}`, {
-        method: "GET"
+        method: "GET",
+        headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
       });
       if (!response.ok) {
         const failure = await response.json().catch(() => ({}));
@@ -11244,7 +11274,7 @@ export default function Stillform() {
                 </div>
               )}
 
-            {/* Home UAT status banner (home-only) */}
+            {/* Home UAT status banner (UAT mode only) */}
             {uatTrialFreezeActive && (
               <div
                 style={{
@@ -12364,7 +12394,7 @@ export default function Stillform() {
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
-            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups are also stored in our Supabase cloud infrastructure so you can restore data across devices. Data is encrypted on-device before upload.</p>
+            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups from this device are stored in our Supabase cloud infrastructure. Data is encrypted on-device before upload. Restore requires access to the original device encryption key, so restore on a different device may be limited.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
             <h2>Performance Metrics (counts + rates only)</h2>
             <p>Performance Metrics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas).</p>
@@ -12468,7 +12498,7 @@ export default function Stillform() {
               },
               {
                 q: "Is my data private?",
-                a: "Your data is encrypted. Local data is stored on your device, and optional Cloud Sync stores encrypted backups you can restore on another device. The AI receives context to generate a response, then returns output. You can delete your data anytime from Settings."
+                a: "Your data is encrypted. Local data is stored on your device, and optional Cloud Sync stores encrypted backups from this device. Restore depends on the original device encryption key, so recovery on another device may be limited. The AI receives context to generate a response, then returns output. You can delete your data anytime from Settings."
               },
               {
                 q: "How much does it cost?",
@@ -12476,11 +12506,11 @@ export default function Stillform() {
               },
               {
                 q: "What if I cancel?",
-                a: "Your local data stays on your device. If Cloud Sync was enabled, your encrypted backups remain available for restore when you resubscribe."
+                a: "Your local data stays on your device. If Cloud Sync was enabled, your encrypted backups remain stored for later restore. Restore still depends on having the original device encryption key."
               },
               {
                 q: "Is my data backed up?",
-                a: "Yes — go to Settings and sign in or create an account to enable cloud backup. Your data is encrypted on your device before it leaves, so we can't read it. It syncs automatically after each session and restores fully on a new device."
+                a: "Yes — go to Settings and sign in or create an account to enable cloud backup. Your data is encrypted on your device before it leaves, so we can't read it. You can sync and restore from Settings. Restore on a different device may be limited if the original encryption key is unavailable."
               },
               {
                 q: "Can I upload screenshots to Reframe?",
@@ -13300,7 +13330,10 @@ export default function Stillform() {
                     Signed in as <span style={{ color: "var(--amber)" }}>{sbGetUser()?.email}</span>
                   </div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-                    Your data is encrypted and backed up. It syncs automatically after each session.
+                    Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
+                    Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt.
                   </div>
                   <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                     <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
@@ -13322,11 +13355,12 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncDown();
+                        const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                         setSyncFeedbackWithClear(
                           r?.ok ? "success" : "error",
                           r?.ok
                             ? `Restored ${r.restored || 0} items from cloud ✓`
-                            : `Restore completed with issues (${r?.errors?.length || 0}).`
+                            : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`
                         );
                       } catch {
                         setSyncFeedbackWithClear("error", "Restore failed. Check connection.");
@@ -13350,7 +13384,7 @@ export default function Stillform() {
               ) : (
                 <div>
                   <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
-                    Back up your data and access it on any device. Your data is encrypted before it leaves your device — we can't read it.
+                    Back up encrypted data from this device. Your data is encrypted before it leaves your device — we can't read it. Restore on a different device may be limited if the original encryption key is unavailable.
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
                     <input

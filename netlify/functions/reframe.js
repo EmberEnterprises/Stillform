@@ -938,7 +938,14 @@ exports.handler = async function(event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Method not allowed" }) };
 
   const requestOrigin = getRequestOrigin(event);
-  if (requestOrigin && !isAllowedOrigin(requestOrigin)) {
+  if (!requestOrigin) {
+    return {
+      statusCode: 403,
+      headers: createCorsHeaders(event),
+      body: JSON.stringify({ error: "Origin required" })
+    };
+  }
+  if (!isAllowedOrigin(requestOrigin)) {
     return {
       statusCode: 403,
       headers: createCorsHeaders(event),
@@ -957,7 +964,41 @@ exports.handler = async function(event) {
   }
 
   try {
-    const { input, history = [], mode = "calm", images = null, imageData = null, imageMimeType = "image/jpeg", journalContext = null, checkinContext = null, eodContext = null, sessionCount = 0, priorModeContext = null, feelState = null, signalProfile = null, biasProfile = null, priorToolContext = null, bioFilter = null, regulationType = null, sessionNotes = null, sessionEntryMode = null, aiTone = "balanced", userLocalNowMs = null, userTimeZone = null, scienceEvidence = null } = JSON.parse(event.body);
+    const {
+      input,
+      history = [],
+      mode = "calm",
+      images = null,
+      imageData = null,
+      imageMimeType = "image/jpeg",
+      journalContext = null,
+      checkinContext = null,
+      eodContext = null,
+      sessionCount = 0,
+      priorModeContext = null,
+      feelState = null,
+      signalProfile = null,
+      biasProfile = null,
+      priorToolContext = null,
+      bioFilter = null,
+      regulationType = null,
+      sessionNotes = null,
+      sessionEntryMode = null,
+      aiTone = "balanced",
+      userLocalNowMs = null,
+      userTimeZone = null,
+      scienceEvidence = null,
+      install_id = null,
+      user_id = null
+    } = JSON.parse(event.body);
+
+    if (!user_id && !install_id) {
+      return {
+        statusCode: 401,
+        headers: createCorsHeaders(event),
+        body: JSON.stringify({ error: "Authentication context required." })
+      };
+    }
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
