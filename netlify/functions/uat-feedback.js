@@ -1,12 +1,18 @@
 import { insertUatFeedback } from "./_uatFeedbackState.js";
 import { getStore } from "@netlify/blobs";
+import {
+  jsonResponse,
+  parseBearer,
+  getUserFromToken,
+  rejectDisallowedOrigin
+} from "./_httpSecurity.js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://pxrewildfnbxlygjofpx.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
 const FEEDBACK_TEXT_MIN = 8;
 const FEEDBACK_TEXT_MAX = 1000;
 const QUESTION_IDS = new Set(["confusing", "friction", "missing", "working"]);
 const UAT_BLOBS_STORE = "stillform-uat-feedback";
+const MAX_BODY_CHARS = 12000;
+const CORS_OPTIONS = { methods: "POST, OPTIONS" };
 
 async function writeUatFeedbackToBlobs(payload) {
   const store = getStore(UAT_BLOBS_STORE);
@@ -14,39 +20,6 @@ async function writeUatFeedbackToBlobs(payload) {
   const key = `entries/${entryId}.json`;
   await store.set(key, JSON.stringify(payload));
   return entryId;
-}
-
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Methods": "POST, OPTIONS"
-    },
-    body: JSON.stringify(body)
-  };
-}
-
-function parseBearer(authHeader) {
-  if (!authHeader || typeof authHeader !== "string") return null;
-  const [type, token] = authHeader.trim().split(/\s+/);
-  if (!type || !token || type.toLowerCase() !== "bearer") return null;
-  return token;
-}
-
-async function getUserFromToken(accessToken) {
-  if (!accessToken) return null;
-  const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    method: "GET",
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
-  if (!response.ok) return null;
-  return response.json().catch(() => null);
 }
 
 function sanitizeInstallId(value) {
@@ -90,19 +63,32 @@ function sanitizeVersion(value, max = 40) {
 }
 
 export async function handler(event) {
-  if (event.httpMethod === "OPTIONS") return json(200, { ok: true });
-  if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
+  if (event.httpMethod === "OPTIONS") return jsonResponse(event, 200, { ok: true }, CORS_OPTIONS);
+  if (event.httpMethod !== "POST") return jsonResponse(event, 405, { error: "Method not allowed" }, CORS_OPTIONS);
+
+  const originBlocked = rejectDisallowedOrigin(event, CORS_OPTIONS);
+  if (originBlocked) return originBlocked;
 
   try {
-    const payload = JSON.parse(event.body || "{}");
+    if ((event.body || "").length > MAX_BODY_CHARS) {
+      return jsonResponse(event, 413, { error: "Payload too large" }, CORS_OPTIONS);
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(event.body || "{}");
+    } catch {
+      return jsonResponse(event, 400, { error: "Invalid JSON body" }, CORS_OPTIONS);
+    }
+
     const feedbackText = sanitizeFeedbackText(payload?.feedback_text);
     if (feedbackText.length < FEEDBACK_TEXT_MIN) {
-      return json(400, { error: `feedback_text must be at least ${FEEDBACK_TEXT_MIN} characters` });
+      return jsonResponse(event, 400, { error: `feedback_text must be at least ${FEEDBACK_TEXT_MIN} characters` }, CORS_OPTIONS);
     }
 
     const questionId = sanitizeQuestionId(payload?.question_id);
     if (!questionId) {
-      return json(400, { error: "question_id is required" });
+      return jsonResponse(event, 400, { error: "question_id is required" }, CORS_OPTIONS);
     }
 
     const token = parseBearer(event.headers?.authorization || event.headers?.Authorization || "");
@@ -111,7 +97,7 @@ export async function handler(event) {
 
     const installId = sanitizeInstallId(payload?.install_id);
     if (!userId && !installId) {
-      return json(400, { error: "install_id is required when not authenticated" });
+      return jsonResponse(event, 400, { error: "install_id is required when not authenticated" }, CORS_OPTIONS);
     }
     const sourceScreen = sanitizeSourceScreen(payload?.source_screen);
     const questionPrompt = sanitizeQuestionPrompt(payload?.question_prompt);
@@ -136,11 +122,11 @@ export async function handler(event) {
         }
       });
 
-      return json(200, {
+      return jsonResponse(event, 200, {
         ok: true,
         id: row?.id || null,
         storage: "supabase"
-      });
+      }, CORS_OPTIONS);
     } catch (writeError) {
       const message = String(writeError?.message || "");
       const tableMissing = message.includes("PGRST205") || message.includes("stillform_uat_feedback");
@@ -160,24 +146,26 @@ export async function handler(event) {
             package_version: packageVersion,
             user_agent: userAgent
           });
-          return json(200, {
+          return jsonResponse(event, 200, {
             ok: true,
             id: entryId,
             storage: "netlify-blobs",
             warning: "uat_feedback_table_missing"
-          });
-        } catch {
-          return json(202, {
+          }, CORS_OPTIONS);
+        } catch (blobError) {
+          console.error("uat-feedback-blobs-write-failed", { message: blobError?.message || "unknown" });
+          return jsonResponse(event, 202, {
             ok: true,
             id: null,
             storage: "local-only",
             warning: "uat_feedback_table_missing"
-          });
+          }, CORS_OPTIONS);
         }
       }
       throw writeError;
     }
   } catch (error) {
-    return json(500, { error: error?.message || "uat feedback ingest failed" });
+    console.error("uat-feedback-ingest-failed", { message: error?.message || "unknown" });
+    return jsonResponse(event, 500, { error: "UAT feedback ingest failed" }, CORS_OPTIONS);
   }
 }

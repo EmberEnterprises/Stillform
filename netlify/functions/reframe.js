@@ -1,6 +1,52 @@
 // Simple in-memory rate limiter — resets when function cold starts
 // Limits: 10 requests per IP per minute
 const rateLimits = new Map();
+const REFRAME_ALLOWED_ORIGINS = (() => {
+  const defaults = [
+    "https://stillformapp.com",
+    "https://www.stillformapp.com",
+    "https://stillformapp.netlify.app",
+    "http://localhost:4173",
+    "http://localhost:5173",
+    "http://127.0.0.1:4173",
+    "http://127.0.0.1:5173",
+    "capacitor://localhost",
+    "ionic://localhost"
+  ];
+  const envOrigins = String(process.env.SECURITY_ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+  return [...new Set([...defaults, ...envOrigins])];
+})();
+
+function getRequestOrigin(event) {
+  return event?.headers?.origin || event?.headers?.Origin || null;
+}
+
+function isAllowedOrigin(origin) {
+  if (!origin) return true;
+  if (REFRAME_ALLOWED_ORIGINS.includes(origin)) return true;
+  if (/^https?:\/\/localhost:\d+$/i.test(origin)) return true;
+  if (/^https?:\/\/127\.0\.0\.1:\d+$/i.test(origin)) return true;
+  return false;
+}
+
+function createCorsHeaders(event) {
+  const origin = getRequestOrigin(event);
+  const headers = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    Vary: "Origin"
+  };
+  if (origin && isAllowedOrigin(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  } else if (!origin) {
+    headers["Access-Control-Allow-Origin"] = "https://stillformapp.com";
+  }
+  return headers;
+}
 
 function checkRateLimit(ip) {
   const now = Date.now();
@@ -887,16 +933,25 @@ Return ONLY valid JSON, no markdown: { "distortion": "name or null", "reframe": 
 
 exports.handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type", "Access-Control-Allow-Methods": "POST, OPTIONS" }, body: "" };
+    return { statusCode: 200, headers: createCorsHeaders(event), body: "" };
   }
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Method not allowed" }) };
+
+  const requestOrigin = getRequestOrigin(event);
+  if (requestOrigin && !isAllowedOrigin(requestOrigin)) {
+    return {
+      statusCode: 403,
+      headers: createCorsHeaders(event),
+      body: JSON.stringify({ error: "Origin not allowed" })
+    };
+  }
 
   // Rate limiting
   const ip = event.headers["x-forwarded-for"]?.split(",")[0]?.trim() || event.headers["client-ip"] || "unknown";
   if (!checkRateLimit(ip)) {
     return {
       statusCode: 429,
-      headers: { "Access-Control-Allow-Origin": "*", "Content-Type": "application/json" },
+      headers: createCorsHeaders(event),
       body: JSON.stringify({ error: "Too many requests. Take a breath and try again in a minute." })
     };
   }
@@ -906,22 +961,22 @@ exports.handler = async function(event) {
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
-      return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "No input provided." }) };
+      return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "No input provided." }) };
     }
     const trimmedInput = input.trim();
     const isScreenshot = (images && images.length > 0) || trimmedInput.startsWith("[Screenshot of a conversation]");
     if (input.length > 2000) {
-      return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Message too long." }) };
+      return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Message too long." }) };
     }
     // Image guardrails — validate base64 image payloads if present
     if (imageData) {
       // Max image payload: 15MB base64 encoded (~11MB raw)
       if (imageData.length > 15 * 1024 * 1024) {
-        return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Image too large." }) };
+        return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Image too large." }) };
       }
       // Validate it looks like real base64 image data
       if (!/^[A-Za-z0-9+/]+=*$/.test(imageData.slice(0, 100))) {
-        return { statusCode: 400, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: "Invalid image format." }) };
+        return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Invalid image format." }) };
       }
     }
 
@@ -1233,7 +1288,7 @@ WHAT STAYING SHARP LOOKS LIKE:
 
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      headers: createCorsHeaders(event),
       body: JSON.stringify({
         ...parsed,
         scienceRoute: scienceRoute?.id || null,
@@ -1253,6 +1308,6 @@ WHAT STAYING SHARP LOOKS LIKE:
   } catch (err) {
     console.error("Error:", err.message);
     const msg = err.name === "AbortError" ? "Request timed out. Try again." : (err.message || "Something went wrong.");
-    return { statusCode: 500, headers: { "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ error: msg }) };
+    return { statusCode: 500, headers: createCorsHeaders(event), body: JSON.stringify({ error: msg }) };
   }
 };

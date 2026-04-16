@@ -1,11 +1,8 @@
 import crypto from "node:crypto";
 import { upsertSubscriptionStatus } from "./_subscriptionState.js";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "Content-Type, X-Signature, X-Event-Name",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
+const responseHeaders = { "Content-Type": "application/json" };
+const MAX_BODY_CHARS = 200000;
 
 const normalizeStatus = (eventName, statusValue, cancelled) => {
   const status = String(statusValue || "").toLowerCase();
@@ -19,10 +16,10 @@ const normalizeStatus = (eventName, statusValue, cancelled) => {
 
 export const handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers: corsHeaders, body: "" };
+    return { statusCode: 200, headers: responseHeaders, body: "" };
   }
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: corsHeaders, body: "Method not allowed" };
+    return { statusCode: 405, headers: responseHeaders, body: JSON.stringify({ error: "Method not allowed" }) };
   }
 
   const secret = process.env.LEMON_WEBHOOK_SECRET;
@@ -30,23 +27,27 @@ export const handler = async function(event) {
   if (!secret || !serviceRole) {
     return {
       statusCode: 500,
-      headers: corsHeaders,
+      headers: responseHeaders,
       body: JSON.stringify({ error: "Missing LEMON_WEBHOOK_SECRET or SUPABASE_SERVICE_ROLE_KEY" })
     };
   }
 
   try {
+    if ((event.body || "").length > MAX_BODY_CHARS) {
+      return { statusCode: 413, headers: responseHeaders, body: JSON.stringify({ error: "Payload too large" }) };
+    }
+
     const rawBody = event.body || "";
     const signature = String(event.headers?.["x-signature"] || event.headers?.["X-Signature"] || "").trim();
     if (!signature || !rawBody) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: "Missing signature or payload" }) };
+      return { statusCode: 400, headers: responseHeaders, body: JSON.stringify({ error: "Missing signature or payload" }) };
     }
 
     const digest = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
     const sigBuf = Buffer.from(signature, "hex");
     const digestBuf = Buffer.from(digest, "hex");
     if (sigBuf.length === 0 || sigBuf.length !== digestBuf.length || !crypto.timingSafeEqual(sigBuf, digestBuf)) {
-      return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: "Invalid signature" }) };
+      return { statusCode: 401, headers: responseHeaders, body: JSON.stringify({ error: "Invalid signature" }) };
     }
 
     const payload = JSON.parse(rawBody);
@@ -65,13 +66,13 @@ export const handler = async function(event) {
 
     // We only use live-mode events for truth.
     if (testMode) {
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, ignored: "test_mode" }) };
+      return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "test_mode" }) };
     }
 
     const effectiveStatus = normalizeStatus(eventName, attrs.status, attrs.cancelled);
 
     if (!installId && !userId && !lemonCustomerId && !lemonSubscriptionId) {
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true, ignored: "no_match_keys" }) };
+      return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "no_match_keys" }) };
     }
 
     await upsertSubscriptionStatus({
@@ -90,12 +91,13 @@ export const handler = async function(event) {
       endsAt: attrs.ends_at || null
     });
 
-    return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ ok: true }) };
-  } catch (err) {
+    return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true }) };
+  } catch (error) {
+    console.error("subscription-webhook-failed", { message: error?.message || "unknown" });
     return {
       statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: err.message || "Webhook failed" })
+      headers: responseHeaders,
+      body: JSON.stringify({ error: "Webhook failed" })
     };
   }
 };

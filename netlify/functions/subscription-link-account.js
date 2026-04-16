@@ -1,58 +1,43 @@
 import { upsertSubscriptionStatus, getSubscriptionStatusForLookup } from "./_subscriptionState.js";
+import {
+  jsonResponse,
+  parseBearer,
+  getUserFromToken,
+  rejectDisallowedOrigin
+} from "./_httpSecurity.js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL || "https://pxrewildfnbxlygjofpx.supabase.co";
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || "";
-
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Methods": "POST, OPTIONS"
-    },
-    body: JSON.stringify(body)
-  };
-}
-
-function parseBearer(authHeader) {
-  if (!authHeader || typeof authHeader !== "string") return null;
-  const [type, token] = authHeader.trim().split(/\s+/);
-  if (!type || !token || type.toLowerCase() !== "bearer") return null;
-  return token;
-}
-
-async function getUserFromToken(accessToken) {
-  if (!accessToken) return null;
-  const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-    method: "GET",
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${accessToken}`
-    }
-  });
-  if (!res.ok) return null;
-  return res.json().catch(() => null);
-}
+const CORS_OPTIONS = { methods: "POST, OPTIONS" };
+const MAX_BODY_CHARS = 5000;
 
 export async function handler(event) {
-  if (event.httpMethod === "OPTIONS") return json(200, { ok: true });
-  if (event.httpMethod !== "POST") return json(405, { error: "Method not allowed" });
+  if (event.httpMethod === "OPTIONS") return jsonResponse(event, 200, { ok: true }, CORS_OPTIONS);
+  if (event.httpMethod !== "POST") return jsonResponse(event, 405, { error: "Method not allowed" }, CORS_OPTIONS);
+
+  const originBlocked = rejectDisallowedOrigin(event, CORS_OPTIONS);
+  if (originBlocked) return originBlocked;
 
   try {
+    if ((event.body || "").length > MAX_BODY_CHARS) {
+      return jsonResponse(event, 413, { error: "Payload too large" }, CORS_OPTIONS);
+    }
+
     const token = parseBearer(event.headers?.authorization || event.headers?.Authorization || "");
     const user = await getUserFromToken(token);
     const userId = user?.id || null;
-    if (!userId) return json(401, { error: "Unauthorized" });
+    if (!userId) return jsonResponse(event, 401, { error: "Unauthorized" }, CORS_OPTIONS);
 
-    const body = JSON.parse(event.body || "{}");
-    const installId = body?.install_id || null;
-    if (!installId) return json(400, { error: "install_id is required" });
+    let body;
+    try {
+      body = JSON.parse(event.body || "{}");
+    } catch {
+      return jsonResponse(event, 400, { error: "Invalid JSON body" }, CORS_OPTIONS);
+    }
+    const installId = body?.install_id ? String(body.install_id).trim().slice(0, 120) : null;
+    if (!installId) return jsonResponse(event, 400, { error: "install_id is required" }, CORS_OPTIONS);
 
     const existing = await getSubscriptionStatusForLookup({ installId });
     if (!existing) {
-      return json(200, { ok: true, linked: false, reason: "no_install_record" });
+      return jsonResponse(event, 200, { ok: true, linked: false, reason: "no_install_record" }, CORS_OPTIONS);
     }
 
     await upsertSubscriptionStatus({
@@ -71,8 +56,9 @@ export async function handler(event) {
       endsAt: existing.ends_at || null
     });
 
-    return json(200, { ok: true, linked: true });
-  } catch (err) {
-    return json(500, { error: err.message || "Subscription linking failed" });
+    return jsonResponse(event, 200, { ok: true, linked: true }, CORS_OPTIONS);
+  } catch (error) {
+    console.error("subscription-link-failed", { message: error?.message || "unknown" });
+    return jsonResponse(event, 500, { error: "Subscription linking failed" }, CORS_OPTIONS);
   }
 }
