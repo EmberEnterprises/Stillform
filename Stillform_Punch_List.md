@@ -64,6 +64,13 @@
 - [ ] Settings includes explicit replay path for onboarding visual comfort walkthrough
 - [ ] Delete-all reset returns users to onboarding visual comfort before calibration
 
+### Integrations launch readiness (TestFlight)
+- [ ] Calendar integration uses real device provider sync (not local scaffold-only status)
+- [ ] Health integration uses real device provider sync (not local scaffold-only status)
+- [ ] Integration status labels reflect truth: connected / no-data / denied / restricted / error
+- [ ] Morning check-in receives upcoming pressure context from synced calendar data when available
+- [ ] Reframe payload includes synced calendar + health context when available
+
 ---
 
 ## AUDIT REMEDIATION TRACK (ALSO REQUESTED)

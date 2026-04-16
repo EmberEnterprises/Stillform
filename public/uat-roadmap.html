@@ -324,6 +324,10 @@
         </div>
         <div class="in-progress-grid">
           <article class="work-card">
+            <h3>TestFlight integrations hardening</h3>
+            <p>Calendar (EventKit) and Health (HealthKit baseline) must pull real device data so TestFlight feedback reflects live behavior, not scaffold state.</p>
+          </article>
+          <article class="work-card">
             <h3>Perception vs. accuracy model layer</h3>
             <p>Add a dedicated pass for statement timing/disclosure calibration, external perception prediction, and recovery-debt telemetry.</p>
           </article>
@@ -474,6 +478,16 @@
               <td data-label="Issue">Onboarding visual comfort not appearing after reset</td>
               <td data-label="Status">In progress</td>
               <td data-label="Implementation focus">Reset path now routes to onboarding first; visual audit matrix tracks final verification across theme/motion/grounding combinations.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">Integrations show scaffold status without live provider sync</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Wire Settings actions to native provider sync (Calendar + Health), and ensure status only shows connected when real device context is ingested.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">TestFlight launch needs production-like integration feedback</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Add explicit integration go/no-go checks in runbook and UAT matrix (grant/deny flows, freshness, Morning/Reframe context injection).</td>
             </tr>
             <tr>
               <td data-label="Issue">Perception vs accuracy delta is not explicitly modeled</td>

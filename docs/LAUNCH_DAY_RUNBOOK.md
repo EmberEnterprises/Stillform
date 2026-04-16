@@ -63,6 +63,29 @@ If users report old behavior:
 
 ---
 
+### 4.5) Integration Truth Gate (launch-critical for TestFlight)
+
+Run on a physical iOS device build:
+
+1. Settings → Integrations → **Connect calendar**
+   - Permission prompt appears
+   - If granted, calendar summary + freshness appears
+   - If denied/restricted, status reflects denied/restricted (not connected)
+2. Settings → Integrations → **Connect health**
+   - Health authorization appears
+   - If granted, health summary/snapshot appears (or explicit no-data)
+   - If denied/restricted, status reflects denied/restricted (not connected)
+3. Verify **Sync calendar now** and **Sync health now** update timestamps/errors appropriately
+4. Verify **Revoke calendar/health** clears cached integration context and returns to manual mode copy
+5. Confirm integration context usage in flow:
+   - Morning check-in shows upcoming pressure banner when calendar context exists
+   - Reframe request includes calendar + health context fields when available
+
+Go/No-Go rule:
+- Do not claim “connected” unless provider permission + real device data pull are both confirmed.
+
+---
+
 ### 5) User-Safety and Trust Checks
 
 Confirm in live app:
