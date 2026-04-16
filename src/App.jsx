@@ -8716,7 +8716,7 @@ export default function Stillform() {
     subscription: false,
     sound: false,
     logs: false,
-    customization: false,
+    customization: true,
     signal: false,
     more: false,
     data: false,
@@ -12781,7 +12781,7 @@ export default function Stillform() {
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Customization</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Customization (colors + motion)</span>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.customization ? "▾" : "▸"}</span>
               </button>
               {settingsSectionOpen.customization && (
