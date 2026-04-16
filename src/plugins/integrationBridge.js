@@ -115,7 +115,7 @@ export const integrationBridge = {
       return {
         ok: true,
         supported: true,
-        status: "connected",
+        status: String(result?.status || "connected"),
         ...payload
       };
     } catch (error) {
@@ -146,7 +146,7 @@ export const integrationBridge = {
       return {
         ok: true,
         supported: true,
-        status: "connected",
+        status: String(result?.status || "connected"),
         ...payload
       };
     } catch (error) {

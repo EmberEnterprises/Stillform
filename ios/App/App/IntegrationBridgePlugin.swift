@@ -171,8 +171,10 @@ public class IntegrationBridgePlugin: CAPPlugin, CAPBridgedPlugin {
         if #available(iOS 17.0, *) {
             let status = EKEventStore.authorizationStatus(for: .event)
             switch status {
-            case .fullAccess, .writeOnly:
+            case .fullAccess:
                 completion(true, "granted", nil)
+            case .writeOnly:
+                completion(false, "denied", "Calendar permission is write-only. Enable full access in iOS settings.")
             case .denied:
                 completion(false, "denied", "Calendar access denied in iOS settings.")
             case .restricted:
