@@ -11376,11 +11376,6 @@ export default function Stillform() {
                       <div>
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
                         <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
-                        {homeProgressPinned && (
-                          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginTop: 6 }}>
-                            Pinned open
-                          </div>
-                        )}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button
