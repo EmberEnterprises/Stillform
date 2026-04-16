@@ -8279,9 +8279,10 @@ export default function Stillform() {
   const openUatBoardHomeOnly = () => {
     if (screen === "home") openUatBoard();
   };
+  const resolveTutorialReturnScreen = (target) => (target === "settings" ? "settings" : "home");
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
-    setTutorialReturnScreen(backScreen || "home");
+    setTutorialReturnScreen(resolveTutorialReturnScreen(backScreen));
     setTutorialFocusBrief(null);
     setScreen("tutorial");
   };
@@ -8301,7 +8302,7 @@ export default function Stillform() {
       if (tutorialStep > 0) {
         setTutorialStep((s) => Math.max(0, s - 1));
       } else {
-        setScreen(tutorialReturnScreen || "home");
+        setScreen(resolveTutorialReturnScreen(tutorialReturnScreen));
       }
       return;
     }
@@ -9782,7 +9783,7 @@ export default function Stillform() {
           const safeStep = Math.max(0, Math.min(tutorialStep, tutorialPages.length - 1));
           const page = tutorialPages[safeStep];
           const isLastStep = safeStep === tutorialPages.length - 1;
-          const returnTo = tutorialReturnScreen || "home";
+          const returnTo = resolveTutorialReturnScreen(tutorialReturnScreen);
           return (
             <section
               style={{
@@ -10036,9 +10037,6 @@ export default function Stillform() {
                   <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => beginCalibrationFlow()}>
                     Begin calibration →
                   </button>
-                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
-                    Open FAQ
-                  </button>
                 </>
               ) : (
                 <>
@@ -10047,9 +10045,6 @@ export default function Stillform() {
                   </button>
                   <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => goHomeSafely()}>
                     Go to home
-                  </button>
-                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
-                    Open FAQ
                   </button>
                 </>
               )}
@@ -11383,12 +11378,16 @@ export default function Stillform() {
                             event.stopPropagation();
                             setHomeProgressPinned((current) => {
                               const next = !current;
-                              if (next) setHomeProgressExpanded(true);
+                              if (next) {
+                                setHomeProgressExpanded(true);
+                              } else {
+                                setHomeProgressExpanded(false);
+                              }
                               return next;
                             });
                           }}
-                          aria-label={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress open"}
-                          title={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress open"}
+                          aria-label={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress"}
+                          title={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress"}
                           style={{
                             border: "0.5px solid var(--amber-dim)",
                             background: homeProgressPinned ? "var(--amber-glow)" : "transparent",
@@ -11405,7 +11404,18 @@ export default function Stillform() {
                             padding: 0
                           }}
                         >
-                          📌
+                          <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            width="14"
+                            height="14"
+                            style={{ display: "block" }}
+                          >
+                            <path
+                              fill="currentColor"
+                              d="M14.2 3c.9 0 1.7.8 1.7 1.7v2l2.4 2.4c.5.5.1 1.4-.6 1.4H13v5.4l1.1 3.2c.2.7-.6 1.3-1.2.8L12 18.8l-1 1.1c-.6.5-1.4-.1-1.2-.8l1.1-3.2v-5.4H6.3c-.8 0-1.2-1-.6-1.4L8.1 6.7v-2C8.1 3.8 8.8 3 9.8 3h4.4Z"
+                            />
+                          </svg>
                         </button>
                         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1, opacity: homeProgressPinned ? 0.45 : 1 }}>
                           {showHomeProgressDetails ? "−" : "+"}
