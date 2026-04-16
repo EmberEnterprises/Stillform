@@ -8729,6 +8729,7 @@ export default function Stillform() {
   });
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
+  const [setupBridgeTutorialReturnScreen, setSetupBridgeTutorialReturnScreen] = useState("home");
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
@@ -8863,6 +8864,10 @@ export default function Stillform() {
     if (screen === "home") openUatBoard();
   };
   const resolveTutorialReturnScreen = (target) => (target === "settings" ? "settings" : "home");
+  const openSetupBridge = (tutorialBackScreen = "home") => {
+    setSetupBridgeTutorialReturnScreen(resolveTutorialReturnScreen(tutorialBackScreen));
+    setScreen("onboarding");
+  };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
     setTutorialReturnScreen(resolveTutorialReturnScreen(backScreen));
@@ -8893,8 +8898,14 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
-        goHomeSafely();
+        setScreen("onboarding");
       }
+      return;
+    }
+    if (screen === "onboarding") {
+      setTutorialReturnScreen(resolveTutorialReturnScreen(setupBridgeTutorialReturnScreen));
+      setTutorialStep(4);
+      setScreen("tutorial");
       return;
     }
     if (screen === "faq") {
@@ -8914,14 +8925,14 @@ export default function Stillform() {
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
 
   useEffect(() => {
-    const swipeEnabledScreens = new Set(["tutorial", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
+    const swipeEnabledScreens = new Set(["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
     if (!swipeEnabledScreens.has(screen)) return;
     let touchStart = null;
     const interactiveTags = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]);
@@ -8967,7 +8978,7 @@ export default function Stillform() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupStep, faqBackScreen, focusCheckReturnScreen]);
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeTutorialReturnScreen, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
@@ -10508,7 +10519,7 @@ export default function Stillform() {
                       setScreen("settings");
                       return;
                     }
-                    setScreen("onboarding");
+                    openSetupBridge(returnTo);
                   }}
                 >
                   {returnTo === "settings" ? "Return to settings" : "Continue →"}
@@ -10709,7 +10720,7 @@ export default function Stillform() {
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-              <button className="intervention-back" onClick={() => { if (setupStep > 0) { setSetupStep(s => s - 1); } else { goHomeSafely(); } }}>← Back</button>
+              <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
 
               {/* System calibration header */}
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
@@ -13547,14 +13558,14 @@ export default function Stillform() {
               {settingsSectionOpen.customization && (
               <>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Set colors and motion here anytime, or replay onboarding for a full visual comfort walkthrough.
+                Set colors and motion here anytime, or replay the setup bridge for a full visual comfort walkthrough.
               </div>
-              <button onClick={() => setScreen("onboarding")} style={{
+              <button onClick={() => openSetupBridge("settings")} style={{
                 width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                 padding: "12px 16px", marginBottom: 10, cursor: "pointer", textAlign: "left",
                 fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
               }}>
-                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay onboarding visual comfort →</div>
+                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge visual comfort →</div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
               </button>
 
