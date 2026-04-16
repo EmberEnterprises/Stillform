@@ -1356,6 +1356,7 @@ const UAT_FEEDBACK_TEXT_MAX = 1000;
 const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
 const UAT_FEEDBACK_HISTORY_KEY = "stillform_uat_feedback_history";
 const UAT_FEEDBACK_HISTORY_MAX_ITEMS = 30;
+const UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS = 30;
 const SHARE_QR_TARGET_URL = "https://stillformapp.com";
 const SHARE_QR_IMAGE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=${encodeURIComponent(SHARE_QR_TARGET_URL)}`;
 const UAT_FEEDBACK_FLASH_LABEL = "UAT FEEDBACK";
@@ -1649,32 +1650,49 @@ const getUatFeedbackHistoryFromStorage = () => {
     const parsed = JSON.parse(localStorage.getItem(UAT_FEEDBACK_HISTORY_KEY) || "[]");
     if (!Array.isArray(parsed)) return [];
     return parsed
-      .filter((entry) => entry && typeof entry === "object")
-      .map((entry) => ({
-        id: String(entry.id || ""),
-        submittedAt: String(entry.submittedAt || ""),
-        questionId: String(entry.questionId || ""),
-        text: String(entry.text || "")
-      }))
-      .filter((entry) => entry.id && entry.submittedAt && entry.text)
+      .map((entry) => normalizeUatFeedbackHistoryEntry(entry))
+      .filter(Boolean)
       .slice(0, UAT_FEEDBACK_HISTORY_MAX_ITEMS);
   } catch {
     return [];
   }
 };
 
+const normalizeUatFeedbackHistoryEntry = (entry) => {
+  if (!entry || typeof entry !== "object") return null;
+  const id = String(entry.id || "");
+  const submittedAt = String(entry.submittedAt || entry.submitted_at || "");
+  const questionId = String(entry.questionId || entry.question_id || "");
+  const text = String(entry.text || entry.feedback_text || "");
+  if (!submittedAt || !text) return null;
+  return {
+    id: id || `${submittedAt}_${questionId || "feedback"}`,
+    submittedAt,
+    questionId,
+    text
+  };
+};
+
+const mergeUatFeedbackHistoryEntries = (entries, maxItems = UAT_FEEDBACK_HISTORY_MAX_ITEMS) => {
+  const byKey = new Map();
+  for (const raw of Array.isArray(entries) ? entries : []) {
+    const entry = normalizeUatFeedbackHistoryEntry(raw);
+    if (!entry) continue;
+    const dedupeKey = `${entry.id}|${entry.submittedAt}|${entry.questionId}|${entry.text}`;
+    if (!byKey.has(dedupeKey)) byKey.set(dedupeKey, entry);
+  }
+  return [...byKey.values()]
+    .sort((a, b) => new Date(b.submittedAt || 0).getTime() - new Date(a.submittedAt || 0).getTime())
+    .slice(0, maxItems);
+};
+
 const appendUatFeedbackHistory = (entry, maxItems = UAT_FEEDBACK_HISTORY_MAX_ITEMS) => {
   if (!entry) return getUatFeedbackHistoryFromStorage();
   const current = getUatFeedbackHistoryFromStorage();
-  const next = [
-    {
-      id: String(entry.id || `${Date.now()}`),
-      submittedAt: String(entry.submittedAt || new Date().toISOString()),
-      questionId: String(entry.questionId || ""),
-      text: String(entry.text || "")
-    },
+  const next = mergeUatFeedbackHistoryEntries([
+    normalizeUatFeedbackHistoryEntry(entry),
     ...current
-  ].slice(0, maxItems);
+  ], maxItems);
   try { localStorage.setItem(UAT_FEEDBACK_HISTORY_KEY, JSON.stringify(next)); } catch {}
   return next;
 };
@@ -8720,6 +8738,7 @@ export default function Stillform() {
   const [showUatFeedbackPanel, setShowUatFeedbackPanel] = useState(false);
   const [uatFeedbackHistoryOpen, setUatFeedbackHistoryOpen] = useState(false);
   const [uatFeedbackHistory, setUatFeedbackHistory] = useState(() => getUatFeedbackHistoryFromStorage());
+  const [uatFeedbackHistorySyncing, setUatFeedbackHistorySyncing] = useState(false);
   useEffect(() => {
     const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
     applyThemePreset(themeToApply);
@@ -8991,11 +9010,54 @@ export default function Stillform() {
     try { window.setTimeout(() => setUatFeedbackStatus(""), 4200); } catch {}
   };
 
+  const syncUatFeedbackHistoryState = (entries) => {
+    const merged = mergeUatFeedbackHistoryEntries(entries, UAT_FEEDBACK_HISTORY_MAX_ITEMS);
+    setUatFeedbackHistory(merged);
+    try { localStorage.setItem(UAT_FEEDBACK_HISTORY_KEY, JSON.stringify(merged)); } catch {}
+    return merged;
+  };
+
+  const refreshUatFeedbackHistory = async ({ silent = true } = {}) => {
+    if (uatFeedbackHistorySyncing) return;
+    setUatFeedbackHistorySyncing(true);
+    try {
+      const installId = getOrCreateInstallId();
+      const params = new URLSearchParams();
+      if (installId) params.set("install_id", installId);
+      params.set("limit", String(UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS));
+      const authToken = sbGetSession()?.access_token;
+      const response = await fetch(`/.netlify/functions/uat-feedback-history?${params.toString()}`, {
+        method: "GET",
+        headers: {
+          ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+        }
+      });
+      if (!response.ok) {
+        const failure = await response.json().catch(() => ({}));
+        throw new Error(failure?.error || `UAT feedback history ${response.status}`);
+      }
+      const data = await response.json().catch(() => ({}));
+      const cloudEntries = (Array.isArray(data?.history) ? data.history : [])
+        .map((entry) => normalizeUatFeedbackHistoryEntry(entry))
+        .filter(Boolean);
+      const localEntries = getUatFeedbackHistoryFromStorage();
+      syncUatFeedbackHistoryState([...cloudEntries, ...localEntries]);
+    } catch {
+      if (!silent) {
+        setUatFeedbackStatusWithClear("Could not load cloud feedback history right now.");
+      }
+      setUatFeedbackHistory(getUatFeedbackHistoryFromStorage());
+    } finally {
+      setUatFeedbackHistorySyncing(false);
+    }
+  };
+
   const toggleUatFeedbackHistoryOpen = () => {
     setUatFeedbackHistoryOpen((value) => {
       const next = !value;
       if (next) {
         setUatFeedbackHistory(getUatFeedbackHistoryFromStorage());
+        void refreshUatFeedbackHistory({ silent: true });
       }
       return next;
     });
@@ -9063,6 +9125,7 @@ export default function Stillform() {
       const updatedHistory = appendUatFeedbackHistory(historyEntry, UAT_FEEDBACK_HISTORY_MAX_ITEMS);
       setUatFeedbackHistory(updatedHistory);
       setUatFeedbackHistoryOpen(true);
+      void refreshUatFeedbackHistory({ silent: true });
       setUatFeedbackStatusWithClear("Thanks. Your UAT feedback was sent.");
       try { window.plausible("UAT Feedback Submitted", { props: { question: selectedQuestionId } }); } catch {}
     } catch {
@@ -10592,8 +10655,13 @@ export default function Stillform() {
                     </button>
                     {uatFeedbackHistoryOpen && (
                       <div style={{ marginTop: 8, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px", maxHeight: 220, overflowY: "auto" }}>
+                        {uatFeedbackHistorySyncing && (
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>
+                            Syncing cloud history…
+                          </div>
+                        )}
                         {uatFeedbackHistory.length === 0 ? (
-                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No feedback submitted yet.</div>
+                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No feedback found yet on this install/account.</div>
                         ) : (
                           uatFeedbackHistory.map((entry) => {
                             const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";

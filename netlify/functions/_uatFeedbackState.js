@@ -83,3 +83,44 @@ export const insertUatFeedback = async (payload) => {
   );
   return Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 };
+
+const sanitizeLimit = (value, fallback = 20, max = 50) => {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(1, Math.min(max, Math.floor(n)));
+};
+
+export const listUatFeedbackHistory = async ({
+  userId = null,
+  installId = null,
+  limit = 20
+} = {}) => {
+  const safeUserId = asText(userId, 120);
+  const safeInstallId = asInstallId(installId);
+  if (!safeUserId && !safeInstallId) return [];
+
+  const safeLimit = sanitizeLimit(limit, 20, 50);
+  const rowsById = new Map();
+
+  if (safeUserId) {
+    const rows = await sbAdminFetch(
+      `/rest/v1/${UAT_FEEDBACK_TABLE}?select=id,created_at,source_screen,question_id,question_prompt,feedback_text,install_id,user_id&user_id=eq.${encodeURIComponent(safeUserId)}&order=created_at.desc&limit=${safeLimit}`
+    );
+    for (const row of Array.isArray(rows) ? rows : []) {
+      if (row?.id != null) rowsById.set(String(row.id), row);
+    }
+  }
+
+  if (safeInstallId) {
+    const rows = await sbAdminFetch(
+      `/rest/v1/${UAT_FEEDBACK_TABLE}?select=id,created_at,source_screen,question_id,question_prompt,feedback_text,install_id,user_id&install_id=eq.${encodeURIComponent(safeInstallId)}&order=created_at.desc&limit=${safeLimit}`
+    );
+    for (const row of Array.isArray(rows) ? rows : []) {
+      if (row?.id != null) rowsById.set(String(row.id), row);
+    }
+  }
+
+  return [...rowsById.values()]
+    .sort((a, b) => new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime())
+    .slice(0, safeLimit);
+};
