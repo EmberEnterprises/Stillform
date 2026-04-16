@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { spawnSync } from "node:child_process";
+import { runPortableRipgrep } from "./_patternChecks.mjs";
 
 const checks = [
   { label: "Build (vite)", cmd: "npm", args: ["run", "build"] },
@@ -64,9 +65,14 @@ const checks = [
 
 let failed = false;
 
+const runCommand = (cmd, args) => {
+  if (cmd === "rg") return runPortableRipgrep(args);
+  return spawnSync(cmd, args, { stdio: "inherit", shell: false });
+};
+
 const run = ({ label, cmd, args, type = "default" }) => {
   process.stdout.write(`\n== ${label} ==\n`);
-  const res = spawnSync(cmd, args, { stdio: "inherit", shell: false });
+  const res = runCommand(cmd, args);
   if (type === "merge-check") {
     // rg exits 0 when matches found, 1 when no matches, 2+ on errors.
     if (res.status === 1) {
