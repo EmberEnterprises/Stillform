@@ -49,5 +49,9 @@
 	<true/>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Stillform uses Face ID to protect your Reframe conversations and Signal Log.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Stillform reads your upcoming calendar events to personalize daily composure guidance.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Stillform reads sleep and heart metrics from Health to personalize your regulation prompts.</string>
 </dict>
 </plist>

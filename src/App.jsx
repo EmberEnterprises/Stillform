@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, Component } from "react";
 import { WidgetBridge } from "./plugins/widgetBridge";
+import { integrationBridge } from "./plugins/integrationBridge";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -8887,6 +8888,39 @@ export default function Stillform() {
     } catch {}
   };
 
+  const getIntegrationLabel = (kind) => (kind === "calendar" ? "Calendar" : "Health");
+
+  const writeIntegrationData = (kind, payload) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    if (kind === "calendar") {
+      const events = Array.isArray(payload?.events) ? payload.events : [];
+      if (typeof payload?.summary === "string" && payload.summary.trim()) {
+        localStorage.setItem("stillform_calendar_summary", payload.summary.trim());
+      } else {
+        localStorage.removeItem("stillform_calendar_summary");
+      }
+      localStorage.setItem("stillform_calendar_events", JSON.stringify(events));
+      localStorage.setItem("stillform_calendar_updated_at", String(payload?.updatedAt || new Date().toISOString()));
+      return;
+    }
+    if (kind === "health") {
+      if (typeof payload?.summary === "string" && payload.summary.trim()) {
+        localStorage.setItem("stillform_health_summary", payload.summary.trim());
+      } else {
+        localStorage.removeItem("stillform_health_summary");
+      }
+      localStorage.setItem("stillform_health_snapshot", JSON.stringify(payload?.snapshot || null));
+      localStorage.setItem("stillform_health_updated_at", String(payload?.updatedAt || new Date().toISOString()));
+    }
+  };
+
+  const clearIntegrationData = (kind) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    config.data.forEach((k) => localStorage.removeItem(k));
+  };
+
   const setIntegrationConsent = (kind, nextState) => {
     const config = INTEGRATION_STORAGE_KEYS[kind];
     if (!config) return;
@@ -8895,16 +8929,17 @@ export default function Stillform() {
         localStorage.setItem(config.consent, nextState);
       }
       if (nextState === "revoked") {
-        config.data.forEach((k) => localStorage.removeItem(k));
+        clearIntegrationData(kind);
         localStorage.removeItem(config.error);
+        localStorage.removeItem(config.retryAt);
       }
       if (nextState === "granted") {
         localStorage.removeItem(config.error);
       }
       refreshSettings();
-      const label = kind === "calendar" ? "Calendar" : "Health";
+      const label = getIntegrationLabel(kind);
       const msg = nextState === "granted"
-        ? `${label} context enabled.`
+        ? `${label} access enabled.`
         : nextState === "revoked"
           ? `${label} context revoked and local cache cleared.`
           : `${label} context reset to pending.`;
@@ -8914,21 +8949,57 @@ export default function Stillform() {
     }
   };
 
+  const syncIntegrationContext = async (kind, { source = "sync" } = {}) => {
+    const config = INTEGRATION_STORAGE_KEYS[kind];
+    if (!config) return;
+    const label = getIntegrationLabel(kind);
+    try {
+      const result = kind === "calendar"
+        ? await integrationBridge.syncCalendar()
+        : await integrationBridge.syncHealth();
+
+      if (result?.ok) {
+        localStorage.setItem(config.consent, "granted");
+        localStorage.removeItem(config.error);
+        localStorage.setItem(config.retryAt, new Date().toISOString());
+        writeIntegrationData(kind, result);
+        refreshSettings();
+        if (result?.status === "no-data") {
+          setIntegrationStatusWithClear(`${label} connected, but no recent data was found yet.`);
+        } else {
+          setIntegrationStatusWithClear(`${label} connected and synced from device.`);
+        }
+        return;
+      }
+
+      const status = String(result?.status || "error");
+      const reason = String(result?.error || `${label} sync failed.`);
+      if (status === "denied" || status === "restricted") {
+        localStorage.setItem(config.consent, "pending");
+        clearIntegrationData(kind);
+      }
+      localStorage.setItem(config.error, reason.slice(0, 220));
+      localStorage.setItem(config.retryAt, new Date().toISOString());
+      refreshSettings();
+      if (source === "connect") {
+        setIntegrationStatusWithClear(`${label} connection not completed: ${reason}`);
+      } else {
+        setIntegrationStatusWithClear(`${label} sync failed: ${reason}`);
+      }
+    } catch {
+      try {
+        localStorage.setItem(config.error, `${label} sync failed.`);
+        localStorage.setItem(config.retryAt, new Date().toISOString());
+      } catch {}
+      refreshSettings();
+      setIntegrationStatusWithClear(`Could not sync ${label.toLowerCase()} right now.`);
+    }
+  };
+
   const retryIntegrationContext = (kind) => {
     const config = INTEGRATION_STORAGE_KEYS[kind];
     if (!config) return;
-    try {
-      localStorage.removeItem(config.error);
-      localStorage.setItem(config.retryAt, new Date().toISOString());
-      if (localStorage.getItem(config.consent) !== "granted") {
-        localStorage.setItem(config.consent, "granted");
-      }
-      refreshSettings();
-      const label = kind === "calendar" ? "Calendar" : "Health";
-      setIntegrationStatusWithClear(`${label} retry queued. Refreshing status.`);
-    } catch {
-      setIntegrationStatusWithClear("Could not queue integration retry.");
-    }
+    void syncIntegrationContext(kind, { source: "retry" });
   };
 
   const clearIntegrationError = (kind) => {
@@ -8937,7 +9008,7 @@ export default function Stillform() {
     try {
       localStorage.removeItem(config.error);
       refreshSettings();
-      const label = kind === "calendar" ? "Calendar" : "Health";
+      const label = getIntegrationLabel(kind);
       setIntegrationStatusWithClear(`${label} error cleared.`);
     } catch {
       setIntegrationStatusWithClear("Could not clear integration error.");
@@ -12283,16 +12354,16 @@ export default function Stillform() {
                   <button
                     className="btn btn-ghost"
                     style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => setIntegrationConsent("calendar", "granted")}
+                    onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}
                   >
-                    Enable calendar
+                    Connect calendar
                   </button>
                   <button
                     className="btn btn-ghost"
                     style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => setIntegrationConsent("health", "granted")}
+                    onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}
                   >
-                    Enable health
+                    Connect health
                   </button>
                   <button
                     className="btn btn-ghost"
@@ -12313,14 +12384,14 @@ export default function Stillform() {
                     style={{ fontSize: 12, padding: "8px 12px" }}
                     onClick={() => retryIntegrationContext("calendar")}
                   >
-                    Retry calendar
+                    Sync calendar now
                   </button>
                   <button
                     className="btn btn-ghost"
                     style={{ fontSize: 12, padding: "8px 12px" }}
                     onClick={() => retryIntegrationContext("health")}
                   >
-                    Retry health
+                    Sync health now
                   </button>
                   <button
                     className="btn btn-ghost"
