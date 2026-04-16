@@ -8636,6 +8636,27 @@ function QBPill({ onPress }) {
 }
 
 export default function Stillform() {
+  const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
+  const readFirstRunStage = () => {
+    try {
+      const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
+      return raw === "bridge" || raw === "calibration" ? raw : "tutorial";
+    } catch {
+      return "tutorial";
+    }
+  };
+  const setFirstRunStage = (stage) => {
+    try {
+      if (stage === "bridge" || stage === "calibration") {
+        localStorage.setItem(FIRST_RUN_STAGE_KEY, stage);
+      } else {
+        localStorage.removeItem(FIRST_RUN_STAGE_KEY);
+      }
+    } catch {}
+  };
+  const isFirstRunComplete = () => {
+    try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; }
+  };
   const [splashDone, setSplashDone] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
@@ -8649,8 +8670,7 @@ export default function Stillform() {
   }, []);
 
   // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
-  const hasCompletedFirstRunFlow = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
-  
+  // While incomplete, FIRST_RUN_STAGE_KEY keeps cold-start recovery within that sequence.
   // Subscription & trial tracking
   const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
@@ -8869,7 +8889,11 @@ export default function Stillform() {
     return "home";
   };
   const openSetupBridge = (origin = "home") => {
-    setSetupBridgeOrigin(resolveSetupBridgeOrigin(origin));
+    const resolvedOrigin = resolveSetupBridgeOrigin(origin);
+    setSetupBridgeOrigin(resolvedOrigin);
+    if (!isFirstRunComplete()) {
+      setFirstRunStage("bridge");
+    }
     setScreen("onboarding");
   };
   const openTutorial = (backScreen = "home") => {
@@ -9199,7 +9223,20 @@ export default function Stillform() {
         }
       } catch {}
 
-      if (!hasCompletedFirstRunFlow) {
+      if (!isFirstRunComplete()) {
+        const firstRunStage = readFirstRunStage();
+        if (firstRunStage === "calibration") {
+          setSetupBridgeOrigin("tutorial");
+          setScreen("setup");
+          setScreenReady(true);
+          return;
+        }
+        if (firstRunStage === "bridge") {
+          setSetupBridgeOrigin("tutorial");
+          setScreen("onboarding");
+          setScreenReady(true);
+          return;
+        }
         setTutorialStep(0);
         setTutorialReturnScreen("home");
         setScreen("tutorial");
@@ -9231,7 +9268,7 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams(window.location.search);
       const share = params.get("share");
-      if (share && hasCompletedFirstRunFlow) {
+      if (share && isFirstRunComplete()) {
         setSharedText(decodeURIComponent(share));
         setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
         setScreen("tool");
@@ -9245,7 +9282,7 @@ export default function Stillform() {
             try {
               const url = new URL(data.url);
               const s = url.searchParams.get("share");
-              if (s && hasCompletedFirstRunFlow) {
+              if (s && isFirstRunComplete()) {
                 setSharedText(decodeURIComponent(s));
                 setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
                 setScreen("tool");
@@ -10187,7 +10224,11 @@ export default function Stillform() {
   const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
     // Route to calibration assessment, not home
     if (bridgeOrigin !== null) {
-      setSetupBridgeOrigin(resolveSetupBridgeOrigin(bridgeOrigin));
+      const resolvedOrigin = resolveSetupBridgeOrigin(bridgeOrigin);
+      setSetupBridgeOrigin(resolvedOrigin);
+      if (!isFirstRunComplete()) {
+        setFirstRunStage("calibration");
+      }
     }
     setupAutoLaunchStepRef.current = null;
     setSetupStep(0);
@@ -10197,6 +10238,7 @@ export default function Stillform() {
 
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+    setFirstRunStage(null);
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
   };
@@ -10953,7 +10995,7 @@ export default function Stillform() {
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
                   Let's calibrate your system first.
                 </div>
-                <button onClick={() => beginCalibrationFlow({ bridgeOrigin: "home" })} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
+                <button onClick={() => openSetupBridge("home")} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
                   Begin Calibration →
                 </button>
               </section>
@@ -13877,6 +13919,7 @@ export default function Stillform() {
                       localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
                       localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
                       localStorage.removeItem("stillform_onboarded");
+                      localStorage.removeItem(FIRST_RUN_STAGE_KEY);
                       localStorage.removeItem("stillform_sb_session");
                       localStorage.removeItem("stillform_app_version");
                       localStorage.removeItem("stillform_install_id");
