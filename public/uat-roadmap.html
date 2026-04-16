@@ -269,6 +269,7 @@
       <nav class="jump-links" aria-label="UAT status quick links">
         <a href="#live">What is live</a>
         <a href="#planned">Launch planning</a>
+        <a href="#visual-audit">Customization visual audit</a>
         <a href="#issues">Current issue list</a>
         <a href="#coaching-review">Coaching concept review</a>
       </nav>
@@ -339,6 +340,55 @@
             <p>Operational rule: update this board as changes land and re-check status before every publish to main.</p>
           </article>
         </div>
+      </section>
+
+      <section class="block" id="visual-audit">
+        <div class="block-head">
+          <h2>Customization Visual Audit Matrix</h2>
+          <span class="badge progress">Open</span>
+        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Audit row</th>
+              <th>Expected behavior</th>
+              <th>Status</th>
+              <th>Evidence to collect</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Audit row">Delete-all reset returns to onboarding</td>
+              <td data-label="Expected behavior">After <strong>Delete all data</strong>, app opens onboarding first and shows Visual comfort controls before calibration.</td>
+              <td data-label="Status">Open</td>
+              <td data-label="Evidence to collect">Screenshot: first screen after reset showing Visual comfort card.</td>
+            </tr>
+            <tr>
+              <td data-label="Audit row">Theme parity (Onboarding vs Settings)</td>
+              <td data-label="Expected behavior">Dark, Midnight Blue, Warm, and Light options are available in onboarding and Settings.</td>
+              <td data-label="Status">Open</td>
+              <td data-label="Evidence to collect">Screenshot pair: onboarding selector + Settings selector.</td>
+            </tr>
+            <tr>
+              <td data-label="Audit row">Reduced motion persistence</td>
+              <td data-label="Expected behavior">Reduced motion toggle set during onboarding persists on Home and in Settings.</td>
+              <td data-label="Status">Open</td>
+              <td data-label="Evidence to collect">Screenshot: onboarding selection + Settings confirmation.</td>
+            </tr>
+            <tr>
+              <td data-label="Audit row">Visual grounding persistence</td>
+              <td data-label="Expected behavior">Visual grounding toggle set during onboarding persists on Home and in Settings.</td>
+              <td data-label="Status">Open</td>
+              <td data-label="Evidence to collect">Screenshot: onboarding selection + Settings confirmation.</td>
+            </tr>
+            <tr>
+              <td data-label="Audit row">Replay onboarding path</td>
+              <td data-label="Expected behavior">Settings → Customization includes an explicit replay action to revisit visual comfort setup.</td>
+              <td data-label="Status">Closed</td>
+              <td data-label="Evidence to collect">Screenshot: Settings button “Replay onboarding visual comfort”.</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <section class="block" id="issues">
@@ -419,6 +469,11 @@
               <td data-label="Issue">Privacy/security baseline hardening</td>
               <td data-label="Status">Completed (live)</td>
               <td data-label="Implementation focus">RLS/grants hardening, CORS tightening, email minimization, and CI security gate shipped.</td>
+            </tr>
+            <tr>
+              <td data-label="Issue">Onboarding visual comfort not appearing after reset</td>
+              <td data-label="Status">In progress</td>
+              <td data-label="Implementation focus">Reset path now routes to onboarding first; visual audit matrix tracks final verification across theme/motion/grounding combinations.</td>
             </tr>
             <tr>
               <td data-label="Issue">Perception vs accuracy delta is not explicitly modeled</td>

@@ -61,6 +61,8 @@
 - [ ] Onboarding includes visual customization options (theme selection)
 - [ ] Onboarding includes reduced-motion option
 - [ ] Onboarding includes visual-grounding option
+- [ ] Settings includes explicit replay path for onboarding visual comfort walkthrough
+- [ ] Delete-all reset returns users to onboarding visual comfort before calibration
 
 ---
 
