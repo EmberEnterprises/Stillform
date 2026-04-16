@@ -7448,6 +7448,46 @@ function MyProgress({ onBack }) {
     }
     return lines;
   })();
+  const ratingDeltaSessionsForProof = sessions.filter((session) => (
+    Number.isFinite(Number(session?.preRating))
+    && Number.isFinite(Number(session?.postRating))
+  ));
+  const recent30RatedForProof = ratingDeltaSessionsForProof.filter((session) => withinDays(session?.timestamp, 30));
+  const positiveRecent30ForProof = recent30RatedForProof.filter((session) => (
+    Number(session.postRating) - Number(session.preRating)
+  ) > 0).length;
+  const acuteShiftRate30dForProof = recent30RatedForProof.length
+    ? Math.round((positiveRecent30ForProof / recent30RatedForProof.length) * 100)
+    : null;
+  const recoveredFromHighActivationForProof = recent30RatedForProof.filter((session) => (
+    Number(session.preRating) <= 2
+    && Number(session.postRating) >= 3
+    && Number.isFinite(Number(session.duration))
+    && Number(session.duration) > 0
+  ));
+  const recoverySpeedMinutesForProof = recoveredFromHighActivationForProof.length
+    ? (recoveredFromHighActivationForProof.reduce((sum, session) => sum + Number(session.duration || 0), 0) / recoveredFromHighActivationForProof.length / 60)
+    : null;
+  const communicationEvents30dForProof = readArrayFromStorage(COMMUNICATION_EVENTS_KEY).filter((entry) => (
+    withinDays(entry?.timestamp || entry?.date, 30)
+  ));
+  const communicationActionSetForProof = {
+    opportunity: new Set(["state-to-statement-opportunity", "opportunity", "presented"]),
+    drafted: new Set(["state-to-statement-drafted", "drafted"]),
+    sentConfirmed: new Set(["state-to-statement-sent-confirmed", "sent-confirmed"])
+  };
+  const normalizedCommunicationEvents30dForProof = communicationEvents30dForProof.map((entry) => {
+    const rawAction = String(entry?.action || "");
+    const matched = Object.entries(communicationActionSetForProof).find(([, values]) => values.has(rawAction));
+    return { ...entry, normalizedAction: matched?.[0] || rawAction };
+  });
+  const opportunity30dForProof = normalizedCommunicationEvents30dForProof.filter((entry) => entry.normalizedAction === "opportunity").length;
+  const drafted30dForProof = normalizedCommunicationEvents30dForProof.filter((entry) => entry.normalizedAction === "drafted").length;
+  const sentConfirmed30dForProof = normalizedCommunicationEvents30dForProof.filter((entry) => entry.normalizedAction === "sentConfirmed").length;
+  const followThrough30dForProof = drafted30dForProof > 0
+    ? Math.round((sentConfirmed30dForProof / drafted30dForProof) * 100)
+    : null;
+  const checkinsCompleted14dForProof = morning14dCount + eod14dCount;
   const integrationContext = resolveIntegrationContext();
   const shareCardLines = [
     "Stillform Composure Card",
@@ -7541,183 +7581,139 @@ function MyProgress({ onBack }) {
           Your progress appears here after your first session.
         </div>
       ) : (<>
-        {/* STATS GRID */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 28 }}>
-          {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
-            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
-          </div>}
-          {streak > 0 && <div style={cardStyle}>
-            <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} streak</div>
-          </div>}
-          {topToolEntry && <div style={cardStyle}>
-            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topToolEntry[0]] || topToolEntry[0]}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
-          </div>}
-          {(() => {
-            const durations = sessions.map(s => s.duration).filter(d => 0 < d);
-            if (durations.length < 2) return null;
-            const fastest = Math.min(...durations);
-            const fastSec = Math.round(fastest / 1000);
-            const fastStr = fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`;
-            return <div style={cardStyle}>
-              <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{fastStr}</div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Fastest session</div>
-            </div>;
-          })()}
-        {regulationType && <div style={cardStyle}>
-          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>
-            {regulationType === "thought-first" ? "Thought-first" : regulationType === "body-first" ? "Body-first" : "Balanced"}
-          </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Processing type</div>
-        </div>}
-        {groundingHistory.length >= 3 && (() => {
-          const skipped = groundingHistory.filter(g => g.skipped).length;
-          const rate = Math.round((skipped / groundingHistory.length) * 100);
-          const label = rate >= 50 ? `Skipped ${rate}%` : rate === 0 ? "Never skipped" : `${100 - rate}% complete`;
-          return <div style={cardStyle}>
-            <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{label}</div>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Grounding rate</div>
-          </div>;
-        })()}
-        {checkinToday && <div style={cardStyle}>
-          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{checkinToday.energy || "—"}</div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Today's energy</div>
-        </div>}
-        {eodToday && <div style={cardStyle}>
-          <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{eodToday.composure || "—"}</div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Yesterday's composure</div>
-        </div>}
-        </div>
-
-        {/* PROCESSING MASTERY */}
+        {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-            Processing Mastery
+            Proof in your data
           </div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-            {normalizedRegulationType === "thought-first"
-              ? "Default pattern = cognitive first. Accuracy tracks how often your completed sessions align to that under pressure."
-              : normalizedRegulationType === "body-first"
-                ? "Default pattern = somatic first. Accuracy tracks how often your completed sessions align to that under pressure."
-                : "Balanced profile. Accuracy appears once your usage reveals a stable default pattern."}
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Default pattern accuracy</div>
-              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{defaultPatternAccuracy30d === null ? "N/A" : `${defaultPatternAccuracy30d}%`}</div>
-            </div>
-            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Switch agility</div>
-              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{switchAgility30d === null ? "N/A" : `${switchAgility30d}%`}</div>
-            </div>
-            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Debrief capture (30d)</div>
-              <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
-            </div>
-          </div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-            Built from completed tool sessions and lock-in captures.
-          </div>
-        </div>
-
-        {/* WEEKLY REFLECTION */}
-        <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-            Weekly reflection
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-            {weeklyReflectionSummary.map((line, idx) => (
-              <div key={`weekly-reflection-${idx}`} style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55 }}>
-                {line}
+          <div style={{ display: "grid", gap: 8 }}>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+                Recovery speed
               </div>
-            ))}
+              <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
+                {recoverySpeedMinutesForProof === null ? "N/A" : `${recoverySpeedMinutesForProof.toFixed(1)}m avg from high activation`}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                30-day acute shift rate: <span style={{ color: "var(--text)" }}>{acuteShiftRate30dForProof === null ? "N/A" : `${acuteShiftRate30dForProof}%`}</span>
+                {avgDelta ? <> · Avg session delta: <span style={{ color: "var(--text)" }}>{Number(avgDelta) >= 0 ? "+" : ""}{avgDelta}</span></> : null}
+              </div>
+            </div>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+                Catching patterns sooner
+              </div>
+              <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
+                {loopCompletion14d}% loop consistency (14d)
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                Check-ins completed: <span style={{ color: "var(--text)" }}>{checkinsCompleted14dForProof}</span>
+                {" "}({morning14dCount}/14 morning · {eod14dCount}/14 evening)
+              </div>
+            </div>
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+                Cleaner choices / follow-through
+              </div>
+              <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
+                {followThrough30dForProof === null ? "N/A" : `${followThrough30dForProof}% follow-through from drafted actions`}
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                Opportunities: <span style={{ color: "var(--text)" }}>{opportunity30dForProof}</span>
+                {" · "}Drafted: <span style={{ color: "var(--text)" }}>{drafted30dForProof}</span>
+                {" · "}Sent confirmed: <span style={{ color: "var(--text)" }}>{sentConfirmed30dForProof}</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* PULSE HEAT MAP — composure telemetry */}
-        {(() => {
-          const allEvents = [];
-          sessions.forEach(s => { if (s.timestamp) allEvents.push(new Date(s.timestamp)); });
-          journalEntries.forEach(e => { if (e.id) allEvents.push(new Date(e.id)); });
-          if (allEvents.length < 1) return null;
+        {/* PULSE HEAT MAP — supporting telemetry below top proof cards */}
+        <div style={{ marginBottom: 12 }}>
+          <button onClick={() => toggle("telemetry")} style={rowStyle}>
+            <div>
+              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Composure telemetry</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                12-week activity heat map
+              </div>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.telemetry ? "▾" : "▸"}</span>
+          </button>
+          {openSections.telemetry && (() => {
+            const allEvents = [];
+            sessions.forEach(s => { if (s.timestamp) allEvents.push(new Date(s.timestamp)); });
+            journalEntries.forEach(e => { if (e.id) allEvents.push(new Date(e.id)); });
+            if (allEvents.length < 1) return null;
 
-          const today = new Date();
-          today.setHours(23, 59, 59, 999);
-          const weeks = 12;
-          const startDate = new Date(today);
-          startDate.setDate(startDate.getDate() - (weeks * 7 - 1));
-          startDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            const weeks = 12;
+            const startDate = new Date(today);
+            startDate.setDate(startDate.getDate() - (weeks * 7 - 1));
+            startDate.setHours(0, 0, 0, 0);
 
-          // Build day map: "YYYY-MM-DD" → count
-          const dayMap = {};
-          allEvents.forEach(d => {
-            const key = d.toISOString().slice(0, 10);
-            dayMap[key] = (dayMap[key] || 0) + 1;
-          });
+            const dayMap = {};
+            allEvents.forEach(d => {
+              const key = d.toISOString().slice(0, 10);
+              dayMap[key] = (dayMap[key] || 0) + 1;
+            });
 
-          // Build grid: 7 rows (Mon-Sun) × 12 cols (weeks)
-          const cells = [];
-          const d = new Date(startDate);
-          // Adjust to Monday
-          while (d.getDay() !== 1) d.setDate(d.getDate() - 1);
-          const gridStart = new Date(d);
+            const cells = [];
+            const d = new Date(startDate);
+            while (d.getDay() !== 1) d.setDate(d.getDate() - 1);
+            const gridStart = new Date(d);
 
-          for (let week = 0; week < weeks; week++) {
-            for (let day = 0; day < 7; day++) {
-              const cellDate = new Date(gridStart);
-              cellDate.setDate(gridStart.getDate() + week * 7 + day);
-              const key = cellDate.toISOString().slice(0, 10);
-              const count = dayMap[key] || 0;
-              const future = cellDate > today;
-              cells.push({ week, day, count, future, date: cellDate });
+            for (let week = 0; week < weeks; week++) {
+              for (let day = 0; day < 7; day++) {
+                const cellDate = new Date(gridStart);
+                cellDate.setDate(gridStart.getDate() + week * 7 + day);
+                const key = cellDate.toISOString().slice(0, 10);
+                const count = dayMap[key] || 0;
+                const future = cellDate > today;
+                cells.push({ week, day, count, future, date: cellDate });
+              }
             }
-          }
 
-          const maxCount = Math.max(1, ...cells.map(c => c.count));
-          const dayLabels = ["M", "", "W", "", "F", "", ""];
+            const maxCount = Math.max(1, ...cells.map(c => c.count));
+            const dayLabels = ["M", "", "W", "", "F", "", ""];
 
-          return (
-            <div style={{ marginBottom: 28 }}>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>Composure Telemetry</div>
-              <div style={{ display: "flex", gap: 2 }}>
-                {/* Day labels */}
-                <div style={{ display: "flex", flexDirection: "column", gap: 2, marginRight: 4, justifyContent: "flex-start" }}>
-                  {dayLabels.map((label, i) => (
-                    <div key={i} style={{ width: 12, height: 14, fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", display: "flex", alignItems: "center" }}>{label}</div>
+            return (
+              <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "14px 16px 12px" }}>
+                <div style={{ display: "flex", gap: 2 }}>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 2, marginRight: 4, justifyContent: "flex-start" }}>
+                    {dayLabels.map((label, i) => (
+                      <div key={i} style={{ width: 12, height: 14, fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", display: "flex", alignItems: "center" }}>{label}</div>
+                    ))}
+                  </div>
+                  {Array.from({ length: weeks }, (_, week) => (
+                    <div key={week} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                      {Array.from({ length: 7 }, (_, day) => {
+                        const cell = cells[week * 7 + day];
+                        if (!cell) return null;
+                        const intensity = cell.future ? 0 : cell.count / maxCount;
+                        const bg = cell.future ? "transparent"
+                          : cell.count === 0 ? "rgba(255,255,255,0.03)"
+                          : `rgba(201, 147, 58, ${0.15 + intensity * 0.75})`;
+                        const border = cell.future ? "0.5px solid transparent" : cell.count === 0 ? "0.5px solid var(--border)" : "0.5px solid rgba(201, 147, 58, 0.2)";
+                        return (
+                          <div key={day} title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${cell.count} event${cell.count !== 1 ? "s" : ""}`} style={{
+                            width: 14, height: 14, borderRadius: 2, background: bg, border, transition: "background 0.3s"
+                          }} />
+                        );
+                      })}
+                    </div>
                   ))}
                 </div>
-                {/* Grid */}
-                {Array.from({ length: weeks }, (_, week) => (
-                  <div key={week} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    {Array.from({ length: 7 }, (_, day) => {
-                      const cell = cells[week * 7 + day];
-                      if (!cell) return null;
-                      const intensity = cell.future ? 0 : cell.count / maxCount;
-                      const bg = cell.future ? "transparent"
-                        : cell.count === 0 ? "rgba(255,255,255,0.03)"
-                        : `rgba(201, 147, 58, ${0.15 + intensity * 0.75})`;
-                      const border = cell.future ? "0.5px solid transparent" : cell.count === 0 ? "0.5px solid var(--border)" : "0.5px solid rgba(201, 147, 58, 0.2)";
-                      return (
-                        <div key={day} title={`${cell.date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}: ${cell.count} event${cell.count !== 1 ? "s" : ""}`} style={{
-                          width: 14, height: 14, borderRadius: 2, background: bg, border, transition: "background 0.3s"
-                        }} />
-                      );
-                    })}
-                  </div>
-                ))}
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, justifyContent: "flex-end" }}>
+                  <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>Less</span>
+                  {[0, 0.25, 0.5, 0.75, 1].map((v, i) => (
+                    <div key={i} style={{ width: 10, height: 10, borderRadius: 2, background: v === 0 ? "rgba(255,255,255,0.03)" : `rgba(201, 147, 58, ${0.15 + v * 0.75})`, border: "0.5px solid rgba(201, 147, 58, 0.15)" }} />
+                  ))}
+                  <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>More</span>
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8, justifyContent: "flex-end" }}>
-                <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>Less</span>
-                {[0, 0.25, 0.5, 0.75, 1].map((v, i) => (
-                  <div key={i} style={{ width: 10, height: 10, borderRadius: 2, background: v === 0 ? "rgba(255,255,255,0.03)" : `rgba(201, 147, 58, ${0.15 + v * 0.75})`, border: "0.5px solid rgba(201, 147, 58, 0.15)" }} />
-                ))}
-                <span style={{ fontSize: 9, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>More</span>
-              </div>
-            </div>
-          );
-        })()}
+            );
+          })()}
+        </div>
 
         {/* PROOF — outcome and protocol evidence */}
         {(() => {
@@ -8049,6 +8045,114 @@ function MyProgress({ onBack }) {
               {shareCardStatus && (
                 <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{shareCardStatus}</div>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* ADDITIONAL STATS — moved below top proof areas */}
+        <div style={{ marginBottom: 12 }}>
+          <button onClick={() => toggle("supportingStats")} style={rowStyle}>
+            <div>
+              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Additional stats</div>
+              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                Supporting metrics and weekly readout
+              </div>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.supportingStats ? "▾" : "▸"}</span>
+          </button>
+          {openSections.supportingStats && (
+            <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
+                  <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
+                </div>}
+                {streak > 0 && <div style={cardStyle}>
+                  <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Day{streak !== 1 ? "s" : ""} streak</div>
+                </div>}
+                {topToolEntry && <div style={cardStyle}>
+                  <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topToolEntry[0]] || topToolEntry[0]}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
+                </div>}
+                {(() => {
+                  const durations = sessions.map(s => s.duration).filter(d => 0 < d);
+                  if (durations.length < 2) return null;
+                  const fastest = Math.min(...durations);
+                  const fastSec = Math.round(fastest / 1000);
+                  const fastStr = fastSec >= 60 ? `${Math.floor(fastSec / 60)}m ${fastSec % 60}s` : `${fastSec}s`;
+                  return <div style={cardStyle}>
+                    <div style={{ fontSize: 28, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{fastStr}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Fastest session</div>
+                  </div>;
+                })()}
+                {regulationType && <div style={cardStyle}>
+                  <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>
+                    {regulationType === "thought-first" ? "Thought-first" : regulationType === "body-first" ? "Body-first" : "Balanced"}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Processing type</div>
+                </div>}
+                {groundingHistory.length >= 3 && (() => {
+                  const skipped = groundingHistory.filter(g => g.skipped).length;
+                  const rate = Math.round((skipped / groundingHistory.length) * 100);
+                  const label = rate >= 50 ? `Skipped ${rate}%` : rate === 0 ? "Never skipped" : `${100 - rate}% complete`;
+                  return <div style={cardStyle}>
+                    <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{label}</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Grounding rate</div>
+                  </div>;
+                })()}
+                {checkinToday && <div style={cardStyle}>
+                  <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{checkinToday.energy || "—"}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Today's energy</div>
+                </div>}
+                {eodToday && <div style={cardStyle}>
+                  <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4, textTransform: "capitalize" }}>{eodToday.composure || "—"}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Yesterday's composure</div>
+                </div>}
+              </div>
+
+              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  Processing Mastery
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                  {normalizedRegulationType === "thought-first"
+                    ? "Default pattern = cognitive first. Accuracy tracks how often your completed sessions align to that under pressure."
+                    : normalizedRegulationType === "body-first"
+                      ? "Default pattern = somatic first. Accuracy tracks how often your completed sessions align to that under pressure."
+                      : "Balanced profile. Accuracy appears once your usage reveals a stable default pattern."}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+                  <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Default pattern accuracy</div>
+                    <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{defaultPatternAccuracy30d === null ? "N/A" : `${defaultPatternAccuracy30d}%`}</div>
+                  </div>
+                  <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Switch agility</div>
+                    <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{switchAgility30d === null ? "N/A" : `${switchAgility30d}%`}</div>
+                  </div>
+                  <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Debrief capture (30d)</div>
+                    <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                  Built from completed tool sessions and lock-in captures.
+                </div>
+              </div>
+
+              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  Weekly reflection
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {weeklyReflectionSummary.map((line, idx) => (
+                    <div key={`weekly-reflection-${idx}`} style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55 }}>
+                      {line}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>
