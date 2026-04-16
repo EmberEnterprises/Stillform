@@ -1649,22 +1649,43 @@ const getPendingNextMoveFollowUpSession = (sessions = getSessionsFromStorage()) 
 };
 
 const saveSessionNextMoveFollowUp = (sessionTimestamp, { didIt, helped } = {}) => {
-  if (!sessionTimestamp || typeof didIt !== "boolean") return null;
+  const didItCompleted = didIt === true;
+  const didItDeferred = didIt === null;
+  const didItRejected = didIt === false;
+  if (!sessionTimestamp || (!didItCompleted && !didItDeferred && !didItRejected)) return null;
   return updateSessionByTimestamp(sessionTimestamp, (session) => {
     const existingNextMove = session?.nextMove;
     if (!existingNextMove || typeof existingNextMove !== "object") return session;
     const stamp = new Date().toISOString();
+    const existingFollowUp = existingNextMove.followUp || {};
+    if (didItDeferred) {
+      return {
+        ...session,
+        nextMove: {
+          ...existingNextMove,
+          followUp: {
+            ...existingFollowUp,
+            status: "pending",
+            dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString(),
+            promptedAt: existingFollowUp.promptedAt || stamp,
+            answeredAt: null,
+            didIt: null,
+            helped: null
+          }
+        }
+      };
+    }
     return {
       ...session,
       nextMove: {
         ...existingNextMove,
         followUp: {
-          ...(existingNextMove.followUp || {}),
+          ...existingFollowUp,
           status: "answered",
-          promptedAt: existingNextMove?.followUp?.promptedAt || stamp,
+          promptedAt: existingFollowUp.promptedAt || stamp,
           answeredAt: stamp,
-          didIt,
-          helped: typeof helped === "boolean" ? helped : null
+          didIt: didItCompleted ? true : false,
+          helped: didItCompleted && typeof helped === "boolean" ? helped : null
         }
       }
     };
@@ -3921,11 +3942,11 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
   const submitReady = didIt !== null && (!helpedRequired || helped !== null);
   const handleSubmit = () => {
     if (!submitReady || typeof onSubmit !== "function") return;
-    const didItBoolean = didIt === "yes";
+    const didItCompleted = didIt === "yes";
     onSubmit({
       sessionTimestamp,
-      didIt: didItBoolean,
-      helped: didItBoolean
+      didIt: didItCompleted ? true : null,
+      helped: didItCompleted
         ? (helped === "yes" ? true : helped === "no" ? false : null)
         : null
     });
@@ -8770,8 +8791,10 @@ export default function Stillform() {
     try {
       window.plausible("Next Move Follow-Up Saved", {
         props: {
-          did_it: didIt ? "yes" : "no",
-          helped: helped === true ? "yes" : helped === false ? "no" : "not-sure"
+          did_it: didIt === true ? "yes" : didIt === false ? "no" : "not-yet",
+          helped: didIt === true
+            ? (helped === true ? "yes" : helped === false ? "no" : "not-sure")
+            : "not-yet"
         }
       });
     } catch {}
