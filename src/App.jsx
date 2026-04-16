@@ -8590,7 +8590,9 @@ export default function Stillform() {
       } catch {}
 
       if (!hasSeenOnboarding) {
-        setScreen("onboarding");
+        setTutorialStep(0);
+        setTutorialReturnScreen("home");
+        setScreen("tutorial");
         setScreenReady(true);
         return;
       }
