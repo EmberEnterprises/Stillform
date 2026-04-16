@@ -8555,9 +8555,7 @@ export default function Stillform() {
       } catch {}
 
       if (!hasSeenOnboarding) {
-        setTutorialStep(0);
-        setTutorialReturnScreen("home");
-        setScreen("tutorial");
+        setScreen("onboarding");
         setScreenReady(true);
         return;
       }
@@ -9815,7 +9813,7 @@ export default function Stillform() {
           );
         })()}
 
-        {/* ONBOARDING — replay from Settings */}
+        {/* ONBOARDING — first run + replay from Settings */}
         {screen === "onboarding" && (() => (
           <section
             style={{
@@ -9853,6 +9851,7 @@ export default function Stillform() {
               const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
               const themeOptions = [
                 { id: "dark", label: "Dark" },
+                { id: "midnight", label: "Midnight Blue" },
                 { id: "warm", label: "Warm" },
                 { id: "light", label: "Light" }
               ];
@@ -9928,12 +9927,28 @@ export default function Stillform() {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16, width: "100%", maxWidth: 320 }}>
-              <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => beginCalibrationFlow()}>
-                Begin calibration →
-              </button>
-              <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
-                Open FAQ
-              </button>
+              {!hasSeenOnboarding ? (
+                <>
+                  <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => beginCalibrationFlow()}>
+                    Begin calibration →
+                  </button>
+                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
+                    Open FAQ
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="btn btn-primary" style={{ padding: "16px 32px", fontSize: 16, width: "100%" }} onClick={() => setScreen("settings")}>
+                    Return to settings
+                  </button>
+                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => goHomeSafely()}>
+                    Go to home
+                  </button>
+                  <button className="btn btn-ghost" style={{ width: "100%" }} onClick={() => openFaq("onboarding")}>
+                    Open FAQ
+                  </button>
+                </>
+              )}
             </div>
           </section>
         ))()}
@@ -12786,6 +12801,17 @@ export default function Stillform() {
               </button>
               {settingsSectionOpen.customization && (
               <>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                Set colors and motion here anytime, or replay onboarding for a full visual comfort walkthrough.
+              </div>
+              <button onClick={() => setScreen("onboarding")} style={{
+                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "12px 16px", marginBottom: 10, cursor: "pointer", textAlign: "left",
+                fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
+              }}>
+                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay onboarding visual comfort →</div>
+                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
+              </button>
 
               {/* Theme options (subscriber included) */}
               <div style={{ marginBottom: 12 }}>
