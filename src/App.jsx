@@ -12401,6 +12401,7 @@ export default function Stillform() {
 
             <h2>What Stillform Is Not</h2>
             <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health crisis, please see our Crisis Resources page for international helplines.</p>
+            <p>Stillform can help in many situations, but composure may still be limited by underlying physical or health factors such as illness, pain, inflammation, hormonal shifts, medication effects, or severe sleep disruption. If your state is being driven by a medical issue, treat that as real signal and seek appropriate professional care.</p>
 
             <h2>Acupressure</h2>
             <p>The acupressure guidance in Stillform is for general wellness purposes only. It is not medical treatment. The pressure points referenced are based on traditional practices and are provided for informational and self-care purposes. Consult a healthcare provider before beginning any new wellness practice, especially if you are pregnant, have a medical condition, or are taking medication.</p>
@@ -12510,6 +12511,10 @@ export default function Stillform() {
               {
                 q: "What happens when I type fast in Reframe?",
                 a: "The app notices. If you're typing rapidly — a sign your body is ahead of your thoughts — a gentle nudge appears: 'Drop your shoulders' or 'Unclench your jaw.' It fades after a few seconds. The system watches your body, not just your words."
+              },
+              {
+                q: "What if composure still feels out of reach?",
+                a: "Sometimes the issue is not mindset alone. Pain, illness, inflammation, hormonal shifts, medication effects, or severe sleep disruption can make composure hard to access even when you are doing the right things. Stillform can help you read the signal more clearly, but if your state feels physically driven or persistently off, treat that as real and get appropriate medical support."
               },
               {
                 q: "What is visual grounding?",
