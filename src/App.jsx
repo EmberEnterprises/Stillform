@@ -8982,7 +8982,7 @@ export default function Stillform() {
       return;
     }
     if (screen === "tool") {
-      goHomeSafely();
+      handleActiveToolBack();
       return;
     }
     if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing") {
