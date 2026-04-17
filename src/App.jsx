@@ -11971,15 +11971,6 @@ export default function Stillform() {
               </div>
             )}
 
-            {!isSubscribed && !uatTrialFreezeActive && (
-              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  Subscription unlocks full Stillform access.
-                </span>
-                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
-              </div>
-            )}
-
             {uatTrialFreezeActive && (() => {
               const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
               const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
