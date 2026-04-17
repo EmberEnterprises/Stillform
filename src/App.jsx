@@ -13414,15 +13414,11 @@ export default function Stillform() {
                   {integrationsSupportedOnPlatform && (<>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}>Connect calendar</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}>Connect health</button>
-                  </>)}
-                  {integrationsSupportedOnPlatform && (<>
-                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("calendar", "revoked")}>Revoke calendar</button>
-                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("health", "revoked")}>Revoke health</button>
-                  </>)}
-                  {integrationsSupportedOnPlatform && (<>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("calendar")}>Sync calendar now</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("health")}>Sync health now</button>
                   </>)}
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("calendar", "revoked")} disabled={!integrationContext.calendarConsent || integrationContext.calendarConsent === "pending"}>Revoke calendar</button>
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("health", "revoked")} disabled={!integrationContext.healthConsent || integrationContext.healthConsent === "pending"}>Revoke health</button>
                   <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => clearIntegrationError("calendar")} disabled={!integrationContext.calendarError}>Clear calendar error</button>
                   <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => clearIntegrationError("health")} disabled={!integrationContext.healthError}>Clear health error</button>
                 </div>
@@ -13559,15 +13555,6 @@ export default function Stillform() {
 
                 {/* Divider */}
                 <div style={{ borderTop: "0.5px solid var(--border)", marginBottom: 16 }} />
-
-                {/* Auto backup */}
-                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Auto backup</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Weekly encrypted backup of all your data</div>
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
-                </div>
 
                                 {/* App Diagnostics — collapsible */}
                 <div style={{ marginBottom: 10 }}>
