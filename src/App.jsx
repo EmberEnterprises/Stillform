@@ -10447,9 +10447,11 @@ export default function Stillform() {
             <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
-            <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
-              Subscribe
-            </button>
+            {!isSubscribed && (
+              <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
+                Subscribe
+              </button>
+            )}
           </div>
         </nav>
         )}
