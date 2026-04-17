@@ -13688,17 +13688,29 @@ export default function Stillform() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-                }}>Privacy &amp; Disclaimers</button>
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--text)" }}>Privacy &amp; Disclaimers</span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </button>
                 <a href="mailto:ARAembersllc@proton.me" style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
-                }}>Contact us</a>
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  textDecoration: "none"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--text)" }}>Contact us</span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </a>
                 <button onClick={() => openTutorial("settings")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
-                }}>Replay tutorial</button>
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--text)" }}>Replay tutorial</span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </button>
                 {/* Focus Check */}
                 <button onClick={() => openFocusCheck("settings")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
