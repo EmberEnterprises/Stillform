@@ -1,6 +1,6 @@
 # Stillform Copy Locks
 
-This document defines locked and constrained copy anchors for onboarding and tutorial surfaces.
+This document defines locked and constrained copy anchors for setup bridge and tutorial surfaces.
 Any edits to **LOCKED** strings require explicit approval and a matching preflight update.
 
 ## Status Legend
@@ -52,7 +52,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
    - How You Process
    - Signal Profile + Pattern Check
 6. Calibration step 2 may skip signal mapping when profile is already configured, then proceed directly to Pattern Check.
-7. Preview routing supports: `tutorial`, `onboarding`, `home`, `settings`, `faq`, `privacy`.
+7. Preview routing supports: `tutorial`, `setup-bridge`, `home`, `settings`, `faq`, `privacy`.
 8. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 9. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
 10. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
