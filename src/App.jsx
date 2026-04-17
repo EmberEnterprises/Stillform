@@ -4111,6 +4111,14 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
+const ACCOUNT_SETUP_STATE_VERSION = 1;
+const PORTABLE_SETUP_TRUTH_KEYS = new Set([
+  "stillform_onboarded",
+  "stillform_first_run_stage",
+  "stillform_regulation_type",
+  "stillform_signal_profile",
+  "stillform_bias_profile"
+]);
 const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
@@ -4183,6 +4191,7 @@ const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
   const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'}; let uploaded=0; const errors=[];
   for (const key of SYNC_KEYS) {
+    if (PORTABLE_SETUP_TRUTH_KEYS.has(key)) continue;
     try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
   }
   try { window.plausible?.("Cloud Sync Up",{props:{keys:uploaded}}); } catch {}
@@ -4198,6 +4207,7 @@ const sbSyncDown = async () => {
     if (!rows?.length) return {ok:true,restored:0};
     for (const row of rows) {
       if (!row?.data_key || restoredKeys.has(row.data_key)) continue;
+      if (PORTABLE_SETUP_TRUTH_KEYS.has(row.data_key)) continue;
       try {
         const dec=await decryptFromCloud(row.encrypted_blob);
         if (dec!==null) {
@@ -4242,7 +4252,7 @@ const sbPreUpdateBackup = async () => {
   if (!sbIsSignedIn()) return {ok:false};
   const user=sbGetUser();
   try {
-    const snap={}; for (const k of SYNC_KEYS) { const v=localStorage.getItem(k); if (v!==null) snap[k]=v; }
+    const snap={}; for (const k of SYNC_KEYS) { if (PORTABLE_SETUP_TRUTH_KEYS.has(k)) continue; const v=localStorage.getItem(k); if (v!==null) snap[k]=v; }
     await sbFetch("/rest/v1/backups",{method:"POST",body:JSON.stringify({user_id:user.id,backup_blob:await encryptForCloud(snap),app_version:APP_VERSION,trigger_type:"pre-update"})});
     try { window.plausible?.("Pre-Update Backup"); } catch {}
     return {ok:true};
@@ -4254,7 +4264,45 @@ const sbVersionCheck = async () => {
 const sbCreateProfile = async () => {
   if (!sbIsSignedIn()) return;
   const user=sbGetUser();
-  try { await sbFetch("/rest/v1/user_profiles",{method:"POST",headers:{"Prefer":"resolution=ignore-duplicates"},body:JSON.stringify({id:user.id,app_version:APP_VERSION,last_seen:new Date().toISOString()})}); } catch {}
+  try {
+    await sbFetch("/rest/v1/user_profiles?on_conflict=id", {
+      method: "POST",
+      headers: {"Prefer":"resolution=merge-duplicates"},
+      body: JSON.stringify({ id: user.id, app_version: APP_VERSION, last_seen: new Date().toISOString() })
+    });
+  } catch {}
+};
+const sbGetProfileSetupState = async () => {
+  if (!sbIsSignedIn()) return null;
+  const user = sbGetUser();
+  if (!user?.id) return null;
+  try {
+    const rows = await sbFetch(`/rest/v1/user_profiles?select=setup_state,id=id,app_version,last_seen&id=eq.${encodeURIComponent(user.id)}&limit=1`);
+    if (!Array.isArray(rows) || rows.length === 0) return null;
+    return rows[0]?.setup_state || null;
+  } catch {
+    return null;
+  }
+};
+const sbUpsertProfileSetupState = async (setupState) => {
+  if (!sbIsSignedIn()) return { ok: false, reason: "not_signed_in" };
+  const user = sbGetUser();
+  if (!user?.id) return { ok: false, reason: "no_user_id" };
+  try {
+    await sbFetch("/rest/v1/user_profiles?on_conflict=id", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates" },
+      body: JSON.stringify({
+        id: user.id,
+        app_version: APP_VERSION,
+        last_seen: new Date().toISOString(),
+        setup_state: setupState
+      })
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, reason: e?.message || "write_failed" };
+  }
 };
 const INSTALL_ID_KEY = "stillform_install_id";
 const getOrCreateInstallId = () => {
@@ -8711,6 +8759,9 @@ export default function Stillform() {
         localStorage.removeItem(FIRST_RUN_STAGE_KEY);
       }
     } catch {}
+    if (sbIsSignedIn()) {
+      void syncSetupTruthToAccount();
+    }
   };
   const isFirstRunComplete = () => {
     try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; }
@@ -8719,11 +8770,8 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
-    // Cloud sync init — version check + restore data if signed in
+    // Cloud sync init — version check only. Signed-in restore/reconcile runs in startup init.
     sbVersionCheck().catch(() => {});
-    if (sbIsSignedIn()) {
-      sbRefreshSession().then(() => sbSyncDown().catch(() => {})).catch(() => {});
-    }
     return () => clearTimeout(t);
   }, []);
 
@@ -8873,6 +8921,160 @@ export default function Stillform() {
     }
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+  const [accountSetupTruth, setAccountSetupTruth] = useState(() => null);
+  const setupTruthSyncInFlightRef = useRef(null);
+  const lastSyncedSetupTruthSignatureRef = useRef("");
+  const normalizeSetupStage = (stage) => {
+    if (stage === "bridge" || stage === "calibration" || stage === "tutorial") return stage;
+    return "tutorial";
+  };
+  const normalizeRegulationType = (value) => {
+    if (value === "thought-first" || value === "body-first" || value === "balanced") return value;
+    return null;
+  };
+  const getLocalSignalMappingCompletion = () => {
+    try {
+      const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+      return Array.isArray(profile?.firstAreas) && profile.firstAreas.length > 0;
+    } catch {
+      return false;
+    }
+  };
+  const getLocalPatternBaselineCompletion = () => {
+    try {
+      const raw = localStorage.getItem("stillform_bias_profile");
+      if (raw === null) return false;
+      return Array.isArray(JSON.parse(raw));
+    } catch {
+      return false;
+    }
+  };
+  const normalizeSetupTruth = (input) => {
+    if (!input || typeof input !== "object") return null;
+    const firstRunComplete = input.first_run_complete === true || input.onboardingCompleted === true;
+    const regulationType = normalizeRegulationType(input.regulation_type ?? input.regulationType ?? null);
+    const signalProfileComplete = input.signal_profile_complete === true || input.signalMappingCompleted === true;
+    const biasProfileComplete = input.bias_profile_complete === true || input.patternBaselineCompleted === true;
+    const firstRunStage = firstRunComplete
+      ? null
+      : normalizeSetupStage(input.first_run_stage ?? input.firstRunStage ?? null);
+    return {
+      first_run_complete: firstRunComplete,
+      first_run_stage: firstRunStage,
+      regulation_type: regulationType,
+      signal_profile_complete: signalProfileComplete,
+      bias_profile_complete: biasProfileComplete
+    };
+  };
+  const isCalibrationCompleteFromTruth = (truth) => (
+    truth?.first_run_complete === true
+    || (!!truth?.regulation_type && truth?.signal_profile_complete === true && truth?.bias_profile_complete === true)
+  );
+  const readLocalSetupTruth = () => normalizeSetupTruth({
+    first_run_complete: isFirstRunComplete(),
+    first_run_stage: isFirstRunComplete() ? null : readFirstRunStage(),
+    regulation_type: (() => {
+      try { return normalizeRegulationType(localStorage.getItem("stillform_regulation_type")); } catch { return null; }
+    })(),
+    signal_profile_complete: getLocalSignalMappingCompletion(),
+    bias_profile_complete: getLocalPatternBaselineCompletion()
+  });
+  const getSetupTruthSignature = (truth) => JSON.stringify({
+    first_run_complete: truth?.first_run_complete === true,
+    first_run_stage: truth?.first_run_stage || null,
+    regulation_type: truth?.regulation_type || null,
+    signal_profile_complete: truth?.signal_profile_complete === true,
+    bias_profile_complete: truth?.bias_profile_complete === true
+  });
+  const getSetupTruthCompletenessScore = (truth) => {
+    if (!truth || typeof truth !== "object") return 0;
+    let score = 0;
+    if (truth.first_run_complete) score += 1000;
+    if (isCalibrationCompleteFromTruth(truth)) score += 300;
+    if (truth.regulation_type) score += 80;
+    if (truth.signal_profile_complete) score += 60;
+    if (truth.bias_profile_complete) score += 60;
+    if (!truth.first_run_complete) {
+      if (truth.first_run_stage === "calibration") score += 20;
+      else if (truth.first_run_stage === "bridge") score += 10;
+      else score += 5;
+    }
+    return score;
+  };
+  const applySetupTruthToLocal = (truth) => {
+    const normalized = normalizeSetupTruth(truth);
+    if (!normalized) return;
+    try {
+      if (normalized.first_run_complete) {
+        localStorage.setItem("stillform_onboarded", "yes");
+      } else {
+        localStorage.removeItem("stillform_onboarded");
+      }
+      if (!normalized.first_run_complete && (normalized.first_run_stage === "bridge" || normalized.first_run_stage === "calibration")) {
+        localStorage.setItem(FIRST_RUN_STAGE_KEY, normalized.first_run_stage);
+      } else {
+        localStorage.removeItem(FIRST_RUN_STAGE_KEY);
+      }
+      if (normalized.regulation_type) {
+        localStorage.setItem("stillform_regulation_type", normalized.regulation_type);
+      } else {
+        localStorage.removeItem("stillform_regulation_type");
+      }
+    } catch {}
+    setRegType(normalized.regulation_type || null);
+    setAccountSetupTruth(normalized);
+  };
+  const chooseEffectiveSetupTruth = ({ localTruth, remoteTruth }) => {
+    if (!remoteTruth) return { effectiveTruth: localTruth, useRemote: false };
+    const localScore = getSetupTruthCompletenessScore(localTruth);
+    const remoteScore = getSetupTruthCompletenessScore(remoteTruth);
+    if (remoteScore > localScore) return { effectiveTruth: remoteTruth, useRemote: true };
+    if (remoteScore < localScore) return { effectiveTruth: localTruth, useRemote: false };
+    return { effectiveTruth: remoteTruth, useRemote: true };
+  };
+  const syncSetupTruthToAccount = async ({ force = false } = {}) => {
+    if (!sbIsSignedIn()) return { ok: false, reason: "not_signed_in" };
+    const payload = readLocalSetupTruth();
+    if (!payload) return { ok: false, reason: "no_local_truth" };
+    const signature = getSetupTruthSignature(payload);
+    if (!force && lastSyncedSetupTruthSignatureRef.current === signature) {
+      setAccountSetupTruth(payload);
+      return { ok: true, skipped: true };
+    }
+    if (setupTruthSyncInFlightRef.current) {
+      return setupTruthSyncInFlightRef.current;
+    }
+    const job = (async () => {
+      const result = await sbUpsertProfileSetupState(payload);
+      if (result?.ok) {
+        lastSyncedSetupTruthSignatureRef.current = signature;
+        setAccountSetupTruth(payload);
+      }
+      return result;
+    })().finally(() => {
+      setupTruthSyncInFlightRef.current = null;
+    });
+    setupTruthSyncInFlightRef.current = job;
+    return job;
+  };
+  const loadSetupTruthForSignedInUser = async () => {
+    const localTruth = readLocalSetupTruth();
+    if (!sbIsSignedIn()) {
+      setAccountSetupTruth(localTruth);
+      return { truth: localTruth, source: "local" };
+    }
+    await sbCreateProfile();
+    const remoteTruth = normalizeSetupTruth(await sbGetProfileSetupState());
+    const { effectiveTruth, useRemote } = chooseEffectiveSetupTruth({ localTruth, remoteTruth });
+    if (useRemote) {
+      applySetupTruthToLocal(effectiveTruth);
+      lastSyncedSetupTruthSignatureRef.current = getSetupTruthSignature(effectiveTruth);
+      return { truth: effectiveTruth, source: "remote" };
+    }
+    setAccountSetupTruth(effectiveTruth);
+    await syncSetupTruthToAccount({ force: true });
+    return { truth: effectiveTruth, source: "local" };
+  };
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
 
   useEffect(() => {
@@ -9298,6 +9500,18 @@ export default function Stillform() {
         }
       } catch {}
 
+      if (sbIsSignedIn()) {
+        await sbRefreshSession().catch(() => {});
+        await loadSetupTruthForSignedInUser();
+        sbSyncDown()
+          .then(async () => {
+            await loadSetupTruthForSignedInUser();
+          })
+          .catch(() => {});
+      } else {
+        setAccountSetupTruth(readLocalSetupTruth());
+      }
+
       if (!isFirstRunComplete()) {
         const firstRunStage = readFirstRunStage();
         if (firstRunStage === "calibration") {
@@ -9583,6 +9797,7 @@ export default function Stillform() {
         await sbSignIn(pricingAuthEmail, pricingAuthPassword);
         if (sbIsSignedIn()) {
           await sbSyncDown();
+          await loadSetupTruthForSignedInUser();
           signedIn = true;
         }
       } catch (e) {
@@ -9612,6 +9827,7 @@ export default function Stillform() {
         }
         await sbCreateProfile();
         await sbSyncUp();
+        await loadSetupTruthForSignedInUser();
         signedIn = true;
       }
 
@@ -10294,12 +10510,12 @@ export default function Stillform() {
   const [uatTestAgain, setUatTestAgain] = useState(null);
 
   const isSignalProfileConfigured = () => {
-    try {
-      const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
-      return Array.isArray(profile?.firstAreas) && profile.firstAreas.length > 0;
-    } catch {
-      return false;
-    }
+    if (syncSignedIn && accountSetupTruth?.signal_profile_complete === true) return true;
+    return getLocalSignalMappingCompletion();
+  };
+  const isPatternBaselineConfigured = () => {
+    if (syncSignedIn && accountSetupTruth?.bias_profile_complete === true) return true;
+    return getLocalPatternBaselineCompletion();
   };
 
   const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
@@ -10322,6 +10538,9 @@ export default function Stillform() {
     setFirstRunStage(null);
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
+    if (sbIsSignedIn()) {
+      void syncSetupTruthToAccount({ force: true });
+    }
   };
 
   // Scroll to top on every screen change + analytics
@@ -10983,6 +11202,9 @@ export default function Stillform() {
                       try { localStorage.setItem("stillform_regulation_type", type); } catch {}
                       try { window.plausible("Assessment Completed", { props: { type } }); } catch {}
                       setRegType(type);
+                      if (sbIsSignedIn()) {
+                        void syncSetupTruthToAccount({ force: true });
+                      }
                       setAssessmentAnswers([]);
                       setSetupStep(s => s + 1);
                     }}>
@@ -10994,6 +11216,9 @@ export default function Stillform() {
                   <button onClick={() => {
                     try { localStorage.setItem("stillform_regulation_type", "balanced"); } catch {}
                     setRegType("balanced");
+                    if (sbIsSignedIn()) {
+                      void syncSetupTruthToAccount({ force: true });
+                    }
                     setAssessmentAnswers([]);
                     setSetupStep(s => s + 1);
                   }} style={{
@@ -11085,9 +11310,10 @@ export default function Stillform() {
         {/* HOME — different for first-time vs returning users */}
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
+          const effectiveRegType = regType || (syncSignedIn ? (accountSetupTruth?.regulation_type || null) : null);
 
           // No regulation type set? Route to calibration
-          if (!regType) {
+          if (!effectiveRegType) {
             return (
               <section className="home">
                 <h1 className="home-title">
@@ -11106,8 +11332,8 @@ export default function Stillform() {
             );
           }
 
-          const isThoughtFirst = regType === "thought-first";
-          const isBodyFirst = regType === "body-first";
+          const isThoughtFirst = effectiveRegType === "thought-first";
+          const isBodyFirst = effectiveRegType === "body-first";
 
           /* ── RETURNING USER: clean, one dominant action ── */
           // Calculate milestones
@@ -11540,9 +11766,10 @@ export default function Stillform() {
 
               {/* GO DEEPER — secondary, below the line */}
               {(() => {
-                const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
-                const signalDone = (() => { try { const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); return p?.firstAreas?.length > 0; } catch { return false; } })();
-                const calibrationComplete = signalDone && !!biasDone;
+                const biasDone = isPatternBaselineConfigured();
+                const signalDone = isSignalProfileConfigured();
+                const calibrationComplete = (syncSignedIn && accountSetupTruth?.first_run_complete === true)
+                  || (!!(regType || accountSetupTruth?.regulation_type) && signalDone && biasDone);
 
                 const tools = [
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
@@ -11753,9 +11980,9 @@ export default function Stillform() {
                   sigh: "Sigh"
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
-                const processingCue = regType === "thought-first"
+                const processingCue = (regType || accountSetupTruth?.regulation_type) === "thought-first"
                   ? "Start with signal clarity, not full analysis."
-                  : regType === "body-first"
+                  : (regType || accountSetupTruth?.regulation_type) === "body-first"
                     ? "Start with body downshift, then language."
                     : "Stabilize first, then separate fact from story.";
                 const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
@@ -12258,7 +12485,7 @@ export default function Stillform() {
               Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </div>
             {(() => {
-              const primer = getToolEntryPrimer(activeTool?.id, regType);
+              const primer = getToolEntryPrimer(activeTool?.id, regType || accountSetupTruth?.regulation_type || null);
               if (!primer) return null;
               return (
                 <div
@@ -13437,6 +13664,7 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncUp();
+                        await syncSetupTruthToAccount();
                         setSyncFeedbackWithClear(
                           r.ok ? "success" : "error",
                           r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`
@@ -13452,6 +13680,7 @@ export default function Stillform() {
                       setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                       try {
                         const r = await sbSyncDown();
+                        await loadSetupTruthForSignedInUser();
                         const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                         setSyncFeedbackWithClear(
                           r?.ok ? "success" : "error",
@@ -13522,6 +13751,7 @@ export default function Stillform() {
                           await sbSignIn(syncEmail, syncPassword);
                           if (sbIsSignedIn()) {
                             await sbSyncDown();
+                            await loadSetupTruthForSignedInUser();
                             signedIn = true;
                           }
                         } catch (e) {
@@ -13553,6 +13783,7 @@ export default function Stillform() {
                           }
                           await sbCreateProfile();
                           await sbSyncUp();
+                          await loadSetupTruthForSignedInUser();
                           signedIn = true;
                         }
 
