@@ -4476,8 +4476,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     clinical: "Clinical",
     motivational: "Motivational"
   })[aiToneChoice] || "Balanced";
-  const inputNormalized = String(input || "").trim().toLowerCase();
-  const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
   const effectiveMode = autoMode;
   const regulationType = (() => {
     try {
@@ -4617,6 +4615,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+  const inputNormalized = String(input || "").trim().toLowerCase();
+  const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
 
   // Somatic interrupt — detects rapid typing, shows body nudge
   const keystrokeTimestamps = useRef([]);
