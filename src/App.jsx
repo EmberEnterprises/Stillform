@@ -1286,9 +1286,7 @@ const scheduleReminder = async (title, body, hour, minute) => {
             id: Date.now(),
             title,
             body,
-            schedule: { at: scheduled, repeats: true, every: 'day' },
-            sound: undefined,
-            smallIcon: 'ic_stat_icon_config_sample',
+            schedule: { at: scheduled, repeats: true, every: 'day' }
           }]
         });
       }

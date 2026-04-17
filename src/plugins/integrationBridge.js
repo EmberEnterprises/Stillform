@@ -89,12 +89,25 @@ const normalizeHealthPayload = (payload) => {
   };
 };
 
-const unsupportedResult = (kind) => ({
-  ok: false,
-  supported: false,
-  status: "unsupported",
-  error: `${kind} integration requires native TestFlight build`
-});
+const unsupportedResult = (kind) => {
+  const platform = (() => {
+    try { return Capacitor?.getPlatform?.() || null; } catch { return null; }
+  })();
+  const platformLabel = platform === "ios"
+    ? "this iOS build"
+    : platform === "android"
+      ? "Android yet"
+      : "a supported native build";
+  const error = platform === "android"
+    ? `${kind} integration is not available on Android yet`
+    : `${kind} integration requires ${platformLabel}`;
+  return {
+    ok: false,
+    supported: false,
+    status: "unsupported",
+    error
+  };
+};
 
 export const integrationBridge = {
   async syncCalendar() {
