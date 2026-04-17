@@ -4,7 +4,14 @@
 
 ARA Embers LLC · April 2026 · For Stillform Project in Claude
 
-> *Paste this document into the **Stillform** Claude project on session start. Everything here is current as of April 7, 2026. No decisions need to be relitigated.*
+> *Paste this document into the **Stillform** Claude project on session start. Historical context remains useful, but always follow the "Current-main refresh" below for launch-critical truth.*
+
+## Current-main refresh (April 17, 2026)
+
+- Share-to-Reframe is implemented on Android and requires first-run completion before shared text auto-routes into Reframe.
+- Wear OS breathing bridge is implemented (phone `WatchBridge` + `android/wear` module) and should be treated as "implemented, verify on paired devices."
+- Calendar + Health integration controls are currently supported in native iOS builds; Android currently reports these integrations as unavailable.
+- `STILLFORM_LAUNCH_TRANSFER_NEXT.md` is now used as a concise handoff snapshot for current merged state.
 
 ## CRITICAL: Multi-Session Rules
 
@@ -144,7 +151,7 @@ After the 7th session (regardless of frequency), the AI reflects on tool usage v
 - The user decides. The AI observes. That's the product.
 - First pattern note moved from session 5 to session 3 (if user doesn't feel seen in 48 hours, they leave)
 
-## Morning Check-In (BUILT — April 4, calendar integration pending)
+## Morning Check-In (BUILT — April 4, integrations partially shipped)
 
 Daily check-in card at top of home screen. Two quick taps:
 
@@ -152,7 +159,7 @@ Daily check-in card at top of home screen. Two quick taps:
 - Hardware check: multi-select — All clear / Depleted / Under-rested / Pain present / Activated / Medicated (user can select multiple, e.g. pain + under-rested). All selections sent to AI as combined context.
 - "Set my tone →" saves and collapses to "✓ Checked in · tap to update"
 - Bio-filter sends all selected hardware states to AI — combined context changes how AI interprets signals (pain + under-rested is a different baseline than either alone)
-- PENDING: Calendar integration — reads device calendar so system knows what's ahead before you tell it
+- Calendar + health integration path exists in current main, with native iOS support and Android unavailable-state messaging.
 
 ## Bio-Filter (Physical State Check)
 
@@ -283,10 +290,10 @@ Hybrid approach:
 - Haptics: @capacitor/haptics — native impact/notification patterns
 - Local notifications: @capacitor/local-notifications — daily reminder scheduler
 - Widget: Working (SharedPreferences → WidgetBridgePlugin → React)
-- Share extension: code written, untested
-- Watch haptics: code written, wear module builds, untested
+- Share extension: implemented on Android (verify on device after first-run completion)
+- Watch haptics: implemented with Wear OS module + phone bridge (verify on paired hardware)
 - Web fallback: all native features gracefully degrade on web
-- PENDING: Apple Watch companion, Health integrations
+- PENDING: Apple Watch companion parity and Android calendar/health support
 - IN PROGRESS: Biometric lock — @aparajita/capacitor-biometric-auth installed by other Claude session (April 7)
 
 ---

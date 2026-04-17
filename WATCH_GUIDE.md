@@ -1,6 +1,6 @@
 # Stillform Watch Haptics Integration Guide
 
-**Status:** ✅ Fully Implemented & Ready to Test  
+**Status:** ✅ Implemented — verify on paired phone/watch hardware  
 **Last Updated:** April 4, 2026  
 **Watch Device:** Samsung Galaxy Watch Ultra (Wear OS 4+)
 
@@ -82,7 +82,7 @@ adb devices
 cd ~/stillform/android
 ./gradlew assembleDebug
 
-# Output: android/app/build/outputs/apk/debug/app-debug.apk
+# Output: app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ### Step 3: Build Watch App
@@ -91,14 +91,14 @@ cd ~/stillform/android
 cd ~/stillform/android
 ./gradlew :wear:assembleDebug
 
-# Output: android/wear/build/outputs/apk/debug/wear-debug.apk
+# Output: wear/build/outputs/apk/debug/wear-debug.apk
 ```
 
 ### Step 4: Install Phone APK
 
 ```bash
-# Use default adb (phone)
-adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+# Use default adb target (phone)
+adb install -r app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ### Step 5: Install Watch APK
@@ -108,10 +108,10 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 adb connect <WATCH_IP>:5555
 
 # Install watch app
-adb -s <WATCH_SERIAL_OR_IP> install -r android/wear/build/outputs/apk/debug/wear-debug.apk
+adb -s <WATCH_SERIAL_OR_IP> install -r wear/build/outputs/apk/debug/wear-debug.apk
 
 # Or if only one watch connected:
-adb install -r android/wear/build/outputs/apk/debug/wear-debug.apk
+adb install -r wear/build/outputs/apk/debug/wear-debug.apk
 ```
 
 ### Step 6: Verify Installation
@@ -134,11 +134,11 @@ adb -s <WATCH_SERIAL> shell pm list packages | grep araembers.stillform
 
 ### Test 1: Basic Connectivity
 1. Open Stillform on phone
-2. Go to Settings
-3. Look for "Wearable Integration" status (should show "Connected" or "Ready")
-4. Open logcat: `adb logcat | grep "StillformWatch"`
+2. Open phone logcat: `adb logcat | grep "StillformWatch"`
+3. Start any breathing session
+4. Confirm log shows a send attempt (for example: `Breathing sent to watch: calm`)
 
-### Test 2: Start Breathing → Watch Activation
+### Test 2: Start Breathing -> Watch Activation
 1. Phone: Start a breathing session (any pattern)
 2. Watch: Should light up within 2-3 seconds
 3. Watch: Should show "INHALE" and a countdown
@@ -229,7 +229,7 @@ vibrator.vibrate(VibrationEffect.createOneShot(60, 80)); // was 120
 vibrator.vibrate(VibrationEffect.createOneShot(100, 120)); // was 60ms
 ```
 
-After changes, rebuild: `./gradlew :wear:assembleDebug && adb install -r android/wear/build/outputs/apk/debug/wear-debug.apk`
+After changes, rebuild: `./gradlew :wear:assembleDebug && adb install -r wear/build/outputs/apk/debug/wear-debug.apk`
 
 ## Debugging & Logs
 
@@ -375,4 +375,4 @@ adb logcat | grep -E "Stillform|Watch|Haptics" --line-buffered
 
 ---
 
-**Next:** Share Extension integration for Reframe input from any app
+**Note:** Share-to-Reframe integration is already implemented in the Android app and documented in `SHARE_EXTENSION_GUIDE.md`.

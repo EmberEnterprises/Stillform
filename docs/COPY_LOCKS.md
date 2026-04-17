@@ -1,6 +1,6 @@
 # Stillform Copy Locks
 
-This document defines locked and constrained copy anchors for onboarding and tutorial surfaces.
+This document defines locked and constrained copy anchors for onboarding/tutorial plus AI entry copy surfaces.
 Any edits to **LOCKED** strings require explicit approval and a matching preflight update.
 
 ## Status Legend
@@ -19,7 +19,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Pattern Check` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
-| Reframe soft-entry greeting | LOCKED | `Hey good to see you. How are you doing?` |
+| Reframe soft-entry greeting (`netlify/functions/reframe.js`) | LOCKED | `Hey good to see you. How are you doing?` |
 | Pulse progress-layer descriptor | LOCKED | `Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.` |
 | Science evidence section title | LOCKED | `Science Evidence` |
 | Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
