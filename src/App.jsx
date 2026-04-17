@@ -13126,10 +13126,9 @@ export default function Stillform() {
                   )}
                 </div>
                 {/* Re-run calibration */}
-                <div style={{ marginBottom: 6 }}>
+                <div style={{ marginBottom: 10, padding: "8px 0", borderBottom: "0.5px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); localStorage.removeItem("stillform_signal_profile"); localStorage.removeItem("stillform_bias_profile"); localStorage.removeItem("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
                     <span style={{ fontSize: 13, color: "var(--text)" }}>Re-run calibration</span>
@@ -13138,10 +13137,9 @@ export default function Stillform() {
                 </div>
 
                 {/* Replay setup bridge */}
-                <div style={{ marginBottom: 6 }}>
+                <div style={{ marginBottom: 10, padding: "8px 0", borderBottom: "0.5px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <button onClick={() => openSetupBridge("settings")} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
                     <span style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge</span>
