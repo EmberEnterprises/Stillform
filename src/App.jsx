@@ -12842,27 +12842,21 @@ export default function Stillform() {
                   )}
                 </div>
                 {/* Audio */}
-                <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Audio</div>
-                  <div style={{
-                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
-                  }}>
-                    <div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
-                    </div>
-                    <button onClick={() => { try { const current = localStorage.getItem("stillform_audio") === "on"; localStorage.setItem("stillform_audio", current ? "off" : "on"); refreshSettings(); } catch {} }} style={{
-                      background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
-                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
-                    }}>
-                      <div style={{
-                        width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
-                        left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
-                        transition: "left 0.2s"
-                      }} />
-                    </button>
+                <div style={{ marginBottom: 10, padding: "8px 0", borderBottom: "0.5px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Audio</span>
+                    <span style={{ fontSize: 11, color: "var(--text-dim)", marginLeft: 8 }}>Gentle tones during breathing</span>
                   </div>
+                  <button onClick={() => { try { const current = localStorage.getItem("stillform_audio") === "on"; localStorage.setItem("stillform_audio", current ? "off" : "on"); refreshSettings(); } catch {} }} style={{
+                    background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
+                    border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0
+                  }}>
+                    <div style={{
+                      width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
+                      left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
+                      transition: "left 0.2s"
+                    }} />
+                  </button>
                 </div>
 
                                 {/* Sound — collapsible */}
