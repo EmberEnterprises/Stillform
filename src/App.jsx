@@ -4387,13 +4387,36 @@ async function secureSet(key, value) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
+  const POSITIVE_STATE_PATTERNS = [
+    "not so bad",
+    "figured it out",
+    "figured out",
+    "found a way",
+    "worked out",
+    "working out",
+    "in a good place",
+    "better now",
+    "doing better",
+    "feel better now",
+    "feeling better now",
+    "good now",
+    "okay now",
+    "calmer now",
+    "more clear now",
+    "relieved",
+    "relief",
+    "that helped",
+    "it helped",
+    "i'm proud",
+    "im proud",
+    "small win",
+    "win today",
+    "good news",
+    "made it work",
+    "got through it"
+  ];
   const [activeMode, setActiveMode] = useState(() => {
-    if (mode !== "calm") return mode;
-    try {
-      const last = localStorage.getItem("stillform_reframe_last_mode");
-      if (last === "calm" || last === "clarity" || last === "hype") return last;
-    } catch {}
-    return null;
+    return mode !== "calm" ? mode : null;
   });
   const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
@@ -4453,6 +4476,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     clinical: "Clinical",
     motivational: "Motivational"
   })[aiToneChoice] || "Balanced";
+  const inputNormalized = String(input || "").trim().toLowerCase();
+  const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
   const effectiveMode = autoMode;
   const regulationType = (() => {
     try {
@@ -4850,10 +4875,27 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch { return null; }
           })(),
           mode: (() => {
-            // Auto-route to clarity mode if input signals spiraling/looping
+            // Only force clarity when the user clearly signals repetitive thinking.
             const lower = textToSend.toLowerCase();
-            const clarityTriggers = ["can't stop", "cant stop", "keep thinking", "won't stop", "wont stop", "looping", "replaying", "over and over", "can't sleep", "cant sleep", "won't shut up", "wont shut up", "same thought", "stuck in my head", "broken record"];
-            if (clarityTriggers.some(t => lower.includes(t)) && textToSend.split(/\s+/).length < 30) return "clarity";
+            const clarityTriggers = [
+              "can't stop thinking",
+              "cant stop thinking",
+              "can't stop replaying",
+              "cant stop replaying",
+              "won't stop replaying",
+              "wont stop replaying",
+              "keep replaying",
+              "over and over",
+              "same thought",
+              "stuck in my head",
+              "spiraling",
+              "i keep looping",
+              "my mind won't stop",
+              "my mind wont stop"
+            ];
+            const looksLikeResolvedOrPositive = POSITIVE_STATE_PATTERNS.some((token) => lower.includes(token));
+            const looksLikeLoop = clarityTriggers.some((trigger) => lower.includes(trigger));
+            if (!looksLikeResolvedOrPositive && looksLikeLoop && textToSend.split(/\s+/).length < 40) return "clarity";
             return effectiveMode;
           })(),
           history: prevMessages.map(m => ({
@@ -5127,11 +5169,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       "What's running in the background right now?"
     ],
     clarity: [
-      "Name the thought loop. Cut through it.",
-      "What keeps coming back no matter how many times you dismiss it?",
-      "What decision are you circling?",
-      "What thought won't stop?",
-      "What are you replaying?"
+      "What thought or question keeps pulling you back?",
+      "What's the part your mind keeps returning to?",
+      "What are you trying to solve right now?",
+      "What's the signal underneath the overthinking?",
+      "What keeps snagging your attention?"
     ],
     hype: [
       "What are you about to walk into? Say it.",
@@ -5853,7 +5895,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 className="ai-input"
                 style={{ borderColor: input.length > 1800 ? "rgba(200,100,50,0.6)" : mc.border, width: "100%", boxSizing: "border-box" }}
-                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What's looping?" : "What's on your mind..."}
+                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : (isClarity && !looksLikePositiveState) ? "What keeps pulling your mind back?" : "What's on your mind..."}
                 value={input}
                 maxLength={2000}
                 onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
