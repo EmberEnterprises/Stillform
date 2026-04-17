@@ -58,6 +58,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 10. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
 11. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
 12. Tutorial includes a Go / No-Go TTFV step with an on-page Post-Check Briefing before proceeding.
+13. Setup bridge identity is explicit (`setup-bridge` route + "setup bridge" surface naming), not legacy onboarding-step naming.
+14. First-run resume state uses `stillform_first_run_stage` (`bridge` / `calibration`) until `stillform_onboarded` is set.
 
 ## Prohibited Claims
 

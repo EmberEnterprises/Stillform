@@ -56,7 +56,6 @@ Users can share text from Notes, Email, Twitter, etc. → lands in Reframe tool.
 **Read this if you need to:**
 - Test share intent
 - Debug share text encoding/decoding
-- Implement iOS share extension
 - Understand Android intent handling
 - Test edge cases (long text, special chars, etc.)
 
@@ -257,7 +256,7 @@ git pull origin main
 
 ---
 
-## 📞 Support & Next Steps
+## 📞 Support
 
 **If you need to:**
 
@@ -267,16 +266,7 @@ git pull origin main
 4. **Debug issues** → Check corresponding guide's troubleshooting section
 5. **Make code changes** → Build, sync, deploy, test (see workflows above)
 
-**Next priorities (from memory notes):**
-- [ ] Set up languages (user chose languages in another session)
-- [ ] DUNS number application (needed for Google Play $25 org account)
-- [ ] Android Studio on Mac for watch debugging
-- [ ] Plausible custom event goals in dashboard
-- [ ] Test with real user session (not just internal testing)
-
----
-
-**Last updated:** April 4, 2026  
+**Last updated:** April 17, 2026  
 **Current version:** Android build with widget fix, watch haptics, share extension  
 **Status:** ✅ Ready for testing & deployment
 

@@ -26,6 +26,7 @@ Expected:
 - SHIP preflight passes
 - Core loop smoke prints all checks as `✓`
 - Security smoke passes
+- SHIP preflight validates current copy-lock + routing contract checks for `src/App.jsx` and `netlify/functions/reframe.js`
 
 ---
 
@@ -60,6 +61,9 @@ If users report old behavior:
    - sessions
    - pulse log
    - profiles/insights
+5. Confirm restore limitation copy remains honest:
+   - restore depends on the original device encryption key
+   - cross-device restore can report undecryptable items
 
 ---
 
@@ -91,12 +95,45 @@ Go/No-Go rule:
 
 ---
 
+### 4.6) First-run + setup-bridge flow gate
+
+Verify first-run sequence and resume behavior:
+- First-run order is `tutorial` → `setup-bridge` → `setup` (calibration flow).
+- If first run is interrupted, app resumes by `stillform_first_run_stage` (`bridge` or `calibration`) instead of restarting at home.
+- Setup bridge uses current identity/copy (“Set up your customizations and map your signals”), not legacy onboarding wizard language.
+
+---
+
+### 4.7) Home + return-path behavior gate
+
+Verify current navigation behavior:
+- Home above-fold starts with morning check-in window card, then adaptive dominant CTA block.
+- Nav “Subscribe” button appears only when local access is inactive.
+- Footer “Subscribe” link appears on non-home/non-pricing screens (including subscribed sessions) and is hidden on active screen links.
+- Tool back behavior:
+  - tools launched with `returnTo` return to their caller surface
+  - calibration combined flow preserves `setup-bridge`/`setup` return paths
+  - share-to-Reframe launches tool view and falls back to home when no explicit `returnTo` is set.
+
+---
+
+### 4.8) UAT gating + shared feedback feed gate
+
+Verify UAT controls are not broad-surface defaults:
+- UAT state is gated by `?uat=on|true|1` (or saved local storage toggle), with freeze window behavior applied only in UAT mode.
+- Home UAT banner + feedback panel appear only while UAT freeze is active.
+- “Shared UAT feed” fetch requires authenticated session; unauthenticated requests are rejected by `/.netlify/functions/uat-feedback-history`.
+
+---
+
 ### 5) User-Safety and Trust Checks
 
 Confirm in live app:
 - Crisis resources open and links work (`tel`, `sms`, web)
 - AI insights remain guarded (no clinical labels/judgmental language)
 - Post-rating reflection appears only when threshold is met
+- Privacy/disclaimer text includes composure limitation note for physically driven states (illness, pain, inflammation, hormonal shifts, medication, severe sleep disruption)
+- Reminder reliability copy remains explicit: notification delivery depends on device/browser permissions and native shell capabilities (no guaranteed delivery claim)
 
 ---
 
