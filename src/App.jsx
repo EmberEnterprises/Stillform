@@ -4840,6 +4840,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }
 
     try {
+      const authToken = sbGetSession()?.access_token || "";
+      const installId = getOrCreateInstallId();
       const requestBody = JSON.stringify({
           input: textToSend,
           images: imagesForRequest,
@@ -5046,7 +5048,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               if (internalNotes.length === 0) return null;
               return internalNotes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
             } catch { return null; }
-          })()
+          })(),
+          install_id: installId,
+          user_id: sbGetUser()?.id || null
         });
 
       let parsed = null;
@@ -5057,7 +5061,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         try {
           const response = await fetch("/.netlify/functions/reframe", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+              "Content-Type": "application/json",
+              ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+            },
             signal: controller.signal,
             body: requestBody
           });
