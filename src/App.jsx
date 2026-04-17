@@ -10293,12 +10293,13 @@ export default function Stillform() {
       return;
     }
     if (activeTool?.setupFlow === "calibration-combined") {
+      const currentToolId = activeTool?.id;
       setActiveTool(null);
-      if (activeTool?.id === "signals") {
+      if (currentToolId === "signals") {
         setScreen("onboarding");
         return;
       }
-      if (activeTool?.id === "bias") {
+      if (currentToolId === "bias") {
         setScreen("setup");
         return;
       }
