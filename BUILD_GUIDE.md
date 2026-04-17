@@ -46,7 +46,7 @@ cd ~/stillform/android
 # APK: app/build/outputs/apk/release/app-release.apk
 ```
 
-### 5. Install on Galaxy Watch Ultra
+### 5. Install on Android phone (debug APK)
 
 ```bash
 # Connect device via ADB
@@ -55,11 +55,26 @@ adb devices
 # Uninstall old version (optional)
 adb uninstall com.araembers.stillform
 
-# Install new APK
+# Install new APK on phone
 adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 
 # View logs (optional, for debugging)
 adb logcat | grep "stillform\|Widget"
+```
+
+### 6. Install on paired Wear OS watch (optional)
+
+Only required when validating the watch breathing companion.
+
+```bash
+cd ~/stillform/android
+./gradlew :wear:assembleDebug
+
+# Install watch APK
+adb -s <WATCH_SERIAL_OR_IP> install -r wear/build/outputs/apk/debug/wear-debug.apk
+
+# Watch logs
+adb -s <WATCH_SERIAL_OR_IP> logcat | grep -E "StillformWatch|WearBreathe"
 ```
 
 ## What Changed in This Update
@@ -131,9 +146,9 @@ stillform/
 
 ## Next Steps
 
-1. ✅ **This week:** Deploy widget fix + test
-2. **Coming soon:** Watch haptics integration
-3. **Coming soon:** Share extension for Reframe input
+1. ✅ Deploy widget fix + test on device
+2. ✅ Watch haptics bridge is implemented — verify on paired phone/watch hardware
+3. ✅ Share-to-Reframe is implemented — verify with first-run already completed
 
 ## Build Times
 

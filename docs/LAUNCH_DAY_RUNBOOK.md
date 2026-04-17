@@ -63,7 +63,12 @@ If users report old behavior:
 
 ---
 
-### 4.5) Integration Truth Gate (launch-critical for TestFlight)
+### 4.5) Integration Truth Gate (launch-critical for iOS native builds)
+
+Platform truth before testing:
+- Calendar + Health integration actions are currently supported on native iOS builds.
+- Android currently reports these integrations as not available.
+- Do not claim cross-platform parity for integrations yet.
 
 Run on a physical iOS device build:
 

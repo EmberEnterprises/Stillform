@@ -34,12 +34,12 @@ Full watch haptics system: breathing countdown + haptic feedback on Galaxy Watch
 - Debug watch connectivity
 - Understand Wearable API architecture
 
-**Time:** ~10 minutes to deploy both phone + watch APK
+**Time:** ~10 minutes to deploy both phone + watch APK (then verify on paired devices)
 
 **Key files:**
-- `android/app/src/main/java/WatchBridgePlugin.java` (phone)
-- `android/wear/src/main/java/WearBreatheActivity.java` (watch)
-- `android/wear/src/main/java/WearListenerService.java` (watch receiver)
+- `android/app/src/main/java/com/araembers/stillform/WatchBridgePlugin.java` (phone)
+- `android/wear/src/main/java/com/araembers/stillform/WearBreatheActivity.java` (watch)
+- `android/wear/src/main/java/com/araembers/stillform/WearListenerService.java` (watch receiver)
 
 ---
 
@@ -49,7 +49,7 @@ Users can share text from Notes, Email, Twitter, etc. → lands in Reframe tool.
 **Features:**
 - ✅ Share menu shows "Stillform · Reframe"
 - ✅ Text pre-fills in Reframe input
-- ✅ Works before onboarding (seamless flow)
+- ✅ Requires first-run completion before auto-routing to Reframe
 - ✅ URL-encoded for special characters
 - ✅ No storage/logging of shared text
 
@@ -60,11 +60,11 @@ Users can share text from Notes, Email, Twitter, etc. → lands in Reframe tool.
 - Understand Android intent handling
 - Test edge cases (long text, special chars, etc.)
 
-**Time:** ~5 minutes to test (fully implemented already)
+**Time:** ~5 minutes to test (implemented; verify on device)
 
 **Key files:**
-- `android/app/src/main/java/ShareReceiverActivity.java`
-- `src/App.jsx` (lines 4902-4924 for ?share= param handling)
+- `android/app/src/main/java/com/araembers/stillform/ShareReceiverActivity.java`
+- `src/App.jsx` (`?share=` deep-link handling guarded by first-run completion)
 
 ---
 
@@ -130,7 +130,7 @@ adb -s <WATCH_SERIAL> install -r wear/build/outputs/apk/debug/wear-debug.apk
 - [ ] Share option appears in Notes app
 - [ ] Shared text pre-fills in Reframe
 - [ ] Special characters preserved (emojis, quotes, etc.)
-- [ ] Works before onboarding
+- [ ] First-run has already been completed before share test
 - [ ] Can submit reframe and get AI response
 
 ---
