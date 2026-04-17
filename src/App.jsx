@@ -8969,7 +8969,7 @@ export default function Stillform() {
     if (!isFirstRunComplete()) {
       setFirstRunStage("bridge");
     }
-    setScreen("onboarding");
+    setScreen("setup-bridge");
   };
   const openTutorial = (backScreen = "home") => {
     setTutorialStep(0);
@@ -9001,11 +9001,11 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
-        setScreen("onboarding");
+        setScreen("setup-bridge");
       }
       return;
     }
-    if (screen === "onboarding") {
+    if (screen === "setup-bridge") {
       const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
       if (origin === "settings") {
         setScreen("settings");
@@ -9037,14 +9037,14 @@ export default function Stillform() {
       return;
     }
   };
-  const showBottomBack = ["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
 
   useEffect(() => {
-    const swipeEnabledScreens = new Set(["tutorial", "onboarding", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
+    const swipeEnabledScreens = new Set(["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
     if (!swipeEnabledScreens.has(screen)) return;
     let touchStart = null;
     const interactiveTags = new Set(["INPUT", "TEXTAREA", "SELECT", "BUTTON", "A"]);
@@ -9283,13 +9283,13 @@ export default function Stillform() {
       try {
         const params = new URLSearchParams(window.location.search);
         const preview = (params.get("preview") || "").trim().toLowerCase();
-        const previewAllowed = new Set(["tutorial", "onboarding", "home", "settings", "faq", "privacy"]);
+        const previewAllowed = new Set(["tutorial", "setup-bridge", "home", "settings", "faq", "privacy"]);
         if (previewAllowed.has(preview)) {
           if (preview === "tutorial") {
             setTutorialStep(0);
             setTutorialReturnScreen("home");
           }
-          if (preview === "onboarding") {
+          if (preview === "setup-bridge") {
             setSetupBridgeOrigin("home");
           }
           setScreen(preview);
@@ -9308,7 +9308,7 @@ export default function Stillform() {
         }
         if (firstRunStage === "bridge") {
           setSetupBridgeOrigin("tutorial");
-          setScreen("onboarding");
+          setScreen("setup-bridge");
           setScreenReady(true);
           return;
         }
@@ -10327,7 +10327,7 @@ export default function Stillform() {
   // Scroll to top on every screen change + analytics
   useEffect(() => {
     window.scrollTo(0, 0);
-    if (screen !== "home" && screen !== "onboarding") {
+    if (screen !== "home" && screen !== "setup-bridge") {
       try { window.plausible("Screen View", { props: { screen } }); } catch {}
     }
   }, [screen]);
@@ -10347,7 +10347,7 @@ export default function Stillform() {
       const currentToolId = activeTool?.id;
       setActiveTool(null);
       if (currentToolId === "signals") {
-        setScreen("onboarding");
+        setScreen("setup-bridge");
         return;
       }
       if (currentToolId === "bias") {
@@ -10481,8 +10481,8 @@ export default function Stillform() {
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
-        {/* NAV — hidden during onboarding */}
-        {screen !== "onboarding" && (
+        {/* NAV — hidden during setup bridge */}
+        {screen !== "setup-bridge" && (
         <nav className="nav">
           <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => goHomeSafely()}>
             Still<span>form</span>
@@ -10694,8 +10694,8 @@ export default function Stillform() {
           );
         })()}
 
-        {/* ONBOARDING — setup bridge between tutorial and calibration */}
-        {screen === "onboarding" && (() => {
+        {/* SETUP BRIDGE — between tutorial and calibration */}
+        {screen === "setup-bridge" && (() => {
           const reducedMotionOn = (() => { try { return localStorage.getItem("stillform_reducedmotion") === "on"; } catch { return false; } })();
           const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
           const signalMappingConfigured = isSignalProfileConfigured();
@@ -10793,7 +10793,7 @@ export default function Stillform() {
                   className="btn btn-ghost"
                   style={{ width: "100%" }}
                   onClick={() => {
-                    startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "onboarding" });
+                    startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" });
                   }}
                 >
                   Map signals now
@@ -11052,7 +11052,7 @@ export default function Stillform() {
         )}
 
         {/* FLOATING RESET — accessible from any screen except active tool sessions */}
-        {screen !== "home" && screen !== "panic" && screen !== "onboarding" && screen !== "pricing" && 
+        {screen !== "home" && screen !== "panic" && screen !== "setup-bridge" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
           <QBPill onPress={() => setScreen("panic")} />
         )}
@@ -14174,8 +14174,8 @@ export default function Stillform() {
           </section>
         )}
 
-        {/* FOOTER — always visible except tool/panic/onboarding. Active screen link hidden. */}
-        {!["tool","panic","onboarding"].includes(screen) && (
+        {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
+        {!["tool","panic","setup-bridge"].includes(screen) && (
           <footer className="footer">
             <div className="footer-logo">Stillform</div>
             <div className="footer-links">
