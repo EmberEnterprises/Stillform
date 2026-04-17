@@ -9032,7 +9032,7 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing") {
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing" || screen === "crisis") {
       goHomeSafely();
       return;
     }
@@ -10569,13 +10569,7 @@ export default function Stillform() {
             >
               <button
                 className="intervention-back"
-                onClick={() => {
-                  if (safeStep > 0) {
-                    setTutorialStep((s) => Math.max(0, s - 1));
-                    return;
-                  }
-                  setScreen(returnTo);
-                }}
+                onClick={handleScreenBack}
               >
                 ← Back
               </button>
@@ -12285,12 +12279,12 @@ export default function Stillform() {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => goHomeSafely()} />
+          <MyProgress onBack={handleScreenBack} />
         )}
 
         {/* FOCUS CHECK */}
         {screen === "focus-check" && (
-          <FocusCheckValidation onBack={() => setScreen(focusCheckReturnScreen || "home")} />
+          <FocusCheckValidation onBack={handleScreenBack} />
         )}
 
         {/* JOURNAL — log triggers, emotions, outcomes */}
@@ -12298,7 +12292,7 @@ export default function Stillform() {
         {/* PRICING */}
         {screen === "pricing" && (
           <section className="pricing">
-            {!trialExpired && <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>}
+            {!trialExpired && <button className="intervention-back" onClick={handleScreenBack}>← Back</button>}
             {!syncSignedIn && (
               <div style={{
                 maxWidth: 420,
@@ -12437,7 +12431,7 @@ export default function Stillform() {
         {/* PRIVACY */}
         {screen === "privacy" && (
           <section className="privacy">
-            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
+            <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
             <h1>Privacy & Disclaimers</h1>
             <div className="privacy-date">Effective April 01, 2026 · ARA Embers LLC</div>
             <p style={{ marginBottom: 24 }}><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>View full Privacy Policy</a></p>
@@ -12483,7 +12477,7 @@ export default function Stillform() {
         {/* FAQ */}
         {screen === "faq" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => setScreen(faqBackScreen || "home")}>← Back</button>
+            <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
             <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 32, fontFamily: "'Cormorant Garamond', serif" }}>
               Composure is being in control of how you show up — in any moment that matters.
@@ -12598,7 +12592,7 @@ export default function Stillform() {
         {/* CRISIS RESOURCES — international hotlines */}
         {screen === "crisis" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
+            <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
             <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
@@ -12694,7 +12688,7 @@ export default function Stillform() {
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
-            <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
+            <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
             <button
