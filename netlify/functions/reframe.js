@@ -407,6 +407,40 @@ function detectClaritySignal(input) {
   return false;
 }
 
+function detectPositiveState(input) {
+  const text = String(input || "").trim().toLowerCase();
+  if (!text) return false;
+  const positiveSignals = [
+    "not so bad",
+    "figured it out",
+    "figured out",
+    "found a way",
+    "worked out",
+    "working out",
+    "in a good place",
+    "better now",
+    "doing better",
+    "feel better now",
+    "feeling better now",
+    "good now",
+    "okay now",
+    "calmer now",
+    "more clear now",
+    "relieved",
+    "relief",
+    "that helped",
+    "it helped",
+    "i'm proud",
+    "im proud",
+    "small win",
+    "win today",
+    "good news",
+    "made it work",
+    "got through it"
+  ];
+  return positiveSignals.some((token) => text.includes(token));
+}
+
 function detectSoftEntry(input) {
   const text = String(input || "").trim();
   if (!text) return false;
@@ -1085,6 +1119,7 @@ exports.handler = async function(event) {
     const hasCrisisLanguage = crisisTerms.some(term => inputNormalized.includes(term));
     const isInternalSummaryRequest = /^internal\s+[—-]\s+session summary request/i.test(trimmedInput);
     const isSoftEntry = !isInternalSummaryRequest && detectSoftEntry(trimmedInput);
+    const isPositiveState = !isInternalSummaryRequest && detectPositiveState(trimmedInput);
     const scienceRoute = isInternalSummaryRequest
       ? null
       : pickScienceRoute({
@@ -1241,6 +1276,9 @@ WHAT STAYING SHARP LOOKS LIKE:
       contextParts.push(buildSciencePrompt(scienceRoute));
       contextParts.push(REFRAME_RESPONSE_SCHEMA);
       contextParts.push("ENTRY GUARD: Do not assume something is wrong just because the user opened Reframe. If the input is casual or playful, stay friendly and useful without forcing a problem-state frame.");
+      if (isPositiveState) {
+        contextParts.push("POSITIVE / RESOLVED STATE MODE: The user may be reporting relief, progress, a win, or that they figured something out. Do NOT drag this into a problem frame. Do NOT hunt for the hidden negative angle. Acknowledge the movement accurately, reinforce what worked, and help them hold onto the useful lesson or next carry-forward move. If a question helps, ask what clicked or what they want to keep from this.");
+      }
       if (isSoftEntry) {
         contextParts.push("SOFT ENTRY MODE: The user may be opening gently or playfully. Do NOT force a problem-state framing. Keep tone friendly, grounded, and welcoming while still useful. No clinical language, no escalation language, no generic filler.");
       }

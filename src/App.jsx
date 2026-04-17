@@ -4387,6 +4387,34 @@ async function secureSet(key, value) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
+  const POSITIVE_STATE_PATTERNS = [
+    "not so bad",
+    "figured it out",
+    "figured out",
+    "found a way",
+    "worked out",
+    "working out",
+    "in a good place",
+    "better now",
+    "doing better",
+    "feel better now",
+    "feeling better now",
+    "good now",
+    "okay now",
+    "calmer now",
+    "more clear now",
+    "relieved",
+    "relief",
+    "that helped",
+    "it helped",
+    "i'm proud",
+    "im proud",
+    "small win",
+    "win today",
+    "good news",
+    "made it work",
+    "got through it"
+  ];
   const [activeMode, setActiveMode] = useState(() => {
     return mode !== "calm" ? mode : null;
   });
@@ -4448,6 +4476,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     clinical: "Clinical",
     motivational: "Motivational"
   })[aiToneChoice] || "Balanced";
+  const inputNormalized = String(input || "").trim().toLowerCase();
+  const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
   const effectiveMode = autoMode;
   const regulationType = (() => {
     try {
@@ -4863,8 +4893,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               "my mind won't stop",
               "my mind wont stop"
             ];
+            const looksLikeResolvedOrPositive = POSITIVE_STATE_PATTERNS.some((token) => lower.includes(token));
             const looksLikeLoop = clarityTriggers.some((trigger) => lower.includes(trigger));
-            if (looksLikeLoop && textToSend.split(/\s+/).length < 40) return "clarity";
+            if (!looksLikeResolvedOrPositive && looksLikeLoop && textToSend.split(/\s+/).length < 40) return "clarity";
             return effectiveMode;
           })(),
           history: prevMessages.map(m => ({
@@ -5864,7 +5895,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 className="ai-input"
                 style={{ borderColor: input.length > 1800 ? "rgba(200,100,50,0.6)" : mc.border, width: "100%", boxSizing: "border-box" }}
-                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : isClarity ? "What keeps pulling your mind back?" : "What's on your mind..."}
+                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : (isClarity && !looksLikePositiveState) ? "What keeps pulling your mind back?" : "What's on your mind..."}
                 value={input}
                 maxLength={2000}
                 onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
