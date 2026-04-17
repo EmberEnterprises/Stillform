@@ -13732,6 +13732,18 @@ export default function Stillform() {
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
                 }}>Replay tutorial</button>
+                {/* Focus Check */}
+                <button onClick={() => openFocusCheck("settings")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Run Focus Check (30s)</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
+                  </div>
+                  <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
+                </button>
                 <button onClick={() => setSettingsShareQrOpen((prev) => !prev)} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
@@ -13753,18 +13765,6 @@ export default function Stillform() {
                     <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>{SHARE_QR_TARGET_URL}</div>
                   </div>
                 )}
-                {/* Focus Check */}
-                <button onClick={() => openFocusCheck("settings")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Run Focus Check (30s)</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
-                  </div>
-                  <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
-                </button>
               </div>
               )}
             </div>
