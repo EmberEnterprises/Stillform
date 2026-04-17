@@ -10285,6 +10285,27 @@ export default function Stillform() {
     setActiveTool(tool);
     setScreen("tool");
   };
+  const handleActiveToolBack = () => {
+    if (activeTool?.returnTo) {
+      const returnScreen = activeTool.returnTo;
+      setActiveTool(null);
+      setScreen(returnScreen);
+      return;
+    }
+    if (activeTool?.setupFlow === "calibration-combined") {
+      const currentToolId = activeTool?.id;
+      setActiveTool(null);
+      if (currentToolId === "signals") {
+        setScreen("onboarding");
+        return;
+      }
+      if (currentToolId === "bias") {
+        setScreen("setup");
+        return;
+      }
+    }
+    goHomeSafely();
+  };
 
   const startPathway = async (p) => {
     try { window.plausible("Session Initiated", { props: { pathway: p } }); } catch {}
@@ -12173,7 +12194,7 @@ export default function Stillform() {
         {screen === "tool" && activeTool && (
           <section className="intervention">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-              <button className="intervention-back" onClick={() => goHomeSafely()} style={{ marginBottom: 0 }}>
+              <button className="intervention-back" onClick={handleActiveToolBack} style={{ marginBottom: 0 }}>
                 ← Back
               </button>
               <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
