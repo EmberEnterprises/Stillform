@@ -13197,38 +13197,34 @@ export default function Stillform() {
                       </button>
                       {settingsSubOpen.subscriptionStatus && (
                         <div style={{ marginTop: 10 }}>
-                          {/* Subscription status */}
-                    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 12 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                        <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
-                          {isSubscribed ? "ACTIVE" : "INACTIVE"}
-                        </div>
-                      </div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                        {isSubscribed
-                          ? "This device has active access."
-                          : (trialExpired
-                              ? "Trial expired. Subscription is required for full access."
-                              : (uatTrialFreezeActive
-                                  ? `UAT access window active until ${uatLaunchTargetLabel}.`
-                                  : "Trial active. Subscription unlocks full access."))}
-                      </div>
-                      <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
-                        {hasPendingWebhookSync ? "Recent checkout detected. Waiting for webhook confirmation." : "If access looks wrong, refresh from server."}
-                      </div>
-                      {subscriptionLastCheckedAt > 0 && (
-                        <div style={{ marginTop: 4, fontSize: 10, color: "var(--text-muted)" }}>
-                          Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
-                        </div>
-                      )}
-                      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                        <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={refreshSubscriptionStatus} disabled={subscriptionStatusLoading}>
-                          {subscriptionStatusLoading ? "Checking..." : "Refresh from server"}
-                        </button>
-                      </div>
-                      {subscriptionStatusMessage && <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{subscriptionStatusMessage}</div>}
-                    </div>
+                          {isSubscribed ? (
+                            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <div style={{ fontSize: 13, color: "var(--text)" }}>Status</div>
+                                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Active</div>
+                              </div>
+                              {syncSignedIn && sbGetUser()?.email && (
+                                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{sbGetUser().email}</div>
+                              )}
+                            </div>
+                          ) : (
+                            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
+                              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                                No active subscription found on this device.
+                              </div>
+                              <button
+                                className="btn btn-ghost"
+                                style={{ fontSize: 13, width: "100%" }}
+                                onClick={refreshSubscriptionStatus}
+                                disabled={subscriptionStatusLoading}
+                              >
+                                {subscriptionStatusLoading ? "Checking..." : "Restore purchase"}
+                              </button>
+                              {subscriptionStatusMessage && (
+                                <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{subscriptionStatusMessage}</div>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
