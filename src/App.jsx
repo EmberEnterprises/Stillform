@@ -11149,360 +11149,6 @@ export default function Stillform() {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
-              {/* ABSENCE DETECTION — operator tone, no guilt */}
-              {isAbsent && (
-                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
-                </div>
-              )}
-
-              {/* 7-SESSION MILESTONE — type review */}
-              {milestone7 && !isAbsent && (
-                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                    {hasStreak ? "7 days straight" : "7 sessions"}
-                  </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
-                    {hasStreak
-                      ? "You've been here every day this week. You're building something. How's it feeling?"
-                      : "You've completed 7 sessions. This is the point to check whether your current processing route still fits. Keep current route if it's working, or review processing type in Settings and change it."}
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => {
-                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
-                      setMilestone7Seen(true);
-                      try { window.plausible("7 Session Milestone Kept Route"); } catch {}
-                    }} style={{
-                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
-                      borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>Keep current route</button>
-                    <button onClick={() => {
-                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
-                      setMilestone7Seen(true);
-                      setSettingsSectionOpen((current) => ({ ...current, processing: true }));
-                      setScreen("settings");
-                      try { window.plausible("7 Session Milestone Review Route"); } catch {}
-                    }} style={{
-                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>Review processing type</button>
-                  </div>
-                </div>
-              )}
-
-              {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
-              {showLoopNudge && (
-                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                    Loop reliability nudge
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
-                    {isSoftTone
-                      ? "Quick check-in now keeps your daily loop steady."
-                      : `${activeLoopNudge?.title}: ${activeLoopNudge?.dropoffPct}% drop-off in the last 14 days (${activeLoopNudge?.dropoffCount}/${activeLoopNudge?.opens}).`}
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      onClick={handleLoopNudgeAction}
-                      style={{
-                        flex: 1,
-                        background: "var(--amber)",
-                        color: "#0A0A0C",
-                        border: "none",
-                        borderRadius: "var(--r)",
-                        padding: "9px 10px",
-                        fontSize: 11,
-                        fontFamily: "'DM Sans', sans-serif",
-                        cursor: "pointer"
-                      }}
-                    >
-                      {activeLoopNudge?.actionLabel}
-                    </button>
-                    {!isSoftTone && (
-                      <button
-                        onClick={dismissLoopNudge}
-                        style={{
-                          background: "none",
-                          color: "var(--text-muted)",
-                          border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)",
-                          padding: "9px 10px",
-                          fontSize: 11,
-                          fontFamily: "'DM Sans', sans-serif",
-                          cursor: "pointer"
-                        }}
-                      >
-                        Not now
-                      </button>
-                    )}
-                  </div>
-                  {isSoftTone && (
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8 }}>
-                      Keeping this simple after recent dismissals.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* PWA INSTALL BANNER */}
-              {installPrompt && !installDismissed && (
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 12, color: "var(--text)" }}>Install Stillform for instant access</span>
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Later</button>
-                    <button onClick={async () => {
-                      if (installPrompt) {
-                        installPrompt.prompt();
-                        const result = await installPrompt.userChoice;
-                        if (result.outcome === "accepted") setInstallPrompt(null);
-                        setInstallDismissed(true);
-                      }
-                    }} style={{ background: "var(--amber)", border: "none", color: "#0A0A0C", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 500 }}>Install</button>
-                  </div>
-                </div>
-              )}
-              {/* FALLBACK INSTALL HINT — shows in browser mode when no install prompt event */}
-              {!installPrompt && !installDismissed && !window.matchMedia("(display-mode: standalone)").matches && (
-                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                  <span style={{ fontSize: 11, color: "var(--text-dim)" }}>Install: tap ⋮ menu → "Add to Home Screen"</span>
-                  <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>✕</button>
-                </div>
-              )}
-
-            {/* Home UAT status banner (UAT mode only) */}
-            {uatTrialFreezeActive && (
-              <div
-                style={{
-                  marginBottom: 12,
-                  position: "relative",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--border)",
-                  borderRadius: "var(--r)",
-                  padding: "10px 14px",
-                  animation: !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)"
-                }}
-              >
-                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                    UAT
-                  </div>
-                </div>
-                <div style={{ textAlign: "center", lineHeight: 1.4 }}>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
-                </div>
-                <button
-                  onClick={openUatBoardHomeOnly}
-                  style={{ position: "absolute", right: 12, background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
-                  aria-label="Open UAT board"
-                >
-                  →
-                </button>
-              </div>
-            )}
-
-            {!isSubscribed && !uatTrialFreezeActive && (
-              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
-                <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  Subscription unlocks full Stillform access.
-                </span>
-                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
-              </div>
-            )}
-
-            {uatTrialFreezeActive && (() => {
-              const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
-              const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
-              const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
-              const shortLabelMap = {
-                confusing: "Confusing",
-                friction: "Friction",
-                missing: "Missing clarity",
-                working: "Working well"
-              };
-              return (
-                <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
-                  <button
-                    onClick={() => setShowUatFeedbackPanel((value) => !value)}
-                    style={{
-                      width: "100%",
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      textAlign: "left",
-                      cursor: "pointer",
-                      marginBottom: showUatFeedbackPanel ? 10 : 0
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", animation: !reducedMotion ? "pulse 1.2s ease-in-out infinite" : "none" }}>
-                        {UAT_FEEDBACK_FLASH_LABEL}
-                      </div>
-                      <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
-                        {showUatFeedbackPanel ? "▾" : "▸"}
-                      </div>
-                    </div>
-                  </button>
-
-                  {showUatFeedbackPanel && (
-                    <>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                        Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
-                      </div>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
-                        {UAT_QUESTION_OPTIONS.map((item) => {
-                          const active = item.id === selectedQuestion?.id;
-                          return (
-                            <button
-                              key={item.id}
-                              onClick={() => setUatQuestionId(item.id)}
-                              style={{
-                                background: active ? "var(--amber-glow)" : "transparent",
-                                border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                                borderRadius: 999,
-                                padding: "5px 11px",
-                                fontSize: 11,
-                                color: active ? "var(--amber)" : "var(--text-muted)",
-                                cursor: "pointer",
-                                fontFamily: "'DM Sans', sans-serif"
-                              }}
-                            >
-                              {shortLabelMap[item.id] || item.prompt}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <textarea
-                        value={uatQuestionText}
-                        onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
-                        placeholder={selectedQuestion?.placeholder || "Write your feedback."}
-                        style={{
-                          width: "100%",
-                          minHeight: 92,
-                          background: "var(--surface2)",
-                          border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)",
-                          padding: "10px 12px",
-                          color: "var(--text)",
-                          fontSize: 12,
-                          lineHeight: 1.55,
-                          fontFamily: "'DM Sans', sans-serif",
-                          resize: "vertical",
-                          outline: "none"
-                        }}
-                      />
-                      <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
-                          {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
-                        </div>
-                        <button
-                          onClick={submitUatFeedback}
-                          disabled={uatSubmitting || tooShort}
-                          style={{
-                            background: "var(--amber)",
-                            color: "#0A0A0C",
-                            border: "none",
-                            borderRadius: "var(--r-sm)",
-                            padding: "8px 12px",
-                            fontSize: 11,
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            letterSpacing: "0.08em",
-                            textTransform: "uppercase",
-                            cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
-                            opacity: uatSubmitting || tooShort ? 0.55 : 1
-                          }}
-                        >
-                          {uatSubmitting ? "Sending…" : "Send UAT feedback"}
-                        </button>
-                      </div>
-                    </>
-                  )}
-
-                  <div style={{ marginTop: showUatFeedbackPanel ? 10 : 8 }}>
-                    <button
-                      onClick={toggleUatFeedbackHistoryOpen}
-                      style={{
-                        width: "100%",
-                        background: "none",
-                        border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r-sm)",
-                        color: "var(--text-dim)",
-                        fontSize: 11,
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif",
-                        padding: "8px 10px",
-                        textAlign: "left",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center"
-                      }}
-                    >
-                      <span>Shared UAT feed (all testers)</span>
-                      <span style={{ color: "var(--text-muted)" }}>{uatFeedbackHistoryOpen ? "▾" : "▸"}</span>
-                    </button>
-                    {uatFeedbackHistoryOpen && (
-                      <div style={{ marginTop: 8, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px", maxHeight: 220, overflowY: "auto" }}>
-                        {uatFeedbackHistorySyncing && (
-                          <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>
-                            Syncing shared feed…
-                          </div>
-                        )}
-                        {uatFeedbackHistory.length === 0 ? (
-                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No shared UAT feedback yet.</div>
-                        ) : (
-                          uatFeedbackHistory.map((entry) => {
-                            const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";
-                            return (
-                              <div key={entry.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
-                                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
-                                  <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{questionLabel}</span>
-                                  <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{new Date(entry.submittedAt).toLocaleString()}</span>
-                                </div>
-                                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{entry.text}</div>
-                              </div>
-                            );
-                          })
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {uatFeedbackStatus && (
-                    <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                      {uatFeedbackStatus}
-                    </div>
-                  )}
-                </div>
-              );
-            })()}
-
-              {/* Roadmap link intentionally hidden from home surface */}
-              {showHomeContextTip && (
-                <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
-                  </div>
-                  <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    Dismiss tip
-                  </button>
-                </div>
-              )}
-              {pendingNextMoveFollowUpSession && (
-                <NextMoveFollowUpCard
-                  session={pendingNextMoveFollowUpSession}
-                  onSubmit={handleNextMoveFollowUpSubmit}
-                />
-              )}
-
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
                 const now = new Date();
@@ -12156,6 +11802,361 @@ export default function Stillform() {
                   </div>
                 );
               })()}
+
+              {/* Lower-priority operational surfaces — moved below primary actions */}
+              {/* ABSENCE DETECTION — operator tone, no guilt */}
+              {isAbsent && (
+                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
+                </div>
+              )}
+
+              {/* 7-SESSION MILESTONE — type review */}
+              {milestone7 && !isAbsent && (
+                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    {hasStreak ? "7 days straight" : "7 sessions"}
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                    {hasStreak
+                      ? "You've been here every day this week. You're building something. How's it feeling?"
+                      : "You've completed 7 sessions. This is the point to check whether your current processing route still fits. Keep current route if it's working, or review processing type in Settings and change it."}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => {
+                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                      setMilestone7Seen(true);
+                      try { window.plausible("7 Session Milestone Kept Route"); } catch {}
+                    }} style={{
+                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
+                      borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>Keep current route</button>
+                    <button onClick={() => {
+                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                      setMilestone7Seen(true);
+                      setSettingsSectionOpen((current) => ({ ...current, processing: true }));
+                      setScreen("settings");
+                      try { window.plausible("7 Session Milestone Review Route"); } catch {}
+                    }} style={{
+                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>Review processing type</button>
+                  </div>
+                </div>
+              )}
+
+              {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
+              {showLoopNudge && (
+                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                    Loop reliability nudge
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
+                    {isSoftTone
+                      ? "Quick check-in now keeps your daily loop steady."
+                      : `${activeLoopNudge?.title}: ${activeLoopNudge?.dropoffPct}% drop-off in the last 14 days (${activeLoopNudge?.dropoffCount}/${activeLoopNudge?.opens}).`}
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={handleLoopNudgeAction}
+                      style={{
+                        flex: 1,
+                        background: "var(--amber)",
+                        color: "#0A0A0C",
+                        border: "none",
+                        borderRadius: "var(--r)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      {activeLoopNudge?.actionLabel}
+                    </button>
+                    {!isSoftTone && (
+                      <button
+                        onClick={dismissLoopNudge}
+                        style={{
+                          background: "none",
+                          color: "var(--text-muted)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          padding: "9px 10px",
+                          fontSize: 11,
+                          fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer"
+                        }}
+                      >
+                        Not now
+                      </button>
+                    )}
+                  </div>
+                  {isSoftTone && (
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8 }}>
+                      Keeping this simple after recent dismissals.
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* PWA INSTALL BANNER */}
+              {installPrompt && !installDismissed && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 12, color: "var(--text)" }}>Install Stillform for instant access</span>
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Later</button>
+                    <button onClick={async () => {
+                      if (installPrompt) {
+                        installPrompt.prompt();
+                        const result = await installPrompt.userChoice;
+                        if (result.outcome === "accepted") setInstallPrompt(null);
+                        setInstallDismissed(true);
+                      }
+                    }} style={{ background: "var(--amber)", border: "none", color: "#0A0A0C", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 500 }}>Install</button>
+                  </div>
+                </div>
+              )}
+              {/* FALLBACK INSTALL HINT — shows in browser mode when no install prompt event */}
+              {!installPrompt && !installDismissed && !window.matchMedia("(display-mode: standalone)").matches && (
+                <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                  <span style={{ fontSize: 11, color: "var(--text-dim)" }}>Install: tap ⋮ menu → "Add to Home Screen"</span>
+                  <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>✕</button>
+                </div>
+              )}
+
+            {/* Home UAT status banner (UAT mode only) */}
+            {uatTrialFreezeActive && (
+              <div
+                style={{
+                  marginBottom: 12,
+                  position: "relative",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  padding: "10px 14px",
+                  animation: !reducedMotion ? "uatBannerFlash 1.5s ease-in-out infinite" : "none",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03), 0 0 0 1px var(--amber-dim)"
+                }}
+              >
+                <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center" }}>
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                    UAT
+                  </div>
+                </div>
+                <div style={{ textAlign: "center", lineHeight: 1.4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
+                </div>
+                <button
+                  onClick={openUatBoardHomeOnly}
+                  style={{ position: "absolute", right: 12, background: "none", border: "none", color: "var(--amber)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                  aria-label="Open UAT board"
+                >
+                  →
+                </button>
+              </div>
+            )}
+
+            {!isSubscribed && !uatTrialFreezeActive && (
+              <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 16px" }}>
+                <span style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  Subscription unlocks full Stillform access.
+                </span>
+                <button onClick={() => setScreen("pricing")} style={{ background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Subscribe</button>
+              </div>
+            )}
+
+            {uatTrialFreezeActive && (() => {
+              const selectedQuestion = UAT_QUESTION_OPTIONS.find((item) => item.id === uatQuestionId) || UAT_QUESTION_OPTIONS[0];
+              const remaining = Math.max(0, UAT_FEEDBACK_TEXT_MAX - String(uatQuestionText || "").length);
+              const tooShort = String(uatQuestionText || "").trim().length < UAT_FEEDBACK_TEXT_MIN;
+              const shortLabelMap = {
+                confusing: "Confusing",
+                friction: "Friction",
+                missing: "Missing clarity",
+                working: "Working well"
+              };
+              return (
+                <div style={{ marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 14px 12px" }}>
+                  <button
+                    onClick={() => setShowUatFeedbackPanel((value) => !value)}
+                    style={{
+                      width: "100%",
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      textAlign: "left",
+                      cursor: "pointer",
+                      marginBottom: showUatFeedbackPanel ? 10 : 0
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", animation: !reducedMotion ? "pulse 1.2s ease-in-out infinite" : "none" }}>
+                        {UAT_FEEDBACK_FLASH_LABEL}
+                      </div>
+                      <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
+                        {showUatFeedbackPanel ? "▾" : "▸"}
+                      </div>
+                    </div>
+                  </button>
+
+                  {showUatFeedbackPanel && (
+                    <>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                        Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
+                      </div>
+                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
+                        {UAT_QUESTION_OPTIONS.map((item) => {
+                          const active = item.id === selectedQuestion?.id;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => setUatQuestionId(item.id)}
+                              style={{
+                                background: active ? "var(--amber-glow)" : "transparent",
+                                border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                                borderRadius: 999,
+                                padding: "5px 11px",
+                                fontSize: 11,
+                                color: active ? "var(--amber)" : "var(--text-muted)",
+                                cursor: "pointer",
+                                fontFamily: "'DM Sans', sans-serif"
+                              }}
+                            >
+                              {shortLabelMap[item.id] || item.prompt}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <textarea
+                        value={uatQuestionText}
+                        onChange={(event) => setUatQuestionText(String(event.target.value || "").slice(0, UAT_FEEDBACK_TEXT_MAX))}
+                        placeholder={selectedQuestion?.placeholder || "Write your feedback."}
+                        style={{
+                          width: "100%",
+                          minHeight: 92,
+                          background: "var(--surface2)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          padding: "10px 12px",
+                          color: "var(--text)",
+                          fontSize: 12,
+                          lineHeight: 1.55,
+                          fontFamily: "'DM Sans', sans-serif",
+                          resize: "vertical",
+                          outline: "none"
+                        }}
+                      />
+                      <div style={{ marginTop: 7, display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)" }}>
+                          {tooShort ? `Add at least ${UAT_FEEDBACK_TEXT_MIN} characters.` : `${remaining} characters left.`}
+                        </div>
+                        <button
+                          onClick={submitUatFeedback}
+                          disabled={uatSubmitting || tooShort}
+                          style={{
+                            background: "var(--amber)",
+                            color: "#0A0A0C",
+                            border: "none",
+                            borderRadius: "var(--r-sm)",
+                            padding: "8px 12px",
+                            fontSize: 11,
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            letterSpacing: "0.08em",
+                            textTransform: "uppercase",
+                            cursor: uatSubmitting || tooShort ? "not-allowed" : "pointer",
+                            opacity: uatSubmitting || tooShort ? 0.55 : 1
+                          }}
+                        >
+                          {uatSubmitting ? "Sending…" : "Send UAT feedback"}
+                        </button>
+                      </div>
+                    </>
+                  )}
+
+                  <div style={{ marginTop: showUatFeedbackPanel ? 10 : 8 }}>
+                    <button
+                      onClick={toggleUatFeedbackHistoryOpen}
+                      style={{
+                        width: "100%",
+                        background: "none",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r-sm)",
+                        color: "var(--text-dim)",
+                        fontSize: 11,
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        padding: "8px 10px",
+                        textAlign: "left",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                      }}
+                    >
+                      <span>Shared UAT feed (all testers)</span>
+                      <span style={{ color: "var(--text-muted)" }}>{uatFeedbackHistoryOpen ? "▾" : "▸"}</span>
+                    </button>
+                    {uatFeedbackHistoryOpen && (
+                      <div style={{ marginTop: 8, background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 10px", maxHeight: 220, overflowY: "auto" }}>
+                        {uatFeedbackHistorySyncing && (
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 6 }}>
+                            Syncing shared feed…
+                          </div>
+                        )}
+                        {uatFeedbackHistory.length === 0 ? (
+                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No shared UAT feedback yet.</div>
+                        ) : (
+                          uatFeedbackHistory.map((entry) => {
+                            const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";
+                            return (
+                              <div key={entry.id} style={{ padding: "8px 0", borderBottom: "1px solid var(--border)" }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", gap: 10, marginBottom: 4 }}>
+                                  <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{questionLabel}</span>
+                                  <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{new Date(entry.submittedAt).toLocaleString()}</span>
+                                </div>
+                                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{entry.text}</div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {uatFeedbackStatus && (
+                    <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                      {uatFeedbackStatus}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+
+              {/* Roadmap link intentionally hidden from home surface */}
+              {showHomeContextTip && (
+                <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
+                  </div>
+                  <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                    Dismiss tip
+                  </button>
+                </div>
+              )}
+              {pendingNextMoveFollowUpSession && (
+                <NextMoveFollowUpCard
+                  session={pendingNextMoveFollowUpSession}
+                  onSubmit={handleNextMoveFollowUpSubmit}
+                />
+              )}
 
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
