@@ -9505,6 +9505,10 @@ export default function Stillform() {
     }
   }, [themeChoice]);
   const metricsAuthToken = sbGetSession()?.access_token || "";
+  const nativePlatform = (() => {
+    try { return window?.Capacitor?.getPlatform?.() || "web"; } catch { return "web"; }
+  })();
+  const integrationsSupportedOnPlatform = nativePlatform === "ios";
   const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
@@ -13115,7 +13119,11 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
                   {integrationContext.calendar
                     ? integrationContext.calendar.summary
-                    : "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."}
+                    : (integrationsSupportedOnPlatform
+                        ? "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."
+                        : (nativePlatform === "android"
+                            ? "Calendar integration is not available on Android yet."
+                            : "Calendar integration is only available in supported native builds."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
@@ -13151,7 +13159,11 @@ export default function Stillform() {
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
                   {integrationContext.health
                     ? integrationContext.health.summary
-                    : "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."}
+                    : (integrationsSupportedOnPlatform
+                        ? "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."
+                        : (nativePlatform === "android"
+                            ? "Health integration is not available on Android yet."
+                            : "Health integration is only available in supported native builds."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
@@ -13174,6 +13186,13 @@ export default function Stillform() {
                     Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}
                   </div>
                 )}
+                {!integrationsSupportedOnPlatform && (
+                  <div style={{ marginTop: 12, marginBottom: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                    {nativePlatform === "android"
+                      ? "Calendar and health integrations are not available on Android yet."
+                      : "Calendar and health integrations are only available in supported native builds."}
+                  </div>
+                )}
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
                   <button
                     className="btn btn-ghost"
@@ -13193,48 +13212,60 @@ export default function Stillform() {
                   >
                     Clear stale context
                   </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}
-                  >
-                    Connect calendar
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}
-                  >
-                    Connect health
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                    onClick={() => setIntegrationConsent("calendar", "revoked")}
-                  >
-                    Revoke calendar
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                    onClick={() => setIntegrationConsent("health", "revoked")}
-                  >
-                    Revoke health
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => retryIntegrationContext("calendar")}
-                  >
-                    Sync calendar now
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => retryIntegrationContext("health")}
-                  >
-                    Sync health now
-                  </button>
+                  {integrationsSupportedOnPlatform && (
+                    <>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px" }}
+                        onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}
+                      >
+                        Connect calendar
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px" }}
+                        onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}
+                      >
+                        Connect health
+                      </button>
+                    </>
+                  )}
+                  {integrationsSupportedOnPlatform && (
+                    <>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                        onClick={() => setIntegrationConsent("calendar", "revoked")}
+                      >
+                        Revoke calendar
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
+                        onClick={() => setIntegrationConsent("health", "revoked")}
+                      >
+                        Revoke health
+                      </button>
+                    </>
+                  )}
+                  {integrationsSupportedOnPlatform && (
+                    <>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px" }}
+                        onClick={() => retryIntegrationContext("calendar")}
+                      >
+                        Sync calendar now
+                      </button>
+                      <button
+                        className="btn btn-ghost"
+                        style={{ fontSize: 12, padding: "8px 12px" }}
+                        onClick={() => retryIntegrationContext("health")}
+                      >
+                        Sync health now
+                      </button>
+                    </>
+                  )}
                   <button
                     className="btn btn-ghost"
                     style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
