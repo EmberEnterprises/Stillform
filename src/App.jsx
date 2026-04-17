@@ -13143,23 +13143,26 @@ export default function Stillform() {
                   )}
                 </div>
                 {/* Re-run calibration */}
-                <div style={{ marginBottom: 8 }}>
+                <div style={{ marginBottom: 6 }}>
                   <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); localStorage.removeItem("stillform_signal_profile"); localStorage.removeItem("stillform_bias_profile"); localStorage.removeItem("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                    padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
-                    Re-run calibration
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Re-run calibration</span>
+                    <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
                   </button>
                 </div>
 
                 {/* Replay setup bridge */}
-                <div style={{ marginBottom: 8 }}>
+                <div style={{ marginBottom: 6 }}>
                   <button onClick={() => openSetupBridge("settings")} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                    padding: "12px 16px", cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
+                    padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge visual comfort →</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge</span>
+                    <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
                   </button>
                 </div>
 
