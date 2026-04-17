@@ -8948,7 +8948,7 @@ export default function Stillform() {
 
   const openFaq = (backScreen = "home") => {
     setFaqBackScreen(backScreen);
-    setScreen("faq");
+    navigateTo("faq");
   };
   const openUatBoard = () => {
     if (typeof window !== "undefined") {
@@ -8979,8 +8979,17 @@ export default function Stillform() {
   };
   const openFocusCheck = (backScreen = "home") => {
     setFocusCheckReturnScreen(backScreen || "home");
-    setScreen("focus-check");
+    navigateTo("focus-check");
   };
+  // Push a history entry when navigating into a non-home screen so the
+  // browser back button triggers in-app back instead of leaving the site.
+  const navigateTo = (s) => {
+    if (s && s !== "home") {
+      window.history.pushState({ sf: s }, "");
+    }
+    setScreen(s);
+  };
+
   const goHomeSafely = (defer = false) => {
     if (defer) {
       setTimeout(() => setScreen("home"), 0);
@@ -9008,7 +9017,7 @@ export default function Stillform() {
     if (screen === "setup-bridge") {
       const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
       if (origin === "settings") {
-        setScreen("settings");
+        navigateTo("settings");
         return;
       }
       if (origin === "tutorial") {
@@ -9042,6 +9051,20 @@ export default function Stillform() {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
+
+  // Browser back button → in-app back
+  useEffect(() => {
+    const handlePopState = () => {
+      // If we have an in-app screen active, intercept and go back in-app
+      if (screen && screen !== "home") {
+        // Push a replacement so repeated back presses keep working
+        window.history.pushState({ sf: screen }, "");
+        handleScreenBack();
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [screen]);
 
   useEffect(() => {
     const swipeEnabledScreens = new Set(["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
@@ -10392,7 +10415,7 @@ export default function Stillform() {
   const renderTool = () => {
     const props = { onComplete: (redirectTo) => {
       if (redirectTo) {
-        if (redirectTo === "crisis") { setScreen("crisis"); return; }
+        if (redirectTo === "crisis") { navigateTo("crisis"); return; }
         if (redirectTo === "eod-close") {
           setEodSaved(false);
           setEodPromptDismissed(false);
@@ -10489,11 +10512,11 @@ export default function Stillform() {
               fontFamily: "'DM Sans', sans-serif", fontWeight: 500,
               border: "0.5px solid var(--border)", transition: "all 0.2s"
             }}>?</button>
-            <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
+            <button className="btn btn-ghost" onClick={() => navigateTo("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
             {!isSubscribed && (
-              <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
+              <button className="btn btn-primary" onClick={() => navigateTo("pricing")}>
                 Subscribe
               </button>
             )}
@@ -10675,7 +10698,7 @@ export default function Stillform() {
                   style={{ padding: "16px 24px", fontSize: 15, width: "100%", maxWidth: 360 }}
                   onClick={() => {
                     if (returnTo === "settings") {
-                      setScreen("settings");
+                      navigateTo("settings");
                       return;
                     }
                     openSetupBridge("tutorial");
@@ -11055,7 +11078,7 @@ export default function Stillform() {
         {screen === "panic" && (
           <PanicMode onComplete={(redirectTo) => {
             if (redirectTo) {
-              if (redirectTo === "crisis") { setScreen("crisis"); return; }
+              if (redirectTo === "crisis") { navigateTo("crisis"); return; }
               if (redirectTo === "reframe" || redirectTo === "reframe-calm") {
                 const tool = { ...TOOLS.find(t => t.id === "reframe"), mode: "calm" };
                 setActiveTool(tool);
@@ -11855,7 +11878,7 @@ export default function Stillform() {
                           </div>
                         </div>
                         <button
-                          onClick={async () => { if (await biometric.gate()) setScreen("progress"); }}
+                          onClick={async () => { if (await biometric.gate()) navigateTo("progress"); }}
                           style={{
                             width: "100%",
                             background: "none",
@@ -11911,7 +11934,7 @@ export default function Stillform() {
                       try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
                       setMilestone7Seen(true);
                       setSettingsSectionOpen((current) => ({ ...current, processing: true }));
-                      setScreen("settings");
+                      navigateTo("settings");
                       try { window.plausible("7 Session Milestone Review Route"); } catch {}
                     }} style={{
                       flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
@@ -12249,7 +12272,7 @@ export default function Stillform() {
 
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
-              Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+              Your data is encrypted. <button onClick={() => navigateTo("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </div>
             {(() => {
               const primer = getToolEntryPrimer(activeTool?.id, regType);
@@ -12423,7 +12446,7 @@ export default function Stillform() {
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
-              Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
+              Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => navigateTo("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
             </p>
           </section>
         )}
@@ -13719,7 +13742,7 @@ export default function Stillform() {
               </button>
               {settingsSectionOpen.more && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => setScreen("privacy")} style={{
+                <button onClick={() => navigateTo("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
                 }}>Privacy &amp; Disclaimers</button>
@@ -13782,13 +13805,13 @@ export default function Stillform() {
             <div className="footer-logo">Stillform</div>
             <div className="footer-links">
               {screen !== "pricing" && screen !== "home" && (
-                <button onClick={() => setScreen("pricing")}>Subscribe</button>
+                <button onClick={() => navigateTo("pricing")}>Subscribe</button>
               )}
               {screen !== "settings" && (
-                <button onClick={() => setScreen("settings")}>Settings</button>
+                <button onClick={() => navigateTo("settings")}>Settings</button>
               )}
               {screen !== "crisis" && (
-                <button onClick={() => setScreen("crisis")}>Crisis Resources</button>
+                <button onClick={() => navigateTo("crisis")}>Crisis Resources</button>
               )}
             </div>
             <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", textAlign: "center" }}>
