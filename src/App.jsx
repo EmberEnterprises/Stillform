@@ -12691,24 +12691,7 @@ export default function Stillform() {
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
-            {/* FAQ — top CTA */}
-            <button
-              onClick={() => openFaq("settings")}
-              style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--amber-dim)",
-                borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 26, textAlign: "left",
-                cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}
-            >
-              <div>
-                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 2 }}>FAQ</div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>Method, science, and boundaries</div>
-              </div>
-              <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
-            </button>
-
-            {/* PERSONALIZATION */}
+{/* PERSONALIZATION */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("personalization")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
