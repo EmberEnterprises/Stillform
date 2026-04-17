@@ -9036,19 +9036,29 @@ export default function Stillform() {
     if (!sbIsSignedIn()) return { ok: false, reason: "not_signed_in" };
     const payload = readLocalSetupTruth();
     if (!payload) return { ok: false, reason: "no_local_truth" };
-    const signature = getSetupTruthSignature(payload);
+    // Account setup_state should only carry portable setup truth.
+    const setupStatePayload = {
+      first_run_complete: payload.first_run_complete === true,
+      first_run_stage: payload.first_run_complete ? null : (payload.first_run_stage || "tutorial"),
+      regulation_type: payload.regulation_type || null,
+      signal_profile_complete: payload.signal_profile_complete === true,
+      bias_profile_complete: payload.bias_profile_complete === true
+    };
+    const normalizedPayload = normalizeSetupTruth(setupStatePayload);
+    if (!normalizedPayload) return { ok: false, reason: "invalid_payload" };
+    const signature = getSetupTruthSignature(normalizedPayload);
     if (!force && lastSyncedSetupTruthSignatureRef.current === signature) {
-      setAccountSetupTruth(payload);
+      setAccountSetupTruth(normalizedPayload);
       return { ok: true, skipped: true };
     }
     if (setupTruthSyncInFlightRef.current) {
       return setupTruthSyncInFlightRef.current;
     }
     const job = (async () => {
-      const result = await sbUpsertProfileSetupState(payload);
+      const result = await sbUpsertProfileSetupState(normalizedPayload);
       if (result?.ok) {
         lastSyncedSetupTruthSignatureRef.current = signature;
-        setAccountSetupTruth(payload);
+        setAccountSetupTruth(normalizedPayload);
       }
       return result;
     })().finally(() => {
@@ -11769,7 +11779,7 @@ export default function Stillform() {
                 const biasDone = isPatternBaselineConfigured();
                 const signalDone = isSignalProfileConfigured();
                 const calibrationComplete = (syncSignedIn && accountSetupTruth?.first_run_complete === true)
-                  || (!!(regType || accountSetupTruth?.regulation_type) && signalDone && biasDone);
+                  || (!!effectiveRegType && signalDone && biasDone);
 
                 const tools = [
                   ...(!signalDone ? [{ id: "signals", label: "Map Signals", rec: true }] : []),
@@ -11980,9 +11990,9 @@ export default function Stillform() {
                   sigh: "Sigh"
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
-                const processingCue = (regType || accountSetupTruth?.regulation_type) === "thought-first"
+                const processingCue = effectiveRegType === "thought-first"
                   ? "Start with signal clarity, not full analysis."
-                  : (regType || accountSetupTruth?.regulation_type) === "body-first"
+                  : effectiveRegType === "body-first"
                     ? "Start with body downshift, then language."
                     : "Stabilize first, then separate fact from story.";
                 const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
@@ -12485,7 +12495,7 @@ export default function Stillform() {
               Your data is encrypted. <button onClick={() => setScreen("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
             </div>
             {(() => {
-              const primer = getToolEntryPrimer(activeTool?.id, regType || accountSetupTruth?.regulation_type || null);
+              const primer = getToolEntryPrimer(activeTool?.id, effectiveRegType);
               if (!primer) return null;
               return (
                 <div
@@ -12970,6 +12980,9 @@ export default function Stillform() {
                     return (
                       <button key={t.id} onClick={() => {
                         try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {}
+                        if (sbIsSignedIn()) {
+                          void syncSetupTruthToAccount({ force: true });
+                        }
                       }} style={{
                         width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                         background: isSelected ? "var(--amber-glow)" : "var(--surface)",
@@ -13698,6 +13711,7 @@ export default function Stillform() {
                     <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => {
                       await sbSignOut();
                       setSyncSignedIn(false);
+                      setAccountSetupTruth(readLocalSetupTruth());
                       setSyncSuccess(null);
                       setSyncError(null);
                     }}>
@@ -14224,6 +14238,7 @@ export default function Stillform() {
                       try { await sbSignOut().catch(() => {}); } catch {}
                       try { sbClearSession(); } catch {}
                       setSyncSignedIn(false);
+                      setAccountSetupTruth(null);
                       setSyncSuccess(null);
                       setSyncError(null);
                       localStorage.removeItem("stillform_sessions");
