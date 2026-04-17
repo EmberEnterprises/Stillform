@@ -9460,24 +9460,11 @@ export default function Stillform() {
   const [exportStatus, setExportStatus] = useState("");
   const [settingsShareQrOpen, setSettingsShareQrOpen] = useState(false);
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
-    processing: false,
-    breathing: false,
-    schedule: false,
-    notifications: false,
-    audio: false,
-    scanPace: false,
-    display: false,
-    security: false,
-    cloudsync: false,
+    personalization: false,
+    account: false,
     integrations: false,
-    subscription: false,
-    sound: false,
-    logs: false,
-    customization: true,
-    signal: false,
-    more: false,
     data: false,
-    advanced: false
+    more: false,
   }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -12697,21 +12684,14 @@ export default function Stillform() {
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
 
+            {/* FAQ — top CTA */}
             <button
               onClick={() => openFaq("settings")}
               style={{
-                width: "100%",
-                background: "var(--surface)",
-                border: "1px solid var(--amber-dim)",
-                borderRadius: "var(--r-lg)",
-                padding: "14px 18px",
-                marginBottom: 26,
-                textAlign: "left",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center"
+                width: "100%", background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 26, textAlign: "left",
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                display: "flex", justifyContent: "space-between", alignItems: "center"
               }}
             >
               <div>
@@ -12720,17 +12700,170 @@ export default function Stillform() {
               </div>
               <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
             </button>
-            {/* Regulation Type */}
+
+            {/* PERSONALIZATION */}
             <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("processing")} style={{
+              <button onClick={() => toggleSettingsSection("personalization")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Processing Type</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.processing ? "▾" : "▸"}</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Personalization</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.personalization ? "▾" : "▸"}</span>
               </button>
-              {settingsSectionOpen.processing && (
-                <>
+              {settingsSectionOpen.personalization && (<>
+
+                {/* App Customization sub-group */}
+                <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, marginTop: 4 }}>App Customization</div>
+
+                {/* Theme */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
+                  {[
+                    { id: "dark", label: "Dark" }, { id: "midnight", label: "Midnight Blue" },
+                    { id: "warm", label: "Warm Amber" }, { id: "light", label: "Light" }
+                  ].map(t => {
+                    const selected = themeChoice === t.id;
+                    return (
+                      <button key={t.id} type="button" onClick={() => setThemeSelection(t.id)} style={{
+                        width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
+                        border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4, cursor: "pointer",
+                        display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
+                        {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* AI Reframe Tone */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
+                  {[
+                    { id: "balanced", label: "Balanced (default)" }, { id: "gentle", label: "Gentle" },
+                    { id: "direct", label: "Direct & blunt" }, { id: "clinical", label: "Clinical / technical" },
+                    { id: "motivational", label: "Motivational" }
+                  ].map(t => {
+                    const selected = aiToneChoice === t.id;
+                    return (
+                      <button key={t.id} type="button" onClick={() => setAiToneSelection(t.id)} style={{
+                        width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
+                        border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
+                        display: "flex", justifyContent: "space-between", alignItems: "center",
+                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
+                        {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Display */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Display</div>
+                  {[
+                    { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
+                    { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
+                    { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
+                  ].map(opt => {
+                    const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
+                    return (
+                      <div key={opt.key} style={{
+                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                        padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8
+                      }}>
+                        <div>
+                          <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
+                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
+                        </div>
+                        <button onClick={() => { try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {} }} style={{
+                          background: isOn ? "var(--amber)" : "var(--border)",
+                          border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                          position: "relative", transition: "background 0.2s", flexShrink: 0
+                        }}>
+                          <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: isOn ? 23 : 3, transition: "left 0.2s" }} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Audio */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Audio</div>
+                  <div style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
+                    </div>
+                    <button onClick={() => { try { const current = localStorage.getItem("stillform_audio") === "on"; localStorage.setItem("stillform_audio", current ? "off" : "on"); refreshSettings(); } catch {} }} style={{
+                      background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
+                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
+                        left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
+                        transition: "left 0.2s"
+                      }} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sound */}
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Sound</div>
+                  {(() => {
+                    const current = (() => { try { return localStorage.getItem("stillform_sound_type") || "tone"; } catch { return "tone"; } })();
+                    const free = [
+                      { id: "tone", label: "Tone", desc: "Oscillator tones that follow your breath" },
+                      { id: "rhythm", label: "Rhythm", desc: "Pulsing beat matched to breathing pattern" },
+                      { id: "silence", label: "Silence", desc: "No sound. Visual cues only." }
+                    ];
+                    const premium = [
+                      { id: "bowl", label: "Singing bowl" }, { id: "rain", label: "Rain" },
+                      { id: "ocean", label: "Ocean waves" }, { id: "lofi", label: "Lo-fi ambient" }, { id: "white", label: "White noise" }
+                    ];
+                    return (<>
+                      {free.map(s => (
+                        <button key={s.id} onClick={() => { try { localStorage.setItem("stillform_sound_type", s.id); } catch {} refreshSettings(); }} style={{
+                          width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
+                          border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6, cursor: "pointer",
+                          display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans', sans-serif", textAlign: "left"
+                        }}>
+                          <div>
+                            <div style={{ fontSize: 13, color: current === s.id ? "var(--amber)" : "var(--text)" }}>{s.label}</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 1 }}>{s.desc}</div>
+                          </div>
+                          {current === s.id && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                        </button>
+                      ))}
+                      {premium.map(s => (
+                        <div key={s.id} style={{
+                          background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                          padding: "12px 16px", marginBottom: 6, opacity: 0.35, display: "flex", justifyContent: "space-between", alignItems: "center"
+                        }}>
+                          <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{s.label}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Coming soon</div>
+                        </div>
+                      ))}
+                    </>);
+                  })()}
+                </div>
+
+                {/* Your Setup sub-group */}
+                <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, marginTop: 4 }}>Your Setup</div>
+
+                {/* Processing Type */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Processing Type</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                     How you naturally process intensity — through thoughts or through your body. This determines which tool appears first. The system checks in after 7 sessions to see if it still fits.
                   </div>
@@ -12741,35 +12874,22 @@ export default function Stillform() {
                   ].map(t => {
                     const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
                     return (
-                      <button key={t.id} onClick={() => {
-                        try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {}
-                      }} style={{
+                      <button key={t.id} onClick={() => { try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {} }} style={{
                         width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                         background: isSelected ? "var(--amber-glow)" : "var(--surface)",
                         border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
-                        fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                       }}>
                         <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{t.name}</div>
                         <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{t.desc}</div>
                       </button>
                     );
                   })}
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Breathing Pattern */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("breathing")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Breathing Pattern</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.breathing ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.breathing && (
-                <>
+                {/* Breathing Pattern */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Breathing Pattern</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                     Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
                   </div>
@@ -12779,14 +12899,11 @@ export default function Stillform() {
                   ].map(p => {
                     const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
                     return (
-                      <button key={p.id} onClick={() => {
-                        try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {}
-                      }} style={{
+                      <button key={p.id} onClick={() => { try { localStorage.setItem("stillform_breath_pattern", p.id); refreshSettings(); } catch {} }} style={{
                         width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
                         background: isSelected ? "var(--amber-glow)" : "var(--surface)",
                         border: `1px solid ${isSelected ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)",
-                        fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                        borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                       }}>
                         <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
                         <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4, fontStyle: "italic" }}>{p.use}</div>
@@ -12794,166 +12911,11 @@ export default function Stillform() {
                       </button>
                     );
                   })}
-                </>
-              )}
-            </div>
-
-            {/* Check-In Schedule */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("schedule")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Check-In Schedule</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.schedule ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.schedule && (
-                <>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                    When morning check-in appears and when end of day begins.
-                  </div>
-                  {(() => {
-                    const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
-                    const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1080"); } catch { return 1080; } })();
-                    const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
-                    const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
-                    return (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
-                          <div style={{ fontSize: 13, color: "var(--text)" }}>Morning starts</div>
-                          <input type="time" value={toTime(morningMin)} onChange={e => { try { localStorage.setItem("stillform_morning_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
-                        </div>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
-                          <div style={{ fontSize: 13, color: "var(--text)" }}>Evening starts</div>
-                          <input type="time" value={toTime(eveningMin)} onChange={e => { try { localStorage.setItem("stillform_evening_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </>
-              )}
-            </div>
-
-            {/* Notifications + Reminder */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("notifications")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Notifications</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.notifications ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.notifications && (() => {
-                const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
-                const reminderTime = (() => { try { return localStorage.getItem("stillform_reminder_time") || "08:00"; } catch { return "08:00"; } })();
-                const [rHour, rMin] = reminderTime.split(":").map(Number);
-                return (
-                  <div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
-                      Manage check-in reminder and notification behavior in one place.
-                    </div>
-                  <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
-                    <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                      <div>
-                        <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in reminder</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                          {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
-                        </div>
-                      </div>
-                      <button onClick={() => {
-                        try {
-                          const current = localStorage.getItem("stillform_reminder") === "on";
-                          localStorage.setItem("stillform_reminder", current ? "off" : "on");
-                          if (!current) scheduleReminder("Stillform", "Time to check in. How steady are you?", rHour, rMin);
-                          refreshSettings();
-                        } catch {}
-                      }} style={{
-                        background: reminderOn ? "var(--amber)" : "var(--border)",
-                        border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24,
-                        cursor: "pointer", position: "relative", transition: "background 0.2s",
-                        flexShrink: 0
-                      }}>
-                        <div style={{
-                          width: 18, height: 18, borderRadius: "50%", background: "white",
-                          position: "absolute", top: 3, left: reminderOn ? 23 : 3, transition: "left 0.2s"
-                        }} />
-                      </button>
-                    </div>
-                    <div style={{ padding: "10px 18px", borderTop: "0.5px solid var(--border)", fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                      Mobile push notification support depends on device/browser permissions and native shell capabilities.
-                    </div>
-                    {reminderOn && (
-                      <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Time</div>
-                        <input type="time" defaultValue={reminderTime} onChange={e => {
-                          try {
-                            localStorage.setItem("stillform_reminder_time", e.target.value);
-                            const [h, m] = e.target.value.split(":").map(Number);
-                            scheduleReminder("Stillform", "Time to check in. How steady are you?", h, m);
-                            refreshSettings();
-                          } catch {}
-                        }} style={{
-                          background: "var(--surface2)", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)",
-                          fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none"
-                        }} />
-                      </div>
-                    )}
-                  </div>
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Audio */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("audio")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Audio</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.audio ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.audio && (
-                <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Breathing audio guidance</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Gentle tones during breathing exercises</div>
-                  </div>
-                  <button onClick={() => {
-                    try {
-                      const current = localStorage.getItem("stillform_audio") === "on";
-                      localStorage.setItem("stillform_audio", current ? "off" : "on");
-                      refreshSettings();
-                    } catch {}
-                  }} style={{
-                    background: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? "var(--amber)" : "var(--border)"; } catch { return "var(--border)"; } })(),
-                    border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s"
-                  }}>
-                    <div style={{
-                      width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3,
-                      left: (() => { try { return localStorage.getItem("stillform_audio") === "on" ? 23 : 3; } catch { return 3; } })(),
-                      transition: "left 0.2s"
-                    }} />
-                  </button>
                 </div>
-              )}
-            </div>
 
-            {/* Body Scan Pace */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("scanPace")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Body Scan Pace</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.scanPace ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.scanPace && (
-                <>
+                {/* Body Scan Pace */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Body Scan Pace</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
                   <div style={{ display: "flex", gap: 6 }}>
                     {[
@@ -12967,8 +12929,7 @@ export default function Stillform() {
                         <button key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
                           flex: 1, background: active ? "var(--amber-glow)" : "var(--surface)",
                           border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer",
-                          textAlign: "center", transition: "all 0.15s",
+                          borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer", textAlign: "center", transition: "all 0.15s",
                           boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)"
                         }}>
                           <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: active ? "var(--amber)" : "var(--text-dim)", fontWeight: active ? 500 : 400 }}>{opt.label}</div>
@@ -12977,125 +12938,275 @@ export default function Stillform() {
                       );
                     })}
                   </div>
-                </>
-              )}
-            </div>
+                </div>
 
-            {/* Display */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("display")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Display</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.display ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.display && (
-                <>
-                  {[
-                    { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
-                    { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
-                    { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
-                  ].map(opt => {
-                    const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
+                {/* Signal Mapping */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Signal Mapping</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                    Map where your body responds first — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
+                  </div>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals →</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
+                  </button>
+                </div>
+
+                {/* Schedule & Notifications — combined */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Schedule & Notifications</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                    When check-ins appear and whether you get a daily reminder.
+                  </div>
+                  {/* Time pickers */}
+                  {(() => {
+                    const morningMin = (() => { try { return parseInt(localStorage.getItem("stillform_morning_start") || "270"); } catch { return 270; } })();
+                    const eveningMin = (() => { try { return parseInt(localStorage.getItem("stillform_evening_start") || "1080"); } catch { return 1080; } })();
+                    const toTime = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+                    const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
                     return (
-                      <div key={opt.key} style={{
-                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center",
-                        marginBottom: 8
-                      }}>
-                        <div>
-                          <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)" }}>Morning starts</div>
+                          <input type="time" value={toTime(morningMin)} onChange={e => { try { localStorage.setItem("stillform_morning_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
                         </div>
-                        <button onClick={() => {
-                          try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {}
-                        }} style={{
-                          background: isOn ? "var(--amber)" : "var(--border)",
-                          border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
-                          position: "relative", transition: "background 0.2s", flexShrink: 0
-                        }}>
-                          <div style={{
-                            width: 18, height: 18, borderRadius: "50%", background: "white",
-                            position: "absolute", top: 3, left: isOn ? 23 : 3, transition: "left 0.2s"
-                          }} />
-                        </button>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)" }}>Evening starts</div>
+                          <input type="time" value={toTime(eveningMin)} onChange={e => { try { localStorage.setItem("stillform_evening_start", String(toMin(e.target.value))); refreshSettings(); } catch {} }} style={{ background: "transparent", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 8px", color: "var(--amber)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }} />
+                        </div>
                       </div>
                     );
-                  })}
-                </>
-              )}
+                  })()}
+                  {/* Reminder toggle */}
+                  {(() => {
+                    const reminderOn = (() => { try { return localStorage.getItem("stillform_reminder") === "on"; } catch { return false; } })();
+                    const reminderTime = (() => { try { return localStorage.getItem("stillform_reminder_time") || "08:00"; } catch { return "08:00"; } })();
+                    const [rHour, rMin] = reminderTime.split(":").map(Number);
+                    return (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
+                        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in reminder</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                              {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
+                            </div>
+                          </div>
+                          <button onClick={() => { try { const current = localStorage.getItem("stillform_reminder") === "on"; localStorage.setItem("stillform_reminder", current ? "off" : "on"); if (!current) scheduleReminder("Stillform", "Time to check in. How steady are you?", rHour, rMin); refreshSettings(); } catch {} }} style={{
+                            background: reminderOn ? "var(--amber)" : "var(--border)",
+                            border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0
+                          }}>
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: reminderOn ? 23 : 3, transition: "left 0.2s" }} />
+                          </button>
+                        </div>
+                        <div style={{ padding: "10px 18px", borderTop: "0.5px solid var(--border)", fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          Mobile push notification support depends on device/browser permissions and native shell capabilities.
+                        </div>
+                        {reminderOn && (
+                          <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
+                            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Time</div>
+                            <input type="time" defaultValue={reminderTime} onChange={e => { try { localStorage.setItem("stillform_reminder_time", e.target.value); const [h, m] = e.target.value.split(":").map(Number); scheduleReminder("Stillform", "Time to check in. How steady are you?", h, m); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Re-run calibration */}
+                <div style={{ marginBottom: 8 }}>
+                  <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); localStorage.removeItem("stillform_signal_profile"); localStorage.removeItem("stillform_bias_profile"); localStorage.removeItem("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    Re-run calibration
+                  </button>
+                </div>
+
+                {/* Replay setup bridge */}
+                <div style={{ marginBottom: 8 }}>
+                  <button onClick={() => openSetupBridge("settings")} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "12px 16px", cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
+                  }}>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge visual comfort →</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
+                  </button>
+                </div>
+
+              </>)}
             </div>
 
-            {/* Security — only visible in native shell (Face ID / fingerprint) */}
-            {isNative() && (
-              <div style={{ marginBottom: 28 }}>
-                <button onClick={() => toggleSettingsSection("security")} style={{
-                  width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                  display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-                }}>
-                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Security</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.security ? "▾" : "▸"}</span>
-                </button>
-                {settingsSectionOpen.security && (() => {
-                  const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
-                  return (
-                    <div style={{
-                      background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                      padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center"
-                    }}>
-                      <div>
-                        <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress</div>
-                      </div>
-                      <button onClick={() => {
-                        biometric.setEnabled(!bioOn);
-                        refreshSettings();
-                      }} style={{
-                        background: bioOn ? "var(--amber)" : "var(--border)",
-                        border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
-                        position: "relative", transition: "background 0.2s", flexShrink: 0
-                      }}>
-                        <div style={{
-                          width: 18, height: 18, borderRadius: "50%", background: "white",
-                          position: "absolute", top: 3, left: bioOn ? 23 : 3, transition: "left 0.2s"
-                        }} />
-                      </button>
-                    </div>
-                  );
-                })()}
-              </div>
-            )}
-
-            {/* Advanced controls */}
+            {/* ACCOUNT */}
             <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("advanced")} style={{
+              <button onClick={() => toggleSettingsSection("account")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Advanced controls</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.advanced ? "▾" : "▸"}</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Account</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.account ? "▾" : "▸"}</span>
               </button>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
-                Integrations, sync diagnostics, data exports, and account operations.
-              </div>
+              {settingsSectionOpen.account && (<>
+                {syncSignedIn ? (
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
+                      Signed in as <span style={{ color: "var(--amber)" }}>{sbGetUser()?.email}</span>
+                    </div>
+
+                    {/* Subscription status */}
+                    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                        <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
+                          {isSubscribed ? "ACTIVE" : "INACTIVE"}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                        {isSubscribed
+                          ? "This device has active access."
+                          : (trialExpired
+                              ? "Trial expired. Subscription is required for full access."
+                              : (uatTrialFreezeActive
+                                  ? `UAT access window active until ${uatLaunchTargetLabel}.`
+                                  : "Trial active. Subscription unlocks full access."))}
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
+                        {hasPendingWebhookSync ? "Recent checkout detected. Waiting for webhook confirmation." : "If access looks wrong, refresh from server."}
+                      </div>
+                      {subscriptionLastCheckedAt > 0 && (
+                        <div style={{ marginTop: 4, fontSize: 10, color: "var(--text-muted)" }}>
+                          Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
+                        </div>
+                      )}
+                      <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
+                        <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={refreshSubscriptionStatus} disabled={subscriptionStatusLoading}>
+                          {subscriptionStatusLoading ? "Checking..." : "Refresh from server"}
+                        </button>
+                      </div>
+                      {subscriptionStatusMessage && <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{subscriptionStatusMessage}</div>}
+                    </div>
+
+                    {/* Cloud sync controls */}
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+                      Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
+                      Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt.
+                    </div>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+                      <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
+                        setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
+                        try {
+                          const r = await sbSyncUp();
+                          setSyncFeedbackWithClear(r.ok ? "success" : "error", r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`);
+                        } catch { setSyncFeedbackWithClear("error", "Sync failed. Check connection."); }
+                        setSyncLoading(false);
+                      }}>
+                        {syncLoading ? "Syncing..." : "Sync now"}
+                      </button>
+                      <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
+                        setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
+                        try {
+                          const r = await sbSyncDown();
+                          const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
+                          setSyncFeedbackWithClear(r?.ok ? "success" : "error", r?.ok ? `Restored ${r.restored || 0} items from cloud ✓` : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`);
+                        } catch { setSyncFeedbackWithClear("error", "Restore failed. Check connection."); }
+                        setSyncLoading(false);
+                      }}>
+                        {syncLoading ? "Restoring..." : "Restore now"}
+                      </button>
+                    </div>
+                    {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginBottom: 8 }}>{syncSuccess}</div>}
+                    {syncError && <div style={{ fontSize: 12, color: "#e05", marginBottom: 8 }}>{syncError}</div>}
+
+                    {/* Biometric lock — native only */}
+                    {isNative() && (() => {
+                      const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
+                      return (
+                        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
+                            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress</div>
+                          </div>
+                          <button onClick={() => { biometric.setEnabled(!bioOn); refreshSettings(); }} style={{
+                            background: bioOn ? "var(--amber)" : "var(--border)",
+                            border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0
+                          }}>
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: bioOn ? 23 : 3, transition: "left 0.2s" }} />
+                          </button>
+                        </div>
+                      );
+                    })()}
+
+                    <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => { await sbSignOut(); setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null); }}>
+                      Sign out
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
+                      Back up encrypted data from this device. Your data is encrypted before it leaves your device — we can't read it. Restore on a different device may be limited if the original encryption key is unavailable.
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+                      <input type="email" placeholder="Email" value={syncEmail} onChange={e => setSyncEmail(e.target.value)}
+                        style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+                      <input type="password" placeholder="Password" value={syncPassword} onChange={e => setSyncPassword(e.target.value)}
+                        style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+                      {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
+                      {syncAuthCooldownSeconds > 0 && (
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                          Too many attempts. Please wait {syncAuthCooldownSeconds}s before trying again.
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button className="btn btn-primary" style={{ fontSize: 14, flex: 1 }} onClick={async () => {
+                        if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
+                        if (syncAuthCooldownSeconds > 0) { setSyncError(`Please wait ${syncAuthCooldownSeconds}s, then try again.`); return; }
+                        setSyncLoading(true); setSyncError(null);
+                        try {
+                          let signedIn = false; let signInError = null;
+                          try { await sbSignIn(syncEmail, syncPassword); if (sbIsSignedIn()) { await sbSyncDown(); signedIn = true; } } catch (e) { signInError = e; }
+                          if (!signedIn) {
+                            if (isRateLimitedMessage(signInError?.message)) { startSyncAuthCooldown(signInError?.message); throw signInError; }
+                            if (isInvalidCredentialsMessage(signInError?.message)) { throw new Error("Incorrect email or password. Please try again."); }
+                            try { await sbSignUp(syncEmail, syncPassword); } catch (signupErr) {
+                              if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) { throw new Error("Incorrect email or password. Please try again."); }
+                              throw signupErr;
+                            }
+                            if (!sbIsSignedIn()) { setSyncError("Check your email to confirm your account, then sign in."); setSyncLoading(false); return; }
+                            await sbCreateProfile(); await sbSyncUp(); signedIn = true;
+                          }
+                          if (signedIn) {
+                            try { await fetch("/.netlify/functions/subscription-link-account", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${sbGetSession()?.access_token || ""}` }, body: JSON.stringify({ install_id: getOrCreateInstallId() }) }); } catch {}
+                            try {
+                              const pending = JSON.parse(localStorage.getItem("stillform_checkout_after_login") || "null");
+                              const isFreshPending = pending?.createdAt && (Date.now() - pending.createdAt) < (10 * 60 * 1000);
+                              if (isFreshPending) { if (pending.pricingPlan === "annual" || pending.pricingPlan === "monthly") { setPricingPlan(pending.pricingPlan); } localStorage.removeItem("stillform_checkout_after_login"); setTimeout(() => checkoutToLemon(), 200); }
+                            } catch {}
+                            setSyncSignedIn(true); setSyncAuthCooldownUntil(0); setSubscriptionCheckTick(n => n + 1); setSyncEmail(""); setSyncPassword(""); refreshSettings();
+                          }
+                        } catch (e) {
+                          const msg = e?.message || "Something went wrong. Check your details.";
+                          if (isRateLimitedMessage(msg)) startSyncAuthCooldown(msg);
+                          setSyncError(msg);
+                        }
+                        setSyncLoading(false);
+                      }}>
+                        {syncLoading ? "Please wait..." : (syncAuthCooldownSeconds > 0 ? `Wait ${syncAuthCooldownSeconds}s` : "Sign in / Create account")}
+                      </button>
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                      New to Stillform? Enter your email and a password — your account is created automatically.
+                    </div>
+                  </div>
+                )}
+              </>)}
             </div>
 
-            {settingsSectionOpen.advanced && (<>
-            <div style={{ marginBottom: 20 }}>
-              <button onClick={() => openFocusCheck("settings")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, color: "var(--text)" }}>Run Go / No-Go Quick Check (30s)</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Optional 30-second inhibition and accuracy validation.</div>
-                </div>
-                <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
-              </button>
-            </div>
-            {/* Integrations */}
+            {/* INTEGRATIONS */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("integrations")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
@@ -13109,11 +13220,7 @@ export default function Stillform() {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("calendar", !!integrationContext.calendar) }}>
-                    {integrationSignalLabel(
-                      "calendar",
-                      !!integrationContext.calendar,
-                      `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`
-                    )}
+                    {integrationSignalLabel("calendar", !!integrationContext.calendar, `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`)}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
@@ -13131,29 +13238,13 @@ export default function Stillform() {
                     {integrationContext.calendarConsent || "pending"}
                   </div>
                 </div>
-                {integrationContext.calendarConsent === "revoked" && (
-                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                    Calendar access is revoked. Re-enable to let Stillform use upcoming schedule context.
-                  </div>
-                )}
-                {integrationContext.calendarError && (
-                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
-                    Calendar error: {integrationContext.calendarError}
-                  </div>
-                )}
-                {integrationContext.calendarLastRetryAt && (
-                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                    Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}
-                  </div>
-                )}
+                {integrationContext.calendarConsent === "revoked" && <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>Calendar access is revoked. Re-enable to let Stillform use upcoming schedule context.</div>}
+                {integrationContext.calendarError && <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>Calendar error: {integrationContext.calendarError}</div>}
+                {integrationContext.calendarLastRetryAt && <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}</div>}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("health", !!integrationContext.health) }}>
-                    {integrationSignalLabel(
-                      "health",
-                      !!integrationContext.health,
-                      `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`
-                    )}
+                    {integrationSignalLabel("health", !!integrationContext.health, `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`)}
                   </div>
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
@@ -13171,790 +13262,219 @@ export default function Stillform() {
                     {integrationContext.healthConsent || "pending"}
                   </div>
                 </div>
-                {integrationContext.healthConsent === "revoked" && (
-                  <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
-                    Health access is revoked. Re-enable to let Stillform use sleep/readiness context.
-                  </div>
-                )}
-                {integrationContext.healthError && (
-                  <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
-                    Health error: {integrationContext.healthError}
-                  </div>
-                )}
-                {integrationContext.healthLastRetryAt && (
-                  <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>
-                    Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}
-                  </div>
-                )}
+                {integrationContext.healthConsent === "revoked" && <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>Health access is revoked. Re-enable to let Stillform use sleep/readiness context.</div>}
+                {integrationContext.healthError && <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>Health error: {integrationContext.healthError}</div>}
+                {integrationContext.healthLastRetryAt && <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}</div>}
                 {!integrationsSupportedOnPlatform && (
                   <div style={{ marginTop: 12, marginBottom: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                    {nativePlatform === "android"
-                      ? "Calendar and health integrations are not available on Android yet."
-                      : "Calendar and health integrations are only available in supported native builds."}
+                    {nativePlatform === "android" ? "Calendar and health integrations are not available on Android yet." : "Calendar and health integrations are only available in supported native builds."}
                   </div>
                 )}
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={() => {
-                      refreshSettings();
-                      setIntegrationStatusWithClear("Integration status refreshed.");
-                    }}
-                  >
-                    Refresh status
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                    onClick={clearIntegrationContextCache}
-                    disabled={!integrationContext.hasAny}
-                  >
-                    Clear stale context
-                  </button>
-                  {integrationsSupportedOnPlatform && (
-                    <>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px" }}
-                        onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}
-                      >
-                        Connect calendar
-                      </button>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px" }}
-                        onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}
-                      >
-                        Connect health
-                      </button>
-                    </>
-                  )}
-                  {integrationsSupportedOnPlatform && (
-                    <>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                        onClick={() => setIntegrationConsent("calendar", "revoked")}
-                      >
-                        Revoke calendar
-                      </button>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                        onClick={() => setIntegrationConsent("health", "revoked")}
-                      >
-                        Revoke health
-                      </button>
-                    </>
-                  )}
-                  {integrationsSupportedOnPlatform && (
-                    <>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px" }}
-                        onClick={() => retryIntegrationContext("calendar")}
-                      >
-                        Sync calendar now
-                      </button>
-                      <button
-                        className="btn btn-ghost"
-                        style={{ fontSize: 12, padding: "8px 12px" }}
-                        onClick={() => retryIntegrationContext("health")}
-                      >
-                        Sync health now
-                      </button>
-                    </>
-                  )}
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                    onClick={() => clearIntegrationError("calendar")}
-                    disabled={!integrationContext.calendarError}
-                  >
-                    Clear calendar error
-                  </button>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }}
-                    onClick={() => clearIntegrationError("health")}
-                    disabled={!integrationContext.healthError}
-                  >
-                    Clear health error
-                  </button>
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { refreshSettings(); setIntegrationStatusWithClear("Integration status refreshed."); }}>Refresh status</button>
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={clearIntegrationContextCache} disabled={!integrationContext.hasAny}>Clear stale context</button>
+                  {integrationsSupportedOnPlatform && (<>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}>Connect calendar</button>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}>Connect health</button>
+                  </>)}
+                  {integrationsSupportedOnPlatform && (<>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("calendar", "revoked")}>Revoke calendar</button>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => setIntegrationConsent("health", "revoked")}>Revoke health</button>
+                  </>)}
+                  {integrationsSupportedOnPlatform && (<>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("calendar")}>Sync calendar now</button>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("health")}>Sync health now</button>
+                  </>)}
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => clearIntegrationError("calendar")} disabled={!integrationContext.calendarError}>Clear calendar error</button>
+                  <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={() => clearIntegrationError("health")} disabled={!integrationContext.healthError}>Clear health error</button>
                 </div>
-                {integrationContext.hasStale && (
-                  <div style={{ marginTop: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>
-                    One or more integration signals are stale. Stillform will continue in manual mode until context is refreshed.
-                  </div>
-                )}
-                {integrationActionStatus && (
-                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
-                    {integrationActionStatus}
-                  </div>
-                )}
+                {integrationContext.hasStale && <div style={{ marginTop: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>One or more integration signals are stale. Stillform will continue in manual mode until context is refreshed.</div>}
+                {integrationActionStatus && <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{integrationActionStatus}</div>}
               </div>
               )}
             </div>
 
-            {/* Subscription status */}
+            {/* DATA MANAGEMENT */}
             <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("subscription")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Subscription status</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.subscription ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.subscription && (
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: isSubscribed ? "var(--amber)" : "var(--text-muted)" }}>
-                    {isSubscribed ? "ACTIVE" : "INACTIVE"}
-                  </div>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                  {isSubscribed
-                    ? "This device has active access."
-                    : (trialExpired
-                        ? "Trial expired. Subscription is required for full access."
-                        : (uatTrialFreezeActive
-                            ? `UAT access window active until ${uatLaunchTargetLabel}.`
-                            : "Trial active. Subscription unlocks full access."))}
-                </div>
-                <div style={{ marginTop: 8, fontSize: 10, color: hasPendingWebhookSync ? "var(--amber)" : "var(--text-muted)" }}>
-                  {hasPendingWebhookSync
-                    ? "Recent checkout detected. Waiting for webhook confirmation."
-                    : "If access looks wrong, refresh from server."}
-                </div>
-                {subscriptionLastCheckedAt > 0 && (
-                  <div style={{ marginTop: 4, fontSize: 10, color: "var(--text-muted)" }}>
-                    Last checked: {new Date(subscriptionLastCheckedAt).toLocaleString()}
-                  </div>
-                )}
-                <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
-                  <button
-                    className="btn btn-ghost"
-                    style={{ fontSize: 12, padding: "8px 12px" }}
-                    onClick={refreshSubscriptionStatus}
-                    disabled={subscriptionStatusLoading}
-                  >
-                    {subscriptionStatusLoading ? "Checking..." : "Refresh from server"}
-                  </button>
-                </div>
-                {subscriptionStatusMessage && (
-                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>
-                    {subscriptionStatusMessage}
-                  </div>
-                )}
-              </div>
-              )}
-            </div>
-
-            {/* Sound */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("sound")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Sound</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.sound ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.sound && (() => {
-                const current = (() => { try { return localStorage.getItem("stillform_sound_type") || "tone"; } catch { return "tone"; } })();
-                const free = [
-                  { id: "tone", label: "Tone", desc: "Oscillator tones that follow your breath" },
-                  { id: "rhythm", label: "Rhythm", desc: "Pulsing beat matched to breathing pattern" },
-                  { id: "silence", label: "Silence", desc: "No sound. Visual cues only." }
-                ];
-                const premium = [
-                  { id: "bowl", label: "Singing bowl" },
-                  { id: "rain", label: "Rain" },
-                  { id: "ocean", label: "Ocean waves" },
-                  { id: "lofi", label: "Lo-fi ambient" },
-                  { id: "white", label: "White noise" }
-                ];
-                return (
-                  <>
-                    {free.map(s => (
-                      <button key={s.id} onClick={() => {
-                        try { localStorage.setItem("stillform_sound_type", s.id); } catch {}
-                        refreshSettings();
-                      }} style={{
-                        width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
-                        border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6, cursor: "pointer",
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                        fontFamily: "'DM Sans', sans-serif", textAlign: "left"
-                      }}>
-                        <div>
-                          <div style={{ fontSize: 13, color: current === s.id ? "var(--amber)" : "var(--text)" }}>{s.label}</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 1 }}>{s.desc}</div>
-                        </div>
-                        {current === s.id && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
-                      </button>
-                    ))}
-                    {premium.map(s => (
-                      <div key={s.id} style={{
-                        background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                        padding: "12px 16px", marginBottom: 6, opacity: 0.35,
-                        display: "flex", justifyContent: "space-between", alignItems: "center"
-                      }}>
-                        <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{s.label}</div>
-                        <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Coming soon</div>
-                      </div>
-                    ))}
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Cloud Sync */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("cloudsync")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Cloud Sync</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.cloudsync ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.cloudsync && (
-              <>
-              {syncSignedIn ? (
-                <div>
-                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>
-                    Signed in as <span style={{ color: "var(--amber)" }}>{sbGetUser()?.email}</span>
-                  </div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-                    Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
-                    Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt.
-                  </div>
-                  <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                    <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
-                      setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
-                      try {
-                        const r = await sbSyncUp();
-                        setSyncFeedbackWithClear(
-                          r.ok ? "success" : "error",
-                          r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`
-                        );
-                      } catch {
-                        setSyncFeedbackWithClear("error", "Sync failed. Check connection.");
-                      }
-                      setSyncLoading(false);
-                    }}>
-                      {syncLoading ? "Syncing..." : "Sync now"}
-                    </button>
-                    <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
-                      setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
-                      try {
-                        const r = await sbSyncDown();
-                        const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
-                        setSyncFeedbackWithClear(
-                          r?.ok ? "success" : "error",
-                          r?.ok
-                            ? `Restored ${r.restored || 0} items from cloud ✓`
-                            : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`
-                        );
-                      } catch {
-                        setSyncFeedbackWithClear("error", "Restore failed. Check connection.");
-                      }
-                      setSyncLoading(false);
-                    }}>
-                      {syncLoading ? "Restoring..." : "Restore now"}
-                    </button>
-                    <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)" }} onClick={async () => {
-                      await sbSignOut();
-                      setSyncSignedIn(false);
-                      setSyncSuccess(null);
-                      setSyncError(null);
-                    }}>
-                      Sign out
-                    </button>
-                  </div>
-                  {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginTop: 8 }}>{syncSuccess}</div>}
-                  {syncError && <div style={{ fontSize: 12, color: "#e05", marginTop: 8 }}>{syncError}</div>}
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
-                    Back up encrypted data from this device. Your data is encrypted before it leaves your device — we can't read it. Restore on a different device may be limited if the original encryption key is unavailable.
-                  </div>
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
-                    <input
-                      type="email"
-                      placeholder="Email"
-                      value={syncEmail}
-                      onChange={e => setSyncEmail(e.target.value)}
-                      style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={syncPassword}
-                      onChange={e => setSyncPassword(e.target.value)}
-                      style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-                    />
-                    {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
-                    {syncAuthCooldownSeconds > 0 && (
-                      <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
-                        Too many attempts. Please wait {syncAuthCooldownSeconds}s before trying again.
-                      </div>
-                    )}
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button className="btn btn-primary" style={{ fontSize: 14, flex: 1 }} onClick={async () => {
-                      if (!syncEmail || !syncPassword) { setSyncError("Enter email and password."); return; }
-                      if (syncAuthCooldownSeconds > 0) {
-                        setSyncError(`Please wait ${syncAuthCooldownSeconds}s, then try again.`);
-                        return;
-                      }
-                      setSyncLoading(true); setSyncError(null);
-                      try {
-                        // Try sign in first — if user exists this works immediately
-                        // If not, fall through to signup
-                        let signedIn = false;
-                        let signInError = null;
-                        try {
-                          await sbSignIn(syncEmail, syncPassword);
-                          if (sbIsSignedIn()) {
-                            await sbSyncDown();
-                            signedIn = true;
-                          }
-                        } catch (e) {
-                          signInError = e;
-                        }
-
-                        if (!signedIn) {
-                          if (isRateLimitedMessage(signInError?.message)) {
-                            startSyncAuthCooldown(signInError?.message);
-                            throw signInError;
-                          }
-                          if (isInvalidCredentialsMessage(signInError?.message)) {
-                            throw new Error("Incorrect email or password. Please try again.");
-                          }
-                          // New user — sign up
-                          try {
-                            await sbSignUp(syncEmail, syncPassword);
-                          } catch (signupErr) {
-                            if (isAlreadyRegisteredMessage(signupErr?.message) || isAlreadyRegisteredMessage(signInError?.message)) {
-                              throw new Error("Incorrect email or password. Please try again.");
-                            }
-                            throw signupErr;
-                          }
-                          if (!sbIsSignedIn()) {
-                            // Email confirmation required
-                            setSyncError("Check your email to confirm your account, then sign in.");
-                            setSyncLoading(false);
-                            return;
-                          }
-                          await sbCreateProfile();
-                          await sbSyncUp();
-                          signedIn = true;
-                        }
-
-                        if (signedIn) {
-                          try {
-                            await fetch("/.netlify/functions/subscription-link-account", {
-                              method: "POST",
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `Bearer ${sbGetSession()?.access_token || ""}`
-                              },
-                              body: JSON.stringify({ install_id: getOrCreateInstallId() })
-                            });
-                          } catch {}
-                          try {
-                            const pending = JSON.parse(localStorage.getItem("stillform_checkout_after_login") || "null");
-                            const isFreshPending = pending?.createdAt && (Date.now() - pending.createdAt) < (10 * 60 * 1000);
-                            if (isFreshPending) {
-                              if (pending.pricingPlan === "annual" || pending.pricingPlan === "monthly") {
-                                setPricingPlan(pending.pricingPlan);
-                              }
-                              localStorage.removeItem("stillform_checkout_after_login");
-                              setTimeout(() => checkoutToLemon(), 200);
-                            }
-                          } catch {}
-                          setSyncSignedIn(true);
-                          setSyncAuthCooldownUntil(0);
-                          setSubscriptionCheckTick(n => n + 1);
-                          setSyncEmail(""); setSyncPassword("");
-                          refreshSettings();
-                        }
-                      } catch (e) {
-                        const msg = e?.message || "Something went wrong. Check your details.";
-                        if (isRateLimitedMessage(msg)) startSyncAuthCooldown(msg);
-                        setSyncError(msg);
-                      }
-                      setSyncLoading(false);
-                    }}>
-                      {syncLoading
-                        ? "Please wait..."
-                        : (syncAuthCooldownSeconds > 0 ? `Wait ${syncAuthCooldownSeconds}s` : "Sign in / Create account")}
-                    </button>
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-                    New to Stillform? Enter your email and a password — your account is created automatically.
-                  </div>
-                </div>
-              )}
-              </>
-              )}
-            </div>
-
-            {/* Your Logs */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("logs")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Your Logs</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.logs ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.logs && (
-              <>
-              {/* Session Log */}
-              <button onClick={() => setOpenLog(openLog === "sessions" ? null : "sessions")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
-                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {getSessionCountFromStorage()} sessions
-                  </div>
-                </div>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
-              </button>
-              {openLog === "sessions" && (() => {
-                try {
-                  const sessions = getSessionsFromStorage().slice().reverse();
-                  if (sessions.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No sessions yet.</div>;
-                  const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
-                  return (
-                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
-                      {sessions.map((s, i) => {
-                        const d = s.timestamp ? new Date(s.timestamp) : null;
-                        const dur = s.duration ? Math.round(s.duration / 1000) : 0;
-                        const durStr = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
-                        return (
-                          <div key={i} style={{ padding: "8px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
-                            <div style={{ display: "flex", justifyContent: "space-between" }}>
-                              <span style={{ color: "var(--text-dim)" }}>{d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
-                              <span style={{ color: "var(--text-muted)" }}>{d ? d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : ""}</span>
-                            </div>
-                            <div style={{ color: "var(--text)", marginTop: 2 }}>
-                              {(s.tools || []).map(t => toolLabel[t] || t).join(", ") || "Session"} · {durStr}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                } catch { return null; }
-              })()}
-
-              {/* Pulse */}
-              <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
-                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries
-                  </div>
-                </div>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
-              </button>
-              {openLog === "journal" && (() => {
-                try {
-                  const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-                  if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No signal entries yet.</div>;
-                  return (
-                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
-                      {entries.map((e, i) => (
-                        <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
-                          <div style={{ color: "var(--text-dim)", marginBottom: 4 }}>{e.date || "—"}</div>
-                          {e.emotions?.length > 0 && <div style={{ color: "var(--amber)", marginBottom: 4 }}>{e.emotions.join(", ")}</div>}
-                          <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{e.text || e.trigger || "—"}</div>
-                          {e.body && <div style={{ color: "var(--text-dim)", marginTop: 4, fontStyle: "italic" }}>Body: {e.body}</div>}
-                          {e.outcome && <div style={{ color: "var(--text-dim)", marginTop: 2, fontStyle: "italic" }}>Outcome: {e.outcome}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  );
-                } catch { return null; }
-              })()}
-
-              {/* Saved Reframes Log */}
-              <button onClick={() => setOpenLog(openLog === "reframes" ? null : "reframes")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
-                fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved
-                  </div>
-                </div>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
-              </button>
-              {openLog === "reframes" && (() => {
-                try {
-                  const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
-                  if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
-                  const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" };
-                  return (
-                    <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
-                      {saved.map((r, i) => (
-                        <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                            <span style={{ color: "var(--amber)" }}>{modeLabel[r.mode] || "Reframe"}</span>
-                            {r.distortion && <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>{r.distortion}</span>}
-                          </div>
-                          <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{r.text || r.reframe || "—"}</div>
-                        </div>
-                      ))}
-                    </div>
-                  );
-                } catch { return null; }
-              })()}
-
-              {/* Signal Profile */}
-              <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 6 }}>
-                <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                  {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Settings"; } catch { return "Not set up yet"; } })()}
-                </div>
-              </div>
-              </>
-              )}
-            </div>
-
-            {/* Customization */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("customization")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 10px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Customization (colors + motion)</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.customization ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.customization && (
-              <>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Set colors and motion here anytime, or replay the setup bridge for a full visual comfort walkthrough.
-              </div>
-              <button onClick={() => openSetupBridge("settings")} style={{
-                width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "12px 16px", marginBottom: 10, cursor: "pointer", textAlign: "left",
-                fontFamily: "'DM Sans', sans-serif", color: "var(--text)"
-              }}>
-                <div style={{ fontSize: 13, color: "var(--text)" }}>Replay setup bridge visual comfort →</div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Preview theme, reduced motion, and visual grounding in one place.</div>
-              </button>
-
-              {/* Theme options (subscriber included) */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
-              {[
-                  { id: "dark", label: "Dark" },
-                  { id: "midnight", label: "Midnight Blue" },
-                  { id: "warm", label: "Warm Amber" },
-                  { id: "light", label: "Light" }
-                ].map(t => {
-                  const selected = themeChoice === t.id;
-                  return (
-                    <button key={t.id} type="button" onClick={() => setThemeSelection(t.id)} style={{
-                      width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
-                      border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4, cursor: "pointer",
-                      display: "flex", justifyContent: "space-between", alignItems: "center", textAlign: "left",
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>
-                      <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
-                      {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* AI Tone options (subscriber included) */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
-                {[
-                  { id: "balanced", label: "Balanced (default)" },
-                  { id: "gentle", label: "Gentle" },
-                  { id: "direct", label: "Direct & blunt" },
-                  { id: "clinical", label: "Clinical / technical" },
-                  { id: "motivational", label: "Motivational" }
-                ].map(t => {
-                  const selected = aiToneChoice === t.id;
-                  return (
-                    <button key={t.id} type="button" onClick={() => setAiToneSelection(t.id)} style={{
-                      width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
-                      border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                      display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
-                      textAlign: "left", fontFamily: "'DM Sans', sans-serif"
-                    }}>
-                      <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
-                      {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Wearable — grayed, needs native */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Wearable Integration</div>
-                <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "12px 16px", opacity: 0.3,
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Connect HR / HRV monitor</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Auto-detect elevated heart rate and prompt composure tools</div>
-                  </div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Native app</div>
-                </div>
-              </div>
-              {/* Cloud Sync status */}
-              <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Cloud Sync</div>
-                <div style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "12px 16px", opacity: 0.4,
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <div>
-                    <div style={{ fontSize: 14, color: "var(--text-muted)" }}>Sync across devices</div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Available now in Cloud Sync above. Sign in and tap Sync now.</div>
-                  </div>
-                  <div style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", flexShrink: 0 }}>Included</div>
-                </div>
-              </div>
-              </>
-              )}
-            </div>
-
-            {/* Signal Mapping */}
-            <div style={{ marginBottom: 28 }}>
-              <button onClick={() => toggleSettingsSection("signal")} style={{
-                width: "100%", background: "none", border: "none", padding: "0 0 6px",
-                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
-              }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Signal Mapping</span>
-                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.signal ? "▾" : "▸"}</span>
-              </button>
-              {settingsSectionOpen.signal && (
-              <>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                Map where your body responds first — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
-              </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals →</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
-                </button>
-                {/* Tension check moved into morning check-in flow */}
-              </div>
-              </>
-              )}
-            </div>
-
-            {/* BACKUP & DATA — collapsed by default */}
-            <div style={{ marginTop: 40, paddingTop: 20, borderTop: "1px solid var(--border)" }}>
               <button onClick={() => toggleSettingsSection("data")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
                 display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
               }}>
-                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Data management (exports + reset)</span>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Data Management</span>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.data ? "▾" : "▸"}</span>
               </button>
-              {settingsSectionOpen.data && (
-              <>
+              {settingsSectionOpen.data && (<>
 
-              {/* Auto backup */}
-              <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "12px 16px", marginBottom: 8,
-                display: "flex", justifyContent: "space-between", alignItems: "center"
-              }}>
-                <div>
-                  <div style={{ fontSize: 13, color: "var(--text)" }}>Auto backup</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Weekly encrypted backup of all your data</div>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
-              </div>
+                {/* Your Logs sub-group */}
+                <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10 }}>Your Logs</div>
 
-              {/* Metrics telemetry */}
-              <div style={{
-                background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                padding: "12px 16px", marginBottom: 8
-              }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                {/* Session history */}
+                <button onClick={() => setOpenLog(openLog === "sessions" ? null : "sessions")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                  fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
                   <div>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
-                      Enabled by default. Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
-                    </div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{getSessionCountFromStorage()} sessions</div>
                   </div>
-                  <button onClick={() => setMetricsOptIn((value) => !value)} style={{
-                    background: metricsOptIn ? "var(--amber-glow)" : "var(--surface)",
-                    border: `1px solid ${metricsOptIn ? "var(--amber-dim)" : "var(--border)"}`,
-                    color: metricsOptIn ? "var(--amber)" : "var(--text-muted)",
-                    borderRadius: "var(--r)", padding: "8px 10px", fontSize: 11, cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", flexShrink: 0
-                  }}>
-                    {metricsOptIn ? "On" : "Off"}
-                  </button>
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-                  {metricsLastSentAt
-                    ? `Last sent: ${new Date(metricsLastSentAt).toLocaleString()}`
-                    : "Last sent: not yet"}
-                </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
-                  Disclosure is documented in Privacy &amp; Disclaimers and must stay aligned with the full Privacy Policy.
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
-                  <button onClick={() => pushMetricsSnapshot({ source: "manual" })} disabled={!metricsOptIn || !metricsAuthToken || metricsUploading} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
-                    padding: "10px 12px", textAlign: "left", cursor: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? "not-allowed" : "pointer",
-                    color: "var(--text)", fontSize: 12, opacity: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? 0.55 : 1,
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    {metricsUploading ? "Sending metrics..." : "Send metrics now"}
-                  </button>
-                  <button onClick={copyMetricsSnapshot} style={{
-                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
-                    padding: "10px 12px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 12,
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    Copy metrics snapshot (JSON)
-                  </button>
-                </div>
-                {!metricsAuthToken && (
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-                    Sign in to Cloud Sync to send metrics.
-                  </div>
-                )}
-              </div>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
+                </button>
+                {openLog === "sessions" && (() => {
+                  try {
+                    const sessions = getSessionsFromStorage().slice().reverse();
+                    if (sessions.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No sessions yet.</div>;
+                    const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
+                    return (
+                      <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                        {sessions.map((s, i) => {
+                          const d = s.timestamp ? new Date(s.timestamp) : null;
+                          const dur = s.duration ? Math.round(s.duration / 1000) : 0;
+                          const durStr = dur >= 60 ? `${Math.floor(dur / 60)}m ${dur % 60}s` : `${dur}s`;
+                          return (
+                            <div key={i} style={{ padding: "8px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                                <span style={{ color: "var(--text-dim)" }}>{d ? d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}</span>
+                                <span style={{ color: "var(--text-muted)" }}>{d ? d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) : ""}</span>
+                              </div>
+                              <div style={{ color: "var(--text)", marginTop: 2 }}>{(s.tools || []).map(t => toolLabel[t] || t).join(", ") || "Session"} · {durStr}</div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
 
-              {/* Export */}
+                {/* Pulse */}
+                <button onClick={() => setOpenLog(openLog === "journal" ? null : "journal")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                  fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries</div>
+                  </div>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
+                </button>
+                {openLog === "journal" && (() => {
+                  try {
+                    const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+                    if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No signal entries yet.</div>;
+                    return (
+                      <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                        {entries.map((e, i) => (
+                          <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                            <div style={{ color: "var(--text-dim)", marginBottom: 4 }}>{e.date || "—"}</div>
+                            {e.emotions?.length > 0 && <div style={{ color: "var(--amber)", marginBottom: 4 }}>{e.emotions.join(", ")}</div>}
+                            <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{e.text || e.trigger || "—"}</div>
+                            {e.body && <div style={{ color: "var(--text-dim)", marginTop: 4, fontStyle: "italic" }}>Body: {e.body}</div>}
+                            {e.outcome && <div style={{ color: "var(--text-dim)", marginTop: 2, fontStyle: "italic" }}>Outcome: {e.outcome}</div>}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+
+                {/* Saved reframes */}
+                <button onClick={() => setOpenLog(openLog === "reframes" ? null : "reframes")} style={{
+                  width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", marginBottom: 6, cursor: "pointer", textAlign: "left",
+                  fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved</div>
+                  </div>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
+                </button>
+                {openLog === "reframes" && (() => {
+                  try {
+                    const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+                    if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
+                    const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" };
+                    return (
+                      <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
+                        {saved.map((r, i) => (
+                          <div key={i} style={{ padding: "10px 18px", borderBottom: "1px solid var(--border)", fontSize: 12 }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                              <span style={{ color: "var(--amber)" }}>{modeLabel[r.mode] || "Reframe"}</span>
+                              {r.distortion && <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>{r.distortion}</span>}
+                            </div>
+                            <div style={{ color: "var(--text)", lineHeight: 1.5 }}>{r.text || r.reframe || "—"}</div>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  } catch { return null; }
+                })()}
+
+                {/* Signal profile */}
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 20 }}>
+                  <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                    {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Personalization"; } catch { return "Not set up yet"; } })()}
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ borderTop: "0.5px solid var(--border)", marginBottom: 16 }} />
+
+                {/* Auto backup */}
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 8, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Auto backup</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Weekly encrypted backup of all your data</div>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
+                </div>
+
+                {/* Performance metrics */}
+                <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 8 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
+                      <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                        Enabled by default. Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
+                      </div>
+                    </div>
+                    <button onClick={() => setMetricsOptIn((value) => !value)} style={{
+                      background: metricsOptIn ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1px solid ${metricsOptIn ? "var(--amber-dim)" : "var(--border)"}`,
+                      color: metricsOptIn ? "var(--amber)" : "var(--text-muted)",
+                      borderRadius: "var(--r)", padding: "8px 10px", fontSize: 11, cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif", flexShrink: 0
+                    }}>
+                      {metricsOptIn ? "On" : "Off"}
+                    </button>
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                    {metricsLastSentAt ? `Last sent: ${new Date(metricsLastSentAt).toLocaleString()}` : "Last sent: not yet"}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
+                    Disclosure is documented in Privacy &amp; Disclaimers and must stay aligned with the full Privacy Policy.
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
+                    <button onClick={() => pushMetricsSnapshot({ source: "manual" })} disabled={!metricsOptIn || !metricsAuthToken || metricsUploading} style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
+                      padding: "10px 12px", textAlign: "left", cursor: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? "not-allowed" : "pointer",
+                      color: "var(--text)", fontSize: 12, opacity: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? 0.55 : 1, fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      {metricsUploading ? "Sending metrics..." : "Send metrics now"}
+                    </button>
+                    <button onClick={copyMetricsSnapshot} style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
+                      padding: "10px 12px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 12, fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      Copy metrics snapshot (JSON)
+                    </button>
+                  </div>
+                  {!metricsAuthToken && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>Sign in to Cloud Sync to send metrics.</div>}
+                </div>
+
+                {/* Exports */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
                   <button onClick={exportPulseLogPdf} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
@@ -13971,109 +13491,38 @@ export default function Stillform() {
                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Structured session data for personal review or provider share.</div>
                   </button>
                 </div>
-                {exportStatus && (
-                  <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>
-                    {exportStatus}
-                  </div>
-                )}
-                {metricsStatus && (
-                  <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>
-                    {metricsStatus}
-                  </div>
-                )}
+                {exportStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{exportStatus}</div>}
+                {metricsStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{metricsStatus}</div>}
 
-              {/* Delete — small, understated, double confirm */}
-              <button onClick={async () => {
-                if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
-                  const typed = window.prompt("To confirm deletion, type DELETE below:");
-                  if (typed === "DELETE") {
-                    try {
-                      // Delete cloud payload first so signed-in users don't rehydrate stale artifacts.
-                      try { await sbDeleteCloudData().catch(() => {}); } catch {}
-                      try { await sbSignOut().catch(() => {}); } catch {}
-                      try { sbClearSession(); } catch {}
-                      setSyncSignedIn(false);
-                      setSyncSuccess(null);
-                      setSyncError(null);
-                      localStorage.removeItem("stillform_sessions");
-                      localStorage.removeItem("stillform_signal_profile");
-                      localStorage.removeItem("stillform_saved_reframes");
-                      localStorage.removeItem("stillform_reframe_session_calm");
-                      localStorage.removeItem("stillform_reframe_session_clarity");
-                      localStorage.removeItem("stillform_reframe_session_hype");
-                      localStorage.removeItem("stillform_reframe_last_mode");
-                      localStorage.removeItem("stillform_reframe_entry_mode");
-                      localStorage.removeItem("stillform_reframe_entry_protocol");
-                      localStorage.removeItem("stillform_reframe_prefill");
-                      localStorage.removeItem("stillform_journal");
-                      localStorage.removeItem("stillform_focus_check_history");
-                      localStorage.removeItem("stillform_communication_events");
-                      localStorage.removeItem("stillform_tool_debriefs");
-                      localStorage.removeItem("stillform_ai_session_notes");
-                      localStorage.removeItem("stillform_bias_profile");
-                      localStorage.removeItem("stillform_regulation_type");
-                      localStorage.removeItem("stillform_breath_pattern");
-                      localStorage.removeItem("stillform_ai_tone");
-                      localStorage.removeItem("stillform_theme");
-                      localStorage.removeItem("stillform_scan_pace");
-                      localStorage.removeItem("stillform_audio");
-                      localStorage.removeItem("stillform_sound_type");
-                      localStorage.removeItem("stillform_screenlight");
-                      localStorage.removeItem("stillform_reducedmotion");
-                      localStorage.removeItem("stillform_visual_grounding");
-                      localStorage.removeItem("stillform_grounding_data");
-                      localStorage.removeItem("stillform_bio_filter");
-                      localStorage.removeItem("stillform_morning_start");
-                      localStorage.removeItem("stillform_evening_start");
-                      localStorage.removeItem("stillform_reminder");
-                      localStorage.removeItem("stillform_reminder_time");
-                      localStorage.removeItem("stillform_tooltip_home_seen");
-                      localStorage.removeItem("stillform_tooltips_reframe_seen");
-                      localStorage.removeItem("stillform_outcome_focus");
-                      localStorage.removeItem("stillform_session_entry_context");
-                      localStorage.removeItem("stillform_checkout_after_login");
-                      localStorage.removeItem("stillform_sb_sync_version");
-                      localStorage.removeItem("stillform_qb_position");
-                      localStorage.removeItem("stillform_milestone_7_seen");
-                      localStorage.removeItem("stillform_trial_start");
-                      localStorage.removeItem("stillform_subscribed");
-                      localStorage.removeItem("stillform_checkin_today");
-                      localStorage.removeItem("stillform_checkin_open_history");
-                      localStorage.removeItem("stillform_checkin_history");
-                      localStorage.removeItem("stillform_eod_open_history");
-                      localStorage.removeItem("stillform_eod_history");
-                      localStorage.removeItem("stillform_eod_today");
-                      localStorage.removeItem("stillform_loop_nudge_events");
-                      localStorage.removeItem("stillform_loop_nudge_dismissed_day");
-                      localStorage.removeItem("stillform_loop_nudge_dismiss_streak");
-                      localStorage.removeItem(METRICS_OPT_IN_KEY);
-                      localStorage.removeItem(METRICS_LAST_SENT_DAY_KEY);
-                      localStorage.removeItem(METRICS_LAST_SENT_AT_KEY);
-                      localStorage.removeItem("stillform_onboarded");
-                      localStorage.removeItem(FIRST_RUN_STAGE_KEY);
-                      localStorage.removeItem("stillform_sb_session");
-                      localStorage.removeItem("stillform_app_version");
-                      localStorage.removeItem("stillform_install_id");
-                      // Hard catch-all to guarantee no stale stillform_* keys survive.
-                      Object.keys(localStorage).forEach((key) => {
-                        if (key.startsWith("stillform_")) localStorage.removeItem(key);
-                      });
-                      window.location.reload();
-                    } catch {}
+                {/* Delete */}
+                <button onClick={async () => {
+                  if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
+                    const typed = window.prompt("To confirm deletion, type DELETE below:");
+                    if (typed === "DELETE") {
+                      try {
+                        try { await sbDeleteCloudData().catch(() => {}); } catch {}
+                        try { await sbSignOut().catch(() => {}); } catch {}
+                        try { sbClearSession(); } catch {}
+                        setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
+                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                        keysToRemove.forEach(key => localStorage.removeItem(key));
+                        Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
+                        window.location.reload();
+                      } catch {}
+                    }
                   }
-                }
-              }} style={{
-                background: "none", border: "none", padding: "8px 0", fontSize: 11, 
-                color: "rgba(200,80,80,0.4)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                marginTop: 16, letterSpacing: "0.04em"
-              }}>
-                Delete all data
-              </button>
-              </>
-              )}
+                }} style={{
+                  background: "none", border: "none", padding: "8px 0", fontSize: 11,
+                  color: "rgba(200,80,80,0.4)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  marginTop: 16, letterSpacing: "0.04em"
+                }}>
+                  Delete all data
+                </button>
+
+              </>)}
             </div>
 
-            {/* More */}
+            {/* MORE */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("more")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
@@ -14086,43 +13535,17 @@ export default function Stillform() {
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Privacy & Disclaimers
-                </button>
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                }}>Privacy &amp; Disclaimers</button>
                 <a href="mailto:ARAembersllc@proton.me" style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
                   textDecoration: "none", fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Contact us
-                </a>
-                <button onClick={() => {
-                  openTutorial("settings");
-                }} style={{
+                }}>Contact us</a>
+                <button onClick={() => openTutorial("settings")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Replay tutorial
-                </button>
-                <button onClick={() => {
-                  try {
-                    localStorage.removeItem("stillform_regulation_type");
-                    localStorage.removeItem("stillform_signal_profile");
-                    localStorage.removeItem("stillform_bias_profile");
-                    localStorage.removeItem("stillform_bio_filter");
-                  } catch {}
-                  setRegType(null);
-                  beginCalibrationFlow({ bridgeOrigin: "settings" });
-                }} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
-                  fontFamily: "'DM Sans', sans-serif"
-                }}>
-                  Re-run calibration
-                </button>
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
+                }}>Replay tutorial</button>
                 <button onClick={() => setSettingsShareQrOpen((prev) => !prev)} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14,
@@ -14134,41 +13557,34 @@ export default function Stillform() {
                 {settingsShareQrOpen && (
                   <div style={{ marginTop: 4, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
-                        Share Stillform
-                      </div>
-                      <a
-                        href={SHARE_QR_TARGET_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}
-                      >
-                        Open link ↗
-                      </a>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>Share Stillform</div>
+                      <a href={SHARE_QR_TARGET_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>Open link ↗</a>
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
-                      Use this QR when meeting someone in person.
-                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>Use this QR when meeting someone in person.</div>
                     <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
-                      <img
-                        src={SHARE_QR_IMAGE_URL}
-                        alt={`QR code for ${SHARE_QR_TARGET_URL}`}
-                        style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }}
-                        loading="lazy"
-                      />
+                      <img src={SHARE_QR_URL} alt={`QR code for ${SHARE_QR_TARGET_URL}`} style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }} loading="lazy" />
                     </div>
-                    <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>
-                      {SHARE_QR_TARGET_URL}
-                    </div>
+                    <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>{SHARE_QR_TARGET_URL}</div>
                   </div>
                 )}
+                {/* Focus Check */}
+                <button onClick={() => openFocusCheck("settings")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <div>
+                    <div style={{ fontSize: 14, color: "var(--text)" }}>Run Focus Check (30s)</div>
+                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
+                  </div>
+                  <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
+                </button>
               </div>
               )}
             </div>
-            </>)}
+
             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 28, lineHeight: 1.5 }}>
-              Stillform · ARA Embers LLC · v{APP_VERSION}
-              <br />
+              Stillform · ARA Embers LLC · v{APP_VERSION}<br />
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>

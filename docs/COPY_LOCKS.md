@@ -55,7 +55,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 7. Preview routing supports: `tutorial`, `setup-bridge`, `home`, `settings`, `faq`, `privacy`.
 8. Tutorial uses four concise guided pages after the opening page, with exact tool naming aligned to active daily tools.
 9. Pulse is part of My Progress data interpretation and not a standalone manual-entry tool surface.
-10. Focus Check action launches from Home (`Quick Check`) and Settings > Advanced controls (`Run Focus Check (30s)`).
+10. Focus Check action launches from Home (`Quick Check`) and Settings > More (`Run Focus Check (30s)` · *"Quick signal on focus, inhibition, and response control."*).
 11. Focus Check appears inside My Progress evidence outputs only (not as a standalone tool card).
 12. Tutorial includes a Go / No-Go TTFV step with an on-page Post-Check Briefing before proceeding.
 
