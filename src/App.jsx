@@ -11147,8 +11147,9 @@ export default function Stillform() {
           };
 
           return (
-            <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+            <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1, display: "flex", flexDirection: "column" }}>
 
+              <div style={{ order: 90 }}>
               {/* ABSENCE DETECTION — operator tone, no guilt */}
               {isAbsent && (
                 <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
@@ -11496,13 +11497,17 @@ export default function Stillform() {
                   </button>
                 </div>
               )}
+              </div>
+              <div style={{ order: 30 }}>
               {pendingNextMoveFollowUpSession && (
                 <NextMoveFollowUpCard
                   session={pendingNextMoveFollowUpSession}
                   onSubmit={handleNextMoveFollowUpSubmit}
                 />
               )}
+              </div>
 
+              <div style={{ order: 10 }}>
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
                 const now = new Date();
@@ -11708,9 +11713,10 @@ export default function Stillform() {
                   </div>
                 );
               })()}
+              </div>
 
               {/* DOMINANT CTA — Adaptive to regulation type */}
-              <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
+              <div style={{ order: 20, marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 {/* Identity line */}
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Choose your entry point."}
@@ -11811,6 +11817,7 @@ export default function Stillform() {
                 )}
               </div>
 
+              <div style={{ order: 40 }}>
               {/* GO DEEPER — secondary, below the line */}
               {(() => {
                 const biasDone = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
@@ -11853,7 +11860,9 @@ export default function Stillform() {
                   </div>
                 );
               })()}
+              </div>
 
+              <div style={{ order: 50 }}>
               {/* END OF DAY CHECK-IN — appears 6 PM through 4 AM only */}
               {(() => {
                 const now = new Date();
@@ -11996,7 +12005,9 @@ export default function Stillform() {
                   </div>
                 );
               })()}
+              </div>
 
+              <div style={{ order: 60 }}>
               {/* BOTTOM MY PROGRESS SURFACE — expandable */}
               {(() => {
                 const daySet = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean));
@@ -12156,9 +12167,10 @@ export default function Stillform() {
                   </div>
                 );
               })()}
+              </div>
 
               {/* BOTTOM LINKS — minimal */}
-              <div style={{ display: "flex", justifyContent: "center" }}>
+              <div style={{ order: 80, display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
               </div>
 
