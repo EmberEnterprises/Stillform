@@ -43,10 +43,10 @@ Run locally:
 npm run security:smoke
 ```
 
-Set `SECURITY_SMOKE_BASE_URL` if not testing prod:
+Set `SECURITY_SMOKE_FUNCTION_BASE_URL` when runtime function checks should run against a deployed environment:
 
 ```bash
-SECURITY_SMOKE_BASE_URL="https://stillformapp.com" npm run security:smoke
+SECURITY_SMOKE_FUNCTION_BASE_URL="https://stillformapp.com" npm run security:smoke
 ```
 
 Checks:

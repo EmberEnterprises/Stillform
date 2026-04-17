@@ -1,8 +1,8 @@
 # Stillform Share Extension Guide
 
 **Status:** ✅ Implemented — verify on device  
-**Last Updated:** April 4, 2026  
-**Platforms:** Android (native), iOS (planned)
+**Last Updated:** April 17, 2026  
+**Platforms:** Android (native)
 
 ## Overview
 
@@ -185,7 +185,6 @@ If user shares >2000 chars, input is truncated in Reframe. Add warning if needed
 - ✅ Text is **not** transmitted to any analytics
 - ✅ URL params are cleared from browser history (`replaceState()`)
 - ✅ Shared text only used for AI reframe, not stored in history by default
-- ⚠️ **Future:** Add option to exclude shared text from Pulse context
 
 ## Debugging
 
@@ -262,56 +261,6 @@ If user shares multiple times without closing app:
 - App launches when user taps Reframe
 - Shared text is processed immediately
 
-## Future Enhancements
-
-- [ ] **iOS Share Extension** — Native iOS share sheet integration
-- [ ] **Character limit UI** — Warn when text >2000 chars
-- [ ] **Rich text support** — Handle bold/italic formatting (if available)
-- [ ] **Share history** — Optional: save shared text in Signal Log
-- [ ] **One-tap reframe** — Auto-submit shared text without user interaction
-- [ ] **Multiple selection** — Share multiple snippets at once
-- [ ] **Image OCR** — Share image → extract text → reframe
-
-## iOS Implementation (Planned)
-
-When building for iOS, implement:
-
-1. **Info.plist configuration:**
-   ```xml
-   <key>CFBundleDocumentTypes</key>
-   <array>
-       <dict>
-           <key>CFBundleTypeName</key>
-           <string>Text</string>
-           <key>LSItemContentTypes</key>
-           <array>
-               <string>public.text</string>
-               <string>public.plain-text</string>
-           </array>
-       </dict>
-   </array>
-   ```
-
-2. **Share Extension Target** (SwiftUI):
-   ```swift
-   // Receives shared text via NotificationCenter
-   // Sends to React app via deep link
-   // Similar to Android flow
-   ```
-
-3. **URL scheme configuration:**
-   ```xml
-   <key>CFBundleURLTypes</key>
-   <array>
-       <dict>
-           <key>CFBundleURLSchemes</key>
-           <array>
-               <string>stillform</string>
-           </array>
-       </dict>
-   </array>
-   ```
-
 ## One-Command Deploy
 
 ```bash
@@ -354,13 +303,13 @@ adb shell am query-activities \
 ## FAQ
 
 **Q: Can I share images?**  
-A: Not yet. Share extension currently handles text/plain only. Image OCR planned for future.
+A: No. Share extension currently handles `text/plain` only.
 
 **Q: Where does the shared text go?**  
 A: It's used immediately in Reframe tool, not stored unless user explicitly saves the reframe to Signal Log.
 
 **Q: Can I disable the share extension?**  
-A: Remove the `<intent-filter>` from `AndroidManifest.xml` if needed (but why would you? 😊)
+A: Remove the `<intent-filter>` from `AndroidManifest.xml` if needed.
 
 **Q: Does sharing expose my privacy?**  
 A: No. Text is not logged, stored, or sent anywhere except directly to Stillform app. Not transmitted to servers during share.
@@ -369,10 +318,4 @@ A: No. Text is not logged, stored, or sent anywhere except directly to Stillform
 A: Yes! Web browser share sheet works the same way (Android 6+).
 
 ---
-
-**Next Steps:**
-1. Test share extension thoroughly
-2. Implement iOS version before public launch
-3. Monitor for share intent errors in production
-4. Consider add: Character limit warning + One-tap auto-reframe option
 

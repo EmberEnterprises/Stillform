@@ -1,7 +1,7 @@
 # Stillform Watch Haptics Integration Guide
 
 **Status:** ✅ Implemented — verify on paired phone/watch hardware  
-**Last Updated:** April 4, 2026  
+**Last Updated:** April 17, 2026  
 **Watch Device:** Samsung Galaxy Watch Ultra (Wear OS 4+)
 
 ## Overview
@@ -337,15 +337,6 @@ This design avoids latency issues and ensures smooth haptic feedback.
 3. **No HRV monitoring yet:** Watch can't read heart rate to auto-prompt
 4. **No voice guidance:** Watch haptics only (no audio)
 5. **No complications:** Watch doesn't show persistent Stillform widget (can add later)
-
-## Future Enhancements
-
-- [ ] Add watch complications (quick-launch breathing from watch face)
-- [ ] Add custom pace settings sent from phone to watch
-- [ ] HRV integration (detect elevated heart rate on watch, prompt breathing)
-- [ ] Voice guidance on watch (spoken phase names)
-- [ ] Watch → Phone feedback (send session stats back to phone)
-- [ ] Ambient mode (watch face changes color during breathing)
 
 ## Quick Reference
 

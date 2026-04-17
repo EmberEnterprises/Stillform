@@ -1,8 +1,7 @@
 # Stillform Build & Deploy Guide
 
-**Last Updated:** April 4, 2026  
-**Changes:** Widget routing fix + improved visual design  
-**Commit:** eaef420
+**Last Updated:** April 17, 2026  
+**Scope:** Current `main` build/install source of truth
 
 ## Quick Start (5 min)
 
@@ -144,7 +143,7 @@ stillform/
 └── package.json
 ```
 
-## Next Steps
+## Current Integration Status
 
 1. ✅ Deploy widget fix + test on device
 2. ✅ Watch haptics bridge is implemented — verify on paired phone/watch hardware
@@ -165,7 +164,7 @@ If testing push notifications or watch integration:
 # After APK install, grant permissions
 adb shell pm grant com.araembers.stillform android.permission.POST_NOTIFICATIONS
 
-# For watch testing (when ready):
+# For watch testing:
 adb shell setprop debug.atrace.tags.enableflags 1
 adb logcat | grep "WatchBridge\|Haptics"
 ```
