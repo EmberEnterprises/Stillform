@@ -9974,21 +9974,21 @@ export default function Stillform() {
         document.execCommand("copy");
         document.body.removeChild(ta);
       }
-      setMetricsStatusWithClear("Metrics snapshot copied.");
+      setMetricsStatusWithClear("Diagnostic snapshot copied.");
       try { window.plausible("Metrics Snapshot Copied"); } catch {}
     } catch {
-      setMetricsStatusWithClear("Could not copy metrics snapshot.");
+      setMetricsStatusWithClear("Could not copy diagnostic snapshot.");
     }
   };
 
   const pushMetricsSnapshot = async ({ source = "manual", silent = false } = {}) => {
     if (metricsUploading) return false;
     if (!metricsOptIn) {
-      if (!silent) setMetricsStatusWithClear("Metrics sharing is turned off.");
+      if (!silent) setMetricsStatusWithClear("App diagnostics is turned off.");
       return false;
     }
     if (!metricsAuthToken) {
-      if (!silent) setMetricsStatusWithClear("Sign in to send metrics.");
+      if (!silent) setMetricsStatusWithClear("Sign in to send diagnostics.");
       return false;
     }
     setMetricsUploading(true);
@@ -10022,7 +10022,7 @@ export default function Stillform() {
       setMetricsLastSentAt(sentAt);
       if (!silent) {
         setMetricsStatusWithClear(
-          response?.metric_date ? `Metrics sent for ${response.metric_date}.` : "Metrics sent."
+          response?.metric_date ? `Diagnostics sent for ${response.metric_date}.` : "Diagnostics sent."
         );
       }
       try {
@@ -10030,7 +10030,7 @@ export default function Stillform() {
       } catch {}
       return true;
     } catch {
-      if (!silent) setMetricsStatusWithClear("Could not send metrics. Try again.");
+      if (!silent) setMetricsStatusWithClear("Could not send. Try again.");
       return false;
     } finally {
       setMetricsUploading(false);
@@ -10225,7 +10225,7 @@ export default function Stillform() {
       if (alreadySentToday) return;
       const ok = await pushMetricsSnapshot({ source: "auto-daily", silent: true });
       if (!cancelled && ok && screen === "settings") {
-        setMetricsStatusWithClear("Daily metrics synced.");
+        setMetricsStatusWithClear("Daily diagnostics synced.");
       }
     };
     autoSend();
@@ -12456,8 +12456,8 @@ export default function Stillform() {
             <h2>Your Data</h2>
             <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups from this device are stored in our Supabase cloud infrastructure. Data is encrypted on-device before upload. Restore requires access to the original device encryption key, so restore on a different device may be limited.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
-            <h2>Performance Metrics (counts + rates only)</h2>
-            <p>Performance Metrics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only aggregate usage metrics (for example session counts, completion rates, and trend deltas).</p>
+            <h2>App Diagnostics (counts + rates only)</h2>
+            <p>App Diagnostics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only anonymous aggregate counts (for example session counts, completion rates, and trend deltas).</p>
             <p>These metrics do not include journal text, AI conversation content, or free-form notes. You can turn this off anytime in Settings, and this handling is covered in this Privacy &amp; Disclaimers view and our full Privacy Policy.</p>
 
             <h2>Screenshot &amp; Image Analysis Boundaries</h2>
@@ -13589,23 +13589,23 @@ export default function Stillform() {
                   <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
                 </div>
 
-                                {/* Performance Metrics — collapsible */}
+                                {/* App Diagnostics — collapsible */}
                 <div style={{ marginBottom: 10 }}>
                   <button onClick={() => toggleSubOpen("metrics")} style={{
                     width: "100%", background: "none", border: "none", padding: "8px 0",
                     display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
                     borderBottom: "0.5px solid var(--border)"
                   }}>
-                    <span style={{ fontSize: 13, color: "var(--text)" }}>Performance Metrics</span>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>App Diagnostics</span>
                     <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.metrics ? "▾" : "▸"}</span>
                   </button>
                   {settingsSubOpen.metrics && (
                     <div style={{ marginTop: 10 }}>
-                      {/* Performance metrics */}
+                      {/* App Diagnostics */}
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 8 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                     <div>
-                      <div style={{ fontSize: 13, color: "var(--text)" }}>Performance metrics (counts + rates only)</div>
+                      <div style={{ fontSize: 13, color: "var(--text)" }}>App diagnostics (counts + rates only)</div>
                       <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
                         Enabled by default. Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
                       </div>
@@ -13632,13 +13632,13 @@ export default function Stillform() {
                       padding: "10px 12px", textAlign: "left", cursor: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? "not-allowed" : "pointer",
                       color: "var(--text)", fontSize: 12, opacity: (!metricsOptIn || !metricsAuthToken || metricsUploading) ? 0.55 : 1, fontFamily: "'DM Sans', sans-serif"
                     }}>
-                      {metricsUploading ? "Sending metrics..." : "Send metrics now"}
+                      {metricsUploading ? "Sending..." : "Send to Stillform"}
                     </button>
                     <button onClick={copyMetricsSnapshot} style={{
                       width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r)",
                       padding: "10px 12px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 12, fontFamily: "'DM Sans', sans-serif"
                     }}>
-                      Copy metrics snapshot (JSON)
+                      Copy diagnostic snapshot (JSON)
                     </button>
                   </div>
                   {!metricsAuthToken && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>Sign in to Cloud Sync to send metrics.</div>}
@@ -13646,32 +13646,32 @@ export default function Stillform() {
                     </div>
                   )}
                 </div>
-                                {/* Exports — collapsible */}
+                                {/* Download My Data — collapsible */}
                 <div style={{ marginBottom: 10 }}>
                   <button onClick={() => toggleSubOpen("exports")} style={{
                     width: "100%", background: "none", border: "none", padding: "8px 0",
                     display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
                     borderBottom: "0.5px solid var(--border)"
                   }}>
-                    <span style={{ fontSize: 13, color: "var(--text)" }}>Exports</span>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Download My Data</span>
                     <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.exports ? "▾" : "▸"}</span>
                   </button>
                   {settingsSubOpen.exports && (
                     <div style={{ marginTop: 10 }}>
-                      {/* Exports */}
+                      {/* Download My Data */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
                   <button onClick={exportPulseLogPdf} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Export pulse log (PDF)</div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Download pulse log (PDF)</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Opens a printable document for Save as PDF.</div>
                   </button>
                   <button onClick={exportSessionHistoryCsv} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
-                    <div style={{ fontSize: 13, color: "var(--text)" }}>Export session history (CSV)</div>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Download session history (CSV)</div>
                     <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Structured session data for personal review or provider share.</div>
                   </button>
                 </div>
