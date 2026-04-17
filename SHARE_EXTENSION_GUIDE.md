@@ -1,12 +1,12 @@
 # Stillform Share Extension Guide
 
-**Status:** ✅ Fully Implemented & Ready to Deploy  
+**Status:** ✅ Implemented — verify on device  
 **Last Updated:** April 4, 2026  
 **Platforms:** Android (native), iOS (planned)
 
 ## Overview
 
-Users can share text from ANY app (Notes, Messages, Twitter, Email, etc.) directly to Stillform. The shared text lands pre-filled in the **Reframe tool**, ready for AI analysis.
+Users can share text from ANY app (Notes, Messages, Twitter, Email, etc.) directly to Stillform. The shared text lands pre-filled in the **Reframe tool**, ready for AI analysis, once first-run setup has been completed.
 
 **Use case:** "I'm spiraling over a work email → Select & share → Stillform opens Reframe with the email text already there → AI reframes in seconds"
 
@@ -27,7 +27,7 @@ Capacitor/React receives URL param
   ↓
 App.jsx detects ?share= parameter
   ↓
-Launches Reframe tool with sharedText prop
+If first-run is complete, launches Reframe tool with sharedText prop
   ↓
 ReframeTool auto-fills input field
   ↓
@@ -70,15 +70,15 @@ User reviews & submits to AI
 const params = new URLSearchParams(window.location.search);
 const share = params.get("share");
 
-if (share) {
-    console.log("[Share] Received shared text, launching Reframe");
+if (share && isFirstRunComplete()) {
     setSharedText(decodeURIComponent(share));
     setActiveTool({ id: "reframe", name: "Reframe", mode: "calm" });
-    setScreen(hasSeenOnboarding ? "tool" : "onboarding");
+    setScreen("tool");
+    window.history.replaceState({}, "", "/");
 }
 ```
 
-**Location:** `src/App.jsx` lines 4902-4924
+**Location:** `src/App.jsx` (`?share=` deep-link effect + native `appUrlOpen` listener)
 
 #### ReframeTool Component
 ```javascript
@@ -95,7 +95,7 @@ function ReframeTool({ sharedText = null, ... }) {
 }
 ```
 
-**Location:** `src/App.jsx` lines 2730-2819
+**Location:** `src/App.jsx` (`ReframeTool` shared-text prefill effect)
 
 ## Testing Checklist
 
@@ -110,7 +110,7 @@ function ReframeTool({ sharedText = null, ... }) {
 3. Tap Share → "Stillform · Reframe"
 4. Stillform launches
 5. Check: Text appears pre-filled in Reframe input field
-6. Check logs: `[Share] Received shared text, launching Reframe`
+6. Check: URL query is cleared after route (`window.history.replaceState`)
 
 ### Test 2: Share from Email
 1. Open Gmail or email app
@@ -129,11 +129,11 @@ function ReframeTool({ sharedText = null, ... }) {
 2. Verify all characters encoded/decoded correctly
 3. Text appears exactly as original in input field
 
-### Test 5: Share Before Onboarding
+### Test 5: Share Before First-Run Completion
 1. Fresh install of app
-2. Share text from another app (before completing onboarding)
-3. Check: App shows onboarding first, THEN Reframe with shared text
-4. User can skip onboarding → Reframe loads with shared text
+2. Share text from another app before completing tutorial/setup
+3. Check: app does not auto-route directly into Reframe with shared text
+4. Complete first-run flow, then share again and verify Reframe pre-fill
 
 ### Test 6: Reframe the Shared Text
 1. Share text to Stillform
@@ -185,18 +185,18 @@ If user shares >2000 chars, input is truncated in Reframe. Add warning if needed
 - ✅ Text is **not** transmitted to any analytics
 - ✅ URL params are cleared from browser history (`replaceState()`)
 - ✅ Shared text only used for AI reframe, not stored in history by default
-- ⚠️ **Future:** Add option to exclude shared text from Signal Log
+- ⚠️ **Future:** Add option to exclude shared text from Pulse context
 
 ## Debugging
 
-### View Share Intent Logs
+### View Share Intent Activity Resolution
 ```bash
-adb logcat | grep "\[Share\]"
+adb shell am query-activities -a android.intent.action.SEND -t text/plain
 ```
 
-### Expected Log Output
+### Expected Debug Output
 ```
-[Share] Received shared text, launching Reframe
+`com.araembers.stillform/.ShareReceiverActivity` should appear in the activity list.
 ```
 
 ### If Share Doesn't Appear in Menu
