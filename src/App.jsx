@@ -9466,6 +9466,13 @@ export default function Stillform() {
     data: false,
     more: false,
   }));
+  const [settingsSubOpen, setSettingsSubOpen] = useState(() => ({
+    theme: false, aiTone: false, display: false, sound: false,
+    processingType: false, breathingPattern: false, scanPace: false, signalMapping: false, scheduleNotif: false,
+    subscriptionStatus: false, syncControls: false,
+    metrics: false, exports: false,
+  }));
+  const toggleSubOpen = (key) => setSettingsSubOpen(prev => ({ ...prev, [key]: !prev[key] }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
   });
@@ -12715,7 +12722,19 @@ export default function Stillform() {
                 {/* App Customization sub-group */}
                 <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, marginTop: 4 }}>App Customization</div>
 
-                {/* Theme */}
+                                {/* Theme — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("theme")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Theme</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.theme ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.theme && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Theme */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
                   {[
@@ -12737,8 +12756,22 @@ export default function Stillform() {
                     );
                   })}
                 </div>
-
-                {/* AI Reframe Tone */}
+                    </div>
+                  )}
+                </div>
+                                {/* AI Reframe Tone — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("aiTone")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>AI Reframe Tone</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.aiTone ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.aiTone && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* AI Reframe Tone */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
                   {[
@@ -12761,8 +12794,22 @@ export default function Stillform() {
                     );
                   })}
                 </div>
-
-                {/* Display */}
+                    </div>
+                  )}
+                </div>
+                                {/* Display — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("display")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Display</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.display ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.display && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Display */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Display</div>
                   {[
@@ -12791,7 +12838,9 @@ export default function Stillform() {
                     );
                   })}
                 </div>
-
+                    </div>
+                  )}
+                </div>
                 {/* Audio */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Audio</div>
@@ -12816,7 +12865,19 @@ export default function Stillform() {
                   </div>
                 </div>
 
-                {/* Sound */}
+                                {/* Sound — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("sound")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Sound</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.sound ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.sound && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Sound */}
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Sound</div>
                   {(() => {
@@ -12857,11 +12918,25 @@ export default function Stillform() {
                     </>);
                   })()}
                 </div>
-
+                    </div>
+                  )}
+                </div>
                 {/* Your Setup sub-group */}
                 <div style={{ fontSize: 9, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 10, marginTop: 4 }}>Your Setup</div>
 
-                {/* Processing Type */}
+                                {/* Processing Type — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("processingType")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Processing Type</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.processingType ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.processingType && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Processing Type */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Processing Type</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
@@ -12886,8 +12961,22 @@ export default function Stillform() {
                     );
                   })}
                 </div>
-
-                {/* Breathing Pattern */}
+                    </div>
+                  )}
+                </div>
+                                {/* Breathing Pattern — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("breathingPattern")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Breathing Pattern</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.breathingPattern ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.breathingPattern && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Breathing Pattern */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Breathing Pattern</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
@@ -12912,8 +13001,22 @@ export default function Stillform() {
                     );
                   })}
                 </div>
-
-                {/* Body Scan Pace */}
+                    </div>
+                  )}
+                </div>
+                                {/* Body Scan Pace — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("scanPace")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Body Scan Pace</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.scanPace ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.scanPace && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Body Scan Pace */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Body Scan Pace</div>
                   <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
@@ -12939,8 +13042,22 @@ export default function Stillform() {
                     })}
                   </div>
                 </div>
-
-                {/* Signal Mapping */}
+                    </div>
+                  )}
+                </div>
+                                {/* Signal Mapping — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("signalMapping")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Signal Mapping</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.signalMapping ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.signalMapping && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Signal Mapping */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Signal Mapping</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
@@ -12954,8 +13071,22 @@ export default function Stillform() {
                     <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
                   </button>
                 </div>
-
-                {/* Schedule & Notifications — combined */}
+                    </div>
+                  )}
+                </div>
+                                {/* Schedule & Notifications — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("scheduleNotif")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Schedule & Notifications</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.scheduleNotif ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.scheduleNotif && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Schedule & Notifications — combined */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Schedule & Notifications</div>
                   <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
@@ -13014,7 +13145,9 @@ export default function Stillform() {
                     );
                   })()}
                 </div>
-
+                    </div>
+                  )}
+                </div>
                 {/* Re-run calibration */}
                 <div style={{ marginBottom: 8 }}>
                   <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); localStorage.removeItem("stillform_signal_profile"); localStorage.removeItem("stillform_bias_profile"); localStorage.removeItem("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
@@ -13055,7 +13188,19 @@ export default function Stillform() {
                       Signed in as <span style={{ color: "var(--amber)" }}>{sbGetUser()?.email}</span>
                     </div>
 
-                    {/* Subscription status */}
+                                        {/* Subscription — collapsible */}
+                    <div style={{ marginBottom: 10 }}>
+                      <button onClick={() => toggleSubOpen("subscriptionStatus")} style={{
+                        width: "100%", background: "none", border: "none", padding: "8px 0",
+                        display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                        borderBottom: "0.5px solid var(--border)"
+                      }}>
+                        <span style={{ fontSize: 13, color: "var(--text)" }}>Subscription</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.subscriptionStatus ? "▾" : "▸"}</span>
+                      </button>
+                      {settingsSubOpen.subscriptionStatus && (
+                        <div style={{ marginTop: 10 }}>
+                          {/* Subscription status */}
                     <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 12 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                         <div style={{ fontSize: 14, color: "var(--text)" }}>Access</div>
@@ -13087,8 +13232,22 @@ export default function Stillform() {
                       </div>
                       {subscriptionStatusMessage && <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{subscriptionStatusMessage}</div>}
                     </div>
-
-                    {/* Cloud sync controls */}
+                        </div>
+                      )}
+                    </div>
+                                        {/* Cloud Sync — collapsible */}
+                    <div style={{ marginBottom: 10 }}>
+                      <button onClick={() => toggleSubOpen("syncControls")} style={{
+                        width: "100%", background: "none", border: "none", padding: "8px 0",
+                        display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                        borderBottom: "0.5px solid var(--border)"
+                      }}>
+                        <span style={{ fontSize: 13, color: "var(--text)" }}>Cloud Sync</span>
+                        <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.syncControls ? "▾" : "▸"}</span>
+                      </button>
+                      {settingsSubOpen.syncControls && (
+                        <div style={{ marginTop: 10 }}>
+                          {/* Cloud sync controls */}
                     <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
                       Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
                     </div>
@@ -13120,7 +13279,9 @@ export default function Stillform() {
                     </div>
                     {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginBottom: 8 }}>{syncSuccess}</div>}
                     {syncError && <div style={{ fontSize: 12, color: "#e05", marginBottom: 8 }}>{syncError}</div>}
-
+                        </div>
+                      )}
+                    </div>
                     {/* Biometric lock — native only */}
                     {isNative() && (() => {
                       const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
@@ -13431,7 +13592,19 @@ export default function Stillform() {
                   <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.06em" }}>Weekly</div>
                 </div>
 
-                {/* Performance metrics */}
+                                {/* Performance Metrics — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("metrics")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Performance Metrics</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.metrics ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.metrics && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Performance metrics */}
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 8 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                     <div>
@@ -13473,8 +13646,22 @@ export default function Stillform() {
                   </div>
                   {!metricsAuthToken && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>Sign in to Cloud Sync to send metrics.</div>}
                 </div>
-
-                {/* Exports */}
+                    </div>
+                  )}
+                </div>
+                                {/* Exports — collapsible */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("exports")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Exports</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.exports ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.exports && (
+                    <div style={{ marginTop: 10 }}>
+                      {/* Exports */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 8 }}>
                   <button onClick={exportPulseLogPdf} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
@@ -13493,7 +13680,9 @@ export default function Stillform() {
                 </div>
                 {exportStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{exportStatus}</div>}
                 {metricsStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{metricsStatus}</div>}
-
+                    </div>
+                  )}
+                </div>
                 {/* Delete */}
                 <button onClick={async () => {
                   if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
