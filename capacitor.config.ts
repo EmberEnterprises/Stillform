@@ -9,9 +9,7 @@ const config: CapacitorConfig = {
       presentationOptions: ["badge", "sound", "alert"]
     },
     LocalNotifications: {
-      smallIcon: "ic_stat_icon_config_sample",
-      iconColor: "#C8922A",
-      sound: "beep.wav"
+      iconColor: "#C8922A"
     }
   },
   server: {
