@@ -12044,59 +12044,57 @@ export default function Stillform() {
                   sigh: "Sigh"
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
-                const processingCues = {
-                  "thought-first": [
-                    "Start with signal clarity, not full analysis.",
-                    "Name the feeling before you explain it.",
-                    "Your first interpretation is a draft. Check it.",
-                    "Slow the thought. The body already knows.",
-                    "Separate what happened from what you made it mean.",
-                    "Notice the story you're telling. Is it verified?",
-                    "Signal first. Strategy second.",
-                    "The analysis can wait. The signal cannot.",
-                    "What are you feeling — not thinking — right now?",
-                    "Clarity is not certainty. Start there anyway.",
-                    "Your pattern is to process fast. Pause before you conclude.",
-                    "Check your assumptions before you act on them.",
-                    "What does your body say before your mind edits it?",
-                    "The thought is real. The conclusion may not be."
-                  ],
-                  "body-first": [
-                    "Start with body downshift, then language.",
-                    "Let the nervous system settle before you decide.",
-                    "The activation is information. Read it, don't react to it.",
-                    "Ground the signal. Then think.",
-                    "Your body got there first. Honor that.",
-                    "Physical state is context. Adjust your read accordingly.",
-                    "Downshift before you speak.",
-                    "What is your body trying to tell you right now?",
-                    "Regulation first. Response second.",
-                    "The tension is a signal, not a verdict.",
-                    "Breathe once before you decide what this means.",
-                    "Your system is primed. That affects perception.",
-                    "Notice where you're holding it. That's the signal.",
-                    "Body knows before mind catches up. Listen."
-                  ],
-                  "balanced": [
-                    "Stabilize first, then separate fact from story.",
-                    "You process both ways. Use that.",
-                    "Neither the thought nor the feeling is the full picture.",
-                    "Regulate, then evaluate.",
-                    "What's real right now versus what you're projecting?",
-                    "Both channels are active. Which one leads today?",
-                    "Check in — body or mind — whichever is louder.",
-                    "Settle first. Interpret after.",
-                    "You have range. Use the right tool for this moment.",
-                    "The clearest read comes after the system is calm.",
-                    "Signal clarity before strategic thinking.",
-                    "Notice what's driving the read — head or body?",
-                    "One breath before one conclusion.",
-                    "What does composure look like in this specific moment?"
-                  ]
-                };
-                const cuePool = processingCues[regType] || processingCues["balanced"];
+                const processingCues = [
+                  "You don't have to figure it all out right now.",
+                  "One clear thought beats ten tangled ones.",
+                  "The smartest move right now is to slow down.",
+                  "Not every thought needs to be solved. Some just need to be heard.",
+                  "Your gut flagged this first. Trust that.",
+                  "Breathe before you build the case.",
+                  "You've handled harder than this. Start with what's actually true.",
+                  "The analysis is coming. Give your body a moment first.",
+                  "Stop editing. What are you actually feeling?",
+                  "Slow is not weak. Slow is accurate.",
+                  "Let the noise settle before you decide what it means.",
+                  "You've earned the right to pause. Use it.",
+                  "The pressure you're feeling is real. So is your ability to handle it.",
+                  "You don't owe anyone a response before you're ready.",
+                  "You are not your worst-case scenario.",
+                  "Get honest with yourself before you get strategic.",
+                  "The clearest version of you shows up after you regulate.",
+                  "What would you tell someone you love in this moment?",
+                  "You've got this. Start with one breath.",
+                  "Your body is not overreacting. It's communicating.",
+                  "You don't have to push through. You can settle first.",
+                  "You're allowed to take up space with what you're feeling.",
+                  "You don't have to explain the tension. Just notice it.",
+                  "You are stronger than what you're feeling right now.",
+                  "You don't have to carry all of this at once.",
+                  "The feeling will pass. You get to decide what comes next.",
+                  "You are the one who can work with this.",
+                  "Soften one thing. That's enough to start.",
+                  "You can be uncomfortable and still move forward.",
+                  "Let your body exhale what your mind is still holding.",
+                  "You have everything you need to handle this moment.",
+                  "It's okay not to have it all figured out yet.",
+                  "Feel it first. Then decide what to do with it.",
+                  "You are allowed to need a minute.",
+                  "The fact that you're here means you're already doing the work.",
+                  "This moment is temporary. How you handle it doesn't have to be.",
+                  "You've navigated harder than this. Remember that today.",
+                  "What you're feeling is valid. What you do next is the practice.",
+                  "Be as patient with yourself as you would be with someone you love.",
+                  "What do you actually need right now — not what's expected of you?",
+                  "You can feel overwhelmed and still be capable. Both are true.",
+                  "Every hard moment you get through is data. You're building something.",
+                  "Give yourself the same grace you'd give anyone else.",
+                  "You are more consistent than you give yourself credit for.",
+                  "You don't have to fix it all today. Just stay present.",
+                  "Check in. Breathe. You know what to do.",
+                  "You are doing better than you think."
+                ];
                 const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-                const processingCue = cuePool[dayOfYear % cuePool.length];
+                const processingCue = processingCues[dayOfYear % processingCues.length];
                 const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
                 return (
                   <div style={{ marginBottom: 16 }}>
