@@ -10820,7 +10820,7 @@ export default function Stillform() {
               <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
                 <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 1 of 2</div>
                 <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
-                  Make it yours.
+                  Personalization
                 </h1>
                 <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
                   Set up how Stillform looks and feels before you start. You can always change these in Settings.
