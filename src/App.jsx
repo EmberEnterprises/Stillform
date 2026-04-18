@@ -8813,6 +8813,7 @@ export default function Stillform() {
   }, [syncSignedIn, subscriptionCheckTick]);
 
   const [screen, setScreenRaw] = useState(null);
+  const currentScreenRef = useRef(null); // always holds latest screen for native listeners
 
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
@@ -8823,6 +8824,7 @@ export default function Stillform() {
   };
   const setScreen = (s) => {
     setScreenRaw(s);
+    currentScreenRef.current = s;
     try {
       const hash = screenToHash(s);
       if (window.location.hash !== hash) window.location.hash = hash;
@@ -9388,7 +9390,7 @@ export default function Stillform() {
         window.history.replaceState({}, "", "/");
       }
 
-      // Native: listen for share extension
+      // Native: listen for share extension + Android hardware back button
       if (isNative()) {
         import('@capacitor/app').then(({ App }) => {
           App.addListener("appUrlOpen", (data) => {
@@ -9401,6 +9403,17 @@ export default function Stillform() {
                 setScreen("tool");
               }
             } catch {}
+          });
+
+          // Android hardware back button — wire to same handleScreenBack used everywhere
+          App.addListener("backButton", ({ canGoBack }) => {
+            const currentScreen = currentScreenRef.current;
+            if (!currentScreen || currentScreen === "home") {
+              // On home screen — exit the app (standard Android behavior)
+              App.exitApp();
+            } else {
+              handleScreenBack();
+            }
           });
         }).catch(() => {});
       }
@@ -10543,7 +10556,7 @@ export default function Stillform() {
         {screen === "tutorial" && (() => {
           const tutorialPages = [
             {
-              kicker: "Opening page",
+              kicker: "",
               title: "Stillform",
               openingLines: [
                 "Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.",
@@ -10599,18 +10612,20 @@ export default function Stillform() {
                 minHeight: "100vh", position: "relative", zIndex: 1
               }}
             >
-              <button
-                className="intervention-back"
-                onClick={() => {
-                  if (safeStep > 0) {
-                    setTutorialStep((s) => Math.max(0, s - 1));
-                    return;
-                  }
-                  setScreen(returnTo);
-                }}
-              >
-                ← Back
-              </button>
+              {(safeStep > 0 || isFirstRunComplete()) && (
+                <button
+                  className="intervention-back"
+                  onClick={() => {
+                    if (safeStep > 0) {
+                      setTutorialStep((s) => Math.max(0, s - 1));
+                      return;
+                    }
+                    setScreen(returnTo);
+                  }}
+                >
+                  ← Back
+                </button>
+              )}
               <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                 {page.kicker}
               </div>
@@ -11118,8 +11133,14 @@ export default function Stillform() {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // regType guaranteed by startup routing — this is a safety net only
-          if (!regType) return null;
+          // Safety net — startup routing should handle this, but if regType
+          // is missing (e.g. browser back into home on fresh session), go to tutorial
+          if (!regType) {
+            setTutorialStep(0);
+            setTutorialReturnScreen("home");
+            setScreen("tutorial");
+            return null;
+          }
 
                     const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
