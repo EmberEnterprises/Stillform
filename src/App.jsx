@@ -14056,7 +14056,7 @@ export default function Stillform() {
                     </div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>Use this QR when meeting someone in person.</div>
                     <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
-                      <img src={SHARE_QR_URL} alt={`QR code for ${SHARE_QR_TARGET_URL}`} style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }} loading="lazy" />
+                      <img src={SHARE_QR_IMAGE_URL} alt={`QR code for ${SHARE_QR_TARGET_URL}`} style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }} loading="lazy" />
                     </div>
                     <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)", textAlign: "center", wordBreak: "break-all" }}>{SHARE_QR_TARGET_URL}</div>
                   </div>
