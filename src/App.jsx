@@ -4446,7 +4446,7 @@ async function secureSet(key, value) {
 // GPT-4o vision handles image reading
 
 
-function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null }) {
+function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null }) {
   const POSITIVE_STATE_PATTERNS = [
     "not so bad",
     "figured it out",
@@ -5445,6 +5445,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
 
   const handleMergedWatchChooseComplete = (redirectTo) => {
+    if (toolBackOverrideRef) toolBackOverrideRef.current = null;
     if (!redirectTo || redirectTo === "reframe-calm" || redirectTo === "reframe") {
       setShowWatchChooseFlow(false);
       return;
@@ -5532,6 +5533,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   }
 
   if (showWatchChooseFlow) {
+    // Register back override so ← Back closes watch sequence, not exits the tool
+    if (toolBackOverrideRef) toolBackOverrideRef.current = () => setShowWatchChooseFlow(false);
     return (
       <div style={{ paddingTop: 12 }}>
         <MetacognitionTool onComplete={handleMergedWatchChooseComplete} />
@@ -8952,6 +8955,9 @@ export default function Stillform() {
   });
   const [setupStep, setSetupStep] = useState(0);
   const setupAutoLaunchStepRef = useRef(null);
+  // Tool sub-state back override — any tool with internal sub-states writes a handler here.
+  // handleActiveToolBack checks this first so back always goes to the right place.
+  const toolBackOverrideRef = useRef(null);
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [ciOpen, setCiOpen] = useState(false);
   const [ciEnergy, setCiEnergy] = useState(null);
@@ -10476,6 +10482,12 @@ export default function Stillform() {
     setScreen("tool");
   };
   const handleActiveToolBack = () => {
+    // Check if an active tool has registered a sub-state back handler
+    if (toolBackOverrideRef.current) {
+      toolBackOverrideRef.current();
+      toolBackOverrideRef.current = null;
+      return;
+    }
     if (activeTool?.returnTo) {
       const returnScreen = activeTool.returnTo;
       setActiveTool(null);
@@ -10589,7 +10601,7 @@ export default function Stillform() {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} quickStart={activeTool?.quickStart} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} toolBackOverrideRef={toolBackOverrideRef} />;
       case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} />;
 
       case "bias": return <MicroBiasTool {...props} />;
