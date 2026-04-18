@@ -8812,7 +8812,22 @@ export default function Stillform() {
     return () => { cancelled = true; };
   }, [syncSignedIn, subscriptionCheckTick]);
 
-  const [screen, setScreen] = useState(null);
+  const [screen, setScreenRaw] = useState(null);
+
+  // Hash routing — keeps browser back button working
+  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
+  const screenToHash = (s) => s && HASH_SCREENS.has(s) ? `#${s}` : "#home";
+  const hashToScreen = (h) => {
+    const s = (h || "").replace("#", "");
+    return HASH_SCREENS.has(s) ? s : "home";
+  };
+  const setScreen = (s) => {
+    setScreenRaw(s);
+    try {
+      const hash = screenToHash(s);
+      if (window.location.hash !== hash) window.location.hash = hash;
+    } catch {}
+  };
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
@@ -8983,10 +8998,11 @@ export default function Stillform() {
   };
   const goHomeSafely = (defer = false) => {
     if (defer) {
-      setTimeout(() => setScreen("home"), 0);
+      setTimeout(() => { setScreenRaw("home"); try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {} }, 0);
       return;
     }
-    setScreen("home");
+    setScreenRaw("home");
+    try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {}
   };
   const handleScreenBack = () => {
     if (screen === "tutorial") {
@@ -9043,6 +9059,16 @@ export default function Stillform() {
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
 
+  // Sync browser back/forward to in-app screen via hash
+  useEffect(() => {
+    const onHashChange = () => {
+      const s = hashToScreen(window.location.hash);
+      setScreenRaw(s);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
   useEffect(() => {
     const swipeEnabledScreens = new Set(["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
     if (!swipeEnabledScreens.has(screen)) return;
@@ -9052,8 +9078,11 @@ export default function Stillform() {
     const onTouchStart = (event) => {
       if (!event.touches || event.touches.length !== 1) return;
       const target = event.target;
+      // Only block swipe initiation on text inputs — buttons/links are fine to start from
+      // (swipe vs tap is distinguished in onTouchEnd by distance)
       if (target instanceof HTMLElement) {
-        if (interactiveTags.has(target.tagName) || target.closest("input, textarea, select, button, a, [role='button']")) return;
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") return;
+        if (target.closest("input, textarea, select")) return;
       }
       const t = event.touches[0];
       touchStart = { x: t.clientX, y: t.clientY, ts: Date.now() };
@@ -9332,6 +9361,15 @@ export default function Stillform() {
         console.error("WidgetBridge error:", e);
       }
 
+      // If onboarded but somehow missing regType, send to tutorial — never show dead screen
+      const missingRegType = !localStorage.getItem("stillform_regulation_type");
+      if (missingRegType && !trialExpired) {
+        setTutorialStep(0);
+        setTutorialReturnScreen("home");
+        setScreen("tutorial");
+        setScreenReady(true);
+        return;
+      }
       setScreen(trialExpired ? "pricing" : "home");
       setScreenReady(true);
     };
@@ -11080,27 +11118,10 @@ export default function Stillform() {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // No regulation type set? Route to calibration
-          if (!regType) {
-            return (
-              <section className="home">
-                <h1 className="home-title">
-                  Composure.<br /><em>On demand.</em>
-                </h1>
-                <p className="home-sub">
-                  Master how you carry yourself — when things are hard and when things are going great. Composure isn’t just for bad days. Set your tone, stay sharp, and build awareness that compounds over time.
-                </p>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
-                  Let's calibrate your system first.
-                </div>
-                <button onClick={() => openSetupBridge("home")} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
-                  Begin Calibration →
-                </button>
-              </section>
-            );
-          }
+          // regType guaranteed by startup routing — this is a safety net only
+          if (!regType) return null;
 
-          const isThoughtFirst = regType === "thought-first";
+                    const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
 
           /* ── RETURNING USER: clean, one dominant action ── */
