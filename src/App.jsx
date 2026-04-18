@@ -1379,7 +1379,7 @@ const UAT_QUESTION_OPTIONS = [
   { id: "missing", prompt: "What should be clearer or easier?", placeholder: "Example: Add one line explaining why this tool exists." },
   { id: "working", prompt: "What worked well for you?", placeholder: "Example: The reframe flow felt direct and calm." }
 ];
-const VALID_THEME_IDS = new Set(["dark", "midnight", "suede", "teal", "sage", "light"]);
+const VALID_THEME_IDS = new Set(["dark", "midnight", "suede", "teal", "rose", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 const TOOL_ENTRY_PRIMER_COPY = {
   "thought-first": {
@@ -1514,36 +1514,36 @@ const THEME_PRESETS = {
     "--green-glow": "rgba(138,171,138,0.10)"
   },
   teal: {
-    "--bg": "#060e0e",
-    "--surface": "#0d1a1a",
-    "--surface2": "#122020",
-    "--border": "rgba(45,212,191,0.15)",
-    "--border-hi": "rgba(45,212,191,0.28)",
-    "--amber": "#2dd4bf",
-    "--amber-dim": "rgba(45,212,191,0.28)",
-    "--amber-glow": "rgba(45,212,191,0.08)",
-    "--amber-20": "rgba(45,212,191,0.18)",
-    "--text": "#edfaf8",
-    "--text-dim": "#a8d4ce",
-    "--text-muted": "#6aada5",
-    "--green": "#2dd4bf",
-    "--green-glow": "rgba(45,212,191,0.10)"
+    "--bg": "#030d0e",
+    "--surface": "#0a1f21",
+    "--surface2": "#102829",
+    "--border": "rgba(0,210,200,0.20)",
+    "--border-hi": "rgba(0,210,200,0.40)",
+    "--amber": "#00d4c8",
+    "--amber-dim": "rgba(0,212,200,0.30)",
+    "--amber-glow": "rgba(0,212,200,0.10)",
+    "--amber-20": "rgba(0,212,200,0.20)",
+    "--text": "#ffffff",
+    "--text-dim": "#b0deda",
+    "--text-muted": "#5eaaa4",
+    "--green": "#00d4c8",
+    "--green-glow": "rgba(0,212,200,0.12)"
   },
-  sage: {
-    "--bg": "#0a0e0b",
-    "--surface": "#131a14",
-    "--surface2": "#192019",
-    "--border": "rgba(160,190,155,0.16)",
-    "--border-hi": "rgba(160,190,155,0.28)",
-    "--amber": "#8fba8a",
-    "--amber-dim": "rgba(143,186,138,0.28)",
-    "--amber-glow": "rgba(143,186,138,0.08)",
-    "--amber-20": "rgba(143,186,138,0.18)",
-    "--text": "#eef5ee",
-    "--text-dim": "#b8d4b4",
-    "--text-muted": "#7a9e76",
-    "--green": "#8fba8a",
-    "--green-glow": "rgba(143,186,138,0.10)"
+  rose: {
+    "--bg": "#0e090c",
+    "--surface": "#1c1018",
+    "--surface2": "#241520",
+    "--border": "rgba(210,140,160,0.18)",
+    "--border-hi": "rgba(210,140,160,0.32)",
+    "--amber": "#c47890",
+    "--amber-dim": "rgba(196,120,144,0.30)",
+    "--amber-glow": "rgba(196,120,144,0.10)",
+    "--amber-20": "rgba(196,120,144,0.20)",
+    "--text": "#f8eef2",
+    "--text-dim": "#d4b0be",
+    "--text-muted": "#a07888",
+    "--green": "#c47890",
+    "--green-glow": "rgba(196,120,144,0.10)"
   },
   light: {
     "--bg": "#f0f2f8",
@@ -9627,7 +9627,7 @@ export default function Stillform() {
   const [uatFeedbackHistory, setUatFeedbackHistory] = useState(() => getUatFeedbackHistoryFromStorage());
   const [uatFeedbackHistorySyncing, setUatFeedbackHistorySyncing] = useState(false);
   useEffect(() => {
-    const themeToApply = ["dark", "midnight", "suede", "teal", "sage", "light"].includes(themeChoice) ? themeChoice : "dark";
+    const themeToApply = ["dark", "midnight", "suede", "teal", "rose", "light"].includes(themeChoice) ? themeChoice : "dark";
     applyThemePreset(themeToApply, highContrastMode);
     if (themeToApply !== themeChoice) {
       try { localStorage.setItem("stillform_theme", themeToApply); } catch {}
@@ -10846,8 +10846,8 @@ export default function Stillform() {
             { id: "dark",     label: "Dark",     bg: "#0A0A0C", accent: "#C8922A" },
             { id: "midnight", label: "Midnight",  bg: "#070b18", accent: "#7aa8ff" },
             { id: "suede",    label: "Suede",     bg: "#0f0d0b", accent: "#c9956a" },
-            { id: "teal",     label: "Teal",      bg: "#060e0e", accent: "#2dd4bf" },
-            { id: "sage",     label: "Sage",      bg: "#0a0e0b", accent: "#8fba8a" },
+            { id: "teal",     label: "Teal",      bg: "#030d0e", accent: "#00d4c8" },
+            { id: "rose",     label: "Rose",      bg: "#0e090c", accent: "#c47890" },
             { id: "light",    label: "Light",     bg: "#f0f2f8", accent: "#C8922A" }
           ];
 
@@ -13018,7 +13018,7 @@ export default function Stillform() {
                   {[
                     { id: "dark", label: "Dark" }, { id: "midnight", label: "Midnight" },
                     { id: "suede", label: "Suede" }, { id: "teal", label: "Teal" },
-                    { id: "sage", label: "Sage" }, { id: "light", label: "Light" }
+                    { id: "rose", label: "Rose" }, { id: "light", label: "Light" }
                   ].map(t => {
                     const selected = themeChoice === t.id;
                     return (
