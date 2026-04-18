@@ -10771,7 +10771,7 @@ export default function Stillform() {
             { id: "dark",     label: "Dark",     bg: "#0A0A0C", accent: "#C8922A" },
             { id: "midnight", label: "Midnight",  bg: "#070b18", accent: "#7aa8ff" },
             { id: "warm",     label: "Warm",      bg: "#150f08", accent: "#d4922a" },
-            { id: "light",    label: "Light",     bg: "#f6f7fb", accent: "#7a4800" }
+            { id: "light",    label: "Light",     bg: "#f0f2f8", accent: "#C8922A" }
           ];
           return (
             <section
