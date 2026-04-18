@@ -10426,6 +10426,13 @@ export default function Stillform() {
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setFirstRunStage(null);
+    // Ensure regType is always set before going to home — default balanced if user skipped assessment
+    try {
+      if (!localStorage.getItem("stillform_regulation_type")) {
+        localStorage.setItem("stillform_regulation_type", "balanced");
+        setRegType("balanced");
+      }
+    } catch {}
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
   };
@@ -10537,6 +10544,12 @@ export default function Stillform() {
           goHomeSafely();
           return;
         }
+      }
+      if (activeTool?.returnTo === "setup-bridge") {
+        // Always return to setup bridge regardless of redirectTo — calibration not done yet
+        setActiveTool(null);
+        setScreen("setup-bridge");
+        return;
       }
       if (!redirectTo && activeTool?.returnTo) {
         const returnScreen = activeTool.returnTo;
