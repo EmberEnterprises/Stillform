@@ -123,7 +123,7 @@ const styles = `
 
   .btn-primary {
     background: var(--amber);
-    color: #0A0A0C;
+    color: var(--btn-primary-text, #0A0A0C);
     font-weight: 500;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2);
   }
@@ -1379,7 +1379,7 @@ const UAT_QUESTION_OPTIONS = [
   { id: "missing", prompt: "What should be clearer or easier?", placeholder: "Example: Add one line explaining why this tool exists." },
   { id: "working", prompt: "What worked well for you?", placeholder: "Example: The reframe flow felt direct and calm." }
 ];
-const VALID_THEME_IDS = new Set(["dark", "midnight", "warm", "light"]);
+const VALID_THEME_IDS = new Set(["dark", "midnight", "suede", "teal", "rose", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
 const TOOL_ENTRY_PRIMER_COPY = {
   "thought-first": {
@@ -1485,57 +1485,117 @@ const THEME_PRESETS = {
     "--bg": "#070b18",
     "--surface": "#0f1526",
     "--surface2": "#141d33",
-    "--border": "rgba(156,184,255,0.18)",
-    "--border-hi": "rgba(173,198,255,0.28)",
-    "--amber": "#8eb5ff",
-    "--amber-dim": "rgba(142,181,255,0.28)",
-    "--amber-glow": "rgba(142,181,255,0.12)",
-    "--amber-20": "rgba(142,181,255,0.20)",
-    "--text": "#e7eefc",
-    "--text-dim": "#9db0d7",
-    "--text-muted": "#8fa4ce",
+    "--border": "rgba(200,220,255,0.20)",
+    "--border-hi": "rgba(200,220,255,0.35)",
+    "--amber": "#7aa8ff",
+    "--amber-dim": "rgba(122,168,255,0.30)",
+    "--amber-glow": "rgba(122,168,255,0.12)",
+    "--amber-20": "rgba(122,168,255,0.20)",
+    "--text": "#ffffff",
+    "--text-dim": "#c8d8f0",
+    "--text-muted": "#96aece",
     "--green": "#7abfa4",
     "--green-glow": "rgba(122,191,164,0.12)"
   },
-  warm: {
-    "--bg": "#150f08",
-    "--surface": "#22170d",
-    "--surface2": "#2a1c10",
-    "--border": "rgba(234,186,124,0.22)",
-    "--border-hi": "rgba(239,199,148,0.30)",
-    "--amber": "#e3a44f",
-    "--amber-dim": "rgba(227,164,79,0.34)",
-    "--amber-glow": "rgba(227,164,79,0.13)",
-    "--amber-20": "rgba(227,164,79,0.23)",
-    "--text": "#f6eee4",
-    "--text-dim": "#d4b895",
-    "--text-muted": "#c8aa86",
-    "--green": "#96b78a",
-    "--green-glow": "rgba(150,183,138,0.12)"
+  suede: {
+    "--bg": "#0f0d0b",
+    "--surface": "#1c1814",
+    "--surface2": "#252018",
+    "--border": "rgba(210,185,155,0.18)",
+    "--border-hi": "rgba(210,185,155,0.30)",
+    "--amber": "#c9956a",
+    "--amber-dim": "rgba(201,149,106,0.30)",
+    "--amber-glow": "rgba(201,149,106,0.10)",
+    "--amber-20": "rgba(201,149,106,0.18)",
+    "--text": "#f5efe8",
+    "--text-dim": "#d4c4b0",
+    "--text-muted": "#a89070",
+    "--green": "#8aab8a",
+    "--green-glow": "rgba(138,171,138,0.10)"
+  },
+  teal: {
+    "--bg": "#030d0e",
+    "--surface": "#0a1f21",
+    "--surface2": "#102829",
+    "--border": "rgba(60,130,125,0.25)",
+    "--border-hi": "rgba(60,130,125,0.45)",
+    "--amber": "#2e7a74",
+    "--amber-dim": "rgba(46,122,116,0.35)",
+    "--amber-glow": "rgba(46,122,116,0.12)",
+    "--amber-20": "rgba(46,122,116,0.20)",
+    "--text": "#ffffff",
+    "--text-dim": "#96bcb8",
+    "--text-muted": "#4e8e88",
+    "--green": "#2e7a74",
+    "--green-glow": "rgba(46,122,116,0.12)",
+    "--btn-primary-text": "#ffffff"
+  },
+  rose: {
+    "--bg": "#0e090c",
+    "--surface": "#1c1018",
+    "--surface2": "#241520",
+    "--border": "rgba(140,75,92,0.25)",
+    "--border-hi": "rgba(140,75,92,0.42)",
+    "--amber": "#7a3a50",
+    "--amber-dim": "rgba(122,58,80,0.35)",
+    "--amber-glow": "rgba(122,58,80,0.12)",
+    "--amber-20": "rgba(122,58,80,0.20)",
+    "--text": "#f8eef2",
+    "--text-dim": "#c090a0",
+    "--text-muted": "#885060",
+    "--green": "#7a3a50",
+    "--green-glow": "rgba(122,58,80,0.10)",
+    "--btn-primary-text": "#ffffff"
   },
   light: {
-    "--bg": "#f6f7fb",
+    "--bg": "#f0f2f8",
     "--surface": "#ffffff",
-    "--surface2": "#eef1f8",
-    "--border": "rgba(16,24,40,0.11)",
-    "--border-hi": "rgba(16,24,40,0.19)",
-    "--amber": "#b1700a",
-    "--amber-dim": "rgba(177,112,10,0.30)",
-    "--amber-glow": "rgba(177,112,10,0.10)",
-    "--amber-20": "rgba(177,112,10,0.20)",
-    "--text": "#171b27",
-    "--text-dim": "#5f6473",
-    "--text-muted": "#656b7b",
+    "--surface2": "#e8ecf4",
+    "--border": "rgba(16,24,40,0.18)",
+    "--border-hi": "rgba(16,24,40,0.30)",
+    "--amber": "#C8922A",
+    "--amber-dim": "rgba(200,146,42,0.30)",
+    "--amber-glow": "rgba(200,146,42,0.10)",
+    "--amber-20": "rgba(200,146,42,0.20)",
+    "--text": "#080c14",
+    "--text-dim": "#2a2f3e",
+    "--text-muted": "#464c60",
     "--green": "#2f7c59",
-    "--green-glow": "rgba(47,124,89,0.12)"
+    "--green-glow": "rgba(47,124,89,0.12)",
   }
 };
 
-const applyThemePreset = (themeId) => {
+const HIGH_CONTRAST_OVERLAY = {
+  "--bg": "#000000",
+  "--surface": "#111114",
+  "--surface2": "#18181c",
+  "--text": "#ffffff",
+  "--text-dim": "#dddddd",
+  "--text-muted": "#aaaaaa",
+  "--border": "rgba(255,255,255,0.45)",
+  "--border-hi": "rgba(255,255,255,0.70)",
+};
+
+const HIGH_CONTRAST_OVERLAY_LIGHT = {
+  "--bg": "#ffffff",
+  "--surface": "#f0f0f0",
+  "--surface2": "#e0e0e0",
+  "--text": "#000000",
+  "--text-dim": "#111111",
+  "--text-muted": "#333333",
+  "--border": "rgba(0,0,0,0.50)",
+  "--border-hi": "rgba(0,0,0,0.75)",
+};
+
+const applyThemePreset = (themeId, highContrast = false) => {
   if (typeof document === "undefined") return;
   const preset = THEME_PRESETS[themeId] || THEME_PRESETS.dark;
   const root = document.documentElement;
   Object.entries(preset).forEach(([token, value]) => root.style.setProperty(token, value));
+  if (highContrast) {
+    const overlay = themeId === "light" ? HIGH_CONTRAST_OVERLAY_LIGHT : HIGH_CONTRAST_OVERLAY;
+    Object.entries(overlay).forEach(([token, value]) => root.style.setProperty(token, value));
+  }
 };
 
 const readArrayFromStorage = (key) => {
@@ -6345,8 +6405,8 @@ function MetacognitionTool({ onComplete }) {
   );
 }
 
-function SignalMapTool({ onComplete }) {
-  const [step, setStep] = useState(0);
+function SignalMapTool({ onComplete, skipIntro = false }) {
+  const [step, setStep] = useState(skipIntro ? 1 : 0);
   const [signals, setSignals] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_signal_profile")) || {}; } catch { return {}; }
   });
@@ -8719,6 +8779,13 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+    // Apply high contrast on startup if previously enabled
+    try {
+      if (localStorage.getItem("stillform_high_contrast") === "on") {
+        const savedTheme = localStorage.getItem("stillform_theme") || "dark";
+        applyThemePreset(savedTheme, true);
+      }
+    } catch {}
     // Cloud sync init — version check + restore data if signed in
     sbVersionCheck().catch(() => {});
     if (sbIsSignedIn()) {
@@ -8813,13 +8880,24 @@ export default function Stillform() {
   }, [syncSignedIn, subscriptionCheckTick]);
 
   const [screen, setScreenRaw] = useState(null);
+  const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
 
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
-  const screenToHash = (s) => s && HASH_SCREENS.has(s) ? `#${s}` : "#home";
+  const screenToHash = (s) => {
+    if (!s) return "#home";
+    // Transient screens (tool, panic) keep whatever hash is current — no navigation entry
+    if (s === "tool" || s === "panic") return window.location.hash || "#home";
+    if (!HASH_SCREENS.has(s)) return "#home";
+    if (s === "setup-bridge") return `#setup-bridge-${setupBridgeStep}`;
+    return `#${s}`;
+  };
   const hashToScreen = (h) => {
-    const s = (h || "").replace("#", "");
-    return HASH_SCREENS.has(s) ? s : "home";
+    const raw = (h || "").replace("#", "");
+    // Handle setup-bridge sub-steps
+    if (raw === "setup-bridge-0") { setSetupBridgeStep(0); return "setup-bridge"; }
+    if (raw === "setup-bridge-1") { setSetupBridgeStep(1); return "setup-bridge"; }
+    return HASH_SCREENS.has(raw) ? raw : "home";
   };
   const setScreen = (s) => {
     setScreenRaw(s);
@@ -8828,6 +8906,16 @@ export default function Stillform() {
       if (window.location.hash !== hash) window.location.hash = hash;
     } catch {}
   };
+
+  // Keep hash in sync when setup bridge step changes
+  useEffect(() => {
+    if (screen === "setup-bridge") {
+      try {
+        const hash = `#setup-bridge-${setupBridgeStep}`;
+        if (window.location.hash !== hash) window.location.hash = hash;
+      } catch {}
+    }
+  }, [setupBridgeStep, screen]);
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
@@ -8981,6 +9069,7 @@ export default function Stillform() {
   const openSetupBridge = (origin = "home") => {
     const resolvedOrigin = resolveSetupBridgeOrigin(origin);
     setSetupBridgeOrigin(resolvedOrigin);
+    setSetupBridgeStep(0);
     if (!isFirstRunComplete()) {
       setFirstRunStage("bridge");
     }
@@ -9017,11 +9106,19 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
-        setScreen("setup-bridge");
+        // Set step and hash synchronously before React processes state
+        // to avoid hashchange firing with stale step=0
+        setSetupBridgeStep(1);
+        setScreenRaw("setup-bridge");
+        try { window.location.hash = "#setup-bridge-1"; } catch {}
       }
       return;
     }
     if (screen === "setup-bridge") {
+      if (setupBridgeStep === 1) {
+        setSetupBridgeStep(0);
+        return;
+      }
       const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
       if (origin === "settings") {
         setScreen("settings");
@@ -9119,7 +9216,7 @@ export default function Stillform() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupStep, faqBackScreen, focusCheckReturnScreen]);
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupBridgeStep, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
@@ -9446,6 +9543,9 @@ export default function Stillform() {
     }
   };
   const [pricingPlan, setPricingPlan] = useState("annual");
+  const [highContrastMode, setHighContrastMode] = useState(() => {
+    try { return localStorage.getItem("stillform_high_contrast") === "on"; } catch { return false; }
+  });
   const [themeChoice, setThemeChoice] = useState(() => {
     try {
       const stored = localStorage.getItem("stillform_theme") || "dark";
@@ -9529,13 +9629,13 @@ export default function Stillform() {
   const [uatFeedbackHistory, setUatFeedbackHistory] = useState(() => getUatFeedbackHistoryFromStorage());
   const [uatFeedbackHistorySyncing, setUatFeedbackHistorySyncing] = useState(false);
   useEffect(() => {
-    const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
-    applyThemePreset(themeToApply);
+    const themeToApply = ["dark", "midnight", "suede", "teal", "rose", "light"].includes(themeChoice) ? themeChoice : "dark";
+    applyThemePreset(themeToApply, highContrastMode);
     if (themeToApply !== themeChoice) {
       try { localStorage.setItem("stillform_theme", themeToApply); } catch {}
       setThemeChoice(themeToApply);
     }
-  }, [themeChoice]);
+  }, [themeChoice, highContrastMode]);
   const metricsAuthToken = sbGetSession()?.access_token || "";
   const nativePlatform = (() => {
     try { return window?.Capacitor?.getPlatform?.() || "web"; } catch { return "web"; }
@@ -10352,6 +10452,13 @@ export default function Stillform() {
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setFirstRunStage(null);
+    // Ensure regType is always set before going to home — default balanced if user skipped assessment
+    try {
+      if (!localStorage.getItem("stillform_regulation_type")) {
+        localStorage.setItem("stillform_regulation_type", "balanced");
+        setRegType("balanced");
+      }
+    } catch {}
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
     try { window.plausible("Onboarding Complete"); } catch {}
   };
@@ -10464,6 +10571,12 @@ export default function Stillform() {
           return;
         }
       }
+      if (activeTool?.returnTo === "setup-bridge") {
+        // Always return to setup bridge regardless of redirectTo — calibration not done yet
+        setActiveTool(null);
+        setScreen("setup-bridge");
+        return;
+      }
       if (!redirectTo && activeTool?.returnTo) {
         const returnScreen = activeTool.returnTo;
         setActiveTool(null);
@@ -10477,7 +10590,7 @@ export default function Stillform() {
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
-      case "signals": return <SignalMapTool {...props} />;
+      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} />;
 
       case "bias": return <MicroBiasTool {...props} />;
       default:
@@ -10732,118 +10845,281 @@ export default function Stillform() {
           const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
           const signalMappingConfigured = isSignalProfileConfigured();
           const themeOptions = [
-            { id: "dark", label: "Dark" },
-            { id: "midnight", label: "Midnight Blue" },
-            { id: "warm", label: "Warm" },
-            { id: "light", label: "Light" }
+            { id: "dark",     label: "Dark",     bg: "#0A0A0C", accent: "#C8922A" },
+            { id: "midnight", label: "Midnight",  bg: "#070b18", accent: "#7aa8ff" },
+            { id: "suede",    label: "Suede",     bg: "#0f0d0b", accent: "#c9956a" },
+            { id: "teal",     label: "Teal",      bg: "#030d0e", accent: "#2e7a74" },
+            { id: "rose",     label: "Rose",      bg: "#0e090c", accent: "#7a3a50" },
+            { id: "light",    label: "Light",     bg: "#f0f2f8", accent: "#C8922A" }
           ];
-          return (
-            <section
-              style={{
-                maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px",
-                minHeight: "100vh", position: "relative", zIndex: 1
-              }}
-            >
-              <h1 style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 36,
-                fontWeight: 300, lineHeight: 1.12, marginBottom: 20
-              }}>
-                Set up your customizations and map your signals
-              </h1>
 
-              <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", textAlign: "left" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  Visual customization
+          // Page 1 — Make it yours
+          if (setupBridgeStep === 0) {
+            return (
+              <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 1 of 2</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
+                  Personalization
+                </h1>
+                <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+                  Set up how Stillform looks and feels before you start. You can always change these in Settings.
+                </p>
+
+                {/* Theme */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Theme</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Pick your environment. The whole app changes instantly — try them.
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                    {themeOptions.map((opt) => {
+                      const active = themeChoice === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => setThemeSelection(opt.id)}
+                          style={{
+                            background: active ? "var(--amber-glow)" : "var(--surface)",
+                            border: `1.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
+                            borderRadius: "var(--r-lg)",
+                            padding: "14px 10px 12px",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 13,
+                            fontWeight: active ? 500 : 400,
+                            color: active ? "var(--amber)" : "var(--text)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 8,
+                            transition: "all 0.15s"
+                          }}
+                        >
+                          <div style={{
+                            width: 44, height: 28, borderRadius: 6,
+                            overflow: "hidden", flexShrink: 0,
+                            display: "flex",
+                            border: "1px solid rgba(255,255,255,0.12)"
+                          }}>
+                            <div style={{ flex: 1, background: opt.bg }} />
+                            <div style={{ flex: 1, background: opt.accent }} />
+                          </div>
+                          {opt.label}
+                          {active && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--amber)", marginTop: -4 }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 6 }}>Theme</div>
-                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                  {themeOptions.map((opt) => {
-                    const active = themeChoice === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => setThemeSelection(opt.id)}
-                        style={{
-                          flex: 1,
-                          background: active ? "var(--amber-glow)" : "var(--surface2)",
-                          border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: "var(--r-sm)",
-                          padding: "8px 6px",
-                          cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 12,
-                          color: active ? "var(--amber)" : "var(--text-dim)"
-                        }}
-                      >
-                        {opt.label}
-                      </button>
-                    );
-                  })}
+
+                {/* High contrast */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>High contrast</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Strengthens text and borders. Helps with color sensitivity and low vision. Toggle and see the difference on any theme above.
+                  </div>
+                  <button
+                    onClick={() => {
+                      const next = !highContrastMode;
+                      setHighContrastMode(next);
+                      try { localStorage.setItem("stillform_high_contrast", next ? "on" : "off"); } catch {}
+                    }}
+                    style={{
+                      width: "100%",
+                      background: highContrastMode ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${highContrastMode ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
+                    }}
+                  >
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
+                      {highContrastMode ? "High contrast — On" : "High contrast — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: highContrastMode ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: highContrastMode ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
+                  </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+
+                {/* Reduced motion */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Reduced motion</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Removes animations throughout the app. Text and timers only.
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                    {/* Demo: animated vs static */}
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Animations on</div>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--amber)", animation: "pulse 1.2s ease-in-out infinite" }} />
+                    </div>
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Reduced motion</div>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--text-muted)" }} />
+                    </div>
+                  </div>
                   <button
                     onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
                     style={{
-                      background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      width: "100%",
+                      background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${reducedMotionOn ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    Reduced motion {reducedMotionOn ? "On" : "Off"}
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
+                      {reducedMotionOn ? "Reduced motion — On" : "Reduced motion — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: reducedMotionOn ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: reducedMotionOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
                   </button>
+                </div>
+
+                {/* Visual grounding */}
+                <div style={{ marginBottom: 32 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Visual grounding</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Organic visuals behind breathing exercises. Gives your eyes an anchor while your body settles.
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                    {/* Demo: fractal vs plain */}
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Grounding on</div>
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.4" />
+                        <circle cx="20" cy="20" r="12" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.6" />
+                        <circle cx="20" cy="20" r="6" fill="none" stroke="var(--amber)" strokeWidth="1" opacity="0.8" />
+                        <circle cx="20" cy="20" r="2" fill="var(--amber)" />
+                        {[0,60,120,180,240,300].map(deg => {
+                          const r = deg * Math.PI / 180;
+                          return <line key={deg} x1={20 + 8*Math.cos(r)} y1={20 + 8*Math.sin(r)} x2={20 + 16*Math.cos(r)} y2={20 + 16*Math.sin(r)} stroke="var(--amber)" strokeWidth="0.5" opacity="0.5" />;
+                        })}
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Grounding off</div>
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="var(--border)" strokeWidth="1" />
+                        <circle cx="20" cy="20" r="2" fill="var(--text-muted)" />
+                      </svg>
+                    </div>
+                  </div>
                   <button
                     onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
                     style={{
-                      background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      width: "100%",
+                      background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${visualGroundingOn ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    Visual grounding {visualGroundingOn ? "On" : "Off"}
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
+                      {visualGroundingOn ? "Visual grounding — On" : "Visual grounding — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: visualGroundingOn ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: visualGroundingOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
                   </button>
                 </div>
-              </div>
 
-              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px", textAlign: "left" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                  onClick={() => setSetupBridgeStep(1)}
+                >
+                  Next →
+                </button>
+              </section>
+            );
+          }
+
+          // Page 2 — Map your signals
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setSetupBridgeStep(0)}>← Back</button>
+              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 2 of 2</div>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
+                Map your signals.
+              </h1>
+              <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+                Where does intensity hit first in your body? Jaw, shoulders, chest, gut, hands, legs. This is how the app learns you.
+              </p>
+              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 24 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
                   Signal mapping
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
-                  Status: {signalMappingConfigured ? "configured" : "not configured"}
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6, fontWeight: 500 }}>
+                  {signalMappingConfigured ? "✓ Your signals are mapped." : "Takes about 60 seconds."}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.6 }}>
+                  {signalMappingConfigured
+                    ? "The app knows where to look first. You can update this anytime in Settings."
+                    : "Every session uses this to personalise your regulation tools and AI prompts. The more accurate, the faster it works."}
                 </div>
                 <button
-                  className="btn btn-ghost"
-                  style={{ width: "100%" }}
-                  onClick={() => {
-                    startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" });
-                  }}
+                  className="btn btn-primary"
+                  style={{ width: "100%", fontSize: 14 }}
+                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
                 >
-                  Map signals now
+                  {signalMappingConfigured ? "Update signal mapping →" : "Map signals now →"}
                 </button>
               </div>
-
-              <button
-                className="btn btn-primary"
-                style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
-              >
-                Continue to calibration
-              </button>
+              {signalMappingConfigured
+                ? (
+                  <button
+                    className="btn btn-primary"
+                    style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                  >
+                    Continue to calibration →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                    style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0", textDecoration: "underline" }}
+                  >
+                    Skip for now →
+                  </button>
+                )
+              }
             </section>
           );
         })()}
 
-        {/* SETUP — System Calibration */}
+                {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
           const signalMappingConfigured = isSignalProfileConfigured();
           const setupSteps = [
@@ -12742,8 +13018,9 @@ export default function Stillform() {
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Theme</div>
                   {[
-                    { id: "dark", label: "Dark" }, { id: "midnight", label: "Midnight Blue" },
-                    { id: "warm", label: "Warm Amber" }, { id: "light", label: "Light" }
+                    { id: "dark", label: "Dark" }, { id: "midnight", label: "Midnight" },
+                    { id: "suede", label: "Suede" }, { id: "teal", label: "Teal" },
+                    { id: "rose", label: "Rose" }, { id: "light", label: "Light" }
                   ].map(t => {
                     const selected = themeChoice === t.id;
                     return (
@@ -12841,6 +13118,27 @@ export default function Stillform() {
                       </div>
                     );
                   })}
+                  {/* High contrast toggle */}
+                  <div style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>◑ High contrast</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Boosts text and border contrast. Helps with color blindness and visual sensitivity.</div>
+                    </div>
+                    <button onClick={() => {
+                      const next = !highContrastMode;
+                      setHighContrastMode(next);
+                      try { localStorage.setItem("stillform_high_contrast", next ? "on" : "off"); } catch {}
+                    }} style={{
+                      background: highContrastMode ? "var(--amber)" : "var(--border)",
+                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: highContrastMode ? 23 : 3, transition: "left 0.2s" }} />
+                    </button>
+                  </div>
                 </div>
                     </div>
                   )}
