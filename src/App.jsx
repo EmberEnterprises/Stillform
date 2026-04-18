@@ -6403,8 +6403,8 @@ function MetacognitionTool({ onComplete }) {
   );
 }
 
-function SignalMapTool({ onComplete }) {
-  const [step, setStep] = useState(0);
+function SignalMapTool({ onComplete, skipIntro = false }) {
+  const [step, setStep] = useState(skipIntro ? 1 : 0);
   const [signals, setSignals] = useState(() => {
     try { return JSON.parse(localStorage.getItem("stillform_signal_profile")) || {}; } catch { return {}; }
   });
@@ -10585,7 +10585,7 @@ export default function Stillform() {
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} />;
-      case "signals": return <SignalMapTool {...props} />;
+      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} />;
 
       case "bias": return <MicroBiasTool {...props} />;
       default:
