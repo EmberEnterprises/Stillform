@@ -219,3 +219,59 @@
 ---
 
 *This is the single source of what needs to happen. Update every session.*
+
+---
+
+## 📌 APRIL 14–18 UPDATE
+
+### ✅ Shipped this week (PRs #42–#45 + direct pushes)
+
+**Settings restructure (PR #42 — merged)**
+- [x] Full settings restructured into 5 clean sections: Personalization, Account, Integrations, Data Management, More
+- [x] FAQ removed from Settings (redundant with nav button)
+- [x] Auto backup card removed
+- [x] Subscription section: Active shows email, Inactive shows "Restore purchase" button
+- [x] Integrations: Revoke/Clear error ungated for web users
+- [x] All action row buttons standardized (flat row, border-bottom, amber →)
+- [x] Re-run calibration and Replay setup bridge match flat row style
+
+**Hash routing + back button (PR #43 — merged)**
+- [x] Browser back button now routes in-app via hash routing
+- [x] Dead "Composure. On demand." screen removed
+- [x] First-run routing fixed — missing regType sends to tutorial
+- [x] Swipe-to-go-back fixed (settings restructure broke buttons guard)
+
+**Android hardware back button (PR #44 — merged)**
+- [x] Capacitor backButton listener wired to handleScreenBack
+- [x] currentScreenRef prevents stale closure bug
+- [x] Home screen → App.exitApp()
+- [x] Tutorial opening page: kicker label removed, back hidden on first-run
+
+**Setup bridge visual overhaul (PR #45 — merged)**
+- [x] Two-page flow: Page 1 = Personalization, Page 2 = Map Your Signals
+- [x] 6 themes: Dark, Midnight, Suede, Teal, Rose, Light (Warm replaced)
+- [x] High contrast mode — separate toggle, overlays any theme, persists
+- [x] Theme demos: split bg/accent swatches, live preview on select
+- [x] Reduced motion demo: animated dot vs static dot
+- [x] Visual grounding demo: fractal SVG vs plain circle
+- [x] Signal mapping moved first — primary CTA, skips tool intro when from setup bridge
+- [x] Nav system updated: setupBridgeStep in hash, swipe dep array, back button sequence correct
+- [x] Tool screen hash routing fixed (transient screens preserve current hash)
+- [x] Toggle labels use var(--text) for readability on all themes
+
+**Direct pushes to main**
+- [x] QR image variable name fixed (SHARE_QR_URL → SHARE_QR_IMAGE_URL)
+- [x] QR target URL updated to include #home hash
+- [x] Daily rotating processing cues — 47 unified empowering cues, rotates by day of year
+- [x] Watch sequence back button fixed — toolBackOverrideRef system (extensible to any tool sub-state)
+
+### 🔴 Still on critical path
+- [ ] Cloud infrastructure (Supabase) — biggest remaining blocker
+- [ ] Server-side subscription verification
+- [ ] TestFlight build
+- [ ] Samsung Galaxy Watch haptic companion
+- [ ] Reddit launch (waiting on paywall live + 3-5 testimonials)
+
+### 🟡 Soft launch target
+- Hold until cloud sync + server-side verification complete
+- Bobby needs to confirm live mode is stable
