@@ -10784,8 +10784,29 @@ export default function Stillform() {
                 fontFamily: "'Cormorant Garamond', serif", fontSize: 36,
                 fontWeight: 300, lineHeight: 1.12, marginBottom: 20
               }}>
-                Set up your customizations and map your signals
+                Map your signals and set up your look
               </h1>
+
+              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                  Signal mapping
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>
+                  Where does your body respond first?
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 12, lineHeight: 1.5 }}>
+                  {signalMappingConfigured
+                    ? "✓ Configured — the app knows your signal pattern."
+                    : "Takes 60 seconds. The app uses this to personalize every session."}
+                </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%", fontSize: 14 }}
+                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
+                >
+                  {signalMappingConfigured ? "Update signal mapping" : "Map signals now →"}
+                </button>
+              </div>
 
               <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
@@ -10886,23 +10907,7 @@ export default function Stillform() {
                 </div>
               </div>
 
-              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  Signal mapping
-                </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
-                  Status: {signalMappingConfigured ? "configured" : "not configured"}
-                </div>
-                <button
-                  className="btn btn-ghost"
-                  style={{ width: "100%" }}
-                  onClick={() => {
-                    startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" });
-                  }}
-                >
-                  Map signals now
-                </button>
-              </div>
+
 
               <button
                 className="btn btn-primary"
