@@ -8812,7 +8812,22 @@ export default function Stillform() {
     return () => { cancelled = true; };
   }, [syncSignedIn, subscriptionCheckTick]);
 
-  const [screen, setScreen] = useState(null);
+  const [screen, setScreenRaw] = useState(null);
+
+  // Hash routing — keeps browser back button working
+  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
+  const screenToHash = (s) => s && HASH_SCREENS.has(s) ? `#${s}` : "#home";
+  const hashToScreen = (h) => {
+    const s = (h || "").replace("#", "");
+    return HASH_SCREENS.has(s) ? s : "home";
+  };
+  const setScreen = (s) => {
+    setScreenRaw(s);
+    try {
+      const hash = screenToHash(s);
+      if (window.location.hash !== hash) window.location.hash = hash;
+    } catch {}
+  };
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
@@ -9042,6 +9057,16 @@ export default function Stillform() {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
   };
+
+  // Sync browser back/forward to in-app screen via hash
+  useEffect(() => {
+    const onHashChange = () => {
+      const s = hashToScreen(window.location.hash);
+      setScreenRaw(s);
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
 
   useEffect(() => {
     const swipeEnabledScreens = new Set(["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing"]);
