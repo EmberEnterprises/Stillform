@@ -9077,8 +9077,11 @@ export default function Stillform() {
     const onTouchStart = (event) => {
       if (!event.touches || event.touches.length !== 1) return;
       const target = event.target;
+      // Only block swipe initiation on text inputs — buttons/links are fine to start from
+      // (swipe vs tap is distinguished in onTouchEnd by distance)
       if (target instanceof HTMLElement) {
-        if (interactiveTags.has(target.tagName) || target.closest("input, textarea, select, button, a, [role='button']")) return;
+        if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT") return;
+        if (target.closest("input, textarea, select")) return;
       }
       const t = event.touches[0];
       touchStart = { x: t.clientX, y: t.clientY, ts: Date.now() };
