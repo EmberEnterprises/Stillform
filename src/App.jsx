@@ -10556,7 +10556,7 @@ export default function Stillform() {
         {screen === "tutorial" && (() => {
           const tutorialPages = [
             {
-              kicker: "Opening page",
+              kicker: "",
               title: "Stillform",
               openingLines: [
                 "Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.",
@@ -10612,18 +10612,20 @@ export default function Stillform() {
                 minHeight: "100vh", position: "relative", zIndex: 1
               }}
             >
-              <button
-                className="intervention-back"
-                onClick={() => {
-                  if (safeStep > 0) {
-                    setTutorialStep((s) => Math.max(0, s - 1));
-                    return;
-                  }
-                  setScreen(returnTo);
-                }}
-              >
-                ← Back
-              </button>
+              {(safeStep > 0 || isFirstRunComplete()) && (
+                <button
+                  className="intervention-back"
+                  onClick={() => {
+                    if (safeStep > 0) {
+                      setTutorialStep((s) => Math.max(0, s - 1));
+                      return;
+                    }
+                    setScreen(returnTo);
+                  }}
+                >
+                  ← Back
+                </button>
+              )}
               <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                 {page.kicker}
               </div>
