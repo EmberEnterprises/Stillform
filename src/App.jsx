@@ -1485,15 +1485,15 @@ const THEME_PRESETS = {
     "--bg": "#070b18",
     "--surface": "#0f1526",
     "--surface2": "#141d33",
-    "--border": "rgba(156,184,255,0.22)",
-    "--border-hi": "rgba(173,198,255,0.35)",
-    "--amber": "#8eb5ff",
-    "--amber-dim": "rgba(142,181,255,0.28)",
-    "--amber-glow": "rgba(142,181,255,0.12)",
-    "--amber-20": "rgba(142,181,255,0.20)",
-    "--text": "#edf2ff",
-    "--text-dim": "#c4d4f0",
-    "--text-muted": "#a8bdd8",
+    "--border": "rgba(200,220,255,0.20)",
+    "--border-hi": "rgba(200,220,255,0.35)",
+    "--amber": "#7aa8ff",
+    "--amber-dim": "rgba(122,168,255,0.30)",
+    "--amber-glow": "rgba(122,168,255,0.12)",
+    "--amber-20": "rgba(122,168,255,0.20)",
+    "--text": "#ffffff",
+    "--text-dim": "#c8d8f0",
+    "--text-muted": "#96aece",
     "--green": "#7abfa4",
     "--green-glow": "rgba(122,191,164,0.12)"
   },
@@ -1501,15 +1501,15 @@ const THEME_PRESETS = {
     "--bg": "#150f08",
     "--surface": "#22170d",
     "--surface2": "#2a1c10",
-    "--border": "rgba(234,186,124,0.25)",
-    "--border-hi": "rgba(239,199,148,0.35)",
-    "--amber": "#e3a44f",
-    "--amber-dim": "rgba(227,164,79,0.34)",
-    "--amber-glow": "rgba(227,164,79,0.13)",
-    "--amber-20": "rgba(227,164,79,0.23)",
-    "--text": "#faf4ec",
-    "--text-dim": "#e8d8c2",
-    "--text-muted": "#d4be9e",
+    "--border": "rgba(240,200,140,0.22)",
+    "--border-hi": "rgba(240,200,140,0.35)",
+    "--amber": "#d4922a",
+    "--amber-dim": "rgba(212,146,42,0.34)",
+    "--amber-glow": "rgba(212,146,42,0.13)",
+    "--amber-20": "rgba(212,146,42,0.23)",
+    "--text": "#ffffff",
+    "--text-dim": "#eed8bc",
+    "--text-muted": "#c8a878",
     "--green": "#96b78a",
     "--green-glow": "rgba(150,183,138,0.12)"
   },
@@ -1519,23 +1519,43 @@ const THEME_PRESETS = {
     "--surface2": "#eef1f8",
     "--border": "rgba(16,24,40,0.13)",
     "--border-hi": "rgba(16,24,40,0.22)",
-    "--amber": "#9a5e00",
-    "--amber-dim": "rgba(154,94,0,0.30)",
-    "--amber-glow": "rgba(154,94,0,0.10)",
-    "--amber-20": "rgba(154,94,0,0.20)",
-    "--text": "#111520",
-    "--text-dim": "#3d4256",
-    "--text-muted": "#555a6e",
+    "--amber": "#7a4800",
+    "--amber-dim": "rgba(122,72,0,0.30)",
+    "--amber-glow": "rgba(122,72,0,0.08)",
+    "--amber-20": "rgba(122,72,0,0.18)",
+    "--text": "#0d1017",
+    "--text-dim": "#353a4a",
+    "--text-muted": "#505568",
     "--green": "#2f7c59",
     "--green-glow": "rgba(47,124,89,0.12)"
   }
 };
 
-const applyThemePreset = (themeId) => {
+const HIGH_CONTRAST_OVERLAY = {
+  "--text": "#ffffff",
+  "--text-dim": "#e0e0e0",
+  "--text-muted": "#bbbbbb",
+  "--border": "rgba(255,255,255,0.35)",
+  "--border-hi": "rgba(255,255,255,0.55)",
+};
+
+const HIGH_CONTRAST_OVERLAY_LIGHT = {
+  "--text": "#000000",
+  "--text-dim": "#1a1a1a",
+  "--text-muted": "#333333",
+  "--border": "rgba(0,0,0,0.35)",
+  "--border-hi": "rgba(0,0,0,0.55)",
+};
+
+const applyThemePreset = (themeId, highContrast = false) => {
   if (typeof document === "undefined") return;
   const preset = THEME_PRESETS[themeId] || THEME_PRESETS.dark;
   const root = document.documentElement;
   Object.entries(preset).forEach(([token, value]) => root.style.setProperty(token, value));
+  if (highContrast) {
+    const overlay = themeId === "light" ? HIGH_CONTRAST_OVERLAY_LIGHT : HIGH_CONTRAST_OVERLAY;
+    Object.entries(overlay).forEach(([token, value]) => root.style.setProperty(token, value));
+  }
 };
 
 const readArrayFromStorage = (key) => {
@@ -8719,6 +8739,13 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+    // Apply high contrast on startup if previously enabled
+    try {
+      if (localStorage.getItem("stillform_high_contrast") === "on") {
+        const savedTheme = localStorage.getItem("stillform_theme") || "dark";
+        applyThemePreset(savedTheme, true);
+      }
+    } catch {}
     // Cloud sync init — version check + restore data if signed in
     sbVersionCheck().catch(() => {});
     if (sbIsSignedIn()) {
@@ -9446,6 +9473,9 @@ export default function Stillform() {
     }
   };
   const [pricingPlan, setPricingPlan] = useState("annual");
+  const [highContrastMode, setHighContrastMode] = useState(() => {
+    try { return localStorage.getItem("stillform_high_contrast") === "on"; } catch { return false; }
+  });
   const [themeChoice, setThemeChoice] = useState(() => {
     try {
       const stored = localStorage.getItem("stillform_theme") || "dark";
@@ -9530,12 +9560,12 @@ export default function Stillform() {
   const [uatFeedbackHistorySyncing, setUatFeedbackHistorySyncing] = useState(false);
   useEffect(() => {
     const themeToApply = ["dark", "midnight", "warm", "light"].includes(themeChoice) ? themeChoice : "dark";
-    applyThemePreset(themeToApply);
+    applyThemePreset(themeToApply, highContrastMode);
     if (themeToApply !== themeChoice) {
       try { localStorage.setItem("stillform_theme", themeToApply); } catch {}
       setThemeChoice(themeToApply);
     }
-  }, [themeChoice]);
+  }, [themeChoice, highContrastMode]);
   const metricsAuthToken = sbGetSession()?.access_token || "";
   const nativePlatform = (() => {
     try { return window?.Capacitor?.getPlatform?.() || "web"; } catch { return "web"; }
@@ -10789,6 +10819,30 @@ export default function Stillform() {
                       </button>
                     );
                   })}
+                </div>
+                <div style={{ marginBottom: 8 }}>
+                  <button
+                    onClick={() => {
+                      const next = !highContrastMode;
+                      setHighContrastMode(next);
+                      try { localStorage.setItem("stillform_high_contrast", next ? "on" : "off"); } catch {}
+                    }}
+                    style={{
+                      width: "100%",
+                      background: highContrastMode ? "var(--amber-glow)" : "var(--surface2)",
+                      border: `0.5px solid ${highContrastMode ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 6px",
+                      cursor: "pointer",
+                      fontFamily: "'DM Sans', sans-serif",
+                      fontSize: 11,
+                      color: highContrastMode ? "var(--amber)" : "var(--text-dim)",
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
+                    }}
+                  >
+                    <span>High contrast</span>
+                    <span>{highContrastMode ? "On" : "Off"}</span>
+                  </button>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
                   <button
@@ -12851,6 +12905,27 @@ export default function Stillform() {
                       </div>
                     );
                   })}
+                  {/* High contrast toggle */}
+                  <div style={{
+                    background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8
+                  }}>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)" }}>◑ High contrast</div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Boosts text and border contrast. Helps with color blindness and visual sensitivity.</div>
+                    </div>
+                    <button onClick={() => {
+                      const next = !highContrastMode;
+                      setHighContrastMode(next);
+                      try { localStorage.setItem("stillform_high_contrast", next ? "on" : "off"); } catch {}
+                    }} style={{
+                      background: highContrastMode ? "var(--amber)" : "var(--border)",
+                      border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: highContrastMode ? 23 : 3, transition: "left 0.2s" }} />
+                    </button>
+                  </div>
                 </div>
                     </div>
                   )}
