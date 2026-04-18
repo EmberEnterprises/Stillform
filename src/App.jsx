@@ -8899,6 +8899,7 @@ export default function Stillform() {
     if (raw === "setup-bridge-1") { setSetupBridgeStep(1); return "setup-bridge"; }
     return HASH_SCREENS.has(raw) ? raw : "home";
   };
+  const appInitiatedHashChange = useRef(false); // prevents app-initiated hash changes from firing the hashchange listener
   const setScreen = (s) => {
     setScreenRaw(s);
     currentScreenRef.current = s;
@@ -9164,8 +9165,7 @@ export default function Stillform() {
   };
 
   // Sync browser back/forward to in-app screen via hash
-  // appInitiatedHashChange flag prevents the listener from overriding app-initiated navigations
-  const appInitiatedHashChange = useRef(false);
+
   useEffect(() => {
     const onHashChange = () => {
       if (appInitiatedHashChange.current) {
