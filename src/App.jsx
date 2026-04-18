@@ -8883,7 +8883,10 @@ export default function Stillform() {
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
   const screenToHash = (s) => {
-    if (!s || !HASH_SCREENS.has(s)) return "#home";
+    if (!s) return "#home";
+    // Transient screens (tool, panic) keep whatever hash is current — no navigation entry
+    if (s === "tool" || s === "panic") return window.location.hash || "#home";
+    if (!HASH_SCREENS.has(s)) return "#home";
     if (s === "setup-bridge") return `#setup-bridge-${setupBridgeStep}`;
     return `#${s}`;
   };
