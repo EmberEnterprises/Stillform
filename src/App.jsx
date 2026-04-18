@@ -8905,6 +8905,7 @@ export default function Stillform() {
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [setupBridgeOrigin, setSetupBridgeOrigin] = useState("home");
+  const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=customization, 1=signal mapping
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
@@ -9046,6 +9047,7 @@ export default function Stillform() {
   const openSetupBridge = (origin = "home") => {
     const resolvedOrigin = resolveSetupBridgeOrigin(origin);
     setSetupBridgeOrigin(resolvedOrigin);
+    setSetupBridgeStep(0);
     if (!isFirstRunComplete()) {
       setFirstRunStage("bridge");
     }
@@ -9087,6 +9089,10 @@ export default function Stillform() {
       return;
     }
     if (screen === "setup-bridge") {
+      if (setupBridgeStep === 1) {
+        setSetupBridgeStep(0);
+        return;
+      }
       const origin = resolveSetupBridgeOrigin(setupBridgeOrigin);
       if (origin === "settings") {
         setScreen("settings");
@@ -10807,83 +10813,72 @@ export default function Stillform() {
             { id: "sage",     label: "Sage",      bg: "#0a0e0b", accent: "#8fba8a" },
             { id: "light",    label: "Light",     bg: "#f0f2f8", accent: "#C8922A" }
           ];
-          return (
-            <section
-              style={{
-                maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px",
-                minHeight: "100vh", position: "relative", zIndex: 1
-              }}
-            >
-              <h1 style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 36,
-                fontWeight: 300, lineHeight: 1.12, marginBottom: 20
-              }}>
-                Map your signals and set up your look
-              </h1>
 
-              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  Signal mapping
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>
-                  Where does your body respond first?
-                </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 12, lineHeight: 1.5 }}>
-                  {signalMappingConfigured
-                    ? "✓ Configured — the app knows your signal pattern."
-                    : "Takes 60 seconds. The app uses this to personalize every session."}
-                </div>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%", fontSize: 14 }}
-                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
-                >
-                  {signalMappingConfigured ? "Update signal mapping" : "Map signals now →"}
-                </button>
-              </div>
+          // Page 1 — Make it yours
+          if (setupBridgeStep === 0) {
+            return (
+              <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 1 of 2</div>
+                <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
+                  Make it yours.
+                </h1>
+                <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+                  Set up how Stillform looks and feels before you start. You can always change these in Settings.
+                </p>
 
-              <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                  Visual customization
+                {/* Theme */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Theme</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Pick your environment. The whole app changes instantly — try them.
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                    {themeOptions.map((opt) => {
+                      const active = themeChoice === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          onClick={() => setThemeSelection(opt.id)}
+                          style={{
+                            background: active ? "var(--amber-glow)" : "var(--surface)",
+                            border: `1.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
+                            borderRadius: "var(--r-lg)",
+                            padding: "14px 10px 12px",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 13,
+                            fontWeight: active ? 500 : 400,
+                            color: active ? "var(--amber)" : "var(--text)",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            gap: 8,
+                            transition: "all 0.15s"
+                          }}
+                        >
+                          <div style={{
+                            width: 44, height: 28, borderRadius: 6,
+                            overflow: "hidden", flexShrink: 0,
+                            display: "flex",
+                            border: "1px solid rgba(255,255,255,0.12)"
+                          }}>
+                            <div style={{ flex: 1, background: opt.bg }} />
+                            <div style={{ flex: 1, background: opt.accent }} />
+                          </div>
+                          {opt.label}
+                          {active && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--amber)", marginTop: -4 }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 6 }}>Theme</div>
-                <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
-                  {themeOptions.map((opt) => {
-                    const active = themeChoice === opt.id;
-                    return (
-                      <button
-                        key={opt.id}
-                        onClick={() => setThemeSelection(opt.id)}
-                        style={{
-                          flex: 1,
-                          background: active ? "var(--amber-glow)" : "var(--surface2)",
-                          border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: "var(--r-sm)",
-                          padding: "10px 6px 8px",
-                          cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 12,
-                          color: active ? "var(--amber)" : "var(--text-dim)",
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          gap: 6
-                        }}
-                      >
-                        <div style={{
-                          width: 36, height: 22, borderRadius: 5,
-                          overflow: "hidden", flexShrink: 0,
-                          display: "flex", border: "1px solid rgba(255,255,255,0.15)"
-                        }}>
-                          <div style={{ flex: 1, background: opt.bg }} />
-                          <div style={{ flex: 1, background: opt.accent }} />
-                        </div>
-                        {opt.label}
-                      </button>
-                    );
-                  })}
-                </div>
-                <div style={{ marginBottom: 8 }}>
+
+                {/* High contrast */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>High contrast</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Strengthens text and borders. Helps with color sensitivity and low vision. Toggle and see the difference on any theme above.
+                  </div>
                   <button
                     onClick={() => {
                       const next = !highContrastMode;
@@ -10892,69 +10887,197 @@ export default function Stillform() {
                     }}
                     style={{
                       width: "100%",
-                      background: highContrastMode ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${highContrastMode ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      background: highContrastMode ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${highContrastMode ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: highContrastMode ? "var(--amber)" : "var(--text-dim)",
                       display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    <span>High contrast</span>
-                    <span>{highContrastMode ? "On" : "Off"}</span>
+                    <span style={{ fontSize: 13, color: highContrastMode ? "var(--amber)" : "var(--text)" }}>
+                      {highContrastMode ? "High contrast — On" : "High contrast — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: highContrastMode ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: highContrastMode ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
                   </button>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+
+                {/* Reduced motion */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Reduced motion</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Removes animations throughout the app. Text and timers only.
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                    {/* Demo: animated vs static */}
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Animations on</div>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--amber)", animation: "pulse 1.2s ease-in-out infinite" }} />
+                    </div>
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Reduced motion</div>
+                      <div style={{ width: 12, height: 12, borderRadius: "50%", background: "var(--text-muted)" }} />
+                    </div>
+                  </div>
                   <button
                     onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
                     style={{
-                      background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      width: "100%",
+                      background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${reducedMotionOn ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    Reduced motion {reducedMotionOn ? "On" : "Off"}
+                    <span style={{ fontSize: 13, color: reducedMotionOn ? "var(--amber)" : "var(--text)" }}>
+                      {reducedMotionOn ? "Reduced motion — On" : "Reduced motion — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: reducedMotionOn ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: reducedMotionOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
                   </button>
+                </div>
+
+                {/* Visual grounding */}
+                <div style={{ marginBottom: 32 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Visual grounding</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Organic visuals behind breathing exercises. Gives your eyes an anchor while your body settles.
+                  </div>
+                  <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
+                    {/* Demo: fractal vs plain */}
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Grounding on</div>
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.4" />
+                        <circle cx="20" cy="20" r="12" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.6" />
+                        <circle cx="20" cy="20" r="6" fill="none" stroke="var(--amber)" strokeWidth="1" opacity="0.8" />
+                        <circle cx="20" cy="20" r="2" fill="var(--amber)" />
+                        {[0,60,120,180,240,300].map(deg => {
+                          const r = deg * Math.PI / 180;
+                          return <line key={deg} x1={20 + 8*Math.cos(r)} y1={20 + 8*Math.sin(r)} x2={20 + 16*Math.cos(r)} y2={20 + 16*Math.sin(r)} stroke="var(--amber)" strokeWidth="0.5" opacity="0.5" />;
+                        })}
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 12px", display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+                      <div style={{ fontSize: 10, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>Grounding off</div>
+                      <svg width="40" height="40" viewBox="0 0 40 40">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="var(--border)" strokeWidth="1" />
+                        <circle cx="20" cy="20" r="2" fill="var(--text-muted)" />
+                      </svg>
+                    </div>
+                  </div>
                   <button
                     onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
                     style={{
-                      background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      width: "100%",
+                      background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface)",
+                      border: `1.5px solid ${visualGroundingOn ? "var(--amber)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      padding: "14px 18px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    Visual grounding {visualGroundingOn ? "On" : "Off"}
+                    <span style={{ fontSize: 13, color: visualGroundingOn ? "var(--amber)" : "var(--text)" }}>
+                      {visualGroundingOn ? "Visual grounding — On" : "Visual grounding — Off"}
+                    </span>
+                    <div style={{
+                      width: 44, height: 24, borderRadius: 12,
+                      background: visualGroundingOn ? "var(--amber)" : "var(--border)",
+                      position: "relative", transition: "background 0.2s", flexShrink: 0
+                    }}>
+                      <div style={{
+                        width: 18, height: 18, borderRadius: "50%", background: "white",
+                        position: "absolute", top: 3, left: visualGroundingOn ? 23 : 3, transition: "left 0.2s"
+                      }} />
+                    </div>
                   </button>
                 </div>
+
+                <button
+                  className="btn btn-primary"
+                  style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                  onClick={() => setSetupBridgeStep(1)}
+                >
+                  Next →
+                </button>
+              </section>
+            );
+          }
+
+          // Page 2 — Map your signals
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setSetupBridgeStep(0)}>← Back</button>
+              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 2 of 2</div>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
+                Map your signals.
+              </h1>
+              <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+                Where does intensity hit first in your body? Jaw, shoulders, chest, gut, hands, legs. This is how the app learns you.
+              </p>
+              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 24 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+                  Signal mapping
+                </div>
+                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6, fontWeight: 500 }}>
+                  {signalMappingConfigured ? "✓ Your signals are mapped." : "Takes about 60 seconds."}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.6 }}>
+                  {signalMappingConfigured
+                    ? "The app knows where to look first. You can update this anytime in Settings."
+                    : "Every session uses this to personalise your regulation tools and AI prompts. The more accurate, the faster it works."}
+                </div>
+                <button
+                  className="btn btn-primary"
+                  style={{ width: "100%", fontSize: 14 }}
+                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
+                >
+                  {signalMappingConfigured ? "Update signal mapping →" : "Map signals now →"}
+                </button>
               </div>
-
-
-
               <button
                 className="btn btn-primary"
                 style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
                 onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
               >
-                Continue to calibration
+                Continue to calibration →
               </button>
+              {!signalMappingConfigured && (
+                <button
+                  onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                  style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12, padding: "8px 0" }}
+                >
+                  Skip for now
+                </button>
+              )}
             </section>
           );
         })()}
 
-        {/* SETUP — System Calibration */}
+                {/* SETUP — System Calibration */}
         {screen === "setup" && (() => {
           const signalMappingConfigured = isSignalProfileConfigured();
           const setupSteps = [
