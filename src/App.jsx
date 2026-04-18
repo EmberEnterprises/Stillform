@@ -10935,7 +10935,7 @@ export default function Stillform() {
                       display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    <span style={{ fontSize: 13, color: highContrastMode ? "var(--amber)" : "var(--text)" }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
                       {highContrastMode ? "High contrast — On" : "High contrast — Off"}
                     </span>
                     <div style={{
@@ -10981,7 +10981,7 @@ export default function Stillform() {
                       display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    <span style={{ fontSize: 13, color: reducedMotionOn ? "var(--amber)" : "var(--text)" }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
                       {reducedMotionOn ? "Reduced motion — On" : "Reduced motion — Off"}
                     </span>
                     <div style={{
@@ -11039,7 +11039,7 @@ export default function Stillform() {
                       display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}
                   >
-                    <span style={{ fontSize: 13, color: visualGroundingOn ? "var(--amber)" : "var(--text)" }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>
                       {visualGroundingOn ? "Visual grounding — On" : "Visual grounding — Off"}
                     </span>
                     <div style={{
