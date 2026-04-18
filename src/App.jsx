@@ -10766,13 +10766,14 @@ export default function Stillform() {
                         style={{
                           flex: 1,
                           background: active ? "var(--amber-glow)" : "var(--surface2)",
-                          border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                          border: `1px solid ${active ? "var(--amber)" : "var(--border)"}`,
                           borderRadius: "var(--r-sm)",
                           padding: "10px 6px 8px",
                           cursor: "pointer",
                           fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 11,
-                          color: active ? "var(--amber)" : "var(--text-dim)",
+                          fontSize: 13,
+                          fontWeight: active ? 500 : 400,
+                          color: active ? "var(--amber)" : "var(--text)",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
@@ -10795,13 +10796,14 @@ export default function Stillform() {
                     onClick={() => setDisplayPreference("stillform_reducedmotion", !reducedMotionOn)}
                     style={{
                       background: reducedMotionOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${reducedMotionOn ? "var(--amber-dim)" : "var(--border)"}`,
+                      border: `1px solid ${reducedMotionOn ? "var(--amber)" : "var(--border)"}`,
                       borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      padding: "12px 10px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: reducedMotionOn ? "var(--amber)" : "var(--text-dim)"
+                      fontSize: 13,
+                      fontWeight: reducedMotionOn ? 500 : 400,
+                      color: reducedMotionOn ? "var(--amber)" : "var(--text)"
                     }}
                   >
                     Reduced motion {reducedMotionOn ? "On" : "Off"}
@@ -10810,13 +10812,14 @@ export default function Stillform() {
                     onClick={() => setDisplayPreference("stillform_visual_grounding", !visualGroundingOn)}
                     style={{
                       background: visualGroundingOn ? "var(--amber-glow)" : "var(--surface2)",
-                      border: `0.5px solid ${visualGroundingOn ? "var(--amber-dim)" : "var(--border)"}`,
+                      border: `1px solid ${visualGroundingOn ? "var(--amber)" : "var(--border)"}`,
                       borderRadius: "var(--r-sm)",
-                      padding: "8px 6px",
+                      padding: "12px 10px",
                       cursor: "pointer",
                       fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 11,
-                      color: visualGroundingOn ? "var(--amber)" : "var(--text-dim)"
+                      fontSize: 13,
+                      fontWeight: visualGroundingOn ? 500 : 400,
+                      color: visualGroundingOn ? "var(--amber)" : "var(--text)"
                     }}
                   >
                     Visual grounding {visualGroundingOn ? "On" : "Off"}
