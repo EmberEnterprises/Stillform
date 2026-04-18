@@ -1532,19 +1532,25 @@ const THEME_PRESETS = {
 };
 
 const HIGH_CONTRAST_OVERLAY = {
+  "--bg": "#000000",
+  "--surface": "#111114",
+  "--surface2": "#18181c",
   "--text": "#ffffff",
-  "--text-dim": "#e0e0e0",
-  "--text-muted": "#bbbbbb",
-  "--border": "rgba(255,255,255,0.35)",
-  "--border-hi": "rgba(255,255,255,0.55)",
+  "--text-dim": "#dddddd",
+  "--text-muted": "#aaaaaa",
+  "--border": "rgba(255,255,255,0.45)",
+  "--border-hi": "rgba(255,255,255,0.70)",
 };
 
 const HIGH_CONTRAST_OVERLAY_LIGHT = {
+  "--bg": "#ffffff",
+  "--surface": "#f0f0f0",
+  "--surface2": "#e0e0e0",
   "--text": "#000000",
-  "--text-dim": "#1a1a1a",
+  "--text-dim": "#111111",
   "--text-muted": "#333333",
-  "--border": "rgba(0,0,0,0.35)",
-  "--border-hi": "rgba(0,0,0,0.55)",
+  "--border": "rgba(0,0,0,0.50)",
+  "--border-hi": "rgba(0,0,0,0.75)",
 };
 
 const applyThemePreset = (themeId, highContrast = false) => {
@@ -10762,10 +10768,10 @@ export default function Stillform() {
           const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
           const signalMappingConfigured = isSignalProfileConfigured();
           const themeOptions = [
-            { id: "dark", label: "Dark", swatch: "#0A0A0C", swatchBorder: "rgba(255,255,255,0.12)" },
-            { id: "midnight", label: "Midnight", swatch: "#070b18", swatchBorder: "rgba(156,184,255,0.3)" },
-            { id: "warm", label: "Warm", swatch: "#150f08", swatchBorder: "rgba(234,186,124,0.3)" },
-            { id: "light", label: "Light", swatch: "#f6f7fb", swatchBorder: "rgba(16,24,40,0.2)" }
+            { id: "dark",     label: "Dark",     bg: "#0A0A0C", accent: "#C8922A" },
+            { id: "midnight", label: "Midnight",  bg: "#070b18", accent: "#7aa8ff" },
+            { id: "warm",     label: "Warm",      bg: "#150f08", accent: "#d4922a" },
+            { id: "light",    label: "Light",     bg: "#f6f7fb", accent: "#7a4800" }
           ];
           return (
             <section
@@ -10810,11 +10816,13 @@ export default function Stillform() {
                         }}
                       >
                         <div style={{
-                          width: 28, height: 28, borderRadius: 6,
-                          background: opt.swatch,
-                          border: `1px solid ${opt.swatchBorder}`,
-                          flexShrink: 0
-                        }} />
+                          width: 36, height: 22, borderRadius: 5,
+                          overflow: "hidden", flexShrink: 0,
+                          display: "flex", border: "1px solid rgba(255,255,255,0.15)"
+                        }}>
+                          <div style={{ flex: 1, background: opt.bg }} />
+                          <div style={{ flex: 1, background: opt.accent }} />
+                        </div>
                         {opt.label}
                       </button>
                     );
