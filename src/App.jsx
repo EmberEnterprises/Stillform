@@ -8813,6 +8813,7 @@ export default function Stillform() {
   }, [syncSignedIn, subscriptionCheckTick]);
 
   const [screen, setScreenRaw] = useState(null);
+  const currentScreenRef = useRef(null); // always holds latest screen for native listeners
 
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
@@ -8823,6 +8824,7 @@ export default function Stillform() {
   };
   const setScreen = (s) => {
     setScreenRaw(s);
+    currentScreenRef.current = s;
     try {
       const hash = screenToHash(s);
       if (window.location.hash !== hash) window.location.hash = hash;
@@ -9388,7 +9390,7 @@ export default function Stillform() {
         window.history.replaceState({}, "", "/");
       }
 
-      // Native: listen for share extension
+      // Native: listen for share extension + Android hardware back button
       if (isNative()) {
         import('@capacitor/app').then(({ App }) => {
           App.addListener("appUrlOpen", (data) => {
@@ -9401,6 +9403,17 @@ export default function Stillform() {
                 setScreen("tool");
               }
             } catch {}
+          });
+
+          // Android hardware back button — wire to same handleScreenBack used everywhere
+          App.addListener("backButton", ({ canGoBack }) => {
+            const currentScreen = currentScreenRef.current;
+            if (!currentScreen || currentScreen === "home") {
+              // On home screen — exit the app (standard Android behavior)
+              App.exitApp();
+            } else {
+              handleScreenBack();
+            }
           });
         }).catch(() => {});
       }
