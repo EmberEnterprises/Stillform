@@ -8901,13 +8901,9 @@ export default function Stillform() {
   };
   const setScreen = (s) => {
     setScreenRaw(s);
-    currentScreenRef.current = s;
     try {
       const hash = screenToHash(s);
-      if (window.location.hash !== hash) {
-        appInitiatedHashChange.current = true;
-        window.location.hash = hash;
-      }
+      if (window.location.hash !== hash) window.location.hash = hash;
     } catch {}
   };
 
@@ -8916,10 +8912,7 @@ export default function Stillform() {
     if (screen === "setup-bridge") {
       try {
         const hash = `#setup-bridge-${setupBridgeStep}`;
-        if (window.location.hash !== hash) {
-          appInitiatedHashChange.current = true;
-          window.location.hash = hash;
-        }
+        if (window.location.hash !== hash) window.location.hash = hash;
       } catch {}
     }
   }, [setupBridgeStep, screen]);
@@ -9117,7 +9110,7 @@ export default function Stillform() {
         // to avoid hashchange firing with stale step=0
         setSetupBridgeStep(1);
         setScreenRaw("setup-bridge");
-        try { appInitiatedHashChange.current = true; window.location.hash = "#setup-bridge-1"; } catch {}
+        try { window.location.hash = "#setup-bridge-1"; } catch {}
       }
       return;
     }
@@ -9164,14 +9157,8 @@ export default function Stillform() {
   };
 
   // Sync browser back/forward to in-app screen via hash
-  // appInitiatedHashChange flag prevents the listener from overriding app-initiated navigations
-  const appInitiatedHashChange = useRef(false);
   useEffect(() => {
     const onHashChange = () => {
-      if (appInitiatedHashChange.current) {
-        appInitiatedHashChange.current = false;
-        return;
-      }
       const s = hashToScreen(window.location.hash);
       setScreenRaw(s);
     };
