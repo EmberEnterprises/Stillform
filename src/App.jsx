@@ -10732,10 +10732,10 @@ export default function Stillform() {
           const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
           const signalMappingConfigured = isSignalProfileConfigured();
           const themeOptions = [
-            { id: "dark", label: "Dark" },
-            { id: "midnight", label: "Midnight Blue" },
-            { id: "warm", label: "Warm" },
-            { id: "light", label: "Light" }
+            { id: "dark", label: "Dark", swatch: "#0A0A0C", swatchBorder: "rgba(255,255,255,0.12)" },
+            { id: "midnight", label: "Midnight", swatch: "#070b18", swatchBorder: "rgba(156,184,255,0.3)" },
+            { id: "warm", label: "Warm", swatch: "#150f08", swatchBorder: "rgba(234,186,124,0.3)" },
+            { id: "light", label: "Light", swatch: "#f6f7fb", swatchBorder: "rgba(16,24,40,0.2)" }
           ];
           return (
             <section
@@ -10751,7 +10751,7 @@ export default function Stillform() {
                 Set up your customizations and map your signals
               </h1>
 
-              <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", textAlign: "left" }}>
+              <div style={{ width: "100%", marginBottom: 14, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                   Visual customization
                 </div>
@@ -10768,13 +10768,23 @@ export default function Stillform() {
                           background: active ? "var(--amber-glow)" : "var(--surface2)",
                           border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r-sm)",
-                          padding: "8px 6px",
+                          padding: "10px 6px 8px",
                           cursor: "pointer",
                           fontFamily: "'DM Sans', sans-serif",
-                          fontSize: 12,
-                          color: active ? "var(--amber)" : "var(--text-dim)"
+                          fontSize: 11,
+                          color: active ? "var(--amber)" : "var(--text-dim)",
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 6
                         }}
                       >
+                        <div style={{
+                          width: 28, height: 28, borderRadius: 6,
+                          background: opt.swatch,
+                          border: `1px solid ${opt.swatchBorder}`,
+                          flexShrink: 0
+                        }} />
                         {opt.label}
                       </button>
                     );
@@ -10814,7 +10824,7 @@ export default function Stillform() {
                 </div>
               </div>
 
-              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px", textAlign: "left" }}>
+              <div style={{ width: "100%", marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px", textAlign: "left" }}>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                   Signal mapping
                 </div>
