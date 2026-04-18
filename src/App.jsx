@@ -1368,7 +1368,7 @@ const UAT_FEEDBACK_DRAFT_KEY = "stillform_uat_feedback_draft";
 const UAT_FEEDBACK_HISTORY_KEY = "stillform_uat_feedback_history";
 const UAT_FEEDBACK_HISTORY_MAX_ITEMS = 30;
 const UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS = 30;
-const SHARE_QR_TARGET_URL = "https://stillformapp.com";
+const SHARE_QR_TARGET_URL = "https://stillformapp.com/#home";
 const SHARE_QR_IMAGE_URL = `https://api.qrserver.com/v1/create-qr-code/?size=480x480&data=${encodeURIComponent(SHARE_QR_TARGET_URL)}`;
 const UAT_FEEDBACK_FLASH_LABEL = "UAT FEEDBACK";
 const UAT_MODE_QUERY_PARAM = "uat";
