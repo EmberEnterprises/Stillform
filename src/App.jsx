@@ -8878,6 +8878,7 @@ export default function Stillform() {
   }, [syncSignedIn, subscriptionCheckTick]);
 
   const [screen, setScreenRaw] = useState(null);
+  const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
 
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
@@ -8922,7 +8923,6 @@ export default function Stillform() {
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [setupBridgeOrigin, setSetupBridgeOrigin] = useState("home");
-  const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=customization, 1=signal mapping
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
