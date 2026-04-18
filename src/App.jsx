@@ -1519,16 +1519,15 @@ const THEME_PRESETS = {
     "--surface2": "#e8ecf4",
     "--border": "rgba(16,24,40,0.18)",
     "--border-hi": "rgba(16,24,40,0.30)",
-    "--amber": "#8B5E00",
-    "--amber-dim": "rgba(139,94,0,0.30)",
-    "--amber-glow": "rgba(139,94,0,0.10)",
-    "--amber-20": "rgba(139,94,0,0.20)",
+    "--amber": "#C8922A",
+    "--amber-dim": "rgba(200,146,42,0.30)",
+    "--amber-glow": "rgba(200,146,42,0.10)",
+    "--amber-20": "rgba(200,146,42,0.20)",
     "--text": "#080c14",
     "--text-dim": "#2a2f3e",
     "--text-muted": "#464c60",
     "--green": "#2f7c59",
     "--green-glow": "rgba(47,124,89,0.12)",
-    "--btn-primary-text": "#ffffff"
   }
 };
 
