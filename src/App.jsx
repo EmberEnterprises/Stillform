@@ -8934,6 +8934,7 @@ export default function Stillform() {
   const [focusCheckReturnScreen, setFocusCheckReturnScreen] = useState("home");
   const [tutorialFocusBrief, setTutorialFocusBrief] = useState(null);
   const [screenReady, setScreenReady] = useState(false);
+  const [biometricCleared, setBiometricCleared] = useState(false); // true once authenticated this session
   const [homeProgressPinned, setHomeProgressPinned] = useState(() => {
     try {
       const modern = localStorage.getItem("stillform_home_progress_pinned_v2");
@@ -9436,18 +9437,21 @@ export default function Stillform() {
           setSetupBridgeOrigin("tutorial");
           setScreen("setup");
           setScreenReady(true);
+          setBiometricCleared(true);
           return;
         }
         if (firstRunStage === "bridge") {
           setSetupBridgeOrigin("tutorial");
           setScreen("setup-bridge");
           setScreenReady(true);
+          setBiometricCleared(true);
           return;
         }
         setTutorialStep(0);
         setTutorialReturnScreen("home");
         setScreen("tutorial");
         setScreenReady(true);
+        setBiometricCleared(true); // no biometric gate for first-run flows
         return;
       }
 
@@ -9458,6 +9462,7 @@ export default function Stillform() {
           setPathway("calm");
           setScreen("tool");
           setScreenReady(true);
+          setBiometricCleared(true);
           return;
         }
       } catch (e) {
@@ -9473,8 +9478,28 @@ export default function Stillform() {
         setScreenReady(true);
         return;
       }
-      setScreen(trialExpired ? "pricing" : "home");
-      setScreenReady(true);
+      // Biometric gate — prompt before revealing home if enabled
+      if (biometric.isEnabled()) {
+        setScreen(trialExpired ? "pricing" : "home");
+        setScreenReady(true);
+        const ok = await biometric.authenticate();
+        if (!ok) {
+          // Auth failed or cancelled — keep showing splash until they authenticate
+          setBiometricCleared(false);
+          const retry = async () => {
+            const r = await biometric.authenticate();
+            if (r) setBiometricCleared(true);
+            else setTimeout(retry, 1000);
+          };
+          retry();
+          return;
+        }
+        setBiometricCleared(true);
+      } else {
+        setScreen(trialExpired ? "pricing" : "home");
+        setScreenReady(true);
+        setBiometricCleared(true);
+      }
     };
     init();
   }, []);
@@ -9504,6 +9529,34 @@ export default function Stillform() {
                 setScreen("tool");
               }
             } catch {}
+          });
+
+          // Foreground resume — re-prompt biometric when app comes back from background
+          App.addListener("appStateChange", async ({ isActive }) => {
+            if (isActive && biometric.isEnabled()) {
+              setBiometricCleared(false);
+              const ok = await biometric.authenticate();
+              if (ok) {
+                setBiometricCleared(true);
+              } else {
+                const retry = async () => {
+                  const r = await biometric.authenticate();
+                  if (r) setBiometricCleared(true);
+                  else setTimeout(retry, 1500);
+                };
+                retry();
+              }
+            }
+          });
+
+          // Android hardware back button
+          App.addListener("backButton", () => {
+            const currentScreen = currentScreenRef.current;
+            if (!currentScreen || currentScreen === "home") {
+              App.exitApp();
+            } else {
+              handleScreenBack();
+            }
           });
         }).catch(() => {});
       }
@@ -10620,7 +10673,7 @@ export default function Stillform() {
       <style>{styles}</style>
       <div className={appClasses}>
         {/* SPLASH OVERLAY — fades out, never blocks hooks */}
-        {(!splashDone || !screenReady) && (
+        {(!splashDone || !screenReady || (biometric.isEnabled() && !biometricCleared)) && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
             display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
