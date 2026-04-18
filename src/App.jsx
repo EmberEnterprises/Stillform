@@ -9104,6 +9104,7 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
+        setSetupBridgeStep(1); // return to signal mapping page, not personalization
         setScreen("setup-bridge");
       }
       return;
@@ -11091,21 +11092,24 @@ export default function Stillform() {
                   {signalMappingConfigured ? "Update signal mapping →" : "Map signals now →"}
                 </button>
               </div>
-              <button
-                className="btn btn-primary"
-                style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
-              >
-                Continue to calibration →
-              </button>
-              {!signalMappingConfigured && (
-                <button
-                  onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
-                  style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12, padding: "8px 0" }}
-                >
-                  Skip for now
-                </button>
-              )}
+              {signalMappingConfigured
+                ? (
+                  <button
+                    className="btn btn-primary"
+                    style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                  >
+                    Continue to calibration →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                    style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0", textDecoration: "underline" }}
+                  >
+                    Skip for now →
+                  </button>
+                )
+              }
             </section>
           );
         })()}
