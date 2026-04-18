@@ -9361,6 +9361,15 @@ export default function Stillform() {
         console.error("WidgetBridge error:", e);
       }
 
+      // If onboarded but somehow missing regType, send to tutorial — never show dead screen
+      const missingRegType = !localStorage.getItem("stillform_regulation_type");
+      if (missingRegType && !trialExpired) {
+        setTutorialStep(0);
+        setTutorialReturnScreen("home");
+        setScreen("tutorial");
+        setScreenReady(true);
+        return;
+      }
       setScreen(trialExpired ? "pricing" : "home");
       setScreenReady(true);
     };
@@ -11109,13 +11118,8 @@ export default function Stillform() {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // No regulation type — send to tutorial (dead screen removed)
-          if (!regType) {
-            setTutorialStep(0);
-            setTutorialReturnScreen("home");
-            setScreen("tutorial");
-            return null;
-          }
+          // regType guaranteed by startup routing — this is a safety net only
+          if (!regType) return null;
 
                     const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
