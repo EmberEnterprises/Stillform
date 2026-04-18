@@ -9104,8 +9104,11 @@ export default function Stillform() {
       if (setupStep > 0) {
         setSetupStep((s) => Math.max(0, s - 1));
       } else {
-        setSetupBridgeStep(1); // return to signal mapping page, not personalization
-        setScreen("setup-bridge");
+        // Set step and hash synchronously before React processes state
+        // to avoid hashchange firing with stale step=0
+        setSetupBridgeStep(1);
+        setScreenRaw("setup-bridge");
+        try { window.location.hash = "#setup-bridge-1"; } catch {}
       }
       return;
     }
