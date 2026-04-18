@@ -11131,8 +11131,14 @@ export default function Stillform() {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // regType guaranteed by startup routing — this is a safety net only
-          if (!regType) return null;
+          // Safety net — startup routing should handle this, but if regType
+          // is missing (e.g. browser back into home on fresh session), go to tutorial
+          if (!regType) {
+            setTutorialStep(0);
+            setTutorialReturnScreen("home");
+            setScreen("tutorial");
+            return null;
+          }
 
                     const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
