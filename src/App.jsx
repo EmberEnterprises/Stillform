@@ -123,7 +123,7 @@ const styles = `
 
   .btn-primary {
     background: var(--amber);
-    color: #0A0A0C;
+    color: var(--btn-primary-text, #0A0A0C);
     font-weight: 500;
     box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2);
   }
@@ -1527,7 +1527,8 @@ const THEME_PRESETS = {
     "--text-dim": "#2a2f3e",
     "--text-muted": "#464c60",
     "--green": "#2f7c59",
-    "--green-glow": "rgba(47,124,89,0.12)"
+    "--green-glow": "rgba(47,124,89,0.12)",
+    "--btn-primary-text": "#ffffff"
   }
 };
 
