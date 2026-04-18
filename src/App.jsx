@@ -8881,10 +8881,17 @@ export default function Stillform() {
 
   // Hash routing — keeps browser back button working
   const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
-  const screenToHash = (s) => s && HASH_SCREENS.has(s) ? `#${s}` : "#home";
+  const screenToHash = (s) => {
+    if (!s || !HASH_SCREENS.has(s)) return "#home";
+    if (s === "setup-bridge") return `#setup-bridge-${setupBridgeStep}`;
+    return `#${s}`;
+  };
   const hashToScreen = (h) => {
-    const s = (h || "").replace("#", "");
-    return HASH_SCREENS.has(s) ? s : "home";
+    const raw = (h || "").replace("#", "");
+    // Handle setup-bridge sub-steps
+    if (raw === "setup-bridge-0") { setSetupBridgeStep(0); return "setup-bridge"; }
+    if (raw === "setup-bridge-1") { setSetupBridgeStep(1); return "setup-bridge"; }
+    return HASH_SCREENS.has(raw) ? raw : "home";
   };
   const setScreen = (s) => {
     setScreenRaw(s);
@@ -8893,6 +8900,16 @@ export default function Stillform() {
       if (window.location.hash !== hash) window.location.hash = hash;
     } catch {}
   };
+
+  // Keep hash in sync when setup bridge step changes
+  useEffect(() => {
+    if (screen === "setup-bridge") {
+      try {
+        const hash = `#setup-bridge-${setupBridgeStep}`;
+        if (window.location.hash !== hash) window.location.hash = hash;
+      } catch {}
+    }
+  }, [setupBridgeStep, screen]);
   const [faqBackScreen, setFaqBackScreen] = useState("home");
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
@@ -9190,7 +9207,7 @@ export default function Stillform() {
       window.removeEventListener("touchstart", onTouchStart);
       window.removeEventListener("touchend", onTouchEnd);
     };
-  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupStep, faqBackScreen, focusCheckReturnScreen]);
+  }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupBridgeStep, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = toLocalDateKey();
