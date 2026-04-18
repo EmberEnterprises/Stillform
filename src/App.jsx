@@ -10568,11 +10568,9 @@ export default function Stillform() {
     if (p === "calm") {
       startTool(TOOLS.find(t => t.id === "breathe"));
     } else if (p === "hype") {
-      if (!(await biometric.gate())) return;
       setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" });
       setScreen("tool");
     } else if (p === "clarity") {
-      if (!(await biometric.gate())) return;
       setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
       setScreen("tool");
     } else {
@@ -10586,7 +10584,7 @@ export default function Stillform() {
       setPathway,
       setActiveTool,
       setScreen,
-      gateBiometric: () => biometric.gate()
+
     });
     if (!launched) {
       // Fail safe: if routing config drifts, default to calm reframe so users are never blocked.
@@ -11797,7 +11795,7 @@ export default function Stillform() {
                   <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                     <div style={{ display: "flex", gap: 6 }}>
                       <button onClick={async () => {
-                        if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                        setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                       }} style={{
                         flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                         borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
@@ -11829,7 +11827,7 @@ export default function Stillform() {
                 {/* Primary tool — determined by regulation type */}
                 <button onClick={async () => {
                   if (isThoughtFirst) {
-                    if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                    setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                   } else {
                     startPathway("calm");
                   }
@@ -11856,7 +11854,7 @@ export default function Stillform() {
                 <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
                   <button onClick={async () => {
                     if (isBodyFirst) {
-                      if (await biometric.gate()) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                      setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                     } else {
                       startPathway("calm");
                     }
@@ -12263,7 +12261,7 @@ export default function Stillform() {
                           </div>
                         </div>
                         <button
-                          onClick={async () => { if (await biometric.gate()) setScreen("progress"); }}
+                          onClick={() => setScreen("progress")}
                           style={{
                             width: "100%",
                             background: "none",
