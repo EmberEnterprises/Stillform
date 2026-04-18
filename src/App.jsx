@@ -8998,10 +8998,11 @@ export default function Stillform() {
   };
   const goHomeSafely = (defer = false) => {
     if (defer) {
-      setTimeout(() => setScreen("home"), 0);
+      setTimeout(() => { setScreenRaw("home"); try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {} }, 0);
       return;
     }
-    setScreen("home");
+    setScreenRaw("home");
+    try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {}
   };
   const handleScreenBack = () => {
     if (screen === "tutorial") {
@@ -11108,27 +11109,15 @@ export default function Stillform() {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // No regulation type set? Route to calibration
+          // No regulation type — send to tutorial (dead screen removed)
           if (!regType) {
-            return (
-              <section className="home">
-                <h1 className="home-title">
-                  Composure.<br /><em>On demand.</em>
-                </h1>
-                <p className="home-sub">
-                  Master how you carry yourself — when things are hard and when things are going great. Composure isn’t just for bad days. Set your tone, stay sharp, and build awareness that compounds over time.
-                </p>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 15, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 40, marginTop: -8 }}>
-                  Let's calibrate your system first.
-                </div>
-                <button onClick={() => openSetupBridge("home")} className="btn btn-primary" style={{ padding: "18px 32px", fontSize: 15, width: "100%", maxWidth: 360 }}>
-                  Begin Calibration →
-                </button>
-              </section>
-            );
+            setTutorialStep(0);
+            setTutorialReturnScreen("home");
+            setScreen("tutorial");
+            return null;
           }
 
-          const isThoughtFirst = regType === "thought-first";
+                    const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
 
           /* ── RETURNING USER: clean, one dominant action ── */
