@@ -4478,7 +4478,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [activeMode, setActiveMode] = useState(() => {
     return mode !== "calm" ? mode : null;
   });
-  const [exitAnchor, setExitAnchor] = useState(false);
   const [showPostRating, setShowPostRating] = useState(false);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
@@ -4550,9 +4549,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const openingText = isHype
     ? "What are you walking into? Name it and what's making it hard."
     : "What's on your mind?";
-  const [showReframeFirstTip, setShowReframeFirstTip] = useState(() => {
-    try { return localStorage.getItem("stillform_tooltips_reframe_seen") !== "yes"; } catch { return true; }
-  });
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
   const markLastReframeMode = (nextMode) => {
     try { localStorage.setItem("stillform_reframe_last_mode", nextMode); } catch {}
@@ -10482,7 +10478,6 @@ export default function Stillform() {
     window.addEventListener("beforeinstallprompt", handler);
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
-  const [uatTestAgain, setUatTestAgain] = useState(null);
 
   const isSignalProfileConfigured = () => {
     try {
