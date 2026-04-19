@@ -1657,3 +1657,44 @@ stillform_sb_session (Supabase auth session)
 9. **Promo** — N/A (no promo copy changes in this pass).
 10. **Punch list** — N/A (no new post-launch infrastructure task created by this pass).
 11. **Emotion coverage** — N/A (no Pulse/chip distribution changes in this pass).
+
+---
+
+## April 19, 2026 — Current State Update
+
+### ✅ Confirmed complete (do not revisit)
+- Supabase cloud sync — fully built and tested across Mac + Android
+- Lemon Squeezy webhook — pointing to subscription-webhook, 11 events
+- Netlify env vars — all 6 set: ANTHROPIC_API_KEY, LEMON_WEBHOOK_SECRET, OPENAI_API_KEY, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, SUPABASE_URL
+- Termly privacy policy — updated
+- Supabase SQL — all tables, RLS, policies run successfully
+- Server-side subscription verification — fully wired end to end
+- Biometric lock — app-open gate + foreground resume (one gate per session, optional in Settings)
+- Settings restructure — 5 clean sections, complete, do not touch
+- Hash routing + back button — all surfaces covered
+- Setup bridge — two-page flow, 6 themes, demos, high contrast
+- Daily rotating processing cues — 47 cues, rotates by day
+- QR share link — fixed and working
+- Watch sequence back button — fixed
+
+### 🔴 What needs to be complete BEFORE TestFlight
+TestFlight is a final QA pass, not feature discovery. Do not suggest TestFlight until every item below is done.
+
+1. **Galaxy Watch haptic breathing** — needs Mac + Android Studio. Wear OS module exists, needs validation on paired device.
+2. **Apple Watch companion** — not yet built. Needs Xcode + WatchKit.
+3. **Apple HealthKit integration** — iOS native, needs real device verification.
+4. **Google Health Connect** — Android, currently reports unavailable.
+5. **Calendar integration** — iOS native, needs real device verification.
+6. **Biometric lock** — needs native build testing on real device.
+7. **Second-device cloud restore QA** — manual test.
+8. **3-5 real testimonials** — required before Reddit.
+9. **Reddit post** — drafted, needs final review.
+10. **@stillformapp Instagram** — not yet created.
+11. **Google Play closed testing build** — needs Mac + Android Studio.
+
+### ❌ Do not suggest until app is complete
+- TestFlight build
+- App Store submission
+- Reddit launch
+- Product Hunt
+
