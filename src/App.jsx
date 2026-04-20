@@ -9713,7 +9713,7 @@ export default function Stillform() {
   const nativePlatform = (() => {
     try { return window?.Capacitor?.getPlatform?.() || "web"; } catch { return "web"; }
   })();
-  const integrationsSupportedOnPlatform = nativePlatform === "ios";
+  const integrationsSupportedOnPlatform = nativePlatform === "ios" || nativePlatform === "android";
   const integrationContext = resolveIntegrationContext();
   const hasPendingWebhookSync = hasFreshSubscribePending(SUBSCRIPTION_PENDING_GRACE_MS);
 
