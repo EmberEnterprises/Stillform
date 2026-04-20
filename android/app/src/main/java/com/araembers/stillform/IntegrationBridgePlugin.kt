@@ -3,13 +3,14 @@ package com.araembers.stillform
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.provider.CalendarContract
-import android.provider.Settings
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -32,9 +33,15 @@ class IntegrationBridgePlugin : Plugin() {
     companion object {
         private const val TAG = "IntegrationBridge"
         private const val REQUEST_CALENDAR = 1001
+
+        val HEALTH_PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(SleepSessionRecord::class),
+            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
+            HealthPermission.getReadPermission(RestingHeartRateRecord::class)
+        )
     }
 
-    // ─── REQUEST PERMISSIONS ──────────────────────────────────────────────────
+    // ─── REQUEST CALENDAR PERMISSION ─────────────────────────────────────────
 
     @PluginMethod
     fun requestCalendarPermission(call: PluginCall) {
@@ -48,66 +55,40 @@ class IntegrationBridgePlugin : Plugin() {
             arrayOf(Manifest.permission.READ_CALENDAR),
             REQUEST_CALENDAR
         )
-        // Return after requesting — JS will call syncCalendar after user responds
         call.resolve(JSObject().apply { put("granted", false); put("status", "requested") })
     }
+
+    // ─── REQUEST HEALTH PERMISSION ────────────────────────────────────────────
 
     @PluginMethod
     fun requestHealthPermission(call: PluginCall) {
         val status = HealthConnectClient.getSdkStatus(context)
         if (status != HealthConnectClient.SDK_AVAILABLE) {
-            // Try to open Play Store to install Health Connect
-            try {
-                val intent = Intent(Intent.ACTION_VIEW,
-                    Uri.parse("market://details?id=com.google.android.apps.healthdata"))
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                activity.startActivity(intent)
-            } catch (e: Exception) {
-                Log.w(TAG, "Could not open Play Store: ${e.message}")
-            }
-            call.resolve(JSObject().apply { put("granted", false); put("status", "unavailable") })
+            call.resolve(JSObject().apply {
+                put("granted", false)
+                put("status", "unavailable")
+                put("error", "Health Connect is not available on this device.")
+            })
             return
         }
-        // Open Health Connect app for user to grant permissions
+
         try {
-            // Try multiple package names for Health Connect (Google + Samsung)
-            val hcPackages = listOf(
-                "com.google.android.healthconnect.controller",
-                "com.google.android.apps.healthdata",
-                "com.sec.android.app.shealth",
-                "com.samsung.android.shealth"
-            )
-            var launched = false
-            for (pkg in hcPackages) {
-                val intent = activity.packageManager.getLaunchIntentForPackage(pkg)
-                if (intent != null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    activity.startActivity(intent)
-                    launched = true
-                    break
-                }
+            // Use Health Connect's official permission controller contract
+            val requestPermissions = activity.registerForActivityResult(
+                PermissionController.createRequestPermissionResultContract()
+            ) { granted ->
+                val allGranted = granted.containsAll(HEALTH_PERMISSIONS)
+                Log.d(TAG, "Health permissions granted: $granted")
             }
-            if (!launched) {
-                // Fall back to Health Connect permissions rationale intent
-                val rationaleIntent = Intent("androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE")
-                rationaleIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                try {
-                    activity.startActivity(rationaleIntent)
-                    launched = true
-                } catch (e2: Exception) {
-                    Log.w(TAG, "Could not launch HC rationale: ${e2.message}")
-                }
-            }
-            call.resolve(JSObject().apply { 
-                put("granted", false)
-                put("status", if (launched) "opened" else "unavailable")
-            })
+            requestPermissions.launch(HEALTH_PERMISSIONS)
+            call.resolve(JSObject().apply { put("granted", false); put("status", "requested") })
         } catch (e: Exception) {
+            Log.e(TAG, "requestHealthPermission error: ${e.message}", e)
             call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
         }
     }
 
-    // ─── HEALTH ───────────────────────────────────────────────────────────────
+    // ─── HEALTH SYNC ──────────────────────────────────────────────────────────
 
     @PluginMethod
     fun syncHealth(call: PluginCall) {
@@ -182,7 +163,7 @@ class IntegrationBridgePlugin : Plugin() {
                         put("ok", false)
                         put("supported", true)
                         put("status", "permission_required")
-                        put("error", "Health Connect permission required. Please grant access in Settings.")
+                        put("error", "Health Connect permission required.")
                     })
                     return@Thread
                 }
@@ -209,7 +190,7 @@ class IntegrationBridgePlugin : Plugin() {
         }.start()
     }
 
-    // ─── CALENDAR ─────────────────────────────────────────────────────────────
+    // ─── CALENDAR SYNC ────────────────────────────────────────────────────────
 
     @PluginMethod
     fun syncCalendar(call: PluginCall) {
