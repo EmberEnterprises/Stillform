@@ -70,20 +70,37 @@ class IntegrationBridgePlugin : Plugin() {
         }
         // Open Health Connect app for user to grant permissions
         try {
-            val intent = activity.packageManager.getLaunchIntentForPackage("com.google.android.apps.healthdata")
-                ?: activity.packageManager.getLaunchIntentForPackage("com.samsung.android.shealth")
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                activity.startActivity(intent)
-                call.resolve(JSObject().apply { put("granted", false); put("status", "opened") })
-            } else {
-                // Fall back to app settings
-                val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:com.araembers.stillform"))
-                settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                activity.startActivity(settingsIntent)
-                call.resolve(JSObject().apply { put("granted", false); put("status", "settings_opened") })
+            // Try multiple package names for Health Connect (Google + Samsung)
+            val hcPackages = listOf(
+                "com.google.android.apps.healthdata",
+                "com.samsung.android.shealth",
+                "com.samsung.android.shealth.healthplatform"
+            )
+            var launched = false
+            for (pkg in hcPackages) {
+                val intent = activity.packageManager.getLaunchIntentForPackage(pkg)
+                if (intent != null) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    activity.startActivity(intent)
+                    launched = true
+                    break
+                }
             }
+            if (!launched) {
+                // Fall back to Health Connect permissions rationale intent
+                val rationaleIntent = Intent("androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE")
+                rationaleIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    activity.startActivity(rationaleIntent)
+                    launched = true
+                } catch (e2: Exception) {
+                    Log.w(TAG, "Could not launch HC rationale: ${e2.message}")
+                }
+            }
+            call.resolve(JSObject().apply { 
+                put("granted", false)
+                put("status", if (launched) "opened" else "unavailable")
+            })
         } catch (e: Exception) {
             call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
         }

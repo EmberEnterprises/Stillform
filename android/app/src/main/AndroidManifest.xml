@@ -29,6 +29,11 @@
                 <data android:scheme="https" android:host="stillformapp.com" />
             </intent-filter>
 
+            <!-- Health Connect permissions rationale -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -100,5 +105,7 @@
     <!-- Required so Health Connect shows this app in its permissions list -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <package android:name="com.samsung.android.shealth" />
+        <package android:name="com.samsung.android.shealth.healthplatform" />
     </queries>
 </manifest>
