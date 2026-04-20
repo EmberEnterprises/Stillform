@@ -11,6 +11,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(WatchBridgePlugin.class);
         registerPlugin(WidgetBridgePlugin.class);
+        registerPlugin(IntegrationBridgePlugin.class);
         Log.d("STILLFORM", "onCreate called");
         handleWidgetAction(getIntent());
         super.onCreate(savedInstanceState);

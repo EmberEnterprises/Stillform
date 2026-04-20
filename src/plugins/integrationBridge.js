@@ -93,11 +93,9 @@ const unsupportedResult = (kind) => {
   const platform = (() => {
     try { return Capacitor?.getPlatform?.() || null; } catch { return null; }
   })();
-  const error = platform === "android"
-    ? `${kind} integration is not available on Android yet.`
-    : platform === "ios"
-      ? `${kind} integration requires the native iOS app build.`
-      : `${kind} integration requires a supported native app build.`;
+  const error = platform === "ios"
+    ? `${kind} integration requires the native iOS app build.`
+    : `${kind} integration requires a supported native app build.`;
   return {
     ok: false,
     supported: false,
