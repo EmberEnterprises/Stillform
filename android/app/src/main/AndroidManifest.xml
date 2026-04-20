@@ -105,7 +105,8 @@
     <!-- Required so Health Connect shows this app in its permissions list -->
     <queries>
         <package android:name="com.google.android.apps.healthdata" />
+        <package android:name="com.google.android.healthconnect.controller" />
+        <package android:name="com.sec.android.app.shealth" />
         <package android:name="com.samsung.android.shealth" />
-        <package android:name="com.samsung.android.shealth.healthplatform" />
     </queries>
 </manifest>

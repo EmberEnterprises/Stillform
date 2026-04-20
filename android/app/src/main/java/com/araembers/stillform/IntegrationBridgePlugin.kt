@@ -72,9 +72,10 @@ class IntegrationBridgePlugin : Plugin() {
         try {
             // Try multiple package names for Health Connect (Google + Samsung)
             val hcPackages = listOf(
+                "com.google.android.healthconnect.controller",
                 "com.google.android.apps.healthdata",
-                "com.samsung.android.shealth",
-                "com.samsung.android.shealth.healthplatform"
+                "com.sec.android.app.shealth",
+                "com.samsung.android.shealth"
             )
             var launched = false
             for (pkg in hcPackages) {
