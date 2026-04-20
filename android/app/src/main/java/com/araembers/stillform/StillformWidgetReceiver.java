@@ -1,6 +1,7 @@
 package com.araembers.stillform;
 
 import android.content.BroadcastReceiver;
+import com.araembers.stillform.MainActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
