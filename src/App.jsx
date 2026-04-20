@@ -1254,7 +1254,12 @@ const setupPushNotifications = async () => {
   if (!isNative()) return;
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications');
-    const permission = await PushNotifications.requestPermissions();
+    // Check existing permission first — never prompt if already granted or denied
+    const existing = await PushNotifications.checkPermissions();
+    if (existing.receive === 'denied') return; // user said no, don't ask again
+    const permission = existing.receive === 'granted'
+      ? existing
+      : await PushNotifications.requestPermissions();
     if (permission.receive === 'granted') {
       await PushNotifications.register();
       PushNotifications.addListener('registration', token => {
