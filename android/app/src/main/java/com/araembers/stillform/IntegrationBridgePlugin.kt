@@ -1,13 +1,15 @@
 package com.araembers.stillform
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.provider.CalendarContract
+import android.provider.Settings
 import android.util.Log
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -18,29 +20,18 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
-import com.getcapacitor.annotation.Permission
-import com.getcapacitor.annotation.PermissionCallback
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@CapacitorPlugin(
-    name = "IntegrationBridge",
-    permissions = [
-        Permission(strings = [Manifest.permission.READ_CALENDAR], alias = "calendar")
-    ]
-)
+@CapacitorPlugin(name = "IntegrationBridge")
 class IntegrationBridgePlugin : Plugin() {
 
     companion object {
         private const val TAG = "IntegrationBridge"
-        private val HEALTH_PERMISSIONS = setOf(
-            HealthPermission.getReadPermission(SleepSessionRecord::class),
-            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
-            HealthPermission.getReadPermission(RestingHeartRateRecord::class)
-        )
+        private const val REQUEST_CALENDAR = 1001
     }
 
     // ─── REQUEST PERMISSIONS ──────────────────────────────────────────────────
@@ -52,31 +43,47 @@ class IntegrationBridgePlugin : Plugin() {
             call.resolve(JSObject().apply { put("granted", true) })
             return
         }
-        requestPermissionForAlias("calendar", call, "calendarPermissionCallback")
-    }
-
-    @PermissionCallback
-    private fun calendarPermissionCallback(call: PluginCall) {
-        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
-        call.resolve(JSObject().apply { put("granted", granted) })
+        ActivityCompat.requestPermissions(
+            activity,
+            arrayOf(Manifest.permission.READ_CALENDAR),
+            REQUEST_CALENDAR
+        )
+        // Return after requesting — JS will call syncCalendar after user responds
+        call.resolve(JSObject().apply { put("granted", false); put("status", "requested") })
     }
 
     @PluginMethod
     fun requestHealthPermission(call: PluginCall) {
         val status = HealthConnectClient.getSdkStatus(context)
         if (status != HealthConnectClient.SDK_AVAILABLE) {
-            call.resolve(JSObject().apply { put("granted", false); put("error", "Health Connect not available") })
+            // Try to open Play Store to install Health Connect
+            try {
+                val intent = Intent(Intent.ACTION_VIEW,
+                    Uri.parse("market://details?id=com.google.android.apps.healthdata"))
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(intent)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not open Play Store: ${e.message}")
+            }
+            call.resolve(JSObject().apply { put("granted", false); put("status", "unavailable") })
             return
         }
+        // Open Health Connect app for user to grant permissions
         try {
-            // Launch Health Connect permission screen
-            val requestPermissionActivity = PermissionController.createRequestPermissionResultContract()
             val intent = activity.packageManager.getLaunchIntentForPackage("com.google.android.apps.healthdata")
+                ?: activity.packageManager.getLaunchIntentForPackage("com.samsung.android.shealth")
             if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 activity.startActivity(intent)
+                call.resolve(JSObject().apply { put("granted", false); put("status", "opened") })
+            } else {
+                // Fall back to app settings
+                val settingsIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:com.araembers.stillform"))
+                settingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(settingsIntent)
+                call.resolve(JSObject().apply { put("granted", false); put("status", "settings_opened") })
             }
-            // Return pending — user must go grant in Health Connect then come back and sync
-            call.resolve(JSObject().apply { put("granted", false); put("status", "pending") })
         } catch (e: Exception) {
             call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
         }

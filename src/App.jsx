@@ -13973,13 +13973,17 @@ const isSignalProfileConfigured = () => {
                   {integrationsSupportedOnPlatform && (<>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={async () => {
                       const r = await integrationBridge.requestCalendarPermission();
-                      if (r?.granted) void syncIntegrationContext("calendar", { source: "connect" });
-                      else void syncIntegrationContext("calendar", { source: "connect" }); // will surface the error
+                      if (r?.granted) {
+                        void syncIntegrationContext("calendar", { source: "connect" });
+                      } else if (r?.status === "requested") {
+                        // Wait for user to respond to dialog then sync
+                        setTimeout(() => void syncIntegrationContext("calendar", { source: "connect" }), 2000);
+                      }
                     }}>Connect calendar</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={async () => {
-                      await integrationBridge.requestHealthPermission(); // opens Health Connect settings
-                      setIntegrationActionStatus("Grant access in Health Connect, then tap 'Sync health now'");
-                      setTimeout(() => setIntegrationActionStatus(""), 6000);
+                      await integrationBridge.requestHealthPermission();
+                      setIntegrationActionStatus("Grant Stillform access in Health Connect, then tap 'Sync health now'");
+                      setTimeout(() => setIntegrationActionStatus(""), 8000);
                     }}>Connect health</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("calendar")}>Sync calendar now</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("health")}>Sync health now</button>
