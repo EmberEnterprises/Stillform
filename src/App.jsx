@@ -3554,7 +3554,10 @@ function BodyScanTool({ onComplete }) {
                 {renderAreaOverview(a.name)}
               </div>
               <div className="scan-area-prompt" style={{ marginTop: 8 }}>{a.prompt}</div>
-              <div style={{ marginTop: 16, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
+              <div style={{ marginTop: 12, marginBottom: 12, fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.6 }}>
+                Notice what's here. You don't need to change it — just let it be.
+              </div>
+              <div style={{ marginTop: 4, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
               <div className="tension-bar">
                 {[1,2,3,4,5].map(n => (
                   <div key={n} className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
@@ -6545,7 +6548,8 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where do you activate first?</h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 12 }}>Tap the areas that respond first — whether stress, excitement, or anything in between.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Tap the areas that respond first — whether stress, excitement, or anything in between.</p>
+        <p style={{ color: "var(--text-dim)", fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>This changes over time. Update it whenever your patterns shift.</p>
         <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
@@ -11697,7 +11701,10 @@ export default function Stillform() {
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>Morning check-in</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning check-in</div>
+                    <div style={{ fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.7, marginBottom: 14 }}>
+                      Take one breath. Notice where you're starting from.
+                    </div>
                     {upcomingPressure && (
                       <div style={{ fontSize: 11, color: "var(--amber)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "8px 10px", marginBottom: 14, lineHeight: 1.5 }}>
                         {upcomingPressure}
