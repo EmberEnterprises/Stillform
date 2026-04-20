@@ -6,7 +6,6 @@ import android.provider.CalendarContract
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -30,8 +29,6 @@ class IntegrationBridgePlugin : Plugin() {
         private const val TAG = "IntegrationBridge"
     }
 
-    // ─── HEALTH ───────────────────────────────────────────────────────────────
-
     @PluginMethod
     fun syncHealth(call: PluginCall) {
         val status = HealthConnectClient.getSdkStatus(context)
@@ -48,24 +45,6 @@ class IntegrationBridgePlugin : Plugin() {
         Thread {
             try {
                 val client = HealthConnectClient.getOrCreate(context)
-
-                // Check which permissions are granted
-                val granted = runBlocking { client.getGrantedPermissions() }
-
-                val hasSleep = HealthPermission.getReadPermission(SleepSessionRecord::class) in granted
-                val hasHrv = HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class) in granted
-                val hasHr = HealthPermission.getReadPermission(RestingHeartRateRecord::class) in granted
-
-                if (!hasSleep && !hasHrv && !hasHr) {
-                    call.resolve(JSObject().apply {
-                        put("ok", false)
-                        put("supported", true)
-                        put("status", "permission_required")
-                        put("error", "Health Connect permission required. Please grant access in Settings.")
-                    })
-                    return@Thread
-                }
-
                 val now = Instant.now()
                 val yesterday = now.minus(24, ChronoUnit.HOURS)
                 val timeRange = TimeRangeFilter.between(yesterday, now)
@@ -73,54 +52,59 @@ class IntegrationBridgePlugin : Plugin() {
                 var sleepHours: Double? = null
                 var hrv: Double? = null
                 var restingHr: Double? = null
+                var permissionRequired = false
 
-                // Sleep
-                if (hasSleep) {
-                    try {
-                        val records = runBlocking {
-                            client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, timeRange)).records
-                        }
-                        if (records.isNotEmpty()) {
-                            val totalMs = records.sumOf {
-                                it.endTime.toEpochMilli() - it.startTime.toEpochMilli()
-                            }
-                            sleepHours = totalMs / 3_600_000.0
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Sleep read failed: ${e.message}")
+                try {
+                    val records = runBlocking {
+                        client.readRecords(ReadRecordsRequest(SleepSessionRecord::class, timeRange)).records
                     }
+                    if (records.isNotEmpty()) {
+                        val totalMs = records.sumOf { it.endTime.toEpochMilli() - it.startTime.toEpochMilli() }
+                        sleepHours = totalMs / 3_600_000.0
+                    }
+                } catch (e: SecurityException) {
+                    Log.w(TAG, "Sleep permission not granted")
+                    permissionRequired = true
+                } catch (e: Exception) {
+                    Log.w(TAG, "Sleep read failed: ${e.message}")
                 }
 
-                // HRV (RMSSD)
-                if (hasHrv) {
-                    try {
-                        val records = runBlocking {
-                            client.readRecords(
-                                ReadRecordsRequest(HeartRateVariabilityRmssdRecord::class, timeRange)
-                            ).records
-                        }
-                        if (records.isNotEmpty()) {
-                            hrv = records.map { it.heartRateVariabilityMillis }.average()
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "HRV read failed: ${e.message}")
+                try {
+                    val records = runBlocking {
+                        client.readRecords(ReadRecordsRequest(HeartRateVariabilityRmssdRecord::class, timeRange)).records
                     }
+                    if (records.isNotEmpty()) {
+                        hrv = records.map { it.heartRateVariabilityMillis }.average()
+                    }
+                } catch (e: SecurityException) {
+                    Log.w(TAG, "HRV permission not granted")
+                    permissionRequired = true
+                } catch (e: Exception) {
+                    Log.w(TAG, "HRV read failed: ${e.message}")
                 }
 
-                // Resting heart rate
-                if (hasHr) {
-                    try {
-                        val records = runBlocking {
-                            client.readRecords(
-                                ReadRecordsRequest(RestingHeartRateRecord::class, timeRange)
-                            ).records
-                        }
-                        if (records.isNotEmpty()) {
-                            restingHr = records.map { it.beatsPerMinute.toDouble() }.average()
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Resting HR read failed: ${e.message}")
+                try {
+                    val records = runBlocking {
+                        client.readRecords(ReadRecordsRequest(RestingHeartRateRecord::class, timeRange)).records
                     }
+                    if (records.isNotEmpty()) {
+                        restingHr = records.map { it.beatsPerMinute.toDouble() }.average()
+                    }
+                } catch (e: SecurityException) {
+                    Log.w(TAG, "HR permission not granted")
+                    permissionRequired = true
+                } catch (e: Exception) {
+                    Log.w(TAG, "HR read failed: ${e.message}")
+                }
+
+                if (permissionRequired && sleepHours == null && hrv == null && restingHr == null) {
+                    call.resolve(JSObject().apply {
+                        put("ok", false)
+                        put("supported", true)
+                        put("status", "permission_required")
+                        put("error", "Health Connect permission required. Please grant access in Settings.")
+                    })
+                    return@Thread
                 }
 
                 call.resolve(JSObject().apply {
@@ -145,13 +129,10 @@ class IntegrationBridgePlugin : Plugin() {
         }.start()
     }
 
-    // ─── CALENDAR ─────────────────────────────────────────────────────────────
-
     @PluginMethod
     fun syncCalendar(call: PluginCall) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
+            != PackageManager.PERMISSION_GRANTED) {
             call.resolve(JSObject().apply {
                 put("ok", false)
                 put("supported", true)
@@ -165,26 +146,20 @@ class IntegrationBridgePlugin : Plugin() {
             try {
                 val now = System.currentTimeMillis()
                 val in48h = now + (48L * 60 * 60 * 1000)
-
                 val cr = context.contentResolver
                 val uri = CalendarContract.Events.CONTENT_URI
-
                 val projection = arrayOf(
                     CalendarContract.Events.TITLE,
                     CalendarContract.Events.DTSTART,
                     CalendarContract.Events.DTEND,
                     CalendarContract.Events.ALL_DAY
                 )
-
                 val selection = "${CalendarContract.Events.DTSTART} >= ? AND " +
                     "${CalendarContract.Events.DTSTART} <= ? AND " +
                     "${CalendarContract.Events.DELETED} = 0"
-
-                val cursor = cr.query(
-                    uri, projection, selection,
+                val cursor = cr.query(uri, projection, selection,
                     arrayOf(now.toString(), in48h.toString()),
-                    "${CalendarContract.Events.DTSTART} ASC"
-                )
+                    "${CalendarContract.Events.DTSTART} ASC")
 
                 val events = JSONArray()
                 var firstTitle: String? = null
@@ -195,9 +170,7 @@ class IntegrationBridgePlugin : Plugin() {
                         if (title.isNullOrEmpty()) continue
                         val start = it.getLong(1)
                         val end = it.getLong(2)
-                        val allDay = it.getInt(3)
-                        if (allDay == 1) continue
-
+                        if (it.getInt(3) == 1) continue
                         events.put(JSONObject().apply {
                             put("title", title)
                             put("start", Instant.ofEpochMilli(start).toString())
