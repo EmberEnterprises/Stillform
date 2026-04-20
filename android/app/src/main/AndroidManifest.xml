@@ -41,6 +41,16 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
 
+        <!-- Health Connect — required for app to appear in Health Connect permissions list -->
+        <activity-alias
+            android:name="com.araembers.stillform.HealthConnectActivity"
+            android:exported="true"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
+        </activity-alias>
+
         <!-- Home screen widget -->
         <receiver
             android:name=".StillformWidget"
