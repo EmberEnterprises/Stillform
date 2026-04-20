@@ -4274,6 +4274,8 @@ const sbSyncDown = async () => {
   const user = sbGetUser();
   if (!user?.id) return {ok:false,reason:"no_user_id"};
   let restored=0; const errors=[]; let undecryptable=0; const restoredKeys = new Set();
+  // Keys that must never be overwritten with empty/null from cloud
+  const CRITICAL_KEYS = new Set(["stillform_onboarded","stillform_regulation_type","stillform_signal_profile","stillform_bias_profile"]);
   try {
     const rows=await sbFetch(`/rest/v1/user_data?select=data_key,encrypted_blob,updated_at&user_id=eq.${encodeURIComponent(user.id)}&order=updated_at.desc`);
     if (!rows?.length) return {ok:true,restored:0};
@@ -4282,7 +4284,25 @@ const sbSyncDown = async () => {
       try {
         const dec=await decryptFromCloud(row.encrypted_blob);
         if (dec!==null) {
-          localStorage.setItem(row.data_key,typeof dec==="string"?dec:JSON.stringify(dec));
+          const val = typeof dec==="string"?dec:JSON.stringify(dec);
+          // Never overwrite critical keys with empty/null values from cloud
+          if (CRITICAL_KEYS.has(row.data_key) && (!val || val === "null" || val === "")) {
+            restoredKeys.add(row.data_key);
+            continue;
+          }
+          // Never overwrite a valid local critical key with a blank cloud value
+          if (CRITICAL_KEYS.has(row.data_key)) {
+            const local = localStorage.getItem(row.data_key);
+            if (local && local !== "null" && local !== "") {
+              // Local has data — only overwrite if cloud value is richer
+              // For onboarded: keep local if it says "yes"
+              if (row.data_key === "stillform_onboarded" && local === "yes") {
+                restoredKeys.add(row.data_key);
+                continue;
+              }
+            }
+          }
+          localStorage.setItem(row.data_key,val);
           restored++;
           restoredKeys.add(row.data_key);
         } else {
