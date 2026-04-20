@@ -9570,12 +9570,7 @@ export default function Stillform() {
 
           // Android hardware back button
           App.addListener("backButton", () => {
-            const currentScreen = currentScreenRef.current;
-            if (!currentScreen || currentScreen === "home") {
-              App.exitApp();
-            } else {
-              handleScreenBack();
-            }
+            handleScreenBack();
           });
         }).catch(() => {});
       }
