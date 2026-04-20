@@ -8977,6 +8977,7 @@ export default function Stillform() {
   const [ciEnergy, setCiEnergy] = useState(null);
   const [ciBio, setCiBio] = useState(new Set());
   const [ciTension, setCiTension] = useState({});
+  const [ciOffBaselineOpen, setCiOffBaselineOpen] = useState(false); // "something's off" branch
   const [ciSaved, setCiSaved] = useState(false);
   const [eodOpen, setEodOpen] = useState(false);
   const [eodEnergy, setEodEnergy] = useState(null);
@@ -11681,6 +11682,7 @@ const isSignalProfileConfigured = () => {
 
                 const saveCheckin = async () => {
                   const bioArray = [...ciBio].filter(b => b !== "clear");
+                  const isOffBaseline = ciBio.has("off-baseline");
                   try {
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
@@ -11694,6 +11696,7 @@ const isSignalProfileConfigured = () => {
                     });
                     if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
                     else localStorage.setItem("stillform_bio_filter", "clear");
+                    if (isOffBaseline) localStorage.setItem("stillform_off_baseline_flagged", new Date().toISOString());
                   } catch {}
                   try {
                     const tensionAreas = Object.keys(ciTension).filter(k => ciTension[k] > 0);
@@ -11714,7 +11717,7 @@ const isSignalProfileConfigured = () => {
                         source: "update"
                       });
                     } catch {}
-                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set());
+                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
                   }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
@@ -11790,10 +11793,12 @@ const isSignalProfileConfigured = () => {
                         { id: "medicated", label: "Medicated" }
                       ].map(b => (
                         <button key={b.id} onClick={() => {
+                          setCiOffBaselineOpen(false);
                           setCiBio(prev => {
                             const next = new Set(prev);
                             if (b.id === "clear") return new Set(["clear"]);
                             next.delete("clear");
+                            next.delete("off-baseline");
                             if (next.has(b.id)) next.delete(b.id);
                             else next.add(b.id);
                             return next.size === 0 ? new Set(["clear"]) : next;
@@ -11806,7 +11811,59 @@ const isSignalProfileConfigured = () => {
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{b.label}</button>
                       ))}
+                      {/* Something's off — for users who can't name it yet */}
+                      <button onClick={() => {
+                        setCiBio(new Set(["off-baseline"]));
+                        setCiOffBaselineOpen(true);
+                      }} style={{
+                        background: ciBio.has("off-baseline") ? "var(--amber-glow)" : "transparent",
+                        border: `1px solid ${ciBio.has("off-baseline") ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: 20, padding: "5px 14px", fontSize: 11, cursor: "pointer",
+                        color: ciBio.has("off-baseline") ? "var(--amber)" : "var(--text-muted)",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>Something's off</button>
                     </div>
+                    {/* Branch: have time vs pin it */}
+                    {ciOffBaselineOpen && (
+                      <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                          Something's registering. Do you have a minute to check where?
+                        </div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button onClick={async () => {
+                            setCiOffBaselineOpen(false);
+                            // Save check-in with off-baseline flag then route to quick tension scan
+                            const bioArray = ["off-baseline"];
+                            try {
+                              const today = new Date().toISOString().slice(0, 10);
+                              localStorage.setItem("stillform_checkin_today", JSON.stringify({
+                                date: today, energy: ciEnergy || "steady", bio: bioArray,
+                                tension: Object.keys(ciTension).length > 0 ? ciTension : null,
+                                offBaseline: true
+                              }));
+                              localStorage.setItem("stillform_bio_filter", "off-baseline");
+                            } catch {}
+                            setCiSaved(true);
+                            setCiOpen(false);
+                            // Launch body scan to identify the signal
+                            startTool({ ...TOOLS.find(t => t.id === "scan"), returnTo: "home" });
+                          }} style={{
+                            flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
+                            borderRadius: "var(--r-lg)", padding: "10px", fontSize: 13, fontWeight: 500,
+                            cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                          }}>I have a minute →</button>
+                          <button onClick={() => {
+                            setCiOffBaselineOpen(false);
+                            // Pin it — flag for AI, continue with check-in
+                            setCiBio(new Set(["off-baseline"]));
+                          }} style={{
+                            flex: 1, background: "none", border: "1px solid var(--border)",
+                            borderRadius: "var(--r-lg)", padding: "10px", fontSize: 13,
+                            cursor: "pointer", color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif"
+                          }}>Pin it for now</button>
+                        </div>
+                      </div>
+                    )}
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where are you holding tension?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
