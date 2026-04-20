@@ -3431,50 +3431,50 @@ function BodyScanTool({ onComplete }) {
     const highlightStyle = { fill: "rgba(201,147,58,0.28)", stroke: "var(--amber)", strokeWidth: 1 };
     return (
       <svg viewBox="0 0 180 200" width="140" height="140" style={{ overflow: "visible" }} aria-label={`${areaName} body map`}>
-        <circle cx="90" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1" />
-        <path d="M70 42 L62 74 L66 150 L82 194" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
-        <path d="M110 42 L118 74 L114 150 L98 194" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.2" />
-        <path d="M66 72 L114 72 L108 126 L72 126 Z" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.1" />
-        <path d="M62 74 L40 102" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
-        <path d="M118 74 L140 102" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
-        <path d="M40 102 L38 150" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
-        <path d="M140 102 L142 150" fill="none" stroke="rgba(255,255,255,0.16)" strokeWidth="1.1" />
+        <circle cx="90" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1" />
+        <path d="M70 42 L62 74 L66 150 L82 194" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2" />
+        <path d="M110 42 L118 74 L114 150 L98 194" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2" />
+        <path d="M66 72 L114 72 L108 126 L72 126 Z" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.1" />
+        <path d="M62 74 L40 102" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
+        <path d="M118 74 L140 102" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
+        <path d="M40 102 L38 150" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
+        <path d="M140 102 L142 150" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.1" />
         {areaName === "Jaw & Face" && (
           <>
             <ellipse cx="90" cy="30" rx="15" ry="9" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Face + jaw region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Face + jaw region</text>
           </>
         )}
         {areaName === "Shoulders & Neck" && (
           <>
             <rect x="58" y="44" width="64" height="16" rx="8" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Shoulders + neck region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Shoulders + neck region</text>
           </>
         )}
         {areaName === "Chest & Breath" && (
           <>
             <rect x="74" y="74" width="32" height="26" rx="10" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Chest + breath region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Chest + breath region</text>
           </>
         )}
         {areaName === "Hands & Arms" && (
           <>
             <rect x="31" y="114" width="16" height="22" rx="7" {...highlightStyle} />
             <rect x="133" y="114" width="16" height="22" rx="7" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Hands + forearms region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Hands + forearms region</text>
           </>
         )}
         {areaName === "Gut & Core" && (
           <>
             <rect x="74" y="100" width="32" height="24" rx="10" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Gut + core region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Gut + core region</text>
           </>
         )}
         {areaName === "Legs & Feet" && (
           <>
             <rect x="70" y="144" width="14" height="36" rx="7" {...highlightStyle} />
             <rect x="96" y="144" width="14" height="36" rx="7" {...highlightStyle} />
-            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.45)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Legs + feet region</text>
+            <text x="90" y="188" textAnchor="middle" fill="rgba(255,255,255,0.75)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">Legs + feet region</text>
           </>
         )}
       </svg>
@@ -3598,78 +3598,78 @@ function BodyScanTool({ onComplete }) {
                 <svg viewBox="0 0 160 160" width="140" height="140" style={{ overflow: "visible" }}>
                   {a.name === "Jaw & Face" && <>
                     {/* Head */}
-                    <ellipse cx="80" cy="54" rx="28" ry="34" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <ellipse cx="80" cy="54" rx="28" ry="34" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
                     {/* Neck */}
-                    <line x1="72" y1="86" x2="70" y2="102" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-                    <line x1="88" y1="86" x2="90" y2="102" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    <line x1="72" y1="86" x2="70" y2="102" stroke="rgba(255,255,255,0.42)" strokeWidth="1.5"/>
+                    <line x1="88" y1="86" x2="90" y2="102" stroke="rgba(255,255,255,0.42)" strokeWidth="1.5"/>
                     {/* Jaw line */}
-                    <path d="M55 68 Q80 82 105 68" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.8"/>
+                    <path d="M55 68 Q80 82 105 68" fill="none" stroke="rgba(255,255,255,0.42)" strokeWidth="1.2"/>
                     {/* Pressure point — between eyebrows */}
                     <circle cx="80" cy="43" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="80" cy="43" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* Label */}
-                    <text x="80" y="128" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GV24.5 · between eyebrows</text>
+                    <text x="80" y="128" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GV24.5 · between eyebrows</text>
                   </>}
 
                   {a.name === "Shoulders & Neck" && <>
                     {/* Head */}
-                    <circle cx="80" cy="28" r="14" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <circle cx="80" cy="28" r="14" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
                     {/* Neck */}
-                    <line x1="75" y1="41" x2="74" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
-                    <line x1="85" y1="41" x2="86" y2="54" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <line x1="75" y1="41" x2="74" y2="54" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
+                    <line x1="85" y1="41" x2="86" y2="54" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
                     {/* Shoulders */}
-                    <path d="M74 54 Q60 56 38 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2"/>
-                    <path d="M86 54 Q100 56 122 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2"/>
+                    <path d="M74 54 Q60 56 38 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.6"/>
+                    <path d="M86 54 Q100 56 122 70" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1.6"/>
                     {/* Torso top */}
-                    <line x1="38" y1="70" x2="42" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
-                    <line x1="122" y1="70" x2="118" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+                    <line x1="38" y1="70" x2="42" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
+                    <line x1="122" y1="70" x2="118" y2="110" stroke="rgba(255,255,255,0.1)" strokeWidth="1.5"/>
                     {/* Pressure point — GB21 left shoulder */}
                     <circle cx="56" cy="62" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="56" cy="62" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* Label */}
-                    <text x="80" y="136" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GB21 · shoulder well</text>
+                    <text x="80" y="136" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">GB21 · shoulder well</text>
                   </>}
 
                   {a.name === "Chest & Breath" && <>
                     {/* Head */}
-                    <circle cx="80" cy="18" r="11" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <circle cx="80" cy="18" r="11" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
                     {/* Neck */}
-                    <line x1="76" y1="28" x2="75" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
-                    <line x1="84" y1="28" x2="85" y2="36" stroke="rgba(255,255,255,0.12)" strokeWidth="1"/>
+                    <line x1="76" y1="28" x2="75" y2="36" stroke="rgba(255,255,255,0.42)" strokeWidth="1.5"/>
+                    <line x1="84" y1="28" x2="85" y2="36" stroke="rgba(255,255,255,0.42)" strokeWidth="1.5"/>
                     {/* Shoulders */}
-                    <path d="M75 36 Q62 38 48 48" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
-                    <path d="M85 36 Q98 38 112 48" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    <path d="M75 36 Q62 38 48 48" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.5"/>
+                    <path d="M85 36 Q98 38 112 48" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.5"/>
                     {/* Torso / chest */}
-                    <path d="M48 48 L44 110 L116 110 L112 48 Z" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    <path d="M48 48 L44 110 L116 110 L112 48 Z" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.5"/>
                     {/* Sternum center line */}
-                    <line x1="80" y1="48" x2="80" y2="110" stroke="rgba(255,255,255,0.08)" strokeWidth="0.8" strokeDasharray="3,3"/>
+                    <line x1="80" y1="48" x2="80" y2="110" stroke="rgba(255,255,255,0.36)" strokeWidth="0.8" strokeDasharray="3,3"/>
                     {/* Pressure point — CV17 center sternum */}
                     <circle cx="80" cy="66" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="80" cy="66" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* Label */}
-                    <text x="80" y="138" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">CV17 · center sternum</text>
+                    <text x="80" y="138" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">CV17 · center sternum</text>
                   </>}
 
                   {a.name === "Hands & Arms" && <>
                     {/* Hand outline — palm facing up */}
-                    <path d="M60 110 L60 65 Q60 58 56 50 M60 65 Q62 56 64 44 M60 65 Q65 55 70 43 M60 65 Q67 57 75 48 M60 65 Q58 57 52 52" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    <path d="M60 110 L60 65 Q60 58 56 50 M60 65 Q62 56 64 44 M60 65 Q65 55 70 43 M60 65 Q67 57 75 48 M60 65 Q58 57 52 52" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.6"/>
                     {/* Palm base */}
-                    <path d="M52 52 Q48 70 50 85 Q54 100 60 110 Q66 100 70 85 Q72 70 75 48" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="1"/>
+                    <path d="M52 52 Q48 70 50 85 Q54 100 60 110 Q66 100 70 85 Q72 70 75 48" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1.5"/>
                     {/* Thumb */}
-                    <path d="M52 52 Q44 48 40 56 Q38 64 46 68" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    <path d="M52 52 Q44 48 40 56 Q38 64 46 68" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.5"/>
                     {/* Pressure point — LI4 webbing */}
                     <circle cx="52" cy="57" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="52" cy="57" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* Label */}
-                    <text x="80" y="140" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">LI4 · thumb–index web</text>
+                    <text x="80" y="140" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">LI4 · thumb–index web</text>
                   </>}
 
                   {a.name === "Gut & Core" && <>
                     {/* Arm outline — inner wrist */}
-                    <path d="M55 20 L55 100 Q55 112 65 118 Q75 124 85 118 Q95 112 95 100 L95 20" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    <path d="M55 20 L55 100 Q55 112 65 118 Q75 124 85 118 Q95 112 95 100 L95 20" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.6"/>
                     {/* Wrist crease */}
-                    <line x1="52" y1="95" x2="98" y2="95" stroke="rgba(255,255,255,0.2)" strokeWidth="0.8"/>
-                    <line x1="52" y1="100" x2="98" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8"/>
+                    <line x1="52" y1="95" x2="98" y2="95" stroke="rgba(255,255,255,0.2)" strokeWidth="1.2"/>
+                    <line x1="52" y1="100" x2="98" y2="100" stroke="rgba(255,255,255,0.1)" strokeWidth="1.2"/>
                     {/* Two tendons */}
                     <line x1="72" y1="20" x2="72" y2="92" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="2,3"/>
                     <line x1="78" y1="20" x2="78" y2="92" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="2,3"/>
@@ -3677,35 +3677,35 @@ function BodyScanTool({ onComplete }) {
                     <circle cx="75" cy="78" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="75" cy="78" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* 3-finger measurement indicator */}
-                    <line x1="104" y1="78" x2="104" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
-                    <line x1="101" y1="78" x2="107" y2="78" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
-                    <line x1="101" y1="95" x2="107" y2="95" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="104" y1="78" x2="104" y2="95" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
+                    <line x1="101" y1="78" x2="107" y2="78" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
+                    <line x1="101" y1="95" x2="107" y2="95" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
                     <text x="112" y="88" fill="rgba(255,255,255,0.25)" fontSize="7" fontFamily="'IBM Plex Mono', monospace">3 fin</text>
                     {/* Label */}
-                    <text x="80" y="150" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">PC6 · inner wrist</text>
+                    <text x="80" y="150" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">PC6 · inner wrist</text>
                   </>}
 
                   {a.name === "Legs & Feet" && <>
                     {/* Knee outline */}
-                    <ellipse cx="80" cy="42" rx="22" ry="18" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="1"/>
+                    <ellipse cx="80" cy="42" rx="22" ry="18" fill="none" stroke="rgba(255,255,255,0.52)" strokeWidth="1.5"/>
                     {/* Thigh */}
-                    <line x1="64" y1="36" x2="58" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2"/>
-                    <line x1="96" y1="36" x2="102" y2="10" stroke="rgba(255,255,255,0.15)" strokeWidth="1.2"/>
+                    <line x1="64" y1="36" x2="58" y2="10" stroke="rgba(255,255,255,0.50)" strokeWidth="1.6"/>
+                    <line x1="96" y1="36" x2="102" y2="10" stroke="rgba(255,255,255,0.50)" strokeWidth="1.6"/>
                     {/* Shin */}
-                    <line x1="66" y1="58" x2="62" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
-                    <line x1="94" y1="58" x2="98" y2="120" stroke="rgba(255,255,255,0.18)" strokeWidth="1.2"/>
+                    <line x1="66" y1="58" x2="62" y2="120" stroke="rgba(255,255,255,0.52)" strokeWidth="1.6"/>
+                    <line x1="94" y1="58" x2="98" y2="120" stroke="rgba(255,255,255,0.52)" strokeWidth="1.6"/>
                     {/* Shin bone — tibia */}
                     <line x1="74" y1="58" x2="72" y2="118" stroke="rgba(255,255,255,0.1)" strokeWidth="0.8" strokeDasharray="3,3"/>
                     {/* 4-finger measurement */}
-                    <line x1="108" y1="62" x2="108" y2="94" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
-                    <line x1="105" y1="62" x2="111" y2="62" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
-                    <line x1="105" y1="94" x2="111" y2="94" stroke="rgba(255,255,255,0.15)" strokeWidth="0.8"/>
+                    <line x1="108" y1="62" x2="108" y2="94" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
+                    <line x1="105" y1="62" x2="111" y2="62" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
+                    <line x1="105" y1="94" x2="111" y2="94" stroke="rgba(255,255,255,0.50)" strokeWidth="1.2"/>
                     <text x="115" y="80" fill="rgba(255,255,255,0.25)" fontSize="7" fontFamily="'IBM Plex Mono', monospace">4 fin</text>
                     {/* Pressure point — ST36, 4 fingers below kneecap */}
                     <circle cx="80" cy="94" r="5" fill="var(--amber)" opacity="0.9"/>
                     <circle cx="80" cy="94" r="9" fill="none" stroke="var(--amber)" strokeWidth="0.5" opacity="0.3"/>
                     {/* Label */}
-                    <text x="80" y="148" textAnchor="middle" fill="rgba(255,255,255,0.35)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">ST36 · below kneecap</text>
+                    <text x="80" y="148" textAnchor="middle" fill="rgba(255,255,255,0.72)" fontSize="9" fontFamily="'IBM Plex Mono', monospace">ST36 · below kneecap</text>
                   </>}
                 </svg>
               </div>
