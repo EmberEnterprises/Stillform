@@ -3255,6 +3255,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Jaw & Face",
       prompt: "Unclench your jaw. Let your tongue rest. Soften your eyes.",
+      holdObservation: "Notice if the pressure creates a release or more resistance. Either is information.",
       pointEffect: "Interrupt racing thoughts",
       pointName: "GV24.5 — Third Eye Point",
       pointLocation: "Place two fingers between your eyebrows, just above the bridge of your nose.",
@@ -3265,6 +3266,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Shoulders & Neck",
       prompt: "Notice if your shoulders are raised. Let them drop completely.",
+      holdObservation: "Feel the weight of your arms. Notice if your neck wants to follow and soften.",
       pointEffect: "Release shoulder tension",
       pointName: "GB21 — Shoulder Well",
       pointLocation: "Find the highest point of your shoulder muscle, halfway between your neck and the edge of your shoulder.",
@@ -3275,6 +3277,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Chest & Breath",
       prompt: "Is your breath shallow? Take one slow, full breath down to your belly.",
+      holdObservation: "Notice your breath without directing it. Is it expanding into the pressure or pulling away?",
       pointEffect: "Interrupt emotional escalation",
       pointName: "CV17 — Sea of Tranquility",
       pointLocation: "Find the center of your breastbone, level with your heart. Place your flat palm here.",
@@ -3285,6 +3288,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Hands & Arms",
       prompt: "Are your hands gripping anything? Open them fully. Let your arms go heavy.",
+      holdObservation: "Notice if the tenderness in the point shifts or spreads. Stay with it.",
       pointEffect: "Reduce stress load",
       pointName: "LI4 — Union Valley",
       pointLocation: "Find the webbing between your thumb and index finger. Pinch the highest point of the muscle there.",
@@ -3295,6 +3299,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Gut & Core",
       prompt: "Scan your stomach and core. Notice tightness without trying to fix it.",
+      holdObservation: "Notice what your gut is doing — gripping, fluttering, or still. You don't need to interpret it yet.",
       pointEffect: "Stabilize racing heart and nausea",
       pointName: "PC6 — Inner Gate",
       pointLocation: "Turn your wrist palm-up. Measure three finger-widths down from your wrist crease, between the two tendons.",
@@ -3305,6 +3310,7 @@ function BodyScanTool({ onComplete }) {
     {
       name: "Legs & Feet",
       prompt: "Feel the full weight of your legs. Press your feet flat into the floor.",
+      holdObservation: "Feel the floor beneath you. Notice if the weight of your body starts to settle.",
       pointEffect: "Ground and stabilize",
       pointName: "ST36 — Leg Three Miles",
       pointLocation: "Find the outer edge of your kneecap, then measure four finger-widths straight down your shin.",
@@ -3751,13 +3757,20 @@ function BodyScanTool({ onComplete }) {
                     <div style={{ width: `${holdProgress}%`, height: "100%", background: holdProgress >= 100 ? "var(--green)" : "var(--amber)", transition: "width 1s linear" }} />
                   </div>
                   {holding && (
-                    <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
-                      background: "none", border: "none", fontSize: 11, color: "var(--text-muted)",
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12,
-                      letterSpacing: "0.06em"
-                    }}>
-                      Skip →
-                    </button>
+                    <>
+                      {area.holdObservation && (
+                        <div style={{ marginTop: 16, fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.7, padding: "12px 16px", background: "var(--surface)", borderRadius: "var(--r-lg)", border: "0.5px solid var(--border)" }}>
+                          {area.holdObservation}
+                        </div>
+                      )}
+                      <button onClick={(e) => { e.stopPropagation(); handleNext(); }} style={{
+                        background: "none", border: "none", fontSize: 11, color: "var(--text-muted)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 12,
+                        letterSpacing: "0.06em"
+                      }}>
+                        Skip →
+                      </button>
+                    </>
                   )}
                   {!holding && holdCount >= holdTarget && (() => {
                     setTimeout(() => handleNext(), 1500);
@@ -10483,7 +10496,40 @@ export default function Stillform() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  const isSignalProfileConfigured = () => {
+  // Detects if recent check-in tension patterns diverge from mapped signal profile
+// Returns the top divergent area if 3+ check-ins in last 7 days show tension in an unmapped area
+const getSignalDivergence = () => {
+  try {
+    const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+    const mappedAreas = (profile?.firstAreas || []).map(a => a.toLowerCase());
+    if (!mappedAreas.length) return null;
+
+    const history = JSON.parse(localStorage.getItem("stillform_checkin_history") || "[]");
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recent = history.filter(c => new Date(c.timestamp || c.date).getTime() > sevenDaysAgo);
+    if (recent.length < 3) return null;
+
+    const areaCounts = {};
+    recent.forEach(c => {
+      if (!c.tension) return;
+      Object.entries(c.tension).forEach(([area, level]) => {
+        if (level > 0) {
+          const normalized = area.toLowerCase();
+          areaCounts[normalized] = (areaCounts[normalized] || 0) + 1;
+        }
+      });
+    });
+
+    // Find areas with tension in 3+ check-ins that aren't in mapped profile
+    const divergent = Object.entries(areaCounts)
+      .filter(([area, count]) => count >= 3 && !mappedAreas.includes(area))
+      .sort((a, b) => b[1] - a[1]);
+
+    return divergent.length > 0 ? divergent[0][0] : null;
+  } catch { return null; }
+};
+
+const isSignalProfileConfigured = () => {
     try {
       const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
       return Array.isArray(profile?.firstAreas) && profile.firstAreas.length > 0;
@@ -11702,9 +11748,18 @@ export default function Stillform() {
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning check-in</div>
-                    <div style={{ fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.7, marginBottom: 14 }}>
-                      Take one breath. Notice where you're starting from.
-                    </div>
+                    {(() => {
+                      const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
+                      if (!breathCueOn) return null;
+                      return (
+                        <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "center" }}>
+                          <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>Before you begin</div>
+                          <div style={{ fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.7 }}>
+                            Take one breath in through your nose.<br />Let it out slowly through your mouth.<br />Notice where you're starting from.
+                          </div>
+                        </div>
+                      );
+                    })()}
                     {upcomingPressure && (
                       <div style={{ fontSize: 11, color: "var(--amber)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "8px 10px", marginBottom: 14, lineHeight: 1.5 }}>
                         {upcomingPressure}
@@ -12161,8 +12216,26 @@ export default function Stillform() {
                 const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
                 const processingCue = processingCues[dayOfYear % processingCues.length];
                 const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
+                const signalDivergence = getSignalDivergence();
                 return (
                   <div style={{ marginBottom: 16 }}>
+                    {signalDivergence && (
+                      <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <div>
+                          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
+                            Signal shift detected
+                          </div>
+                          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                            You've been reporting {signalDivergence} tension consistently. Your signal map doesn't include it yet.
+                          </div>
+                        </div>
+                        <button onClick={() => openSetupBridge("home")} style={{
+                          background: "none", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-sm)",
+                          padding: "6px 10px", fontSize: 10, color: "var(--amber)", cursor: "pointer",
+                          fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", marginLeft: 12, flexShrink: 0
+                        }}>Update →</button>
+                      </div>
+                    )}
                     <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)" }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
                         Today's processing cue
@@ -13207,7 +13280,8 @@ export default function Stillform() {
                   {[
                     { key: "stillform_screenlight", label: "Screen-light mode", desc: "Dims screen to near-black during exercises. Audio guides you.", icon: "◐" },
                     { key: "stillform_reducedmotion", label: "Reduced motion", desc: "Removes animations. Text and timers only.", icon: "◻" },
-                    { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true }
+                    { key: "stillform_visual_grounding", label: "Visual grounding", desc: "Organic fractal visuals behind breathing exercises. Helps ground through visual focus.", icon: "◈", defaultOn: true },
+                    { key: "stillform_morning_breath_cue", label: "Morning breath cue", desc: "A brief breathing prompt before your morning check-in. Helps you arrive before you assess.", icon: "◌", defaultOn: false }
                   ].map(opt => {
                     const isOn = (() => { try { const v = localStorage.getItem(opt.key); if (v === null && opt.defaultOn) return true; return v === "on"; } catch { return !!opt.defaultOn; } })();
                     return (
