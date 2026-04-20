@@ -1698,3 +1698,38 @@ TestFlight is a final QA pass, not feature discovery. Do not suggest TestFlight 
 - Reddit launch
 - Product Hunt
 
+
+---
+
+## April 20, 2026 — Android Integration Session
+
+### ✅ Completed today
+
+**Android Health Connect + Calendar native plugin — WORKING:**
+- `IntegrationBridgePlugin.kt` — reads sleep hours, HRV (RMSSD), resting heart rate from Health Connect last 24h; reads calendar events next 48h
+- `MainActivity.kt` — converted from Java, registers all 3 plugins
+- `AndroidManifest.xml` — correct `VIEW_PERMISSION_USAGE` + `HEALTH_PERMISSIONS` activity-alias (this is what makes Stillform appear in Health Connect permissions list), Calendar + Health Connect permissions declared, `START_VIEW_PERMISSION_USAGE` permission guard
+- `build.gradle` — Health Connect client 1.1.0-alpha07, kotlinx-coroutines-android 1.7.3, kotlin-android plugin
+- `variables.gradle` — minSdkVersion bumped 24 → 26 (Health Connect requirement)
+- `integrationsSupportedOnPlatform` — now includes Android (was iOS only)
+- Notification permission — fixed to check existing state before prompting (was firing every launch)
+- Calendar permission — granted manually in phone settings; works
+- Health Connect — Stillform now appears in Health Connect permissions list and access granted
+
+### Key technical lessons
+- Health Connect registration requires `VIEW_PERMISSION_USAGE` + `HEALTH_PERMISSIONS` alias NOT `ACTION_SHOW_PERMISSIONS_RATIONALE`
+- Health Connect package on this device: `com.google.android.healthconnect.controller`
+- Kotlin plugin must be explicitly added to app/build.gradle or Kotlin files compile but don't get included in DEX
+- Never run `adb shell pm clear` in production testing — wipes all permissions
+
+### Still needed before TestFlight
+All items from April 19 list remain except Android Health Connect + Calendar which are now done.
+- Galaxy Watch validation (need watch)
+- Apple Watch companion (not built)
+- Apple HealthKit (iOS native, needs real device)
+- Calendar integration iOS verification
+- Biometric lock native build test
+- Google Play closed testing build
+- 3-5 real testimonials (after TestFlight)
+- Reddit post (after TestFlight)
+
