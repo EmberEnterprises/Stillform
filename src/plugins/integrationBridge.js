@@ -105,6 +105,27 @@ const unsupportedResult = (kind) => {
 };
 
 export const integrationBridge = {
+  async requestCalendarPermission() {
+    if (!isNative()) return { granted: false, error: "Native only" };
+    const plugin = getPlugin();
+    if (!plugin?.requestCalendarPermission) return { granted: false, error: "Plugin not available" };
+    try {
+      return await plugin.requestCalendarPermission();
+    } catch (e) {
+      return { granted: false, error: String(e?.message || "Permission request failed") };
+    }
+  },
+
+  async requestHealthPermission() {
+    if (!isNative()) return { granted: false, error: "Native only" };
+    const plugin = getPlugin();
+    if (!plugin?.requestHealthPermission) return { granted: false, error: "Plugin not available" };
+    try {
+      return await plugin.requestHealthPermission();
+    } catch (e) {
+      return { granted: false, error: String(e?.message || "Permission request failed") };
+    }
+  },
   async syncCalendar() {
     if (!isNative()) return unsupportedResult("Calendar");
     const plugin = getPlugin();

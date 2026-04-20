@@ -13971,8 +13971,16 @@ const isSignalProfileConfigured = () => {
                   <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { refreshSettings(); setIntegrationStatusWithClear("Integration status refreshed."); }}>Refresh status</button>
                   <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px", color: "var(--text-muted)" }} onClick={clearIntegrationContextCache} disabled={!integrationContext.hasAny}>Clear stale context</button>
                   {integrationsSupportedOnPlatform && (<>
-                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("calendar", { source: "connect" }); }}>Connect calendar</button>
-                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => { void syncIntegrationContext("health", { source: "connect" }); }}>Connect health</button>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={async () => {
+                      const r = await integrationBridge.requestCalendarPermission();
+                      if (r?.granted) void syncIntegrationContext("calendar", { source: "connect" });
+                      else void syncIntegrationContext("calendar", { source: "connect" }); // will surface the error
+                    }}>Connect calendar</button>
+                    <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={async () => {
+                      await integrationBridge.requestHealthPermission(); // opens Health Connect settings
+                      setIntegrationActionStatus("Grant access in Health Connect, then tap 'Sync health now'");
+                      setTimeout(() => setIntegrationActionStatus(""), 6000);
+                    }}>Connect health</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("calendar")}>Sync calendar now</button>
                     <button className="btn btn-ghost" style={{ fontSize: 12, padding: "8px 12px" }} onClick={() => retryIntegrationContext("health")}>Sync health now</button>
                   </>)}

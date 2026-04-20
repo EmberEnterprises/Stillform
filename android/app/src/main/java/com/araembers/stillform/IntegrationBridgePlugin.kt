@@ -6,6 +6,8 @@ import android.provider.CalendarContract
 import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
+import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
 import androidx.health.connect.client.records.SleepSessionRecord
@@ -16,18 +18,71 @@ import com.getcapacitor.Plugin
 import com.getcapacitor.PluginCall
 import com.getcapacitor.PluginMethod
 import com.getcapacitor.annotation.CapacitorPlugin
+import com.getcapacitor.annotation.Permission
+import com.getcapacitor.annotation.PermissionCallback
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
-@CapacitorPlugin(name = "IntegrationBridge")
+@CapacitorPlugin(
+    name = "IntegrationBridge",
+    permissions = [
+        Permission(strings = [Manifest.permission.READ_CALENDAR], alias = "calendar")
+    ]
+)
 class IntegrationBridgePlugin : Plugin() {
 
     companion object {
         private const val TAG = "IntegrationBridge"
+        private val HEALTH_PERMISSIONS = setOf(
+            HealthPermission.getReadPermission(SleepSessionRecord::class),
+            HealthPermission.getReadPermission(HeartRateVariabilityRmssdRecord::class),
+            HealthPermission.getReadPermission(RestingHeartRateRecord::class)
+        )
     }
+
+    // ─── REQUEST PERMISSIONS ──────────────────────────────────────────────────
+
+    @PluginMethod
+    fun requestCalendarPermission(call: PluginCall) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR)
+            == PackageManager.PERMISSION_GRANTED) {
+            call.resolve(JSObject().apply { put("granted", true) })
+            return
+        }
+        requestPermissionForAlias("calendar", call, "calendarPermissionCallback")
+    }
+
+    @PermissionCallback
+    private fun calendarPermissionCallback(call: PluginCall) {
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED
+        call.resolve(JSObject().apply { put("granted", granted) })
+    }
+
+    @PluginMethod
+    fun requestHealthPermission(call: PluginCall) {
+        val status = HealthConnectClient.getSdkStatus(context)
+        if (status != HealthConnectClient.SDK_AVAILABLE) {
+            call.resolve(JSObject().apply { put("granted", false); put("error", "Health Connect not available") })
+            return
+        }
+        try {
+            // Launch Health Connect permission screen
+            val requestPermissionActivity = PermissionController.createRequestPermissionResultContract()
+            val intent = activity.packageManager.getLaunchIntentForPackage("com.google.android.apps.healthdata")
+            if (intent != null) {
+                activity.startActivity(intent)
+            }
+            // Return pending — user must go grant in Health Connect then come back and sync
+            call.resolve(JSObject().apply { put("granted", false); put("status", "pending") })
+        } catch (e: Exception) {
+            call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
+        }
+    }
+
+    // ─── HEALTH ───────────────────────────────────────────────────────────────
 
     @PluginMethod
     fun syncHealth(call: PluginCall) {
@@ -128,6 +183,8 @@ class IntegrationBridgePlugin : Plugin() {
             }
         }.start()
     }
+
+    // ─── CALENDAR ─────────────────────────────────────────────────────────────
 
     @PluginMethod
     fun syncCalendar(call: PluginCall) {
