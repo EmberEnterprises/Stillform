@@ -1,7 +1,6 @@
 package com.araembers.stillform;
 
 import android.app.PendingIntent;
-import com.araembers.stillform.MainActivity;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
@@ -13,7 +12,8 @@ public class StillformWidget extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         for (int appWidgetId : appWidgetIds) {
-            Intent intent = new Intent(context, MainActivity.class);
+            Intent intent = new Intent();
+            intent.setClassName(context, "com.araembers.stillform.MainActivity");
             intent.putExtra("stillform_action", "breathe");
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 

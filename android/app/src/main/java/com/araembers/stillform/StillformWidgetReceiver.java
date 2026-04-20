@@ -1,7 +1,6 @@
 package com.araembers.stillform;
 
 import android.content.BroadcastReceiver;
-import com.araembers.stillform.MainActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -16,7 +15,8 @@ public class StillformWidgetReceiver extends BroadcastReceiver {
             prefs.edit().putBoolean("launch_breathe", true).commit(); // commit(), not apply() — synchronous
 
             // Launch the app
-            Intent launchIntent = new Intent(context, MainActivity.class);
+            Intent launchIntent = new Intent();
+            launchIntent.setClassName(context, "com.araembers.stillform.MainActivity");
             launchIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             context.startActivity(launchIntent);
         }
