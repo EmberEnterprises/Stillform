@@ -9132,12 +9132,16 @@ export default function Stillform() {
     setScreen("focus-check");
   };
   const goHomeSafely = (defer = false) => {
+    // If not onboarded, return to tutorial not home — avoids blank screen
+    const isOnboarded = (() => { try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; } })();
+    const targetScreen = isOnboarded ? "home" : "tutorial";
+    const targetHash = isOnboarded ? "#home" : "#tutorial";
     if (defer) {
-      setTimeout(() => { setScreenRaw("home"); try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {} }, 0);
+      setTimeout(() => { setScreenRaw(targetScreen); try { if (window.location.hash !== targetHash) window.location.hash = targetHash; } catch {} }, 0);
       return;
     }
-    setScreenRaw("home");
-    try { if (window.location.hash !== "#home") window.location.hash = "#home"; } catch {}
+    setScreenRaw(targetScreen);
+    try { if (window.location.hash !== targetHash) window.location.hash = targetHash; } catch {}
   };
   const handleScreenBack = () => {
     if (screen === "tutorial") {
