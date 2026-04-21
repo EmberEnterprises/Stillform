@@ -4279,11 +4279,19 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position"]);
+
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
   const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'}; let uploaded=0; const errors=[];
   for (const key of SYNC_KEYS) {
-    try { const raw=localStorage.getItem(key); if (raw===null) continue; const enc=await encryptForCloud(raw); await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})}); uploaded++; } catch { errors.push(key); }
+    try {
+      const raw=localStorage.getItem(key); if (raw===null) continue;
+      // Non-sensitive routing/preference keys stored as plaintext for cross-device restore
+      const enc = UNENCRYPTED_SYNC_KEYS.has(key) ? JSON.stringify(raw) : await encryptForCloud(raw);
+      await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})});
+      uploaded++;
+    } catch { errors.push(key); }
   }
   try { window.plausible?.("Cloud Sync Up",{props:{keys:uploaded}}); } catch {}
   return {ok:errors.length===0,uploaded,errors};
