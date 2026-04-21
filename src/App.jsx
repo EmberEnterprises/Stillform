@@ -5296,30 +5296,30 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const modeConfig = {
     calm: {
       icon: "◎", title: "Talk it out", subtitle: rotatingSubtitle,
-      color: "#c9933a",
-      bg: "linear-gradient(180deg, rgba(201,147,58,0.10) 0%, transparent 50%)",
-      border: "rgba(201,147,58,0.25)",
-      inputBg: "rgba(201,147,58,0.07)",
-      aiBubble: "rgba(201,147,58,0.10)",
-      sendBg: "#c9933a"
+      color: "var(--amber)",
+      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      border: "var(--amber-dim)",
+      inputBg: "var(--amber-glow)",
+      aiBubble: "var(--amber-glow)",
+      sendBg: "var(--amber)"
     },
     clarity: {
       icon: "✦", title: "Talk it out", subtitle: rotatingSubtitle,
-      color: "#7aadcf",
-      bg: "linear-gradient(180deg, rgba(122,173,207,0.12) 0%, transparent 50%)",
-      border: "rgba(122,173,207,0.28)",
-      inputBg: "rgba(122,173,207,0.07)",
-      aiBubble: "rgba(122,173,207,0.10)",
-      sendBg: "#7aadcf"
+      color: "var(--amber)",
+      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      border: "var(--amber-dim)",
+      inputBg: "var(--amber-glow)",
+      aiBubble: "var(--amber-glow)",
+      sendBg: "var(--amber)"
     },
     hype: {
       icon: "◌", title: "Talk it out", subtitle: rotatingSubtitle,
-      color: "#c9793a",
-      bg: "linear-gradient(180deg, rgba(201,121,58,0.12) 0%, transparent 50%)",
-      border: "rgba(201,121,58,0.30)",
-      inputBg: "rgba(201,121,58,0.08)",
-      aiBubble: "rgba(201,121,58,0.12)",
-      sendBg: "#c9793a"
+      color: "var(--amber)",
+      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      border: "var(--amber-dim)",
+      inputBg: "var(--amber-glow)",
+      aiBubble: "var(--amber-glow)",
+      sendBg: "var(--amber)"
     }
   };
   const mc = modeConfig[effectiveMode] || modeConfig.calm;
