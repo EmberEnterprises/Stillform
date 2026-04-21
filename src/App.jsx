@@ -11252,7 +11252,7 @@ const isSignalProfileConfigured = () => {
                   </button>
                 ) : (
                   <button
-                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
+                    onClick={() => { try { sessionStorage.setItem("stillform_signals_skipped_this_session", "yes"); } catch {} beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin }); }}
                     style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0", textDecoration: "underline" }}
                   >
                     Skip for now →
@@ -11299,7 +11299,8 @@ const isSignalProfileConfigured = () => {
               body: null,
               cta: null,
               autoLaunch: () => {
-                const firstToolId = signalMappingConfigured ? "bias" : "signals";
+                const skippedSignals = (() => { try { return sessionStorage.getItem("stillform_signals_skipped_this_session") === "yes"; } catch { return false; } })();
+                const firstToolId = (signalMappingConfigured || skippedSignals) ? "bias" : "signals";
                 setScreen("tool");
                 startTool({ ...TOOLS.find(t => t.id === firstToolId), setupFlow: "calibration-combined" });
               }
