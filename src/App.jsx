@@ -8869,7 +8869,6 @@ export default function Stillform() {
             try { window.location.hash = "#home"; } catch {}
           }
         } catch {}
-        rehydrateAfterSync();
       }).catch(() => {})).catch(() => {});
     }
     return () => clearTimeout(t);
