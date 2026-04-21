@@ -8858,7 +8858,7 @@ export default function Stillform() {
     sbVersionCheck().catch(() => {});
     if (sbIsSignedIn()) {
       sbRefreshSession().then(() => sbSyncDown().then(() => {
-        // After sync, re-check onboarded state — sync may have restored it
+        // After sync, re-check onboarded state and rehydrate preferences
         try {
           const onboarded = localStorage.getItem("stillform_onboarded") === "yes";
           const regType = localStorage.getItem("stillform_regulation_type");
@@ -8866,13 +8866,8 @@ export default function Stillform() {
             setScreenRaw("home");
             try { window.location.hash = "#home"; } catch {}
           }
-          // Re-apply theme if restored from cloud
-          const restoredTheme = localStorage.getItem("stillform_theme");
-          if (restoredTheme) {
-            setThemeChoice(restoredTheme);
-            applyThemePreset(restoredTheme, localStorage.getItem("stillform_high_contrast") === "on");
-          }
         } catch {}
+        rehydrateAfterSync();
       }).catch(() => {})).catch(() => {});
     }
     return () => clearTimeout(t);
@@ -9707,6 +9702,22 @@ export default function Stillform() {
   const [openLog, setOpenLog] = useState(null);
   const [, forceUpdate] = useState(0);
   const refreshSettings = () => forceUpdate(n => n + 1);
+
+  // Re-reads key preference state from localStorage after cloud sync
+  const rehydrateAfterSync = () => {
+    try {
+      const restoredTheme = localStorage.getItem("stillform_theme");
+      const restoredHC = localStorage.getItem("stillform_high_contrast") === "on";
+      const restoredRegType = localStorage.getItem("stillform_regulation_type");
+      if (restoredTheme && ["dark","midnight","suede","teal","rose","light"].includes(restoredTheme)) {
+        setThemeChoice(restoredTheme);
+        applyThemePreset(restoredTheme, restoredHC);
+      }
+      if (restoredRegType) setRegType(restoredRegType);
+      if (restoredHC !== highContrastMode) setHighContrastMode(restoredHC);
+      refreshSettings();
+    } catch {}
+  };
   const { screenLight, reducedMotion } = useDisplayPrefs();
   const appClasses = `app${screenLight ? " screenlight-active" : ""}${reducedMotion ? " reduced-motion" : ""}`;
 
@@ -9855,6 +9866,7 @@ export default function Stillform() {
         await sbSignIn(pricingAuthEmail, pricingAuthPassword);
         if (sbIsSignedIn()) {
           await sbSyncDown();
+          rehydrateAfterSync();
           signedIn = true;
         }
       } catch (e) {
@@ -13874,16 +13886,11 @@ const isSignalProfileConfigured = () => {
                           const r = await sbSyncDown();
                           const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                           setSyncFeedbackWithClear(r?.ok ? "success" : "error", r?.ok ? `Restored ${r.restored || 0} items from cloud ✓` : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`);
-                          // After restore, navigate home + re-apply theme if recovered
+                          rehydrateAfterSync();
                           try {
                             const onboarded = localStorage.getItem("stillform_onboarded") === "yes";
                             const regType = localStorage.getItem("stillform_regulation_type");
                             if (onboarded && regType) { goHomeSafely(); }
-                            const restoredTheme = localStorage.getItem("stillform_theme");
-                            if (restoredTheme) {
-                              setThemeChoice(restoredTheme);
-                              applyThemePreset(restoredTheme, localStorage.getItem("stillform_high_contrast") === "on");
-                            }
                           } catch {}
                         } catch { setSyncFeedbackWithClear("error", "Restore failed. Check connection."); }
                         setSyncLoading(false);
@@ -13944,7 +13951,7 @@ const isSignalProfileConfigured = () => {
                         setSyncLoading(true); setSyncError(null);
                         try {
                           let signedIn = false; let signInError = null;
-                          try { await sbSignIn(syncEmail, syncPassword); if (sbIsSignedIn()) { await sbSyncDown(); signedIn = true; } } catch (e) { signInError = e; }
+                          try { await sbSignIn(syncEmail, syncPassword); if (sbIsSignedIn()) { await sbSyncDown(); rehydrateAfterSync(); signedIn = true; } } catch (e) { signInError = e; }
                           if (!signedIn) {
                             if (isRateLimitedMessage(signInError?.message)) { startSyncAuthCooldown(signInError?.message); throw signInError; }
                             if (isInvalidCredentialsMessage(signInError?.message)) { throw new Error("Incorrect email or password. Please try again."); }
