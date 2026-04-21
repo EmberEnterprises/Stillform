@@ -680,7 +680,7 @@ const styles = `
     }
     50% {
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 18px rgba(201,147,58,0.18);
-      border-color: rgba(201,147,58,0.6);
+      border-color: var(--amber);
     }
   }
 
@@ -3055,7 +3055,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
             Round {cycle} of {totalCycles}
           </div>
           <button onClick={toggleAudio} style={{
-            background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+            background: audioOn ? "var(--amber-glow)" : "var(--surface)",
             border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
             borderRadius: 20, padding: "6px 14px", fontSize: 11, cursor: "pointer",
             color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif",
@@ -5757,6 +5757,30 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         >
           Skip rating and continue
         </button>
+        {/* Watch Sequence nudge after high-activation sessions */}
+        {preRating >= 4 && (
+          <div style={{ marginTop: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "left" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+              Want to go deeper?
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+              You came in at a high intensity. The Watch Sequence helps you see the pattern under the moment — not just regulate it.
+            </div>
+            <button onClick={() => {
+              // Save rating then route to metacognition — don't call finishReframeSession
+              // which would navigate away and cause state conflict
+              try { saveSession(postRating); } catch {}
+              setShowPostRating(false);
+              onComplete("metacognition");
+            }} style={{
+              background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)",
+              color: "var(--amber)", fontSize: 12, cursor: "pointer", padding: "8px 14px",
+              fontFamily: "'DM Sans', sans-serif"
+            }}>
+              Open Watch Sequence →
+            </button>
+          </div>
+        )}
       </div>
     );
   }
@@ -6140,7 +6164,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             {pendingImages.length > 0 && (
               <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
-                letterSpacing: "0.06em", padding: "4px 10px", background: "rgba(201,147,58,0.1)",
+                letterSpacing: "0.06em", padding: "4px 10px", background: "var(--amber-glow)",
                 borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
                 {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
               </div>
@@ -6383,18 +6407,29 @@ function MetacognitionTool({ onComplete }) {
           .filter(s => s.source === "metacognition" && (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated")).length;
       } catch { return 0; }
     })();
+    const isAutonomous = responses && Object.values(responses).length > 0;
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
           You watched it. You named it. You chose.
         </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 8 }}>
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
           That's the skill. Seeing your own mind in motion and choosing what to do with it.
         </p>
-        {autonomousCount > 1 && (
-          <div style={{ fontSize: 13, color: "var(--amber)", marginBottom: 24 }}>
-            You've done this {autonomousCount} times without tools.
+        {autonomousCount >= 1 && (
+          <div style={{ background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 20, textAlign: "left" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+              Signal Awareness
+            </div>
+            <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>
+              {autonomousCount === 1
+                ? "First time choosing without a tool. That's the observer activating."
+                : `${autonomousCount} times now. The observer is getting faster.`}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+              This is the skill compounding. The less you need the app, the more it's working.
+            </div>
           </div>
         )}
         <button className="btn btn-ghost" onClick={onComplete}>Done</button>
@@ -7159,7 +7194,7 @@ function PanicMode({ onComplete }) {
           position: "absolute",
           top: 16,
           right: 16,
-          background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+          background: audioOn ? "var(--amber-glow)" : "var(--surface)",
           border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
           borderRadius: "var(--r-lg)",
           padding: "8px 14px",
@@ -7506,6 +7541,42 @@ function MyProgress({ onBack }) {
 
   const hasPatterns = journalEntries.length >= 3 || sessionsWithRatings.length >= 5;
 
+  // --- SIGNAL AWARENESS LATENCY ---
+  // Proxy: session duration trend (shorter = catching it earlier)
+  // Autonomous exits: "I saw it and didn't need help"
+  const autonomousExits = sessions.filter(s =>
+    s.source === "metacognition" && (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated")
+  ).length;
+
+  // Session duration trend — compare recent 5 vs prior 5
+  const timedSessions = sessions.filter(s => s.duration && s.duration > 0);
+  const recentFive = timedSessions.slice(-5);
+  const priorFive = timedSessions.slice(-10, -5);
+  const recentAvgDuration = recentFive.length
+    ? recentFive.reduce((sum, s) => sum + s.duration, 0) / recentFive.length / 1000 / 60
+    : null;
+  const priorAvgDuration = priorFive.length
+    ? priorFive.reduce((sum, s) => sum + s.duration, 0) / priorFive.length / 1000 / 60
+    : null;
+  const durationTrend = recentAvgDuration !== null && priorAvgDuration !== null
+    ? priorAvgDuration - recentAvgDuration // positive = getting faster
+    : null;
+
+  // Autonomous exit trend — last 30 days vs prior 30 days
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const sixtyDaysAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const recentAutoExits = sessions.filter(s =>
+    s.source === "metacognition" &&
+    (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated") &&
+    new Date(s.timestamp).getTime() > thirtyDaysAgo
+  ).length;
+  const priorAutoExits = sessions.filter(s =>
+    s.source === "metacognition" &&
+    (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated") &&
+    new Date(s.timestamp).getTime() > sixtyDaysAgo &&
+    new Date(s.timestamp).getTime() <= thirtyDaysAgo
+  ).length;
+
   // Additional data sources
   const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
@@ -7835,6 +7906,37 @@ function MyProgress({ onBack }) {
             Proof in your data
           </div>
           <div style={{ display: "grid", gap: 8 }}>
+            {/* HERO: Signal Awareness */}
+            {(autonomousExits > 0 || durationTrend !== null) && (
+              <div style={{ background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "12px 14px" }}>
+                <div style={{ fontSize: 11, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 6 }}>
+                  Signal Awareness
+                </div>
+                {autonomousExits > 0 && (
+                  <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4, fontWeight: 500 }}>
+                    {autonomousExits === 1
+                      ? "You caught it once without needing a tool."
+                      : `${autonomousExits} times you saw it and chose without tools.`}
+                  </div>
+                )}
+                {durationTrend !== null && durationTrend > 0.5 && (
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    Your sessions are getting {durationTrend.toFixed(1)}m shorter on average. You're catching it earlier.
+                  </div>
+                )}
+                {durationTrend !== null && durationTrend <= 0.5 && autonomousExits === 0 && (
+                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                    This measures how quickly you notice your state before it drives action. Keep going.
+                  </div>
+                )}
+                {recentAutoExits > priorAutoExits && priorAutoExits >= 0 && (
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+                    Autonomous exits this month: <span style={{ color: "var(--amber)" }}>{recentAutoExits}</span>
+                    {priorAutoExits > 0 ? ` (up from ${priorAutoExits} last month)` : " — first month tracking."}
+                  </div>
+                )}
+              </div>
+            )}
             <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
                 Recovery speed
@@ -8230,8 +8332,8 @@ function MyProgress({ onBack }) {
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
                         Loop reliability
                       </div>
-                      <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid rgba(201,147,58,0.18)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ position: "absolute", inset: -5, borderRadius: "50%", clipPath: `polygon(50% 50%, 50% 0%, ${50 + (reliabilityScore * 0.5)}% 0%, 100% 100%, 0% 100%)`, background: "rgba(201,147,58,0.2)", pointerEvents: "none" }} />
+                      <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid var(--amber-dim)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "absolute", inset: -5, borderRadius: "50%", clipPath: `polygon(50% 50%, 50% 0%, ${50 + (reliabilityScore * 0.5)}% 0%, 100% 100%, 0% 100%)`, background: "var(--amber-20)", pointerEvents: "none" }} />
                         <div style={{ position: "relative", zIndex: 1, fontSize: 13, color: "var(--amber)", fontWeight: 600 }}>
                           {reliabilityScore}
                         </div>
@@ -12110,7 +12212,7 @@ const isSignalProfileConfigured = () => {
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                       {tools.map(item => (
                         <button key={item.id} onClick={() => startTool(TOOLS.find(t => t.id === item.id))} style={{
-                          width: "100%", background: item.rec ? "rgba(200,146,42,0.05)" : "var(--surface)",
+                          width: "100%", background: item.rec ? "var(--amber-glow)" : "var(--surface)",
                           border: `0.5px solid ${item.rec ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r)", padding: "11px 14px", textAlign: "left", cursor: "pointer",
                           display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -12504,40 +12606,57 @@ const isSignalProfileConfigured = () => {
               )}
 
               {/* 7-SESSION MILESTONE — type review */}
-              {milestone7 && !isAbsent && (
-                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                    {hasStreak ? "7 days straight" : "7 sessions"}
+              {milestone7 && !isAbsent && (() => {
+                // Check if tool usage matches assessed processing type
+                const regType = localStorage.getItem("stillform_regulation_type") || "balanced";
+                const reframeSessions = sessions.filter(s => (s.tools || []).includes("reframe")).length;
+                const breatheSessions = sessions.filter(s => (s.tools || []).includes("breathe") || (s.tools || []).includes("body-scan")).length;
+                const totalTool = reframeSessions + breatheSessions;
+                const reframeRatio = totalTool > 0 ? reframeSessions / totalTool : 0.5;
+                const mismatch = (regType === "body-first" && reframeRatio > 0.7) ||
+                                 (regType === "thought-first" && reframeRatio < 0.3);
+                return (
+                  <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                      {hasStreak ? "7 days straight" : "7 sessions"}
+                    </div>
+                    <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 17 }}>
+                      {hasStreak
+                        ? "You've been here every day this week. I've noticed something — want to talk about it?"
+                        : mismatch
+                          ? `I've noticed something. You came in as ${regType === "body-first" ? "body-first" : "thought-first"}, but you keep reaching for ${regType === "body-first" ? "conversation" : "breathing"}. That's not wrong — it might mean your system is telling you something about how you actually process. Want to explore that?`
+                          : "7 sessions. You're building something. How's it feeling?"}
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 14 }}>
+                      {mismatch
+                        ? "The system adapts to how you actually use it, not just how it assessed you. You decide."
+                        : "Take it into Reframe when you're ready — or just notice it."}
+                    </div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => {
+                        try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                        setMilestone7Seen(true);
+                        setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
+                        setScreen("tool");
+                        try { window.plausible("7 Session Milestone Open Reframe"); } catch {}
+                      }} style={{
+                        flex: 1, padding: "10px", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>Talk it through →</button>
+                      <button onClick={() => {
+                        try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
+                        setMilestone7Seen(true);
+                        try { window.plausible("7 Session Milestone Dismissed"); } catch {}
+                      }} style={{
+                        padding: "10px 14px", background: "none", border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>Got it</button>
+                    </div>
                   </div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
-                    {hasStreak
-                      ? "You've been here every day this week. You're building something. How's it feeling?"
-                      : "You've completed 7 sessions. This is the point to check whether your current processing route still fits. Keep current route if it's working, or review processing type in Settings and change it."}
-                  </div>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button onClick={() => {
-                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
-                      setMilestone7Seen(true);
-                      try { window.plausible("7 Session Milestone Kept Route"); } catch {}
-                    }} style={{
-                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--amber-dim)",
-                      borderRadius: "var(--r)", color: "var(--amber)", fontSize: 12, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>Keep current route</button>
-                    <button onClick={() => {
-                      try { localStorage.setItem("stillform_milestone_7_seen", "yes"); } catch {}
-                      setMilestone7Seen(true);
-                      setSettingsSectionOpen((current) => ({ ...current, processing: true }));
-                      setScreen("settings");
-                      try { window.plausible("7 Session Milestone Review Route"); } catch {}
-                    }} style={{
-                      flex: 1, padding: "10px", background: "none", border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r)", color: "var(--text-dim)", fontSize: 12, cursor: "pointer",
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>Review processing type</button>
-                  </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
               {showLoopNudge && (
@@ -13511,7 +13630,7 @@ const isSignalProfileConfigured = () => {
                     return (<>
                       {free.map(s => (
                         <button key={s.id} onClick={() => { try { localStorage.setItem("stillform_sound_type", s.id); } catch {} refreshSettings(); }} style={{
-                          width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
+                          width: "100%", background: current === s.id ? "var(--amber-glow)" : "var(--surface)",
                           border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6, cursor: "pointer",
                           display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans', sans-serif", textAlign: "left"
