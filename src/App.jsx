@@ -8866,6 +8866,12 @@ export default function Stillform() {
             setScreenRaw("home");
             try { window.location.hash = "#home"; } catch {}
           }
+          // Re-apply theme if restored from cloud
+          const restoredTheme = localStorage.getItem("stillform_theme");
+          if (restoredTheme) {
+            setThemeChoice(restoredTheme);
+            applyThemePreset(restoredTheme, localStorage.getItem("stillform_high_contrast") === "on");
+          }
         } catch {}
       }).catch(() => {})).catch(() => {});
     }
@@ -13868,11 +13874,16 @@ const isSignalProfileConfigured = () => {
                           const r = await sbSyncDown();
                           const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                           setSyncFeedbackWithClear(r?.ok ? "success" : "error", r?.ok ? `Restored ${r.restored || 0} items from cloud ✓` : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`);
-                          // After restore, navigate home if onboarded state was recovered
+                          // After restore, navigate home + re-apply theme if recovered
                           try {
                             const onboarded = localStorage.getItem("stillform_onboarded") === "yes";
                             const regType = localStorage.getItem("stillform_regulation_type");
                             if (onboarded && regType) { goHomeSafely(); }
+                            const restoredTheme = localStorage.getItem("stillform_theme");
+                            if (restoredTheme) {
+                              setThemeChoice(restoredTheme);
+                              applyThemePreset(restoredTheme, localStorage.getItem("stillform_high_contrast") === "on");
+                            }
                           } catch {}
                         } catch { setSyncFeedbackWithClear("error", "Restore failed. Check connection."); }
                         setSyncLoading(false);
