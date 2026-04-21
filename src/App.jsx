@@ -4211,7 +4211,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -4279,7 +4279,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
