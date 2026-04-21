@@ -1250,6 +1250,17 @@ const biometric = {
   async gate() { if (!this.isEnabled()) return true; return this.authenticate(); },
 };
 
+const REFRAME_API_URL = (() => {
+  try {
+    const isNativePlatform = window?.Capacitor?.isNativePlatform?.();
+    return isNativePlatform
+      ? "https://stillformapp.com/.netlify/functions/reframe"
+      : "/.netlify/functions/reframe";
+  } catch {
+    return "/.netlify/functions/reframe";
+  }
+})();
+
 const setupPushNotifications = async () => {
   if (!isNative()) return;
   try {
@@ -4677,7 +4688,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (messages.length >= 2) {
       const authToken = sbGetSession()?.access_token || "";
       const installId = getOrCreateInstallId();
-      fetch("/.netlify/functions/reframe", {
+      fetch(REFRAME_API_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -5196,7 +5207,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 24000);
         try {
-          const response = await fetch("/.netlify/functions/reframe", {
+          const response = await fetch(REFRAME_API_URL, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
