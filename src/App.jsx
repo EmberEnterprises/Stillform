@@ -3125,7 +3125,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
               }} style={{
                 width: 56, height: 56, borderRadius: "50%",
                 border: `2px solid ${postRating === n ? "var(--amber)" : "var(--border)"}`,
-                background: postRating === n ? "rgba(201,147,58,0.15)" : "var(--surface)",
+                background: postRating === n ? "var(--amber-glow)" : "var(--surface)",
                 color: postRating === n ? "var(--amber)" : "var(--text)", fontSize: 20, fontWeight: 500,
                 cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
                 WebkitTapHighlightColor: "transparent"
@@ -3748,7 +3748,7 @@ function BodyScanTool({ onComplete }) {
                     Start {holdTarget}s hold
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); toggleAudio(); }} style={{
-                    background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+                    background: audioOn ? "var(--amber-glow)" : "var(--surface)",
                     border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
                     borderRadius: "var(--r-lg)", padding: "8px 12px", fontSize: 11, cursor: "pointer",
                     color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif"
@@ -5777,7 +5777,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       <div style={{ marginBottom: 16 }}>
         {selfGuidedActive && (
           <div style={{
-            background: "rgba(201,147,58,0.08)",
+            background: "var(--amber-glow)",
             border: "1px solid var(--amber-dim)",
             borderRadius: "var(--r-lg)",
             padding: "12px 14px",
@@ -5989,8 +5989,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "var(--amber)",
             letterSpacing: "0.08em", padding: "8px 14px", marginBottom: 8,
-            background: "rgba(201,147,58,0.08)", borderRadius: "var(--r)",
-            border: "0.5px solid rgba(201,147,58,0.2)",
+            background: "var(--amber-glow)", borderRadius: "var(--r)",
+            border: "0.5px solid var(--amber-dim)",
             animation: "deltaFlash 0.6s ease-out", textAlign: "center"
           }}>{somaticNudge}</div>
         )}
