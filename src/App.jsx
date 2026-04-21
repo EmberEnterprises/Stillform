@@ -5767,7 +5767,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               You came in at a high intensity. The Watch Sequence helps you see the pattern under the moment — not just regulate it.
             </div>
             <button onClick={() => {
-              finishReframeSession({ postState: postRating });
+              // Save rating then route to metacognition — don't call finishReframeSession
+              // which would navigate away and cause state conflict
+              try { saveSession(postRating); } catch {}
+              setShowPostRating(false);
               onComplete("metacognition");
             }} style={{
               background: "none", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)",
