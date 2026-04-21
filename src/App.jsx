@@ -680,7 +680,7 @@ const styles = `
     }
     50% {
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.03), 0 0 18px rgba(201,147,58,0.18);
-      border-color: rgba(201,147,58,0.6);
+      border-color: var(--amber);
     }
   }
 
@@ -3055,7 +3055,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
             Round {cycle} of {totalCycles}
           </div>
           <button onClick={toggleAudio} style={{
-            background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+            background: audioOn ? "var(--amber-glow)" : "var(--surface)",
             border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
             borderRadius: 20, padding: "6px 14px", fontSize: 11, cursor: "pointer",
             color: audioOn ? "var(--amber)" : "var(--text-dim)", fontFamily: "'DM Sans', sans-serif",
@@ -6161,7 +6161,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             {pendingImages.length > 0 && (
               <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
-                letterSpacing: "0.06em", padding: "4px 10px", background: "rgba(201,147,58,0.1)",
+                letterSpacing: "0.06em", padding: "4px 10px", background: "var(--amber-glow)",
                 borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
                 {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
               </div>
@@ -7191,7 +7191,7 @@ function PanicMode({ onComplete }) {
           position: "absolute",
           top: 16,
           right: 16,
-          background: audioOn ? "rgba(201,147,58,0.12)" : "var(--surface)",
+          background: audioOn ? "var(--amber-glow)" : "var(--surface)",
           border: `1px solid ${audioOn ? "var(--amber-dim)" : "var(--border)"}`,
           borderRadius: "var(--r-lg)",
           padding: "8px 14px",
@@ -8329,8 +8329,8 @@ function MyProgress({ onBack }) {
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
                         Loop reliability
                       </div>
-                      <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid rgba(201,147,58,0.18)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <div style={{ position: "absolute", inset: -5, borderRadius: "50%", clipPath: `polygon(50% 50%, 50% 0%, ${50 + (reliabilityScore * 0.5)}% 0%, 100% 100%, 0% 100%)`, background: "rgba(201,147,58,0.2)", pointerEvents: "none" }} />
+                      <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid var(--amber-dim)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ position: "absolute", inset: -5, borderRadius: "50%", clipPath: `polygon(50% 50%, 50% 0%, ${50 + (reliabilityScore * 0.5)}% 0%, 100% 100%, 0% 100%)`, background: "var(--amber-20)", pointerEvents: "none" }} />
                         <div style={{ position: "relative", zIndex: 1, fontSize: 13, color: "var(--amber)", fontWeight: 600 }}>
                           {reliabilityScore}
                         </div>
@@ -12209,7 +12209,7 @@ const isSignalProfileConfigured = () => {
                     <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                       {tools.map(item => (
                         <button key={item.id} onClick={() => startTool(TOOLS.find(t => t.id === item.id))} style={{
-                          width: "100%", background: item.rec ? "rgba(200,146,42,0.05)" : "var(--surface)",
+                          width: "100%", background: item.rec ? "var(--amber-glow)" : "var(--surface)",
                           border: `0.5px solid ${item.rec ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r)", padding: "11px 14px", textAlign: "left", cursor: "pointer",
                           display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -13627,7 +13627,7 @@ const isSignalProfileConfigured = () => {
                     return (<>
                       {free.map(s => (
                         <button key={s.id} onClick={() => { try { localStorage.setItem("stillform_sound_type", s.id); } catch {} refreshSettings(); }} style={{
-                          width: "100%", background: current === s.id ? "rgba(201,147,58,0.08)" : "var(--surface)",
+                          width: "100%", background: current === s.id ? "var(--amber-glow)" : "var(--surface)",
                           border: `1px solid ${current === s.id ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6, cursor: "pointer",
                           display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "'DM Sans', sans-serif", textAlign: "left"
