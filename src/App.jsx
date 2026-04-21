@@ -8849,7 +8849,17 @@ export default function Stillform() {
     // Cloud sync init — version check + restore data if signed in
     sbVersionCheck().catch(() => {});
     if (sbIsSignedIn()) {
-      sbRefreshSession().then(() => sbSyncDown().catch(() => {})).catch(() => {});
+      sbRefreshSession().then(() => sbSyncDown().then(() => {
+        // After sync, re-check onboarded state — sync may have restored it
+        try {
+          const onboarded = localStorage.getItem("stillform_onboarded") === "yes";
+          const regType = localStorage.getItem("stillform_regulation_type");
+          if (onboarded && regType) {
+            setScreenRaw("home");
+            try { window.location.hash = "#home"; } catch {}
+          }
+        } catch {}
+      }).catch(() => {})).catch(() => {});
     }
     return () => clearTimeout(t);
   }, []);
@@ -13850,6 +13860,12 @@ const isSignalProfileConfigured = () => {
                           const r = await sbSyncDown();
                           const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                           setSyncFeedbackWithClear(r?.ok ? "success" : "error", r?.ok ? `Restored ${r.restored || 0} items from cloud ✓` : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`);
+                          // After restore, navigate home if onboarded state was recovered
+                          try {
+                            const onboarded = localStorage.getItem("stillform_onboarded") === "yes";
+                            const regType = localStorage.getItem("stillform_regulation_type");
+                            if (onboarded && regType) { goHomeSafely(); }
+                          } catch {}
                         } catch { setSyncFeedbackWithClear("error", "Restore failed. Check connection."); }
                         setSyncLoading(false);
                       }}>
