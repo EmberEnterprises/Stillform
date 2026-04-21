@@ -4341,6 +4341,8 @@ const sbSyncDown = async () => {
     }
   } catch(e) { return {ok:false,reason:e.message}; }
   try { window.plausible?.("Cloud Sync Down",{props:{keys:restored}}); } catch {}
+  // DEBUG — log what was restored
+  try { console.log("[SyncDown] restored:", restored, "undecryptable:", undecryptable, "errors:", errors, "keys:", Array.from(restoredKeys)); } catch {}
   return {ok:errors.length===0 && undecryptable===0,restored,undecryptable,errors};
 };
 const sbDeleteCloudData = async () => {
