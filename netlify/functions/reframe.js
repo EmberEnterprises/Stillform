@@ -11,7 +11,9 @@ const REFRAME_ALLOWED_ORIGINS = (() => {
     "http://127.0.0.1:4173",
     "http://127.0.0.1:5173",
     "capacitor://localhost",
-    "ionic://localhost"
+    "ionic://localhost",
+    "https://localhost",
+    "http://localhost"
   ];
   const envOrigins = String(process.env.SECURITY_ALLOWED_ORIGINS || process.env.ALLOWED_ORIGINS || "")
     .split(",")
