@@ -1250,6 +1250,14 @@ const biometric = {
   async gate() { if (!this.isEnabled()) return true; return this.authenticate(); },
 };
 
+const NETLIFY_BASE = (() => {
+  try {
+    return window?.Capacitor?.isNativePlatform?.()
+      ? "https://stillformapp.com"
+      : "";
+  } catch { return ""; }
+})();
+
 const REFRAME_API_URL = (() => {
   try {
     const isNativePlatform = window?.Capacitor?.isNativePlatform?.();
@@ -4203,7 +4211,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -4387,7 +4395,7 @@ const sbCheckSubscriptionStatus = async () => {
   const token = sbGetSession()?.access_token;
   const params = new URLSearchParams();
   if (installId) params.set("install_id", installId);
-  const url = `/.netlify/functions/subscription-status${params.toString() ? `?${params.toString()}` : ""}`;
+  const url = `${NETLIFY_BASE}/.netlify/functions/subscription-status${params.toString() ? `?${params.toString()}` : ""}`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
@@ -9857,7 +9865,7 @@ export default function Stillform() {
 
       if (signedIn) {
         try {
-          await fetch("/.netlify/functions/subscription-link-account", {
+          await fetch(`${NETLIFY_BASE}/.netlify/functions/subscription-link-account`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -10095,7 +10103,7 @@ export default function Stillform() {
       const params = new URLSearchParams();
       params.set("limit", String(UAT_FEEDBACK_HISTORY_CLOUD_FETCH_MAX_ITEMS));
       const authToken = sbGetSession()?.access_token || "";
-      const response = await fetch(`/.netlify/functions/uat-feedback-history?${params.toString()}`, {
+      const response = await fetch(`${NETLIFY_BASE}/.netlify/functions/uat-feedback-history?${params.toString()}`, {
         method: "GET",
         headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
       });
@@ -10241,7 +10249,7 @@ export default function Stillform() {
     try {
       const snapshot = getMetricsSnapshot();
       const installId = getOrCreateInstallId();
-      const res = await fetch("/.netlify/functions/metrics-ingest", {
+      const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/metrics-ingest`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -13913,7 +13921,7 @@ const isSignalProfileConfigured = () => {
                             await sbCreateProfile(); await sbSyncUp(); signedIn = true;
                           }
                           if (signedIn) {
-                            try { await fetch("/.netlify/functions/subscription-link-account", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${sbGetSession()?.access_token || ""}` }, body: JSON.stringify({ install_id: getOrCreateInstallId() }) }); } catch {}
+                            try { await fetch(`${NETLIFY_BASE}/.netlify/functions/subscription-link-account`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${sbGetSession()?.access_token || ""}` }, body: JSON.stringify({ install_id: getOrCreateInstallId() }) }); } catch {}
                             try {
                               const pending = JSON.parse(localStorage.getItem("stillform_checkout_after_login") || "null");
                               const isFreshPending = pending?.createdAt && (Date.now() - pending.createdAt) < (10 * 60 * 1000);
