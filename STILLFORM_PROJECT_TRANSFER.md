@@ -1770,3 +1770,119 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 - Fix offline fallback message (clinical worksheet tone, needs rewrite)
 - Audit all Netlify function fetch calls for native URL issue
 
+
+---
+
+## April 21, 2026 — Metacognition Layer + Infrastructure
+
+### ✅ Metacognition features shipped
+
+**Signal Awareness Latency — hero metric in My Progress:**
+- Tracks autonomous exits (Watch Sequence "no tool needed" choices) over time
+- Session duration trend — shorter sessions = catching it earlier
+- Month-over-month autonomous exit comparison
+- Displayed as first card in "Proof in your data" section, above Recovery Speed
+
+**Autonomous exit celebration enhanced:**
+- Watch Sequence completion screen now shows amber glow card with count
+- "The observer is getting faster" framing
+- "The less you need the app, the more it's working"
+
+**7-session milestone rewritten:**
+- Detects tool usage mismatch vs assessed processing type
+- Body-first reaching for Reframe >70%: reflects it back openly
+- Thought-first reaching for Breathe >70%: mirror message
+- No mismatch: "7 sessions. How's it feeling?" — conversational not diagnostic
+- Opens Reframe directly vs routing to Settings
+
+**Watch Sequence nudge after high-activation Reframe sessions:**
+- Appears when preRating >= 4
+- Offers depth — "not just regulate it, see the pattern under it"
+- Non-blocking, below skip button
+
+### ✅ Infrastructure fixes shipped today
+
+**Cloud sync — fully working cross-device:**
+- UNENCRYPTED_SYNC_KEYS: non-sensitive prefs stored as plaintext JSON
+- rehydrateAfterSync() helper — updates React state after any sync down
+- Theme, high_contrast, ai_tone, onboarded, regulation_type all restore correctly
+- SYNC_KEYS expanded: theme, high_contrast, ai_tone, morning_breath_cue
+
+**Native Android API fixes:**
+- NETLIFY_BASE const: absolute URL on native, empty on web
+- All Netlify functions fixed: subscription-status, subscription-link-account, uat-feedback-history, metrics-ingest, reframe
+- CORS: https://localhost added to allowed origins
+- Authorization header added to CORS allow-headers in reframe.js
+
+**Theme system:**
+- Teal, Rose, Suede — pure black bg + white borders, accent colors pop
+- Reframe modeConfig: all hardcoded amber replaced with CSS variables
+- Self-guided banner, somatic nudge, post-rating selection all theme-aware
+
+**Navigation:**
+- goHomeSafely routes to tutorial if not onboarded
+- Signal mapping loop fixed (sessionStorage skip flag)
+- Back button during onboarding works correctly
+
+### 🔴 Still pending before TestFlight
+- My Progress language audit (observational not diagnostic)
+- Offline fallback message rewrite
+- Galaxy Watch validation (need watch)
+- Apple Watch companion (not built)
+- Apple HealthKit (iOS, needs device)
+- Calendar + Health data flowing into AI (needs verification)
+- Google Play closed testing build
+- 3-5 real testimonials
+- Reddit post
+
+
+---
+
+## April 21, 2026 — Metacognition Layer + Infrastructure
+
+### ✅ Metacognition features shipped
+
+**Signal Awareness Latency — hero metric in My Progress:**
+- Tracks autonomous exits (Watch Sequence "no tool needed" choices) over time
+- Session duration trend — shorter sessions = catching it earlier
+- Month-over-month autonomous exit comparison
+- Displayed as first card in "Proof in your data" section, above Recovery Speed
+
+**Autonomous exit celebration enhanced:**
+- Watch Sequence completion screen now shows amber glow card with count
+- "The observer is getting faster" framing
+- "The less you need the app, the more it's working"
+
+**7-session milestone rewritten:**
+- Detects tool usage mismatch vs assessed processing type
+- Opens Reframe directly vs routing to Settings
+
+**Watch Sequence nudge after high-activation Reframe sessions:**
+- Appears when preRating >= 4
+- Offers depth — "not just regulate it, see the pattern under it"
+
+### ✅ Infrastructure fixes shipped today
+
+**Cloud sync fully working cross-device:**
+- UNENCRYPTED_SYNC_KEYS: non-sensitive prefs stored as plaintext
+- rehydrateAfterSync(): updates React state after sync down
+- Theme, high_contrast, ai_tone, onboarded, regulation_type all restore
+
+**Native Android API fixes:**
+- NETLIFY_BASE const for all Netlify function calls
+- CORS: https://localhost added, Authorization header allowed
+
+**Theme system:**
+- Teal, Rose, Suede — pure black bg + white borders
+- Reframe modeConfig all CSS variables, no hardcoded amber
+
+### 🔴 Still pending before TestFlight
+- My Progress language audit (observational not diagnostic)
+- Offline fallback message rewrite
+- Galaxy Watch validation
+- Apple Watch companion
+- Apple HealthKit (iOS)
+- Calendar + Health data → AI verification
+- Google Play closed testing build
+- 3-5 real testimonials
+- Reddit post
