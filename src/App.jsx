@@ -5234,8 +5234,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }
 
       if (!parsed) {
-        const debugInfo = `URL: ${REFRAME_API_URL} | Origin: ${window.location.origin} | Native: ${window?.Capacitor?.isNativePlatform?.() || false} | Err: ${lastErr?.message || 'no response'}`;
-        runSelfGuidedFallback(textToSend, `AI connection is unstable. Debug: ${debugInfo}`);
+        runSelfGuidedFallback(textToSend, "AI connection is unstable right now. Self-guided mode is active.");
         return;
       }
 
