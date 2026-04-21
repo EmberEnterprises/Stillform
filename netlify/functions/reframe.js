@@ -1010,14 +1010,9 @@ exports.handler = async function(event) {
   if (event.httpMethod !== "POST") return { statusCode: 405, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Method not allowed" }) };
 
   const requestOrigin = getRequestOrigin(event);
-  if (!requestOrigin) {
-    return {
-      statusCode: 403,
-      headers: createCorsHeaders(event),
-      body: JSON.stringify({ error: "Origin required" })
-    };
-  }
-  if (!isAllowedOrigin(requestOrigin)) {
+  // Native apps (Capacitor) may send no origin or capacitor://localhost
+  // Allow missing origin — rate limiting handles abuse
+  if (requestOrigin && !isAllowedOrigin(requestOrigin)) {
     return {
       statusCode: 403,
       headers: createCorsHeaders(event),
