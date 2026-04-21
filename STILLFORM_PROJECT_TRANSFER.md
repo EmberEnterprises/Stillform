@@ -1733,3 +1733,40 @@ All items from April 19 list remain except Android Health Connect + Calendar whi
 - 3-5 real testimonials (after TestFlight)
 - Reddit post (after TestFlight)
 
+
+---
+
+## April 20, 2026 — Evening Session Updates
+
+### ✅ Additional fixes shipped today
+
+**Reframe API on native — CRITICAL FIX:**
+- Root cause: Capacitor androidScheme:https means relative URLs resolve to https://localhost on device, not stillformapp.com
+- Fix: REFRAME_API_URL const — uses absolute URL on native, relative on web
+- Still needs testing — APK installed but not confirmed working yet
+
+**Other fixes shipped:**
+- Cloud sync no longer wipes onboarding/regulation_type (CRITICAL_KEYS protection)
+- goHomeSafely routes to tutorial if not onboarded (fixes blank home during onboarding)
+- Notification permission only prompts once (checks existing state first)
+- Android back button fixed (was calling exitApp due to undefined currentScreenRef)
+- Theme contrast fixed — teal, rose, suede now use pure black bg + white borders
+- Teal accent: #3dbdb5, Rose accent: #d4607e
+- Origin check loosened — native requests without origin header no longer blocked
+
+### 🔴 Still needs verification
+- Reframe AI on native — APK installed, NOT yet confirmed working
+- Run: `adb logcat | grep -i "reframe\|fetch\|network\|cors\|403"` while testing
+
+### 🔴 Pending — absolute URLs for ALL Netlify functions on native
+Same issue as reframe may affect:
+- subscription-status
+- subscription-webhook  
+- uat-feedback-history
+- subscription-link-account
+Need to audit and fix all with same NETLIFY_BASE_URL pattern
+
+### 🔴 Pending before next APK build
+- Fix offline fallback message (clinical worksheet tone, needs rewrite)
+- Audit all Netlify function fetch calls for native URL issue
+
