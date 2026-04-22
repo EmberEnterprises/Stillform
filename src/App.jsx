@@ -12237,68 +12237,37 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
-                    {/* Primary CTA */}
+                    {/* Single entry point — no tool names, routing is invisible */}
                     <button onClick={() => setShowObserveEntry(true)} style={{
                       width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 18, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
                       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
-                      WebkitTapHighlightColor: "transparent", marginBottom: 6
+                      WebkitTapHighlightColor: "transparent", marginBottom: 8, letterSpacing: "0.02em"
                     }}>
-                      <div>
-                        <div>Observe and Choose</div>
-                        <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>
-                          Catch it before it runs you
-                        </div>
-                      </div>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 0.65 }}>
-                        ✦ START
-                      </span>
+                      Begin
                     </button>
 
-                    {/* Shortcuts — direct fast-relief paths */}
+                    {/* Icon-only shortcuts — for explicit intent bypass, no decision required */}
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => {
-                        const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-                        const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
-                        if (isPhysActivated || isBodyFirst) { startPathway("calm"); }
-                        else { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                      }} style={{
-                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center"
-                      }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
-                          {isBodyFirst ? "◎ Breathe" : "✦ Reframe"}
-                        </div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
-                          {isBodyFirst ? "Settle fast" : "Talk it out"}
-                        </div>
-                      </button>
-                      <button onClick={() => {
-                        if (isBodyFirst) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                        else { startPathway("calm"); }
-                      }} style={{
-                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center"
-                      }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
-                          {isBodyFirst ? "✦ Reframe" : "◎ Breathe"}
-                        </div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
-                          {isBodyFirst ? "Talk it out" : "Settle fast"}
-                        </div>
-                      </button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center"
-                      }}>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
-                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>Body</div>
-                      </button>
+                      <button onClick={() => startPathway("calm")} title="Breathe" style={{
+                        flex: 1, background: "none", border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center",
+                        color: "var(--text-muted)", fontSize: 16
+                      }}>◎</button>
+                      <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} title="Reframe" style={{
+                        flex: 1, background: "none", border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center",
+                        color: "var(--text-muted)", fontSize: 16
+                      }}>✦</button>
+                      <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} title="Body Scan" style={{
+                        flex: 1, background: "none", border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center",
+                        color: "var(--text-muted)", fontSize: 16
+                      }}>◉</button>
                     </div>
                   </>
                 )}
