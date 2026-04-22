@@ -1805,7 +1805,7 @@ const normalizeSessionToolId = (toolId) => {
   if (!id) return null;
   if (id === "body-scan") return "scan";
   if (id === "ground" || id === "sigh") return "breathe";
-  if (id === "metacognition") return "reframe";
+  if (id === "metacognition") return "metacognition";
   return id;
 };
 
@@ -6348,6 +6348,28 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
     WebkitTapHighlightColor: "transparent", transition: "all 0.15s"
   });
 
+  // Order options by calibration type — body-first sees Body first
+  const signalOptions = isBodyFirst
+    ? [
+        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
+        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
+        { id: "both", label: "Both", sub: "Hard to separate" },
+        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+      ]
+    : isThoughtFirst
+    ? [
+        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
+        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
+        { id: "both", label: "Both", sub: "Hard to separate" },
+        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+      ]
+    : [
+        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
+        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
+        { id: "both", label: "Both", sub: "Hard to separate" },
+        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+      ];
+
   if (step === 0) return (
     <div>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
@@ -6358,12 +6380,7 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
       </div>
       <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First instinct. Don't overthink it.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {[
-          { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
-          { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
-          { id: "both", label: "Both", sub: "Hard to separate" },
-          { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
-        ].map(opt => (
+        {signalOptions.map(opt => (
           <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={optBtn(signalOrigin === opt.id)}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
             <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
@@ -7587,7 +7604,7 @@ function MyProgress({ onBack }) {
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
 
-  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Reframe · Observe and Choose" };
+  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Observe and Choose" };
   const toolCounts = {};
   sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
   const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
@@ -8685,7 +8702,7 @@ function MyProgress({ onBack }) {
           // Recommendation — one thing based on data, factual only
           let recommendation = null;
           if (underusedHighPerformer) {
-            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Observe and Choose" };
+            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Observe and Choose" };
             recommendation = `${toolLabels[underusedHighPerformer.id] || underusedHighPerformer.id} shows your strongest avg shift (+${underusedHighPerformer.avgShift.toFixed(1)}) but accounts for ${underusedHighPerformer.pct}% of sessions.`;
           } else if (shiftTrend !== null && shiftTrend > 0.3) {
             recommendation = `Avg composure shift increased by +${shiftTrend.toFixed(1)} compared to last week.`;
@@ -8740,7 +8757,7 @@ function MyProgress({ onBack }) {
                     <div>
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
-                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Observe and Choose", signals: "Map Signals", bias: "Pattern Check" };
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Observe and Choose", signals: "Map Signals", bias: "Pattern Check" };
                         const shift = t.avgShift ?? 0;
                         const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
@@ -9252,6 +9269,7 @@ export default function Stillform() {
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
   const [showObserveEntry, setShowObserveEntry] = useState(false);
+  const [showSupportSheet, setShowSupportSheet] = useState(false);
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
 
   useEffect(() => {
@@ -10816,7 +10834,7 @@ const isSignalProfileConfigured = () => {
   const routeObserveEntry = (signalOrigin, needState) => {
     setShowObserveEntry(false);
     const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-    const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
+    const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain") || bioFilter.includes("sleep") || bioFilter.includes("medicated") || bioFilter.includes("off-baseline") || bioFilter.includes("something");
 
     const goMetacognition = () => {
       setScreen("tool");
@@ -11021,7 +11039,10 @@ const isSignalProfileConfigured = () => {
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
           <MetacognitionTool onComplete={(redirectTo) => {
             if (redirectTo === "breathe") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "breathe") }); }
-            else if (redirectTo === "reframe") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" }); }
+            else if (redirectTo === "scan") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "scan") }); }
+            else if (redirectTo === "reframe" || redirectTo === "reframe-calm") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" }); }
+            else if (redirectTo === "reframe-clarity") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" }); }
+            else if (redirectTo === "reframe-hype") { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "hype" }); }
             else { goHomeSafely(); }
           }} />
         </div>
@@ -12224,8 +12245,8 @@ const isSignalProfileConfigured = () => {
 
               {/* OBSERVE AND CHOOSE — primary intraday practice */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  Catch the state before it drives the action.
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
+                  {isBodyFirst ? "Settle the system. Then think clearly." : isThoughtFirst ? "Think clearly. Then settle." : "Catch the state before it drives the action."}
                 </div>
 
                 {showObserveEntry ? (
@@ -12248,30 +12269,56 @@ const isSignalProfileConfigured = () => {
                       Begin
                     </button>
 
-                    {/* Icon-only shortcuts — for explicit intent bypass, no decision required */}
-                    <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => startPathway("calm")} title="Breathe" style={{
-                        flex: 1, background: "none", border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center",
-                        color: "var(--text-muted)", fontSize: 16
-                      }}>◎</button>
-                      <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} title="Reframe" style={{
-                        flex: 1, background: "none", border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center",
-                        color: "var(--text-muted)", fontSize: 16
-                      }}>✦</button>
-                      <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} title="Body Scan" style={{
-                        flex: 1, background: "none", border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)", padding: "10px", cursor: "pointer",
-                        WebkitTapHighlightColor: "transparent", textAlign: "center",
-                        color: "var(--text-muted)", fontSize: 16
-                      }}>◉</button>
+                    {/* Need support fast? — secondary affordance only */}
+                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                      <button onClick={() => setShowSupportSheet(true)} style={{
+                        background: "none", border: "none", color: "var(--text-muted)",
+                        fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        letterSpacing: "0.02em", padding: "4px 0"
+                      }}>
+                        Need support fast? ↓
+                      </button>
                     </div>
                   </>
                 )}
               </div>
+
+              {/* SUPPORT SHEET — secondary fast-lane, discreet */}
+              {showSupportSheet && (
+                <div style={{
+                  position: "fixed", inset: 0, zIndex: 200,
+                  background: "rgba(0,0,0,0.7)", display: "flex",
+                  alignItems: "flex-end", justifyContent: "center"
+                }} onClick={() => setShowSupportSheet(false)}>
+                  <div onClick={e => e.stopPropagation()} style={{
+                    background: "var(--surface)", borderRadius: "var(--r-lg) var(--r-lg) 0 0",
+                    padding: "24px 24px 40px", width: "100%", maxWidth: 480
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+                      Support
+                    </div>
+                    {[
+                      { label: "Quick Breathe", sub: "60 second reset", action: () => { setShowSupportSheet(false); startPathway("calm"); } },
+                      { label: "Reframe", sub: "Talk it through with AI", action: () => { setShowSupportSheet(false); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } },
+                      { label: "Body Scan", sub: "Locate where it lives", action: () => { setShowSupportSheet(false); startTool(TOOLS.find(t => t.id === "scan")); } },
+                    ].map(opt => (
+                      <button key={opt.label} onClick={opt.action} style={{
+                        width: "100%", background: "none", border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 8,
+                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif",
+                        WebkitTapHighlightColor: "transparent"
+                      }}>
+                        <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{opt.label}</div>
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{opt.sub}</div>
+                      </button>
+                    ))}
+                    <button onClick={() => setShowSupportSheet(false)} style={{
+                      width: "100%", background: "none", border: "none", color: "var(--text-muted)",
+                      fontSize: 12, cursor: "pointer", marginTop: 8, fontFamily: "'DM Sans', sans-serif", padding: "8px"
+                    }}>Cancel</button>
+                  </div>
+                </div>
+              )}
 
               {pendingNextMoveFollowUpSession && (
                 <NextMoveFollowUpCard
@@ -12488,7 +12535,7 @@ const isSignalProfileConfigured = () => {
                   breathe: "Breathe",
                   ground: "Breathe",
                   reframe: "Reframe",
-                  metacognition: "Reframe · Observe and Choose",
+                  metacognition: "Observe and Choose",
                   "body-scan": "Body Scan",
                   scan: "Body Scan",
                   panic: "Panic",
