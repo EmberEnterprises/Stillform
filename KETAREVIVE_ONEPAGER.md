@@ -47,10 +47,8 @@ Stillform does not diagnose, treat, or cure any condition. It is not a substitut
 
 As a KetaRevive client, you receive:
 
-- **30% off for the first 3 months** on the monthly plan
-- **Additional 10% off** on the annual plan
-
-Use code **[KETAREVIVE]** at checkout.
+- **30% off for the first 3 months** on the monthly plan — use code **KETAREVIVE30**
+- **Additional 10% off** on the annual plan — use code **KETAREVIVEANNUAL**
 
 Standard pricing: $14.99/month or $9.99/month annual. One price, everything included.
 
