@@ -15,7 +15,7 @@ Stillform is a metacognition trainer that stabilizes composure. It builds the sk
 
 Metacognition is the ability to observe your own thinking and emotional state as it happens — and then choose what to do with it. Stillform makes that skill trainable, daily, in real moments. The result is inner poise and outward presence: fewer impulsive actions, fewer regrets, fewer moments of guilt or shame after the fact.
 
-Composure is a way of being — not just damage control. It applies to excitement, patience, presence, professionalism, and being steady when nothing is wrong. The daily practice and the in-the-moment intervention are the same skill: notice, regulate, choose.
+Composure is a way of being — not just damage control. It applies equally to difficulty and momentum: the anxiety before a performance, the excitement before a big moment, the steadiness required to stay present when everything is going right. The butterflies before you walk on stage are the same signal as the tension before a hard conversation — both are your system activating. Stillform trains you to work with that activation instead of being driven by it. The daily practice and the in-the-moment intervention are the same skill: notice, regulate, choose.
 
 The product philosophy: regulate yourself → see yourself clearly → see others clearly → let them in.
 
