@@ -43,7 +43,7 @@
 
 ## ❌ DECIDED NOT TO DO (and why)
 
-- **Gamify metrics** — open risk accepted. "Time returned to your life" will be observational not a score to chase. If users game it, data reflects it honestly.
+- **Gamify metrics** — decided not to gamify. No badges, no targets, no scores to chase. The "Time returned to your life" metric IS being built but framed as a neutral observation only — not a leaderboard, not a goal. If users rush sessions to improve the number, data reflects it honestly and the risk is accepted.
 - **Warning users not to game metrics** — rejected. Hand-holding, defensive, undermines integrity.
 - **Shorten onboarding** — rejected. Calibration is the platform. It's one time, 3 minutes, and everything runs on it. The tutorial now explains this clearly.
 - **Reddit launch now** — rejected. Needs native tested via Google Play closed testing first. Needs real testimonials. This is a one-shot moment.
