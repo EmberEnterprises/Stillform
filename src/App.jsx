@@ -7983,7 +7983,7 @@ function MyProgress({ onBack }) {
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
       <button className="intervention-back" onClick={onBack}>← Back</button>
       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>What your data shows about how you're building the skill — not a score, a mirror.</p>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>One question: is the observer getting faster?</p>
 
       {sessions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
@@ -7993,7 +7993,7 @@ function MyProgress({ onBack }) {
         {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-            Proof in your data
+            Observer growth
           </div>
           <div style={{ display: "grid", gap: 8 }}>
             {/* HERO: Signal Awareness */}
@@ -8029,7 +8029,7 @@ function MyProgress({ onBack }) {
             )}
             <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-                Recovery speed
+                Recovery when needed
               </div>
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {recoverySpeedMinutesForProof === null ? "N/A" : `${recoverySpeedMinutesForProof.toFixed(1)}m avg from high activation`}
@@ -12049,8 +12049,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Checked in · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Set the tone</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Done · tap to update</div>
                   </button>
                 );
 
@@ -12069,14 +12069,14 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Set your tone for today</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Set the tone</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What might drive you today if you don't notice it early?</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning check-in</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Set the tone</div>
                     {(() => {
                       const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
                       if (!breathCueOn) return null;
@@ -12380,8 +12380,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
                   </button>
                 );
                 if (eodDone && !eodOpen) return (
@@ -12399,8 +12399,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
                   </button>
                 );
 
@@ -12441,14 +12441,14 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Close the loop — 15 seconds</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What did you catch today? What got past you?</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>End of day</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>Close the loop</div>
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
@@ -14664,6 +14664,18 @@ const isSignalProfileConfigured = () => {
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>
+        )}
+
+        {/* RECONSTRUCTION BANNER */}
+        {screen === "home" && (
+          <div style={{
+            background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)",
+            padding: "8px 20px", textAlign: "center", fontSize: 11,
+            color: "var(--text-dim)", letterSpacing: "0.04em"
+          }}>
+            <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
+            One practice. One skill. Everything else is support.
+          </div>
         )}
 
         {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
