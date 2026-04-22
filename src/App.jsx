@@ -14051,12 +14051,15 @@ const isSignalProfileConfigured = () => {
                     </div>
                     {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginBottom: 8 }}>{syncSuccess}</div>}
                     {syncError && <div style={{ fontSize: 12, color: "#e05", marginBottom: 8 }}>{syncError}</div>}
-                    <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }} onClick={async () => { await sbSignOut(); setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null); }}>
-                      Sign out
-                    </button>
                         </div>
                       )}
                     </div>
+                    {/* Sign out — always visible when signed in */}
+                    {syncSignedIn && (
+                      <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, width: "100%", textAlign: "left" }} onClick={async () => { await sbSignOut(); setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null); }}>
+                        Sign out
+                      </button>
+                    )}
                     {/* Biometric lock — native only */}
                     {isNative() && (() => {
                       const bioOn = (() => { try { return localStorage.getItem("stillform_biometric_enabled") === "yes"; } catch { return false; } })();
