@@ -4547,7 +4547,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return mode !== "calm" ? mode : null;
   });
   const [showPostRating, setShowPostRating] = useState(false);
-  const [showObserveEntry, setShowObserveEntry] = useState(false);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
@@ -6321,86 +6320,6 @@ function MicroBiasTool({ onComplete }) {
           <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
         ))}
       </div>
-    </div>
-  );
-}
-
-
-// ─── OBSERVE ENTRY — 2-tap entry shell ──────────────────────────────────────
-function ObserveEntry({ onRoute, onClose, isBodyFirst, isThoughtFirst }) {
-  const [step, setStep] = useState(0);
-  const [signalOrigin, setSignalOrigin] = useState(null);
-
-  const btn = (active) => ({
-    width: "100%", padding: "14px 18px",
-    background: active ? "var(--amber-glow)" : "var(--surface)",
-    border: `0.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
-    borderRadius: "var(--r)", color: active ? "var(--amber)" : "var(--text)",
-    fontSize: 14, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-    textAlign: "left", WebkitTapHighlightColor: "transparent"
-  });
-
-  const route = (needState) => {
-    const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-    const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
-
-    // Off-baseline + body → Body Scan
-    if (offBaseline && (signalOrigin === "body" || signalOrigin === "both" || signalOrigin === "unsure") && needState !== "understand") {
-      onRoute("scan"); return;
-    }
-    if (needState === "settle") { onRoute("breathe"); return; }
-    if (needState === "understand") {
-      if (signalOrigin === "body") { onRoute("scan"); return; }
-      if (signalOrigin === "thought") { onRoute("reframe"); return; }
-      if (signalOrigin === "both") { onRoute("metacognition"); return; }
-      // unsure — use calibration as tiebreaker
-      if (isThoughtFirst) { onRoute("reframe"); return; }
-      if (isBodyFirst) { onRoute("scan"); return; }
-      onRoute("metacognition"); return;
-    }
-    onRoute("metacognition");
-  };
-
-  if (step === 0) return (
-    <div>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Observe and Choose</div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 4 }}>What fired first?</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First instinct. Don't overthink it.</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {[
-          { id: "body", label: "Body", sub: "Tension, chest, gut, jaw" },
-          { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
-          { id: "both", label: "Both", sub: "Hard to separate" },
-          { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
-        ].map(opt => (
-          <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={btn(false)}>
-            <span style={{ fontWeight: 500 }}>{opt.label}</span>
-            <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
-          </button>
-        ))}
-      </div>
-      <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", marginTop: 16, padding: "8px 0", fontFamily: "'DM Sans', sans-serif" }}>← Back</button>
-    </div>
-  );
-
-  return (
-    <div>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Observe and Choose</div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 4 }}>What do you need?</div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {[
-          { id: "settle", label: "Settle", sub: "Bring the system down. Body first." },
-          { id: "understand", label: "Understand", sub: "Get distance. Clarify what's happening." },
-          { id: "catch", label: "Just catch it", sub: "Notice without intervening." },
-        ].map(opt => (
-          <button key={opt.id} onClick={() => route(opt.id)} style={btn(false)}>
-            <span style={{ fontWeight: 500 }}>{opt.label}</span>
-            <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
-          </button>
-        ))}
-      </div>
-      <button onClick={() => setStep(0)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", marginTop: 16, padding: "8px 0", fontFamily: "'DM Sans', sans-serif" }}>← Back</button>
     </div>
   );
 }
@@ -12170,87 +12089,119 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* DOMINANT CTA — Observe and Choose as primary entry */}
+              {/* DOMINANT CTA — Adaptive to regulation type */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
+                {/* Identity line */}
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  Catch the state before it drives the action.
+                  {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Choose your entry point."}
                 </div>
 
-                {showObserveEntry ? (
-                  <ObserveEntry
-                    isBodyFirst={isBodyFirst}
-                    isThoughtFirst={isThoughtFirst}
-                    onClose={() => setShowObserveEntry(false)}
-                    onRoute={(target) => {
-                      setShowObserveEntry(false);
-                      if (target === "breathe") startPathway("calm");
-                      else if (target === "scan") startTool(TOOLS.find(t => t.id === "scan"));
-                      else if (target === "reframe") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                      else if (target === "metacognition") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); setTimeout(() => setShowWatchChooseFlow(true), 100); }
-                    }}
-                  />
-                ) : (
-                  <>
-                  {/* Primary — Observe and Choose */}
-                  <button onClick={() => setShowObserveEntry(true)} style={{
-                    width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                    borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
-                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    WebkitTapHighlightColor: "transparent", marginBottom: 6
-                  }}>
-                    <div>
-                      <div>Observe and Choose</div>
-                      <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.7 }}>Catch it before it runs you</div>
+                {/* Balanced: three equal buttons */}
+                {!isThoughtFirst && !isBodyFirst ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={async () => {
+                        setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                      }} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
+                      }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>✦ Reframe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Talk it out</div>
+                      </button>
+                      <button onClick={() => startPathway("calm")} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
+                      }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◎ Breathe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Calm my body</div>
+                      </button>
                     </div>
-                    <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 0.65 }}>✦ START</span>
-                  </button>
-
-                  {/* Shortcuts — direct relief paths, calibration-aware */}
-                  <div style={{ display: "flex", gap: 6 }}>
-                    <button onClick={async () => {
-                      const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-                      const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
-                      if (isPhysActivated || isBodyFirst) { startPathway("calm"); }
-                      else { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                    }} style={{
-                      flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                      borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
-                      WebkitTapHighlightColor: "transparent", textAlign: "center"
-                    }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
-                        {isBodyFirst ? "◎ Breathe" : "✦ Reframe"}
-                      </div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
-                        {isBodyFirst ? "Settle fast" : "Talk it out"}
-                      </div>
-                    </button>
-                    <button onClick={async () => {
-                      if (isBodyFirst) { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                      else { startPathway("calm"); }
-                    }} style={{
-                      flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                      borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
-                      WebkitTapHighlightColor: "transparent", textAlign: "center"
-                    }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
-                        {isBodyFirst ? "✦ Reframe" : "◎ Breathe"}
-                      </div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
-                        {isBodyFirst ? "Talk it out" : "Settle fast"}
-                      </div>
-                    </button>
                     <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
-                      flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "16px 10px", cursor: "pointer",
                       WebkitTapHighlightColor: "transparent", textAlign: "center"
                     }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Scan</div>
-                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>Body</div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>Release tension</div>
                     </button>
                   </div>
-                  </>
+                ) : (
+                <>
+                {/* Primary tool — determined by regulation type, overridden by activation state */}
+                {/* Research: top-down strategies fail during physiological activation (Ochsner, Gross) */}
+                {(() => {
+                  const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                  const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
+                  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+                  const hwActivated = checkinToday?.hardware?.some(h => ["activated", "depleted", "pain"].includes(h));
+                  const needsBodyFirst = isPhysActivated || hwActivated;
+                  return null; // just computing — used below
+                })()}
+                <button onClick={async () => {
+                  const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                  const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
+                  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+                  const hwActivated = checkinToday?.hardware?.some(h => ["activated", "depleted", "pain"].includes(h));
+                  const needsBodyFirst = isPhysActivated || hwActivated;
+                  if (needsBodyFirst || isBodyFirst) {
+                    startPathway("calm"); // Breathe first — body regulation before cognitive processing
+                  } else {
+                    setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                  }
+                }} style={{
+                  width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                  borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
+                }}>
+                  <div>
+                    <div>{isBodyFirst ? "Calm my body" : "Talk it out"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, opacity: 1, marginTop: 2, color: "rgba(10,10,12,0.75)" }}>
+                      {isBodyFirst ? "Settle the nervous system" : "Think through what's happening"}
+                    </div>
+                  </div>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 1, color: "rgba(10,10,12,0.65)" }}>
+                    {isBodyFirst ? "◎ BREATHE" : "✦ REFRAME"}
+                  </span>
+                </button>
+
+                {/* Secondary tool + Body Scan */}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  <button onClick={async () => {
+                    if (isBodyFirst) {
+                      setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                    } else {
+                      startPathway("calm");
+                    }
+                  }} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      {isBodyFirst ? "✦ Reframe" : "◎ Breathe"}
+                    </div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>
+                      {isBodyFirst ? "Talk it out" : "Calm my body"}
+                    </div>
+                  </button>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Release tension</div>
+                  </button>
+                </div>
+                </>
                 )}
               </div>
 
@@ -14613,14 +14564,6 @@ const isSignalProfileConfigured = () => {
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>
-        )}
-
-        {/* RECONSTRUCTION BANNER */}
-        {screen === "home" && (
-          <div style={{ background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)", padding: "8px 20px", textAlign: "center", fontSize: 11, color: "var(--text-dim)" }}>
-            <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
-            Bringing all tools into one practice. Things may shift.
-          </div>
         )}
 
         {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
