@@ -98,6 +98,28 @@ This is also the B2B clinical channel — integration as a between-session or du
 
 ---
 
+## KetaRevive partnership — infusion center B2B channel (April 22, 2026)
+
+**Context:** KetaRevive is an infusion center (not a psych center). Founders expressed interest in using Stillform as a therapeutic companion tool for their clients. No therapist overlap — Stillform fills the integration gap they don't have.
+
+**The fit:**
+- Ketamine creates a neuroplasticity window — brain more malleable, patterns more accessible
+- Infusion centers administer the treatment but have no structured integration framework
+- Stillform becomes the integration layer: breathing during infusion, body scan for grounding, AI to process what surfaces without a therapist in the room
+- No medical claims — positioned as composure and reflection companion
+
+**Proposed client discount:**
+- 30% off for first 3 months (monthly plan)
+- Additional 10% off annual plan (on top of existing 33% discount)
+- Unique discount code per partner for attribution tracking
+
+**Guardrails:**
+- Never positioned as medical treatment or clinical tool
+- "Companion app" not "therapy tool" in all partnership language
+- Stillform supports the user's own process — it doesn't treat anything
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
