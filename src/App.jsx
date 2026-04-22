@@ -5899,7 +5899,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <button
           className="btn btn-ghost"
           style={{ fontSize: 11, padding: "6px 10px" }}
-          onClick={() => setShowWatchChooseFlow(true)}
+          onClick={() => onComplete("metacognition")}
         >
           Observe and Choose →
         </button>
@@ -11117,19 +11117,18 @@ const isSignalProfileConfigured = () => {
             },
             {
               kicker: "Tutorial · 3 of 4",
-              title: "Morning + Daily Tools — Active Execution Layer",
+              title: "One Practice. Three Moments.",
               paragraphs: [
-                "Morning Check-In captures state and context early so drift is caught before escalation.",
-                "Use Reframe, Breathe, and Body Scan through the day to prepare, stabilize, and reset without breaking execution.",
-                "After Reframe, State to Statement helps you convert that regulated state into one clear message you can send outside the app."
+                "Set the tone in the morning — before the day sets it for you. Observe and Choose through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
+                "Breathe, Body Scan, and Reframe are supports. The system routes you to the right one. You don't have to choose."
               ]
             },
             {
               kicker: "Tutorial · 4 of 4",
-              title: "Run the Full Loop Daily",
+              title: "The Skill Builds Over Time",
               paragraphs: [
-                "First-time setup sequence: How You Process → Signal Profile + Pattern Check.",
-                "Daily sequence: Go / No-Go Quick Check → Morning + Daily Tools → End-of-Day Close → My Progress."
+                "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
+                "Every day after: Set the tone → Observe and Choose → Close the loop. The less you need the app, the more it's working."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
