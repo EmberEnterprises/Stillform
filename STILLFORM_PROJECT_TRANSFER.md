@@ -1950,3 +1950,119 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 - Sound packs
 - Shareable composure card
 - PDF/CSV export polish
+
+---
+
+## Queued Features — Pre-Launch
+
+### Recovered Time (My Progress)
+
+**Concept:** Show users the gap between their early session durations and recent session durations as "time returned to your life." Proof that the skill is compounding — not a gamified score, a factual observation.
+
+**Calculation:**
+- Early avg duration: average of first 5 timed sessions
+- Recent avg duration: average of last 5 timed sessions
+- Gap: early avg minus recent avg = time returned per session
+
+**Display:** Card in My Progress below Signal Awareness hero card. Only shows when:
+- 10+ sessions with duration data exist
+- Recent avg is actually lower than early avg (trend is positive)
+- Never shown in real time during or after a session — only in My Progress
+
+**Framing (critical):**
+- "Your sessions averaged 8.2 min early on. Recent sessions average 1.4 min."
+- "6.8 minutes back, per session."
+- NO "great job." NO implied target. NO verdict. Just the numbers.
+- Label: "Time returned" — not "improvement" or "progress score"
+- Alternate framing if duration trend isn't clean: "Your awareness window has narrowed over X weeks" (trend-based, harder to game)
+
+**Risk acknowledged:** Users could rush through sessions to improve the number. Mitigations:
+- Only surfaces after 10+ sessions (trend is real by then, not gameable in one sitting)
+- Framing is observational not evaluative — nothing to chase
+- If they game it, the data reflects it honestly. No verdict, no shame.
+- Never surfaces in real time — removes in-session feedback loop
+
+**Integrity note:** This metric reinforces "trainer not a crutch" better than any copy. As the skill builds, sessions get shorter. The number goes down as the user gets better. That's the product proving itself.
+
+---
+
+### Export PDF — Metric Explanations
+
+**Concept:** When user exports their session data, the PDF includes a plain-language explanation of every metric — what it measures, how it's calculated, and what the science behind it is.
+
+**Purpose:**
+- Depth layer for curious/invested users without cluttering the app surface
+- Clinical channel credibility — therapist/coach can understand exactly what their client has been doing
+- FSA/HSA documentation — explained, science-backed record of practice
+- Transparency for skeptics — integrity document, not hand-holding
+
+**Contents:**
+- What each metric measures and how it's calculated
+- Science behind each tool (with citations)
+- Their personal data in plain language
+- Note that metrics are observations, not evaluations
+
+**Build order:** After recovered time metric is built and stable.
+
+**Pre-launch doc update required:** Brief + science sheet both need updating after these ship.
+
+
+---
+
+## Queued Features — Pre-Launch
+
+### Recovered Time (My Progress)
+
+**Concept:** Show users the gap between their early session durations and recent session durations as "time returned to your life." Proof that the skill is compounding — not a gamified score, a factual observation.
+
+**Calculation:**
+- Early avg duration: average of first 5 timed sessions
+- Recent avg duration: average of last 5 timed sessions
+- Gap: early avg minus recent avg = time returned per session
+
+**Display:** Card in My Progress below Signal Awareness hero card. Only shows when:
+- 10+ sessions with duration data exist
+- Recent avg is actually lower than early avg (trend is positive)
+- Never shown in real time during or after a session — only in My Progress
+
+**Framing (critical):**
+- "Your sessions averaged 8.2 min early on. Recent sessions average 1.4 min."
+- "6.8 minutes back, per session."
+- NO "great job." NO implied target. NO verdict. Just the numbers.
+- Label: "Time returned" — not "improvement" or "progress score"
+- Alternate framing if duration trend isn't clean: "Your awareness window has narrowed over X weeks"
+
+**Risk acknowledged:** Users could rush through sessions to improve the number. Decision: open risk accepted. Framing is observational not evaluative — nothing to chase. Only surfaces after 10+ sessions. Never in real time.
+
+**Integrity note:** As the skill builds, sessions get shorter. The number goes down as the user gets better. That's the product proving itself.
+
+---
+
+### Export PDF — Metric Explanations
+
+**Concept:** Session data export PDF includes plain-language explanation of every metric — what it measures, how it's calculated, the science behind it.
+
+**Purpose:**
+- Depth layer for curious users without cluttering app surface
+- Clinical channel credibility document
+- FSA/HSA documentation support
+- Transparency for skeptics
+
+**Contents:**
+- What each metric measures and how it's calculated
+- Science behind each tool (with citations)
+- Personal data in plain language
+- Note that metrics are observations, not evaluations
+
+**Build order:** After recovered time metric is built and stable.
+
+---
+
+## Pre-Launch Doc Queue (before Reddit)
+
+1. Build recovered time metric
+2. Build export PDF with metric explanations
+3. Comprehensive brief — fine tooth comb, make it public-ready
+4. Science sheet — update for metacognition features
+5. Privacy policy — any new data flows from recovered time
+
