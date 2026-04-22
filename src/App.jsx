@@ -14143,8 +14143,8 @@ const isSignalProfileConfigured = () => {
                     : (integrationsSupportedOnPlatform
                         ? "No calendar context available yet. When connected, Morning and Reframe use upcoming context to reduce manual input."
                         : (nativePlatform === "android"
-                            ? "Calendar integration is not available on Android yet."
-                            : "Calendar integration is only available in supported native builds."))}
+                            ? "Calendar integration available on Android. Grant permission in phone Settings > Apps > Stillform > Permissions."
+                            : "Calendar integration requires the native Android app."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
@@ -14167,8 +14167,8 @@ const isSignalProfileConfigured = () => {
                     : (integrationsSupportedOnPlatform
                         ? "No health context available yet. When connected, Reframe uses sleep/readiness context to tune prompts."
                         : (nativePlatform === "android"
-                            ? "Health integration is not available on Android yet."
-                            : "Health integration is only available in supported native builds."))}
+                            ? "Health Connect integration available on Android. Grant permission in Health Connect app > App permissions > Stillform."
+                            : "Health integration requires the native Android app."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>

@@ -1,6 +1,8 @@
 # STILLFORM — Comprehensive Product Brief
 ## April 22, 2026 | ARA Embers LLC
 
+> **How to use this document:** This is a product brief and positioning doc — it describes what Stillform is, what it does, and the decisions behind it. It is NOT a strict line-by-line code snapshot. Technical implementation details (line numbers, function names) live in STILLFORM_PROJECT_TRANSFER.md. Where implementation status matters, this doc notes it explicitly (e.g. "data flow not yet confirmed on device"). Everything else reflects current product intent and shipped behavior as of April 22, 2026.
+
 ---
 
 ## What Stillform Is
