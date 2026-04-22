@@ -12645,7 +12645,7 @@ const isSignalProfileConfigured = () => {
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
                       {hasStreak ? "7 days straight" : "7 sessions"}
                     </div>
-                    <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 17 }}>
+                    <div style={{ fontSize: 17, color: "var(--text)", lineHeight: 1.7, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
                       {hasStreak
                         ? "You've been here every day this week. I've noticed something — want to talk about it?"
                         : mismatch
