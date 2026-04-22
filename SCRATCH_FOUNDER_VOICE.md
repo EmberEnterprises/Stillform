@@ -24,6 +24,14 @@ I see people flipping out all the time, especially on social media, or even beca
 
 ---
 
+## On judgment and the design intention (Arlin's words, April 22, 2026)
+
+"We put guardrails in so the user never feels judged. Media and society have this way of putting things in a way that make us feel like there are negative connotations to true health issues, neglect, trauma. These are natural elements to life and living it — but it's considered bad if you can't keep your shit together. What ignorant statements. Almost unbelievable and in ways unbearable.
+
+I hope they don't find what the app says as judgment. I tried my best to eliminate that and also eliminate labels — because honestly, what matters is how they feel and what they think and how we can help."
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
