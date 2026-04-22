@@ -12450,7 +12450,7 @@ const isSignalProfileConfigured = () => {
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>Close the loop</div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy landing?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Full", "Steady", "Low", "Empty"].map(e => (
                         <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
@@ -12463,7 +12463,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How'd you carry yourself today?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How much did you catch before it ran you?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Mixed", "Rough"].map(e => (
                         <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
@@ -12476,7 +12476,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word for today</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word that names what today taught you</div>
                     <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
                         <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
@@ -12493,7 +12493,7 @@ const isSignalProfileConfigured = () => {
                       width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
                       borderRadius: "var(--r)", padding: "12px", fontSize: 13, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-                    }}>Close the day →</button>
+                    }}>Close the loop →</button>
                   </div>
                 );
               })()}
@@ -13347,11 +13347,11 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure system. Breathing, body scan, and AI-powered reframing — built for morning practice, difficult moments, momentum, and daily execution. Composure matters all the time."
+                a: "A metacognition trainer that stabilizes composure. One practice, three moments: Set the tone in the morning. Observe and Choose throughout the day. Close the loop in the evening. The tools — Breathe, Body Scan, Reframe — are supports the system routes you to. You don't pick them. The practice does."
               },
               {
                 q: "What is the method behind Stillform?",
-                a: "One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first."
+                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift: from 'I am this state' to 'I can see this state happening and choose my response.' Observe and Choose is the central practice. Breathe, Body Scan, and Reframe are supports the system routes you to based on what fired first and what you need. Calibration sets your routing profile so the system knows how you process."
               },
               {
                 q: "What science basis does Stillform use?",
