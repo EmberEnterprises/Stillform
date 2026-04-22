@@ -12,6 +12,12 @@ I see people flipping out all the time, especially on social media, or even beca
 
 ---
 
+## On the mission (Arlin's words, April 22, 2026)
+
+"I've been hurt a lot in my life because of ego, whether someone else's or mine. If there is anything I can do to prevent that and let others live a less 'noisy' life I would like to contribute to that. My little thing to give a little bit more peace on earth."
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
