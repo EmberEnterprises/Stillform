@@ -7,27 +7,27 @@
 
 **One sentence:** Stillform is a composure architecture — how you carry yourself every day, in every moment that matters.
 
-**Stillform is NOT positioned as a meditation app, therapy, or crisis tool.** It is a precision composure system. The target user would never download a meditation app or book a therapy session, but they will use a system that makes them sharper, steadier, and more functional.
-
-**Category: Executive Composure.** New category. Use this phrase for press, Product Hunt, Reddit.
+**Category:** Composure Architecture. Metacognition applied to daily life — building the inner clarity that produces outward steadiness, better decisions, and fewer regrets.
 
 ### The Core Idea
 
 Stillform is a metacognition trainer that stabilizes composure. It builds the skill of observing your own state before it drives your behavior — then choosing your response deliberately.
 
+Metacognition is the ability to observe your own thinking and emotional state as it happens — and then choose what to do with it. Stillform makes that skill trainable, daily, in real moments. The result is inner poise and outward presence: fewer impulsive actions, fewer regrets, fewer moments of guilt or shame after the fact.
+
 Composure is a way of being — not just damage control. It applies to excitement, patience, presence, professionalism, and being steady when nothing is wrong. The daily practice and the in-the-moment intervention are the same skill: notice, regulate, choose.
 
 The product philosophy: regulate yourself → see yourself clearly → see others clearly → let them in.
 
-**Product philosophy:** Trainer, not a crutch. Signal Awareness Latency (how fast the user catches themselves before acting from state instead of decision) is the proof the app is building a skill they eventually own. The less you need the app, the more it's working.
+**Trainer, not a crutch.** Signal Awareness Latency (how fast the user catches themselves before acting from state instead of decision) is the proof the app is building a skill they eventually own. The less you need the app, the more it's working.
 
-**Metacognition is the product.** Every feature must train noticing — not collect data. The shift from "I am this state" to "I can see this state happening and choose my response" is what gets built over time. If a feature feels like a form, it's wrong. If it feels like a mirror, it's right.
+**Every feature must train noticing — not collect data.** The shift from "I am this state" to "I can see this state happening and choose my response" is what gets built over time. If a feature feels like a form, it's wrong. If it feels like a mirror, it's right.
 
 ### Identity Lines (locked)
 
 - Stabilize. Then think clearly.
 - Body. Then thought.
-- A precision composure system.
+- Composure architecture.
 - The less you need the app, the more it's working.
 
 ---
