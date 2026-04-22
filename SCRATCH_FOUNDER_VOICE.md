@@ -120,6 +120,29 @@ This is also the B2B clinical channel — integration as a between-session or du
 
 ---
 
+## KetaRevive discount structure — implement before live launch
+
+**Decision:** Single-use codes, 10% off annual plan only.
+
+**Why single-use:** Prevents code leaking to non-patients. Each code works once. No sharing possible. Full attribution.
+
+**Why annual only:** Monthly is better recurring revenue but annual gets patients committed for the year. KetaRevive patients are invested in their healing — annual fits.
+
+**How to set up in Lemon Squeezy (after Bobby flips to live mode):**
+1. Discounts → Create discount
+2. 10% off, annual plan only
+3. Usage → Unique codes → generate batch of 50
+4. Download CSV
+5. Give CSV to KetaRevive — they hand one code per patient at checkout
+
+**Pricing confirmation:**
+- Standard annual: $119.88/year ($9.99/month equivalent)
+- With 10% off: $107.89/year (~$8.99/month)
+
+**One-pager needs updating before share:** Remove placeholder code, add explanation of unique code process for KetaRevive staff.
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
