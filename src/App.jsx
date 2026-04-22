@@ -13315,6 +13315,14 @@ const isSignalProfileConfigured = () => {
               {
                 q: "Can I upload screenshots to Reframe?",
                 a: "Yes. Tap 📎 to share up to 3 screenshots at once. The AI reads layout context (for example message order and attribution) to improve coaching relevance. Screenshot interpretation can still be wrong, and should not be treated as legal, medical, or definitive factual analysis. Use it as composure support and verify critical facts independently."
+              },
+              {
+                q: "Why don't I see my calendar or health data in the app?",
+                a: "Calendar and Health Connect integrations are only available in the native Android app — they require device-level permissions that aren't accessible from a browser. If you're using Stillform on the web, those integrations won't appear. Install the Android app and grant permissions in Settings > Integrations to enable them."
+              },
+              {
+                q: "Does Stillform work on tablets?",
+                a: "The web app works on any browser including tablets and iPads. The layout is optimized for phones but readable on larger screens. A dedicated tablet layout and native iPad app are planned for a future release."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
