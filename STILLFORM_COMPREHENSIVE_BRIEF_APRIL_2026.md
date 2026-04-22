@@ -13,9 +13,11 @@
 
 ### The Core Idea
 
-Composure is a way of being — not just damage control. It applies to excitement, patience, presence, professionalism, and being steady when nothing is wrong.
+Stillform is a metacognition trainer that stabilizes composure. It builds the skill of observing your own state before it drives your behavior — then choosing your response deliberately.
 
-Stillform is a daily composure practice AND a fast intervention system. Morning calibration and in-the-moment reset. Both. The product philosophy is: regulate yourself → see yourself clearly → see others clearly → let them in.
+Composure is a way of being — not just damage control. It applies to excitement, patience, presence, professionalism, and being steady when nothing is wrong. The daily practice and the in-the-moment intervention are the same skill: notice, regulate, choose.
+
+The product philosophy: regulate yourself → see yourself clearly → see others clearly → let them in.
 
 **Product philosophy:** Trainer, not a crutch. Signal Awareness Latency (how fast the user catches themselves before acting from state instead of decision) is the proof the app is building a skill they eventually own. The less you need the app, the more it's working.
 
