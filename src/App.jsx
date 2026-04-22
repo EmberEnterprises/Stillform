@@ -5758,7 +5758,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           Skip rating and continue
         </button>
         {/* Watch Sequence nudge after high-activation sessions */}
-        {preRating >= 4 && (
+        {(feelState === "angry" || feelState === "anxious" || feelState === "mixed") && (
           <div style={{ marginTop: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "left" }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
               Want to go deeper?
