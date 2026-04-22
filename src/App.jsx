@@ -3452,7 +3452,7 @@ function BodyScanTool({ onComplete }) {
   const holdTarget = area.holdSeconds;
   const holdProgress = Math.min((holdCount / holdTarget) * 100, 100);
   const renderAreaOverview = (areaName) => {
-    const highlightStyle = { fill: "rgba(201,147,58,0.28)", stroke: "var(--amber)", strokeWidth: 1 };
+    const highlightStyle = { fill: "var(--amber-20)", stroke: "var(--amber)", strokeWidth: 1 };
     return (
       <svg viewBox="0 0 180 200" width="140" height="140" style={{ overflow: "visible" }} aria-label={`${areaName} body map`}>
         <circle cx="90" cy="24" r="14" fill="none" stroke="rgba(255,255,255,0.50)" strokeWidth="1" />
