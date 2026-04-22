@@ -93,6 +93,34 @@
 
 ---
 
+## Metacognitive Therapy (MCT) — The Primary Framework
+
+**What it does:** Every feature in Stillform trains one shift: from experiencing a state to observing a state. This is the clinical definition of metacognition — thinking about your own thinking and emotional processes rather than being fused with them.
+
+**Why MCT, not just CBT:**
+CBT targets the *content* of thoughts — "is this thought rational?" MCT targets the *relationship* to thoughts — "I am having this thought" vs "I am this thought." Stillform does the latter. The app never asks users to challenge whether their thoughts are logical. It asks them to observe the state, name it, and choose a response. That is MCT.
+
+**The core MCT concepts Stillform implements:**
+
+**Detached Mindfulness (DM)** — observing thoughts and feelings without engaging, suppressing, or arguing with them. Stillform's Observe and Choose tool is detached mindfulness in structured practice: Notice → Name → Recognize → Perspective → Choose.
+
+**CAS Interruption (Cognitive Attentional Syndrome)** — breaking the worry/rumination/threat-monitoring loop. Breathing routes, somatic interrupt, and the QB pill all serve as CAS interruption — they break the loop before it compounds.
+
+**Attention Training** — flexible attentional control rather than fixated threat monitoring. Breathing redirects attention to the body. Body scan redirects to physical sensation. Both train the attentional flexibility MCT prioritizes.
+
+**Metacognitive Beliefs** — MCT addresses unhelpful beliefs about mental processes ("worrying keeps me safe," "I can't control my thoughts"). Stillform's AI is designed to surface these patterns without labeling them — "I've noticed something" not "you have this disorder."
+
+**Who says so:**
+- Wells (2009) — *Metacognitive Therapy for Anxiety and Depression* — the foundational clinical text
+- Wells & Matthews (1994) — Attention and Emotion: A Clinical Perspective — original CAS model
+- Wells (2000) — *Emotional Disorders and Metacognition* — detached mindfulness framework
+- Normann & Morina (2018) — meta-analysis of MCT efficacy across anxiety and depression — *Frontiers in Psychology* (effect sizes exceeding CBT in several conditions)
+- Fisher & Wells (2008) — metacognitive therapy vs CBT for OCD — MCT produced larger effect sizes
+
+**If they push back:** "Stillform isn't CBT. It doesn't ask you to challenge your thoughts. It trains you to observe them — which is the evidence base for Metacognitive Therapy. The shift from 'I am anxious' to 'I'm noticing anxiety' is the entire product. Wells called it detached mindfulness. We built a daily practice around it."
+
+---
+
 ## Pattern Recognition (AI Learning)
 
 **What it does:** AI tracks session notes, recognizes recurring patterns, and surfaces observations over time

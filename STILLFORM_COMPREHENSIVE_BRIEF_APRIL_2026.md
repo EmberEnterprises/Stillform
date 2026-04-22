@@ -9,7 +9,7 @@
 
 **One sentence:** Stillform is a composure architecture — how you carry yourself every day, in every moment that matters.
 
-**Category:** Composure Architecture. Metacognition applied to daily life — building the inner clarity that produces outward steadiness, better decisions, and fewer regrets.
+**Category:** Composure Architecture. Metacognitive Therapy (MCT) applied to daily life — building the skill of observing your own state before it drives behavior, then choosing deliberately. Every feature trains the shift from experiencing a state to observing one.
 
 ### The Core Idea
 
@@ -367,7 +367,10 @@ Every feature traces to published research:
 - Implementation intentions → Gollwitzer (1999) — assessment pre-loads regulation pathway
 - Fractal visuals → Taylor (UO), Hagerhall et al. (2015) — natural fractals reduce stress up to 60%
 - Interpersonal microbiases → Nature Communications (2025)
-- Metacognition / Observer → metacognitive therapy research (Wells), mindfulness-based stress reduction (Kabat-Zinn)
+- Metacognitive Therapy (MCT) → Wells (2009) — PRIMARY framework. Detached mindfulness, CAS interruption, attention training. Stillform is more MCT than CBT — it doesn't challenge thought content, it changes the relationship to thoughts.
+- Wells & Matthews (1994) — Cognitive Attentional Syndrome (CAS) — the worry/rumination loop Stillform interrupts
+- Normann & Morina (2018) — MCT meta-analysis, effect sizes exceeding CBT in several conditions
+- Mindfulness-based stress reduction → Kabat-Zinn (supporting, not primary)
 
 ---
 
