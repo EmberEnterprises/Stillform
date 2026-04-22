@@ -1886,3 +1886,67 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 - Google Play closed testing build
 - 3-5 real testimonials
 - Reddit post
+
+---
+
+## April 22, 2026 — Polish Pass + Watch Audit
+
+### ✅ Shipped today
+
+**Offline fallback rewritten:**
+- Old: "Offline self-guided reframe (AI is temporarily unavailable): 1) Name the feeling..."
+- New: "Connection dropped. Working through it on your own for now." — direct prompts, no numbering
+- Error banner: "Connection dropped. Working through it on your own for now."
+
+**My Progress language audit:**
+- Subtitle: "What your data shows about how you're building the skill — not a score, a mirror."
+- Tool effectiveness bar: CSS gradient variables (no hardcoded amber)
+- All language observational throughout — no diagnostic verdicts
+
+**Integrations message fixed:**
+- Was: "Calendar and health integrations are not available on Android yet." (WRONG)
+- Now: Correctly explains native Android app requirement for web users
+
+**FAQ additions:**
+- Calendar/Health native-only explanation
+- Tablet/iPad support note
+
+**Galaxy Watch companion — audit complete:**
+- WearBreatheActivity.java — fully implemented (haptic breathing, all 4 patterns)
+- WearListenerService.java — fully implemented (receives /stillform/breathe messages)
+- WatchBridge.java + WatchBridgePlugin.java — phone side fully implemented
+- wear module included in settings.gradle, build.gradle configured
+- watchBridge.startBreathing() called when breathing session starts in app
+- STATUS: Code complete. Needs wear APK installed on Galaxy Watch Ultra to test.
+
+### 🔴 Galaxy Watch Ultra — how to install wear APK
+1. Enable developer mode on watch: Settings → About → Software → tap version 5x
+2. Enable ADB debugging: Settings → Developer options → ADB debugging ON
+3. Enable WiFi debugging on watch
+4. Connect: `adb connect <watch-ip>:5555`
+5. Build wear APK: `cd android && ./gradlew :wear:assembleDebug`
+6. Install: `adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk`
+7. Start breathing session on phone — watch should launch haptic breathing automatically
+
+### 🔴 Remaining before launch (priority order)
+**Blocking:**
+1. Paywall live — Bobby triggers Lemon Squeezy live mode switch
+2. Galaxy Watch — wear APK install + validation on Galaxy Watch Ultra
+3. Apple Watch + HealthKit — need iPhone + Apple Watch device
+4. Google Play closed testing build (14-day clock must run)
+5. TestFlight build
+6. 3–5 real testimonials
+7. Reddit post
+
+**Should do before launch:**
+8. In-app check-in reminders for web (push notifications are native-only)
+9. Subscribe button/nav theme cleanup (currently amber — by design via btn-primary, but verify on all themes)
+10. Biometric lock native test
+11. Calendar + Health → AI context verification on device
+12. Science sheet update for metacognition features
+
+**Post-launch (deliberate):**
+- Tablet/iPad responsive layout
+- Sound packs
+- Shareable composure card
+- PDF/CSV export polish
