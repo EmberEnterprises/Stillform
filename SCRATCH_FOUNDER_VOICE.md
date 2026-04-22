@@ -80,6 +80,24 @@ This is also why the privacy policy distinguishes between what is stored locally
 
 ---
 
+## On neuroplasticity windows (Arlin's words, April 22, 2026)
+
+"Promote this as a tool for ketamine users without making the statement of so. Instead of therapy to work out what they are thinking — imagine the relaxation from breath, body scan, and then to be able to talk into the AI and let your mind wander. It is a metacognition app. Should work great with a neuroplasticity tool."
+
+### Why this matters strategically
+
+Ketamine therapy creates a neuroplasticity window — the brain is more malleable, patterns are more accessible, defenses are lower. Stillform is precisely the tool you want in that window:
+- Breathe settles the nervous system during the experience
+- Body Scan keeps the user grounded and present
+- Reframe AI listens without judgment while the mind is more open than usual
+- No labels, no verdicts — just reflection and choice
+
+You don't position it explicitly. The product does the work. Clinicians and patients who know, know.
+
+This is also the B2B clinical channel — integration as a between-session or during-session companion for ketamine-assisted therapy practices. Strict guardrail: never position as medical tool, never claim therapeutic outcomes. Position as a composure and reflection companion.
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
