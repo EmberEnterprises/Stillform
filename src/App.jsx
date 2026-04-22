@@ -643,7 +643,7 @@ const styles = `
     transition: all 0.2s;
   }
 
-  .btn-send:hover { background: #d9a34a; }
+  .btn-send:hover { background: var(--amber); filter: brightness(1.15); }
   .btn-send:disabled { opacity: 0.5; cursor: not-allowed; }
 
   @keyframes pulse {
@@ -10905,7 +10905,7 @@ const isSignalProfileConfigured = () => {
           }}>
             <div style={{
               fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
-              color: "#c9933a", letterSpacing: "0.04em", marginBottom: 8,
+              color: "var(--amber)", letterSpacing: "0.04em", marginBottom: 8,
               opacity: 0, animation: "splashIn 1.2s ease-out 0.3s forwards"
             }}>Stillform</div>
             <div style={{
