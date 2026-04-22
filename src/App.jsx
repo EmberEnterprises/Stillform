@@ -6376,9 +6376,9 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What fired first?
+        What's loudest right now?
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First instinct. Don't overthink it.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>Start with the signal that is easiest to recognize.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {signalOptions.map(opt => (
           <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={optBtn(signalOrigin === opt.id)}>
@@ -6399,14 +6399,14 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What do you need?
+        What would help first?
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>Choose the layer that needs attention first. The support follows from there.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
-          { id: "settle", label: "Settle", sub: "Bring the system down. Body first." },
-          { id: "understand", label: "Understand", sub: "Get distance. Clarify what's happening." },
-          { id: "catch", label: "Just catch it", sub: "Notice without intervening." },
+          { id: "settle", label: "Settle the system", sub: "Lower the load so clear thought is easier to access." },
+          { id: "understand", label: "Get clear", sub: "Create distance from the story and see the pattern more cleanly." },
+          { id: "catch", label: "Stay with the signal", sub: "Notice it without forcing a response too quickly." },
         ].map(opt => (
           <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn(false)}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
@@ -12266,7 +12266,7 @@ const isSignalProfileConfigured = () => {
                       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
                       WebkitTapHighlightColor: "transparent", marginBottom: 8, letterSpacing: "0.02em"
                     }}>
-                      Begin
+                      Start here
                     </button>
 
                     {/* Need support fast? — secondary affordance only */}
@@ -12276,7 +12276,7 @@ const isSignalProfileConfigured = () => {
                         fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                         letterSpacing: "0.02em", padding: "4px 0"
                       }}>
-                        Need support fast? ↓
+                        Need support right away? ↓
                       </button>
                     </div>
                   </>
@@ -13362,15 +13362,15 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A metacognition trainer that stabilizes composure. One practice, three moments: Set the tone in the morning. Observe and Choose throughout the day. Close the loop in the evening. The tools — Breathe, Body Scan, Reframe — are supports the system routes you to. You don't pick them. The practice does."
+                a: "A metacognitive composure practice. It helps you read how your system handles pressure, separate signal from story, and use the right support when clear action matters. The loop is simple: set the tone, read the signal, then close the loop and learn from it."
               },
               {
                 q: "What is the method behind Stillform?",
-                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift: from 'I am this state' to 'I can see this state happening and choose my response.' Observe and Choose is the central practice. Breathe, Body Scan, and Reframe are supports the system routes you to based on what fired first and what you need. Calibration sets your routing profile so the system knows how you process."
+                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift is from being inside a state to recognizing it clearly enough to choose your response. Calibration maps how your system tends to process pressure, and the platform uses that map to route support with more precision."
               },
               {
                 q: "What science basis does Stillform use?",
-                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
+                a: "Stillform draws from metacognitive therapy, behavioral and cognitive neuroscience, and stress-regulation research: paced breathing for autonomic downshift, body scanning for interoceptive awareness, and cognitive distancing in Reframe so you can separate signal from story. It is a composure and performance platform, not diagnosis or treatment."
               },
               {
                 q: "What is State to Statement?",
@@ -13378,11 +13378,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "Who is this for?",
-                a: "Anyone who wants more control over how they show up. Not just in hard moments — every day. The person who wants to walk into any room composed, handle whatever comes, and know they're getting better at it over time."
+                a: "Anyone who wants more command over how they show up. Not just when pressure spikes, but every day. The person who wants clearer judgment, steadier access to composure, and a better read on how their own system works."
               },
               {
                 q: "What does the AI actually do?",
-                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your signal history and session patterns."
+                a: "It helps you get clear on what your system is doing. It names the pattern, separates signal from story, and helps you decide the next move without getting dragged by momentum. Over time it gets more precise because it has more context about how you tend to process pressure."
               },
               {
                 q: "What does 'status is junk code for the ego' mean?",
