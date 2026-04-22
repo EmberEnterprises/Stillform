@@ -88,7 +88,17 @@ The metacognition tool. A structured reflection sequence: Notice → Name → Re
 
 ### Onboarding Flow
 
-1. Tutorial (condensed, science-backed, swipe navigation)
+**Why calibration exists and why it's non-negotiable:**
+Stillform is a metacognition trainer built around the individual — not a generic user. Without calibration, the AI is generic, routing is guesswork, and the system has no baseline to measure growth against. Calibration is the platform. Everything that runs on top of it — every tool, every AI response, every progress metric — is more accurate because of it. It is a one-time setup, takes about 3 minutes, and is explicitly framed to users as such.
+
+**Tutorial opening page (what users see first):**
+"Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them. Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds."
+
+**Tutorial calibration slide (what users see before setup begins):**
+"Before anything else works, the system needs to know how you work. This is a one-time calibration — takes about 3 minutes. After this, every tool, every AI response, and every recommendation is built around you specifically. Not a generic user. You. The more honestly you answer, the more accurately the system reads your signals. This is not a quiz. There are no wrong answers."
+
+**Calibration sequence:**
+1. Tutorial (4 slides — opening, calibration explanation, Go/No-Go TTFV, daily loop)
 2. How You Process assessment (3 scenarios, determines thought-first/body-first/balanced)
 3. Signal Profile (body areas where intensity activates first)
 4. Pattern Check (10 cognitive distortions — blind spot profiling)

@@ -10952,17 +10952,18 @@ const isSignalProfileConfigured = () => {
               kicker: "Opening page",
               title: "Stillform",
               openingLines: [
-                "Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.",
-                "Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.",
+                "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
+                "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
                 "Stillform. Composure Architecture."
               ]
             },
             {
               kicker: "Tutorial · 1 of 4",
-              title: "Calibration — Build Your Baseline",
+              title: "This Setup Is For You",
               paragraphs: [
-                "Calibration establishes your operating profile in one sequence: How You Process, then Signal Profile + Pattern Check.",
-                "It sets your starting recommendations while preserving full tool access, and adapts as real usage data accumulates."
+                "Before anything else works, the system needs to know how you work. This is a one-time calibration — takes about 3 minutes.",
+                "After this, every tool, every AI response, and every recommendation is built around you specifically. Not a generic user. You.",
+                "The more honestly you answer, the more accurately the system reads your signals. This is not a quiz. There are no wrong answers."
               ]
             },
             {

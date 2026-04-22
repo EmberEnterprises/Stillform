@@ -2066,3 +2066,46 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 4. Science sheet — update for metacognition features
 5. Privacy policy — any new data flows from recovered time
 
+
+---
+
+## Calibration — Why It Exists (Critical Product Context)
+
+This must be understood by anyone working on or evaluating Stillform.
+
+**Calibration is the platform. Everything else runs on top of it.**
+
+Stillform is not a generic wellness tool. It is a metacognition trainer built around the individual user. Without calibration:
+- The AI gives generic responses — it doesn't know how the user processes intensity
+- Routing is guesswork — body-first users get thought-first tools and vice versa
+- Progress metrics have no baseline to measure against
+- Signal Awareness Latency cannot be tracked because there's no starting point
+
+The analogy: installing a platform like Windows or macOS before running applications. The setup is not friction — it's the foundation. Every tool, every AI response, every recommendation is more accurate because calibration happened. Users who skip it get a weaker product. Users who complete it get a system that actually knows them.
+
+**It is a one-time setup. Takes about 3 minutes.**
+
+**What users see in the tutorial before calibration:**
+
+Opening page:
+"Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them. Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds."
+
+Calibration slide:
+"Before anything else works, the system needs to know how you work. This is a one-time calibration — takes about 3 minutes. After this, every tool, every AI response, and every recommendation is built around you specifically. Not a generic user. You. The more honestly you answer, the more accurately the system reads your signals. This is not a quiz. There are no wrong answers."
+
+**What calibration collects:**
+1. How You Process — 3 scenarios → thought-first / body-first / balanced
+2. Signal Profile — which body areas activate first under intensity
+3. Pattern Check — 10 cognitive distortions, blind spot profiling
+4. Default breathing pattern — Quick Reset or Deep Regulate
+
+**What calibration unlocks:**
+- AI routes to correct tool type automatically
+- AI knows which distortions to watch for in real time
+- AI can reference prior signal patterns from session 3+
+- Home screen prioritizes the right tool based on regulation type
+- 7-session milestone detects mismatch between assessed type and actual usage
+- Signal Awareness Latency is trackable from session 1
+
+**Design principle:** Calibration must never feel like a form. It must feel like the system is learning how to serve this specific person. Every question exists because the answer changes how the product behaves.
+
