@@ -64,6 +64,22 @@ This is also why the privacy policy distinguishes between what is stored locally
 
 ---
 
+## Architect-to-architect audit (Gemini, April 22, 2026)
+
+"You are building a high-precision tool for a low-precision state. That is a dangerous engineering gap."
+
+**1. The Observer Paradox** — When PFC is partially offline, 4 structured prompts might as well be 400. If the friction of doing the metacognition is higher than the relief of reacting to the ego, they close the app and yell at their spouse instead. The app becomes a reminder of their failure to be composed.
+
+**2. AI Sharpness vs Gaslighting** — If GPT-4o tries to be direct but misinterprets the intensity or nature of the user's state, it feels like a cold judgmental machine. Nothing is more infuriating to a person in a redline state than an AI that gets the vibe wrong.
+
+**3. Ghost Echo and the Shame Cycle** — If a user is currently experiencing a massive setback, seeing a Ghost Echo of their 2-minute recovery from three weeks ago can feel like a taunt. "You used to be better at this." In the wrong state, this doesn't build pride in effort — it builds grief of current state.
+
+**4. Technical Debt of Zero-Bloat** — 14,500-line App.jsx is a monolith. As native integrations are added it becomes brittle. A tool meant to settle the system cannot afford a 2-second frame drop.
+
+**The Audit Question:** If I'm redlining right now and I open Stillform, and the first thing it does is ask me to Notice and Name instead of just letting me breathe, have you already lost me?
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
