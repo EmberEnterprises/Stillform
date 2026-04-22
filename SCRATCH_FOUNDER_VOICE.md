@@ -48,6 +48,22 @@ Stillform is as much a philosophical stance as it is a software product. In a wo
 
 ---
 
+## On the two-layer notes system (Arlin's words, April 22, 2026)
+
+"The notes session the user sees and the notes session AI sees are separate. This is to keep people from being judged when AI is purely labeling things for its own data process so it can continue to help the user."
+
+### Why this matters
+
+The AI writes internal session notes in clinical/pattern language — it needs that precision to track trends, recognize distortions, and calibrate future responses. But that language would feel like a label or verdict if the user saw it.
+
+What the user sees is human — warm, specific, observational. What the AI uses internally is functional — pattern recognition for continuity of care.
+
+Two layers. Same integrity standard. The user is never exposed to the mechanical layer.
+
+This is also why the privacy policy distinguishes between what is stored locally (user-facing notes) and what is used as AI context (internal session summaries). The user owns their experience. The AI uses the pattern. Never the other way around.
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
