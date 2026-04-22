@@ -4905,18 +4905,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         : "a prior session";
       return `${dateStr}: shifted +${Number(s.delta).toFixed(1)}`;
     });
-    const step5 = evidence.length
-      ? `5) Evidence from your own history: ${evidence.join(" | ")}. You've shifted before — you can shift again.`
-      : "5) Completion: Pick one tiny action you'll take in the next 90 seconds. Small is enough.";
+    const evidenceLine = evidence.length
+      ? `You've shifted before — ${evidence.map(e => e.replace("shifted ", "")).join(", ")}. That's real.`
+      : null;
     return [
-      "Offline self-guided reframe (AI is temporarily unavailable):",
-      "1) Name the feeling in one line. No story yet.",
-      "2) What might your brain be adding on top of the facts?",
-      "3) If your closest friend said this, what would you tell them in one honest sentence?",
-      "4) One action in the next 90 seconds that helps your future self.",
-      step5,
+      "Connection dropped. Work through this on your own for now.",
       "",
-      `Your original message: "${textToSend.trim().slice(0, 260)}${textToSend.trim().length > 260 ? "..." : ""}"`
+      `You said: "${textToSend.trim().slice(0, 200)}${textToSend.trim().length > 200 ? "..." : ""}"`,
+      "",
+      "Name what you're actually feeling. One word or phrase.",
+      "",
+      "What's the fact — separate from what your mind is adding to it?",
+      "",
+      "What would you tell someone you respect if they said exactly this to you?",
+      "",
+      "One thing you can do in the next 90 seconds. Not later. Now.",
+      ...(evidenceLine ? ["", evidenceLine] : [])
     ].join("\n");
   };
 
@@ -5250,7 +5254,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }
 
       if (!parsed) {
-        runSelfGuidedFallback(textToSend, "AI connection is unstable right now. Self-guided mode is active.");
+        runSelfGuidedFallback(textToSend, "Connection dropped. Working through it on your own for now.");
         return;
       }
 
@@ -7893,7 +7897,7 @@ function MyProgress({ onBack }) {
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
       <button className="intervention-back" onClick={onBack}>← Back</button>
       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>This tracks how your processing pattern performs over time — not just activity, but transfer under pressure.</p>
+      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>What your data shows about how you're building the skill — not a score, a mirror.</p>
 
       {sessions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
@@ -8658,7 +8662,7 @@ function MyProgress({ onBack }) {
                             <div style={{ minWidth: 120 }}>
                               <div style={{ fontSize: 13, color: "var(--text)" }}>{labels[t.id] || t.id}</div>
                               <div style={{ width: 120, height: 5, borderRadius: 999, background: "rgba(255,255,255,0.08)", marginTop: 5, overflow: "hidden" }}>
-                                <div style={{ width: `${shiftPct}%`, height: "100%", background: "linear-gradient(90deg, rgba(201,147,58,0.45), var(--amber))" }} />
+                                <div style={{ width: `${shiftPct}%`, height: "100%", background: "linear-gradient(90deg, var(--amber-dim), var(--amber))" }} />
                               </div>
                             </div>
                             <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "right" }}>
@@ -14176,7 +14180,7 @@ const isSignalProfileConfigured = () => {
                 {integrationContext.healthLastRetryAt && <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>Health retry queued: {new Date(integrationContext.healthLastRetryAt).toLocaleString()}</div>}
                 {!integrationsSupportedOnPlatform && (
                   <div style={{ marginTop: 12, marginBottom: 6, fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                    {nativePlatform === "android" ? "Calendar and health integrations are not available on Android yet." : "Calendar and health integrations are only available in supported native builds."}
+                    {"Calendar and Health Connect integrations require the native Android app. Install from the Play Store and grant permissions here to enable them."}
                   </div>
                 )}
                 <div style={{ marginTop: 12, display: "flex", gap: 8, flexWrap: "wrap" }}>
