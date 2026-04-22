@@ -5801,8 +5801,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
 
       {/* Ghost echo — faint past resilience */}
+      {/* Research: Bandura self-efficacy — evidence shown AFTER positive outcome reinforces skill */}
+      {/* Only shown when user is not in high-activation state — prevents shame comparison */}
       {(() => {
         try {
+          // Suppress during high-activation states — would read as "you used to be better"
+          if (feelState === "angry" || feelState === "anxious") return null;
+          const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+          if (bioFilter.includes("activated")) return null;
           const sessions = getSessionsFromStorage();
           const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
           if (wins.length === 0) return null;
@@ -12124,12 +12130,26 @@ const isSignalProfileConfigured = () => {
                   </div>
                 ) : (
                 <>
-                {/* Primary tool — determined by regulation type */}
+                {/* Primary tool — determined by regulation type, overridden by activation state */}
+                {/* Research: top-down strategies fail during physiological activation (Ochsner, Gross) */}
+                {(() => {
+                  const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                  const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
+                  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+                  const hwActivated = checkinToday?.hardware?.some(h => ["activated", "depleted", "pain"].includes(h));
+                  const needsBodyFirst = isPhysActivated || hwActivated;
+                  return null; // just computing — used below
+                })()}
                 <button onClick={async () => {
-                  if (isThoughtFirst) {
-                    setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                  const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                  const isPhysActivated = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain");
+                  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+                  const hwActivated = checkinToday?.hardware?.some(h => ["activated", "depleted", "pain"].includes(h));
+                  const needsBodyFirst = isPhysActivated || hwActivated;
+                  if (needsBodyFirst || isBodyFirst) {
+                    startPathway("calm"); // Breathe first — body regulation before cognitive processing
                   } else {
-                    startPathway("calm");
+                    setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                   }
                 }} style={{
                   width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
