@@ -18,6 +18,12 @@ I see people flipping out all the time, especially on social media, or even beca
 
 ---
 
+## On pride and composure (Arlin's words, April 22, 2026)
+
+"It's feedback that the effort they are putting is working for them. Rather than be proud and dismissive of others — be proud in your efforts and accept others."
+
+---
+
 ## Notes for use
 
 - "A pause rather than a pout in their chest" — this is the product in one line. Consider for Reddit opener, App Store description, or promo.
