@@ -1122,28 +1122,28 @@ const TOOLS = [
     id: "breathe",
     icon: "◎",
     name: "Breathe",
-    desc: "Smart breathing — the app picks the right pattern for what you're feeling, then grounds you.",
+    desc: "Use breath to steady the system so clear thought is easier to access.",
     time: "3 min"
   },
   {
     id: "scan",
     icon: "◉",
     name: "Body Scan",
-    desc: "Locate activation and release it with targeted acupressure.",
+    desc: "Read where your system is carrying the signal, then work with it through focused acupressure.",
     time: "10 min"
   },
   {
     id: "reframe",
     icon: "✦",
     name: "Reframe",
-    desc: "Talk through what's happening. AI reads exactly what you say and helps you see it differently.",
+    desc: "Clarify the story your mind is building so you can respond from discernment, not momentum.",
     time: "Open"
   },
   {
     id: "metacognition",
     icon: "✦",
     name: "Observe and Choose",
-    desc: "Notice what's happening in your mind and body — then choose your response deliberately.",
+    desc: "Step out of the state, see what your system is doing clearly, and choose your next move deliberately.",
     time: "5 min"
   },
   {
