@@ -14064,7 +14064,7 @@ const isSignalProfileConfigured = () => {
                         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                           <div>
                             <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
-                            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress</div>
+                            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress. Device-specific — does not sync across devices.</div>
                           </div>
                           <button onClick={() => { biometric.setEnabled(!bioOn); refreshSettings(); }} style={{
                             background: bioOn ? "var(--amber)" : "var(--border)",
