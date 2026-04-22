@@ -1778,13 +1778,13 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 ### ✅ Metacognition features shipped
 
 **Signal Awareness Latency — hero metric in My Progress:**
-- Tracks autonomous exits (Watch Sequence "no tool needed" choices) over time
+- Tracks autonomous exits (Observe and Choose "no tool needed" choices) over time
 - Session duration trend — shorter sessions = catching it earlier
 - Month-over-month autonomous exit comparison
 - Displayed as first card in "Proof in your data" section, above Recovery Speed
 
 **Autonomous exit celebration enhanced:**
-- Watch Sequence completion screen now shows amber glow card with count
+- Observe and Choose completion screen now shows amber glow card with count
 - "The observer is getting faster" framing
 - "The less you need the app, the more it's working"
 
@@ -1795,7 +1795,7 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 - No mismatch: "7 sessions. How's it feeling?" — conversational not diagnostic
 - Opens Reframe directly vs routing to Settings
 
-**Watch Sequence nudge after high-activation Reframe sessions:**
+**Observe and Choose nudge after high-activation Reframe sessions:**
 - Appears when preRating >= 4
 - Offers depth — "not just regulate it, see the pattern under it"
 - Non-blocking, below skip button
@@ -1843,13 +1843,13 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 ### ✅ Metacognition features shipped
 
 **Signal Awareness Latency — hero metric in My Progress:**
-- Tracks autonomous exits (Watch Sequence "no tool needed" choices) over time
+- Tracks autonomous exits (Observe and Choose "no tool needed" choices) over time
 - Session duration trend — shorter sessions = catching it earlier
 - Month-over-month autonomous exit comparison
 - Displayed as first card in "Proof in your data" section, above Recovery Speed
 
 **Autonomous exit celebration enhanced:**
-- Watch Sequence completion screen now shows amber glow card with count
+- Observe and Choose completion screen now shows amber glow card with count
 - "The observer is getting faster" framing
 - "The less you need the app, the more it's working"
 
@@ -1857,7 +1857,7 @@ Need to audit and fix all with same NETLIFY_BASE_URL pattern
 - Detects tool usage mismatch vs assessed processing type
 - Opens Reframe directly vs routing to Settings
 
-**Watch Sequence nudge after high-activation Reframe sessions:**
+**Observe and Choose nudge after high-activation Reframe sessions:**
 - Appears when preRating >= 4
 - Offers depth — "not just regulate it, see the pattern under it"
 

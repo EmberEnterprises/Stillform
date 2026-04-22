@@ -5761,14 +5761,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         >
           Skip rating and continue
         </button>
-        {/* Watch Sequence nudge after high-activation sessions */}
+        {/* Observe and Choose nudge after high-activation sessions */}
         {(feelState === "angry" || feelState === "anxious" || feelState === "mixed") && (
           <div style={{ marginTop: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "left" }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
               Want to go deeper?
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
-              You came in at a high intensity. The Watch Sequence helps you see the pattern under the moment — not just regulate it.
+              You came in at a high intensity. Observe and Choose helps you see the pattern under the moment — not just regulate it.
             </div>
             <button onClick={() => {
               // Save rating then route to metacognition — don't call finishReframeSession
@@ -5781,7 +5781,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               color: "var(--amber)", fontSize: 12, cursor: "pointer", padding: "8px 14px",
               fontFamily: "'DM Sans', sans-serif"
             }}>
-              Open Watch Sequence →
+              Open Observe and Choose →
             </button>
           </div>
         )}
@@ -5888,7 +5888,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           style={{ fontSize: 11, padding: "6px 10px" }}
           onClick={() => setShowWatchChooseFlow(true)}
         >
-          Reframe watch sequence →
+          Observe and Choose →
         </button>
       </div>
 
@@ -7501,7 +7501,7 @@ function MyProgress({ onBack }) {
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
 
-  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Reframe · Watch Sequence" };
+  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Reframe · Observe and Choose" };
   const toolCounts = {};
   sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
   const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
@@ -8599,7 +8599,7 @@ function MyProgress({ onBack }) {
           // Recommendation — one thing based on data, factual only
           let recommendation = null;
           if (underusedHighPerformer) {
-            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence" };
+            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Observe and Choose" };
             recommendation = `${toolLabels[underusedHighPerformer.id] || underusedHighPerformer.id} shows your strongest avg shift (+${underusedHighPerformer.avgShift.toFixed(1)}) but accounts for ${underusedHighPerformer.pct}% of sessions.`;
           } else if (shiftTrend !== null && shiftTrend > 0.3) {
             recommendation = `Avg composure shift increased by +${shiftTrend.toFixed(1)} compared to last week.`;
@@ -8654,7 +8654,7 @@ function MyProgress({ onBack }) {
                     <div>
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
-                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Watch Sequence", signals: "Map Signals", bias: "Pattern Check" };
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Reframe · Observe and Choose", signals: "Map Signals", bias: "Pattern Check" };
                         const shift = t.avgShift ?? 0;
                         const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
@@ -12399,7 +12399,7 @@ const isSignalProfileConfigured = () => {
                   breathe: "Breathe",
                   ground: "Breathe",
                   reframe: "Reframe",
-                  metacognition: "Reframe · Watch Sequence",
+                  metacognition: "Reframe · Observe and Choose",
                   "body-scan": "Body Scan",
                   scan: "Body Scan",
                   panic: "Panic",
