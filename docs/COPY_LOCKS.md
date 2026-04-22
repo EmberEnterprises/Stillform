@@ -39,8 +39,8 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Setup bridge signal status labels | CONSTRAINED | `Status: configured` / `Status: not configured` |
 | FAQ method question | CONSTRAINED | `What is the method behind Stillform?` |
 | FAQ science question | CONSTRAINED | `What science basis does Stillform use?` |
-| FAQ method answer | CONSTRAINED | `One architecture, three loops: Morning Check-In sets context, in-the-moment regulation tools (Reframe, Breathe, Body Scan) stabilize execution, and End-of-Day Close consolidates learning. Calibration sets your default routing (thought-first or body-first) so the right tool appears first.` |
-| FAQ science answer | CONSTRAINED | `Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment.` |
+| FAQ method answer | CONSTRAINED | `Stillform is a metacognitive composure practice. Calibration maps how your system tends to process pressure so the platform can route support intelligently. From there, daily use follows one loop: set the tone, read the signal, use the right support, then close the loop and learn from it.` |
+| FAQ science answer | CONSTRAINED | `Stillform draws from metacognitive therapy, behavioral and cognitive neuroscience, and stress regulation research: paced breathing for autonomic downshift, body scanning for interoceptive awareness, and cognitive distancing in Reframe so you can separate signal from story. It is a composure and performance platform, not diagnosis or treatment.` |
 
 ## Structural Locks
 
