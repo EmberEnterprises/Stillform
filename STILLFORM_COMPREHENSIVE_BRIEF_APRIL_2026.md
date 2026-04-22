@@ -40,8 +40,8 @@ The product philosophy: regulate yourself → see yourself clearly → see other
 
 - **Hosting:** Netlify Pro — stillformapp.com via Cloudflare
 - **Repo:** GitHub: EmberEnterprises/Stillform
-- **Framework:** React + Vite (src/App.jsx — ~7,900 lines)
-- **AI:** Claude API (claude-haiku-4-5-20251001) via Netlify serverless function (netlify/functions/reframe.js)
+- **Framework:** React + Vite (src/App.jsx — ~14,500 lines)
+- **AI:** OpenAI GPT-4o via Netlify serverless function (netlify/functions/reframe.js)
 - **Analytics:** Plausible — live
 - **PWA:** manifest.json + sw.js — installable on iOS and Android
 - **Native:** Capacitor 8 — Android platform synced, iOS initialized
@@ -77,7 +77,7 @@ Two entry points: "Settle the system" (body overwhelm) and "I need to think clea
 6 acupressure points with timed holds. Body schematic SVGs. Auto-advances. Completion: "Signal cleared."
 
 ### 3. Reframe (AI)
-The AI relationship tool. Single mode — auto-routes based on feel state and input content. Claude API via Netlify function. Rate limited 10 req/IP/min. Conversation persistence via AES-GCM encrypted localStorage. History capped at 10 messages. AI coaching intensity scales silently with session count (<3 no patterns, 3-12 gentle, 12+ direct).
+The AI relationship tool. **User-facing:** one AI that adapts to the user — no mode buttons, no configuration. **Implementation:** internally routes across calm, clarity, and hype modes based on feel state and input content. OpenAI GPT-4o via Netlify function. Rate limited 10 req/IP/min. Conversation persistence via AES-GCM encrypted localStorage. History capped at 10 messages. AI coaching intensity scales silently with session count (<3 no patterns, 3-12 gentle, 12+ direct).
 
 ### 4. Observe and Choose
 The metacognition tool. A structured reflection sequence: Notice → Name → Recognize → Perspective → Choose. Users work through 4 prompts about what happened in their mind, then choose: Breathe, Sit with it (self-regulated), Talk it through (Reframe), or Move on (autonomous — no tool needed). Autonomous exits are tracked as Signal Awareness Latency proof.
@@ -205,8 +205,8 @@ stillform_sessions, stillform_journal, stillform_signal_profile, stillform_bias_
 ## Native Android (Current State)
 
 ### What Works
-- Health Connect — reads sleep hours, HRV (RMSSD), resting HR from last 24h. Stillform appears in Health Connect permissions list.
-- Calendar — reads events from next 48h. Permission granted in phone settings.
+- Health Connect — code reads sleep hours, HRV (RMSSD), resting HR from last 24h. Permissions granted, Stillform appears in Health Connect list. **Data flow to AI context not yet confirmed on device.**
+- Calendar — code reads events from next 48h. Permission granted in phone settings. **Data flow to AI context not yet confirmed on device.**
 - Biometric lock — app-open gate + foreground resume, optional in Settings.
 - Push notifications — permission requested on first launch (checks existing state first to avoid repeat prompts).
 - Widget — home screen widget, one tap → breathing screen.
@@ -337,7 +337,7 @@ adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk
 - The less you need the app, the more it's working. Dependency = failure.
 - Metacognition is the product. Every feature trains noticing. If it feels like a form, it's wrong. If it feels like a mirror, it's right.
 - Signal Awareness Latency (how fast the user catches themselves) is the proof metric. Not DAU, not session count.
-- "Observe and Choose" is the name for the metacognition tool — not "Watch Sequence" (sounds like hardware).
+- "Observe and Choose" is the user-facing name for the metacognition tool — not "Watch Sequence" (sounds like hardware). Plausible analytics events intentionally retain "Watch Sequence" naming for analytics continuity — this is not a bug.
 
 ---
 
