@@ -6376,12 +6376,20 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        Where did it start?
+        {isBodyFirst ? "Where is the system carrying it?" : isThoughtFirst ? "What is the mind doing right now?" : "What's loudest right now?"}
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First signal. Don't analyze it yet.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>
+        {isBodyFirst ? "Start in the body. First read." : isThoughtFirst ? "Start in the thought. First read." : "Don't overthink it. First read."}
+      </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {signalOptions.map(opt => (
-          <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={optBtn(signalOrigin === opt.id)}>
+          <button key={opt.id} onClick={() => {
+            setSignalOrigin(opt.id);
+            // Fast-lane: skip Q2 for highly legible signals matched to calibration
+            if (opt.id === "body" && isBodyFirst) { onRoute("body", "settle"); return; }
+            if (opt.id === "thought" && isThoughtFirst) { onRoute("thought", "understand"); return; }
+            setStep(1);
+          }} style={optBtn(signalOrigin === opt.id)}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
             <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
           </button>
@@ -6399,14 +6407,14 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What does this moment need?
+        {isBodyFirst ? "What does the body need first?" : isThoughtFirst ? "What does the mind need first?" : "What would help first?"}
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The right support follows from here.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
-          { id: "settle", label: "Settle", sub: "The body is running. Bring it down first." },
-          { id: "understand", label: "Understand", sub: "Something's there. Get some distance from it." },
-          { id: "catch", label: "Just name it", sub: "Notice the signal. That's enough for now." },
+          { id: "settle", label: "Settle the system", sub: isBodyFirst ? "The body is running. Bring it down." : "Something physical needs to come down first." },
+          { id: "understand", label: "Get clear", sub: isThoughtFirst ? "The mind is running. Get distance from it." : "Something's there. Get some distance from it." },
+          { id: "catch", label: "Stay with it", sub: "Notice the signal. That's enough for now." },
         ].map(opt => (
           <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn(false)}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
@@ -11974,6 +11982,23 @@ const isSignalProfileConfigured = () => {
                    All three practice sections live inside one visual container.
                    Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
               */}
+              {/* AUTH ENTRY — visible on Home when signed out */}
+              {!syncSignedIn && (
+                <div style={{
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  padding: "10px 14px", marginBottom: 12,
+                  background: "none", border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)", cursor: "pointer"
+                }} onClick={() => setScreen("settings")}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
+                    Sign in to sync your practice across devices
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                    SIGN IN →
+                  </div>
+                </div>
+              )}
+
               <div style={{
                 background: "var(--surface)",
                 border: "0.5px solid var(--border)",
@@ -12258,7 +12283,7 @@ const isSignalProfileConfigured = () => {
               {/* OBSERVE AND CHOOSE — primary intraday practice (day mode) */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  {isBodyFirst ? "Settle the system. Then think clearly." : isThoughtFirst ? "Think clearly. Then settle." : "Catch the state before it drives the action."}
+                  {isBodyFirst ? "The body signals first. That's your entry point." : isThoughtFirst ? "The mind runs first. That's where to start." : "One moment of noticing changes what comes next."}
                 </div>
 
                 {showObserveEntry ? (
@@ -12280,9 +12305,9 @@ const isSignalProfileConfigured = () => {
                       display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
                       <div style={{ textAlign: "left" }}>
-                        <div>{isBodyFirst ? "Check in with your body" : isThoughtFirst ? "Clear the noise" : "What's happening right now"}</div>
+                        <div>{isBodyFirst ? "Settle the system. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "What's happening right now?"}</div>
                         <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2, fontWeight: 400 }}>
-                          {isBodyFirst ? "Find the signal. Choose the response." : isThoughtFirst ? "Name it. Then decide." : "Catch it before it runs you."}
+                          {isBodyFirst ? "Start in the body. The thought follows." : isThoughtFirst ? "Start in the mind. Name what's there." : "Catch it before it runs you."}
                         </div>
                       </div>
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
