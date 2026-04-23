@@ -11999,6 +11999,36 @@ const isSignalProfileConfigured = () => {
                 </div>
               )}
 
+              {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
+              {(() => {
+                // Compute shellMode once — drives which practice renders
+                const _sNow = new Date();
+                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
+                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                const _sMorningEnd = 1050;
+                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
+                const _sEodDone = (() => { try { const eod = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return eod?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
+                const _sInMorning = _sMins >= _sMorningStart && _sMins < _sMorningEnd && !_sMorningDone;
+                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
+                const shellMode = _sInMorning ? "morning" : _sInEvening ? "evening" : "day";
+                const shellModeLabel = shellMode === "morning" ? "Before the day begins" : shellMode === "evening" ? "Before you close out" : null;
+                return (
+                  <div style={{
+                    background: "var(--surface)",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r-lg)",
+                    padding: "18px 18px 4px",
+                    marginBottom: 20
+                  }}>
+                    {shellModeLabel && (
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+                        {shellModeLabel}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
               <div style={{
                 background: "var(--surface)",
                 border: "0.5px solid var(--border)",
