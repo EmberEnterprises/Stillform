@@ -12611,7 +12611,7 @@ const isSignalProfileConfigured = () => {
                       }}
                     >
                       <div>
-                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)" }}>My Progress</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 400, color: "var(--text)" }}>My Progress</div>
 
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
