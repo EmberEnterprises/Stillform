@@ -12330,6 +12330,9 @@ const isSignalProfileConfigured = () => {
                     }}>
                       <div>
                         <div>{isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}</div>
+                        <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>
+                          {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
+                        </div>
 
                       </div>
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
@@ -12609,7 +12612,7 @@ const isSignalProfileConfigured = () => {
                     >
                       <div>
                         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>My Progress</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Your sessions, patterns, and progress.</div>
+
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button
