@@ -12295,6 +12295,7 @@ const isSignalProfileConfigured = () => {
                 </div>
 
                 {showObserveEntry ? (
+                  /* Balanced / unclear — one orienting question inline */
                   <ObserveEntryLite
                     isBodyFirst={isBodyFirst}
                     isThoughtFirst={isThoughtFirst}
@@ -12303,76 +12304,41 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
-                    {isThoughtFirst ? (
-                      <>
-                        <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
-                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
-                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                          display: "flex", justifyContent: "space-between", alignItems: "center",
-                          WebkitTapHighlightColor: "transparent", marginBottom: 8
-                        }}>
-                          <div>
-                            <div>Talk it out</div>
-                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start with what the mind is doing.</div>
-                          </div>
-                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
-                        </button>
-                        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 4 }}>
-                          <button onClick={() => {
-                            const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-                            const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
-                            if (ob) startTool(TOOLS.find(t => t.id === "scan")); else startPathway("calm");
-                          }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>My body is louder →</button>
-                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I just want to observe →</button>
-                        </div>
-                      </>
-                    ) : isBodyFirst ? (
-                      <>
-                        <button onClick={() => {
-                          const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
-                          const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
-                          if (ob) startTool(TOOLS.find(t => t.id === "scan")); else startPathway("calm");
-                        }} style={{
-                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
-                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                          display: "flex", justifyContent: "space-between", alignItems: "center",
-                          WebkitTapHighlightColor: "transparent", marginBottom: 8
-                        }}>
-                          <div>
-                            <div>Calm my body</div>
-                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start where the pressure lands in the body.</div>
-                          </div>
-                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
-                        </button>
-                        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 4 }}>
-                          <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I need to think this through →</button>
-                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I just want to observe →</button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => setShowObserveEntry(true)} style={{
-                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
-                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                          display: "flex", justifyContent: "space-between", alignItems: "center",
-                          WebkitTapHighlightColor: "transparent", marginBottom: 8
-                        }}>
-                          <div>
-                            <div>Start here</div>
-                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start with what's loudest.</div>
-                          </div>
-                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
-                        </button>
-                      </>
-                    )}
+                    {/* Hero CTA — app routes directly based on calibration */}
+                    <button onClick={() => {
+                      const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                      const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
 
-                    <div style={{ textAlign: "center", marginTop: 10 }}>
+                      if (isThoughtFirst) {
+                        // Thought-first → straight to Reframe
+                        setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                      } else if (isBodyFirst) {
+                        // Body-first → Breathe, or Body Scan if off-baseline
+                        if (offBaseline) startTool(TOOLS.find(t => t.id === "scan"));
+                        else startPathway("calm");
+                      } else {
+                        // Balanced / unclear → one orienting question
+                        setShowObserveEntry(true);
+                      }
+                    }} style={{
+                      width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
+                      borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      WebkitTapHighlightColor: "transparent", marginBottom: 8
+                    }}>
+                      <div>
+                        <div>{isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}</div>
+                        <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>
+                          {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
+                    </button>
+
+                    {/* Or go directly — always secondary */}
+                    <div style={{ textAlign: "center", marginTop: 8 }}>
                       <button onClick={() => setShowSupportSheet(true)} style={{
                         background: "none", border: "none", color: "var(--text-muted)",
                         fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
