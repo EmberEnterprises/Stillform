@@ -23,7 +23,7 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Pulse progress-layer descriptor | LOCKED | `Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.` |
 | Science evidence section title | LOCKED | `Science Evidence` |
 | Tutorial progression labels | LOCKED | `Tutorial · 1 of 4` / `Tutorial · 2 of 4` / `Tutorial · 3 of 4` / `Tutorial · 4 of 4` |
-| Tutorial page titles | LOCKED | `Calibration — Build Your Baseline` / `Go / No-Go Quick Check — Time to First Value` / `Morning + Daily Tools — Active Execution Layer` / `Run the Full Loop Daily` |
+| Tutorial page titles | LOCKED | `This Setup Is For You` / `Go / No-Go Quick Check — Time to First Value` / `One Practice. Three Moments.` / `The Skill Builds Over Time` |
 | Tutorial CTA row | LOCKED | Non-final pages use `Next →`; final page uses `Continue →` (or `Return to settings` on replay) |
 | Setup bridge title | LOCKED | `Set up your customizations and map your signals` |
 | Setup bridge signal action | LOCKED | `Map signals now` |
