@@ -5,7 +5,7 @@ import { runPortableRipgrep } from "./_patternChecks.mjs";
 const checks = [
   {
     label: "Morning check-in launches reframe",
-    pattern: "Set my tone and launch",
+    pattern: "Done. Start the day",
     path: "src/App.jsx"
   },
   {

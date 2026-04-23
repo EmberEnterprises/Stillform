@@ -150,3 +150,31 @@ This is also the B2B clinical channel — integration as a between-session or du
 - "Grief that followed my actions" — this is the regret that Stillform is designed to prevent. Connects directly to the "fewer regrets" positioning.
 - The social media overstimulation angle is a direct path to r/nosurf, r/digitalminimalism in addition to r/ADHD and r/anxiety.
 
+
+---
+
+## Next build spec — Adaptive Shell Architecture (from GPT, April 22 2026)
+
+Home needs to become two visible planes only:
+
+**1. Adaptive shell (top)** — one container that swaps mode by context:
+- Morning mode → Set the tone (if morning check-in incomplete)
+- Day mode → Observe and Choose (main intraday)
+- Evening mode → Close the loop (if EOD is due)
+
+**2. My Progress (bottom)** — quiet evidence layer. What is becoming visible. What the system is showing. Secondary to the shell, never competing with it.
+
+**What to collapse:** Separate morning card, separate shell card, separate EOD card → all become one adaptive shell container.
+
+**What to preserve:** All underlying logic — morning data capture, off-baseline branch, protocol launch, EOD storage, routing engine, ObserveEntryLite.
+
+**Shell copy direction:**
+- Page 1: "What's loudest right now?" with lived options: My body is loud / My mind is looping / Both are active / I just feel off
+- Page 2: "What would help first?" with options: Settle the system / Get clear / Stay with it
+- Entry CTA: calibration-aware — body-first / thought-first / balanced variants
+
+**My Progress behavior:** Compact at rest (one insight/evidence snippet). Expandable. Never the active layer. Never another task.
+
+**Do not:** Add more things. Make Home busier. Reintroduce visible tool rows.
+**Solve through:** Consolidation, hierarchy, restraint.
+
