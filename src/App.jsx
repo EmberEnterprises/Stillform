@@ -12012,33 +12012,17 @@ const isSignalProfileConfigured = () => {
 
               {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
               {(() => {
-                // Compute shellMode once — drives which practice renders
                 const _sNow = new Date();
                 const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
                 const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
                 const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
                 const _sMorningEnd = 1050;
                 const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
-                const _sEodDone = (() => { try { const eod = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return eod?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
                 const _sInMorning = _sMins >= _sMorningStart && _sMins < _sMorningEnd && !_sMorningDone;
                 const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
                 const shellMode = _sInMorning ? "morning" : _sInEvening ? "evening" : "day";
                 const shellModeLabel = shellMode === "morning" ? "Before the day begins" : shellMode === "evening" ? "Before you close out" : null;
-                return (
-                  <div style={{
-                    background: "var(--surface)",
-                    border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r-lg)",
-                    padding: "18px 18px 4px",
-                    marginBottom: 20
-                  }}>
-                    {shellModeLabel && (
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
-                        {shellModeLabel}
-                      </div>
-                    )}
-                  </div>
-                );
+                return null; // shellMode available via closure below
               })()}
               <div style={{
                 background: "var(--surface)",
@@ -12047,6 +12031,22 @@ const isSignalProfileConfigured = () => {
                 padding: "18px 18px 4px",
                 marginBottom: 20
               }}>
+              {/* Shell mode label — computed inline */}
+              {(() => {
+                const _sNow = new Date();
+                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
+                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
+                const _sInMorning = _sMins >= _sMorningStart && _sMins < 1050 && !_sMorningDone;
+                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
+                const label = _sInMorning ? "Before the day begins" : _sInEvening ? "Before you close out" : null;
+                return label ? (
+                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+                    {label}
+                  </div>
+                ) : null;
+              })()}
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
                 const now = new Date();
@@ -12354,11 +12354,27 @@ const isSignalProfileConfigured = () => {
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                     </button>
 
-                    {/* Need support fast? — secondary affordance only */}
-                    <div style={{ textAlign: "center", marginTop: 12 }}>
+                    {/* Depth selector — subtle, adult, no gamification */}
+                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                      {[
+                        { label: "30 sec", action: () => { setShowObserveEntry(false); startPathway("calm"); } },
+                        { label: "A few minutes", action: () => setShowObserveEntry(true) },
+                        { label: "Go deeper", action: () => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); } },
+                      ].map(opt => (
+                        <button key={opt.label} onClick={opt.action} style={{
+                          flex: 1, background: "none", border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "8px 4px", cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif", fontSize: 11,
+                          color: "var(--text-muted)", WebkitTapHighlightColor: "transparent"
+                        }}>{opt.label}</button>
+                      ))}
+                    </div>
+
+                    {/* Direct access — secondary affordance */}
+                    <div style={{ textAlign: "center", marginTop: 10 }}>
                       <button onClick={() => setShowSupportSheet(true)} style={{
                         background: "none", border: "none", color: "var(--text-muted)",
-                        fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                         letterSpacing: "0.02em", padding: "4px 0"
                       }}>
                         Or go directly →
