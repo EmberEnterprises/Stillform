@@ -6324,64 +6324,42 @@ function MicroBiasTool({ onComplete }) {
 }
 
 
-// ─── OBSERVE ENTRY LITE — lightweight 2-tap shell ───────────────────────────
-// Pure component. All routing handled by onRoute prop from App.
-// No direct access to App state or closures.
-function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
+// ─── OBSERVE ENTRY LITE — single question for balanced users ─────────────────
+// Used only when balanced / unclear. Thought-first and body-first route directly.
+function ObserveEntryLite({ onClose, onRoute }) {
   const [step, setStep] = useState(0);
   const [signalOrigin, setSignalOrigin] = useState(null);
 
-  const optBtn = (active) => ({
+  const optBtn = () => ({
     width: "100%", padding: "14px 18px",
-    background: active ? "var(--amber-glow)" : "var(--surface)",
-    border: `0.5px solid ${active ? "var(--amber)" : "var(--border)"}`,
+    background: "var(--surface)", border: "0.5px solid var(--border)",
     borderRadius: "var(--r)", cursor: "pointer",
     fontFamily: "'DM Sans', sans-serif", textAlign: "left",
-    WebkitTapHighlightColor: "transparent", transition: "all 0.15s"
+    WebkitTapHighlightColor: "transparent"
   });
-
-  // Order options by calibration type — body-first sees Body first
-  const signalOptions = isBodyFirst
-    ? [
-        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
-        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
-        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
-        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
-      ]
-    : isThoughtFirst
-    ? [
-        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
-        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
-        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
-        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
-      ]
-    : [
-        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
-        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
-        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
-        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
-      ];
 
   if (step === 0) return (
     <div>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-        Observe and Choose
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
+        What's louder right now?
       </div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        {isBodyFirst ? "Where is the system carrying it?" : isThoughtFirst ? "What is the mind doing right now?" : "What's loudest right now?"}
-      </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>
-        {isBodyFirst ? "Start in the body. First read." : isThoughtFirst ? "Start in the thought. First read." : "Don't overthink it. First read."}
-      </div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First read. Don't overthink it.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {signalOptions.map(opt => (
+        {[
+          { id: "body", label: "My body is loud", sub: "Tension, chest, gut, jaw — something physical" },
+          { id: "thought", label: "My mind is looping", sub: "Replaying, anticipating, spiraling" },
+          { id: "both", label: "Both", sub: "Hard to separate right now" },
+          { id: "unsure", label: "I just feel off", sub: "Something's there, can't place it" },
+        ].map(opt => (
           <button key={opt.id} onClick={() => {
-            setSignalOrigin(opt.id);
-            // Fast-lane: skip Q2 for highly legible signals matched to calibration
-            if (opt.id === "body" && isBodyFirst) { onRoute("body", "settle"); return; }
-            if (opt.id === "thought" && isThoughtFirst) { onRoute("thought", "understand"); return; }
-            setStep(1);
-          }} style={optBtn(signalOrigin === opt.id)}>
+            if (opt.id === "body") {
+              const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+              const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
+              onRoute(opt.id, ob ? "understand" : "settle"); return;
+            }
+            if (opt.id === "thought") { onRoute(opt.id, "understand"); return; }
+            setSignalOrigin(opt.id); setStep(1);
+          }} style={optBtn()}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
             <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
           </button>
@@ -6395,20 +6373,17 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
 
   return (
     <div>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-        Observe and Choose
-      </div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        {isBodyFirst ? "What does the body need first?" : isThoughtFirst ? "What does the mind need first?" : "What would help first?"}
+      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
+        What would help first?
       </div>
       <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
-          { id: "settle", label: "Settle the system", sub: isBodyFirst ? "The body is running. Bring it down." : "Something physical needs to come down first." },
-          { id: "understand", label: "Get clear", sub: isThoughtFirst ? "The mind is running. Get distance from it." : "Something's there. Get some distance from it." },
-          { id: "catch", label: "Stay with it", sub: "Notice the signal. That's enough for now." },
+          { id: "settle", label: "Settle first", sub: "Something needs to come down before thinking." },
+          { id: "understand", label: "Get clear", sub: "Get some distance from what's happening." },
+          { id: "catch", label: "Stay with it", sub: "Notice it without moving yet." },
         ].map(opt => (
-          <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn(false)}>
+          <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn()}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
             <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
           </button>
@@ -6420,6 +6395,7 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
     </div>
   );
 }
+
 
 function MetacognitionTool({ onComplete }) {
   const [step, setStep] = useState(0);
