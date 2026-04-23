@@ -12319,13 +12319,13 @@ const isSignalProfileConfigured = () => {
                           </div>
                           <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                         </button>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 4 }}>
                           <button onClick={() => {
                             const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
                             const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
                             if (ob) startTool(TOOLS.find(t => t.id === "scan")); else startPathway("calm");
-                          }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>My body is louder →</button>
-                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I just want to observe →</button>
+                          }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>My body is louder →</button>
+                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I just want to observe →</button>
                         </div>
                       </>
                     ) : isBodyFirst ? (
@@ -12348,9 +12348,9 @@ const isSignalProfileConfigured = () => {
                           </div>
                           <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                         </button>
-                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                          <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I need to think this through →</button>
-                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I just want to observe →</button>
+                        <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 4 }}>
+                          <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I need to think this through →</button>
+                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "var(--text-muted)", WebkitTapHighlightColor: "transparent", padding: "4px 0" }}>I just want to observe →</button>
                         </div>
                       </>
                     ) : (
