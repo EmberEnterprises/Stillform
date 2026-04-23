@@ -5895,15 +5895,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           Reframe tone: {aiToneLabel}
         </div>
       </div>
-      <div style={{ marginTop: -2, marginBottom: 10, display: "flex", justifyContent: "flex-end" }}>
-        <button
-          className="btn btn-ghost"
-          style={{ fontSize: 11, padding: "6px 10px" }}
-          onClick={() => onComplete("metacognition")}
-        >
-          Observe and Choose →
-        </button>
-      </div>
+
 
       <>
 
