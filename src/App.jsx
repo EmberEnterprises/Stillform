@@ -11156,7 +11156,7 @@ const isSignalProfileConfigured = () => {
               kicker: "Tutorial · 3 of 4",
               title: "One Practice. Three Moments.",
               paragraphs: [
-                "Set the tone in the morning — before the day sets it for you. Observe and Choose through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
+                "Morning Check-in in the morning — before the day sets it for you. Observe and Choose through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
                 "Breathe, Body Scan, and Reframe are supports. The system routes you to the right one. You don't have to choose."
               ]
             },
@@ -11165,7 +11165,7 @@ const isSignalProfileConfigured = () => {
               title: "The Skill Builds Over Time",
               paragraphs: [
                 "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
-                "Every day after: Set the tone → Observe and Choose → Close the loop. The less you need the app, the more it's working."
+                "Every day after: Morning Check-in → Observe and Choose → Close the loop. The less you need the app, the more it's working."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -12004,7 +12004,7 @@ const isSignalProfileConfigured = () => {
                   }}>
                     <div>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 3 }}>
-                        Set the tone
+                        Morning Check-in
                       </div>
                       <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
                         {_ms_done ? "✓ Done · tap to update" : "What might drive you today if you don't notice it early?"}
@@ -12111,7 +12111,7 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Set the tone</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning Check-in</div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Done · tap to update</div>
                   </button>
                 );
@@ -12138,7 +12138,7 @@ const isSignalProfileConfigured = () => {
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Set the tone</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning Check-in</div>
                     {(() => {
                       const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
                       if (!breathCueOn) return null;
@@ -12651,7 +12651,7 @@ const isSignalProfileConfigured = () => {
                       }}
                     >
                       <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>What's becoming visible</div>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>My Progress</div>
                         <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Is the observer getting faster? Your data answers that.</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -13369,7 +13369,7 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A metacognition trainer that stabilizes composure. One practice, three moments: Set the tone in the morning. Observe and Choose throughout the day. Close the loop in the evening. The tools — Breathe, Body Scan, Reframe — are supports the system routes you to. You don't pick them. The practice does."
+                a: "A metacognition trainer that stabilizes composure. One practice, three moments: Morning Check-in in the morning. Observe and Choose throughout the day. Close the loop in the evening. The tools — Breathe, Body Scan, Reframe — are supports the system routes you to. You don't pick them. The practice does."
               },
               {
                 q: "What is the method behind Stillform?",
