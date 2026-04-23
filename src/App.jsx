@@ -12330,9 +12330,7 @@ const isSignalProfileConfigured = () => {
                     }}>
                       <div>
                         <div>{isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}</div>
-                        <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>
-                          {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
-                        </div>
+
                       </div>
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                     </button>
