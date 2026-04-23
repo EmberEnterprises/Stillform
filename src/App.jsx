@@ -12336,22 +12336,6 @@ const isSignalProfileConfigured = () => {
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                     </button>
 
-                    {/* Depth selector — subtle, adult, no gamification */}
-                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      {[
-                        { label: "30 sec", action: () => { setShowObserveEntry(false); startPathway("calm"); } },
-                        { label: "A few minutes", action: () => setShowObserveEntry(true) },
-                        { label: "Go deeper", action: () => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); } },
-                      ].map(opt => (
-                        <button key={opt.label} onClick={opt.action} style={{
-                          flex: 1, background: "none", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "8px 4px", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 11,
-                          color: "var(--text-muted)", WebkitTapHighlightColor: "transparent"
-                        }}>{opt.label}</button>
-                      ))}
-                    </div>
-
                     {/* Direct access — secondary affordance */}
                     <div style={{ textAlign: "center", marginTop: 10 }}>
                       <button onClick={() => setShowSupportSheet(true)} style={{
