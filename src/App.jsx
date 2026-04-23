@@ -11982,22 +11982,33 @@ const isSignalProfileConfigured = () => {
                    All three practice sections live inside one visual container.
                    Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
               */}
-              {/* AUTH ENTRY — visible on Home when signed out */}
-              {!syncSignedIn && (
-                <div style={{
-                  display: "flex", justifyContent: "space-between", alignItems: "center",
-                  padding: "10px 14px", marginBottom: 12,
-                  background: "none", border: "0.5px solid var(--border)",
-                  borderRadius: "var(--r)", cursor: "pointer"
-                }} onClick={() => setScreen("settings")}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-                    Sign in to sync your practice across devices
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
-                    SIGN IN →
-                  </div>
-                </div>
-              )}
+              {/* AUTH ENTRY — always visible on Home */}
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                padding: "10px 14px", marginBottom: 12,
+                background: "none", border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)", cursor: "pointer"
+              }} onClick={() => setScreen("settings")}>
+                {syncSignedIn ? (
+                  <>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
+                      {(() => { try { return sbGetSession()?.user?.email || "Signed in"; } catch { return "Signed in"; } })()}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                      SYNCED ✓
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
+                      Sign in or create an account to sync your practice
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                      SIGN IN →
+                    </div>
+                  </>
+                )}
+              </div>
 
               {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
               {(() => {
