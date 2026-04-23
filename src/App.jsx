@@ -5920,19 +5920,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Dismiss
             </button>
           </div>
-          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>
-              While you wait, try one of these
-            </div>
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("breathe")}>
-                ◎ Breathe
-              </button>
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => onComplete("scan")}>
-                ◉ Body Scan
-              </button>
-            </div>
-          </div>
+
         </div>
       )}
 
