@@ -11969,6 +11969,31 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
+              {/* ── ADAPTIVE SHELL — one practice, three modes ─────────────────────
+                   Mode is determined by time + state. One container, three contexts.
+                   Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
+              */}
+              {(() => {
+                const _now = new Date();
+                const _h = _now.getHours();
+                const _min = _h * 60 + _now.getMinutes();
+                const _morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                const _eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                const _inMorning = _min >= _morningStart && _min < 1050;
+                const _inEvening = _min >= _eveningStart || _min < 240;
+                const shellMode = _inMorning ? "morning" : _inEvening ? "evening" : "day";
+                const shellKicker = shellMode === "morning" ? "Before the day begins" : shellMode === "evening" ? "Before you close out" : null;
+                return (
+                  <div style={{ marginBottom: 0 }}>
+                    {shellKicker && (
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                        {shellKicker}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
                 const now = new Date();
@@ -12243,7 +12268,7 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* OBSERVE AND CHOOSE — primary intraday practice */}
+              {/* OBSERVE AND CHOOSE — primary intraday practice (day mode) */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   {isBodyFirst ? "Settle the system. Then think clearly." : isThoughtFirst ? "Think clearly. Then settle." : "Catch the state before it drives the action."}
@@ -12520,7 +12545,7 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* BOTTOM MY PROGRESS SURFACE — expandable */}
+              {/* MY PROGRESS — evidence layer, secondary to shell */}
               {(() => {
                 const daySet = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean));
                 let streakCount = 0;
