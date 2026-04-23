@@ -12611,7 +12611,7 @@ const isSignalProfileConfigured = () => {
                       }}
                     >
                       <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>My Progress</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)" }}>My Progress</div>
 
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
