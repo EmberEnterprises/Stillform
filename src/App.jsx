@@ -11105,17 +11105,9 @@ const isSignalProfileConfigured = () => {
             <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
-            {syncSignedIn && isSubscribed ? (
-              <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px", fontSize: 13 }}>
-                Account
-              </button>
-            ) : syncSignedIn ? (
+            {!isSubscribed && (
               <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
                 Subscribe
-              </button>
-            ) : (
-              <button className="btn btn-primary" onClick={() => setPricingAuthOpen(true)}>
-                Log In / Sign Up
               </button>
             )}
           </div>
@@ -11985,50 +11977,6 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
-              {/* ── ADAPTIVE SHELL — one practice container, three modes ──────────────
-                   shellMode computed once from time + state.
-                   All three practice sections live inside one visual container.
-                   Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
-              */}
-
-
-              {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
-              {(() => {
-                const _sNow = new Date();
-                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
-                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
-                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
-                const _sMorningEnd = 1050;
-                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
-                const _sInMorning = _sMins >= _sMorningStart && _sMins < _sMorningEnd && !_sMorningDone;
-                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
-                const shellMode = _sInMorning ? "morning" : _sInEvening ? "evening" : "day";
-                const shellModeLabel = shellMode === "morning" ? "Before the day begins" : shellMode === "evening" ? "Before you close out" : null;
-                return null; // shellMode available via closure below
-              })()}
-              <div style={{
-                background: "var(--surface)",
-                border: "0.5px solid var(--border)",
-                borderRadius: "var(--r-lg)",
-                padding: "18px 18px 4px",
-                marginBottom: 20
-              }}>
-              {/* Shell mode label — computed inline */}
-              {(() => {
-                const _sNow = new Date();
-                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
-                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
-                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
-                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
-                const _sInMorning = _sMins >= _sMorningStart && _sMins < 1050 && !_sMorningDone;
-                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
-                const label = _sInMorning ? "Before the day begins" : _sInEvening ? "Before you close out" : null;
-                return label ? (
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
-                    {label}
-                  </div>
-                ) : null;
-              })()}
               {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
               {(() => {
                 const now = new Date();
@@ -12129,8 +12077,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Set the tone</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Done · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Checked in · tap to update</div>
                   </button>
                 );
 
@@ -12149,14 +12097,14 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Before the day begins</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What might run you today if you don't see it first?</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning check-in</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Set your tone for today</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Set the tone</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning check-in</div>
                     {(() => {
                       const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
                       if (!breathCueOn) return null;
@@ -12297,111 +12245,113 @@ const isSignalProfileConfigured = () => {
                       borderRadius: "var(--r)", padding: "12px", fontSize: 14, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
                     }}>
-                      Done. Start the day. →
+                      Set my tone and launch →
                     </button>
                   </div>
                 );
               })()}
 
-              {/* OBSERVE AND CHOOSE — primary intraday practice (day mode) */}
+              {/* DOMINANT CTA — Adaptive to regulation type */}
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  {isBodyFirst ? "The body signals first. That's your entry point." : isThoughtFirst ? "The mind runs first. That's where to start." : "One moment of noticing changes what comes next."}
+                {/* Identity line */}
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
+                  {isThoughtFirst ? "Think clearly. Then settle." : isBodyFirst ? "Settle the body. Then think." : "Choose your entry point."}
                 </div>
 
-                {showObserveEntry ? (
-                  <ObserveEntryLite
-                    isBodyFirst={isBodyFirst}
-                    isThoughtFirst={isThoughtFirst}
-                    onClose={() => setShowObserveEntry(false)}
-                    onRoute={(signalOrigin, needState) => routeObserveEntry(signalOrigin, needState)}
-                  />
-                ) : (
-                  <>
-                    {/* Single entry point — no tool names, routing is invisible */}
-                    <button onClick={() => setShowObserveEntry(true)} style={{
-                      width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                      WebkitTapHighlightColor: "transparent", marginBottom: 8,
-                      display: "flex", justifyContent: "space-between", alignItems: "center"
-                    }}>
-                      <div style={{ textAlign: "left" }}>
-                        <div>{isBodyFirst ? "Settle the system. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "What's happening right now?"}</div>
-                        <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2, fontWeight: 400 }}>
-                          {isBodyFirst ? "Start in the body. The thought follows." : isThoughtFirst ? "Start in the mind. Name what's there." : "Catch it before it runs you."}
-                        </div>
-                      </div>
-                      <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
-                    </button>
-
-                    {/* Depth selector — subtle, adult, no gamification */}
-                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      {[
-                        { label: "30 sec", action: () => { setShowObserveEntry(false); startPathway("calm"); } },
-                        { label: "A few minutes", action: () => setShowObserveEntry(true) },
-                        { label: "Go deeper", action: () => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); } },
-                      ].map(opt => (
-                        <button key={opt.label} onClick={opt.action} style={{
-                          flex: 1, background: "none", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "8px 4px", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 11,
-                          color: "var(--text-muted)", WebkitTapHighlightColor: "transparent"
-                        }}>{opt.label}</button>
-                      ))}
-                    </div>
-
-                    {/* Direct access — secondary affordance */}
-                    <div style={{ textAlign: "center", marginTop: 10 }}>
-                      <button onClick={() => setShowSupportSheet(true)} style={{
-                        background: "none", border: "none", color: "var(--text-muted)",
-                        fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                        letterSpacing: "0.02em", padding: "4px 0"
+                {/* Balanced: three equal buttons */}
+                {!isThoughtFirst && !isBodyFirst ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <button onClick={async () => {
+                        setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                      }} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
                       }}>
-                        Or go directly →
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>✦ Reframe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Talk it out</div>
+                      </button>
+                      <button onClick={() => startPathway("calm")} style={{
+                        flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "20px 10px", cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent", textAlign: "center"
+                      }}>
+                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>◎ Breathe</div>
+                        <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "var(--text)", marginTop: 6 }}>Calm my body</div>
                       </button>
                     </div>
-                  </>
+                    <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "16px 10px", cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent", textAlign: "center"
+                    }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                      <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>Release tension</div>
+                    </button>
+                  </div>
+                ) : (
+                <>
+                {/* Primary tool — determined by regulation type */}
+                <button onClick={async () => {
+                  if (isThoughtFirst) {
+                    setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                  } else {
+                    startPathway("calm");
+                  }
+                }} style={{
+                  width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                  borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                  WebkitTapHighlightColor: "transparent"
+                }}>
+                  <div>
+                    <div>{isBodyFirst ? "Calm my body" : "Talk it out"}</div>
+                    <div style={{ fontSize: 12, fontWeight: 500, opacity: 1, marginTop: 2, color: "rgba(10,10,12,0.75)" }}>
+                      {isBodyFirst ? "Settle the nervous system" : "Think through what's happening"}
+                    </div>
+                  </div>
+                  <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: "0.1em", opacity: 1, color: "rgba(10,10,12,0.65)" }}>
+                    {isBodyFirst ? "◎ BREATHE" : "✦ REFRAME"}
+                  </span>
+                </button>
+
+                {/* Secondary tool + Body Scan */}
+                <div style={{ display: "flex", gap: 6, marginTop: 6 }}>
+                  <button onClick={async () => {
+                    if (isBodyFirst) {
+                      setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                    } else {
+                      startPathway("calm");
+                    }
+                  }} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      {isBodyFirst ? "✦ Reframe" : "◎ Breathe"}
+                    </div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>
+                      {isBodyFirst ? "Talk it out" : "Calm my body"}
+                    </div>
+                  </button>
+                  <button onClick={() => startTool(TOOLS.find(t => t.id === "scan"))} style={{
+                    flex: 1, background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 10px", cursor: "pointer",
+                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.025)",
+                    WebkitTapHighlightColor: "transparent", textAlign: "center"
+                  }}>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-dim)" }}>◉ Body Scan</div>
+                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.3 }}>Release tension</div>
+                  </button>
+                </div>
+                </>
                 )}
               </div>
-
-              {/* SUPPORT SHEET — secondary fast-lane, discreet */}
-              {showSupportSheet && (
-                <div style={{
-                  position: "fixed", inset: 0, zIndex: 200,
-                  background: "rgba(0,0,0,0.7)", display: "flex",
-                  alignItems: "flex-end", justifyContent: "center"
-                }} onClick={() => setShowSupportSheet(false)}>
-                  <div onClick={e => e.stopPropagation()} style={{
-                    background: "var(--surface)", borderRadius: "var(--r-lg) var(--r-lg) 0 0",
-                    padding: "24px 24px 40px", width: "100%", maxWidth: 480
-                  }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-                      Direct access
-                    </div>
-                    {[
-                      { label: "Breathe", sub: "Settle the system. 60 seconds.", action: () => { setShowSupportSheet(false); startPathway("calm"); } },
-                      { label: "Reframe", sub: "Talk through what's happening.", action: () => { setShowSupportSheet(false); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } },
-                      { label: "Body Scan", sub: "Find where the signal lives.", action: () => { setShowSupportSheet(false); startTool(TOOLS.find(t => t.id === "scan")); } },
-                    ].map(opt => (
-                      <button key={opt.label} onClick={opt.action} style={{
-                        width: "100%", background: "none", border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 8,
-                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif",
-                        WebkitTapHighlightColor: "transparent"
-                      }}>
-                        <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{opt.label}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{opt.sub}</div>
-                      </button>
-                    ))}
-                    <button onClick={() => setShowSupportSheet(false)} style={{
-                      width: "100%", background: "none", border: "none", color: "var(--text-muted)",
-                      fontSize: 12, cursor: "pointer", marginTop: 8, fontFamily: "'DM Sans', sans-serif", padding: "8px"
-                    }}>Cancel</button>
-                  </div>
-                </div>
-              )}
 
               {pendingNextMoveFollowUpSession && (
                 <NextMoveFollowUpCard
@@ -12478,8 +12428,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
                   </button>
                 );
                 if (eodDone && !eodOpen) return (
@@ -12497,8 +12447,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Day closed · tap to update</div>
                   </button>
                 );
 
@@ -12539,16 +12489,16 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Before you close out</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What did you catch today? What got past you?</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>End of day</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Close the loop — 15 seconds</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>Close the loop</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>End of day</div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy landing?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Full", "Steady", "Low", "Empty"].map(e => (
                         <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
@@ -12561,7 +12511,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How much did you catch before it ran you?</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How'd you carry yourself today?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Mixed", "Rough"].map(e => (
                         <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
@@ -12574,7 +12524,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word that names what today taught you</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word for today</div>
                     <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
                         <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
@@ -12591,14 +12541,12 @@ const isSignalProfileConfigured = () => {
                       width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
                       borderRadius: "var(--r)", padding: "12px", fontSize: 13, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-                    }}>Close the loop →</button>
+                    }}>Close the day →</button>
                   </div>
                 );
               })()}
 
-              </div>{/* end adaptive shell container */}
-
-              {/* MY PROGRESS — evidence layer, secondary to shell */}
+              {/* BOTTOM MY PROGRESS SURFACE — expandable */}
               {(() => {
                 const daySet = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean));
                 let streakCount = 0;
@@ -12620,14 +12568,64 @@ const isSignalProfileConfigured = () => {
                   breathe: "Breathe",
                   ground: "Breathe",
                   reframe: "Reframe",
-                  metacognition: "Observe and Choose",
+                  metacognition: "Reframe · Watch Sequence",
                   "body-scan": "Body Scan",
                   scan: "Body Scan",
                   panic: "Panic",
                   sigh: "Sigh"
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
-                // Processing cue bank removed — replaced with evidence-based data
+                const processingCues = [
+                  "You don't have to figure it all out right now.",
+                  "One clear thought beats ten tangled ones.",
+                  "The smartest move right now is to slow down.",
+                  "Not every thought needs to be solved. Some just need to be heard.",
+                  "Your gut flagged this first. Trust that.",
+                  "Breathe before you build the case.",
+                  "You've handled harder than this. Start with what's actually true.",
+                  "The analysis is coming. Give your body a moment first.",
+                  "Stop editing. What are you actually feeling?",
+                  "Slow is not weak. Slow is accurate.",
+                  "Let the noise settle before you decide what it means.",
+                  "You've earned the right to pause. Use it.",
+                  "The pressure you're feeling is real. So is your ability to handle it.",
+                  "You don't owe anyone a response before you're ready.",
+                  "You are not your worst-case scenario.",
+                  "Get honest with yourself before you get strategic.",
+                  "The clearest version of you shows up after you regulate.",
+                  "What would you tell someone you love in this moment?",
+                  "You've got this. Start with one breath.",
+                  "Your body is not overreacting. It's communicating.",
+                  "You don't have to push through. You can settle first.",
+                  "You're allowed to take up space with what you're feeling.",
+                  "You don't have to explain the tension. Just notice it.",
+                  "You are stronger than what you're feeling right now.",
+                  "You don't have to carry all of this at once.",
+                  "The feeling will pass. You get to decide what comes next.",
+                  "You are the one who can work with this.",
+                  "Soften one thing. That's enough to start.",
+                  "You can be uncomfortable and still move forward.",
+                  "Let your body exhale what your mind is still holding.",
+                  "You have everything you need to handle this moment.",
+                  "It's okay not to have it all figured out yet.",
+                  "Feel it first. Then decide what to do with it.",
+                  "You are allowed to need a minute.",
+                  "The fact that you're here means you're already doing the work.",
+                  "This moment is temporary. How you handle it doesn't have to be.",
+                  "You've navigated harder than this. Remember that today.",
+                  "What you're feeling is valid. What you do next is the practice.",
+                  "Be as patient with yourself as you would be with someone you love.",
+                  "What do you actually need right now — not what's expected of you?",
+                  "You can feel overwhelmed and still be capable. Both are true.",
+                  "Every hard moment you get through is data. You're building something.",
+                  "Give yourself the same grace you'd give anyone else.",
+                  "You are more consistent than you give yourself credit for.",
+                  "You don't have to fix it all today. Just stay present.",
+                  "Check in. Breathe. You know what to do.",
+                  "You are doing better than you think."
+                ];
+                const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+                const processingCue = processingCues[dayOfYear % processingCues.length];
                 const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
                 const signalDivergence = getSignalDivergence();
                 return (
@@ -12649,7 +12647,14 @@ const isSignalProfileConfigured = () => {
                         }}>Update →</button>
                       </div>
                     )}
-
+                    <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)" }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
+                        Today's processing cue
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                        {processingCue}
+                      </div>
+                    </div>
                     <button
                       onClick={() => {
                         if (homeProgressPinned) {
@@ -12672,8 +12677,8 @@ const isSignalProfileConfigured = () => {
                       }}
                     >
                       <div>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>What's becoming visible</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>Is the observer getting faster? Your data answers that.</div>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button
@@ -13394,11 +13399,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is the method behind Stillform?",
-                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift: from 'I am this state' to 'I can see this state happening and choose my response.' Observe and Choose is the central practice. Breathe, Body Scan, and Reframe are supports the system routes you to based on what fired first and what you need. Calibration sets your routing profile so the system knows how you process."
+                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift is from being inside a state to recognizing it clearly enough to choose your response. Calibration maps how your system tends to process pressure, and the platform uses that map to route support with more precision."
               },
               {
                 q: "What science basis does Stillform use?",
-                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
+                a: "Stillform draws from metacognitive therapy, behavioral and cognitive neuroscience, and stress-regulation research: paced breathing for autonomic downshift, body scanning for interoceptive awareness, and cognitive distancing in Reframe so you can separate signal from story. It is a composure and performance platform, not diagnosis or treatment."
               },
               {
                 q: "What is State to Statement?",
