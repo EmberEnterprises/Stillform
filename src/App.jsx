@@ -8004,7 +8004,7 @@ function MyProgress({ onBack }) {
 
       {sessions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
-          Your progress appears here after your first session.
+          Your data builds here as you use the practice.
         </div>
       ) : (<>
         {/* PROOF AREAS — top focus */}
@@ -11133,7 +11133,7 @@ const isSignalProfileConfigured = () => {
               focusCheckTTFV: true,
               paragraphs: [
                 "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
-                "This is not diagnosis. It is a fast operational baseline to anchor today’s composure decisions."
+                "Not a diagnosis. A fast read on how your system is running today."
               ]
             },
             {
@@ -12237,7 +12237,7 @@ const isSignalProfileConfigured = () => {
                       borderRadius: "var(--r)", padding: "12px", fontSize: 14, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
                     }}>
-                      Set my tone and launch →
+                      Done. Start the day. →
                     </button>
                   </div>
                 );
@@ -12652,7 +12652,7 @@ const isSignalProfileConfigured = () => {
                     >
                       <div>
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Is the observer getting faster? Your data answers that.</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button
