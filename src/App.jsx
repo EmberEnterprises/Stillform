@@ -11985,67 +11985,49 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
-              {/* ── ADAPTIVE SHELL — one practice container, three modes ──────────────
-                   shellMode computed once from time + state.
-                   All three practice sections live inside one visual container.
-                   Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
-              */}
-
-
-              {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
+              {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
               {(() => {
-                const _sNow = new Date();
-                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
-                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
-                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
-                const _sMorningEnd = 1050;
-                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
-                const _sInMorning = _sMins >= _sMorningStart && _sMins < _sMorningEnd && !_sMorningDone;
-                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
-                const shellMode = _sInMorning ? "morning" : _sInEvening ? "evening" : "day";
-                const shellModeLabel = shellMode === "morning" ? "Before the day begins" : shellMode === "evening" ? "Before you close out" : null;
-                return null; // shellMode available via closure below
-              })()}
-              <div style={{
-                background: "var(--surface)",
-                border: "0.5px solid var(--border)",
-                borderRadius: "var(--r-lg)",
-                padding: "18px 18px 4px",
-                marginBottom: 20
-              }}>
-              {/* Shell mode label — computed inline */}
-              {(() => {
-                const _sNow = new Date();
-                const _sMins = _sNow.getHours() * 60 + _sNow.getMinutes();
-                const _sMorningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
-                const _sEveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
-                const _sMorningDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === new Date().toISOString().slice(0,10); } catch { return false; } })();
-                const _sInMorning = _sMins >= _sMorningStart && _sMins < 1050 && !_sMorningDone;
-                const _sInEvening = _sMins >= _sEveningStart || _sMins < 240;
-                const label = _sInMorning ? "Before the day begins" : _sInEvening ? "Before you close out" : null;
-                return label ? (
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
-                    {label}
+                const _ms_now = new Date();
+                const _ms_mins = _ms_now.getHours() * 60 + _ms_now.getMinutes();
+                const _ms_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                const _ms_end = 1050;
+                if (_ms_mins < _ms_start || _ms_mins >= _ms_end) return null;
+                const _ms_today = new Date().toISOString().slice(0, 10);
+                const _ms_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _ms_today; } catch { return false; } })();
+                if (ciOpen) return null;
+                return (
+                  <div onClick={() => setCiOpen(true)} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "center",
+                    padding: "12px 16px", marginBottom: 12,
+                    background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", cursor: "pointer", WebkitTapHighlightColor: "transparent"
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 3 }}>
+                        Set the tone
+                      </div>
+                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                        {_ms_done ? "✓ Done · tap to update" : "What might drive you today if you don't notice it early?"}
+                      </div>
+                    </div>
+                    <span style={{ color: "var(--text-muted)", fontSize: 14 }}>↓</span>
                   </div>
-                ) : null;
+                );
               })()}
-              {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
+
+              {/* MORNING CHECK-IN FULL FLOW — existing logic, only when ciOpen */}
               {(() => {
                 const now = new Date();
                 const hour = now.getHours();
                 const minute = now.getMinutes();
                 const currentMinutes = hour * 60 + minute;
-                const morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })(); // default 4:30 AM = 270 min
-                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM = 1080 min
-                
-                // Morning check-in shows 4:30 AM – 5:30 PM
-                // Stops at 5:30 so there's no overlap or confusion with EOD at 6 PM
-                const morningEnd = 1050; // 5:30 PM
+                const morningStart = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                const morningEnd = 1050;
                 if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
-                
+                if (!ciOpen) return null;
                 const today = toLocalDateKey(now);
                 // EOD done suppresses morning check-in only if EOD was completed TODAY
-                // (edge case: someone does EOD very early morning — rare but valid)
                 const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
                 if (eodDoneToday) return null;
 
@@ -12301,12 +12283,15 @@ const isSignalProfileConfigured = () => {
                     </button>
                   </div>
                 );
+              
               })()}
 
-              {/* OBSERVE AND CHOOSE — primary intraday practice (day mode) */}
-              <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  {isBodyFirst ? "The body signals first. That's your entry point." : isThoughtFirst ? "The mind runs first. That's where to start." : "One moment of noticing changes what comes next."}
+
+              {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
+              <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite" }}>
+
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
+                  {isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}
                 </div>
 
                 {showObserveEntry ? (
@@ -12318,49 +12303,81 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
-                    {/* Single entry point — no tool names, routing is invisible */}
-                    <button onClick={() => setShowObserveEntry(true)} style={{
-                      width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                      WebkitTapHighlightColor: "transparent", marginBottom: 8,
-                      display: "flex", justifyContent: "space-between", alignItems: "center"
-                    }}>
-                      <div style={{ textAlign: "left" }}>
-                        <div>{isBodyFirst ? "Settle the system. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "What's happening right now?"}</div>
-                        <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2, fontWeight: 400 }}>
-                          {isBodyFirst ? "Start in the body. The thought follows." : isThoughtFirst ? "Start in the mind. Name what's there." : "Catch it before it runs you."}
+                    {isThoughtFirst ? (
+                      <>
+                        <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{
+                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
+                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          WebkitTapHighlightColor: "transparent", marginBottom: 8
+                        }}>
+                          <div>
+                            <div>Talk it out</div>
+                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start with what the mind is doing.</div>
+                          </div>
+                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
+                        </button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <button onClick={() => {
+                            const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                            const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
+                            if (ob) startTool(TOOLS.find(t => t.id === "scan")); else startPathway("calm");
+                          }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>My body is louder →</button>
+                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I just want to observe →</button>
                         </div>
-                      </div>
-                      <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
-                    </button>
+                      </>
+                    ) : isBodyFirst ? (
+                      <>
+                        <button onClick={() => {
+                          const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                          const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
+                          if (ob) startTool(TOOLS.find(t => t.id === "scan")); else startPathway("calm");
+                        }} style={{
+                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
+                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          WebkitTapHighlightColor: "transparent", marginBottom: 8
+                        }}>
+                          <div>
+                            <div>Calm my body</div>
+                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start where the pressure lands in the body.</div>
+                          </div>
+                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
+                        </button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                          <button onClick={() => { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I need to think this through →</button>
+                          <button onClick={() => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); }} style={{ background: "none", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontSize: 13, color: "var(--text-dim)", textAlign: "left", WebkitTapHighlightColor: "transparent" }}>I just want to observe →</button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => setShowObserveEntry(true)} style={{
+                          width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
+                          borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                          display: "flex", justifyContent: "space-between", alignItems: "center",
+                          WebkitTapHighlightColor: "transparent", marginBottom: 8
+                        }}>
+                          <div>
+                            <div>Start here</div>
+                            <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>Start with what's loudest.</div>
+                          </div>
+                          <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
+                        </button>
+                      </>
+                    )}
 
-                    {/* Depth selector — subtle, adult, no gamification */}
-                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      {[
-                        { label: "30 sec", action: () => { setShowObserveEntry(false); startPathway("calm"); } },
-                        { label: "A few minutes", action: () => setShowObserveEntry(true) },
-                        { label: "Go deeper", action: () => { setScreen("tool"); setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") }); } },
-                      ].map(opt => (
-                        <button key={opt.label} onClick={opt.action} style={{
-                          flex: 1, background: "none", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "8px 4px", cursor: "pointer",
-                          fontFamily: "'DM Sans', sans-serif", fontSize: 11,
-                          color: "var(--text-muted)", WebkitTapHighlightColor: "transparent"
-                        }}>{opt.label}</button>
-                      ))}
-                    </div>
-
-                    {/* Direct access — secondary affordance */}
                     <div style={{ textAlign: "center", marginTop: 10 }}>
                       <button onClick={() => setShowSupportSheet(true)} style={{
                         background: "none", border: "none", color: "var(--text-muted)",
                         fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                         letterSpacing: "0.02em", padding: "4px 0"
-                      }}>
-                        Or go directly →
-                      </button>
+                      }}>Or go directly →</button>
                     </div>
                   </>
                 )}
@@ -12453,6 +12470,8 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
+
+              {/* ── 3. EOD STRIP ─────────────────────────────────────────────── */}
               {/* END OF DAY CHECK-IN — appears 6 PM through 4 AM only */}
               {(() => {
                 const now = new Date();
@@ -12596,7 +12615,8 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              </div>{/* end adaptive shell container */}
+              
+
 
               {/* MY PROGRESS — evidence layer, secondary to shell */}
               {(() => {
