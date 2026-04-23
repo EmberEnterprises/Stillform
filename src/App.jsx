@@ -11971,7 +11971,7 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", cursor: "pointer", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 3 }}>
+                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 3 }}>
                         Morning Check-in
                       </div>
                       <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
@@ -12580,6 +12580,33 @@ const isSignalProfileConfigured = () => {
                     >
                       <div>
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 400, color: "var(--text)" }}>My Progress</div>
+                        {(() => {
+                          // Show one data-backed cue at rest — priority order per spec
+                          try {
+                            const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                            if (!Array.isArray(sessions) || sessions.length < 3) return null;
+                            // 1. Signal Awareness — autonomous exits
+                            const autoExits = sessions.filter(s => s.autonomousExit).length;
+                            if (autoExits > 0) return (
+                              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                                {autoExits === 1 ? "1 time you caught it before it ran." : `${autoExits} times you caught it before it ran.`}
+                              </div>
+                            );
+                            // 2. Session duration trend
+                            const recent = sessions.slice(-5).filter(s => s.duration);
+                            const early = sessions.slice(0, 5).filter(s => s.duration);
+                            if (recent.length >= 3 && early.length >= 3) {
+                              const recentAvg = recent.reduce((a, s) => a + s.duration, 0) / recent.length;
+                              const earlyAvg = early.reduce((a, s) => a + s.duration, 0) / early.length;
+                              if (recentAvg < earlyAvg - 0.5) return (
+                                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                                  Sessions are getting shorter. The observer is faster.
+                                </div>
+                              );
+                            }
+                            return null;
+                          } catch { return null; }
+                        })()}
 
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
