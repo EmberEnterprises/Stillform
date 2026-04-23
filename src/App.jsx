@@ -6370,15 +6370,45 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
       ];
 
+  const shellPrompt = isBodyFirst
+    ? {
+        heading: "Where is the signal landing?",
+        sub: "Start with the part of the system that is easiest to read."
+      }
+    : isThoughtFirst
+      ? {
+          heading: "What is your mind doing?",
+          sub: "Start with the pattern that is easiest to name."
+        }
+      : {
+          heading: "What's loudest right now?",
+          sub: "Start with the signal that is easiest to recognize."
+        };
+
+  const supportPrompt = isBodyFirst
+    ? {
+        heading: "What needs attention first?",
+        sub: "Start with the layer that will make the signal easier to work with."
+      }
+    : isThoughtFirst
+      ? {
+          heading: "What would move this forward?",
+          sub: "Choose the layer that will make the pattern easier to read."
+        }
+      : {
+          heading: "What would help first?",
+          sub: "Choose the layer that needs attention first. The support follows from there."
+        };
+
   if (step === 0) return (
     <div>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What's loudest right now?
+        {shellPrompt.heading}
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>Start with the signal that is easiest to recognize.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>{shellPrompt.sub}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {signalOptions.map(opt => (
           <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={optBtn(signalOrigin === opt.id)}>
@@ -6399,9 +6429,9 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What would help first?
+        {supportPrompt.heading}
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>Choose the layer that needs attention first. The support follows from there.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>{supportPrompt.sub}</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
           { id: "settle", label: "Settle the system", sub: "Lower the load so clear thought is easier to access." },
@@ -11097,9 +11127,9 @@ const isSignalProfileConfigured = () => {
             <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
-            {!isSubscribed && (
+            {(!syncSignedIn || !isSubscribed) && (
               <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
-                Subscribe
+                {!syncSignedIn ? "Sign in / Create account" : "Subscribe"}
               </button>
             )}
           </div>
@@ -11877,6 +11907,35 @@ const isSignalProfileConfigured = () => {
           }
 
           const { todayIso, activeLoopNudge, showLoopNudge, isSoftTone, adaptiveDropoffThreshold, adaptiveMinOpens, sensitivityLabel } = getLoopNudgeSnapshot();
+          const nowHome = new Date();
+          const currentMinutesHome = nowHome.getHours() * 60 + nowHome.getMinutes();
+          const morningStartHome = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v, 10) : 270; } catch { return 270; } })();
+          const morningEndHome = 1050;
+          const eveningStartHome = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v, 10) : 1080; } catch { return 1080; } })();
+          const morningCapHome = 240;
+          const todayHome = toLocalDateKey(nowHome);
+          const eodDoneTodayEarly = (() => {
+            try {
+              const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+              return e?.date === todayHome && nowHome.getHours() < 4;
+            } catch {
+              return false;
+            }
+          })();
+          const morningCheckedIn = (() => {
+            try {
+              const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+              return c?.date === todayHome;
+            } catch {
+              return false;
+            }
+          })();
+          const morningVisibleHome = !eodDoneTodayEarly && currentMinutesHome >= morningStartHome && currentMinutesHome < morningEndHome;
+          const shellNeedsMorning = morningVisibleHome && (!morningCheckedIn || ciOpen);
+          const eodDoneHome = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === todayHome; } catch { return false; } })();
+          const eodVisibleHome = currentMinutesHome >= eveningStartHome || currentMinutesHome < morningCapHome;
+          const shellNeedsEvening = eodVisibleHome && (!eodDoneHome || eodOpen);
+          const activeShellMode = shellNeedsMorning ? "morning" : (shellNeedsEvening ? "evening" : "day");
           const dismissLoopNudge = () => {
             if (!activeLoopNudge) return;
             const previousDismissDate = loopNudgeDismissedDay ? new Date(`${loopNudgeDismissedDay}T00:00:00`) : null;
@@ -11969,8 +12028,9 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
-              {/* MORNING CHECK-IN — appears during morning hours, not after EOD time */}
+              {/* MORNING CHECK-IN — shell mode */}
               {(() => {
+                if (activeShellMode !== "morning") return null;
                 const now = new Date();
                 const hour = now.getHours();
                 const minute = now.getMinutes();
@@ -12244,6 +12304,7 @@ const isSignalProfileConfigured = () => {
               })()}
 
               {/* OBSERVE AND CHOOSE — primary intraday practice */}
+              {activeShellMode === "day" && (
               <div style={{ marginBottom: 48, animation: "entrain60glow 1s ease-in-out infinite" }}>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 20, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   {isBodyFirst ? "Settle the system. Then think clearly." : isThoughtFirst ? "Think clearly. Then settle." : "Catch the state before it drives the action."}
@@ -12282,6 +12343,7 @@ const isSignalProfileConfigured = () => {
                   </>
                 )}
               </div>
+              )}
 
               {/* SUPPORT SHEET — secondary fast-lane, discreet */}
               {showSupportSheet && (
@@ -12370,8 +12432,9 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* END OF DAY CHECK-IN — appears 6 PM through 4 AM only */}
+              {/* END OF DAY CHECK-IN — shell mode */}
               {(() => {
+                if (activeShellMode !== "evening") return null;
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })(); // default 6:00 PM
@@ -12543,53 +12606,14 @@ const isSignalProfileConfigured = () => {
                 };
                 const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
                 const processingCues = [
-                  "You don't have to figure it all out right now.",
-                  "One clear thought beats ten tangled ones.",
-                  "The smartest move right now is to slow down.",
-                  "Not every thought needs to be solved. Some just need to be heard.",
-                  "Your gut flagged this first. Trust that.",
-                  "Breathe before you build the case.",
-                  "You've handled harder than this. Start with what's actually true.",
-                  "The analysis is coming. Give your body a moment first.",
-                  "Stop editing. What are you actually feeling?",
-                  "Slow is not weak. Slow is accurate.",
-                  "Let the noise settle before you decide what it means.",
-                  "You've earned the right to pause. Use it.",
-                  "The pressure you're feeling is real. So is your ability to handle it.",
-                  "You don't owe anyone a response before you're ready.",
-                  "You are not your worst-case scenario.",
-                  "Get honest with yourself before you get strategic.",
-                  "The clearest version of you shows up after you regulate.",
-                  "What would you tell someone you love in this moment?",
-                  "You've got this. Start with one breath.",
-                  "Your body is not overreacting. It's communicating.",
-                  "You don't have to push through. You can settle first.",
-                  "You're allowed to take up space with what you're feeling.",
-                  "You don't have to explain the tension. Just notice it.",
-                  "You are stronger than what you're feeling right now.",
-                  "You don't have to carry all of this at once.",
-                  "The feeling will pass. You get to decide what comes next.",
-                  "You are the one who can work with this.",
-                  "Soften one thing. That's enough to start.",
-                  "You can be uncomfortable and still move forward.",
-                  "Let your body exhale what your mind is still holding.",
-                  "You have everything you need to handle this moment.",
-                  "It's okay not to have it all figured out yet.",
-                  "Feel it first. Then decide what to do with it.",
-                  "You are allowed to need a minute.",
-                  "The fact that you're here means you're already doing the work.",
-                  "This moment is temporary. How you handle it doesn't have to be.",
-                  "You've navigated harder than this. Remember that today.",
-                  "What you're feeling is valid. What you do next is the practice.",
-                  "Be as patient with yourself as you would be with someone you love.",
-                  "What do you actually need right now — not what's expected of you?",
-                  "You can feel overwhelmed and still be capable. Both are true.",
-                  "Every hard moment you get through is data. You're building something.",
-                  "Give yourself the same grace you'd give anyone else.",
-                  "You are more consistent than you give yourself credit for.",
-                  "You don't have to fix it all today. Just stay present.",
-                  "Check in. Breathe. You know what to do.",
-                  "You are doing better than you think."
+                  "Your recent sessions point to the layer you tend to reach for first.",
+                  "The signal gets easier to read when you notice it before the story hardens.",
+                  "Composure builds when the first move fits how your system actually starts.",
+                  "Patterns get clearer when you track what fired first instead of forcing a fix.",
+                  "The app is learning where pressure shows up first so the next route is cleaner.",
+                  "What repeats becomes readable. What becomes readable becomes easier to work with.",
+                  "The more precisely you read the signal, the less force the next move needs.",
+                  "This practice is building earlier awareness of what your system does under load."
                 ];
                 const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
                 const processingCue = processingCues[dayOfYear % processingCues.length];
@@ -12614,14 +12638,6 @@ const isSignalProfileConfigured = () => {
                         }}>Update →</button>
                       </div>
                     )}
-                    <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)" }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 4 }}>
-                        Today's processing cue
-                      </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
-                        {processingCue}
-                      </div>
-                    </div>
                     <button
                       onClick={() => {
                         if (homeProgressPinned) {
@@ -12645,7 +12661,7 @@ const isSignalProfileConfigured = () => {
                     >
                       <div>
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, lineHeight: 1.1, color: "var(--text)" }}>My Progress</div>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>Everything you've built. Every session counted.</div>
+                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>{signalDivergence ? `Signal shift in ${signalDivergence} is worth revisiting.` : processingCue}</div>
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                         <button
@@ -12706,7 +12722,7 @@ const isSignalProfileConfigured = () => {
                           </div>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{streakCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Day streak</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Days active</div>
                           </div>
                           <div style={{ gridColumn: "1 / -1", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "var(--amber)", lineHeight: 1.2 }}>{mostUsedLabel}</div>
