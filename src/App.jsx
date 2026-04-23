@@ -12337,14 +12337,7 @@ const isSignalProfileConfigured = () => {
                       <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                     </button>
 
-                    {/* Or go directly — always secondary */}
-                    <div style={{ textAlign: "center", marginTop: 8 }}>
-                      <button onClick={() => setShowSupportSheet(true)} style={{
-                        background: "none", border: "none", color: "var(--text-muted)",
-                        fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                        letterSpacing: "0.02em", padding: "4px 0"
-                      }}>Or go directly →</button>
-                    </div>
+
                   </>
                 )}
               </div>
