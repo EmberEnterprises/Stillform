@@ -11114,7 +11114,7 @@ const isSignalProfileConfigured = () => {
                 Subscribe
               </button>
             ) : (
-              <button className="btn btn-primary" onClick={() => setPricingAuthOpen(true)}>
+              <button className="btn btn-primary" onClick={() => { setScreen("pricing"); setPricingAuthOpen(true); }}>
                 Log In / Sign Up
               </button>
             )}
