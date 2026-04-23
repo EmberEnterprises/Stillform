@@ -11105,9 +11105,17 @@ const isSignalProfileConfigured = () => {
             <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px" }}>
               ⚙
             </button>
-            {!isSubscribed && (
+            {syncSignedIn && isSubscribed ? (
+              <button className="btn btn-ghost" onClick={() => setScreen("settings")} style={{ padding: "8px 14px", fontSize: 13 }}>
+                Account
+              </button>
+            ) : syncSignedIn ? (
               <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
                 Subscribe
+              </button>
+            ) : (
+              <button className="btn btn-primary" onClick={() => setPricingAuthOpen(true)}>
+                Log In / Sign Up
               </button>
             )}
           </div>
@@ -11982,33 +11990,7 @@ const isSignalProfileConfigured = () => {
                    All three practice sections live inside one visual container.
                    Morning: Set the tone | Day: Observe and Choose | Evening: Close the loop
               */}
-              {/* AUTH ENTRY — always visible on Home */}
-              <div style={{
-                display: "flex", justifyContent: "space-between", alignItems: "center",
-                padding: "10px 14px", marginBottom: 12,
-                background: "none", border: "0.5px solid var(--border)",
-                borderRadius: "var(--r)", cursor: "pointer"
-              }} onClick={() => setScreen("settings")}>
-                {syncSignedIn ? (
-                  <>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-                      {(() => { try { return sbGetSession()?.user?.email || "Signed in"; } catch { return "Signed in"; } })()}
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
-                      SYNCED ✓
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>
-                      Sign in or create an account to sync your practice
-                    </div>
-                    <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
-                      SIGN IN →
-                    </div>
-                  </>
-                )}
-              </div>
+
 
               {/* ── ONE ADAPTIVE SHELL CONTAINER ─────────────────────────────────── */}
               {(() => {
@@ -13225,7 +13207,7 @@ const isSignalProfileConfigured = () => {
                 border: "1px solid var(--border)"
               }}>
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8, lineHeight: 1.5 }}>
-                  Sign in / Sign up to subscribe. We'll continue checkout automatically.
+                  Create an account or sign in — then choose your plan.
                 </div>
                 {pricingAuthOpen && (
                   <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -13264,7 +13246,7 @@ const isSignalProfileConfigured = () => {
                     style={{ width: "100%" }}
                     onClick={() => setPricingAuthOpen(true)}
                   >
-                    Continue to sign in →
+                    Create account or sign in →
                   </button>
                 )}
               </div>
@@ -14744,8 +14726,8 @@ const isSignalProfileConfigured = () => {
           <footer className="footer">
             <div className="footer-logo">Stillform</div>
             <div className="footer-links">
-              {screen !== "pricing" && screen !== "home" && (
-                <button onClick={() => setScreen("pricing")}>Subscribe</button>
+              {screen !== "pricing" && screen !== "home" && !isSubscribed && (
+                <button onClick={() => setScreen("pricing")}>{syncSignedIn ? "Subscribe" : "Sign In"}</button>
               )}
               {screen !== "settings" && (
                 <button onClick={() => setScreen("settings")}>Settings</button>
