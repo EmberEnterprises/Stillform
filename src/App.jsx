@@ -6351,23 +6351,23 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
   // Order options by calibration type — body-first sees Body first
   const signalOptions = isBodyFirst
     ? [
-        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
-        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
-        { id: "both", label: "Both", sub: "Hard to separate" },
-        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
+        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
+        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
+        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
       ]
     : isThoughtFirst
     ? [
-        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
-        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
-        { id: "both", label: "Both", sub: "Hard to separate" },
-        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
+        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
+        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
+        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
       ]
     : [
-        { id: "body", label: "Body", sub: "Tension, chest, gut, jaw, shoulders" },
-        { id: "thought", label: "Thought", sub: "Replaying, spiraling, analyzing" },
-        { id: "both", label: "Both", sub: "Hard to separate" },
-        { id: "unsure", label: "Not sure", sub: "Something's off, can't place it" },
+        { id: "body", label: "Body", sub: "Chest, gut, jaw, shoulders — something physical" },
+        { id: "thought", label: "Thought", sub: "Replaying, anticipating, spiraling" },
+        { id: "both", label: "Both", sub: "Tangled — hard to separate right now" },
+        { id: "unsure", label: "Not sure", sub: "Something's active, can't place it yet" },
       ];
 
   if (step === 0) return (
@@ -6376,9 +6376,9 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What fired first?
+        Where did it start?
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First instinct. Don't overthink it.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First signal. Don't analyze it yet.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {signalOptions.map(opt => (
           <button key={opt.id} onClick={() => { setSignalOrigin(opt.id); setStep(1); }} style={optBtn(signalOrigin === opt.id)}>
@@ -6399,14 +6399,14 @@ function ObserveEntryLite({ onClose, onRoute, isBodyFirst, isThoughtFirst }) {
         Observe and Choose
       </div>
       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What do you need?
+        What does this moment need?
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The right support follows from here.</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
-          { id: "settle", label: "Settle", sub: "Bring the system down. Body first." },
-          { id: "understand", label: "Understand", sub: "Get distance. Clarify what's happening." },
-          { id: "catch", label: "Just catch it", sub: "Notice without intervening." },
+          { id: "settle", label: "Settle", sub: "The body is running. Bring it down first." },
+          { id: "understand", label: "Understand", sub: "Something's there. Get some distance from it." },
+          { id: "catch", label: "Just name it", sub: "Notice the signal. That's enough for now." },
         ].map(opt => (
           <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn(false)}>
             <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
@@ -12089,8 +12089,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Set the tone</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What might drive you today if you don't notice it early?</div>
+                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Before the day begins</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What might run you today if you don't see it first?</div>
                   </button>
                 );
 
@@ -12261,12 +12261,19 @@ const isSignalProfileConfigured = () => {
                     {/* Single entry point — no tool names, routing is invisible */}
                     <button onClick={() => setShowObserveEntry(true)} style={{
                       width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 18, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
+                      borderRadius: "var(--r)", padding: "22px 24px", fontSize: 16, fontWeight: 500,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
-                      WebkitTapHighlightColor: "transparent", marginBottom: 8, letterSpacing: "0.02em"
+                      WebkitTapHighlightColor: "transparent", marginBottom: 8,
+                      display: "flex", justifyContent: "space-between", alignItems: "center"
                     }}>
-                      Begin
+                      <div style={{ textAlign: "left" }}>
+                        <div>{isBodyFirst ? "Check in with your body" : isThoughtFirst ? "Clear the noise" : "What's happening right now"}</div>
+                        <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2, fontWeight: 400 }}>
+                          {isBodyFirst ? "Find the signal. Choose the response." : isThoughtFirst ? "Name it. Then decide." : "Catch it before it runs you."}
+                        </div>
+                      </div>
+                      <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
                     </button>
 
                     {/* Need support fast? — secondary affordance only */}
@@ -12276,7 +12283,7 @@ const isSignalProfileConfigured = () => {
                         fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                         letterSpacing: "0.02em", padding: "4px 0"
                       }}>
-                        Need support fast? ↓
+                        Or go directly →
                       </button>
                     </div>
                   </>
@@ -12295,12 +12302,12 @@ const isSignalProfileConfigured = () => {
                     padding: "24px 24px 40px", width: "100%", maxWidth: 480
                   }}>
                     <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-                      Support
+                      Direct access
                     </div>
                     {[
-                      { label: "Quick Breathe", sub: "60 second reset", action: () => { setShowSupportSheet(false); startPathway("calm"); } },
-                      { label: "Reframe", sub: "Talk it through with AI", action: () => { setShowSupportSheet(false); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } },
-                      { label: "Body Scan", sub: "Locate where it lives", action: () => { setShowSupportSheet(false); startTool(TOOLS.find(t => t.id === "scan")); } },
+                      { label: "Breathe", sub: "Settle the system. 60 seconds.", action: () => { setShowSupportSheet(false); startPathway("calm"); } },
+                      { label: "Reframe", sub: "Talk through what's happening.", action: () => { setShowSupportSheet(false); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } },
+                      { label: "Body Scan", sub: "Find where the signal lives.", action: () => { setShowSupportSheet(false); startTool(TOOLS.find(t => t.id === "scan")); } },
                     ].map(opt => (
                       <button key={opt.label} onClick={opt.action} style={{
                         width: "100%", background: "none", border: "0.5px solid var(--border)",
@@ -14689,7 +14696,7 @@ const isSignalProfileConfigured = () => {
             color: "var(--text-dim)", letterSpacing: "0.04em"
           }}>
             <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
-            One practice. One skill. Everything else is support.
+            Composure is a practice. You're building it.
           </div>
         )}
 
