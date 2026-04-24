@@ -5383,7 +5383,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
-    return `State to Statement:\n${clean}`;
+    return `What Shifted:\n${clean}`;
   };
   const logCommunicationEvent = (eventAction, options = {}) => {
     const stamp = new Date().toISOString();
@@ -5624,10 +5624,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          State to Statement
+          What Shifted
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          Close the session. If helpful, capture one clear line you can send while you're regulated.
+          In one line — what shifted? Naming it locks in the regulated state.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -5654,7 +5654,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 setExternalAnchorSent(false);
                 setCommunicationSkipReason(null);
               }}
-              placeholder="Draft one clear message you can send now."
+              placeholder="In one line — what shifted?"
               rows={3}
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
@@ -5781,12 +5781,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             onClick={toggleStateToStatementExpanded}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
           >
-            {stateToStatementExpanded ? "▾ Hide statement" : "▸ Add a statement before you go"}
+            {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
           </button>
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
-                Convert your regulated state into one clear message you can send — Slack, email, text, or talking point.
+                In one line — what shifted? Naming it locks in the regulated state. This is for you, not for sending.
               </div>
               <textarea
                 value={externalAnchorDraft}
