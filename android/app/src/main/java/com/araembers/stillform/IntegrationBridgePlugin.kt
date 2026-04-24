@@ -239,10 +239,12 @@ class IntegrationBridgePlugin : Plugin() {
                 cursor?.use {
                     while (it.moveToNext() && events.length() < 8) {
                         val title = it.getString(0)?.trim()
+                        val allDay = it.getInt(3)
+                        Log.d(TAG, "Calendar row: title='$title' allDay=$allDay")
                         if (title.isNullOrEmpty()) continue
                         val start = it.getLong(1)
                         val end = it.getLong(2)
-                        if (it.getInt(3) == 1) continue
+                        if (allDay == 1) continue
                         events.put(JSONObject().apply {
                             put("title", title)
                             put("start", Instant.ofEpochMilli(start).toString())
