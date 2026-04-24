@@ -2109,3 +2109,47 @@ Calibration slide:
 
 **Design principle:** Calibration must never feel like a form. It must feel like the system is learning how to serve this specific person. Every question exists because the answer changes how the product behaves.
 
+
+---
+
+## April 23, 2026 — Home Architecture + Flow Corrections
+
+### Home structure (final, do not relitigate)
+
+Four blocks in order:
+1. Morning strip — compact, morning window only, full logic preserved when expanded
+2. Main hero — routes directly by processing type, no options for thought-first/body-first
+3. My Progress — on Home, quieter, data-backed cue at rest
+4. EOD strip — compact, evening window only, full logic preserved when expanded
+
+**Processing type routing:**
+- Thought-first → hero → Reframe (direct, no shell)
+- Body-first → hero → Breathe or Body Scan if off-baseline (direct, no shell)
+- Balanced → hero → ObserveEntryLite (one question inline, routes immediately)
+
+**ObserveEntryLite (balanced only):**
+- One question: "What's louder right now?"
+- Body → immediate route (off-baseline → scan, else breathe)
+- Mind → immediate route to Reframe
+- Both/off → one follow-up question then routes
+
+**Reframe:**
+- Persistent "Observe and Choose →" button removed from header
+- Contextual post-session nudge preserved (after high-activation sessions)
+- User stays in Reframe until natural completion
+
+**Auth nav (locked):**
+- Signed out → "Log In / Sign Up" → pricing screen + auth modal
+- Signed in, unsubscribed → "Subscribe" → pricing screen
+- Signed in + subscribed → "Account" → Settings
+
+### Branch/PR workflow (new standard)
+All work goes to `preview/` branch first. PR created. Netlify preview reviewed. Then merge to main. Never push directly to main without approval.
+
+### Next priorities
+1. Integrations verification on device (Health Connect, Calendar → AI context)
+2. Galaxy Watch APK install (ADB over WiFi)
+3. Google Play closed testing build (14-day clock must start)
+4. Real testimonials from Google Play testers
+5. Reddit post after testimonials + paywall confirmed working
+

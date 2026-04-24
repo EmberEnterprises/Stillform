@@ -143,3 +143,69 @@ Then Google Play Console → upload AAB → add testers → start 14-day closed 
 
 Go rest. Treatment first. Product second.
 
+
+---
+
+## Session Summary — April 23, 2026
+
+### ✅ MAJOR: Home Architecture Restructure
+
+Complete rebuild of the Home screen from scratch. Previous architecture had too many competing surfaces and flattened the science.
+
+**New Home structure — four blocks in order:**
+1. **Morning strip** — compact, only visible in morning window. "Morning Check-in" label. Incomplete: shows subcopy. Done: shows ✓. Taps to expand full morning flow. All morning logic preserved.
+2. **Main hero** — one CTA, routes directly by processing type:
+   - Thought-first: "Talk it out" → straight to Reframe
+   - Body-first: "Calm my body" → Breathe or Body Scan (off-baseline override)
+   - Balanced: "Start here" → opens ObserveEntryLite inline
+3. **My Progress** — stays on Home, quieter visual weight. At-rest shows one data-backed cue (autonomous exits, or session duration trend). Expands for detail.
+4. **EOD strip** — compact, only visible in evening window. "Close the loop" label. Same collapsed/expanded behavior as morning.
+
+**ObserveEntryLite — simplified:**
+- One question only: "What's louder right now?"
+- Body → routes immediately (off-baseline → Body Scan, else Breathe)
+- Mind → routes immediately to Reframe
+- Both/off → one follow-up question then routes
+- Thought-first and body-first users never enter the shell — hero routes them directly
+
+**Processing-type is felt at the surface:**
+- Identity line adapts per type
+- Hero CTA label adapts per type
+- Off-baseline overrides preserved throughout
+
+### ✅ Reframe Handoff Fixed
+
+Removed the persistent "Observe and Choose →" button from Reframe header area. User now stays in Reframe without being offered a competing branch mid-session. Contextual post-session nudge (after high-activation sessions) preserved — that path is appropriate because it's contextual.
+
+### ✅ Auth Flow Fixed
+
+Nav button now correctly handles all three states:
+- Signed out → "Log In / Sign Up" → opens auth modal on pricing screen
+- Signed in, unsubscribed → "Subscribe" → pricing screen
+- Signed in + subscribed → "Account" → Settings
+
+No auth card on Home body.
+
+### ✅ Branch/PR Workflow Established
+
+Going forward: all work goes to a `preview/` branch first. PR created. Netlify generates preview URL. Arlin reviews. Then merges to main.
+
+### ✅ Science Preserved
+
+- MCT detached mindfulness: Observe and Choose is contextual, not a persistent branch
+- Top-down vs bottom-up: hero routes by processing type, off-baseline overrides to body-led support
+- Off-baseline detection: includes activated, depleted, pain, sleep, medicated, off-baseline, something
+- Calibration as routing intelligence: drives hero CTA, ObserveEntryLite option ordering, route bias
+
+### 🔴 NEXT — Integrations Before Google Play Build
+
+1. Health Connect → AI context: verify data flows on device
+2. Calendar → AI context: verify data flows on device
+3. Galaxy Watch APK install: ADB over WiFi, code complete
+4. Then: Google Play closed testing build (14-day clock)
+
+### Key files changed
+- `src/App.jsx` — home restructure, ObserveEntryLite, auth flow, Reframe handoff
+- `STILLFORM_SESSION_SUMMARY_APRIL22.md` — this file
+- `Stillform_Science_Sheet.md` — MCT section added
+

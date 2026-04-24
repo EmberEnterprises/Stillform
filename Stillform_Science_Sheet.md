@@ -375,3 +375,20 @@ If someone asks "what is Stillform?" in 10 seconds:
 ---
 
 *ARA Embers LLC · Stillform Science Sheet · April 2026*
+
+---
+
+## ObserveEntryLite — MCT in Practice (April 23, 2026)
+
+The lightweight shell for balanced users implements detached mindfulness (Wells, 2009) in its minimal form:
+
+**One orienting question only.** "What's louder right now?" This is the MCT principle of stepping back from the state to observe it — without triggering the full Cognitive Attentional Syndrome (CAS) of additional prompts and self-monitoring.
+
+**Immediate routing for clear signals.** When the signal is legible (body → settle, mind → clarify), the app routes without asking a second question. This preserves the MCT principle that the observer should catch and release, not analyze.
+
+**Second question only for ambiguous states.** "Both" and "I just feel off" are genuinely ambiguous — they warrant one more orienting step before routing. This is consistent with the MCT principle that intervention should match the clarity of the signal.
+
+**Thought-first and body-first users bypass the shell entirely.** Calibration has already identified the dominant processing pathway. The app routes directly — this is the science working as designed. Asking a calibrated user to describe their signal is redundant and adds friction.
+
+**Off-baseline overrides preserved.** When body-state (activated, depleted, pain, sleep, medicated) is flagged, the app biases toward somatic support regardless of processing type. This is the two-regulation-pathway principle: physiological activation must be addressed at the body level before top-down cognitive processing is effective (Ochsner & Gross, 2005).
+
