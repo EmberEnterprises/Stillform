@@ -2160,7 +2160,11 @@ All work goes to `preview/` branch first. PR created. Netlify preview reviewed. 
 ### Post-Reframe Screen 1 (finish screen)
 - **Feel chips** — "Where are you now?" — post-state capture for delta calculation
 - **What Shifted** — single line text field, expanded by default. Affect labeling (Lieberman). User names what changed in their regulated state. For them, not for sending. Data: qualitative session note.
-- **AI Insight card** — surfaces AI-noticed patterns across sessions. Unlocks at session 5+. Shows when pattern data exists. Data: pattern recognition feed.
+- **AI Insight card** — surfaces AI-noticed observations and patterns across sessions. Adapts by session count:
+  - Session 1-4: observational register — "in this session you..." — single session observation, never claims pattern
+  - Session 5+: pattern register — "you tend to..." — genuine cross-session pattern recognition
+  - Language adapts automatically, same card, same location, no threshold gate visible to user
+  - Data: observation/pattern feed, session count determines register
 
 ### Post-Reframe Screen 2 (Next Move + Lock-in)
 
@@ -2176,7 +2180,12 @@ All work goes to `preview/` branch first. PR created. Netlify preview reviewed. 
 - **Delay response** → set timer → saved to Repository → reminder fires when timer up
 - **Let it go** → one tap → logged as released → done
 
-**Next Move buttons — Internal context (post-launch, built from real usage data)**
+**Next Move buttons — Internal context (built alongside interpersonal, not deferred):**
+- Internal sessions detected by reframe.js same as interpersonal — no user tap
+- Button set TBD — needs content definition before build (same session as interpersonal buttons)
+- Candidates: **Take action / Sit with it / Let it go / Come back to it**
+- Must be defined and approved before Screen 2 is built
+- Rationale: assuming every Reframe session is interpersonal is false — internal processing is equally common and deserves its own execution paths
 
 **Lock-in statements:**
 - Appear after Next Move button is selected
@@ -2206,7 +2215,17 @@ Lock-in statements matrix:
 - Lives in My Patterns or Settings — location TBD
 - Purpose: regulated decisions don't get lost when the moment passes; accountability to self
 
+### Skip data as signal (locked decision)
+- Every skip on Screen 1 and Screen 2 is recorded as a data point
+- Recorded: which element was skipped (What Shifted / Next Move / Lock-in), session number, timestamp
+- NOT surfaced to user until session 10+ — single skips are noise, patterns are signal
+- At session 10+: skip patterns surface in My Patterns gently — "you've been skipping the action step, want to explore why?"
+- Tone: curious, never shaming or pathologizing
+- Science: avoidance patterns are as diagnostically informative as engagement patterns (Hayes, ACT; Wells, MCT)
+- Skip of "Let it go" specifically tracked — choosing not to release is itself a signal
+
 ### What is NOT changing
 - ToolDebriefGate 20-second timer preserved — gating mechanism is the feature
 - Existing lock-in statement copy preserved and extended (not replaced)
 - Regulation type personalization layer preserved throughout
+
