@@ -6113,7 +6113,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           Self Mode
           <span
             title="Work through this on your own without AI. Structured self-observation — for users who prefer to process independently."
-            style={{ fontSize: 10, color: "var(--text-muted)", cursor: "help" }}
+            style={{ fontSize: 11, color: "var(--text-muted)", cursor: "help", fontFamily: "sans-serif" }}
           >
             ⓘ
           </span>
@@ -6603,38 +6603,37 @@ function MetacognitionTool({ onComplete }) {
     {
       label: "Notice",
       question: "What's happening in your body right now?",
-      sub: "Don't fix it. Just notice it. Where is it? What does it feel like?",
-      placeholder: "My chest is tight, my jaw is clenched..."
+      sub: "Scan without judgment. Where are you holding it?",
+      placeholder: "Shoulders, jaw, chest — wherever you feel it first."
     },
     {
       label: "Name",
       question: "What thought just fired?",
-      sub: "The first thought. Not the story, not the explanation. The raw thought.",
-      placeholder: "I'm going to lose everything..."
+      sub: "The first one. Before the story built around it.",
+      placeholder: "Name it plainly. One sentence."
     },
     {
       label: "Recognize",
       question: "Have you been here before?",
-      sub: "Does this thought have a pattern? Is this familiar?",
-      placeholder: "This is the money spiral. I do this when I'm tired..."
+      sub: "Is this thought familiar? Does it have a pattern?",
+      placeholder: "This shows up when I'm under pressure, or when..."
     },
     {
-      // EQ integration — light, not labeled
       label: "Perspective",
       question: indicatesNewPattern
-        ? "What would help you stay steady in this new moment?"
-        : "What do you actually need right now?",
+        ? "What would help you stay steady right now?"
+        : "What do you actually need in this moment?",
       sub: indicatesNewPattern
-        ? "If this feels new, keep it simple: one support, one boundary, one next step."
-        : "Not what you think you should do. What does the part of you that's hurting actually need?",
+        ? "Something simple. One support, one boundary, or one next step."
+        : "Not what you should do. What does this moment actually call for?",
       placeholder: indicatesNewPattern
-        ? "I need 60 seconds, one breath cycle, then one clear action..."
-        : "What do you need right now?"
+        ? "Space, clarity, or one concrete action."
+        : "What would steady you right now?"
     },
     {
       label: "Choose",
-      question: "What do you want to do with the next 60 seconds?",
-      sub: "You caught the spiral. You named it. Now you choose.",
+      question: "What are you doing next?",
+      sub: "You observed it. You named it. Now decide.",
       placeholder: ""
     }
   ];
@@ -6762,10 +6761,10 @@ function MetacognitionTool({ onComplete }) {
             <button className="btn btn-primary" style={{ flex: 1 }}
               disabled={!(responses[step] || "").trim()}
               onClick={() => setStep(s => s + 1)}>
-              Next →
+              {step === 0 ? "Name it →" : step === 1 ? "Recognize →" : step === 2 ? "Get perspective →" : step === 3 ? "Choose →" : "Next →"}
             </button>
             <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={markStepNotApplicable}>
-              Doesn't apply
+              Skip
             </button>
           </div>
         </>
