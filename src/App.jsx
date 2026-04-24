@@ -5094,8 +5094,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           calendarContext: integrationContext.calendarContext,
           healthContext: integrationContext.healthContext,
-          // DEBUG
-          ...((() => { console.log("[Reframe] calendarContext:", integrationContext.calendarContext); return {}; })()),
           sessionCount: getSessionCountFromStorage(),
           scienceEvidence: (() => {
             try {
@@ -14736,6 +14734,7 @@ const isSignalProfileConfigured = () => {
     </ErrorBoundary>
   );
 }
+
 
 
 
