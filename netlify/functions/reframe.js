@@ -1056,6 +1056,8 @@ exports.handler = async function(event) {
       userLocalNowMs = null,
       userTimeZone = null,
       scienceEvidence = null,
+      calendarContext = null,
+      healthContext = null,
       install_id = null,
       user_id = null
     } = JSON.parse(event.body);
@@ -1203,6 +1205,8 @@ exports.handler = async function(event) {
       }
     }
     if (eodContext) contextParts.push(eodContext);
+    if (calendarContext) contextParts.push(`${calendarContext}. If relevant to what they're dealing with, acknowledge it naturally — don't announce it, just factor it in.`);
+    if (healthContext) contextParts.push(`${healthContext}. Use this to calibrate how much capacity this person is likely working with today. Don't diagnose — just factor it in when relevant.`);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
     if (biasProfile) contextParts.push(`USER'S IDENTIFIED COGNITIVE BLIND SPOTS: ${biasProfile}. Watch for these patterns in what they write. If you see one activating, name it clearly but without judgment: "This looks like [bias name] — your brain is doing the thing you've already learned to watch for." Only flag it when you're confident it's present. Don't force it.`);
     if (priorToolContext) contextParts.push(priorToolContext);
