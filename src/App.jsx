@@ -11130,9 +11130,9 @@ const isSignalProfileConfigured = () => {
               kicker: "Tutorial · 1 of 4",
               title: "This Setup Is For You",
               paragraphs: [
-                "Before anything else works, the system needs to know how you work. This is a one-time calibration — takes about 3 minutes.",
-                "After this, every tool, every AI response, and every recommendation is built around you specifically. Not a generic user. You.",
-                "The more honestly you answer, the more accurately the system reads your signals. This is not a quiz. There are no wrong answers."
+                "Stillform is not generic by design. Calibration gives the platform a read on how your system tends to start under pressure so the first move is more precise.",
+                "This setup is one time and short. The payoff is that every support after it is built around your signals, your processing type, and the way load actually shows up for you.",
+                "Answer it instinctively. There are no right answers here — only cleaner data about how your system works."
               ]
             },
             {
@@ -11140,24 +11140,24 @@ const isSignalProfileConfigured = () => {
               title: "Go / No-Go Quick Check — Time to First Value",
               focusCheckTTFV: true,
               paragraphs: [
-                "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
-                "Not a diagnosis. A fast read on how your system is running today."
+                "This is a 30-second read on attention stability, inhibition control, and response tempo. It shows you how available clear thought is right now.",
+                "Not a diagnosis. Just a fast operational baseline before the day starts asking for decisions."
               ]
             },
             {
               kicker: "Tutorial · 3 of 4",
               title: "One Practice. Three Moments.",
               paragraphs: [
-                "Set the tone in the morning — before the day sets it for you. Observe and Choose through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
-                "Breathe, Body Scan, and Reframe are supports. The system routes you to the right one. You don't have to choose."
+                "The practice is simple: set the tone early, catch the signal during the day, and close the loop at night. Morning calibrates. The day reveals what is active. Evening turns experience into pattern.",
+                "Breathe, Body Scan, and Reframe are not separate products to manage. They are supports the platform uses to help you regulate, locate, clarify, or reflect when the moment calls for it."
               ]
             },
             {
               kicker: "Tutorial · 4 of 4",
               title: "The Skill Builds Over Time",
               paragraphs: [
-                "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
-                "Every day after: Set the tone → Observe and Choose → Close the loop. The less you need the app, the more it's working."
+                "What changes over time is not your personality. It is your access to composure. Signals get easier to recognize, routes get cleaner, and you spend less time being run by the first reaction.",
+                "That is why the platform tracks patterns and reflects them back. The less help you need to return to clear thought, the more the practice is working."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
