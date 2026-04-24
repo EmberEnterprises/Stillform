@@ -275,3 +275,23 @@
 ### 🟡 Soft launch target
 - Hold until cloud sync + server-side verification complete
 - Bobby needs to confirm live mode is stable
+
+## Post-Reframe Screen 2 — Next Move + Lock-in (SPEC COMPLETE, NOT YET BUILT)
+
+### Before any code is written:
+- [ ] Write all 36 lock-in statements (4 buttons × 3 regulation types × 3 options)
+- [ ] Write "Let it go" statements separately — release register, not action register
+- [ ] Review and approve all content
+
+### Build sequence:
+- [ ] Session context detection in reframe.js (interpersonal / internal flag, stored on session)
+- [ ] Next Move screen with 4 interpersonal buttons
+- [ ] Send message execution path (compose window + share sheet)
+- [ ] Hold boundary execution path (write line + save to repository + notification)
+- [ ] Delay response execution path (set timer + save to repository + reminder)
+- [ ] Let it go execution path (one tap + logged)
+- [ ] Lock-in statements (contextual by next move + regulation type)
+- [ ] 20-second pause gate
+- [ ] Boundary/Delay Repository (storage + notification system)
+- [ ] My Patterns: surface session context distribution data
+- [ ] Internal session Next Move buttons (post-launch)
