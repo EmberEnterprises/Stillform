@@ -13548,75 +13548,67 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure architecture. It teaches you to regulate your body first, then reset your thinking — so you can choose how you respond instead of reacting on autopilot. Three tools: Breathe handles physical activation. Body Scan clears what your body is holding. Reframe processes the thinking. The system routes you to the right one based on how you process. You don\'t choose the tool — your profile does."
+                a: "A composure architecture. Your body activates before your thinking catches up — Stillform works with that sequence, not against it. Breathe settles the nervous system. Body Scan clears what your body is holding. Reframe processes the thinking once your system is ready to receive it. The tools aren\'t random — they follow the actual order your brain and body need to regulate."
               },
               {
                 q: "What does composure actually mean here?",
-                a: "Not calm for calm\'s sake. Composure is how you carry yourself — in high-stakes conversations, under pressure, when something goes sideways, and when nothing is wrong at all. It\'s the difference between reacting from activation and responding from clarity. Stillform builds that as a daily practice, not a crisis intervention."
-              },
-              {
-                q: "What is the method behind Stillform?",
-                a: "Metacognitive Therapy, applied to daily life. The core shift: from \'I am this state\' to \'I can observe this state and choose my response.\' MCT doesn\'t ask you to challenge your thoughts or decide if they\'re rational. It trains you to step back from them. Every tool in Stillform serves that shift — Breathe interrupts the loop, Body Scan grounds you in the physical, Reframe processes what fired. Calibration identifies your regulation type so the system knows your pathway before you need it."
+                a: "Not calm for calm\'s sake. Composure is how you carry yourself — under pressure, in high-stakes conversations, when something goes sideways, and when nothing is wrong at all. The brain under activation narrows its field of view. It reads threats that aren\'t there, misses signals that are. Composure is what happens when you restore the full picture before you respond."
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is not meditation and not therapy. Meditation is a practice of sustained attention. Therapy is clinical treatment. Stillform is a composure system — structured interventions that interrupt activation and restore function in real time. It is a performance and regulation tool, not a treatment for mental health conditions. If you need clinical support, please seek it."
-              },
-              {
-                q: "What science is Stillform built on?",
-                a: "Metacognitive Therapy (Wells, 2009) is the primary framework. Supporting mechanisms include: autonomic down-regulation through paced breathing (vagal nerve stimulation, Gerritsen & Band 2018), interoceptive awareness through body scanning (Mehling et al. 2012), cognitive reappraisal in Reframe (Ochsner & Gross 2005), affect labeling via emotion naming (Lieberman et al. 2007), implementation intentions via the calibration assessment (Gollwitzer 1999), and psychological distancing via pattern recognition (Kross & Ayduk 2011). These are established mechanisms, not proprietary claims."
+                a: "Stillform is not meditation and not therapy. Meditation is a practice of sustained attention. Therapy is clinical treatment. Stillform is a precision composure system — structured interventions that interrupt activation and restore function in real time. It is a performance and regulation tool, not a treatment for mental health conditions. If you need clinical support, please seek it."
               },
               {
                 q: "What is calibration?",
-                a: "A five-scenario assessment that identifies whether you regulate better body-first or thought-first. Body-first: physical activation hits before cognition catches up — breathing and body work settle you before thinking can. Thought-first: the loop fires in your head — you need to process the thinking before your body releases. Calibration pre-loads your pathway so when activation hits, the app already knows your first move. You can recalibrate anytime in Settings."
+                a: "A five-scenario assessment that identifies whether you regulate better body-first or thought-first. This matters because forcing a cognitive strategy on someone in physical distress doesn\'t work — and pushing breathing on someone who needs to think through a situation doesn\'t work either. Calibration pre-loads your pathway so when activation hits, the app already knows your first move. You can recalibrate anytime in Settings."
               },
               {
                 q: "What is the morning check-in?",
-                a: "Three quick inputs at the start of your day: energy level, physical state, and where you\'re holding tension in your body. Under 30 seconds. The AI uses all of it as context for every session that follows — so when you open Reframe later, it already knows you\'re running on low sleep or carrying tension in your shoulders. The check-in sets the day\'s baseline."
+                a: "Three quick inputs at the start of your day: energy level, physical state, and where you\'re holding tension in your body. Under 30 seconds. Sleep deprivation, pain, and hormonal shifts directly alter emotional perception — they narrow your window before the day even starts. The check-in catches that early, so the AI already knows your baseline when you open Reframe later."
               },
               {
                 q: "What is the end of day check-in?",
-                a: "After 6 PM, three taps: where your energy landed, whether you held composure, and one word for the day. The AI uses yesterday\'s close as context the next morning. The morning and evening bookend creates a feedback loop that makes your patterns visible over time."
+                a: "After 6 PM, three taps: where your energy landed, whether you held composure, and one word for the day. The AI uses yesterday\'s close as context the next morning. The morning and evening bookend creates a feedback loop — patterns that would stay invisible in your head become visible in the data over time."
               },
               {
                 q: "What does the AI actually do in Reframe?",
-                a: "It reads your feel state, physical state, and what you type — then names what\'s happening without telling you what to feel. If you\'re spiraling, it cuts the loop with one precise question. If you\'re processing an interpersonal situation, it separates what\'s real from what your read is adding. If you\'re in a high state, it channels the energy and checks for overcommitment. You don\'t choose a mode. The AI routes based on your input."
+                a: "It reads your feel state, physical state, and what you type — then names what\'s happening without telling you what to feel. When you\'re spiraling, the brain keeps collecting evidence for the story it already believes and misses what doesn\'t fit. The AI interrupts that loop with one precise question. When you\'re processing an interpersonal situation, it separates what\'s real from what your read of the other person is adding. When you\'re in a high state, it channels the energy and checks for overcommitment. You don\'t choose a mode — the AI routes based on your input."
               },
               {
                 q: "Does the AI learn about me?",
-                a: "Yes. It reads your signal profile, bias patterns, check-in history, and session notes. The more you use it, the more accurate it gets about your specific patterns — what tends to trigger you, how you process, and what\'s worked before. From session five onward, it starts surfacing those observations directly."
+                a: "Yes. It reads your signal profile, bias patterns, check-in history, and session notes. The more you use it, the more accurate it gets about your specific patterns — what tends to trigger you, how you process, and what\'s worked before. From session five onward, it starts surfacing those observations directly. Seeing your own patterns externalized creates the distance needed to actually change them."
               },
               {
                 q: "What is Self Mode in Reframe?",
-                a: "An alternative to AI-assisted Reframe for users who prefer to work through activation independently. Five structured steps: Notice (where is it in the body), Name (the first thought, not the story), Recognize (is this pattern familiar), Perspective (what do you actually need), Choose (what next). No AI. Pure structured self-observation based on MCT\'s detached mindfulness framework. Accessible via the Self Mode tab inside Reframe."
+                a: "An alternative to AI-assisted Reframe for users who prefer to work through activation independently. Five structured steps: Notice (where is it in the body), Name (the first thought, not the story), Recognize (is this pattern familiar), Perspective (what do you actually need), Choose (what next). No AI. The structure is based on the clinical principle that stepping back from a state to observe it — rather than fighting it or fusing with it — is what produces real regulation. Accessible via the Self Mode tab inside Reframe."
               },
               {
                 q: "What is What Shifted?",
-                a: "A single line you write after Reframe — naming what changed in your internal state. Not a journal entry. One precise line. The science: affect labeling reduces amygdala activation and reinforces the prefrontal cortex\'s regulation of it. The one-line constraint is intentional — distilling what shifted requires more precision than free writing, which produces more durable regulation. It\'s for you, not for sending."
+                a: "A single line you write after Reframe — naming what changed in your internal state. Not a journal entry. One precise line. When you put a name on an emotional experience, your brain\'s alarm center — the amygdala — measurably quiets down. The prefrontal cortex takes over. The one-line constraint is intentional: distilling what shifted into a single phrase requires more precision than free writing, which produces more durable regulation. It\'s for you, not for sending."
               },
               {
                 q: "What is Next Move?",
-                a: "After Reframe, one concrete action taken from your regulated state. Four options: Send a message, Hold a boundary, Delay your response, or Let it go. Each has a real execution path — not just a label. Send a message opens a compose window. Hold a boundary saves the line you\'re holding with a follow-up notification. Delay response sets a timer with a reminder. Let it go logs the decision and closes the session. The AI detects whether your session was interpersonal or internal and shows the relevant options."
+                a: "After Reframe, one concrete action from your regulated state. Four options: Send a message, Hold a boundary, Delay your response, or Let it go. Each has a real execution path — compose window, boundary repository with notification, timer with reminder, or a clean logged release. The research on this is clear: people who form a specific plan in the moment of clarity follow through dramatically more often than those who leave it open. The AI detects whether your session was interpersonal or internal and shows the relevant options."
               },
               {
                 q: "What is the Bio-Filter?",
-                a: "A physical state check before Reframe. Options: depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. When selected, the AI filters its interpretation through your physical state. The science: misattribution of arousal — reading a biological signal as an emotional one — is well-documented. What reads as anxiety may be sleep deprivation. What reads as irritability may be inflammation. The bio-filter catches that before the session begins."
+                a: "A physical state check before Reframe. Options: depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. When selected, the AI filters its interpretation through your physical state. What reads as anxiety may be sleep deprivation. What reads as irritability may be inflammation. The bio-filter prevents misidentifying a hardware problem as a software problem — and stops the AI from coaching you past a signal that actually needs medical attention."
               },
               {
                 q: "What is the Body Scan?",
-                a: "Six acupressure points with timed holds, auto-advancing. Each point corresponds to a tension-release pathway. Focused body attention — interoceptive awareness — interrupts rumination by redirecting cognitive resources to physical sensation. The session completes with \'Signal cleared.\'"
+                a: "Six acupressure points with timed holds, auto-advancing. Each point corresponds to a tension-release pathway. Focused body attention interrupts rumination by redirecting cognitive resources to physical sensation — you cannot analyze a worry and track a pressure point at the same time. The session completes with \'Signal cleared.\'"
               },
               {
                 q: "What is Signal Log?",
-                a: "Your emotion tracking layer. Tap chips to name what you\'re feeling throughout the day — not just during sessions. The more granular your emotion vocabulary, the better you regulate. Research shows that people who distinguish between specific emotions cope more effectively and are less likely to resort to harmful strategies. Signal Log trains that granularity over time."
+                a: "Your emotion tracking layer. Tap chips to name what you\'re feeling throughout the day — not just during sessions. People who can make fine-grained distinctions between emotions — not just \'bad\' but specifically \'overwhelmed\' vs \'dread\' vs \'shame\' — regulate better, cope more effectively, and are less likely to reach for harmful coping strategies. Signal Log trains that precision over time, without calling it training."
               },
               {
                 q: "What is Composure Telemetry?",
-                a: "A 12-week visual timeline on My Progress. Every session and Signal Log entry lights a cell. Brighter amber means more activity that day. It\'s your practice at a glance — not a mood diary, a flight recorder. It shows frequency and consistency, not just how you felt."
+                a: "A 12-week visual timeline on My Progress. Every session and Signal Log entry lights a cell. Brighter amber means more activity that day. It\'s your practice at a glance — not a mood diary, a flight recorder. Frequency and consistency, not just how you felt."
               },
               {
                 q: "What happens when I type fast in Reframe?",
-                a: "The app notices. Rapid typing is a physical signal — your body is ahead of your thinking. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It fades in a few seconds. The system reads your body, not just your words."
+                a: "The app notices. Rapid typing is a physical signal — your body is ahead of your thinking. Physical tension during emotional processing amplifies the emotional response. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It fades in seconds. The system reads your body, not just your words."
               },
               {
                 q: "What is GO / NO-GO?",
@@ -13624,11 +13616,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is the 60 BPM pulse on the home screen?",
-                a: "A 1Hz ambient glow — the same frequency as a calm resting heart rate. Visual entrainment research shows the nervous system synchronizes to rhythmic visual stimuli. You feel steadier opening the app and may not know why. That\'s by design."
+                a: "A 1Hz ambient glow — the same frequency as a calm resting heart rate. The nervous system synchronizes to rhythmic visual stimuli without you deciding to. You feel steadier opening the app and may not know why. That\'s by design."
               },
               {
                 q: "What if the AI connection drops?",
-                a: "Reframe retries automatically. If the connection fails, the app switches to a built-in self-guided fallback so you\'re never blocked mid-session. Your fallback session saves in your history the same as any other session."
+                a: "Reframe retries automatically. If the connection fails, the app switches to a built-in self-guided fallback so you\'re never blocked mid-session. Your fallback session saves in your history the same as any other."
               },
               {
                 q: "Can I upload screenshots to Reframe?",
@@ -13656,7 +13648,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "Is my data backed up?",
-                a: "Go to Settings and sign in or create an account to enable Cloud Sync. Your data is encrypted on your device before it leaves — we cannot read it. Sync and restore are managed from Settings. Restoration on a different device depends on the original device encryption key."
+                a: "Go to Settings and sign in or create an account to enable Cloud Sync. Your data is encrypted on your device before it leaves — we cannot read it. Sync and restore are managed from Settings."
               },
               {
                 q: "Does Stillform work on tablets?",
