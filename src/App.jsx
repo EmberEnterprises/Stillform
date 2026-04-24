@@ -13572,7 +13572,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What does the AI actually do in Reframe?",
-                a: "It reads your feel state, physical state, and what you type — then names what\'s happening without telling you what to feel. When you\'re spiraling, the brain keeps collecting evidence for the story it already believes and misses what doesn\'t fit. The AI interrupts that loop with one precise question. When you\'re processing an interpersonal situation, it separates what\'s real from what your read of the other person is adding. When you\'re in a high state, it channels the energy and checks for overcommitment. You don\'t choose a mode — the AI routes based on your input."
+                a: "It reads your feel state, physical state, and what you type — then names what\'s happening without telling you what to feel. The brain under activation keeps collecting evidence for the story it already believes and misses what doesn\'t fit. The AI interrupts that with one precise question. When you\'re processing an interpersonal situation, it separates what\'s real from what your read of the other person is adding. When you\'re in a high state, it channels the energy and checks for overcommitment. You don\'t choose a mode — the AI routes based on your input."
               },
               {
                 q: "Does the AI learn about me?",
