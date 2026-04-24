@@ -5,9 +5,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.CalendarContract
 import android.util.Log
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
+import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -39,6 +41,20 @@ class IntegrationBridgePlugin : Plugin() {
         )
     }
 
+    private var pendingHealthCall: PluginCall? = null
+
+    private val requestPermissionLauncher =
+        registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
+            val call = pendingHealthCall
+            pendingHealthCall = null
+            if (call == null) return@registerForActivityResult
+            val allGranted = HEALTH_PERMISSIONS.all { it in granted }
+            call.resolve(JSObject().apply {
+                put("granted", allGranted)
+                put("status", if (allGranted) "granted" else "partial")
+            })
+        }
+
     // ─── REQUEST CALENDAR PERMISSION ─────────────────────────────────────────
 
     @PluginMethod
@@ -60,8 +76,8 @@ class IntegrationBridgePlugin : Plugin() {
 
     @PluginMethod
     fun requestHealthPermission(call: PluginCall) {
-        val status = HealthConnectClient.getSdkStatus(context)
-        if (status != HealthConnectClient.SDK_AVAILABLE) {
+        val sdkStatus = HealthConnectClient.getSdkStatus(context)
+        if (sdkStatus != HealthConnectClient.SDK_AVAILABLE) {
             call.resolve(JSObject().apply {
                 put("granted", false)
                 put("status", "unavailable")
@@ -71,37 +87,16 @@ class IntegrationBridgePlugin : Plugin() {
         }
 
         try {
-            // Open Health Connect permissions screen via VIEW_PERMISSION_USAGE intent
-            // User grants access there, then returns and taps Sync
-            val intent = Intent("android.intent.action.VIEW_PERMISSION_USAGE").apply {
-                addCategory("android.intent.category.HEALTH_PERMISSIONS")
-                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            val client = HealthConnectClient.getOrCreate(context)
+            // Check if already granted
+            val alreadyGranted = runBlocking { client.permissionController.getGrantedPermissions() }
+            if (HEALTH_PERMISSIONS.all { it in alreadyGranted }) {
+                call.resolve(JSObject().apply { put("granted", true); put("status", "granted") })
+                return
             }
-            try {
-                activity.startActivity(intent)
-                call.resolve(JSObject().apply { put("granted", false); put("status", "opened") })
-            } catch (e2: Exception) {
-                // Fallback: open Health Connect app directly
-                val hcPackages = listOf(
-                    "com.google.android.healthconnect.controller",
-                    "com.google.android.apps.healthdata",
-                    "com.sec.android.app.shealth"
-                )
-                var launched = false
-                for (pkg in hcPackages) {
-                    val pkgIntent = activity.packageManager.getLaunchIntentForPackage(pkg)
-                    if (pkgIntent != null) {
-                        pkgIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        activity.startActivity(pkgIntent)
-                        launched = true
-                        break
-                    }
-                }
-                call.resolve(JSObject().apply {
-                    put("granted", false)
-                    put("status", if (launched) "opened" else "unavailable")
-                })
-            }
+            // Launch permission request — result handled in registerForActivityResult
+            pendingHealthCall = call
+            requestPermissionLauncher.launch(HEALTH_PERMISSIONS)
         } catch (e: Exception) {
             Log.e(TAG, "requestHealthPermission error: ${e.message}", e)
             call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
@@ -239,10 +234,11 @@ class IntegrationBridgePlugin : Plugin() {
                 )
                 val selection = "${CalendarContract.Events.DTSTART} >= ? AND " +
                     "${CalendarContract.Events.DTSTART} <= ? AND " +
-                    "${CalendarContract.Events.DELETED} = 0"
+                    "${CalendarContract.Events.DELETED} != 1"
                 val cursor = cr.query(uri, projection, selection,
                     arrayOf(now.toString(), in48h.toString()),
                     "${CalendarContract.Events.DTSTART} ASC")
+                Log.d(TAG, "Calendar query returned ${cursor?.count ?: 0} rows for window $now to $in48h")
 
                 val events = JSONArray()
                 var firstTitle: String? = null

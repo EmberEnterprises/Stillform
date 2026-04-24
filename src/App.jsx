@@ -10187,7 +10187,13 @@ export default function Stillform() {
         if (result?.status === "no-data") {
           setIntegrationStatusWithClear(`${label} connected, but no recent data was found yet.`);
         } else {
-          setIntegrationStatusWithClear(`${label} connected and synced from device.`);
+          const eventCount = (() => { try { const ev = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]"); return Array.isArray(ev) ? ev.length : 0; } catch { return 0; } })();
+          const summary = localStorage.getItem("stillform_calendar_summary") || "";
+          if (kind === "calendar" && eventCount > 0) {
+            setIntegrationStatusWithClear(`Calendar synced · ${eventCount} event${eventCount !== 1 ? "s" : ""} found`);
+          } else {
+            setIntegrationStatusWithClear(`${label} connected and synced from device.`);
+          }
         }
         return;
       }
