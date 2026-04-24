@@ -300,3 +300,39 @@
 - [ ] My Patterns: surface skip patterns at session 10+ with curious framing
 - [ ] Define internal session Next Move button set (content work, before build)
 
+---
+
+## Prelaunch — Regulation Type Simplification
+
+- [ ] Audit all "balanced" references in App.jsx (routing, debrief copy, home screen, AI context)
+- [ ] Audit reframe.js for balanced references
+- [ ] Define tiebreaker rule for calibration (extra scenario OR first-scenario weighting)
+- [ ] Remove balanced output from calibration — binary result only
+- [ ] Migrate existing balanced users → whichever type their scores lean toward on next load
+- [ ] Consolidate TOOL_DEBRIEF_COPY balanced set into thought-first and body-first
+- [ ] Decide fate of ObserveEntryLite — repurpose or remove (was built for balanced users)
+- [ ] Remove balanced from all AI prompts in reframe.js
+- [ ] Verify nothing breaks after balanced removal — full UAT pass
+
+---
+
+## Prelaunch — Onboarding Redesign
+
+- [ ] Write Page 1 (why you're here — 2 intro pages max)
+- [ ] Write Page 2 (how it works — one sentence per tool, system framing)
+- [ ] Rewrite calibration — binary output only, no tiebreaker possible
+- [ ] Build first-use interactive walkthrough (contextual, during actual tool use)
+- [ ] End-of-first-session note pointing to Settings tutorial
+- [ ] Build in-depth tutorial in Settings (full reference, Stillform voice)
+- [ ] Add info circle (ⓘ) button to every tool screen
+- [ ] Rewrite full tutorial copy in separate focused session — system language not feature list
+
+---
+
+## Pre-Build — Screen 2 Content (must complete before coding)
+
+- [ ] Write 8 lock-in statements (4 Next Move buttons × 2 regulation types, 1 statement each)
+- [ ] Write "Let it go" statements — release register, not action register
+- [ ] Define internal session Next Move button set (4 buttons, candidates: Take action / Sit with it / Let it go / Come back to it)
+- [ ] Write 8 internal lock-in statements (4 internal buttons × 2 regulation types)
+- [ ] All content approved before Screen 2 build starts
