@@ -468,9 +468,8 @@ Do not mechanism-shop. Use exactly this mechanism in this response.`;
 
 function normalizeReframePayload(parsed, route) {
   const safe = parsed && typeof parsed === "object" ? parsed : {};
-  const distortion = typeof safe.distortion === "string" && safe.distortion.trim()
-    ? safe.distortion.trim()
-    : null;
+  const distortionRaw = typeof safe.distortion === "string" ? safe.distortion.trim() : "";
+  const distortion = distortionRaw && distortionRaw.toUpperCase() !== "NULL" ? distortionRaw : null;
   const mechanism = typeof safe.mechanism === "string" && safe.mechanism.trim()
     ? safe.mechanism.trim()
     : (route?.id || "signal_noise");

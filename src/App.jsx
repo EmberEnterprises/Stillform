@@ -5955,7 +5955,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <div key={i} className={`message ${msg.role}`} ref={isLastAi ? lastAiRef : null}>
               <div className="message-avatar" style={msg.role === "ai" ? { color: mc.color } : {}}>{msg.role === "ai" ? mc.icon : "●"}</div>
               <div className="message-bubble" style={msg.role === "ai" ? { background: mc.aiBubble, borderColor: mc.border } : {}}>
-                {msg.distortion && (
+                {msg.distortion && msg.distortion !== "NULL" && msg.distortion !== "null" && (
                   <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>
                     {msg.distortion}
                   </div>
