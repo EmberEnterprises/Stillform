@@ -4554,6 +4554,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return mode !== "calm" ? mode : null;
   });
   const [showPostRating, setShowPostRating] = useState(false);
+  const [postNextMoveId, setPostNextMoveId] = useState(null);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
@@ -5456,6 +5457,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const finishReframeSession = ({ postState = null, anchorDraft = null } = {}) => {
     const saved = saveSession(postState);
     latestSessionTimestampRef.current = saved?.timestamp || null;
+    // Save inline next move if selected
+    if (postNextMoveId && saved?.timestamp) {
+      try {
+        saveSessionNextMove(saved.timestamp, {
+          id: `nextmove_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+          actionId: postNextMoveId,
+          label: NEXT_MOVE_ACTION_LABELS[postNextMoveId] || postNextMoveId,
+          customText: null,
+          createdAt: new Date().toISOString(),
+          followUp: { dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString() }
+        });
+      } catch {}
+    }
+    setPostNextMoveId(null);
     const pre = scoreState(feelState);
     const post = scoreState(postState);
     setSessionShareSummary({
@@ -5775,7 +5790,33 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
         )}
 
-        {/* STATE TO STATEMENT — optional, collapsed */}
+        {/* NEXT MOVE — inline pill selector */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+            Next Move
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+            One concrete action before you leave.
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {NEXT_MOVE_ACTION_OPTIONS.filter(o => o.id !== "custom").map(opt => {
+              const active = postNextMoveId === opt.id;
+              return (
+                <button key={opt.id} onClick={() => setPostNextMoveId(active ? null : opt.id)} style={{
+                  background: active ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 20, padding: "6px 14px", fontSize: 12,
+                  color: active ? "var(--amber)" : "var(--text-muted)",
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                }}>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* WHAT SHIFTED — optional, expanded by default */}
         <div style={{ marginBottom: 24 }}>
           <button
             onClick={toggleStateToStatementExpanded}
@@ -5844,10 +5885,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           {!postRating && (
             <button
               className="btn btn-ghost"
-              style={{ fontSize: 13, color: "var(--text-muted)" }}
+              style={{ fontSize: 13, color: "var(--amber)", borderColor: "var(--amber-dim)" }}
               onClick={() => finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft })}
             >
-              Skip rating and finish
+              Skip and finish
             </button>
           )}
         </div>
@@ -9985,6 +10026,7 @@ export default function Stillform() {
   const [pricingAuthOpen, setPricingAuthOpen] = useState(false);
   const [pricingAuthEmail, setPricingAuthEmail] = useState("");
   const [pricingAuthPassword, setPricingAuthPassword] = useState("");
+  const [showPricingPassword, setShowPricingPassword] = useState(false);
   const [pricingAuthLoading, setPricingAuthLoading] = useState(false);
   const [pricingAuthError, setPricingAuthError] = useState(null);
   const [pricingAuthCooldownUntil, setPricingAuthCooldownUntil] = useState(0);
@@ -11128,7 +11170,11 @@ const isSignalProfileConfigured = () => {
         {/* NAV — hidden during setup bridge */}
         {screen !== "setup-bridge" && (
         <nav className="nav">
-          <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => goHomeSafely()}>
+          <div
+            className="nav-logo"
+            style={{ cursor: screen === "home" ? "default" : "pointer", opacity: screen === "home" ? 0.7 : 1 }}
+            onClick={() => { if (screen !== "home") goHomeSafely(); }}
+          >
             Still<span>form</span>
           </div>
           <div className="nav-actions">
@@ -13221,13 +13267,21 @@ const isSignalProfileConfigured = () => {
                       onChange={e => setPricingAuthEmail(e.target.value)}
                       style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
                     />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={pricingAuthPassword}
-                      onChange={e => setPricingAuthPassword(e.target.value)}
-                      style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showPricingPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={pricingAuthPassword}
+                        onChange={e => setPricingAuthPassword(e.target.value)}
+                        style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 40px 10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }}
+                      />
+                      <button
+                        onClick={() => setShowPricingPassword(p => !p)}
+                        style={{ position: "absolute", right: 10, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                      >
+                        {showPricingPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
                     {pricingAuthError && <div style={{ fontSize: 12, color: "#e05" }}>{pricingAuthError}</div>}
                     <button
                       className="btn btn-primary"
