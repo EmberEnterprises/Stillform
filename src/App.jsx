@@ -5455,7 +5455,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setDebriefTarget(null);
     onComplete(nextRoute);
   };
-  const finishReframeSession = ({ postState = null } = {}) => {
+  const finishReframeSession = ({ postState = null, anchorDraft = null } = {}) => {
     const saved = saveSession(postState);
     latestSessionTimestampRef.current = saved?.timestamp || null;
     const pre = scoreState(feelState);
@@ -5467,18 +5467,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       delta: Number.isFinite(pre) && Number.isFinite(post) ? post - pre : null
     });
     communicationDraftLoggedRef.current = false;
+    // Handle state-to-statement draft if present
+    if (anchorDraft && anchorDraft.trim()) {
+      try { ensureDraftLogged(); logCommunicationEvent(COMMUNICATION_ACTIONS.completedWithDraft); } catch {}
+    } else {
+      try { logCommunicationEvent(COMMUNICATION_ACTIONS.completedWithoutDraft); } catch {}
+    }
+    resetStateToStatementTracking();
     setPostRating(null);
     setShowPostRating(false);
-    const latestInsight = getLatestUserFacingInsight();
-    if (latestInsight) {
-      setPostSessionInsight(latestInsight);
-      setShowPostInsight(true);
-      try { window.plausible("Post Session Insight Shown"); } catch {}
-    } else {
-      resetStateToStatementTracking();
-      markStateToStatementOpportunity({ source: "reframe-finish-no-insight" });
-      setShowStateToStatement(true);
-    }
+    setExternalAnchorDraft("");
+    setExternalAnchorCopied(false);
+    setExternalAnchorSent(false);
+    setStateToStatementExpanded(false);
+    setPostSessionInsight(null);
+    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
   };
 
   const finishStateToStatement = () => {
@@ -5738,41 +5741,80 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       { id: "flat", label: "Flat" },
       { id: "mixed", label: "Mixed" }
     ];
+    // Load insight once when screen appears
+    const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
     return (
-      <div style={{ textAlign: "center", padding: "48px 0" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-          Where are you now?
+      <div style={{ padding: "40px 0 8px" }}>
+        {/* FEEL CHIPS */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+            Where are you now?
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+            {feelChips.map(f => (
+              <button key={f.id} onClick={() => setPostRating(f.id)} style={{
+                background: postRating === f.id ? "var(--amber-glow)" : "transparent",
+                border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                borderRadius: 20, padding: "8px 20px", fontSize: 13,
+                color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+              }}>
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center", marginBottom: 36 }}>
-          {feelChips.map(f => (
-            <button key={f.id} onClick={() => setPostRating(f.id)} style={{
-              background: postRating === f.id ? "var(--amber-glow)" : "transparent", border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-              borderRadius: 20, padding: "8px 20px", fontSize: 13,
-              color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-            }}>
-              {f.label}
-            </button>
-          ))}
+
+        {/* POST SESSION INSIGHT — inline, if available */}
+        {insight && (
+          <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+              What the AI has noticed
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
+              {insight.note}
+            </div>
+          </div>
+        )}
+
+        {/* STATE TO STATEMENT — optional, collapsed */}
+        <div style={{ marginBottom: 24 }}>
+          <button
+            onClick={toggleStateToStatementExpanded}
+            style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
+          >
+            {stateToStatementExpanded ? "▾ Hide statement" : "▸ Add a statement before you go"}
+          </button>
+          {stateToStatementExpanded && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
+                Convert your regulated state into one clear message you can send — Slack, email, text, or talking point.
+              </div>
+              <textarea
+                value={externalAnchorDraft}
+                onChange={(e) => { setExternalAnchorDraft(e.target.value); setExternalAnchorSent(false); }}
+                placeholder="Draft one clear message you can send now."
+                rows={3}
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 10 }}
+              />
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
+                  {externalAnchorCopied ? "Copied" : "Copy"}
+                </button>
+                <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
+                  Share
+                </button>
+                <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
+                  {externalAnchorSent ? "Sent logged" : "Mark sent"}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
-        <button
-          className="btn btn-primary"
-          style={{ opacity: postRating ? 1 : 0.5, cursor: postRating ? "pointer" : "not-allowed" }}
-          disabled={!postRating}
-          onClick={() => finishReframeSession({ postState: postRating })}
-        >
-          Finish session
-        </button>
-        <button
-          className="btn btn-ghost"
-          style={{ marginTop: 10 }}
-          onClick={() => finishReframeSession({ postState: null })}
-        >
-          Skip rating and continue
-        </button>
-        {/* Observe and Choose nudge after high-activation sessions */}
+
+        {/* OBSERVE AND CHOOSE nudge — high-activation only */}
         {(feelState === "angry" || feelState === "anxious" || feelState === "mixed") && (
-          <div style={{ marginTop: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "left" }}>
+          <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
               Want to go deeper?
             </div>
@@ -5780,8 +5822,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               You came in at a high intensity. Observe and Choose helps you see the pattern under the moment — not just regulate it.
             </div>
             <button onClick={() => {
-              // Save rating then route to metacognition — don't call finishReframeSession
-              // which would navigate away and cause state conflict
               try { saveSession(postRating); } catch {}
               setShowPostRating(false);
               onComplete("metacognition");
@@ -5794,6 +5834,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           </div>
         )}
+
+        {/* FINISH */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          <button
+            className="btn btn-primary"
+            onClick={() => finishReframeSession({ postState: postRating, anchorDraft: externalAnchorDraft })}
+          >
+            Finish session
+          </button>
+          {!postRating && (
+            <button
+              className="btn btn-ghost"
+              style={{ fontSize: 13, color: "var(--text-muted)" }}
+              onClick={() => finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft })}
+            >
+              Skip rating and finish
+            </button>
+          )}
+        </div>
       </div>
     );
   }
@@ -14677,4 +14736,5 @@ const isSignalProfileConfigured = () => {
     </ErrorBoundary>
   );
 }
+
 
