@@ -9107,7 +9107,17 @@ export default function Stillform() {
   // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
   // While incomplete, FIRST_RUN_STAGE_KEY keeps cold-start recovery within that sequence.
   // Subscription & trial tracking
-  const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
+  const [isSubscribed, setIsSubscribed] = useState(() => { 
+    try { 
+      // Check URL params synchronously on mount — catches return from Lemon Squeezy
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("subscribed") === "true" || urlParams.get("checkout") === "success") {
+        localStorage.setItem("stillform_subscribed", "yes");
+        return true;
+      }
+      return localStorage.getItem("stillform_subscribed") === "yes"; 
+    } catch { return false; } 
+  });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   const trialDaysLeft = (() => {
@@ -9816,6 +9826,12 @@ export default function Stillform() {
       }
     };
     init();
+    // Safety net: if screenReady never fires (e.g. return from external URL), force it after 4s
+    const safetyNet = setTimeout(() => {
+      setScreenReady(true);
+      setBiometricCleared(true);
+    }, 4000);
+    return () => clearTimeout(safetyNet);
   }, []);
 
   // Deep link handling — share extension
