@@ -336,3 +336,25 @@
 - [ ] Define internal session Next Move button set (4 buttons, candidates: Take action / Sit with it / Let it go / Come back to it)
 - [ ] Write 8 internal lock-in statements (4 internal buttons × 2 regulation types)
 - [ ] All content approved before Screen 2 build starts
+
+---
+
+## Pinned — Refocus (formerly Observe and Choose) — Revisit During Home Rebuild
+
+**Do not build placement until home screen is rebuilt from scratch.**
+
+**What's locked:**
+- Renamed to Refocus
+- It is NOT a lesser Reframe — it is a more advanced tool. No AI. Pure structured self-observation: Notice → Name → Recognize → Perspective → Choose
+- Completion can exit with no tools needed — trains the observer to self-regulate without the app
+- Science: MCT detached mindfulness (Wells, 2009), Notice → Name → Recognize → Perspective → Choose
+- "The less you need the app, the more it's working" — this is the product philosophy made concrete
+
+**Open questions to answer during home rebuild:**
+- Session gate: does it appear from day one or unlock after N sessions?
+- Placement: Advanced tile on home, post-Reframe nudge only, or both?
+- Advanced tile concept: slender, minimal, different visual register than core tools — "For when you can already see it"
+- What else eventually lives in Advanced beyond Refocus?
+- Name of the tile: "Advanced" or something more in Stillform voice?
+
+**Let placement come naturally from the flow — do not force it.**
