@@ -294,4 +294,9 @@
 - [ ] 20-second pause gate
 - [ ] Boundary/Delay Repository (storage + notification system)
 - [ ] My Patterns: surface session context distribution data
-- [ ] Internal session Next Move buttons (post-launch)
+- [ ] Internal session Next Move buttons (built alongside interpersonal — candidates: Take action / Sit with it / Let it go / Come back to it — needs content approval first)
+- [ ] AI Insight card adaptive register (session 1-4 observational, 5+ pattern — same card, language adapts)
+- [ ] Skip tracking on all post-Reframe elements (What Shifted / Next Move / Lock-in) — store per session
+- [ ] My Patterns: surface skip patterns at session 10+ with curious framing
+- [ ] Define internal session Next Move button set (content work, before build)
+
