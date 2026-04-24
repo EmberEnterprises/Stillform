@@ -2153,3 +2153,60 @@ All work goes to `preview/` branch first. PR created. Netlify preview reviewed. 
 4. Real testimonials from Google Play testers
 5. Reddit post after testimonials + paywall confirmed working
 
+---
+
+## April 24, 2026 — Post-Reframe Flow Redesign (Locked)
+
+### Post-Reframe Screen 1 (finish screen)
+- **Feel chips** — "Where are you now?" — post-state capture for delta calculation
+- **What Shifted** — single line text field, expanded by default. Affect labeling (Lieberman). User names what changed in their regulated state. For them, not for sending. Data: qualitative session note.
+- **AI Insight card** — surfaces AI-noticed patterns across sessions. Unlocks at session 5+. Shows when pattern data exists. Data: pattern recognition feed.
+
+### Post-Reframe Screen 2 (Next Move + Lock-in)
+
+**Session context detection (server-side, no user tap required):**
+- reframe.js flags every session as `interpersonal` or `internal` based on session content
+- Stored as a data point on the session record (`sessionContext: "interpersonal" | "internal"`)
+- Feeds My Patterns over time ("80% of your Reframe sessions are interpersonal")
+- Drives which Next Move buttons appear — no extra question asked of the user
+
+**Next Move buttons — Interpersonal context:**
+- **Send message** → compose window + share sheet → logged as sent ✓
+- **Hold boundary** → write the line → saved to Boundary Repository → follow-up notification
+- **Delay response** → set timer → saved to Repository → reminder fires when timer up
+- **Let it go** → one tap → logged as released → done
+
+**Next Move buttons — Internal context (post-launch, built from real usage data)**
+
+**Lock-in statements:**
+- Appear after Next Move button is selected
+- 3 options, tailored by: Next Move chosen + user's regulation type (thought-first / body-first / balanced)
+- Together they form one complete thought: processing insight → action taken
+- The pair is the data point: not just what they did, but what processing move led to it
+- 20-second pause required before Finish (forces reflection, cannot be rushed)
+- Data: debrief feed, feeds My Patterns
+
+**Science backing:**
+- What Shifted: Lieberman affect labeling — naming emotion reduces amygdala activation
+- Next Move: Gollwitzer implementation intentions — specific if/then plans increase follow-through
+- Lock-in: Schön reflective practice — reflection on process improves future regulation
+- Session context data: feeds pattern recognition (Flavell metacognition, Kross psychological distancing)
+- 20-second pause: deliberate processing window, prevents rushed exit from regulated state
+
+### Content to write before building Screen 2
+Lock-in statements matrix:
+- 4 Next Move buttons × 3 regulation types = 12 statement sets × 3 options each = 36 statements
+- Must be written and approved before code is touched
+- "Let it go" requires different register — release language, not action language
+
+### Boundary/Delay Repository (new feature — not yet built)
+- Stores Hold Boundary and Delay Response entries
+- Each entry: the written line + timestamp + session context
+- Notifications: Delay Response fires reminder at user-set time; Hold Boundary available for review on demand
+- Lives in My Patterns or Settings — location TBD
+- Purpose: regulated decisions don't get lost when the moment passes; accountability to self
+
+### What is NOT changing
+- ToolDebriefGate 20-second timer preserved — gating mechanism is the feature
+- Existing lock-in statement copy preserved and extended (not replaced)
+- Regulation type personalization layer preserved throughout
