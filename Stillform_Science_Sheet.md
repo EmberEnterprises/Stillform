@@ -450,3 +450,48 @@ Personalization by regulation type is critical. A body-first person who chose to
 - Schön (1983) — *The Reflective Practitioner* — reflection-on-action framework
 - Mann et al. (2009) — reflective practice improves self-awareness — *Advances in Health Sciences Education*
 - Flavell (1979) — metacognitive monitoring — *American Psychologist*
+
+---
+
+## AI Insight Card — Adaptive Observation to Pattern (April 2026)
+
+**What it does:** Surfaces an AI-generated observation on the post-Reframe finish screen. Language adapts by session count — observational early, pattern-based later. Same card, same location, no threshold visible to user.
+
+**Why the adaptive register matters:**
+Pattern recognition requires repetition. Claiming a pattern from one session is presumptuous and risks damaging trust at the most fragile point — early usage. The adaptive approach is honest about what the data actually supports at each stage.
+
+- Sessions 1-4: "In this session you named something specific before choosing a response." — observation, not pattern
+- Sessions 5+: "You tend to name things specifically before acting." — genuine pattern, earned by repetition
+
+**Science:**
+Premature pattern labeling can backfire — it feels presumptuous and can trigger reactance (Brehm, 1966 — psychological reactance theory). Earned pattern recognition, by contrast, produces the psychological distancing effect (Kross & Ayduk, 2011) that makes patterns useful rather than threatening.
+
+**Who says so:**
+- Flavell (1979) — metacognitive monitoring requires sufficient data — *American Psychologist*
+- Kross & Ayduk (2011) — psychological distancing reduces emotional reactivity — *JPSP*
+- Brehm (1966) — reactance theory — premature labeling triggers resistance
+
+---
+
+## Skip Tracking — Avoidance as Signal (April 2026)
+
+**What it does:** Every skip on the post-Reframe screen (What Shifted, Next Move, Lock-in) is recorded as a data point. Not surfaced until session 10+. At that threshold, consistent skip patterns appear in My Patterns with curious, non-shaming language.
+
+**Why skips matter scientifically:**
+In behavioral research, avoidance is as diagnostically informative as engagement. What someone consistently doesn't do reveals as much about their processing patterns as what they do. In MCT specifically, avoidance of metacognitive labeling (skipping What Shifted) can indicate fusion with the emotional state — the person isn't observing it, they're still in it.
+
+**The 10-session threshold:**
+Single skips are noise. Consistent skips are signal. Surfacing skip patterns before session 10 risks false positives and premature conclusions. After session 10 there is enough data to distinguish pattern from exception.
+
+**Specific signals:**
+- Consistent What Shifted skips → possible difficulty with affect labeling, still fused with state post-session
+- Consistent Next Move skips → possible gap between insight and action (intention-action gap)
+- Consistent Lock-in skips → possible avoidance of reflective processing
+- Skip of "Let it go" specifically → choosing not to release is itself a signal worth tracking
+
+**Tone when surfaced:** Curious, never shaming. "You've been skipping the action step — want to explore why?" not "you never follow through."
+
+**Who says so:**
+- Hayes et al. (1996) — experiential avoidance as a transdiagnostic process — *Psychological Review*
+- Wells (2009) — avoidance maintains metacognitive beliefs — *Metacognitive Therapy*
+- Gollwitzer & Sheeran (2006) — intention-action gap — *Advances in Experimental Social Psychology*
