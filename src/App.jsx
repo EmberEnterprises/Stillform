@@ -4554,6 +4554,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return mode !== "calm" ? mode : null;
   });
   const [showPostRating, setShowPostRating] = useState(false);
+  const [postNextMoveId, setPostNextMoveId] = useState(null);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
@@ -4562,7 +4563,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [externalAnchorDraft, setExternalAnchorDraft] = useState("");
   const [externalAnchorCopied, setExternalAnchorCopied] = useState(false);
   const [externalAnchorSent, setExternalAnchorSent] = useState(false);
-  const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
+  const [stateToStatementExpanded, setStateToStatementExpanded] = useState(true);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
   const [communicationSkipReason, setCommunicationSkipReason] = useState(null);
@@ -4572,6 +4573,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const stateToStatementSessionIdRef = useRef(null);
   const latestSessionTimestampRef = useRef(null);
   const [selfGuidedActive, setSelfGuidedActive] = useState(false);
+  const [activeReframeTab, setActiveReframeTab] = useState("ai"); // "ai" | "self"
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
@@ -5094,8 +5096,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           calendarContext: integrationContext.calendarContext,
           healthContext: integrationContext.healthContext,
-          // DEBUG
-          ...((() => { console.log("[Reframe] calendarContext:", integrationContext.calendarContext); return {}; })()),
           sessionCount: getSessionCountFromStorage(),
           scienceEvidence: (() => {
             try {
@@ -5385,7 +5385,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const buildAdditionalAnchorCopy = () => {
     const clean = externalAnchorDraft.trim();
     if (!clean) return "";
-    return `State to Statement:\n${clean}`;
+    return `What Shifted:\n${clean}`;
   };
   const logCommunicationEvent = (eventAction, options = {}) => {
     const stamp = new Date().toISOString();
@@ -5458,6 +5458,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const finishReframeSession = ({ postState = null, anchorDraft = null } = {}) => {
     const saved = saveSession(postState);
     latestSessionTimestampRef.current = saved?.timestamp || null;
+    // Save inline next move if selected
+    if (postNextMoveId && saved?.timestamp) {
+      try {
+        saveSessionNextMove(saved.timestamp, {
+          id: `nextmove_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
+          actionId: postNextMoveId,
+          label: NEXT_MOVE_ACTION_LABELS[postNextMoveId] || postNextMoveId,
+          customText: null,
+          createdAt: new Date().toISOString(),
+          followUp: { dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString() }
+        });
+      } catch {}
+    }
+    setPostNextMoveId(null);
     const pre = scoreState(feelState);
     const post = scoreState(postState);
     setSessionShareSummary({
@@ -5626,10 +5640,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          State to Statement
+          What Shifted
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          Close the session. If helpful, capture one clear line you can send while you're regulated.
+          In one line — what shifted? Naming it locks in the regulated state.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -5656,7 +5670,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 setExternalAnchorSent(false);
                 setCommunicationSkipReason(null);
               }}
-              placeholder="Draft one clear message you can send now."
+              placeholder="In one line — what shifted?"
               rows={3}
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
@@ -5777,18 +5791,44 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
         )}
 
-        {/* STATE TO STATEMENT — optional, collapsed */}
+        {/* NEXT MOVE — inline pill selector */}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+            Next Move
+          </div>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+            One concrete action before you leave.
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {NEXT_MOVE_ACTION_OPTIONS.filter(o => o.id !== "custom").map(opt => {
+              const active = postNextMoveId === opt.id;
+              return (
+                <button key={opt.id} onClick={() => setPostNextMoveId(active ? null : opt.id)} style={{
+                  background: active ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 20, padding: "6px 14px", fontSize: 12,
+                  color: active ? "var(--amber)" : "var(--text-muted)",
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                }}>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* WHAT SHIFTED — optional, expanded by default */}
         <div style={{ marginBottom: 24 }}>
           <button
             onClick={toggleStateToStatementExpanded}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
           >
-            {stateToStatementExpanded ? "▾ Hide statement" : "▸ Add a statement before you go"}
+            {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
           </button>
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
-                Convert your regulated state into one clear message you can send — Slack, email, text, or talking point.
+                In one line — what shifted? Naming it locks in the regulated state. This is for you, not for sending.
               </div>
               <textarea
                 value={externalAnchorDraft}
@@ -5846,10 +5886,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           {!postRating && (
             <button
               className="btn btn-ghost"
-              style={{ fontSize: 13, color: "var(--text-muted)" }}
+              style={{ fontSize: 13, color: "var(--amber)", borderColor: "var(--amber-dim)" }}
               onClick={() => finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft })}
             >
-              Skip rating and finish
+              Skip and finish
             </button>
           )}
         </div>
@@ -5912,29 +5952,89 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           </div>
         )}
-        <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
-          What's present — <span style={{ color: "var(--text-dim)", textTransform: "none", letterSpacing: 0 }}>optional</span>
-        </div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-          {[
-            { id: "excited", label: "Excited" },
-            { id: "focused", label: "Focused" },
-            { id: "anxious", label: "Anxious" },
-            { id: "angry", label: "Angry" },
-            { id: "flat", label: "Flat" },
-            { id: "mixed", label: "Mixed" }
-          ].map(f => (
-            <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
-              background: feelState === f.id ? "var(--amber-glow)" : "transparent",
-              border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-              borderRadius: 20, padding: "5px 14px", fontSize: 12,
-              color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-            }}>
-              {f.label}
-            </button>
-          ))}
-        </div>
+        {/* WHAT IS PRESENT — pre-populated from morning check-in */}
+        {(() => {
+          const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+          const checkinMood = checkin?.mood || null;
+          const checkinTension = checkin ? Object.entries(checkin.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
+          const hasMorningData = checkinMood || checkinTension.length > 0;
+          return (
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                  What is present
+                </div>
+                {hasMorningData && (
+                  <button
+                    title="Pre-filled from your morning check-in. Tap to adjust."
+                    onClick={() => alert("This was pulled from your morning check-in. Tap any chip to update.")}
+                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
+                  >
+                    ⓘ
+                  </button>
+                )}
+              </div>
+
+              {/* LINE 1 — pre-populated from morning check-in */}
+              {hasMorningData && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" }}>
+                    From this morning
+                  </div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {checkinTension.map(area => (
+                      <div key={area} style={{
+                        background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                        borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                        color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {area}
+                      </div>
+                    ))}
+                    {checkinMood && (
+                      <div style={{
+                        background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                        borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                        color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {checkinMood}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* LINE 2 — Anything to add */}
+              <div>
+                {hasMorningData && (
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" }}>
+                    Anything to add?
+                  </div>
+                )}
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {[
+                    { id: "excited", label: "Excited" },
+                    { id: "focused", label: "Focused" },
+                    { id: "anxious", label: "Anxious" },
+                    { id: "angry", label: "Angry" },
+                    { id: "flat", label: "Flat" },
+                    { id: "mixed", label: "Mixed" }
+                  ].map(f => (
+                    <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
+                      background: feelState === f.id ? "var(--amber-glow)" : "transparent",
+                      border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                      color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                    }}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </div>
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
@@ -5985,7 +6085,48 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         </div>
       )}
 
-      <div className="ai-container">
+      {/* TAB BAR — AI vs Self Mode */}
+      <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid var(--border)" }}>
+        <button
+          onClick={() => setActiveReframeTab("ai")}
+          style={{
+            flex: 1, background: "none", border: "none",
+            borderBottom: activeReframeTab === "ai" ? "2px solid var(--amber)" : "2px solid transparent",
+            padding: "8px 0", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase",
+            color: activeReframeTab === "ai" ? "var(--amber)" : "var(--text-muted)",
+            cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.2s"
+          }}
+        >
+          AI
+        </button>
+        <button
+          onClick={() => setActiveReframeTab("self")}
+          style={{
+            flex: 1, background: "none", border: "none",
+            borderBottom: activeReframeTab === "self" ? "2px solid var(--amber)" : "2px solid transparent",
+            padding: "8px 0", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase",
+            color: activeReframeTab === "self" ? "var(--amber)" : "var(--text-muted)",
+            cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.2s",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+          }}
+        >
+          Self Mode
+          <span
+            title="Work through this on your own without AI. Structured self-observation — for users who prefer to process independently."
+            style={{ fontSize: 10, color: "var(--text-muted)", cursor: "help" }}
+          >
+            ⓘ
+          </span>
+        </button>
+      </div>
+
+      {/* SELF MODE — MetacognitionTool inline */}
+      {activeReframeTab === "self" && (
+        <MetacognitionTool onComplete={onComplete} />
+      )}
+
+      {/* AI MODE */}
+      <div className="ai-container" style={{ display: activeReframeTab === "ai" ? "flex" : "none", flexDirection: "column" }}>
         <div className="ai-messages">
           {messages.length === 0 && (
             <>
@@ -9109,7 +9250,17 @@ export default function Stillform() {
   // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
   // While incomplete, FIRST_RUN_STAGE_KEY keeps cold-start recovery within that sequence.
   // Subscription & trial tracking
-  const [isSubscribed, setIsSubscribed] = useState(() => { try { return localStorage.getItem("stillform_subscribed") === "yes"; } catch { return false; } });
+  const [isSubscribed, setIsSubscribed] = useState(() => { 
+    try { 
+      // Check URL params synchronously on mount — catches return from Lemon Squeezy
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("subscribed") === "true" || urlParams.get("checkout") === "success") {
+        localStorage.setItem("stillform_subscribed", "yes");
+        return true;
+      }
+      return localStorage.getItem("stillform_subscribed") === "yes"; 
+    } catch { return false; } 
+  });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   const trialDaysLeft = (() => {
@@ -9818,6 +9969,12 @@ export default function Stillform() {
       }
     };
     init();
+    // Safety net: if screenReady never fires (e.g. return from external URL), force it after 4s
+    const safetyNet = setTimeout(() => {
+      setScreenReady(true);
+      setBiometricCleared(true);
+    }, 4000);
+    return () => clearTimeout(safetyNet);
   }, []);
 
   // Deep link handling — share extension
@@ -9971,6 +10128,7 @@ export default function Stillform() {
   const [pricingAuthOpen, setPricingAuthOpen] = useState(false);
   const [pricingAuthEmail, setPricingAuthEmail] = useState("");
   const [pricingAuthPassword, setPricingAuthPassword] = useState("");
+  const [showPricingPassword, setShowPricingPassword] = useState(false);
   const [pricingAuthLoading, setPricingAuthLoading] = useState(false);
   const [pricingAuthError, setPricingAuthError] = useState(null);
   const [pricingAuthCooldownUntil, setPricingAuthCooldownUntil] = useState(0);
@@ -11114,7 +11272,11 @@ const isSignalProfileConfigured = () => {
         {/* NAV — hidden during setup bridge */}
         {screen !== "setup-bridge" && (
         <nav className="nav">
-          <div className="nav-logo" style={{ cursor: "pointer" }} onClick={() => goHomeSafely()}>
+          <div
+            className="nav-logo"
+            style={{ cursor: screen === "home" ? "default" : "pointer", opacity: screen === "home" ? 0.7 : 1 }}
+            onClick={() => { if (screen !== "home") goHomeSafely(); }}
+          >
             Still<span>form</span>
           </div>
           <div className="nav-actions">
@@ -13207,13 +13369,21 @@ const isSignalProfileConfigured = () => {
                       onChange={e => setPricingAuthEmail(e.target.value)}
                       style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
                     />
-                    <input
-                      type="password"
-                      placeholder="Password"
-                      value={pricingAuthPassword}
-                      onChange={e => setPricingAuthPassword(e.target.value)}
-                      style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }}
-                    />
+                    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                      <input
+                        type={showPricingPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={pricingAuthPassword}
+                        onChange={e => setPricingAuthPassword(e.target.value)}
+                        style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 40px 10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }}
+                      />
+                      <button
+                        onClick={() => setShowPricingPassword(p => !p)}
+                        style={{ position: "absolute", right: 10, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                      >
+                        {showPricingPassword ? "Hide" : "Show"}
+                      </button>
+                    </div>
                     {pricingAuthError && <div style={{ fontSize: 12, color: "#e05" }}>{pricingAuthError}</div>}
                     <button
                       className="btn btn-primary"
@@ -14736,5 +14906,8 @@ const isSignalProfileConfigured = () => {
     </ErrorBoundary>
   );
 }
+
+
+
 
 
