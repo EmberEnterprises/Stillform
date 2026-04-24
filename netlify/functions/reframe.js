@@ -1290,6 +1290,12 @@ WHAT STAYING SHARP LOOKS LIKE:
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
+    // CALENDAR HARD OVERRIDE — injected when calendar context present and first message is short/vague
+    const isVagueOpener = history.length <= 1 && /^(hi|hey|hello|yo|sup|what's up|whats up|hiya|howdy|greetings|helo|hii|heyyy|hi there|hey there|help|i need help|i'm ready|im ready|ready|let's go|lets go|start|begin|go)[\.!\?]?$/i.test(trimmedInput.trim());
+    if (calendarContext && isVagueOpener) {
+      systemPrompt = `CALENDAR HARD RULE — THIS OVERRIDES YOUR DEFAULT OPENER:\nThe user just said something short and vague. You have their calendar context. DO NOT open with "Hey there! What's on your mind?" or any generic welcome. That is BANNED here.\nYou MUST open by referencing their upcoming event by name. Example: "You've got the stillform presentation coming up — is that what you're working through?" or "Looks like [event name] is on deck — want to use this to prepare?" Keep it short, direct, conversational. No filler.\n\n` + systemPrompt;
+    }
+
     // CRISIS DETECTION — hard-coded, cannot be ignored by the AI
     if (hasCrisisLanguage) {
       systemPrompt = `SAFETY OVERRIDE — THIS IS YOUR HIGHEST PRIORITY:\nThe user's message contains language that may indicate crisis or suicidal ideation. You MUST:\n1. Acknowledge what they said directly — do not deflect or redirect to breathing\n2. Ask clearly: "Are you thinking about hurting yourself?"\n3. Surface resources INLINE in your response: "If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7."\n4. Stay present: "I'm still here. You can keep talking to me too."\n5. Do NOT minimize, do NOT give generic comfort, do NOT skip the resource. This is non-negotiable.\n\n` + systemPrompt;
@@ -1432,3 +1438,4 @@ WHAT STAYING SHARP LOOKS LIKE:
     return { statusCode: 500, headers: createCorsHeaders(event), body: JSON.stringify({ error: msg }) };
   }
 };
+
