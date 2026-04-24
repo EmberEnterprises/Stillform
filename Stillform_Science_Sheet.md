@@ -392,3 +392,26 @@ The lightweight shell for balanced users implements detached mindfulness (Wells,
 
 **Off-baseline overrides preserved.** When body-state (activated, depleted, pain, sleep, medicated) is flagged, the app biases toward somatic support regardless of processing type. This is the two-regulation-pathway principle: physiological activation must be addressed at the body level before top-down cognitive processing is effective (Ochsner & Gross, 2005).
 
+---
+
+## What Shifted — Post-Session Affect Labeling (April 2026)
+
+**What it is:** A single-line prompt after Reframe — "In one line — what shifted?" — asking the user to name the change in their internal state before exiting the session.
+
+**Why it works:**
+
+**Affect labeling** (Lieberman et al., 2007) is the mechanism. When a person translates an emotional experience into language, amygdala activation decreases and right ventrolateral prefrontal cortex (RVLPFC) engagement increases. The prefrontal cortex is literally regulating the amygdala through the act of naming.
+
+The one-line constraint is intentional and scientifically stronger than open-ended journaling. It forces the prefrontal cortex to distill — the user must find the precise word or phrase for what changed, which demands higher cognitive engagement than free-form writing and produces more durable regulation.
+
+This is distinct from journaling (which processes at length) and from venting (which can reinforce activation). It is a single act of precise post-regulation labeling that reinforces the regulated state before the user exits.
+
+**Why it belongs after Reframe, not before:**
+Affect labeling after regulation consolidates the shift. Labeling before regulation can intensify the emotional state. The sequence — regulate first, label after — is the correct application of the research.
+
+**References:**
+- Lieberman et al. (2007) — "Putting Feelings Into Words" — affect labeling reduces amygdala activity — *Psychological Science*
+- Burklund et al. (2014) — affect labeling activates RVLPFC — *Psychological Science*
+- Pennebaker (1997) — expressive writing and emotional processing — *Opening Up*
+- Torre & Lieberman (2018) — putting feelings into words: affect labeling as implicit emotion regulation — *Psychological Science*
+
