@@ -415,3 +415,38 @@ Affect labeling after regulation consolidates the shift. Labeling before regulat
 - Pennebaker (1997) — expressive writing and emotional processing — *Opening Up*
 - Torre & Lieberman (2018) — putting feelings into words: affect labeling as implicit emotion regulation — *Psychological Science*
 
+---
+
+## Next Move — Implementation Intention in Action (April 2026)
+
+**What it does:** After Reframe, user picks one concrete action from four options tailored to their session context (interpersonal vs internal). Each action has a real execution path — not just a label, but something completable inside the regulated state.
+
+**The science:** Implementation intention research (Gollwitzer, 1999) shows that forming a specific "if X then Y" plan dramatically increases follow-through compared to general goal-setting. The gap between intention and action is where regulation breaks down. Closing that gap while still regulated is the entire point of Next Move.
+
+The four interpersonal actions map to the full range of regulated responses — act, commit, defer, release. Each is a valid composure outcome. "Let it go" is specifically important: it validates non-action as a regulated choice, which most productivity tools never do.
+
+**Session context detection:** reframe.js flags each session as interpersonal or internal based on content. This is stored as a data point (`sessionContext`) and drives which buttons appear — no extra question asked of the user. Over time this feeds My Patterns with session context distribution data.
+
+**Who says so:**
+- Gollwitzer (1999) — "Implementation Intentions: Strong Effects of Simple Plans" — *American Psychologist*
+- Gollwitzer & Sheeran (2006) — meta-analysis: implementation intentions have medium-to-large effect on goal attainment — *Advances in Experimental Social Psychology*
+- Webb & Sheeran (2004) — implementation intentions improve behavior change follow-through — *British Journal of Social Psychology*
+
+---
+
+## Lock-in Statements — Reflective Practice Personalized (April 2026)
+
+**What it does:** After selecting a Next Move, the user sees 3 lock-in statement options tailored to their chosen action AND their regulation type (thought-first / body-first / balanced). They pick one. Together the pair — lock-in + next move — forms one complete sentence about how they processed and what they decided.
+
+**The science:** Schön's reflective practice framework (1983) distinguishes reflection-in-action (during) from reflection-on-action (after). The lock-in is reflection-on-action — naming the processing move that led to the decision. This consolidates the regulated insight and makes it repeatable.
+
+Personalization by regulation type is critical. A body-first person who chose to send a message processed differently than a thought-first person who made the same choice. The lock-in statement should reflect that difference — "my body settled before I chose my words" vs "I separated facts from story before I acted." Same outcome, different processing pathway, different data point.
+
+**The 20-second pause:** Cannot be skipped. The pause is the feature — it prevents rushed exit from the regulated state and ensures the reflection is genuine, not reflexive.
+
+**Data value:** The lock-in + next move pair is the most information-dense data point in the session. It captures: what they did, how they got there, and which processing pathway they used. Over time this builds a personal composure fingerprint in My Patterns.
+
+**Who says so:**
+- Schön (1983) — *The Reflective Practitioner* — reflection-on-action framework
+- Mann et al. (2009) — reflective practice improves self-awareness — *Advances in Health Sciences Education*
+- Flavell (1979) — metacognitive monitoring — *American Psychologist*
