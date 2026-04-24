@@ -5,11 +5,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.provider.CalendarContract
 import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.health.connect.client.HealthConnectClient
-import androidx.health.connect.client.PermissionController
 import androidx.health.connect.client.permission.HealthPermission
 import androidx.health.connect.client.records.HeartRateVariabilityRmssdRecord
 import androidx.health.connect.client.records.RestingHeartRateRecord
@@ -40,20 +38,6 @@ class IntegrationBridgePlugin : Plugin() {
             HealthPermission.getReadPermission(RestingHeartRateRecord::class)
         )
     }
-
-    private var pendingHealthCall: PluginCall? = null
-
-    private val requestPermissionLauncher =
-        registerForActivityResult(PermissionController.createRequestPermissionResultContract()) { granted ->
-            val call = pendingHealthCall
-            pendingHealthCall = null
-            if (call == null) return@registerForActivityResult
-            val allGranted = HEALTH_PERMISSIONS.all { it in granted }
-            call.resolve(JSObject().apply {
-                put("granted", allGranted)
-                put("status", if (allGranted) "granted" else "partial")
-            })
-        }
 
     // ─── REQUEST CALENDAR PERMISSION ─────────────────────────────────────────
 
@@ -94,9 +78,18 @@ class IntegrationBridgePlugin : Plugin() {
                 call.resolve(JSObject().apply { put("granted", true); put("status", "granted") })
                 return
             }
-            // Launch permission request — result handled in registerForActivityResult
-            pendingHealthCall = call
-            requestPermissionLauncher.launch(HEALTH_PERMISSIONS)
+            // Open Health Connect permissions screen — user grants, then taps Sync in app
+            val intent = HealthConnectClient.getOrCreate(context)
+                .let {
+                    context.packageManager.getLaunchIntentForPackage("com.google.android.healthconnect.controller")
+                        ?: context.packageManager.getLaunchIntentForPackage("com.google.android.apps.healthdata")
+                        ?: context.packageManager.getLaunchIntentForPackage("com.sec.android.app.shealth")
+                }
+            if (intent != null) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                activity.startActivity(intent)
+            }
+            call.resolve(JSObject().apply { put("granted", false); put("status", "opened") })
         } catch (e: Exception) {
             Log.e(TAG, "requestHealthPermission error: ${e.message}", e)
             call.resolve(JSObject().apply { put("granted", false); put("error", e.message) })
