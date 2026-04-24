@@ -6122,7 +6122,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* SELF MODE — MetacognitionTool inline */}
       {activeReframeTab === "self" && (
-        <MetacognitionTool onComplete={onComplete} />
+        <MetacognitionTool onComplete={onComplete} onSessionComplete={() => { setShowPostRating(true); }} />
       )}
 
       {/* AI MODE */}
@@ -6587,7 +6587,7 @@ function ObserveEntryLite({ onClose, onRoute }) {
 }
 
 
-function MetacognitionTool({ onComplete }) {
+function MetacognitionTool({ onComplete, onSessionComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
   const startTrackedRef = useRef(false);
@@ -6604,19 +6604,19 @@ function MetacognitionTool({ onComplete }) {
       label: "Notice",
       question: "What's happening in your body right now?",
       sub: "Scan without judgment. Where are you holding it?",
-      placeholder: "Shoulders, jaw, chest — wherever you feel it first."
+      placeholder: "Where is it sitting right now?"
     },
     {
       label: "Name",
       question: "What thought just fired?",
       sub: "The first one. Before the story built around it.",
-      placeholder: "Name it plainly. One sentence."
+      placeholder: "The raw thought. Not the story."
     },
     {
       label: "Recognize",
       question: "Have you been here before?",
       sub: "Is this thought familiar? Does it have a pattern?",
-      placeholder: "This shows up when I'm under pressure, or when..."
+      placeholder: "This pattern tends to show up when..."
     },
     {
       label: "Perspective",
@@ -6704,7 +6704,7 @@ function MetacognitionTool({ onComplete }) {
             </div>
           </div>
         )}
-        <button className="btn btn-ghost" onClick={onComplete}>Done</button>
+        <button className="btn btn-primary" onClick={() => onSessionComplete ? onSessionComplete() : onComplete()}>Continue →</button>
       </div>
     );
   }
