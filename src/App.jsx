@@ -4562,7 +4562,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [externalAnchorDraft, setExternalAnchorDraft] = useState("");
   const [externalAnchorCopied, setExternalAnchorCopied] = useState(false);
   const [externalAnchorSent, setExternalAnchorSent] = useState(false);
-  const [stateToStatementExpanded, setStateToStatementExpanded] = useState(false);
+  const [stateToStatementExpanded, setStateToStatementExpanded] = useState(true);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
   const [communicationSkipReason, setCommunicationSkipReason] = useState(null);
@@ -14736,5 +14736,6 @@ const isSignalProfileConfigured = () => {
     </ErrorBoundary>
   );
 }
+
 
 
