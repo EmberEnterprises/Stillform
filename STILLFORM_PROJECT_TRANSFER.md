@@ -2229,3 +2229,87 @@ Lock-in statements matrix:
 - Existing lock-in statement copy preserved and extended (not replaced)
 - Regulation type personalization layer preserved throughout
 
+---
+
+## April 24, 2026 — Regulation Type Simplification + Onboarding Redesign (Locked)
+
+### Regulation Types: Two Only (locked decision)
+
+**Decision:** Remove "balanced" as a regulation type. Two types only: **thought-first** and **body-first**.
+
+**Rationale:**
+- "Balanced" was a workaround for ambiguous calibration scores, not a real processing type
+- It created a third routing path, third content set, third AI context — all serving an edge case
+- The product is more confident and cleaner with a binary that the calibration actually resolves
+- Recalibration in Settings means users are never permanently locked in — if thought-first doesn't fit after experience, they re-run calibration
+
+**Tiebreaker rule (locked):**
+- Calibration scenarios that score evenly → forced tiebreaker, cannot produce balanced result
+- Implementation: if scores are equal after all scenarios, one additional deciding scenario is presented
+- OR: weight the first scenario more heavily as a tiebreaker — simpler, no extra screen
+- Decision: no user ever exits calibration without a clear thought-first or body-first assignment
+
+**Ripple effects to address before removing balanced:**
+- ObserveEntryLite (home screen) was built for balanced users → needs a new home or repurposing
+- TOOL_DEBRIEF_COPY balanced set → consolidated into thought-first and body-first
+- AI prompts with balanced context → removed
+- Calibration assessment output → binary only
+- Users currently stored as balanced → migrate to whichever type their scenario scores lean toward on next app load
+- All routing logic referencing "balanced" → audit and remove
+
+**Do not remove balanced until:** full audit of all balanced references in App.jsx and reframe.js is complete and migration path for existing balanced users is confirmed safe.
+
+---
+
+### Onboarding Redesign (locked decisions)
+
+**Current state:** Front-loaded tutorial explains the product before the user has experienced anything. Doesn't land because context is missing.
+
+**New structure:**
+
+**Page 1 — Why you're here (max 2 intro pages total)**
+Short. Speaks to the person, not the product. Sets the frame: this is a composure system, not a wellness app. You regulate first, then think clearly.
+
+**Page 2 — How it works**
+One sentence per tool. No feature list. The system: body → thought → action.
+
+**Calibration — immediately after intro pages**
+Two types, clear scenarios, no tiebreaker possible. Fast. Produces a result the app immediately acts on.
+
+**First-use interactive walkthrough**
+- No tutorial screen before first use
+- Contextual tooltips/coach marks appear during actual first tool use
+- User is doing the thing while being guided, not being told about it in advance
+- Walkthrough ends with: "There's an in-depth guide in Settings if you ever want to review how everything works."
+
+**End of first session note**
+- Gentle, not pushy
+- "You just ran your first session. If you want to understand the full system, there's an in-depth guide in Settings."
+
+**Settings — In-depth tutorial**
+- Full reference document
+- Accessible any time, not pushed at the user
+- Covers every tool, every feature, the science behind each one
+- Rewritten in Stillform voice — system language, not wellness language
+
+**Info circle (ⓘ) per tool**
+- Small info button on every tool screen
+- Opens a brief explanation of what the tool does and why
+- Available at any time, not just first use
+- Respects that people want help when confused, not preemptively
+
+**Tutorial rewrite — separate focused session**
+- Current tutorial voice needs to match the product: system language, operator framing
+- Should explain the composure system, not list features
+- Scheduled as its own work session before launch
+
+---
+
+### Lock-in Statements: Simplified Matrix
+
+**Decision:** Two regulation types (not three) × 4 Next Move buttons = 8 combinations.
+One strong definitive statement per combination (not 3 choices) = **8 statements total**.
+
+Rationale: less decision fatigue at the end of a session. One statement per combination is more confident and easier to produce well. User confirms or skips — no scanning required.
+
+**Still to write:** 8 lock-in statements + internal session button set before Screen 2 is built.
