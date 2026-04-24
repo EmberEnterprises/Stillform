@@ -240,11 +240,12 @@ class IntegrationBridgePlugin : Plugin() {
                     while (it.moveToNext() && events.length() < 8) {
                         val title = it.getString(0)?.trim()
                         val allDay = it.getInt(3)
-                        Log.d(TAG, "Calendar row: title='$title' allDay=$allDay")
+                        Log.d(TAG, "Calendar row: title='$title' allDay=$allDay start=${it.getLong(1)}")
                         if (title.isNullOrEmpty()) continue
                         val start = it.getLong(1)
                         val end = it.getLong(2)
-                        if (allDay == 1) continue
+                        // Include all events including all-day for now to diagnose
+                        // if (allDay == 1) continue
                         events.put(JSONObject().apply {
                             put("title", title)
                             put("start", Instant.ofEpochMilli(start).toString())
