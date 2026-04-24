@@ -13548,107 +13548,119 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A metacognition trainer that stabilizes composure. One practice, three moments: Morning Check-in in the morning. Observe and Choose throughout the day. Close the loop in the evening. The tools — Breathe, Body Scan, Reframe — are supports the system routes you to. You don't pick them. The practice does."
+                a: "A composure architecture. It teaches you to regulate your body first, then reset your thinking — so you can choose how you respond instead of reacting on autopilot. Three tools: Breathe handles physical activation. Body Scan clears what your body is holding. Reframe processes the thinking. The system routes you to the right one based on how you process. You don\'t choose the tool — your profile does."
+              },
+              {
+                q: "What does composure actually mean here?",
+                a: "Not calm for calm\'s sake. Composure is how you carry yourself — in high-stakes conversations, under pressure, when something goes sideways, and when nothing is wrong at all. It\'s the difference between reacting from activation and responding from clarity. Stillform builds that as a daily practice, not a crisis intervention."
               },
               {
                 q: "What is the method behind Stillform?",
-                a: "Metacognitive Therapy (Wells) applied to daily life. The core shift: from 'I am this state' to 'I can see this state happening and choose my response.' Observe and Choose is the central practice. Breathe, Body Scan, and Reframe are supports the system routes you to based on what fired first and what you need. Calibration sets your routing profile so the system knows how you process."
+                a: "Metacognitive Therapy, applied to daily life. The core shift: from \'I am this state\' to \'I can observe this state and choose my response.\' MCT doesn\'t ask you to challenge your thoughts or decide if they\'re rational. It trains you to step back from them. Every tool in Stillform serves that shift — Breathe interrupts the loop, Body Scan grounds you in the physical, Reframe processes what fired. Calibration identifies your regulation type so the system knows your pathway before you need it."
               },
               {
-                q: "What science basis does Stillform use?",
-                a: "Stillform applies established mechanisms from behavioral and cognitive neuroscience: autonomic down-regulation through paced breathing, interoceptive awareness through body scanning, cognitive reappraisal and defusion in Reframe, and implementation-intention style next-step selection. It is a composure and performance tool, not diagnosis or treatment."
+                q: "How is this different from meditation or therapy?",
+                a: "Stillform is not meditation and not therapy. Meditation is a practice of sustained attention. Therapy is clinical treatment. Stillform is a composure system — structured interventions that interrupt activation and restore function in real time. It is a performance and regulation tool, not a treatment for mental health conditions. If you need clinical support, please seek it."
               },
               {
-                q: "What is State to Statement?",
-                a: "State to Statement appears after Reframe. It helps you convert your regulated internal state into one clear external message you can use in Slack, email, text, or a talking point. You can copy it, share it, and mark it sent. Follow-through is tracked in My Progress under Composure → Communication."
+                q: "What science is Stillform built on?",
+                a: "Metacognitive Therapy (Wells, 2009) is the primary framework. Supporting mechanisms include: autonomic down-regulation through paced breathing (vagal nerve stimulation, Gerritsen & Band 2018), interoceptive awareness through body scanning (Mehling et al. 2012), cognitive reappraisal in Reframe (Ochsner & Gross 2005), affect labeling via emotion naming (Lieberman et al. 2007), implementation intentions via the calibration assessment (Gollwitzer 1999), and psychological distancing via pattern recognition (Kross & Ayduk 2011). These are established mechanisms, not proprietary claims."
               },
               {
-                q: "Who is this for?",
-                a: "Anyone who wants more control over how they show up. Not just in hard moments — every day. The person who wants to walk into any room composed, handle whatever comes, and know they're getting better at it over time."
+                q: "What is calibration?",
+                a: "A five-scenario assessment that identifies whether you regulate better body-first or thought-first. Body-first: physical activation hits before cognition catches up — breathing and body work settle you before thinking can. Thought-first: the loop fires in your head — you need to process the thinking before your body releases. Calibration pre-loads your pathway so when activation hits, the app already knows your first move. You can recalibrate anytime in Settings."
               },
               {
-                q: "What does the AI actually do?",
-                a: "It helps you see what's really happening. Names the pattern, separates what's real from what your brain is adding, and helps you choose your next move instead of running on autopilot. It sharpens over time based on your signal history and session patterns."
+                q: "What is the morning check-in?",
+                a: "Three quick inputs at the start of your day: energy level, physical state, and where you\'re holding tension in your body. Under 30 seconds. The AI uses all of it as context for every session that follows — so when you open Reframe later, it already knows you\'re running on low sleep or carrying tension in your shoulders. The check-in sets the day\'s baseline."
               },
               {
-                q: "What does 'status is junk code for the ego' mean?",
-                a: "In Stillform, this is handled as a micro-bias check: sometimes your system reads status threat where there is only comparison noise. The AI helps you separate image anxiety from real consequence, then move on signal — what matters if nobody is watching, and one concrete next move aligned with your values."
+                q: "What is the end of day check-in?",
+                a: "After 6 PM, three taps: where your energy landed, whether you held composure, and one word for the day. The AI uses yesterday\'s close as context the next morning. The morning and evening bookend creates a feedback loop that makes your patterns visible over time."
               },
               {
-                q: "How does the AI know what I need?",
-                a: "It reads your feel state, your physical state, and what you type. If you're excited, it channels the energy and checks for overcommitment. If you're spiraling, it cuts the loop with one sharp question. If you're processing, it gives you perspectives and names what your brain is adding. You don't choose a mode — it adapts to you."
+                q: "What does the AI actually do in Reframe?",
+                a: "It reads your feel state, physical state, and what you type — then names what\'s happening without telling you what to feel. If you\'re spiraling, it cuts the loop with one precise question. If you\'re processing an interpersonal situation, it separates what\'s real from what your read is adding. If you\'re in a high state, it channels the energy and checks for overcommitment. You don\'t choose a mode. The AI routes based on your input."
               },
               {
                 q: "Does the AI learn about me?",
-                a: "Yes. It reads your Pulse, signal profile, pattern check baseline, and check-ins. The more you use it, the more precise it gets about your specific patterns and how you move through states."
+                a: "Yes. It reads your signal profile, bias patterns, check-in history, and session notes. The more you use it, the more accurate it gets about your specific patterns — what tends to trigger you, how you process, and what\'s worked before. From session five onward, it starts surfacing those observations directly."
               },
               {
-                q: "What's the AI's limitation?",
-                a: "It's a tool, not a person. It may occasionally miss context or give a response that doesn't land. It can't give medical, legal, or financial advice. If something it says doesn't fit — tell it. It adjusts."
+                q: "What is Self Mode in Reframe?",
+                a: "An alternative to AI-assisted Reframe for users who prefer to work through activation independently. Five structured steps: Notice (where is it in the body), Name (the first thought, not the story), Recognize (is this pattern familiar), Perspective (what do you actually need), Choose (what next). No AI. Pure structured self-observation based on MCT\'s detached mindfulness framework. Accessible via the Self Mode tab inside Reframe."
               },
               {
-                q: "What if AI can't connect?",
-                a: "Reframe retries automatically. If connection still fails, Stillform switches to a built-in self-guided fallback so you're never blocked. Your fallback session still saves in your history."
+                q: "What is What Shifted?",
+                a: "A single line you write after Reframe — naming what changed in your internal state. Not a journal entry. One precise line. The science: affect labeling reduces amygdala activation and reinforces the prefrontal cortex\'s regulation of it. The one-line constraint is intentional — distilling what shifted requires more precision than free writing, which produces more durable regulation. It\'s for you, not for sending."
               },
               {
-                q: "What is the Pulse?",
-                a: "Pulse is your progress signal layer. It is generated from your completed check-ins and regulation tools, then surfaced in My Progress so you can track patterns over time."
+                q: "What is Next Move?",
+                a: "After Reframe, one concrete action taken from your regulated state. Four options: Send a message, Hold a boundary, Delay your response, or Let it go. Each has a real execution path — not just a label. Send a message opens a compose window. Hold a boundary saves the line you\'re holding with a follow-up notification. Delay response sets a timer with a reminder. Let it go logs the decision and closes the session. The AI detects whether your session was interpersonal or internal and shows the relevant options."
               },
               {
-                q: "How does Pulse work?",
-                a: "Pulse updates from your check-ins and completed regulation sessions. Your full Pulse history lives in My Progress — along with AI session notes, pattern analysis, and everything the app has learned about you."
+                q: "What is the Bio-Filter?",
+                a: "A physical state check before Reframe. Options: depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. When selected, the AI filters its interpretation through your physical state. The science: misattribution of arousal — reading a biological signal as an emotional one — is well-documented. What reads as anxiety may be sleep deprivation. What reads as irritability may be inflammation. The bio-filter catches that before the session begins."
+              },
+              {
+                q: "What is the Body Scan?",
+                a: "Six acupressure points with timed holds, auto-advancing. Each point corresponds to a tension-release pathway. Focused body attention — interoceptive awareness — interrupts rumination by redirecting cognitive resources to physical sensation. The session completes with \'Signal cleared.\'"
+              },
+              {
+                q: "What is Signal Log?",
+                a: "Your emotion tracking layer. Tap chips to name what you\'re feeling throughout the day — not just during sessions. The more granular your emotion vocabulary, the better you regulate. Research shows that people who distinguish between specific emotions cope more effectively and are less likely to resort to harmful strategies. Signal Log trains that granularity over time."
               },
               {
                 q: "What is Composure Telemetry?",
-                a: "A 12-week visual timeline on My Progress. Every session and Pulse entry lights up a cell. Brighter amber means more activity that day. It's your composure practice at a glance — not a diary, a flight recorder."
-              },
-              {
-                q: "What's the morning check-in?",
-                a: "Three quick steps at the start of your day — your energy level, your hardware state, and where you're holding tension in your body. Takes under 30 seconds. The AI uses all of it as context for every session that day."
-              },
-              {
-                q: "What's the end of day check-in?",
-                a: "After 6 PM, three taps to close the loop. Where your energy is, did you hold composure, one word for the day. The AI uses yesterday's close as context the next morning."
+                a: "A 12-week visual timeline on My Progress. Every session and Signal Log entry lights a cell. Brighter amber means more activity that day. It\'s your practice at a glance — not a mood diary, a flight recorder. It shows frequency and consistency, not just how you felt."
               },
               {
                 q: "What happens when I type fast in Reframe?",
-                a: "The app notices. If you're typing rapidly — a sign your body is ahead of your thoughts — a gentle nudge appears: 'Drop your shoulders' or 'Unclench your jaw.' It fades after a few seconds. The system watches your body, not just your words."
+                a: "The app notices. Rapid typing is a physical signal — your body is ahead of your thinking. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It fades in a few seconds. The system reads your body, not just your words."
               },
               {
-                q: "What if composure still feels out of reach?",
-                a: "Sometimes the issue is not mindset alone. Pain, illness, inflammation, hormonal shifts, medication effects, or severe sleep disruption can make composure hard to access even when you are doing the right things. Stillform can help you read the signal more clearly, but if your state feels physically driven or persistently off, treat that as real and get appropriate medical support."
+                q: "What is GO / NO-GO?",
+                a: "A voluntary composure check. A short assessment that reads your current state and tells you whether you\'re operating from a regulated baseline or whether something is narrowing your window. Not a diagnostic — a real-time signal read. Use it before a high-stakes conversation, a decision, or anytime you want an honest read on where you are."
               },
               {
-                q: "What is visual grounding?",
-                a: "Optional fractal visuals behind breathing sessions that give your eyes a stable anchor while your breath settles. You can turn it on or off in Settings > Visual grounding."
+                q: "What is the 60 BPM pulse on the home screen?",
+                a: "A 1Hz ambient glow — the same frequency as a calm resting heart rate. Visual entrainment research shows the nervous system synchronizes to rhythmic visual stimuli. You feel steadier opening the app and may not know why. That\'s by design."
               },
               {
-                q: "Is my data private?",
-                a: "Your data is encrypted. Local data is stored on your device, and optional Cloud Sync stores encrypted backups from this device. Restore depends on the original device encryption key, so recovery on another device may be limited. The AI receives context to generate a response, then returns output. You can delete your data anytime from Settings."
-              },
-              {
-                q: "How much does it cost?",
-                a: "$14.99/month or $9.99/month on the annual plan ($119.88/year). One price — everything included. No add-ons."
-              },
-              {
-                q: "What if I cancel?",
-                a: "Your local data stays on your device. If Cloud Sync was enabled, your encrypted backups remain stored for later restore. Restore still depends on having the original device encryption key."
-              },
-              {
-                q: "Is my data backed up?",
-                a: "Yes — go to Settings and sign in or create an account to enable cloud backup. Your data is encrypted on your device before it leaves, so we can't read it. You can sync and restore from Settings. Restore on a different device may be limited if the original encryption key is unavailable."
+                q: "What if the AI connection drops?",
+                a: "Reframe retries automatically. If the connection fails, the app switches to a built-in self-guided fallback so you\'re never blocked mid-session. Your fallback session saves in your history the same as any other session."
               },
               {
                 q: "Can I upload screenshots to Reframe?",
-                a: "Yes. Tap 📎 to share up to 3 screenshots at once. The AI reads layout context (for example message order and attribution) to improve coaching relevance. Screenshot interpretation can still be wrong, and should not be treated as legal, medical, or definitive factual analysis. Use it as composure support and verify critical facts independently."
+                a: "Yes. Tap the attachment icon to share up to three screenshots at once. The AI reads layout context — message order, attribution, tone — to improve the quality of its coaching. Screenshot interpretation can still be imprecise. Do not treat it as legal, factual, or medical analysis. Use it as composure support and verify anything critical independently."
               },
               {
-                q: "Why don't I see my calendar or health data in the app?",
-                a: "Calendar and Health Connect integrations are only available in the native Android app — they require device-level permissions that aren't accessible from a browser. If you're using Stillform on the web, those integrations won't appear. Install the Android app and grant permissions in Settings > Integrations to enable them."
+                q: "Why don't I see calendar or health data in the app?",
+                a: "Calendar and Health Connect integrations are only available in the native Android app — they require device-level permissions that a browser cannot access. If you\'re using Stillform on the web, those integrations won\'t appear. Install the Android app and grant permissions in Settings under Integrations."
+              },
+              {
+                q: "What if composure still feels out of reach?",
+                a: "Sometimes the obstacle is physical, not psychological. Sleep deprivation, pain, inflammation, hormonal shifts, and medication effects directly alter emotional perception — they narrow the window before you even start. Stillform can help you read the signal more clearly, but if your state feels physically driven or persistently off, treat that as real. Get appropriate medical support."
+              },
+              {
+                q: "Is my data private?",
+                a: "Your session data is encrypted on your device. Optional Cloud Sync stores AES-256 encrypted backups — we cannot read them. The AI receives context to generate a response, then returns output. No session content is stored on our servers. You can delete all your data from Settings at any time."
+              },
+              {
+                q: "How much does Stillform cost?",
+                a: "$14.99 per month, or $9.99 per month on the annual plan ($119.88 per year). One price — everything included. No tiers, no add-ons required for core features."
+              },
+              {
+                q: "What happens to my data if I cancel?",
+                a: "Your local data stays on your device. If Cloud Sync was enabled, your encrypted backups remain stored and can be restored if you return. Restoration on a different device depends on the original device encryption key."
+              },
+              {
+                q: "Is my data backed up?",
+                a: "Go to Settings and sign in or create an account to enable Cloud Sync. Your data is encrypted on your device before it leaves — we cannot read it. Sync and restore are managed from Settings. Restoration on a different device depends on the original device encryption key."
               },
               {
                 q: "Does Stillform work on tablets?",
-                a: "The web app works on any browser including tablets and iPads. The layout is optimized for phones but readable on larger screens. A dedicated tablet layout and native iPad app are planned for a future release."
+                a: "The web app works on any browser, including tablets and iPads. The layout is optimized for phones but readable on larger screens. A dedicated tablet layout is planned for a future release."
               }
             ].map((item, i) => (
               <div key={i} style={{ marginBottom: 20 }}>
