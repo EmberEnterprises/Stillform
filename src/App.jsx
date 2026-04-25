@@ -13548,7 +13548,7 @@ const isSignalProfileConfigured = () => {
             {[
               {
                 q: "What is Stillform?",
-                a: "A composure architecture. The body activates before the thinking catches up — Stillform works with that sequence. Breathe settles the nervous system. Body Scan clears what the body is holding. Reframe processes the cognitive layer once the system is ready. The order matters. It follows how regulation actually works, not how we wish it did."
+                a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation actually takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Each session builds the capacity to notice what is happening, name it accurately, and choose a response instead of producing one automatically. That is the practice that clears out the noise and stabilizes a state in clarity. That is composure."
               },
               {
                 q: "What does composure mean here?",
