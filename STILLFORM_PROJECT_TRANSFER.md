@@ -2313,3 +2313,25 @@ One strong definitive statement per combination (not 3 choices) = **8 statements
 Rationale: less decision fatigue at the end of a session. One statement per combination is more confident and easier to produce well. User confirms or skips — no scanning required.
 
 **Still to write:** 8 lock-in statements + internal session button set before Screen 2 is built.
+
+---
+
+## Lock-in Statements — Final (April 24, 2026)
+
+One statement per combination. User reads it, recognizes it, confirms. Written in third person — clean, direct, no performance.
+
+**Send a message**
+- Body-first: "The physical state cleared first, which made the response possible."
+- Thought-first: "The cognitive pattern was identified and separated from the facts before responding."
+
+**Hold a boundary**
+- Body-first: "The body signaled the limit before the mind could articulate it."
+- Thought-first: "The boundary was defined through clear thinking, not reaction."
+
+**Delay your response**
+- Body-first: "The activation was recognized before it could produce a premature response."
+- Thought-first: "The missing information was identified before committing to a position."
+
+**Let it go**
+- Body-first: "The physical activation dissolved, and with it, the need to respond."
+- Thought-first: "A clear assessment determined that no response was the right response."
