@@ -13552,67 +13552,67 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What does composure mean here?",
-                a: "The capacity to perceive clearly and respond deliberately under conditions that typically degrade both. Not the absence of activation — the ability to function inside it. Stillform treats composure as a trainable skill, not a fixed trait. The practice is daily, not situational."
+                a: "Not calm for its own sake. Composure is the ability to perceive accurately and respond deliberately — in high-stakes conversations, under pressure, when something goes sideways, and when nothing is wrong at all. Stillform treats it as a trainable skill, not a fixed trait. The practice is daily. The standard is consistent."
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is neither. Meditation is a sustained attention practice. Therapy is clinical treatment. Stillform is a precision regulation system — structured interventions that interrupt activation and restore a functional baseline in real time. It is a performance and composure tool. It is not a substitute for clinical care."
+                a: "Stillform is neither. Meditation is a sustained attention practice. Therapy is clinical treatment for psychological conditions. Stillform is a precision regulation system — structured interventions that interrupt activation and restore a functional baseline in real time. It is a performance and composure tool. It is not a substitute for clinical care."
               },
               {
                 q: "What is calibration?",
-                a: "A five-scenario assessment that identifies whether you regulate better body-first or thought-first. People differ — for some, breathing and physical grounding settle the system before cognition can; for others, thinking through the situation has to come first. Applying the wrong approach under activation produces resistance, not regulation. Calibration pre-selects your pathway before you need it. Recalibrate anytime in Settings."
+                a: "A five-scenario assessment that determines your regulation type — body-first or thought-first. For some, the nervous system has to settle before the thinking can clear. For others, working through the cognition releases the physical tension. Applying the wrong approach under activation produces resistance, not regulation. Calibration pre-selects your pathway before you need it. Recalibrate anytime in Settings."
               },
               {
                 q: "What is the morning check-in?",
-                a: "Three quick inputs at the start of the day: energy level, physical state, and where you are holding tension. Under 30 seconds. Sleep debt, pain, and hormonal state directly alter how you perceive situations — they narrow the window before any external stressor arrives. The check-in catches that early, so the AI already knows your physiological baseline when you open Reframe later."
+                a: "Three inputs at the start of the day: energy level, physical state, and where you are holding tension. Under 30 seconds. Sleep debt, pain, and hormonal state directly alter how you perceive situations — they narrow your capacity before any external stressor arrives. The check-in catches that early, so the AI already knows your baseline when you open Reframe later."
               },
               {
                 q: "What is the end of day check-in?",
-                a: "After 6 PM, three inputs: where your energy landed, whether you held composure, one word for the day. The AI carries that into the next morning as context. The morning-to-evening structure creates a feedback loop — patterns that stay invisible inside day-to-day experience become visible over time."
+                a: "After 6 PM, three inputs: where your energy landed, whether you held composure, one word for the day. The AI carries that into the next morning as context. The morning-to-evening structure creates a feedback loop — patterns that stay invisible inside day-to-day experience become legible over time."
               },
               {
                 q: "What does the AI do in Reframe?",
-                a: "It reads your physical state, feel state, and input — then identifies what is actually happening. Under activation, the mind tends to collect evidence for the interpretation it has already formed and filter out what contradicts it. The AI introduces a perspective that breaks that pattern. For interpersonal situations, it separates what is factually present from what your read of the other person is adding. It does not follow a script — it adapts to your input."
+                a: "It reads your physical state, feel state, and input — then identifies what is actually happening. Under activation, the mind tends to collect evidence for the interpretation it has already formed and miss what contradicts it. The AI introduces a perspective that interrupts that pattern. For interpersonal situations, it separates what is factually present from what your read of the other person is adding. It does not follow a script — it adapts to your input."
               },
               {
                 q: "Does the AI learn about me?",
-                a: "Yes. It reads your signal profile, identified cognitive patterns, check-in history, and session notes. The more you use it, the more precise it becomes. From session five onward, it starts surfacing cross-session observations directly. Seeing your own patterns from the outside creates the distance needed to respond to them rather than operate from inside them."
+                a: "Yes. It reads your signal profile, identified cognitive patterns, check-in history, and session notes. The more you use it, the more precise it becomes. From session five onward, it begins surfacing cross-session observations directly. Seeing your own patterns from the outside creates the distance needed to respond to them rather than operate from inside them."
               },
               {
                 q: "What is Self Mode in Reframe?",
-                a: "A structured self-observation protocol for users who prefer to process independently. Five steps: Notice (where it is in the body), Name (the first cognition, without elaboration), Recognize (whether the pattern is familiar), Perspective (what you actually need, separated from what you think you should do), Choose (what next). The structure applies the core principle behind Metacognitive Therapy — observing a state rather than fusing with it — without AI involvement. Available via the Self Mode tab inside Reframe."
+                a: "A structured self-observation protocol for users who prefer to process independently. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The structure is grounded in Metacognitive Therapy — observing a state rather than fusing with it, without AI involvement. Available via the Self Mode tab inside Reframe."
               },
               {
                 q: "What is What Shifted?",
-                a: "A single line written after Reframe, naming what changed in your internal state. When you translate an emotional experience into precise language, amygdala activation decreases and prefrontal engagement increases — the regulation is reinforced through the act of naming. The one-line constraint is intentional: precision requires more effort than open-ended writing and produces more durable consolidation. It is for you, not for sending."
+                a: "A single line written after Reframe, naming what changed in your internal state. Translating an emotional experience into precise language measurably reduces activation and reinforces the regulated state. The one-line constraint is deliberate — precision requires more effort than open-ended writing and produces more durable results. It is a processing tool, not a communication tool."
               },
               {
                 q: "What is Next Move?",
-                a: "One concrete action taken from a regulated state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through compared to leaving it open. The AI reads your session context and surfaces the relevant options."
+                a: "One concrete action selected from a regulated state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. The AI reads your session context and surfaces the relevant options."
               },
               {
                 q: "What is the Bio-Filter?",
-                a: "A physical state check before Reframe. Options include depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. Physical state directly alters perception — sleep debt amplifies threat detection, pain demands attentional resources, hormonal shifts change affective baseline. The bio-filter surfaces these variables so the AI can interpret your input accurately rather than coach past a signal that may need a different response entirely."
+                a: "A physical state check before Reframe. Options include depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. Physical state directly shapes perception — sleep debt amplifies threat detection, pain demands attentional resources, hormonal shifts alter baseline. The bio-filter surfaces these variables so the AI contextualizes your input accurately rather than coaching past something that may need a different response entirely."
               },
               {
                 q: "What is the Body Scan?",
-                a: "Six acupressure points with timed holds, auto-advancing. Focused physical attention interrupts ruminative thought — the cognitive system cannot sustain self-referential processing while simultaneously tracking precise somatic sensation. Each point corresponds to a tension-release pathway. The session completes with \'Signal cleared.\'"
+                a: "Six acupressure points with timed holds, auto-advancing. Each point corresponds to a tension-release pathway. Focused physical attention interrupts ruminative thought by redirecting cognitive resources to somatic sensation — the two cannot run simultaneously at full capacity. The session completes with \'Signal cleared.\'"
               },
               {
                 q: "What is Signal Log?",
-                a: "The emotion tracking layer. Tap chips to name what you are feeling throughout the day — not only during sessions. The ability to distinguish between specific emotional states, rather than broad categories, is consistently associated with better regulation and more adaptive responses. Signal Log builds that precision gradually through repeated, specific labeling."
+                a: "The emotion tracking layer. Tap chips to name what you are experiencing throughout the day — not only during sessions. The ability to distinguish between specific states, rather than broad categories, is consistently associated with better regulation and more adaptive responses. Signal Log builds that precision gradually through repeated, specific labeling."
               },
               {
                 q: "What is Composure Telemetry?",
-                a: "A 12-week visual timeline on My Progress. Each session and Signal Log entry activates a cell. Brighter amber means more activity that day. It is a practice record — frequency and consistency over time — not a mood log."
+                a: "A 12-week visual timeline on My Progress. Each session and Signal Log entry activates a cell. Brighter amber indicates more activity that day. It is a practice record — frequency and consistency over time — not a mood log."
               },
               {
                 q: "What happens when I type rapidly in Reframe?",
-                a: "The system notices. Fast input is a behavioral signal — the body is ahead of the thinking. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It clears within seconds. The system reads behavior, not only content."
+                a: "The system notices. Fast input is a behavioral signal — the body is ahead of the thinking. Physical tension during emotional processing amplifies the response. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It clears within seconds. The system reads behavior, not only content."
               },
               {
                 q: "What is GO / NO-GO?",
-                a: "A voluntary composure check. A structured read of your current state — whether you are operating from a regulated baseline or whether something is narrowing your response window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where you want an accurate read of where you actually are."
+                a: "A voluntary composure check. A structured read of your current state — whether you are operating from a regulated baseline or whether something is narrowing your window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where an accurate read of your current capacity matters."
               },
               {
                 q: "What is the 60 BPM pulse on the home screen?",
@@ -13624,7 +13624,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "Can I attach screenshots to Reframe?",
-                a: "Yes. Attach up to three screenshots per session. The AI reads visual context — layout, attribution, sequence — to improve coaching for interpersonal situations. Screenshot interpretation has limits. Do not treat it as legal, factual, or medical determination. Verify anything consequential independently."
+                a: "Yes. Attach up to three screenshots per session. The AI reads visual context — layout, attribution, sequence — to improve coaching for interpersonal situations. Screenshot interpretation has limits. Do not treat it as legal, factual, or medical analysis. Verify anything consequential independently."
               },
               {
                 q: "Why don't I see calendar or health data?",
@@ -13632,7 +13632,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What if regulation remains difficult?",
-                a: "Physical variables can limit what regulation practice alone can achieve. Sleep debt, chronic pain, inflammation, hormonal changes, and medication effects alter perception at a biological level. Stillform can help you read the signal more clearly — but if your state appears physically driven or consistently resistant, that warrants medical attention, not more practice."
+                a: "Physical variables can impose a ceiling on regulation outcomes independent of practice quality. Sleep debt, chronic pain, inflammation, hormonal changes, and medication effects alter perception at a biological level. Stillform can help you read the signal more clearly — but if your state appears physically driven or consistently resistant, that warrants medical attention, not more practice."
               },
               {
                 q: "Is my data private?",
