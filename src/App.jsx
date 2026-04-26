@@ -10119,6 +10119,7 @@ export default function Stillform() {
 
   const [syncEmail, setSyncEmail] = useState("");
   const [syncPassword, setSyncPassword] = useState("");
+  const [showSyncPassword, setShowSyncPassword] = useState(false);
   const [syncLoading, setSyncLoading] = useState(false);
   const [syncError, setSyncError] = useState(null);
   const [syncSuccess, setSyncSuccess] = useState(null);
@@ -14394,8 +14395,13 @@ const isSignalProfileConfigured = () => {
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
                       <input type="email" placeholder="Email" value={syncEmail} onChange={e => setSyncEmail(e.target.value)}
                         style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
-                      <input type="password" placeholder="Password" value={syncPassword} onChange={e => setSyncPassword(e.target.value)}
-                        style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+                      <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                        <input type={showSyncPassword ? "text" : "password"} placeholder="Password" value={syncPassword} onChange={e => setSyncPassword(e.target.value)}
+                          style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 40px 10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }} />
+                        <button onClick={() => setShowSyncPassword(p => !p)} style={{ position: "absolute", right: 10, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans', sans-serif", padding: 0 }}>
+                          {showSyncPassword ? "Hide" : "Show"}
+                        </button>
+                      </div>
                       {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
                       {syncAuthCooldownSeconds > 0 && (
                         <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
