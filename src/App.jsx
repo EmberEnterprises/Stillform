@@ -1441,31 +1441,7 @@ const TOOL_ENTRY_PRIMER_COPY = {
     breathe: "Downshift physiology first; your cognition clears after the body settles.",
     scan: "Track where activation lives physically before deciding what it means."
   },
-  balanced: {
-    reframe: "Stabilize and label in sequence: signal first, then clear language.",
-    breathe: "Use this as your reset gate before deciding your next move.",
-    scan: "Map physical signals, then choose the smallest deliberate adjustment."
-  }
-};
-const TOOL_DEBRIEF_COPY = {
-  breathe: {
-    prompt: "What shifted most during regulation?",
-    "thought-first": [
-      "My thinking slowed enough to choose one priority.",
-      "I noticed drift early and redirected before spiraling.",
-      "I can separate urgency from importance now."
-    ],
-    "body-first": [
-      "My body settled before my thoughts changed.",
-      "Breath lowered activation enough to stay deliberate.",
-      "I can feel where tension releases first."
-    ],
-    balanced: [
-      "My body and thinking aligned after this round.",
-      "I can move from signal to decision with less friction.",
-      "I recovered enough to act without rushing."
-    ]
-  },
+
   scan: {
     prompt: "What did the scan teach you about your pattern?",
     "thought-first": [
@@ -1848,14 +1824,14 @@ const getToolFamily = (normalizedToolId) => {
 const getToolEntryPrimer = (toolId, regulationType) => {
   const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
   if (!["reframe", "breathe", "scan"].includes(normalizedTool)) return null;
-  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "balanced";
+  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "thought-first";
   return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || TOOL_ENTRY_PRIMER_COPY.balanced[normalizedTool] || null;
 };
 
 const getToolDebriefPromptSet = (toolId, regulationType) => {
   const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
   const config = TOOL_DEBRIEF_COPY[normalizedTool] || TOOL_DEBRIEF_COPY.reframe;
-  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "balanced";
+  const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "thought-first";
   return {
     prompt: config.prompt,
     options: Array.isArray(config[normalizedType]) && config[normalizedType].length
@@ -2562,7 +2538,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
-      return value === "thought-first" || value === "body-first" ? value : "balanced";
+      return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
       return "balanced";
     }
@@ -3234,7 +3210,7 @@ function BodyScanTool({ onComplete }) {
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
-      return value === "thought-first" || value === "body-first" ? value : "balanced";
+      return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
       return "balanced";
     }
@@ -4641,7 +4617,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
-      return value === "thought-first" || value === "body-first" ? value : "balanced";
+      return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
       return "balanced";
     }
@@ -11151,11 +11127,12 @@ const isSignalProfileConfigured = () => {
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setFirstRunStage(null);
-    // Ensure regType is always set before going to home — default balanced if user skipped assessment
+    // Ensure regType is always set before going to home — migrate balanced to thought-first
     try {
       if (!localStorage.getItem("stillform_regulation_type")) {
-        localStorage.setItem("stillform_regulation_type", "balanced");
-        setRegType("balanced");
+        // Migrate balanced users to thought-first (balanced no longer a valid type)
+        localStorage.setItem("stillform_regulation_type", "thought-first");
+        setRegType("thought-first");
       }
     } catch {}
     try { if (!localStorage.getItem("stillform_trial_start")) localStorage.setItem("stillform_trial_start", new Date().toISOString()); } catch {}
@@ -13031,7 +13008,7 @@ const isSignalProfileConfigured = () => {
               {/* 7-SESSION MILESTONE — type review */}
               {milestone7 && !isAbsent && (() => {
                 // Check if tool usage matches assessed processing type
-                const regType = localStorage.getItem("stillform_regulation_type") || "balanced";
+                const regType = localStorage.getItem("stillform_regulation_type") || "thought-first";
                 const reframeSessions = sessions.filter(s => (s.tools || []).includes("reframe")).length;
                 const breatheSessions = sessions.filter(s => (s.tools || []).includes("breathe") || (s.tools || []).includes("body-scan")).length;
                 const totalTool = reframeSessions + breatheSessions;
@@ -14135,9 +14112,9 @@ const isSignalProfileConfigured = () => {
                   {[
                     { id: "thought-first", name: "Thought-first", desc: "I process through my mind — analyzing, replaying, building responses" },
                     { id: "body-first", name: "Body-first", desc: "I feel it physically first — tension, heat, restlessness, then thoughts follow" },
-                    { id: "balanced", name: "Balanced", desc: "I use both equally — depends on the moment" }
+                  
                   ].map(t => {
-                    const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "balanced") === t.id; } catch { return t.id === "balanced"; } })();
+                    const isSelected = (() => { try { return (localStorage.getItem("stillform_regulation_type") || "thought-first") === t.id; } catch { return t.id === "thought-first"; } })();
                     return (
                       <button key={t.id} onClick={() => { try { localStorage.setItem("stillform_regulation_type", t.id); setRegType(t.id); refreshSettings(); } catch {} }} style={{
                         width: "100%", padding: "14px 16px", textAlign: "left", cursor: "pointer",
