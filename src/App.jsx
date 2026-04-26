@@ -3114,9 +3114,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
       {/* POST-RATE */}
       {phase === "post-rate" && (
         <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
-            Where are you now?
-          </h2>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, margin: 0 }}>
+              Where are you now?
+            </h2>
+            <button onClick={() => setInfoModal({ title: "Why track this?", body: "Tracking your state after a session measures the shift. The difference between how you came in and how you leave is the data point that builds your composure pattern over time." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+          </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
             <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Reactive</span>
             <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Composed</span>
@@ -5795,8 +5798,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {/* NEXT MOVE — inline pill selector */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
             Next Move
+            <button onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
           <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
             One concrete action before you leave.
@@ -5825,7 +5829,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             onClick={toggleStateToStatementExpanded}
             style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
           >
-            {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
+            <span>{stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}</span>
+            <button onClick={() => setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </button>
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
@@ -5963,13 +5968,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           return (
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
                   What is present
+                  <button onClick={() => setInfoModal({ title: "Why name your state?", body: "Naming your emotional state before a session is not just context-setting — it is the first regulation act. Research shows that translating an emotional experience into language directly reduces activation in the brain\\'s threat-detection center. The feel state you select also adjusts how the system interprets everything you type." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
                 {hasMorningData && (
                   <button
                     title="Pre-filled from your morning check-in. Tap to adjust."
-                    onClick={() => alert("This was pulled from your morning check-in. Tap any chip to update.")}
+                    onClick={() => setInfoModal({ title: "Morning check-in", body: "Your physiological baseline changes every day. Sleep debt, physical tension, and energy level directly alter how you perceive situations before any external stressor arrives. This check sets the context the AI uses in every session that follows." })}
                     style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
                   >
                     ⓘ
@@ -8690,7 +8696,7 @@ function MyProgress({ onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
                   <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Avg state shift</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Avg state shift</span> <button onClick={() => setInfoModal({ title: "Avg Shift", body: "The average difference between your pre-session and post-session feel state. A positive number means regulation is working. The trend over time matters more than any single session." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                 </div>}
                 {streak > 0 && <div style={cardStyle}>
                   <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
@@ -8714,7 +8720,7 @@ function MyProgress({ onBack }) {
                   <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>
                     {regulationType === "thought-first" ? "Thought-first" : regulationType === "body-first" ? "Body-first" : "Balanced"}
                   </div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Processing type</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Processing type</span> <button onClick={() => setInfoModal({ title: "Processing Type", body: "Your calibration tendency — body-first or thought-first. This is your default entry point, not a fixed identity. Your current state modulates routing each session through the bio-filter and feel state you log." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                 </div>}
                 {groundingHistory.length >= 3 && (() => {
                   const skipped = groundingHistory.filter(g => g.skipped).length;
@@ -8756,7 +8762,7 @@ function MyProgress({ onBack }) {
                     <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{switchAgility30d === null ? "N/A" : `${switchAgility30d}%`}</div>
                   </div>
                   <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Debrief capture (30d)</div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}><span>Debrief capture (30d)</span> <button onClick={() => setInfoModal({ title: "Lock-in Rate", body: "How consistently you complete the post-session lock-in. Reflection-on-action — naming the processing move that produced your decision — consolidates the regulated insight and makes it repeatable. Schön (1983)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                     <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
                   </div>
                 </div>
@@ -9045,7 +9051,7 @@ function MyProgress({ onBack }) {
         <div style={{ marginTop: 24, paddingTop: 24, borderTop: "0.5px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}>Pulse</div>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}><span>Pulse</span> <button onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
               {journalEntries.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
           </div>
@@ -12506,7 +12512,9 @@ const isSignalProfileConfigured = () => {
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite" }}>
 
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  {isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}
+                  <span>{isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}</span>
+                  {isBodyFirst && <button onClick={() => setInfoModal({ title: "Why body first?", body: "Your calibration identified a body-first tendency. When activation hits, physical signals arrive before cognition can intervene. Settling the nervous system first creates the conditions for clear thinking — not the other way around." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
+                  {isThoughtFirst && <button onClick={() => setInfoModal({ title: "Why thought first?", body: "Your calibration identified a thought-first tendency. When activation hits, the cognitive loop fires first. Processing the thinking directly is what releases the physical tension — your body follows your mind." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
                 </div>
 
                 {showObserveEntry ? (
@@ -12912,15 +12920,15 @@ const isSignalProfileConfigured = () => {
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{sessionCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Sessions</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Sessions</span> <button onClick={() => setInfoModal({ title: "Sessions", body: "Total completed sessions. Each session is one rep of autonomic flexibility training — repeated practice increases the nervous system\\'s ability to shift between activation and recovery. Frequency is the leading indicator of composure development." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{streakCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Day streak</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Day streak</span> <button onClick={() => setInfoModal({ title: "Day Streak", body: "Consecutive days with at least one session. Stress inoculation research shows that practicing regulation when calm builds the capacity that deploys automatically under pressure. Consistency compounds." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
                           <div style={{ gridColumn: "1 / -1", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "var(--amber)", lineHeight: 1.2 }}>{mostUsedLabel}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}>Most used</div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Most used</span> <button onClick={() => setInfoModal({ title: "Most Used", body: "The tool your system defaults to most. Over time this should align with your calibration tendency. A persistent mismatch may indicate your default routing has shifted and recalibration is worth considering." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
 
                         </div>
@@ -13296,6 +13304,7 @@ const isSignalProfileConfigured = () => {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Composure Check</button>
+                <button onClick={() => setInfoModal({ title: "What is Composure Check?", body: "Thirty rapid-response trials measuring reaction time, impulse control, and response inhibition. Not a mood check — a read of your current regulatory capacity. Use it before high-stakes interactions or decisions." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
               </div>
 
             </section>
