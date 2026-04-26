@@ -8695,7 +8695,6 @@ function MyProgress({ onBack }) {
                 </div>}
                 {topToolEntry && <div style={cardStyle}>
                   <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>{toolNames[topToolEntry[0]] || topToolEntry[0]}</div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}>Most used</div>
                 </div>}
                 {(() => {
                   const durations = sessions.map(s => s.duration).filter(d => 0 < d);
