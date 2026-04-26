@@ -2962,7 +2962,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
         State read.
       </h2>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-        Bio-filter · What is your hardware running right now?
+        <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
         Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.
@@ -12509,7 +12509,8 @@ const isSignalProfileConfigured = () => {
 
 
               {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
-              <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite" }}>
+              <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
+                  <div style={{ position: "absolute", top: 0, right: 0 }}><button onClick={() => setInfoModal({ title: "Why 60 BPM?", body: "A 1Hz ambient rhythm matching a calm resting heart rate. The nervous system entrains to rhythmic environmental stimuli without conscious effort. Regulation begins before you open a single tool." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button></div>
 
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   <span>{isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}</span>
