@@ -13289,7 +13289,6 @@ const isSignalProfileConfigured = () => {
             })()}
 
               {/* Roadmap link intentionally hidden from home surface */}
-              {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
