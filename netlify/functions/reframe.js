@@ -345,6 +345,7 @@ function pickScienceRoute({ mode, input, feelState = null, checkinContext = null
   const lower = String(input || "").toLowerCase();
   const socialPattern = /(partner|boss|friend|coworker|manager|team|message|text|email|conversation|argu|fight|dismiss|ignored|judg)/.test(lower);
   const bodyPattern = /(chest|heart|breath|jaw|tension|stomach|body|shak|panic|pulse|tight|overwhelm|freeze)/.test(lower) || ["anxious", "angry", "mixed"].includes(feelState);
+  const stuckPattern = feelState === "stuck";
   const loopPattern = /(can't stop|cant stop|loop|replay|over and over|won't stop|wont stop|stuck in my head|spiral)/.test(lower);
   const catastrophePattern = /(ruined|disaster|always|never|everything is over|worst case|fucked|fail)/.test(lower);
   const performancePattern = /(interview|presentation|speech|meeting|stage|pitch|performance|walk into|show up|prepare|prep)/.test(lower);
