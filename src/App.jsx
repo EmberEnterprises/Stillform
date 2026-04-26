@@ -7656,7 +7656,7 @@ function FocusCheckValidation({
   return (
     <section style={containerStyle}>
       {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
-      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Composure Check Quick Check</h1>}
+      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Composure Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
         <br />
@@ -8527,7 +8527,7 @@ function MyProgress({ onBack }) {
                   {focusCheckSummary && (
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                        Composure Check Quick Check
+                        Composure Check
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                         <div>
@@ -11360,7 +11360,7 @@ const isSignalProfileConfigured = () => {
             },
             {
               kicker: "Tutorial · 2 of 4",
-              title: "Composure Check Quick Check — Time to First Value",
+              title: "Composure Check — Time to First Value",
               focusCheckTTFV: true,
               paragraphs: [
                 "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
