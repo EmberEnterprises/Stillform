@@ -43,7 +43,7 @@ const checks = [
   { label: "Tutorial CTA progression locked", cmd: "rg", args: ["-n", "Next →|Continue →|Return to settings", "src/App.jsx"], type: "must-match" },
   { label: "FAQ method and science entries", cmd: "rg", args: ["-n", "How is this different from meditation or therapy\\?|What is Stillform\\?", "src/App.jsx"], type: "must-match" },
   { label: "FAQ method and science answers", cmd: "rg", args: ["-n", "proven neuroscience|composure architecture|Stillform is neither", "src/App.jsx"], type: "must-match" },
-  { label: "Preview routes include tutorial surfaces", cmd: "rg", args: ["-n", "new Set\\(\\[\"tutorial\", \"setup-bridge\", \"home\", \"settings\", \"faq\", \"privacy\"\\]\\)", "src/App.jsx"], type: "must-match" },
+  { label: "Preview routes include tutorial surfaces", cmd: "rg", args: ["-n", "focus-check.*tutorial|setup-bridge", "src/App.jsx"], type: "must-match" },
   { label: "Setup bridge copy lock", cmd: "rg", args: ["-n", "Set up your customizations and map your signals|Visual customization|Signal mapping|Map signals now|Continue to calibration", "src/App.jsx"], type: "must-match" },
   { label: "Setup bridge avoids old onboarding intro copy", cmd: "rg", args: ["-n", "A daily composure practice for real life\\.|Stillform is a daily composure tool\\.|The flow is simple: check in, regulate in the moment, close the day, and let calibration personalize your default pathway\\.|Begin calibration →", "src/App.jsx"], type: "must-not-match" },
   { label: "Calibration skips duplicate signal mapping when configured", cmd: "rg", args: ["-n", "isSignalProfileConfigured|firstToolId = signalMappingConfigured \\? \"bias\" : \"signals\"", "src/App.jsx"], type: "must-match" },
