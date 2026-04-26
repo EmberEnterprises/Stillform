@@ -1186,7 +1186,8 @@ exports.handler = async function(event) {
         anxious: "USER'S SELF-REPORTED STATE: Anxious. Threat response active. Acknowledge first. Regulate tone and interpretation of ambiguous signals. Separate what is real from what the brain is adding.",
         angry: "USER'S SELF-REPORTED STATE: Angry. Do not minimize or redirect too fast. Acknowledge the anger fully first. Then help them separate the feeling from any action they might be considering. Slow the decision-making.",
         flat: "USER'S SELF-REPORTED STATE: Flat. Low energy, low motivation, disconnected. Don't push. Don't cheerload. Don't say 'it's okay to feel off' — that's empty. Match their low energy with directness. Name what flat usually means for people: the system is tired, not broken. Help them find one concrete thing — not 'something to ground you' but an actual specific action. If they're casual ('yo idk'), be casual back.",
-        mixed: "USER'S SELF-REPORTED STATE: Mixed — multiple emotional states active simultaneously. Don't try to resolve it. Acknowledge the complexity. Help them identify which feeling is loudest right now."
+        mixed: "USER'S SELF-REPORTED STATE: Mixed — multiple emotional states active simultaneously. Don't try to resolve it. Acknowledge the complexity. Help them identify which feeling is loudest right now.",
+        stuck: "USER'S SELF-REPORTED STATE: Stuck. This is a cognitive state — unclear thinking, not physical activation. The person knows something isn't resolved but can't see it clearly yet. Do NOT suggest breathing or body work. Do NOT ask how their body feels. Open by naming that something hasn't clicked yet and ask what the core of it is. Keep it simple. One question. Let them bring the specifics."
       };
       if (feelMap[feelState]) contextParts.push(feelMap[feelState]);
     }
