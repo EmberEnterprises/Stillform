@@ -2335,3 +2335,49 @@ One statement per combination. User reads it, recognizes it, confirms. Written i
 **Let it go**
 - Body-first: "The physical activation dissolved, and with it, the need to respond."
 - Thought-first: "A clear assessment determined that no response was the right response."
+
+---
+
+## Current State — April 26, 2026
+
+**Live and working:**
+- stillformapp.com — HTTP 200, deployed on main
+- Lemon Squeezy paywall — LIVE (Bobby confirmed)
+- Supabase cloud sync — AES-256 encrypted, three-table schema
+- Calendar → AI integration — live on Android native app
+- FAQ — fully rewritten (27 questions, Stillform voice)
+- ⓘ info buttons — added to all tool headers
+- Show/hide password — login screen
+- Stillform → home link — all screens except home
+- What Shifted (formerly State to Statement) — renamed, science updated
+- Self Mode tab — inside Reframe, routes to post-session flow
+- Post-session merged screen — chips + What Shifted + Next Move
+- Skip and finish — copy fixed, theme color
+- Most used tile — removed from My Progress home card
+- Static home tip card — removed
+- Security gate — passing
+
+**Lock-in statements — APPROVED (build when ready):**
+- Send message body-first: "The physical state cleared first, which made the response possible."
+- Send message thought-first: "The cognitive pattern was identified and separated from the facts before responding."
+- Hold boundary body-first: "The body signaled the limit before the mind could articulate it."
+- Hold boundary thought-first: "The boundary was defined through clear thinking, not reaction."
+- Delay response body-first: "The activation was recognized before it could produce a premature response."
+- Delay response thought-first: "The missing information was identified before committing to a position."
+- Let it go body-first: "The physical activation dissolved, and with it, the need to respond."
+- Let it go thought-first: "A clear assessment determined that no response was the right response."
+
+**Prelaunch fixes remaining:**
+1. Pre-meeting notification (calendar → local notification → opens Reframe)
+2. GO / NO-GO — needs ⓘ button or name clarification
+3. Onboarding redesign (2 intro pages max → calibration → interactive first-use walkthrough)
+4. Remove "balanced" regulation type — audit required before touching code
+5. Info buttons across all tools — done ✓ (remove static tips — done ✓)
+
+**Next builds (in order):**
+1. Screen 2 — Next Move + lock-in (content approved, ready to build)
+2. Balanced regulation type removal (audit first)
+3. Refocus tool placement (revisit during home rebuild)
+4. Watch haptic breathing companion (Galaxy Watch Ultra)
+5. TestFlight build
+6. Google Play closed testing (14-day clock)
