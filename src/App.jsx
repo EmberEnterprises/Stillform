@@ -1142,7 +1142,7 @@ const TOOLS = [
   {
     id: "metacognition",
     icon: "✦",
-    name: "Observe and Choose",
+    name: "Self Mode",
     desc: "Step out of the state, see what your system is doing clearly, and choose your next move deliberately.",
     time: "5 min"
   },
@@ -4659,7 +4659,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }
   })();
   const aiToneLabel = ({
-    balanced: "Balanced",
+
     gentle: "Gentle",
     direct: "Direct",
     clinical: "Clinical",
@@ -5957,7 +5957,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Want to go deeper?
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
-              You came in at a high intensity. Observe and Choose helps you see the pattern under the moment — not just regulate it.
+              You came in at a high intensity. Self Mode helps you see the pattern under the moment — not just regulate it.
             </div>
             <button onClick={() => {
               try { saveSession(postRating); } catch {}
@@ -5968,7 +5968,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               color: "var(--amber)", fontSize: 12, cursor: "pointer", padding: "8px 14px",
               fontFamily: "'DM Sans', sans-serif"
             }}>
-              Open Observe and Choose →
+              Open Self Mode →
             </button>
           </div>
         )}
@@ -6637,7 +6637,7 @@ function ObserveEntryLite({ onClose, onRoute }) {
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[
           { id: "body", label: "My body is loud", sub: "Tension, chest, gut, jaw — something physical" },
-          { id: "thought", label: "My mind is looping", sub: "Replaying, anticipating, spiraling" },
+          { id: "thought", label: "My mind is looping", sub: "Replaying, anticipating, cycling" },
           { id: "both", label: "Both", sub: "Hard to separate right now" },
           { id: "unsure", label: "I just feel off", sub: "Something's there, can't place it" },
         ].map(opt => (
@@ -7869,7 +7869,7 @@ function MyProgress({ onBack }) {
   const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
   const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
 
-  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Observe and Choose" };
+  const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Self Mode" };
   const toolCounts = {};
   sessions.forEach(s => (s.tools || []).forEach(t => { toolCounts[t] = (toolCounts[t] || 0) + 1; }));
   const topToolEntry = Object.entries(toolCounts).sort((a, b) => b[1] - a[1])[0] || null;
@@ -8966,7 +8966,7 @@ function MyProgress({ onBack }) {
           // Recommendation — one thing based on data, factual only
           let recommendation = null;
           if (underusedHighPerformer) {
-            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Observe and Choose" };
+            const toolLabels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Self Mode" };
             recommendation = `${toolLabels[underusedHighPerformer.id] || underusedHighPerformer.id} shows your strongest avg shift (+${underusedHighPerformer.avgShift.toFixed(1)}) but accounts for ${underusedHighPerformer.pct}% of sessions.`;
           } else if (shiftTrend !== null && shiftTrend > 0.3) {
             recommendation = `Avg composure shift increased by +${shiftTrend.toFixed(1)} compared to last week.`;
@@ -9021,7 +9021,7 @@ function MyProgress({ onBack }) {
                     <div>
                       <div style={sectionLabel}>Tool Effectiveness</div>
                       {toolList.slice(0, 3).map(t => {
-                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Observe and Choose", signals: "Map Signals", bias: "Pattern Check" };
+                        const labels = { scan: "Body Scan", breathe: "Breathe", reframe: "Reframe", metacognition: "Self Mode", signals: "Map Signals", bias: "Pattern Check" };
                         const shift = t.avgShift ?? 0;
                         const shiftPct = Math.max(0, Math.min(100, ((shift + 1.5) / 3.5) * 100));
                         return (
@@ -11471,7 +11471,7 @@ const isSignalProfileConfigured = () => {
               kicker: "Tutorial · 3 of 4",
               title: "One Practice. Three Moments.",
               paragraphs: [
-                "Morning Check-in in the morning — before the day sets it for you. Observe and Choose through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
+                "Morning Check-in in the morning — before the day sets it for you. Use Self Mode through the day — catch the state before it drives the action. Close the loop in the evening — consolidate what you learned about your system.",
                 "Breathe, Body Scan, and Reframe are supports. The system routes you to the right one. You don't have to choose."
               ]
             },
@@ -11480,7 +11480,7 @@ const isSignalProfileConfigured = () => {
               title: "The Skill Builds Over Time",
               paragraphs: [
                 "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
-                "Every day after: Morning Check-in → Observe and Choose → Close the loop. The less you need the app, the more it's working."
+                "Every day after: Morning Check-in → Self Mode → Close the loop. The less you need the app, the more it's working."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -12878,7 +12878,7 @@ const isSignalProfileConfigured = () => {
                   breathe: "Breathe",
                   ground: "Breathe",
                   reframe: "Reframe",
-                  metacognition: "Observe and Choose",
+                  metacognition: "Self Mode",
                   "body-scan": "Body Scan",
                   scan: "Body Scan",
                   panic: "Panic",
@@ -13980,7 +13980,7 @@ const isSignalProfileConfigured = () => {
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
                   {[
-                    { id: "balanced", label: "Balanced (default)" }, { id: "gentle", label: "Gentle" },
+                    { id: "gentle", label: "Gentle" },
                     { id: "direct", label: "Direct & blunt" }, { id: "clinical", label: "Clinical / technical" },
                     { id: "motivational", label: "Motivational" }
                   ].map(t => {
