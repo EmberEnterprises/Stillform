@@ -7231,7 +7231,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
           )}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
