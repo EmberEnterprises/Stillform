@@ -11973,8 +11973,7 @@ const isSignalProfileConfigured = () => {
 
           const typeLabels = {
             "thought-first": { name: "Thought-first", desc: "You tend to process through your mind first. Reframe will be your primary tool." },
-            "body-first": { name: "Body-first", desc: "You tend to feel it in the body first. Breathe will be your primary tool." },
-            "balanced": { name: "Balanced", desc: "You process through both equally. We'll start with both available and learn which you reach for." }
+            "body-first": { name: "Body-first", desc: "You tend to feel it in the body first. Breathe will be your primary tool." }
           };
 
           return (
