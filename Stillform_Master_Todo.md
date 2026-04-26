@@ -358,3 +358,23 @@
 - Name of the tile: "Advanced" or something more in Stillform voice?
 
 **Let placement come naturally from the flow — do not force it.**
+
+---
+
+## Completed — April 26, 2026
+
+- [x] Lemon Squeezy LIVE — paywall active
+- [x] Show/hide password at login
+- [x] Stillform → home link (all screens except home)
+- [x] Skip button — copy fixed ("Skip and finish") + theme color
+- [x] Static home tip card removed
+- [x] ⓘ info buttons added to all tool headers
+- [x] Most used tile removed from My Progress home card
+- [x] FAQ rewritten — 27 questions, Stillform voice, science woven in
+- [x] What Shifted — renamed from State to Statement, science sheet updated
+- [x] Self Mode tab inside Reframe
+- [x] Post-session merged screen (chips + What Shifted + Next Move)
+- [x] Lock-in statements written and approved (8 statements, ready to build)
+- [x] Calendar → AI integration working on native Android
+- [x] Security gate — passing
+- [x] Supabase cloud sync deployed
