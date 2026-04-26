@@ -1325,6 +1325,10 @@ const scheduleReminder = async (title, body, hour, minute) => {
   } catch {}
 };
 
+const PRE_MEETING_NOTIF_KEY = "stillform_pre_meeting_notif";
+const PRE_MEETING_NOTIF_FIRST_KEY = "stillform_pre_meeting_first_mins";
+const PRE_MEETING_NOTIF_SECOND_KEY = "stillform_pre_meeting_second_mins";
+
 const INTEGRATION_STORAGE_KEYS = {
   calendar: {
     consent: "stillform_calendar_consent",
@@ -2114,6 +2118,54 @@ const EMPTY_INTEGRATION_CONTEXT = Object.freeze({
   calendarFreshness: null,
   healthFreshness: null
 });
+
+// Pre-meeting notification scheduler
+const scheduleMeetingNotifications = async () => {
+  try {
+    if (!isNative()) return;
+    const enabled = localStorage.getItem(PRE_MEETING_NOTIF_KEY) !== "off";
+    if (!enabled) return;
+    const firstMins = parseInt(localStorage.getItem(PRE_MEETING_NOTIF_FIRST_KEY) || "30", 10);
+    const secondMins = parseInt(localStorage.getItem(PRE_MEETING_NOTIF_SECOND_KEY) || "15", 10);
+    const events = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
+    if (!Array.isArray(events) || events.length === 0) return;
+    const { LocalNotifications } = await import("@capacitor/local-notifications");
+    const perm = await LocalNotifications.requestPermissions();
+    if (perm.display !== "granted") return;
+    // Cancel existing pre-meeting notifications
+    await LocalNotifications.cancel({ notifications: [{ id: 8800 }, { id: 8801 }, { id: 8802 }, { id: 8803 }] }).catch(() => {});
+    const now = new Date();
+    let notifId = 8800;
+    for (const event of events.slice(0, 4)) {
+      if (!event.start) continue;
+      const eventTime = new Date(event.start);
+      if (isNaN(eventTime.getTime()) || eventTime <= now) continue;
+      const title = event.title || "Upcoming event";
+      // First notification
+      const firstAt = new Date(eventTime.getTime() - firstMins * 60 * 1000);
+      if (firstAt > now) {
+        await LocalNotifications.schedule({ notifications: [{
+          id: notifId++,
+          title: "Prepare with Stillform",
+          body: `${title} in ${firstMins} minutes. Open Reframe to prepare.`,
+          schedule: { at: firstAt },
+          extra: { screen: "reframe", eventTitle: title }
+        }]});
+      }
+      // Second notification
+      const secondAt = new Date(eventTime.getTime() - secondMins * 60 * 1000);
+      if (secondAt > now && secondAt > firstAt) {
+        await LocalNotifications.schedule({ notifications: [{
+          id: notifId++,
+          title: "Prepare with Stillform",
+          body: `${title} in ${secondMins} minutes. Still time to prepare.`,
+          schedule: { at: secondAt },
+          extra: { screen: "reframe", eventTitle: title }
+        }]});
+      }
+    }
+  } catch {}
+};
 
 // Integration context adapter
 // Single source of truth for calendar/health context across the app.
@@ -10388,6 +10440,8 @@ export default function Stillform() {
         localStorage.removeItem("stillform_calendar_summary");
       }
       localStorage.setItem("stillform_calendar_events", JSON.stringify(events));
+      // Schedule pre-meeting notifications when calendar data updates
+      scheduleMeetingNotifications().catch(() => {});
       localStorage.setItem("stillform_calendar_updated_at", String(payload?.updatedAt || new Date().toISOString()));
       return;
     }
@@ -14312,6 +14366,49 @@ const isSignalProfileConfigured = () => {
                     );
                   })()}
                 </div>
+
+                  {/* Pre-meeting notification */}
+                  {(() => {
+                    const enabled = localStorage.getItem(PRE_MEETING_NOTIF_KEY) !== "off";
+                    const firstMins = localStorage.getItem(PRE_MEETING_NOTIF_FIRST_KEY) || "30";
+                    const secondMins = localStorage.getItem(PRE_MEETING_NOTIF_SECOND_KEY) || "15";
+                    const hasCalendar = (() => { try { return JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]").length > 0; } catch { return false; } })();
+                    if (!hasCalendar) return null;
+                    return (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden", marginTop: 8 }}>
+                        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div>
+                            <div style={{ fontSize: 14, color: "var(--text)" }}>Pre-meeting preparation</div>
+                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                              {enabled ? `${firstMins} min + ${secondMins} min before` : "Off"}
+                            </div>
+                          </div>
+                          <button onClick={() => { try { const current = localStorage.getItem(PRE_MEETING_NOTIF_KEY) !== "off"; localStorage.setItem(PRE_MEETING_NOTIF_KEY, current ? "off" : "on"); if (!current) scheduleMeetingNotifications(); refreshSettings(); } catch {} }} style={{
+                            background: enabled ? "var(--amber)" : "var(--border)",
+                            border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0
+                          }}>
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: enabled ? 23 : 3, transition: "left 0.2s" }} />
+                          </button>
+                        </div>
+                        {enabled && (
+                          <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", flexDirection: "column", gap: 10 }}>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>First reminder</div>
+                              <select value={firstMins} onChange={e => { try { localStorage.setItem(PRE_MEETING_NOTIF_FIRST_KEY, e.target.value); scheduleMeetingNotifications(); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
+                                {[10, 15, 20, 30, 45, 60].map(m => <option key={m} value={String(m)}>{m} minutes before</option>)}
+                              </select>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Second reminder</div>
+                              <select value={secondMins} onChange={e => { try { localStorage.setItem(PRE_MEETING_NOTIF_SECOND_KEY, e.target.value); scheduleMeetingNotifications(); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
+                                {[5, 10, 15, 20].map(m => <option key={m} value={String(m)}>{m} minutes before</option>)}
+                              </select>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()}
                     </div>
                   )}
                 </div>
