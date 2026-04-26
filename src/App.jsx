@@ -5849,8 +5849,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             const statement = (LOCK_IN_STATEMENTS[postNextMoveId] || {})[regType] || (LOCK_IN_STATEMENTS[postNextMoveId] || {})["thought-first"] || "";
             return (
               <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                   Lock in
+                  <button onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
                 <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 16, fontStyle: "italic" }}>
                   {statement}
