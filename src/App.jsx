@@ -4595,6 +4595,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const autoMode = (() => {
     if (activeMode) return activeMode; // manual override still works if set programmatically
     if (feelState === "excited" || feelState === "focused") return "hype";
+    if (feelState === "stuck") return "clarity"; // cognitive fog → talk it out
     return "calm"; // default — clarity mode is triggered per-message by input content
   })();
   const aiToneChoice = (() => {
@@ -5753,7 +5754,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       { id: "anxious", label: "Anxious" },
       { id: "angry", label: "Angry" },
       { id: "flat", label: "Flat" },
-      { id: "mixed", label: "Mixed" }
+      { id: "mixed", label: "Mixed" },
+      { id: "stuck", label: "Stuck" }
     ];
     // Load insight once when screen appears
     const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
@@ -6018,7 +6020,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                     { id: "anxious", label: "Anxious" },
                     { id: "angry", label: "Angry" },
                     { id: "flat", label: "Flat" },
-                    { id: "mixed", label: "Mixed" }
+                    { id: "mixed", label: "Mixed" },
+                    { id: "stuck", label: "Stuck" }
                   ].map(f => (
                     <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
                       background: feelState === f.id ? "var(--amber-glow)" : "transparent",
@@ -12525,8 +12528,9 @@ const isSignalProfileConfigured = () => {
                         // Thought-first → straight to Reframe
                         setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                       } else if (isBodyFirst) {
-                        // Body-first → Breathe, or Body Scan if off-baseline
-                        if (offBaseline) startTool(TOOLS.find(t => t.id === "scan"));
+                        // Body-first → Breathe, or Body Scan if off-baseline, or Reframe if stuck
+                        if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                        else if (offBaseline) startTool(TOOLS.find(t => t.id === "scan"));
                         else startPathway("calm");
                       } else {
                         // Balanced / unclear → one orienting question
