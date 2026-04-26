@@ -7656,7 +7656,7 @@ function FocusCheckValidation({
   return (
     <section style={containerStyle}>
       {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
-      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Go / No-Go Quick Check</h1>}
+      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Composure Check Quick Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
         <br />
@@ -8527,7 +8527,7 @@ function MyProgress({ onBack }) {
                   {focusCheckSummary && (
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
                       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                        Go / No-Go Quick Check
+                        Composure Check Quick Check
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
                         <div>
@@ -11360,7 +11360,7 @@ const isSignalProfileConfigured = () => {
             },
             {
               kicker: "Tutorial · 2 of 4",
-              title: "Go / No-Go Quick Check — Time to First Value",
+              title: "Composure Check Quick Check — Time to First Value",
               focusCheckTTFV: true,
               paragraphs: [
                 "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
@@ -13295,7 +13295,7 @@ const isSignalProfileConfigured = () => {
               {/* Roadmap link intentionally hidden from home surface */}
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
+                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Composure Check</button>
               </div>
 
             </section>
@@ -13654,8 +13654,8 @@ const isSignalProfileConfigured = () => {
                 a: "The system notices. Fast input is a behavioral signal — the body is ahead of the thinking. Physical tension during emotional processing amplifies the response. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It clears within seconds. The system reads behavior, not only content."
               },
               {
-                q: "What is GO / NO-GO?",
-                a: "A voluntary composure check. A structured read of your current state — whether you are operating from a regulated baseline or whether something is narrowing your window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where an accurate read of your current capacity matters."
+                q: "What is Composure Check?",
+                a: "A voluntary assessment of your regulatory state. Thirty rapid-response trials that measure reaction time, impulse control, and response inhibition — whether you are operating from a regulated baseline or whether something is narrowing your window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where an accurate read of your current capacity matters."
               },
               {
                 q: "What is the 60 BPM pulse on the home screen?",
