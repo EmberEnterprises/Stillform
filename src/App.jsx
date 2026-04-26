@@ -13595,7 +13595,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is calibration?",
-                a: "A five-scenario assessment that determines your regulation type — body-first or thought-first. For some, the nervous system has to settle before the thinking can clear. For others, working through the cognition releases the physical tension. Applying the wrong approach under activation produces resistance, not regulation. Calibration pre-selects your pathway before you need it. Recalibrate anytime in Settings."
+                a: "A five-scenario assessment that identifies your default regulation tendency — body-first or thought-first. Research shows people have genuine biases toward certain strategies, but these are probabilistic and state-dependent, not fixed. On a given day, physical activation may require a body-first entry even for someone who typically processes cognitively first. Calibration pre-loads your most likely starting point. The bio-filter and feel state you log each session adjust routing when your current state calls for something different. Recalibrate anytime in Settings."
               },
               {
                 q: "What is the morning check-in?",
