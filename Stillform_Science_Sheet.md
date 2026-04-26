@@ -495,3 +495,33 @@ Single skips are noise. Consistent skips are signal. Surfacing skip patterns bef
 - Hayes et al. (1996) — experiential avoidance as a transdiagnostic process — *Psychological Review*
 - Wells (2009) — avoidance maintains metacognitive beliefs — *Metacognitive Therapy*
 - Gollwitzer & Sheeran (2006) — intention-action gap — *Advances in Experimental Social Psychology*
+
+---
+
+## Regulation Tendency vs. Fixed Type — April 26, 2026
+
+**The correction:** Calibration identifies a default regulation tendency, not a fixed processing type. This distinction matters scientifically and for product integrity.
+
+**What the research supports:**
+- Individuals show genuine biases toward certain regulation strategies — somatic grounding vs. cognitive reappraisal (Gross, 2015)
+- These tendencies are probabilistic, context-dependent, and modifiable — not binary or stable across all states
+- Regulation effectiveness is state-dependent: cognitive strategies work better at moderate arousal; physiological strategies work better at high arousal (Ochsner & Gross, 2005)
+- The same person may need body-first when overwhelmed and thought-first when calm but stuck in rumination
+- Interoceptive awareness varies between individuals but is trainable — not a fixed trait (Mehling et al., 2012)
+- MCT (Wells) centers on flexibility of relationship to thought, not classification of people into processing types
+
+**How Stillform handles this correctly:**
+- Calibration identifies the most likely default entry point — not a permanent identity
+- The bio-filter detects when current physical state overrides the default tendency
+- Feel state chips and morning check-in feed state-based routing adjustments each session
+- The user can recalibrate anytime in Settings
+- The UX label ("body-first / thought-first") is preserved for clarity — internally treated as weighted tendency, state-modulated
+
+**The product description framing (corrected):**
+"Calibration identifies your default regulation tendency — the entry point most likely to work for you when nothing else is signaling otherwise. On any given day, your current state may call for a different pathway. The system reads that and adjusts."
+
+**References:**
+- Gross, J.J. (2015) — Emotion regulation: Current status and future prospects — *Psychological Inquiry*
+- Ochsner, K.N. & Gross, J.J. (2005) — The cognitive control of emotion — *Trends in Cognitive Sciences*
+- Mehling et al. (2012) — Body Awareness: Construct and Self-Report Measures — *PLOS ONE*
+- Wells, A. (2009) — Metacognitive Therapy — flexibility over classification
