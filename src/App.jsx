@@ -1378,12 +1378,30 @@ const COMMUNICATION_MEANINGFUL_WORDS_MIN = 6;
 const COMMUNICATION_MEANINGFUL_CHARS_MIN = 40;
 const NEXT_MOVE_FOLLOW_UP_DELAY_MS = 1000 * 60 * 60 * 2;
 const NEXT_MOVE_ACTION_OPTIONS = [
-  { id: "send-message", label: "Send message" },
-  { id: "ask-clarifying-question", label: "Ask clarifying question" },
-  { id: "hold-boundary", label: "Hold boundary" },
-  { id: "delay-response", label: "Delay response" },
-  { id: "custom", label: "Custom action" }
+  { id: "send-message", label: "Send a message" },
+  { id: "hold-boundary", label: "Hold a boundary" },
+  { id: "delay-response", label: "Delay your response" },
+  { id: "let-it-go", label: "Let it go" }
 ];
+const LOCK_IN_STATEMENTS = {
+  "send-message": {
+    "body-first": "The physical state cleared first, which made the response possible.",
+    "thought-first": "The cognitive pattern was identified and separated from the facts before responding."
+  },
+  "hold-boundary": {
+    "body-first": "The body signaled the limit before the mind could articulate it.",
+    "thought-first": "The boundary was defined through clear thinking, not reaction."
+  },
+  "delay-response": {
+    "body-first": "The activation was recognized before it could produce a premature response.",
+    "thought-first": "The missing information was identified before committing to a position."
+  },
+  "let-it-go": {
+    "body-first": "The physical activation dissolved, and with it, the need to respond.",
+    "thought-first": "A clear assessment determined that no response was the right response."
+  }
+};
+
 const NEXT_MOVE_ACTION_LABELS = NEXT_MOVE_ACTION_OPTIONS.reduce((acc, item) => {
   acc[item.id] = item.label;
   return acc;
@@ -4558,6 +4576,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   });
   const [showPostRating, setShowPostRating] = useState(false);
   const [postNextMoveId, setPostNextMoveId] = useState(null);
+  const [showLockIn, setShowLockIn] = useState(false);
+  const [lockInConfirmed, setLockInConfirmed] = useState(false);
+  const [lockInCountdown, setLockInCountdown] = useState(20);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   const [postRating, setPostRating] = useState(null);
@@ -5796,23 +5817,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
         )}
 
-        {/* NEXT MOVE — inline pill selector */}
+        {/* NEXT MOVE — 4 buttons + lock-in */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
             Next Move
             <button onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
-          <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
-            One concrete action before you leave.
-          </div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {NEXT_MOVE_ACTION_OPTIONS.filter(o => o.id !== "custom").map(opt => {
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: postNextMoveId && !lockInConfirmed ? 16 : 0 }}>
+            {NEXT_MOVE_ACTION_OPTIONS.map(opt => {
               const active = postNextMoveId === opt.id;
               return (
-                <button key={opt.id} onClick={() => setPostNextMoveId(active ? null : opt.id)} style={{
+                <button key={opt.id} onClick={() => {
+                  setPostNextMoveId(active ? null : opt.id);
+                  setShowLockIn(false);
+                  setLockInConfirmed(false);
+                  setLockInCountdown(20);
+                }} style={{
                   background: active ? "var(--amber-glow)" : "transparent",
                   border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: 20, padding: "6px 14px", fontSize: 12,
+                  borderRadius: 20, padding: "8px 16px", fontSize: 13,
                   color: active ? "var(--amber)" : "var(--text-muted)",
                   cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                 }}>
@@ -5821,6 +5844,45 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               );
             })}
           </div>
+          {postNextMoveId && !lockInConfirmed && (() => {
+            const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || "thought-first"; } catch { return "thought-first"; } })();
+            const statement = (LOCK_IN_STATEMENTS[postNextMoveId] || {})[regType] || (LOCK_IN_STATEMENTS[postNextMoveId] || {})["thought-first"] || "";
+            return (
+              <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
+                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                  Lock in
+                </div>
+                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 16, fontStyle: "italic" }}>
+                  {statement}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
+                    {(() => {
+                      if (!showLockIn) {
+                        setTimeout(() => setShowLockIn(true), 20000);
+                        return "Take a moment with this.";
+                      }
+                      return null;
+                    })()}
+                  </div>
+                  {showLockIn && (
+                    <button onClick={() => setLockInConfirmed(true)} style={{
+                      background: "var(--amber)", border: "none", borderRadius: "var(--r)",
+                      padding: "8px 20px", fontSize: 12, color: "var(--btn-primary-text, #0A0A0C)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500
+                    }}>
+                      Locked in
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+          {lockInConfirmed && (
+            <div style={{ marginTop: 8, fontSize: 12, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+              ✓ Locked in
+            </div>
+          )}
         </div>
 
         {/* WHAT SHIFTED — optional, expanded by default */}
