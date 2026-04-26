@@ -13398,7 +13398,7 @@ const isSignalProfileConfigured = () => {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Composure Check</button>
-                <button onClick={() => setInfoModal({ title: "What is Composure Check?", body: "Thirty rapid-response trials measuring reaction time, impulse control, and response inhibition. Not a mood check — a read of your current regulatory capacity. Use it before high-stakes interactions or decisions." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                <button onClick={() => setInfoModal({ title: "Composure Check", body: "A 30-trial cognitive test measuring reaction time, impulse control, and response inhibition. Tap it from the home screen before a high-stakes interaction or decision to get an accurate read of your current regulatory capacity." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
               </div>
 
             </section>
