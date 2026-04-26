@@ -7159,81 +7159,19 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
           <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>State-shift signals:</strong> {(signals.preSensations || []).join(", ")}
           </div>
-          
-      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
-        {focusCheckMode === "running" && currentFocusTrial && (
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
-              Trial {Math.min(focusCheckIndex + 1, focusCheckTrials.length)} / {focusCheckTrials.length}
-            </div>
-            <div style={{ fontSize: 32, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
-              {currentFocusTrial.label}
-            </div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
-              {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
-            </div>
-            <button
-              onClick={submitFocusResponse}
-              disabled={focusCheckResponded}
-              style={{
-                background: focusCheckResponded ? "var(--surface2)" : "var(--amber-glow)",
-                border: "0.5px solid var(--amber-dim)",
-                borderRadius: "var(--r-sm)",
-                padding: "10px 16px",
-                fontSize: 12,
-                color: focusCheckResponded ? "var(--text-muted)" : "var(--amber)",
-                cursor: focusCheckResponded ? "not-allowed" : "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}
-            >
-              {focusCheckResponded ? "Recorded" : "Respond"}
-            </button>
-            <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)" }}>Keyboard: Space or Enter</div>
-          </div>
-        )}
-        {focusCheckMode !== "running" && !autoStart && (
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-              {latestSummary ? "Latest run saved. Run again anytime." : "No run yet. Start when ready."}
-            </div>
-            <button
-              onClick={startFocusCheck}
-              style={{
-                background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
-                padding: "9px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
-              }}
-            >
-              Start 30s
-            </button>
-          </div>
-        )}
-      </div>
-      {latestSummary && (
-        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
-            <div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
-              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.accuracy ?? "N/A"}%</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
-              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.inhibition ?? "N/A"}%</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
-              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.avgReactionMs ? `${latestSummary.avgReactionMs}ms` : "N/A"}</div>
-            </div>
-          </div>
-          {previousSummary && (
-            <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)" }}>
-              Delta vs prior: accuracy {latestSummary.accuracy - (previousSummary.accuracy || 0) >= 0 ? "+" : ""}{latestSummary.accuracy - (previousSummary.accuracy || 0)} pts · inhibition {latestSummary.inhibition - (previousSummary.inhibition || 0) >= 0 ? "+" : ""}{latestSummary.inhibition - (previousSummary.inhibition || 0)} pts
-            </div>
-          )}
         </div>
-      )}
+        <button className="btn btn-primary" onClick={() => onComplete()}>Done</button>
+      </div>
+    ),
+  ];
+
+  return (
+    <div>
+      {steps[step]()}
     </div>
   );
 }
+
 
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
