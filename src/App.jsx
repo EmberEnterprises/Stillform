@@ -9197,6 +9197,7 @@ function QBPill({ onPress }) {
 
 export default function Stillform() {
   const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
+  const [infoModal, setInfoModal] = useState(null);
   const readFirstRunStage = () => {
     try {
       const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
@@ -11250,7 +11251,34 @@ const isSignalProfileConfigured = () => {
     <>
       <style>{styles}</style>
       <div className={appClasses}>
-        {/* SPLASH OVERLAY — fades out, never blocks hooks */}
+        {/* INFO MODAL */}
+      {infoModal && (
+        <div onClick={() => setInfoModal(null)} style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
+          display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 48px"
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: "var(--bg2, #111)", border: "0.5px solid var(--border)",
+            borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%"
+          }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+              {infoModal.title}
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif" }}>
+              {infoModal.body}
+            </div>
+            <button onClick={() => setInfoModal(null)} style={{
+              marginTop: 24, background: "none", border: "0.5px solid var(--border)",
+              borderRadius: "var(--r)", padding: "8px 24px", fontSize: 12,
+              color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+            }}>
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* SPLASH OVERLAY — fades out, never blocks hooks */}
         {(!splashDone || !screenReady || (biometric.isEnabled() && !biometricCleared)) && (
           <div style={{
             position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 9999,
@@ -13261,16 +13289,7 @@ const isSignalProfileConfigured = () => {
             })()}
 
               {/* Roadmap link intentionally hidden from home surface */}
-              {showHomeContextTip && (
-                <div style={{ marginBottom: 18, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 12px" }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
-                    Need a quick map? Morning check-in sets today’s context. Reframe or Breathe handles the moment. End of day closes the loop.
-                  </div>
-                  <button onClick={dismissHomeContextTip} style={{ marginTop: 8, background: "none", border: "none", color: "var(--amber)", fontSize: 11, cursor: "pointer", padding: 0, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-                    Dismiss tip
-                  </button>
-                </div>
-              )}
+              {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Go / No-Go</button>
@@ -13290,7 +13309,26 @@ const isSignalProfileConfigured = () => {
               <button className="intervention-back" onClick={handleActiveToolBack} style={{ marginBottom: 0 }}>
                 ← Back
               </button>
-              <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                {activeTool && (() => {
+                  const INFO = {
+                    breathe: { title: "Breathe", body: "Paced breathing activates the vagus nerve, directly down-regulating the autonomic nervous system. The exhale length determines recovery speed. Body-first users start here. Thought-first users use this when cognition alone isn't clearing the state." },
+                    scan: { title: "Body Scan", body: "Six acupressure points with timed holds. Focused somatic attention redirects cognitive resources to physical sensation — ruminative thought cannot run at full capacity simultaneously. Each point corresponds to a tension-release pathway." },
+                    reframe: { title: "Reframe", body: "AI-assisted cognitive processing. The system reads your physical state, feel state, and input — then identifies what is operationally relevant. It separates what is factually present from what your interpretation is adding. Self Mode runs the same process without AI." },
+                    pulse: { title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes. Each entry is a data point. Patterns surface in My Progress over time." },
+                    metacognition: { title: "Self Mode", body: "Structured self-observation without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. Grounded in Metacognitive Therapy." },
+                    progress: { title: "My Progress", body: "A 12-week practice record. Session frequency, streak, tool usage, and Signal Log entries. Patterns that stay invisible inside day-to-day experience become legible over time. A flight recorder, not a mood log." },
+                  };
+                  const info = INFO[activeTool.id];
+                  if (!info) return null;
+                  return (
+                    <button onClick={() => setInfoModal(info)} style={{
+                      background: "none", border: "none", color: "var(--text-muted)",
+                      cursor: "pointer", fontSize: 15, padding: "2px 4px", lineHeight: 1
+                    }}>ⓘ</button>
+                  );
+                })()}
+                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
                 {activeTool.id === "reframe" ? (
                   (() => {
                     const m = activeTool.mode || pathway || "calm";
