@@ -3,13 +3,54 @@
 
 ---
 
-## IN PROGRESS — Next Session
+## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
-- [ ] Bio-filter parity in `routeObserveEntry` (line 10491, 10494) — secondary entry point still routes thought signals + thought-first regType to Reframe without offBaseline check. Hero CTA fix landed; this mirror needs the same override.
-- [ ] Resolve Stuck chip routing for body-first users (what does Stuck mean for body-first?)
-- [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in reframe.js
+### Body-first metacognition access gap
+**The problem:** Body-first calibration currently routes the hero CTA into Breathe by default. Body work is the entry, Reframe is a follow-on. But Stillform is a composure practice, and composure requires both somatic regulation AND metacognition. A body-first user whose state is already regulated (no body tension, no off-baseline) and who needs to think something through has no direct path to Reframe — they're forced through Breathe first.
+
+The dead-code Stuck routing at line 12199 was the planned bridge (body-first + Stuck chip → Reframe clarity), but it's broken because:
+1. `feelState` is declared inside each tool, not at App level — the check at line 12199 always evaluates `undefined === "stuck"` → false
+2. Even if fixed, the Stuck chip currently only exists inside Reframe, so a user on home has no way to set it before tapping the hero CTA — chicken-and-egg
+
+**Three options to decide between:**
+- **(a)** Secondary CTA on body-first home: a small "Just need to think this through →" link below the main Breathe CTA, routes directly to Reframe calm
+- **(b)** Add chip row to home screen so users self-select state before tool entry. Stuck routes to Reframe, others route to default
+- **(c)** Make hero CTA conditional: if bio-filter is "clear" (body baseline) AND user taps an "I want to process" affordance, route to Reframe; otherwise Breathe
+
+This needs a design decision from Arlin. All three are defensible. Option (a) is the smallest surgical change. Option (b) is the most data-rich. Option (c) is the most automatic.
+
+---
+
+## ⚠️ TESTFLIGHT-BLOCKING — Audit Findings (April 27, 2026)
+
+- [ ] **AI conversation persistence — IndexedDB encrypted overflow** (`App.jsx:4984, 4997`). When `secureSet` to localStorage fails (quota or encryption error), conversation is silently lost. Fix: fall through to encrypted IndexedDB write using same AES-GCM device key. IndexedDB has ~50% disk quota (gigabytes) vs localStorage's 5–10MB. Encryption never compromised. Read path checks both. Plus proactive pruning when localStorage hits ~80% capacity (prune orphaned old data, never active conversations).
+- [ ] **Cloud sync batching** (`App.jsx:4404`). `sbSyncUp` currently sends ~34 sequential HTTP requests. On flaky cellular this means partial syncs with no retry. Fix: batch into single POST with array body — Supabase REST supports it via `?on_conflict=user_id,data_key` with array payload.
+- [ ] **Stuck dead-branch cleanup at hero CTA** (`App.jsx:12199`). Delete the `if (feelState === "stuck")` branch — `feelState` is out of scope at App level, the check never fires. **Important:** the chip itself stays untouched — its data flows into journal, My Progress, AI context, and routes correctly inside Reframe via autoMode (line 4711). Only the dead App-level check is removed. Resolution of the body-first metacognition path moves to the architectural decision above.
+- [ ] **Body-first override narrowing — actual science alignment** (`App.jsx` hero CTA). Currently body-first + ANY off-baseline triggers Body Scan suggestion. Per Ochsner & Gross 2005, body-first + Activated/Sleep/Depleted/Medicated should route directly to Breathe (their default IS the science answer — no override needed). Narrow to: body-first + Pain → Body Scan suggestion (Kabat-Zinn / Reiner / Farb), body-first + Off-baseline/Something → Body Scan suggestion (locate the unnamed signal), body-first + Activated/Sleep/Depleted/Medicated → straight to Breathe.
+- [ ] **`routeObserveEntry` bio-filter parity** (lines 10491, 10494). Secondary entry path still routes thought signals + thought-first regType to Reframe without offBaseline check. Hero CTA got the smarts; this mirror needs them too.
+- [ ] **ErrorBoundary cloud-restore + reset-and-restart** (`App.jsx:5`). On error, if signed in: trigger `sbSyncDown` first, then reload — cloud is source of truth, corrupt local gets overwritten. If not signed in: offer secondary "Reset and restart" button that clears non-critical localStorage keys (preserves regulation_type, signal_profile, bias_profile, onboarded). Log error to `stillform_last_error` with timestamp for support visibility.
+
+---
+
+## 🟡 REDDIT-BLOCKING — Existing Prelaunch List
+
+- [ ] Resolve body-first metacognition gap (architectural decision above) — must land before launch positioning
+- [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in `reframe.js`
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
-- [ ] Language preferences missing in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
+- [ ] Language preferences in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
+- [ ] 3–5 real testimonials
+- [ ] Reddit launch post — r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD (do not post before stores are live)
+
+---
+
+## 📝 POST-LAUNCH — Noted, Not Blocking
+
+- [ ] **AI payload size cap** (`App.jsx:5253–5340`). `signalProfile`, `biasProfile`, `priorToolContext`, `priorModeContext`, `sessionNotes` all bundle into every Reframe request with no size cap. The 2000-char input cap is good but doesn't bound the context payload. For a heavy user 6+ months in this could hit token limits or get expensive. Add per-field truncation with most-recent-first selection.
+- [ ] **useEffect cleanup audit** — 47 useEffects, 18 cleanup returns. Possible timer/listener leaks. Post-launch sweep, not urgent.
+- [ ] **Chip touch target sizes** — currently ~28px tall, iOS HIG recommends 44px. Adult users won't notice; an accessibility audit would flag it.
+- [ ] **DST manual test** — `getStillformToday()` uses local Date so it should handle DST correctly, but worth one manual test on a DST night to confirm date guards behave.
+- [ ] **Cloud-corruption edge case for ErrorBoundary** — if corruption got synced up before error fires, `sbSyncDown` pulls it back. Cover via `backups` table restore (the three-table schema already includes pre-update backups). Not blocking — covers <5% of error scenarios.
+- [ ] **GitHub PAT rotation** — scope `repo` only, 90-day expiry, revoke old. Low practical risk per Arlin (separate identity, no overlap with Claude account).
 
 ---
 
@@ -26,7 +67,7 @@
 ## LAUNCH
 
 - [ ] Both stores approved — flip to public
-- [ ] Reddit launch post — r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD (do not post before stores are live)
+- [ ] Reddit launch post (do not post before stores are live)
 
 ---
 
@@ -42,7 +83,7 @@
 - [x] Pre-meeting notifications — 30min plus 15min, Settings toggle, time pickers
 - [x] Composure Check rename (from GO/NO-GO)
 - [x] Self Mode rename (from Observe and Choose)
-- [x] Stuck chip — pre and post session chips, routes to Reframe clarity
+- [x] Stuck chip — pre and post session chips, routes to Reframe clarity (in-Reframe routing works; hero-CTA bridge is dead and pending architectural decision above)
 - [x] FAQ rewrite — 27 questions, Stillform voice, science woven in
 - [x] Calibration framed as tendency not fixed type
 - [x] spiraling replaced with cycling
