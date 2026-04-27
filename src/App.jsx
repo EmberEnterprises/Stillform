@@ -1697,6 +1697,16 @@ function setActiveBioFilter(value) {
   } catch {}
 }
 
+// Body-routing rule per the science:
+// - Pain → Body Scan (Kabat-Zinn 1982 MBSR, Reiner et al. 2013, Farb et al. 2013 — mindful pain pathway)
+// - Off-baseline / Something → Body Scan (locate the unnamed signal first)
+// - Activated / Sleep / Depleted / Medicated → straight to Breathe (Ochsner & Gross 2005 — parasympathetic regulation IS the science answer for these states; body-scanning would be friction without benefit)
+const shouldBodyRouteToScan = (bioFilter) => (
+  bioFilter.includes("pain") ||
+  bioFilter.includes("off-baseline") ||
+  bioFilter.includes("something")
+);
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
@@ -10846,15 +10856,15 @@ const isSignalProfileConfigured = () => {
       setActiveTool({ ...TOOLS.find(t => t.id === "scan") });
     };
 
-    // Priority 1 — off-baseline + body signal → Body Scan
-    if (offBaseline && (signalOrigin === "body" || signalOrigin === "both" || signalOrigin === "unsure") && needState !== "understand") {
+    // Priority 1 — off-baseline + body signal → Body Scan (only when shouldBodyRouteToScan; Activated/Sleep/Depleted/Medicated fall through to Breathe)
+    if (offBaseline && shouldBodyRouteToScan(bioFilter) && (signalOrigin === "body" || signalOrigin === "both" || signalOrigin === "unsure") && needState !== "understand") {
       goScan(); return;
     }
 
     if (needState === "settle") { startPathway("calm"); return; }
 
     if (needState === "understand") {
-      if (signalOrigin === "body") { offBaseline ? goScan() : startPathway("calm"); return; }
+      if (signalOrigin === "body") { (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm"); return; }
       if (signalOrigin === "thought") { goReframe(); return; }
       if (signalOrigin === "both") { goMetacognition(); return; }
       // unsure — use regType as tie-break
@@ -12389,12 +12399,13 @@ const isSignalProfileConfigured = () => {
                         }
                       } else if (isBodyFirst) {
                         if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                        else if (offBaseline) {
+                        else if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
+                          // Pain (Kabat-Zinn/Reiner/Farb) or unnamed signal (locate first) → Body Scan suggestion
                           if (priorChoice === "accept") startTool(TOOLS.find(t => t.id === "scan"));
                           else if (priorChoice === "skip") startPathway("calm");
                           else setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
                         }
-                        else startPathway("calm");
+                        else startPathway("calm");  // Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005)
                       } else {
                         // Balanced / unclear → one orienting question
                         setShowObserveEntry(true);
