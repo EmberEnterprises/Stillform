@@ -2594,11 +2594,23 @@ const BREATHING_PATTERNS = [
   ]}
 ];
 
-function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
+function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoModal }) {
   const [phase, setPhase] = useState(quickStart ? "breathe" : "pre-rate"); // pre-rate | breathe | ground | post-rate | done
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
   const [bioFilter, setBioFilter] = useState(null);
+  const [feelState, setFeelState] = useState(() => {
+    // Infer from today's check-in if available — user can always override via chips
+    try {
+      const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+      if (!checkin || checkin.date !== getStillformToday()) return null;
+      const mood = (checkin.mood || "").toLowerCase();
+      if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
+      if (mood.match(/angry|rage|furious|frustrated|irritat/)) return "angry";
+      if (mood.match(/excit|hyped|pumped|happy|joy|great|amazing|wired/)) return "excited";
+      return null;
+    } catch { return null; }
+  });
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
@@ -2670,6 +2682,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
       regulationType,
       source: debriefTarget?.source || "breathe-ground",
       reflectionText: String(reflectionText || "").trim(),
+      preState: feelState || null,
       route: debriefTarget?.redirectTo || null
     });
     const nextRoute = debriefTarget?.redirectTo || undefined;
@@ -3003,7 +3016,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
         <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Reactive</span>
         <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Composed</span>
       </div>
-      <div style={{ display: "flex", gap: 12, justifyContent: "center" }}>
+      <div style={{ display: "flex", gap: 12, justifyContent: "center", marginBottom: 24 }}>
         {[1, 2, 3, 4, 5].map(n => (
           <button key={n} onClick={() => { setPreRating(n); setPhase("bio-filter"); }} style={{
             width: 56, height: 56, borderRadius: "50%", border: "1px solid var(--border)",
@@ -3013,6 +3026,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
           }}>{n}</button>
         ))}
       </div>
+      {/* Current-state capture — same chips as Reframe entry, data parity for body-first users */}
+      <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} compact={true} />
     </div>
   );
 
@@ -3267,13 +3282,25 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false }) {
   );
 }
 
-function BodyScanTool({ onComplete }) {
+function BodyScanTool({ onComplete, setInfoModal }) {
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
   const latestSessionTimestampRef = useRef(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
+  const [feelState, setFeelState] = useState(() => {
+    // Infer from today's check-in if available — user can always override via chips
+    try {
+      const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+      if (!checkin || checkin.date !== getStillformToday()) return null;
+      const mood = (checkin.mood || "").toLowerCase();
+      if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
+      if (mood.match(/angry|rage|furious|frustrated|irritat/)) return "angry";
+      if (mood.match(/excit|hyped|pumped|happy|joy|great|amazing|wired/)) return "excited";
+      return null;
+    } catch { return null; }
+  });
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
@@ -3339,6 +3366,7 @@ function BodyScanTool({ onComplete }) {
       regulationType,
       source: debriefTarget?.source || "body-scan",
       reflectionText: String(reflectionText || "").trim(),
+      preState: feelState || null,
       route: debriefTarget?.redirectTo || null
     });
     const nextRoute = debriefTarget?.redirectTo || undefined;
@@ -3417,7 +3445,7 @@ function BodyScanTool({ onComplete }) {
 
   const [tension, setTension] = useState({});
   const [currentArea, setCurrentArea] = useState(0);
-  const [phase, setPhase] = useState("scan");
+  const [phase, setPhase] = useState("intro");
   const [holdCount, setHoldCount] = useState(0);
   const [holding, setHolding] = useState(false);
 
@@ -3641,6 +3669,24 @@ function BodyScanTool({ onComplete }) {
       </div>
     );
   }
+
+  if (phase === "intro") return (
+    <div style={{ maxWidth: 400, margin: "0 auto", padding: "0 8px" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6, textAlign: "center" }}>
+        Body scan.
+      </h2>
+      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 24, textAlign: "center" }}>
+        Six areas, head to feet. Notice what's there before you change anything.
+      </div>
+      {/* Current-state capture — same chips as Reframe entry, data parity for body-first users */}
+      <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} compact={true} />
+      <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
+        <button className="btn btn-primary" style={{ fontSize: 16, padding: "14px 40px" }} onClick={() => setPhase("scan")}>
+          Begin
+        </button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="scan-body">
@@ -4585,7 +4631,7 @@ async function secureSet(key, value) {
 // GPT-4o vision handles image reading
 
 
-function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null }) {
+function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null, setInfoModal }) {
   const POSITIVE_STATE_PATTERNS = [
     "not so bad",
     "figured it out",
@@ -6065,92 +6111,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           </div>
         )}
-        {/* WHAT IS PRESENT — pre-populated from morning check-in */}
-        {(() => {
-          const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
-          const checkinIsToday = checkin?.date === getStillformToday();
-          const checkinMood = checkinIsToday ? (checkin?.mood || null) : null;
-          const checkinTension = checkinIsToday ? Object.entries(checkin.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
-          const hasMorningData = checkinMood || checkinTension.length > 0;
-          return (
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-                  What is present
-                  <button onClick={() => setInfoModal({ title: "Why name your state?", body: "Naming your emotional state before a session is not just context-setting — it is the first regulation act. Research shows that translating an emotional experience into language directly reduces activation in the brain\\'s threat-detection center. The feel state you select also adjusts how the system interprets everything you type." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
-                </div>
-                {hasMorningData && (
-                  <button
-                    title="Pre-filled from your morning check-in. Tap to adjust."
-                    onClick={() => setInfoModal({ title: "Morning check-in", body: "Your physiological baseline changes every day. Sleep debt, physical tension, and energy level directly alter how you perceive situations before any external stressor arrives. This check sets the context the AI uses in every session that follows." })}
-                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
-                  >
-                    ⓘ
-                  </button>
-                )}
-              </div>
-
-              {/* LINE 1 — pre-populated from morning check-in */}
-              {hasMorningData && (
-                <div style={{ marginBottom: 8 }}>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" }}>
-                    From this morning
-                  </div>
-                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                    {checkinTension.map(area => (
-                      <div key={area} style={{
-                        background: "var(--surface)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 20, padding: "5px 14px", fontSize: 12,
-                        color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        {area}
-                      </div>
-                    ))}
-                    {checkinMood && (
-                      <div style={{
-                        background: "var(--surface)", border: "1px solid var(--amber-dim)",
-                        borderRadius: 20, padding: "5px 14px", fontSize: 12,
-                        color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        {checkinMood}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* LINE 2 — Anything to add */}
-              <div>
-                {hasMorningData && (
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase" }}>
-                    Anything to add?
-                  </div>
-                )}
-                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                  {[
-                    { id: "excited", label: "Excited" },
-                    { id: "focused", label: "Focused" },
-                    { id: "anxious", label: "Anxious" },
-                    { id: "angry", label: "Angry" },
-                    { id: "flat", label: "Flat" },
-                    { id: "mixed", label: "Mixed" },
-                    { id: "stuck", label: "Stuck" }
-                  ].map(f => (
-                    <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
-                      background: feelState === f.id ? "var(--amber-glow)" : "transparent",
-                      border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                      borderRadius: 20, padding: "5px 14px", fontSize: 12,
-                      color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                    }}>
-                      {f.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          );
-        })()}
+        {/* WHAT IS PRESENT — pre-populated from morning check-in (read-only) + in-the-moment feel chips */}
+        <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} />
       </div>
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
@@ -6771,6 +6733,98 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
       <button onClick={onSkip} style={skipBtn}>
         <div>{config.skipLabel}</div>
       </button>
+    </div>
+  );
+}
+
+
+// Shared component — current-state capture before any tool session.
+// Shows morning check-in pre-fill (no overwrite) + feel chips for in-the-moment additions.
+// Available to body-first tools (Breathe, Scan) and thought-first tool (Reframe) for data parity.
+// Bio-filter and check-in are historical records — never modified here. feelState is session-local.
+function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = false }) {
+  const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
+  const checkinIsToday = checkin?.date === getStillformToday();
+  const checkinMood = checkinIsToday ? (checkin?.mood || null) : null;
+  const checkinTension = checkinIsToday ? Object.entries(checkin?.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
+  const hasMorningData = checkinMood || checkinTension.length > 0;
+
+  return (
+    <div style={{ marginBottom: compact ? 8 : 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, justifyContent: compact ? "center" : "flex-start" }}>
+        <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
+          What is present
+          <button onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Naming your emotional state before a session is not just context-setting — it is the first regulation act. Research shows that translating an emotional experience into language directly reduces activation in the brain's threat-detection center. The feel state you select also adjusts how the system interprets everything you type." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+        </div>
+        {hasMorningData && (
+          <button
+            title="Pre-filled from your morning check-in. This is read-only here — your check-in record is never overwritten by a session."
+            onClick={() => setInfoModal && setInfoModal({ title: "Morning check-in", body: "Your physiological baseline changes every day. Sleep debt, physical tension, and energy level directly alter how you perceive situations before any external stressor arrives. This check sets the context the AI uses in every session that follows. Shown here read-only — only updated from your morning check-in itself." })}
+            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
+          >
+            ⓘ
+          </button>
+        )}
+      </div>
+
+      {/* LINE 1 — pre-populated from morning check-in (read-only display) */}
+      {hasMorningData && (
+        <div style={{ marginBottom: 8 }}>
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase", textAlign: compact ? "center" : "left" }}>
+            From this morning
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: compact ? "center" : "flex-start" }}>
+            {checkinTension.map(area => (
+              <div key={area} style={{
+                background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
+              }}>
+                {area}
+              </div>
+            ))}
+            {checkinMood && (
+              <div style={{
+                background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
+              }}>
+                {checkinMood}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* LINE 2 — Anything to add (in-the-moment feel chips, session-local) */}
+      <div>
+        {hasMorningData && (
+          <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 6, fontFamily: "'IBM Plex Mono', monospace", textTransform: "uppercase", textAlign: compact ? "center" : "left" }}>
+            Anything to add?
+          </div>
+        )}
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: compact ? "center" : "flex-start" }}>
+          {[
+            { id: "excited", label: "Excited" },
+            { id: "focused", label: "Focused" },
+            { id: "anxious", label: "Anxious" },
+            { id: "angry", label: "Angry" },
+            { id: "flat", label: "Flat" },
+            { id: "mixed", label: "Mixed" },
+            { id: "stuck", label: "Stuck" }
+          ].map(f => (
+            <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
+              background: feelState === f.id ? "var(--amber-glow)" : "transparent",
+              border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+              borderRadius: 20, padding: "5px 14px", fontSize: 12,
+              color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
+              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+            }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -10699,7 +10753,7 @@ const isSignalProfileConfigured = () => {
   };
 
   const renderTool = () => {
-    const props = { onComplete: (redirectTo) => {
+    const props = { setInfoModal, onComplete: (redirectTo) => {
       if (redirectTo) {
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
         if (redirectTo === "eod-close") {
