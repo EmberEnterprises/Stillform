@@ -6214,7 +6214,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           )}
         </div>
 
-        {/* OBSERVE AND CHOOSE nudge — high-activation only */}
+        {/* Self Mode nudge — high-activation only */}
         {(feelState === "angry" || feelState === "anxious" || feelState === "mixed") && (
           <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
@@ -12415,8 +12415,7 @@ const isSignalProfileConfigured = () => {
                           setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                         }
                       } else if (isBodyFirst) {
-                        if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                        else if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
+                        if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
                           // Pain (Kabat-Zinn/Reiner/Farb) or unnamed signal (locate first) → Body Scan suggestion
                           if (priorChoice === "accept") startTool(TOOLS.find(t => t.id === "scan"));
                           else if (priorChoice === "skip") startPathway("calm");
