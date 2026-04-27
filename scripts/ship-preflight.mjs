@@ -60,7 +60,15 @@ const checks = [
   { label: "Soft-entry greeting lock", cmd: "rg", args: ["-n", "Hey good to see you\\. How are you doing\\?", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Voice contract runtime guards", cmd: "rg", args: ["-n", "validateVoiceContract|VOICE_CONTRACT_BANNED_PATTERNS|voiceValidationFailed|voiceRepairUsed|voiceFallbackUsed", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
-  { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" }
+  { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" },
+  // TimeKeeper guards — block reintroduction of the broken date conventions migrated in Phases 2-4.
+  // All date/time operations in App.jsx must go through the TimeKeeper module.
+  { label: "TimeKeeper guard: no toISOString().slice(0,10) UTC date keys", cmd: "rg", args: ["-n", "\\.toISOString\\(\\)\\.slice\\(\\s*0\\s*,\\s*10\\s*\\)", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no toISOString().split(\"T\") UTC date keys", cmd: "rg", args: ["-n", "\\.toISOString\\(\\)\\.split\\(['\"]T['\"]\\)", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no inline ms day math (86400000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*86400000", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no inline ms day math (24*60*60*1000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*24\\s*\\*\\s*60\\s*\\*\\s*60\\s*\\*\\s*1000", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no UTC extraction from s.timestamp via slice", cmd: "rg", args: ["-n", "\\bs\\.timestamp\\??\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no UTC extraction from sentAt via slice", cmd: "rg", args: ["-n", "\\bsentAt\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" }
 ];
 
 let failed = false;
