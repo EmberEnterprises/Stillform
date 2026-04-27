@@ -67,7 +67,25 @@ Launch path: Google Play closed testing → public launch. TestFlight blocked un
 
 ## 📝 POST-LAUNCH — Noted, Not Blocking
 
-- [ ] **Internationalization (full)** — reviewed and dropped from launch-gating Apr 27. The original item ("Language preferences in Settings") conflated three different things: (a) date-format preference, (b) language picker UI plumbing without translation, (c) full app translation. (a) doesn't materially matter — the app uses month-name short dates ("Apr 27") which read cleanly across locales, and dates aren't user-referenced content. (b) is plumbing for translation work that may never happen, or may happen in a different shape. (c) is genuinely multi-session work with a translator in the loop, not bolt-on. Real i18n work would touch every user-facing string, every info modal, every AI system prompt (especially the science-grounded ones — translating Porges polyvagal language without losing precision is specialized translator work). Until there's actual non-English user demand and a real translation budget, this stays parked. Crisis region routing (App.jsx line 9538) already handles the one place locale genuinely matters.
+- [ ] **Internationalization (V1 launch language set chosen Apr 27)** — committed launch set: **English (baseline) + Spanish + Brazilian Portuguese + Armenian**. Reasoning grounded in market analysis:
+  - **Spanish** — 500M+ speakers, covers US Hispanic + all Latin America. Strong clinical-translation tradition, abundant translator availability.
+  - **Brazilian Portuguese** — Brazil is the fastest-growing wellness app market globally. 220M speakers. Close enough to Spanish that some translation infrastructure can be reused.
+  - **Armenian** — founder heritage (Arlin). Non-negotiable.
+  - All four use Latin script — no RTL engineering, no character-width layout issues. Translation work only.
+  
+  **Deferred (post-launch international expansion):** German, French, Mandarin, Japanese, Korean, Hindi, Arabic. Each has distinct deferral rationale:
+  - German — strong wellness market but local-tool preference; needs enterprise partnerships first
+  - French — smaller wellness market than Brazilian Portuguese; defer
+  - Mandarin — China requires WeChat ecosystem + local hosting + regulatory work
+  - Hindi — needs country-specific pricing strategy first ($14.99/mo too high for India)
+  - Arabic — RTL layout requires real engineering work across every screen, not just translation
+  - Japanese/Korean — small total audience for the cost + script-width concerns
+  
+  **Build path (NOT yet implemented):** (1) i18n library install (i18next), (2) string extraction from all UI components into a translation table, (3) language picker in Settings persisted to localStorage + Supabase, (4) AI prompt translation for each language — REQUIRES clinical translator, not generic, because Porges polyvagal / Siegel window of tolerance / Ochsner & Gross suppression-vs-reappraisal must keep precision. (5) Per-language QA review.
+  
+  **Cost reality:** ~6,500 lines UI strings + ~1,500 lines AI prompts × 3 target languages × translator rates × QA review. Not free, not bolt-on. Plan as multi-session work with budget allocated. Realistic timeline 4-6 weeks of mixed engineering + translation work.
+  
+  Crisis region routing (App.jsx line 9538) already handles locale-driven hotline routing.
 
 - [ ] **Service worker disabled in production** (`index.html`). The current index.html actively unregisters all service workers and clears caches on every page load — `sw.js` exists in `/public` but is never used. Impact: no offline support beyond the in-app self-guided fallback, no asset caching for repeat visits, weak PWA install experience on mobile. Likely intentional during UAT (avoiding stale-cache bugs) but should be re-enabled before public launch so the offline fallback feature has cached assets to work with. Decision needed: keep disabled or re-enable + set up proper cache invalidation.
 - [ ] **ARIA labels minimal across the app** — only 6 `aria-label` / `aria-labelledby` / `role=` attributes across 14,680 lines. Screen reader users would struggle. App Store accessibility audits could flag this. Not blocking launch but needs a sweep on chips, info buttons, and tool entries.
