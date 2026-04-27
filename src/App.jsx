@@ -4523,7 +4523,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone","stillform_biometric_enabled"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone","stillform_biometric_enabled","stillform_language"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -4591,7 +4591,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -4736,6 +4736,31 @@ const getOrCreateInstallId = () => {
   } catch {
     return null;
   }
+};
+// Device locale capture (Apr 27 2026). Captured once per install for demand-data only.
+// Tells us which languages users' devices are set to so translation prioritization can be
+// data-driven rather than guesswork. Stored locally; surfaced in Settings UI under Language
+// section. Never affects app behavior — Stillform launches in English regardless.
+const DEVICE_LOCALE_KEY = "stillform_detected_locale";
+const captureDeviceLocale = () => {
+  try {
+    if (localStorage.getItem(DEVICE_LOCALE_KEY)) return; // already captured
+    const locale = (() => {
+      try {
+        return navigator?.language
+          || (Array.isArray(navigator?.languages) && navigator.languages[0])
+          || Intl.DateTimeFormat().resolvedOptions().locale
+          || "";
+      } catch { return ""; }
+    })();
+    if (!locale) return;
+    localStorage.setItem(DEVICE_LOCALE_KEY, JSON.stringify({
+      locale: String(locale),
+      capturedAt: new Date().toISOString()
+    }));
+    // Plausible event so demand data is also visible in analytics, not just per-device localStorage
+    try { window.plausible("Device Locale Captured", { props: { locale: String(locale).slice(0, 10) } }); } catch {}
+  } catch {}
 };
 const sbCheckSubscriptionStatus = async () => {
   const installId = getOrCreateInstallId();
@@ -9287,6 +9312,9 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+    // Capture device locale once per install — demand data only, never affects app behavior.
+    // Used to inform translation prioritization based on real user devices.
+    captureDeviceLocale();
     // Apply high contrast on startup if previously enabled
     try {
       if (localStorage.getItem("stillform_high_contrast") === "on") {
@@ -10227,7 +10255,7 @@ export default function Stillform() {
     more: false,
   }));
   const [settingsSubOpen, setSettingsSubOpen] = useState(() => ({
-    theme: false, aiTone: false, display: false, sound: false,
+    theme: false, aiTone: false, language: false, display: false, sound: false,
     processingType: false, breathingPattern: false, scanPace: false, signalMapping: false, scheduleNotif: false,
     subscriptionStatus: false, syncControls: false,
     metrics: false, exports: false,
@@ -14083,6 +14111,55 @@ const isSignalProfileConfigured = () => {
                     );
                   })}
                 </div>
+                    </div>
+                  )}
+                </div>
+                                {/* Language — collapsible (scaffolding Apr 27 2026; translations post-launch) */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("language")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Language</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.language ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.language && (
+                    <div style={{ marginTop: 10 }}>
+                      <div style={{ marginBottom: 16 }}>
+                        <div style={{
+                          background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                          padding: "14px 18px", marginBottom: 12
+                        }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                            <div style={{ fontSize: 14, color: "var(--text)" }}>English</div>
+                            <div style={{ fontSize: 11, color: "var(--amber)" }}>✓ Active</div>
+                          </div>
+                          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                            Stillform launches in English. Additional languages coming post-launch — clinically translated so the science holds in every language, not machine-translated.
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            try { window.plausible("Language Request Tapped"); } catch {}
+                            const subject = encodeURIComponent("Language request");
+                            const body = encodeURIComponent("Hi,\n\nI'd like Stillform in:\n\n[language]\n\nThanks.\n");
+                            window.location.href = `mailto:ARAembersllc@proton.me?subject=${subject}&body=${body}`;
+                          }}
+                          style={{
+                            width: "100%", background: "var(--surface)", border: "1px solid var(--amber-dim)",
+                            borderRadius: "var(--r-lg)", padding: "12px 16px", cursor: "pointer",
+                            display: "flex", justifyContent: "space-between", alignItems: "center",
+                            textAlign: "left", fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 2 }}>Request a language</div>
+                            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>We prioritize languages with the most requests.</div>
+                          </div>
+                          <span style={{ color: "var(--amber)", fontSize: 14 }}>→</span>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
