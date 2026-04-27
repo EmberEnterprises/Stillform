@@ -1493,6 +1493,21 @@ function toLocalDateKey(input = new Date()) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// Returns the user's "logical today" — calendar day shifted by morning_start.
+// Use for daily-ceremony comparisons (morning check-in, EOD, "is it done today")
+// where the user's day rolls over at their configured morning start, not midnight.
+// Default morning start: 270 minutes (4:30 AM local). Always returns a local date key.
+function getStillformToday(date = new Date()) {
+  const morningStart = (() => {
+    try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; }
+    catch { return 270; }
+  })();
+  const minutesNow = date.getHours() * 60 + date.getMinutes();
+  const target = new Date(date);
+  if (minutesNow < morningStart) target.setDate(target.getDate() - 1);
+  return toLocalDateKey(target);
+}
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
@@ -1926,7 +1941,7 @@ const toDayKey = (value) => {
   try {
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return null;
-    return dt.toISOString().slice(0, 10);
+    return toLocalDateKey(dt);
   } catch {
     return null;
   }
@@ -4633,7 +4648,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Infer from today's check-in if available — user can always override
     try {
       const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-      if (!checkin) return null;
+      if (!checkin || checkin.date !== getStillformToday()) return null;
       const mood = (checkin.mood || "").toLowerCase();
       const stress = checkin.stressEvent;
       if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
@@ -5122,7 +5137,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           checkinContext: (() => {
             try {
               const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-              if (!checkin) return null;
+              if (!checkin || checkin.date !== getStillformToday()) return null;
               const parts = [];
               if (checkin.sleep) parts.push(`${checkin.sleep}h sleep`);
               if (checkin.energy) parts.push(`energy: ${checkin.energy}`);
@@ -6053,8 +6068,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {/* WHAT IS PRESENT — pre-populated from morning check-in */}
         {(() => {
           const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
-          const checkinMood = checkin?.mood || null;
-          const checkinTension = checkin ? Object.entries(checkin.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
+          const checkinIsToday = checkin?.date === getStillformToday();
+          const checkinMood = checkinIsToday ? (checkin?.mood || null) : null;
+          const checkinTension = checkinIsToday ? Object.entries(checkin.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
           const hasMorningData = checkinMood || checkinTension.length > 0;
           return (
             <div style={{ marginBottom: 12 }}>
@@ -7222,7 +7238,7 @@ function MyProgress({ onBack }) {
   let streak = 0;
   for (let i = 0; i < 365; i++) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    if (daySet.has(d.toISOString().slice(0, 10))) streak++; else break;
+    if (daySet.has(toLocalDateKey(d))) streak++; else break;
   }
 
   const emotionFreq = {};
@@ -7289,8 +7305,9 @@ function MyProgress({ onBack }) {
   ).length;
 
   // Additional data sources
-  const checkinToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
-  const eodToday = (() => { try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; } })();
+  const stillformToday = getStillformToday();
+  const checkinToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
+  const eodToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
   const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
   const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
   const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
@@ -7561,7 +7578,7 @@ function MyProgress({ onBack }) {
       const blob = new Blob([shareCardText], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const stamp = new Date().toISOString().slice(0, 10);
+      const stamp = toLocalDateKey();
       a.href = url;
       a.download = `stillform-composure-card-${stamp}.txt`;
       document.body.appendChild(a);
@@ -7714,7 +7731,7 @@ function MyProgress({ onBack }) {
 
             const dayMap = {};
             allEvents.forEach(d => {
-              const key = d.toISOString().slice(0, 10);
+              const key = toLocalDateKey(d);
               dayMap[key] = (dayMap[key] || 0) + 1;
             });
 
@@ -7727,7 +7744,7 @@ function MyProgress({ onBack }) {
               for (let day = 0; day < 7; day++) {
                 const cellDate = new Date(gridStart);
                 cellDate.setDate(gridStart.getDate() + week * 7 + day);
-                const key = cellDate.toISOString().slice(0, 10);
+                const key = toLocalDateKey(cellDate);
                 const count = dayMap[key] || 0;
                 const future = cellDate > today;
                 cells.push({ week, day, count, future, date: cellDate });
@@ -9131,7 +9148,7 @@ export default function Stillform() {
   }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupBridgeStep, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
-    const todayIso = toLocalDateKey();
+    const todayIso = getStillformToday();
     const parseLoopHistory = (key) => {
       try {
         const parsed = JSON.parse(localStorage.getItem(key) || "[]");
@@ -9146,7 +9163,7 @@ export default function Stillform() {
       try {
         const dt = new Date(raw);
         if (Number.isNaN(dt.getTime())) return null;
-        return dt.toISOString().slice(0, 10);
+        return toLocalDateKey(dt);
       } catch {
         return null;
       }
@@ -10225,7 +10242,7 @@ export default function Stillform() {
         csvValue(session.exitPoint)
       ].join(","))
     ];
-    const stamp = new Date().toISOString().slice(0, 10);
+    const stamp = toLocalDateKey();
     downloadTextFile(lines.join("\n"), `stillform-session-history-${stamp}.csv`, "text/csv;charset=utf-8");
     setExportStatusWithClear(`Session CSV downloaded (${sessions.length} rows).`);
     try { window.plausible("Session CSV Exported", { props: { rows: sessions.length } }); } catch {}
@@ -10278,7 +10295,7 @@ export default function Stillform() {
         <tbody>${rows}</tbody>
       </table>
     </body></html>`;
-    const stamp = new Date().toISOString().slice(0, 10);
+    const stamp = toLocalDateKey();
     const fallbackCsv = () => {
       const headers = ["date", "time", "signal", "trigger", "outcome", "notes"];
       const lines = [
@@ -10348,7 +10365,7 @@ export default function Stillform() {
     let cancelled = false;
     const autoSend = async () => {
       if (!metricsOptIn || !metricsAuthToken) return;
-      const today = new Date().toISOString().slice(0, 10);
+      const today = getStillformToday();
       const alreadySentToday = (() => {
         try { return localStorage.getItem(METRICS_LAST_SENT_DAY_KEY) === today; } catch { return false; }
       })();
@@ -11645,7 +11662,7 @@ const isSignalProfileConfigured = () => {
                 const _ms_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
                 const _ms_end = 1050;
                 if (_ms_mins < _ms_start || _ms_mins >= _ms_end) return null;
-                const _ms_today = new Date().toISOString().slice(0, 10);
+                const _ms_today = getStillformToday();
                 const _ms_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _ms_today; } catch { return false; } })();
                 if (ciOpen) return null;
                 return (
@@ -11679,7 +11696,7 @@ const isSignalProfileConfigured = () => {
                 const morningEnd = 1050;
                 if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
                 if (!ciOpen) return null;
-                const today = toLocalDateKey(now);
+                const today = getStillformToday(now);
                 // EOD done suppresses morning check-in only if EOD was completed TODAY
                 const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
                 if (eodDoneToday) return null;
@@ -11876,7 +11893,7 @@ const isSignalProfileConfigured = () => {
                             // Save check-in with off-baseline flag then route to quick tension scan
                             const bioArray = ["off-baseline"];
                             try {
-                              const today = new Date().toISOString().slice(0, 10);
+                              const today = getStillformToday();
                               localStorage.setItem("stillform_checkin_today", JSON.stringify({
                                 date: today, energy: ciEnergy || "steady", bio: bioArray,
                                 tension: Object.keys(ciTension).length > 0 ? ciTension : null,
@@ -12058,7 +12075,7 @@ const isSignalProfileConfigured = () => {
                 const morningCap = 240; // 4:00 AM — EOD window closes
                 const inEodWindow = currentMinutes >= eveningStart || currentMinutes < morningCap;
                 if (!inEodWindow) return null;
-                const today = toLocalDateKey(now);
+                const today = getStillformToday(now);
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodSaved && !eodOpen) return (
                   <button onClick={() => {
@@ -12101,7 +12118,8 @@ const isSignalProfileConfigured = () => {
 
                 const saveEod = () => {
                   try {
-                    const morningData = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+                    const morningRaw = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+                    const morningData = morningRaw?.date === today ? morningRaw : null;
                     localStorage.setItem("stillform_eod_today", JSON.stringify({
                       date: today,
                       energy: eodEnergy || "same",
@@ -12203,7 +12221,7 @@ const isSignalProfileConfigured = () => {
                 for (let i = 0; i < 365; i++) {
                   const d = new Date();
                   d.setDate(d.getDate() - i);
-                  if (daySet.has(d.toISOString().slice(0, 10))) streakCount++;
+                  if (daySet.has(toLocalDateKey(d))) streakCount++;
                   else break;
                 }
                 const toolCounts = sessions.reduce((acc, s) => {
