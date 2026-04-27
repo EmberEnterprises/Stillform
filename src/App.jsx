@@ -6703,6 +6703,79 @@ function ObserveEntryLite({ onClose, onRoute }) {
 }
 
 
+// Bio-filter suggestion — shown when hardware is off-baseline and the user's default
+// pathway would skip the somatic regulation that high arousal needs.
+// State-based, suggestive, never permanent. User can always skip back to their normal type.
+function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
+  const offBaselineTokens = ["activated","depleted","pain","sleep","medicated","off-baseline","something"];
+  const activeStates = String(bioFilter || "")
+    .split(",")
+    .map(s => s.trim())
+    .filter(s => offBaselineTokens.includes(s));
+  const stateLabel = activeStates.length > 0 ? activeStates.join(", ") : "off-baseline";
+
+  const config = kind === "thought-to-body" ? {
+    headline: "Quick check before Reframe",
+    body: `Hardware: ${stateLabel}. The nervous system usually needs to settle before cognitive work lands.`,
+    primaryLabel: "Settle first",
+    primarySub: "Short Breathe sequence, then your call.",
+    skipLabel: "Continue to Reframe",
+    infoTitle: "Why settle the body first?",
+    infoBody: "When physical state is off-baseline — activated, depleted, in pain, sleep-deprived, or medicated — the nervous system fires before cognition can intervene. Research (Ochsner & Gross, 2005) shows that at high arousal, physiological regulation has to come before cognitive reappraisal for the cognitive work to actually land. This is a state-based suggestion based on what you marked in your check-in. Your processing type is unchanged — you can skip and go straight to Reframe if you'd rather."
+  } : {
+    headline: "Quick check before Breathe",
+    body: `Hardware: ${stateLabel}. A short scan often releases tension breathing alone won't reach.`,
+    primaryLabel: "Body scan first",
+    primarySub: "Identify the signal, then breathe.",
+    skipLabel: "Continue to Breathe",
+    infoTitle: "Why scan the body first?",
+    infoBody: "When physical state is off-baseline, somatic tension is usually already held in specific points before any breathing intervention. A short scan locates and releases that tension first so the breathing that follows can settle deeper. This is a state-based suggestion based on what you marked in your check-in. Your processing type is unchanged — you can skip and go straight to Breathe if you'd rather."
+  };
+
+  const primaryBtn = {
+    width: "100%", padding: "16px 18px",
+    background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+    borderRadius: "var(--r)", cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+    WebkitTapHighlightColor: "transparent", marginBottom: 8
+  };
+
+  const skipBtn = {
+    width: "100%", padding: "12px 18px",
+    background: "transparent", border: "0.5px solid var(--border)",
+    borderRadius: "var(--r)", cursor: "pointer",
+    fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+    WebkitTapHighlightColor: "transparent",
+    color: "var(--text-dim)", fontSize: 13
+  };
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)" }}>
+          {config.headline}
+        </div>
+        <button
+          onClick={() => openInfo(config.infoTitle, config.infoBody)}
+          style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14, padding: "0 4px", lineHeight: 1 }}
+          aria-label="Why this suggestion"
+        >ⓘ</button>
+      </div>
+      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.5 }}>
+        {config.body}
+      </div>
+      <button onClick={onAccept} style={primaryBtn}>
+        <div style={{ fontWeight: 500, color: "var(--amber)", fontSize: 14 }}>{config.primaryLabel}</div>
+        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{config.primarySub}</div>
+      </button>
+      <button onClick={onSkip} style={skipBtn}>
+        <div>{config.skipLabel}</div>
+      </button>
+    </div>
+  );
+}
+
+
 function MetacognitionTool({ onComplete, onSessionComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
@@ -8900,6 +8973,7 @@ export default function Stillform() {
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
   const [showObserveEntry, setShowObserveEntry] = useState(false);
+  const [showBioFilterSuggestion, setShowBioFilterSuggestion] = useState(null);
   const [showSupportSheet, setShowSupportSheet] = useState(false);
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
 
@@ -11967,7 +12041,26 @@ const isSignalProfileConfigured = () => {
                   {isThoughtFirst && <button onClick={() => setInfoModal({ title: "Why thought first?", body: "Your calibration identified a thought-first tendency. When activation hits, the cognitive loop fires first. Processing the thinking directly is what releases the physical tension — your body follows your mind." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
                 </div>
 
-                {showObserveEntry ? (
+                {showBioFilterSuggestion ? (
+                  /* Bio-filter override — suggestive, with skip back to normal pathway */
+                  <BioFilterSuggestion
+                    kind={showBioFilterSuggestion.kind}
+                    bioFilter={showBioFilterSuggestion.bioFilter}
+                    openInfo={(title, body) => setInfoModal({ title, body })}
+                    onAccept={() => {
+                      const k = showBioFilterSuggestion.kind;
+                      setShowBioFilterSuggestion(null);
+                      if (k === "thought-to-body") startPathway("calm");
+                      else if (k === "body-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
+                    }}
+                    onSkip={() => {
+                      const k = showBioFilterSuggestion.kind;
+                      setShowBioFilterSuggestion(null);
+                      if (k === "thought-to-body") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                      else if (k === "body-to-scan") startPathway("calm");
+                    }}
+                  />
+                ) : showObserveEntry ? (
                   /* Balanced / unclear — one orienting question inline */
                   <ObserveEntryLite
                     isBodyFirst={isBodyFirst}
@@ -11983,14 +12076,14 @@ const isSignalProfileConfigured = () => {
                       const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
 
                       if (isThoughtFirst) {
-                        // Thought-first → Reframe, but Breathe first if bio-filter flags off-baseline
+                        // Thought-first → Reframe, but suggest Breathe first if bio-filter flags off-baseline
                         // (Ochsner & Gross 2005: at high arousal, physiological intervention before cognitive)
-                        if (offBaseline) startPathway("calm");
+                        if (offBaseline) setShowBioFilterSuggestion({ kind: "thought-to-body", bioFilter });
                         else { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
                       } else if (isBodyFirst) {
-                        // Body-first → Breathe, or Body Scan if off-baseline, or Reframe if stuck
+                        // Body-first → Breathe, suggest Body Scan if off-baseline, or Reframe if stuck
                         if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                        else if (offBaseline) startTool(TOOLS.find(t => t.id === "scan"));
+                        else if (offBaseline) setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
                         else startPathway("calm");
                       } else {
                         // Balanced / unclear → one orienting question
