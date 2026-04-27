@@ -2887,7 +2887,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
 
   // --- BREATHE ---
   const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
-  const [patternId, setPatternId] = useState(savedPatternId);
+  const [patternId] = useState(savedPatternId);
   const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
   const phases = pattern.phases;
 
@@ -4978,7 +4978,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     "made it work",
     "got through it"
   ];
-  const [activeMode, setActiveMode] = useState(() => {
+  // activeMode is captured from the mode prop on mount.
+  // The setter was historically here for "manual override" paths that never materialized.
+  // If you need to override, pass a different mode prop from the parent.
+  const [activeMode] = useState(() => {
     return mode !== "calm" ? mode : null;
   });
   const [showPostRating, setShowPostRating] = useState(false);
@@ -9929,8 +9932,19 @@ export default function Stillform() {
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
+  // outcomeFocus: morning intention — user picks a daily outcome (sharp / composed / recovered)
+  // during morning check-in. Drives which protocol is recommended for the day.
+  // Science: Implementation Intentions (Gollwitzer 1999) + Mental Contrasting (MCII / Oettingen).
+  // The morning choice + the bio-filter + protocol match together form the if-then plan
+  // that bypasses decision paralysis when the moment hits later in the day.
   const [outcomeFocus, setOutcomeFocus] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_outcome_focus") || "null"); } catch { return null; }
+    try {
+      const stored = JSON.parse(localStorage.getItem("stillform_outcome_focus") || "null");
+      // Only retain today's choice — yesterday's outcome shouldn't drive today's protocol
+      if (!stored || !stored.date) return null;
+      if (stored.date !== TimeKeeper.stillformDay()) return null;
+      return stored;
+    } catch { return null; }
   });
 
   useEffect(() => {
@@ -12338,32 +12352,40 @@ const isSignalProfileConfigured = () => {
                     id: "hard-conversation",
                     title: "Hard conversation",
                     subtitle: "Objective + facts vs story + clear ask",
-                    route: "Reframe · Clarity",
-                    match: ["composure", "recover"]
+                    route: "Reframe · Clarity"
                   },
                   {
                     id: "physiological-spike",
                     title: "Physiological spike",
                     subtitle: "Body-first reset now",
-                    route: "Breathe",
-                    match: ["recover", "composure"]
+                    route: "Breathe"
                   },
                   {
                     id: "winning-locked-in",
                     title: "Winning but unfocused",
                     subtitle: "Channel momentum cleanly",
-                    route: "Reframe · Hype",
-                    match: ["sharp"]
+                    route: "Reframe · Hype"
                   },
                   {
                     id: "after-conflict-reset",
                     title: "After conflict reset",
                     subtitle: "Drop tension from body",
-                    route: "Body Scan",
-                    match: ["recover", "composure"]
+                    route: "Body Scan"
                   }
                 ];
-                const recommendedProtocol = protocols.find(p => outcomeFocus && p.match.includes(outcomeFocus.id)) || protocols[0];
+                // Outcome → protocol mapping. Explicit and order-independent so reordering
+                // the protocols array later won't silently change routing.
+                //   sharp     → winning-locked-in (Reframe·Hype) — channel momentum
+                //   composure → hard-conversation (Reframe·Clarity) — process under pressure
+                //   recover   → physiological-spike (Breathe) — body-first reset
+                // No outcome chosen → falls back to first protocol (existing behavior).
+                const outcomeProtocolMap = {
+                  "sharp": "winning-locked-in",
+                  "composure": "hard-conversation",
+                  "recover": "physiological-spike"
+                };
+                const recommendedProtocolId = outcomeFocus ? outcomeProtocolMap[outcomeFocus.id] : null;
+                const recommendedProtocol = protocols.find(p => p.id === recommendedProtocolId) || protocols[0];
                 const integrationContext = resolveIntegrationContext();
                 const upcomingPressure = integrationContext.upcomingPressure;
 
@@ -12572,6 +12594,30 @@ const isSignalProfileConfigured = () => {
                       })}
                     </div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 16, fontStyle: "italic" }}>Tap once = mild · twice = high</div>
+
+                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+                      What do you want today?
+                      <button onClick={() => setInfoModal({ title: "Why choose your outcome?", body: "Naming what you want today before the day hits is implementation intention formation (Gollwitzer 1999). Morning intention-setting bypasses decision paralysis when stress arrives later — the if-then plan is already in place. Mental Contrasting (Oettingen) extends this: identifying a desired outcome alongside today's actual state creates cognitive readiness that makes regulation more automatic. Stillform uses your morning outcome to recommend the right starting protocol for your day." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10, fontStyle: "italic" }}>One word. The rest of the day organizes around it.</div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[
+                        { id: "sharp", label: "Sharp", subtitle: "Focused execution" },
+                        { id: "composure", label: "Composed", subtitle: "Steady through pressure" },
+                        { id: "recover", label: "Recover", subtitle: "Rebuild capacity" }
+                      ].map(o => {
+                        const selected = outcomeFocus?.id === o.id;
+                        return (
+                          <button key={o.id} onClick={() => setOutcomeFocus({ id: o.id, label: o.label, date: today })} style={{
+                            background: selected ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                            color: selected ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{o.label}</button>
+                        );
+                      })}
+                    </div>
 
                     <button onClick={saveCheckin} style={{
                       width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
