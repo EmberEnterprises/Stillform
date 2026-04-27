@@ -15,7 +15,7 @@ Stillform is composure architecture. That is the precise and complete product de
 
 Stillform is not a wellness app. Not a self-improvement program. Not a mental health treatment. It is a precision composure system — structured interventions that interrupt activation and restore functional baseline in real time.
 
-The people who use it are not broken. They feel everything at full intensity and need to stay functional inside it. They want a dashboard, not a hug. An operator, not a patient. They do not want to be better. They want to be clear.
+The people who use it are not broken. They feel everything at full intensity and need to stay functional inside it. They want a dashboard, not a hug. An operator, not a patient. They want to be the best version of themselves — clear, functional, and self-aware. This app helps them recognize their patterns and understand who they actually are.
 
 ### The Product Philosophy
 
@@ -23,7 +23,7 @@ Regulate yourself. See yourself clearly. See others clearly. Let them in.
 
 That is the sequence. That is the architecture. Every feature maps to one of those four stages.
 
-Composure is a form of class — and it is accessible to everyone. Not just executives or athletes. Anyone who has ever needed to hold it together before they were ready. Anyone who has ever said something they did not mean because their system fired before their thinking caught up.
+Composure is a form of class — poise under pressure, accessible to everyone. Not a personality trait. A trainable skill. Anyone who has ever needed to hold it together before they were ready. Anyone who has ever said something they did not mean because their system fired before their thinking caught up.
 
 ### The Four Pillars
 
