@@ -2381,3 +2381,84 @@ One statement per combination. User reads it, recognizes it, confirms. Written i
 4. Watch haptic breathing companion (Galaxy Watch Ultra)
 5. TestFlight build
 6. Google Play closed testing (14-day clock)
+
+
+---
+
+## Session Summary — April 27, 2026
+
+### COMPLETED THIS SESSION
+
+**Info buttons everywhere (science-verified):** Hero CTA personalized by type, feel chips pre/post, bio-filter, Composure Check, morning check-in, What Shifted, Next Move, Lock-in, all tool headers, all My Progress data points, 60 BPM pulse. All copy verified against science sheet.
+
+**Screen 2 — Next Move + Lock-in BUILT:** 4 buttons: Send a message / Hold a boundary / Delay your response / Let it go. Lock-in card with personalized statement by regulation type. 20-second pause. Info button on lock-in header. LOCK_IN_STATEMENTS constant in App.jsx.
+
+**Balanced regulation type REMOVED:** Calibration UI binary only. All fallbacks return thought-first. Existing balanced users migrated on next load. reframe.js updated.
+
+**Pre-meeting notifications BUILT:** 30min + 15min before event. Auto-schedules on calendar update. Settings toggle + time pickers. Native only. Keys: PRE_MEETING_NOTIF_KEY, PRE_MEETING_NOTIF_FIRST_KEY, PRE_MEETING_NOTIF_SECOND_KEY.
+
+**Composure Check rename:** GO/NO-GO renamed everywhere. Security gate updated. Description text removed from screen.
+
+**Audit fixes:** Observe and Choose renamed to Self Mode. spiraling replaced with cycling. Balanced card and tone option removed.
+
+**Stuck chip added:** Pre and post-session chips. Routes to Reframe clarity mode. feelMap entry in reframe.js: cognitive state, no body prompts.
+
+**FAQ rewrite:** 27 questions, Stillform voice, science woven in. Calibration framed as tendency not fixed type.
+
+**Security gate:** All 41 checks passing. FocusCheckValidation function boundary restored.
+
+---
+
+## OPEN ISSUES — Must Carry Into Next Session
+
+### 1. Bio-filter routing gap (CRITICAL — fix before launch)
+
+Thought-first users who flag physical activation in bio-filter still route to Reframe. Bio-filter informs AI context but does NOT affect routing for thought-first users.
+
+Current routing App.jsx line 11968:
+- isThoughtFirst: ALWAYS Reframe, no bio-filter override
+- isBodyFirst + offBaseline: Body Scan
+- isBodyFirst + stuck: Reframe clarity
+- isBodyFirst default: Breathe
+
+Science: Ochsner and Gross (2005) — at high arousal, physiological intervention must come first regardless of regulation type.
+
+Fix: Thought-first + bio-filter active (activated/pain/depleted/sleep) should route to Breathe first. State-based override only. NOT forcing a type switch.
+
+Arlin position: Bio-filter is the correct routing override mechanism. Feel chips are NOT routing signals — they inform AI context only. Does not want to force users into the other type default. Wants the system to read current physical signal and adjust.
+
+### 2. Stuck chip routing — question unresolved
+
+For thought-first: Stuck to Reframe is their default anyway — chip does nothing different.
+For body-first: What does Stuck mean — cognitively unclear (Reframe) vs physically frozen (different)? Not resolved.
+
+### 3. Disconnected chip — agreed, not built
+
+Label: Disconnected. Routing: all types to Body Scan first. AI context: hypoarousal, below baseline, needs grounding before cognitive work. Science: Porges Polyvagal Theory, Ogden et al 2006.
+
+---
+
+## Launch Sequence
+
+1. Fix bio-filter routing for thought-first
+2. Resolve Stuck routing for body-first
+3. Add Disconnected chip
+4. Onboarding redesign
+5. Android Studio APK Google Play 14-day closed testing (need 12 Gmail addresses — Arlin has 5)
+6. Xcode TestFlight
+7. Both stores approved then public
+8. Reddit launch
+
+---
+
+## Technical Reference
+
+- Routing logic: App.jsx line 11968
+- offBaseline: bioFilter includes activated, depleted, pain, sleep, medicated
+- autoMode: excited/focused = hype, stuck = clarity, default = calm
+- LOCK_IN_STATEMENTS: App.jsx after NEXT_MOVE_ACTION_OPTIONS
+- Security gate: scripts/ship-preflight.mjs 41 checks — run before every push
+- Netlify: MANUAL deploy — Arlin triggers only
+- GitHub token: [GITHUB_TOKEN_IN_SETTINGS] valid to May 2026
+- Bobby is name only on LLC — NOT involved in code
+
