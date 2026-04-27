@@ -1508,6 +1508,150 @@ function getStillformToday(date = new Date()) {
   return toLocalDateKey(target);
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ─── TimeKeeper — Single Source of Truth for All Date/Time Operations ───────
+//
+// The phone is the source of truth for time. The OS already handles DST,
+// timezone changes, and leap years. TimeKeeper just reads the phone correctly
+// and exposes one consistent API so date logic doesn't drift across the codebase.
+//
+// USE THIS MODULE for every date/time question in the app.
+// DO NOT use raw `new Date().toISOString().slice/split` or `Date.now() - 86400000`
+// patterns — those bypass the user's local time and the morning_start setting.
+//
+// Two flavors of "today":
+//   - clockDay():     phone's wall-clock day  (use for: timestamps, log entries)
+//   - stillformDay(): morning_start-aware day (use for: ceremonies, streaks, practice continuity)
+//
+// All date strings returned in YYYY-MM-DD format, local time.
+// ─────────────────────────────────────────────────────────────────────────────
+const TimeKeeper = {
+  // ─── CLOCK DAY (phone's wall-clock calendar day) ─────────────────────────
+
+  /** Today by phone clock. e.g. "2026-04-27" */
+  clockDay() {
+    return toLocalDateKey(new Date());
+  },
+
+  /** Yesterday by phone clock. e.g. "2026-04-26" */
+  clockYesterday() {
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    return toLocalDateKey(d);
+  },
+
+  /** Extract clock day from a Date object or ISO timestamp string.
+   *  Returns null if input is missing or invalid.
+   *  REPLACES the broken `timestamp.slice(0, 10)` pattern (which extracts UTC). */
+  clockDayOf(input) {
+    if (!input) return null;
+    const dt = input instanceof Date ? input : new Date(input);
+    if (Number.isNaN(dt.getTime())) return null;
+    return toLocalDateKey(dt);
+  },
+
+  // ─── STILLFORM DAY (morning_start-aware practice day) ────────────────────
+
+  /** Today as the user's practice day. If now is before their morning_start
+   *  setting (default 4:30 AM local), returns yesterday's date so late-night
+   *  sessions stay grouped with the practice day they belong to. */
+  stillformDay() {
+    return getStillformToday(new Date());
+  },
+
+  /** Yesterday as the user's practice day. */
+  stillformYesterday() {
+    const todayKey = getStillformToday(new Date());
+    // Use noon-of-today to avoid DST edge cases when subtracting a day
+    const d = new Date(`${todayKey}T12:00:00`);
+    d.setDate(d.getDate() - 1);
+    return toLocalDateKey(d);
+  },
+
+  /** Extract Stillform day from a Date object or ISO timestamp string.
+   *  Honors the user's morning_start setting at time of call.
+   *  Returns null if input is missing or invalid. */
+  stillformDayOf(input) {
+    if (!input) return null;
+    const dt = input instanceof Date ? input : new Date(input);
+    if (Number.isNaN(dt.getTime())) return null;
+    return getStillformToday(dt);
+  },
+
+  // ─── PERIOD FILTERS (millisecond cutoffs for sliding windows) ────────────
+
+  /** Millisecond timestamp for N days ago. Use for "last 30 days" filter math:
+   *  `sessions.filter(s => new Date(s.timestamp).getTime() > TimeKeeper.daysAgoMs(30))`
+   *  This is a sliding window — exactly N × 24 hours back from now. */
+  daysAgoMs(n) {
+    return Date.now() - n * 24 * 60 * 60 * 1000;
+  },
+
+  // ─── TIMESTAMPS ──────────────────────────────────────────────────────────
+
+  /** Current millisecond timestamp. */
+  nowMs() {
+    return Date.now();
+  },
+
+  /** Current ISO string for storing as a timestamp.
+   *  e.g. "2026-04-27T15:30:00.000Z" */
+  nowIso() {
+    return new Date().toISOString();
+  },
+
+  // ─── TIMEZONE ────────────────────────────────────────────────────────────
+
+  /** User's IANA timezone string. e.g. "America/New_York", "Asia/Tokyo".
+   *  Reads the OS — auto-updates when user travels.
+   *  Returns null if browser doesn't support Intl (very rare). */
+  timezone() {
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || null;
+    } catch {
+      return null;
+    }
+  },
+
+  /** Detect if the user has changed timezone since last app open.
+   *  Use the result to inform AI context — does NOT change time logic itself
+   *  (the OS already handled that). Just lets the AI know the user moved.
+   *  Returns: { changed: boolean, from: string|null, to: string|null }
+   *  Updates the stored timezone every call so future calls compare against most recent. */
+  detectTravel() {
+    try {
+      const STORAGE_KEY = "stillform_last_timezone";
+      const currentTz = this.timezone();
+      if (!currentTz) return { changed: false, from: null, to: null };
+      const prevTz = (() => {
+        try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
+      })();
+      try { localStorage.setItem(STORAGE_KEY, currentTz); } catch {}
+      if (!prevTz) return { changed: false, from: null, to: currentTz };
+      if (prevTz === currentTz) return { changed: false, from: prevTz, to: currentTz };
+      return { changed: true, from: prevTz, to: currentTz };
+    } catch {
+      return { changed: false, from: null, to: null };
+    }
+  },
+
+  // ─── DISPLAY ─────────────────────────────────────────────────────────────
+
+  /** User-facing date string in their locale. Use for display only,
+   *  never for storage or comparison.
+   *  Default opts: { month: "short", day: "numeric" } e.g. "Apr 27" */
+  formatForUser(input, options = { month: "short", day: "numeric" }) {
+    if (!input) return "";
+    const d = input instanceof Date ? input : new Date(input);
+    if (Number.isNaN(d.getTime())) return "";
+    try {
+      return d.toLocaleDateString(undefined, options);
+    } catch {
+      return "";
+    }
+  }
+};
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
