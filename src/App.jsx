@@ -4806,21 +4806,117 @@ const CryptoStore = (() => {
   return { encrypt, decrypt };
 })();
 
-// Encrypted get/set for sensitive keys
+// ─── SecureStore — IndexedDB fallback for secureSet/secureGet ────────────────
+// Why: localStorage caps at ~5–10MB per origin. When a long conversation hits
+// the cap, secureSet's localStorage.setItem throws QuotaExceededError, the
+// catch block swallows it, and the message is silently lost. Routing the write
+// to IndexedDB on overflow preserves the conversation. IndexedDB has ~50% disk
+// quota (gigabytes). Same AES-GCM encryption — encryption happens in secureSet
+// before this module is reached, so the stored blob is identical either way.
+const SecureStore = (() => {
+  const DB_NAME = "stillform_secure";
+  const STORE = "secure_data";
+
+  const getDB = () => new Promise((resolve, reject) => {
+    try {
+      const req = indexedDB.open(DB_NAME, 1);
+      req.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+      req.onsuccess = e => resolve(e.target.result);
+      req.onerror = () => reject(req.error);
+    } catch (e) { reject(e); }
+  });
+
+  const set = async (key, value) => {
+    try {
+      const db = await getDB();
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction(STORE, "readwrite");
+        const store = tx.objectStore(STORE);
+        const req = store.put(value, key);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => reject(req.error);
+      });
+    } catch { return false; }
+  };
+
+  const get = async (key) => {
+    try {
+      const db = await getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE, "readonly");
+        const store = tx.objectStore(STORE);
+        const req = store.get(key);
+        req.onsuccess = () => resolve(req.result === undefined ? null : req.result);
+        req.onerror = () => resolve(null);
+      });
+    } catch { return null; }
+  };
+
+  const remove = async (key) => {
+    try {
+      const db = await getDB();
+      return new Promise((resolve) => {
+        const tx = db.transaction(STORE, "readwrite");
+        const store = tx.objectStore(STORE);
+        const req = store.delete(key);
+        req.onsuccess = () => resolve(true);
+        req.onerror = () => resolve(false);
+      });
+    } catch { return false; }
+  };
+
+  return { set, get, remove };
+})();
+
+// Encrypted get/set for sensitive keys.
+// Tries localStorage first (fast), falls through to IndexedDB on overflow/error.
+// Reads check localStorage first, then IndexedDB. Both stores hold the same
+// encrypted blob shape — no decryption-path difference.
 async function secureGet(key) {
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (parsed?.__enc) return await CryptoStore.decrypt(parsed);
-    return parsed;
-  } catch { return null; }
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.__enc) return await CryptoStore.decrypt(parsed);
+      return parsed;
+    }
+  } catch {}
+  // localStorage empty or unreadable — try IndexedDB fallback
+  try {
+    const fallback = await SecureStore.get(key);
+    if (fallback) {
+      if (fallback?.__enc) return await CryptoStore.decrypt(fallback);
+      return fallback;
+    }
+  } catch {}
+  return null;
 }
 async function secureSet(key, value) {
+  let encrypted;
   try {
-    const encrypted = await CryptoStore.encrypt(value);
+    encrypted = await CryptoStore.encrypt(value);
+  } catch {
+    return; // encryption failure — caller can't recover, give up cleanly
+  }
+  // Try localStorage first
+  try {
     localStorage.setItem(key, JSON.stringify(encrypted));
-  } catch {}
+    // Success — also clear any stale IndexedDB copy for this key so reads stay consistent
+    SecureStore.remove(key).catch(() => {});
+    return;
+  } catch {
+    // Quota exceeded or storage unavailable — fall through to IndexedDB
+  }
+  try {
+    await SecureStore.set(key, encrypted);
+  } catch {
+    // Both stores failed. Write a single non-blocking marker for diagnostics.
+    // Caller doesn't get an exception — current session continues normally —
+    // but at least the failure is visible if the user reports a missing message.
+    try {
+      sessionStorage.setItem("stillform_secure_set_failed_at", new Date().toISOString());
+    } catch {}
+  }
 }
 
 // ─── IMAGE OCR UTILITY ───────────────────────────────────────────────────────
