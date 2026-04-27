@@ -7591,8 +7591,8 @@ function MyProgress({ onBack }) {
     : null;
 
   // Autonomous exit trend — last 30 days vs prior 30 days
-  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
-  const sixtyDaysAgo = Date.now() - 60 * 24 * 60 * 60 * 1000;
+  const thirtyDaysAgo = TimeKeeper.daysAgoMs(30);
+  const sixtyDaysAgo = TimeKeeper.daysAgoMs(60);
   const recentAutoExits = sessions.filter(s =>
     s.source === "metacognition" &&
     (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated") &&
@@ -8539,8 +8539,8 @@ function MyProgress({ onBack }) {
         {hasPatterns && (() => {
           // ── DATA COMPUTATION ─────────────────────────────────────────
           const now = new Date();
-          const oneWeekAgo = new Date(now - 7 * 86400000);
-          const twoWeeksAgo = new Date(now - 14 * 86400000);
+          const oneWeekAgo = new Date(TimeKeeper.daysAgoMs(7));
+          const twoWeeksAgo = new Date(TimeKeeper.daysAgoMs(14));
 
           // Sessions this week vs last week
           const sessionsThisWeek = sessions.filter(s => new Date(s.timestamp) >= oneWeekAgo);
@@ -10744,7 +10744,7 @@ const getSignalDivergence = () => {
     if (!mappedAreas.length) return null;
 
     const history = JSON.parse(localStorage.getItem("stillform_checkin_history") || "[]");
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const sevenDaysAgo = TimeKeeper.daysAgoMs(7);
     const recent = history.filter(c => new Date(c.timestamp || c.date).getTime() > sevenDaysAgo);
     if (recent.length < 3) return null;
 
