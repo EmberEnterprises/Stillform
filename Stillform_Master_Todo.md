@@ -50,7 +50,6 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 - [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in `reframe.js`
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
 - [ ] Language preferences in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
-- [ ] 3–5 real testimonials
 - [ ] Reddit launch post — r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD (do not post before stores are live)
 
 ---
