@@ -11966,8 +11966,10 @@ const isSignalProfileConfigured = () => {
                       const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
 
                       if (isThoughtFirst) {
-                        // Thought-first → straight to Reframe
-                        setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                        // Thought-first → Reframe, but Breathe first if bio-filter flags off-baseline
+                        // (Ochsner & Gross 2005: at high arousal, physiological intervention before cognitive)
+                        if (offBaseline) startPathway("calm");
+                        else { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
                       } else if (isBodyFirst) {
                         // Body-first → Breathe, or Body Scan if off-baseline, or Reframe if stuck
                         if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
