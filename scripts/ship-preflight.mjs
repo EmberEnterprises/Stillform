@@ -68,7 +68,11 @@ const checks = [
   { label: "TimeKeeper guard: no inline ms day math (86400000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*86400000", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no inline ms day math (24*60*60*1000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*24\\s*\\*\\s*60\\s*\\*\\s*60\\s*\\*\\s*1000", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no UTC extraction from s.timestamp via slice", cmd: "rg", args: ["-n", "\\bs\\.timestamp\\??\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" },
-  { label: "TimeKeeper guard: no UTC extraction from sentAt via slice", cmd: "rg", args: ["-n", "\\bsentAt\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" }
+  { label: "TimeKeeper guard: no UTC extraction from sentAt via slice", cmd: "rg", args: ["-n", "\\bsentAt\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" },
+  // Block direct calls to the private helpers — all external date logic must route through TimeKeeper.
+  // The underscore prefix marks them as internal; \\b boundary in JS regex means matches do not include _-prefixed names.
+  { label: "TimeKeeper guard: no direct toLocalDateKey() — use TimeKeeper.clockDay/clockDayOf", cmd: "rg", args: ["-n", "\\btoLocalDateKey\\(", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no direct getStillformToday() — use TimeKeeper.stillformDay/stillformDayOf", cmd: "rg", args: ["-n", "\\bgetStillformToday\\(", "src/App.jsx"], type: "must-not-match" }
 ];
 
 let failed = false;

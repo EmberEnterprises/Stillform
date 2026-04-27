@@ -1484,20 +1484,24 @@ const TOOL_ENTRY_PRIMER_COPY = {
   }
 };
 
-function toLocalDateKey(input = new Date()) {
+// PRIVATE — internal helper. External callers must use TimeKeeper.clockDay() / clockDayOf().
+// Do not call _toLocalDateKey directly outside this module — preflight lint will flag it.
+function _toLocalDateKey(input = new Date()) {
   const dt = input instanceof Date ? input : new Date(input);
-  if (Number.isNaN(dt.getTime())) return toLocalDateKey(new Date());
+  if (Number.isNaN(dt.getTime())) return _toLocalDateKey(new Date());
   const yyyy = dt.getFullYear();
   const mm = String(dt.getMonth() + 1).padStart(2, "0");
   const dd = String(dt.getDate()).padStart(2, "0");
   return `${yyyy}-${mm}-${dd}`;
 }
 
+// PRIVATE — internal helper. External callers must use TimeKeeper.stillformDay() / stillformDayOf().
 // Returns the user's "logical today" — calendar day shifted by morning_start.
-// Use for daily-ceremony comparisons (morning check-in, EOD, "is it done today")
+// Used for daily-ceremony comparisons (morning check-in, EOD, "is it done today")
 // where the user's day rolls over at their configured morning start, not midnight.
 // Default morning start: 270 minutes (4:30 AM local). Always returns a local date key.
-function getStillformToday(date = new Date()) {
+// Do not call _getStillformToday directly outside this module — preflight lint will flag it.
+function _getStillformToday(date = new Date()) {
   const morningStart = (() => {
     try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; }
     catch { return 270; }
@@ -1505,7 +1509,7 @@ function getStillformToday(date = new Date()) {
   const minutesNow = date.getHours() * 60 + date.getMinutes();
   const target = new Date(date);
   if (minutesNow < morningStart) target.setDate(target.getDate() - 1);
-  return toLocalDateKey(target);
+  return _toLocalDateKey(target);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1530,14 +1534,14 @@ const TimeKeeper = {
 
   /** Today by phone clock. e.g. "2026-04-27" */
   clockDay() {
-    return toLocalDateKey(new Date());
+    return _toLocalDateKey(new Date());
   },
 
   /** Yesterday by phone clock. e.g. "2026-04-26" */
   clockYesterday() {
     const d = new Date();
     d.setDate(d.getDate() - 1);
-    return toLocalDateKey(d);
+    return _toLocalDateKey(d);
   },
 
   /** Extract clock day from a Date object or ISO timestamp string.
@@ -1547,7 +1551,7 @@ const TimeKeeper = {
     if (!input) return null;
     const dt = input instanceof Date ? input : new Date(input);
     if (Number.isNaN(dt.getTime())) return null;
-    return toLocalDateKey(dt);
+    return _toLocalDateKey(dt);
   },
 
   // ─── STILLFORM DAY (morning_start-aware practice day) ────────────────────
@@ -1556,16 +1560,16 @@ const TimeKeeper = {
    *  setting (default 4:30 AM local), returns yesterday's date so late-night
    *  sessions stay grouped with the practice day they belong to. */
   stillformDay() {
-    return getStillformToday(new Date());
+    return _getStillformToday(new Date());
   },
 
   /** Yesterday as the user's practice day. */
   stillformYesterday() {
-    const todayKey = getStillformToday(new Date());
+    const todayKey = _getStillformToday(new Date());
     // Use noon-of-today to avoid DST edge cases when subtracting a day
     const d = new Date(`${todayKey}T12:00:00`);
     d.setDate(d.getDate() - 1);
-    return toLocalDateKey(d);
+    return _toLocalDateKey(d);
   },
 
   /** Extract Stillform day from a Date object or ISO timestamp string.
@@ -1575,7 +1579,7 @@ const TimeKeeper = {
     if (!input) return null;
     const dt = input instanceof Date ? input : new Date(input);
     if (Number.isNaN(dt.getTime())) return null;
-    return getStillformToday(dt);
+    return _getStillformToday(dt);
   },
 
   // ─── PERIOD FILTERS (millisecond cutoffs for sliding windows) ────────────
@@ -2091,7 +2095,7 @@ const toDayKey = (value) => {
   try {
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return null;
-    return toLocalDateKey(dt);
+    return TimeKeeper.clockDayOf(dt);
   } catch {
     return null;
   }
@@ -2753,7 +2757,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     // Infer from today's check-in if available — user can always override via chips
     try {
       const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-      if (!checkin || checkin.date !== getStillformToday()) return null;
+      if (!checkin || checkin.date !== TimeKeeper.stillformDay()) return null;
       const mood = (checkin.mood || "").toLowerCase();
       if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
       if (mood.match(/angry|rage|furious|frustrated|irritat/)) return "angry";
@@ -2826,7 +2830,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
-      date: toLocalDateKey(),
+      date: TimeKeeper.clockDay(),
       toolId: "breathe",
       toolFamily: getToolFamily("breathe"),
       regulationType,
@@ -3443,7 +3447,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     // Infer from today's check-in if available — user can always override via chips
     try {
       const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-      if (!checkin || checkin.date !== getStillformToday()) return null;
+      if (!checkin || checkin.date !== TimeKeeper.stillformDay()) return null;
       const mood = (checkin.mood || "").toLowerCase();
       if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
       if (mood.match(/angry|rage|furious|frustrated|irritat/)) return "angry";
@@ -3510,7 +3514,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
-      date: toLocalDateKey(),
+      date: TimeKeeper.clockDay(),
       toolId: "scan",
       toolFamily: getToolFamily("scan"),
       regulationType,
@@ -4844,7 +4848,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Infer from today's check-in if available — user can always override
     try {
       const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-      if (!checkin || checkin.date !== getStillformToday()) return null;
+      if (!checkin || checkin.date !== TimeKeeper.stillformDay()) return null;
       const mood = (checkin.mood || "").toLowerCase();
       const stress = checkin.stressEvent;
       if (mood.match(/anxious|anxiety|nervous|worried|scared|dread|panic/)) return "anxious";
@@ -5333,7 +5337,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           checkinContext: (() => {
             try {
               const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
-              if (!checkin || checkin.date !== getStillformToday()) return null;
+              if (!checkin || checkin.date !== TimeKeeper.stillformDay()) return null;
               const parts = [];
               if (checkin.sleep) parts.push(`${checkin.sleep}h sleep`);
               if (checkin.energy) parts.push(`energy: ${checkin.energy}`);
@@ -5663,7 +5667,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       id: `comm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       schemaVersion: COMMUNICATION_EVENT_SCHEMA_VERSION,
       timestamp: stamp,
-      date: toLocalDateKey(stamp),
+      date: TimeKeeper.clockDayOf(stamp),
       action: eventAction,
       source: "reframe-state-to-statement",
       sessionTimestamp: sessionShareSummary?.timestamp || null,
@@ -5711,7 +5715,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
-      date: toLocalDateKey(),
+      date: TimeKeeper.clockDay(),
       toolId: "reframe",
       toolFamily: getToolFamily("reframe"),
       regulationType,
@@ -6928,7 +6932,7 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
 // Bio-filter and check-in are historical records — never modified here. feelState is session-local.
 function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = false }) {
   const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
-  const checkinIsToday = checkin?.date === getStillformToday();
+  const checkinIsToday = checkin?.date === TimeKeeper.stillformDay();
   const checkinMood = checkinIsToday ? (checkin?.mood || null) : null;
   const checkinTension = checkinIsToday ? Object.entries(checkin?.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
   const hasMorningData = checkinMood || checkinTension.length > 0;
@@ -7616,7 +7620,7 @@ function MyProgress({ onBack }) {
   ).length;
 
   // Additional data sources
-  const stillformToday = getStillformToday();
+  const stillformToday = TimeKeeper.stillformDay();
   const checkinToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
   const eodToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
   const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
@@ -7889,7 +7893,7 @@ function MyProgress({ onBack }) {
       const blob = new Blob([shareCardText], { type: "text/plain;charset=utf-8" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      const stamp = toLocalDateKey();
+      const stamp = TimeKeeper.clockDay();
       a.href = url;
       a.download = `stillform-composure-card-${stamp}.txt`;
       document.body.appendChild(a);
@@ -8042,7 +8046,7 @@ function MyProgress({ onBack }) {
 
             const dayMap = {};
             allEvents.forEach(d => {
-              const key = toLocalDateKey(d);
+              const key = TimeKeeper.clockDayOf(d);
               dayMap[key] = (dayMap[key] || 0) + 1;
             });
 
@@ -8055,7 +8059,7 @@ function MyProgress({ onBack }) {
               for (let day = 0; day < 7; day++) {
                 const cellDate = new Date(gridStart);
                 cellDate.setDate(gridStart.getDate() + week * 7 + day);
-                const key = toLocalDateKey(cellDate);
+                const key = TimeKeeper.clockDayOf(cellDate);
                 const count = dayMap[key] || 0;
                 const future = cellDate > today;
                 cells.push({ week, day, count, future, date: cellDate });
@@ -9459,7 +9463,7 @@ export default function Stillform() {
   }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupBridgeStep, setupStep, faqBackScreen, focusCheckReturnScreen]);
 
   const getLoopNudgeSnapshot = () => {
-    const todayIso = getStillformToday();
+    const todayIso = TimeKeeper.stillformDay();
     const parseLoopHistory = (key) => {
       try {
         const parsed = JSON.parse(localStorage.getItem(key) || "[]");
@@ -9474,7 +9478,7 @@ export default function Stillform() {
       try {
         const dt = new Date(raw);
         if (Number.isNaN(dt.getTime())) return null;
-        return toLocalDateKey(dt);
+        return TimeKeeper.clockDayOf(dt);
       } catch {
         return null;
       }
@@ -10553,7 +10557,7 @@ export default function Stillform() {
         csvValue(session.exitPoint)
       ].join(","))
     ];
-    const stamp = toLocalDateKey();
+    const stamp = TimeKeeper.clockDay();
     downloadTextFile(lines.join("\n"), `stillform-session-history-${stamp}.csv`, "text/csv;charset=utf-8");
     setExportStatusWithClear(`Session CSV downloaded (${sessions.length} rows).`);
     try { window.plausible("Session CSV Exported", { props: { rows: sessions.length } }); } catch {}
@@ -10606,7 +10610,7 @@ export default function Stillform() {
         <tbody>${rows}</tbody>
       </table>
     </body></html>`;
-    const stamp = toLocalDateKey();
+    const stamp = TimeKeeper.clockDay();
     const fallbackCsv = () => {
       const headers = ["date", "time", "signal", "trigger", "outcome", "notes"];
       const lines = [
@@ -10676,7 +10680,7 @@ export default function Stillform() {
     let cancelled = false;
     const autoSend = async () => {
       if (!metricsOptIn || !metricsAuthToken) return;
-      const today = getStillformToday();
+      const today = TimeKeeper.stillformDay();
       const alreadySentToday = (() => {
         try { return localStorage.getItem(METRICS_LAST_SENT_DAY_KEY) === today; } catch { return false; }
       })();
@@ -11975,7 +11979,7 @@ const isSignalProfileConfigured = () => {
                 const _ms_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
                 const _ms_end = 1050;
                 if (_ms_mins < _ms_start || _ms_mins >= _ms_end) return null;
-                const _ms_today = getStillformToday();
+                const _ms_today = TimeKeeper.stillformDay();
                 const _ms_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _ms_today; } catch { return false; } })();
                 if (ciOpen) return null;
                 return (
@@ -12009,7 +12013,7 @@ const isSignalProfileConfigured = () => {
                 const morningEnd = 1050;
                 if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
                 if (!ciOpen) return null;
-                const today = getStillformToday(now);
+                const today = TimeKeeper.stillformDayOf(now);
                 // EOD done suppresses morning check-in only if EOD was completed TODAY
                 const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
                 if (eodDoneToday) return null;
@@ -12206,7 +12210,7 @@ const isSignalProfileConfigured = () => {
                             // Save check-in with off-baseline flag then route to quick tension scan
                             const bioArray = ["off-baseline"];
                             try {
-                              const today = getStillformToday();
+                              const today = TimeKeeper.stillformDay();
                               localStorage.setItem("stillform_checkin_today", JSON.stringify({
                                 date: today, energy: ciEnergy || "steady", bio: bioArray,
                                 tension: Object.keys(ciTension).length > 0 ? ciTension : null,
@@ -12290,7 +12294,7 @@ const isSignalProfileConfigured = () => {
                     onAccept={() => {
                       const k = showBioFilterSuggestion.kind;
                       const bf = showBioFilterSuggestion.bioFilter;
-                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: getStillformToday(), bioFilter: bf, choice: "accept" })); } catch {}
+                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: TimeKeeper.stillformDay(), bioFilter: bf, choice: "accept" })); } catch {}
                       setShowBioFilterSuggestion(null);
                       if (k === "thought-to-body") startPathway("calm");
                       else if (k === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
@@ -12299,7 +12303,7 @@ const isSignalProfileConfigured = () => {
                     onSkip={() => {
                       const k = showBioFilterSuggestion.kind;
                       const bf = showBioFilterSuggestion.bioFilter;
-                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: getStillformToday(), bioFilter: bf, choice: "skip" })); } catch {}
+                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: TimeKeeper.stillformDay(), bioFilter: bf, choice: "skip" })); } catch {}
                       setShowBioFilterSuggestion(null);
                       if (k === "thought-to-body" || k === "thought-to-scan") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
                       else if (k === "body-to-scan") startPathway("calm");
@@ -12327,7 +12331,7 @@ const isSignalProfileConfigured = () => {
                         try {
                           const raw = JSON.parse(localStorage.getItem("stillform_biofilter_choice") || "null");
                           if (!raw) return null;
-                          if (raw.date !== getStillformToday()) return null;
+                          if (raw.date !== TimeKeeper.stillformDay()) return null;
                           if (raw.bioFilter !== bioFilter) return null;
                           return raw.choice; // "accept" or "skip"
                         } catch { return null; }
@@ -12439,7 +12443,7 @@ const isSignalProfileConfigured = () => {
                 const morningCap = 240; // 4:00 AM — EOD window closes
                 const inEodWindow = currentMinutes >= eveningStart || currentMinutes < morningCap;
                 if (!inEodWindow) return null;
-                const today = getStillformToday(now);
+                const today = TimeKeeper.stillformDayOf(now);
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
                 if (eodSaved && !eodOpen) return (
                   <button onClick={() => {
