@@ -3,19 +3,118 @@ import { WidgetBridge } from "./plugins/widgetBridge";
 import { integrationBridge } from "./plugins/integrationBridge";
 
 class ErrorBoundary extends Component {
-  constructor(props) { super(props); this.state = { error: null }; }
+  constructor(props) {
+    super(props);
+    this.state = { error: null, working: false, status: null };
+  }
   static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error("Stillform error:", error, info); }
+  componentDidCatch(error, info) {
+    console.error("Stillform error:", error, info);
+    // Persist error context for support visibility — survives the reload
+    try {
+      const payload = {
+        timestamp: new Date().toISOString(),
+        message: String(error?.message || error || "unknown"),
+        stack: String(error?.stack || "").slice(0, 2000), // bound the stored size
+        componentStack: String(info?.componentStack || "").slice(0, 1000)
+      };
+      localStorage.setItem("stillform_last_error", JSON.stringify(payload));
+    } catch {}
+  }
+  // Detect signed-in state without depending on sb* helpers (out of scope at file top).
+  // Reads the same session key sbIsSignedIn() reads.
+  isSignedIn() {
+    try {
+      const s = JSON.parse(localStorage.getItem("stillform_sb_session") || "null");
+      return !!s?.access_token;
+    } catch { return false; }
+  }
+  // Cloud restore: navigate with a flag the App will pick up on mount and run sbSyncDown
+  // before rendering. Reload itself naturally clears whatever React state was corrupt.
+  triggerCloudRestore = () => {
+    this.setState({ working: true, status: null });
+    try { window.location.href = "/?restore=1"; }
+    catch { this.setState({ working: false, status: "Could not navigate. Try the Reset button below." }); }
+  };
+  // Reset path: clear data-heavy keys but preserve calibration. User keeps their setup,
+  // loses session/journal/debrief data that most often triggers React crashes when corrupt.
+  triggerReset = () => {
+    this.setState({ working: true, status: null });
+    try {
+      // Guard against double-reset loops: if we already reset within the last 60 seconds,
+      // localStorage itself is likely the problem and another reset won't help.
+      const lastReset = localStorage.getItem("stillform_last_reset_at");
+      if (lastReset) {
+        const elapsed = Date.now() - new Date(lastReset).getTime();
+        if (elapsed < 60_000) {
+          this.setState({ working: false, status: "Reset just ran. If the problem keeps coming back, please reach out at ARAembersllc@proton.me." });
+          return;
+        }
+      }
+      // Preserve calibration + the error log for support
+      const PRESERVE = new Set([
+        "stillform_onboarded",
+        "stillform_regulation_type",
+        "stillform_signal_profile",
+        "stillform_bias_profile",
+        "stillform_morning_start",
+        "stillform_last_error",
+        "stillform_sb_session" // keep auth so user doesn't have to re-log-in
+      ]);
+      const keysToRemove = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith("stillform_") && !PRESERVE.has(key)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch {} });
+      localStorage.setItem("stillform_last_reset_at", new Date().toISOString());
+      window.location.href = "/";
+    } catch {
+      this.setState({ working: false, status: "Reset failed. Browser storage may be unavailable. Please reach out at ARAembersllc@proton.me." });
+    }
+  };
   render() {
     if (this.state.error) {
+      const signedIn = this.isSignedIn();
+      const { working, status } = this.state;
       return (
         <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "#C8922A", marginBottom: 12 }}>Something went wrong.</div>
-          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 16, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
-          <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
-            style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
-            Restart Stillform
-          </button>
+          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 24, lineHeight: 1.6, maxWidth: 360 }}>
+            {signedIn
+              ? "Your data is backed up to the cloud. Restoring will replace any corrupted local data with your last sync."
+              : "Resetting will clear recent session data but keep your calibration. You won't lose your setup."}
+          </div>
+          {signedIn ? (
+            <>
+              <button onClick={this.triggerCloudRestore} disabled={working}
+                style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: working ? "wait" : "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500, marginBottom: 12, opacity: working ? 0.6 : 1 }}>
+                {working ? "Restoring..." : "Restore from cloud"}
+              </button>
+              <button onClick={this.triggerReset} disabled={working}
+                style={{ background: "transparent", color: "#9496A1", border: "1px solid rgba(255,255,255,0.12)", padding: "10px 22px", cursor: working ? "wait" : "pointer", borderRadius: 3, fontSize: 13, opacity: working ? 0.6 : 1 }}>
+                Reset and restart
+              </button>
+            </>
+          ) : (
+            <>
+              <button onClick={this.triggerReset} disabled={working}
+                style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: working ? "wait" : "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500, marginBottom: 12, opacity: working ? 0.6 : 1 }}>
+                {working ? "Resetting..." : "Reset and restart"}
+              </button>
+              <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }} disabled={working}
+                style={{ background: "transparent", color: "#9496A1", border: "1px solid rgba(255,255,255,0.12)", padding: "10px 22px", cursor: working ? "wait" : "pointer", borderRadius: 3, fontSize: 13, opacity: working ? 0.6 : 1 }}>
+                Just restart
+              </button>
+            </>
+          )}
+          {status && (
+            <div style={{ fontSize: 12, color: "#9496A1", marginTop: 16, maxWidth: 360, lineHeight: 1.5 }}>
+              {status}
+            </div>
+          )}
         </div>
       );
     }
@@ -9156,6 +9255,19 @@ export default function Stillform() {
     try { return localStorage.getItem("stillform_onboarded") === "yes"; } catch { return false; }
   };
   const [splashDone, setSplashDone] = useState(false);
+  // Detect ?restore=1 from ErrorBoundary's "Restore from cloud" button — show clearer
+  // subtitle on the splash and strip the flag from the URL so reloads don't re-trigger.
+  const [restoring, setRestoring] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("restore") === "1") {
+        // Strip flag from URL without reloading
+        try { window.history.replaceState({}, "", window.location.pathname + window.location.hash); } catch {}
+        return true;
+      }
+    } catch {}
+    return false;
+  });
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
@@ -9179,7 +9291,11 @@ export default function Stillform() {
             try { window.location.hash = "#home"; } catch {}
           }
         } catch {}
-      }).catch(() => {})).catch(() => {});
+        setRestoring(false);
+      }).catch(() => setRestoring(false))).catch(() => setRestoring(false));
+    } else if (restoring) {
+      // No session to restore from — clear flag so splash continues normally
+      setRestoring(false);
     }
     return () => clearTimeout(t);
   }, []);
@@ -11251,7 +11367,7 @@ const isSignalProfileConfigured = () => {
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Composure architecture</div>
+            }}>{restoring ? "Restoring your data…" : "Composure architecture"}</div>
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
