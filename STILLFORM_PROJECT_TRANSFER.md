@@ -5,6 +5,83 @@ Paste this document into the Stillform Claude project at session start. Everythi
 
 ---
 
+## 0. Vision, Values and Product Philosophy
+
+**This section is non-negotiable. Read it before touching anything.**
+
+### What Stillform Is — and Is Not
+
+Stillform is composure architecture. That is the precise and complete product definition. Never define it by what it is not. Never position it against meditation or therapy. Never frame it around crisis, damage control, or negative scenarios. Composure applies equally when nothing is wrong.
+
+Stillform is not a wellness app. Not a self-improvement program. Not a mental health treatment. It is a precision composure system — structured interventions that interrupt activation and restore functional baseline in real time.
+
+The people who use it are not broken. They feel everything at full intensity and need to stay functional inside it. They want a dashboard, not a hug. An operator, not a patient. They do not want to be better. They want to be clear.
+
+### The Product Philosophy
+
+Regulate yourself. See yourself clearly. See others clearly. Let them in.
+
+That is the sequence. That is the architecture. Every feature maps to one of those four stages.
+
+Composure is a form of class — and it is accessible to everyone. Not just executives or athletes. Anyone who has ever needed to hold it together before they were ready. Anyone who has ever said something they did not mean because their system fired before their thinking caught up.
+
+### The Four Pillars
+
+**Body first, then thought.** The nervous system activates before the mind can intervene. Stillform works with that sequence. It does not fight human biology — it follows it. Breathe settles the nervous system. Body Scan clears somatic tension. Reframe processes the cognitive layer once the system is ready to receive it.
+
+**Precision over gentleness.** The user is not fragile. The tools are fast, structured, and direct. The language is clean. There is no toxic positivity, no affirmations, no encouragement that isn't earned by data. The AI does not tell you what to feel. It reflects what is happening and asks one precise question.
+
+**Science without jargon.** Every feature is grounded in published research. The science is woven into the experience — the user feels it working without being told why. The info buttons explain the mechanism in plain language when curiosity hits. The app is self-documenting. It does not need a tutorial because the science is always one tap away.
+
+**Composure as daily practice.** Not a crisis tool. Not something you open when you're falling apart. A daily structure — morning check-in, in-moment regulation, end of day close — that trains the nervous system the way physical training trains the body. Practiced when calm so it is available under pressure. Stress inoculation applied to everyday life.
+
+### Voice and Tone
+
+Direct. Precise. Confident. No drama. No filler. No toxic positivity.
+
+The app speaks like someone who has done the work and trusts you to do yours. It does not over-explain. It does not reassure unnecessarily. It does not celebrate minor actions. It holds a standard without being cold.
+
+Never use:
+- Crisis language (spiraling, alarm, breakdown, rage, meltdown)
+- Dramatic framing (overwhelmed, shattered, destroyed)
+- Toxic positivity (amazing, you've got this, proud of you)
+- Medical language (symptoms, diagnosis, treatment, disorder)
+- Vague wellness language (healing, journey, space, energy)
+
+### AI Response Principles
+
+Everyone carries history — light or heavy. The AI assumes it without asking. Every session is fresh. No judgment. No dismissal. Unconditional acceptance. True listening.
+
+Do not say you care. Make the user feel it through response quality. Show do not tell.
+
+The AI never:
+- Tells the user what to feel
+- Suggests they are wrong about their experience
+- Uses love language or performs warmth
+- Gives advice unprompted
+- Makes assumptions about what the user should do next
+
+The AI always:
+- Names what it observes, not what it concludes
+- Asks one precise question, not multiple
+- Separates what is factually present from what the user's interpretation is adding
+- Adjusts its register based on session count — observational early, pattern-based later
+- Reads physical state from bio-filter and adjusts framing accordingly
+
+### What Cannot Change
+
+- "Stillform is composure architecture" — this is the product definition, always
+- The sequence: body first then thought (or thought first then body — calibration determines, never overridden by opinion)
+- Science grounding — every feature must have a published research basis
+- No medical claims — never position as treatment for any condition
+- No crisis escalation language anywhere in the product
+- The user interprets the product however they want — Arlin does not position it against other categories
+- Composure applies equally in positive states — excitement, preparation, focus — not only under stress
+
+
+
+---
+
 ## 1. What Stillform Is
 
 **Stillform is composure architecture.**
