@@ -5029,6 +5029,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (feelState === "stuck") return "clarity"; // cognitive fog → talk it out
     return "calm"; // default — clarity mode is triggered per-message by input content
   })();
+  // Hypoarousal route — when feelState is "distant", route to Body Scan.
+  // Below the window of tolerance (Siegel 1999), prefrontal cortex offline,
+  // verbal reframing has limited reach until somatic re-engagement (Porges 2011).
+  // Body Scan is the science answer; Reframe is not — so the chip acts as CTA
+  // and switches tools rather than just adjusting AI mode.
+  useEffect(() => {
+    if (feelState === "distant" && typeof onComplete === "function") {
+      onComplete("scan");
+    }
+  }, [feelState]);
   const aiToneChoice = (() => {
     try {
       const stored = localStorage.getItem("stillform_ai_tone") || "balanced";
@@ -6189,6 +6199,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       { id: "anxious", label: "Anxious" },
       { id: "angry", label: "Angry" },
       { id: "flat", label: "Flat" },
+      { id: "distant", label: "Distant" },
       { id: "mixed", label: "Mixed" },
       { id: "stuck", label: "Stuck" }
     ];
@@ -7162,6 +7173,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             { id: "anxious", label: "Anxious" },
             { id: "angry", label: "Angry" },
             { id: "flat", label: "Flat" },
+            { id: "distant", label: "Distant" },
             { id: "mixed", label: "Mixed" },
             { id: "stuck", label: "Stuck" }
           ].map(f => (

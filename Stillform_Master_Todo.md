@@ -45,12 +45,19 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 
 ---
 
-## 🟡 REDDIT-BLOCKING — Existing Prelaunch List
+## 🟡 LAUNCH-GATING — Test Platforms → Public Launch
 
-- [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in `reframe.js`
+Launch path: TestFlight + Google Play closed testing → public launch. Reddit is held in reserve as a contingency lever if the app doesn't sell itself in the first week post-launch — NOT a launch step.
+
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
 - [ ] Language preferences in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
-- [ ] Reddit launch post — r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD (do not post before stores are live)
+- [ ] AI-error → Self Mode auto-flip after 2-3 consecutive failures — per Arlin Apr 27, consider: when the AI returns an error or fails to come back online for 2-3 send attempts in a row, automatically flip the user into the existing Self Mode (`runSelfGuidedFallback` + `selfGuidedActive`) for the rest of the session. Right now the user gets the self-guided card per-attempt; this would persist it once the threshold is hit so they get a steady experience instead of repeatedly hitting timeouts. Existing infrastructure handles the per-message case at App.jsx:5805. Pre-launch consideration — not gating but worth thinking through.
+- [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin
+- [ ] TestFlight build + tester invites — Apple Developer already paid, infrastructure ready
+
+## 📡 CONTINGENCY — If App Doesn't Sell Itself Week 1
+
+- [ ] Reddit launch post — r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD. Held in reserve, not a launch step. Only deploy if organic post-launch traction is weak.
 
 ---
 
@@ -91,6 +98,7 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 
 ## Completed — April 27, 2026
 
+- [x] **Disconnected/Distant chip** — added "Distant" chip to both chip arrays (post-rate feelChips at App.jsx:6202 and PresentStateChips at App.jsx:7176). New `useEffect` in ReframeTool watches feelState — when "distant" is selected, routes to Body Scan via `onComplete("scan")`. Per Porges 2011 polyvagal + Siegel 1999 window of tolerance: hypoarousal is below the window, prefrontal cortex offline, verbal reframing has limited reach until somatic re-engagement. Body Scan is the science answer, not Reframe. The chip overrides calibration (both processing types route the same way) because the science is calibration-agnostic at this state. feelMap entry added to reframe.js with science-grounded AI prompt for cases where user lands back in Reframe after Body Scan: short sentences, concrete language, body-and-room grounding, no abstraction, no "how does that make you feel" (feeling access is what's offline). scoreState left untouched — Distant returns null same as Stuck because hypoarousal is off the reactive↔composed dial. Data layer inherits everything automatically: session records, Pulse journal auto-write, My Progress emotion frequency, CSV export.
 - [x] **ErrorBoundary cleanup + App Diagnostics integration** — Reverted earlier-in-day overshoot (cloud-restore path, calibration-preserving reset, three-button decision UI) since all duplicated existing infrastructure (Settings → Restore now / Delete all data; Reframe → Start fresh). Boundary back to original single-button form with original copy. KEPT one addition: componentDidCatch persists last crash to `stillform_last_error`. `buildPerformanceMetricsSnapshot` now reads it and includes as `last_crash` field in the existing opt-in daily metrics push to `/.netlify/functions/metrics-ingest`. After successful send, key is cleared so no duplicate crash reports. Crashes ride the diagnostics flow the user has already opted into — no new pipeline, no new permission grant. Also removed 4 dead TimeKeeper methods (clockYesterday, nowMs, nowIso, formatForUser — never called). Net: ~118 lines lighter.
 - [x] **ErrorBoundary cloud-restore + reset-and-restart** — ErrorBoundary class rewritten with three paths. Signed-in users see primary "Restore from cloud" button → navigates to `/?restore=1` → App component detects flag, sets `restoring` state, splash subtitle changes to "Restoring your data…" until existing `sbSyncDown` completes, flag stripped from URL via `history.replaceState`. All users get "Reset and restart" → clears all `stillform_*` keys except calibration (`onboarded`, `regulation_type`, `signal_profile`, `bias_profile`, `morning_start`) and auth (`sb_session`) — user keeps setup, doesn't have to re-log-in. Every error logs to `stillform_last_error` (timestamp + message + truncated stack + component stack) for support visibility. Double-reset guard: 60-second cooldown surfaces support email instead of looping. Final Sequence 4 item — Resilience pillar complete.
 - [x] **Cloud sync batching** — `sbSyncUp` rewritten as a single batched POST. Encryption parallelized via `Promise.all` over `SYNC_KEYS` (35 keys, independent per-key, parallel-safe). Single `POST /rest/v1/user_data?on_conflict=user_id,data_key` with array body, native Supabase REST upsert. 34 sequential round trips → 1. Atomic from the user's perspective — either all rows landed or none, no partial-sync silent inconsistency. Empty/null-keyed rows still skipped before batching. UNENCRYPTED_SYNC_KEYS distinction still applied per-key. Return shape `{ok, uploaded, errors}` preserved; all 4 call sites verified compatible (Settings manual sync button reads `r.ok`/`r.uploaded`/`r.errors?.length`, all preserved). No retry baked into the helper — deliberate architectural choice to keep helper contract simple and let call sites decide retry policy with their user-facing context (manual button vs auto-sync after Reframe vs background tab — all want different responses).
