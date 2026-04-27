@@ -6665,9 +6665,14 @@ function ObserveEntryLite({ onClose, onRoute }) {
 }
 
 
-// Bio-filter suggestion — shown when hardware is off-baseline and the user's default
-// pathway would skip the somatic regulation that high arousal needs.
-// State-based, suggestive, never permanent. User can always skip back to their normal type.
+// Bio-filter suggestion — shown when hardware is off-baseline and the science recommends
+// a different tool than the user's default. Suggestive, never forced. State-based, never
+// changes calibration. User can always skip back to their default pathway.
+//
+// kind values:
+//   thought-to-body: thought-first user, recommend Breathe (general off-baseline)
+//   thought-to-scan: thought-first user, recommend Body Scan (Pain — Kabat-Zinn / Reiner / Farb)
+//   body-to-scan:    body-first user, recommend Body Scan (Pain or off-baseline/something)
 function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
   const offBaselineTokens = ["activated","depleted","pain","sleep","medicated","off-baseline","something"];
   const activeStates = String(bioFilter || "")
@@ -6675,27 +6680,52 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
     .map(s => s.trim())
     .filter(s => offBaselineTokens.includes(s));
   const stateLabel = activeStates.length > 0 ? activeStates.join(", ") : "off-baseline";
+  const hasPain = activeStates.includes("pain");
 
-  const config = kind === "thought-to-body" ? {
+  // Per-state framing — the body of the suggestion adapts to what the user actually marked.
+  // Each state gets the line that matches the science for that specific signal.
+  const stateBody = (() => {
+    if (hasPain) return "Pain pulls cognitive resources before you can think clearly. A short body scan locates and softens it first — that's the most effective sequence the research supports.";
+    if (activeStates.includes("activated")) return "The nervous system is firing. Settling arousal first is what lets cognitive work actually land — the body has to come down before the mind can sort.";
+    if (activeStates.includes("sleep")) return "Sleep loss amplifies threat detection and degrades the prefrontal regulation that cognitive reappraisal depends on. Body work first.";
+    if (activeStates.includes("depleted")) return "Cognitive reappraisal is high-effort. When capacity is low, the body-first path lands cleaner.";
+    if (activeStates.includes("medicated")) return "Substance is shifting the baseline. Body work is the safer entry point until you can read your system clearly.";
+    if (activeStates.includes("off-baseline") || activeStates.includes("something")) return "Something is registering you can't quite name. Body work helps locate it before you try to think it through.";
+    return `Hardware: ${stateLabel}. The body usually needs settling before cognitive work lands.`;
+  })();
+
+  const config = kind === "thought-to-scan" ? {
     headline: "Quick check before Reframe",
-    body: `Hardware: ${stateLabel}. The nervous system usually needs to settle before cognitive work lands.`,
+    bodyText: stateBody,
+    primaryLabel: "Body Scan first",
+    primarySub: "Locate the signal, then think.",
+    skipLabel: "Continue to Reframe",
+    infoTitle: "Why Body Scan first?",
+    infoBody: "Pain demands attentional resources before cognition can do its work (Eccleston & Crombez, 1999). Mindfulness-based body scan is the most-researched intervention for somatic distress — Kabat-Zinn (1982) MBSR, Reiner et al. (2013) showed measurable pain reduction from a 10-minute scan, and Farb et al. (2013) showed it shifts processing from cognitive evaluation to bottom-up sensing. This is a state-based suggestion. Your processing type is unchanged — skip to go straight to Reframe."
+  } : kind === "thought-to-body" ? {
+    headline: "Quick check before Reframe",
+    bodyText: stateBody,
     primaryLabel: "Settle first",
     primarySub: "Short Breathe sequence, then your call.",
     skipLabel: "Continue to Reframe",
     infoTitle: "Why settle the body first?",
-    infoBody: "When physical state is off-baseline — activated, depleted, in pain, sleep-deprived, or medicated — the nervous system fires before cognition can intervene. Research (Ochsner & Gross, 2005) shows that at high arousal, physiological regulation has to come before cognitive reappraisal for the cognitive work to actually land. This is a state-based suggestion based on what you marked in your check-in. Your processing type is unchanged — you can skip and go straight to Reframe if you'd rather."
+    infoBody: "When physical state is off-baseline, the nervous system fires before cognition can intervene. Research (Ochsner & Gross, 2005) shows that at high arousal, physiological regulation has to come before cognitive reappraisal for the cognitive work to land. Sleep deprivation specifically impairs reappraisal (Li et al., 2023). This is a state-based suggestion. Your processing type is unchanged — skip to go straight to Reframe."
   } : {
     headline: "Quick check before Breathe",
-    body: `Hardware: ${stateLabel}. A short scan often releases tension breathing alone won't reach.`,
-    primaryLabel: "Body scan first",
-    primarySub: "Identify the signal, then breathe.",
+    bodyText: stateBody,
+    primaryLabel: "Body Scan first",
+    primarySub: "Locate the signal, then breathe.",
     skipLabel: "Continue to Breathe",
-    infoTitle: "Why scan the body first?",
-    infoBody: "When physical state is off-baseline, somatic tension is usually already held in specific points before any breathing intervention. A short scan locates and releases that tension first so the breathing that follows can settle deeper. This is a state-based suggestion based on what you marked in your check-in. Your processing type is unchanged — you can skip and go straight to Breathe if you'd rather."
+    infoTitle: "Why Body Scan first?",
+    infoBody: hasPain
+      ? "Pain demands attentional resources before cognition can do its work (Eccleston & Crombez, 1999). A short body scan is the most-researched intervention — Kabat-Zinn (1982) MBSR, Reiner et al. (2013) showed measurable pain reduction from a 10-minute scan, and Farb et al. (2013) showed it shifts processing from cognitive evaluation to bottom-up sensing. This is a state-based suggestion. Your processing type is unchanged."
+      : "When physical state is off-baseline, somatic tension is usually held in specific points before any breathing intervention. A short scan locates and releases that tension first so the breathing afterward settles deeper. This is a state-based suggestion. Your processing type is unchanged — skip to go straight to Breathe."
   };
 
+  // Quieter visual treatment — softer border, smaller header, less interrupt-y.
+  // Reads as guidance, not a stop sign.
   const primaryBtn = {
-    width: "100%", padding: "16px 18px",
+    width: "100%", padding: "14px 18px",
     background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
     borderRadius: "var(--r)", cursor: "pointer",
     fontFamily: "'DM Sans', sans-serif", textAlign: "left",
@@ -6703,7 +6733,7 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
   };
 
   const skipBtn = {
-    width: "100%", padding: "12px 18px",
+    width: "100%", padding: "10px 18px",
     background: "transparent", border: "0.5px solid var(--border)",
     borderRadius: "var(--r)", cursor: "pointer",
     fontFamily: "'DM Sans', sans-serif", textAlign: "left",
@@ -6712,19 +6742,19 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)" }}>
+    <div style={{ padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", marginBottom: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)" }}>
           {config.headline}
         </div>
         <button
           onClick={() => openInfo(config.infoTitle, config.infoBody)}
-          style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 14, padding: "0 4px", lineHeight: 1 }}
+          style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1 }}
           aria-label="Why this suggestion"
         >ⓘ</button>
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.5 }}>
-        {config.body}
+      <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.55 }}>
+        {config.bodyText}
       </div>
       <button onClick={onAccept} style={primaryBtn}>
         <div style={{ fontWeight: 500, color: "var(--amber)", fontSize: 14 }}>{config.primaryLabel}</div>
@@ -11628,8 +11658,10 @@ const isSignalProfileConfigured = () => {
           </button>
         )}
 
-        {/* FLOATING RESET — accessible from any screen except active tool sessions */}
-        {screen !== "home" && screen !== "panic" && screen !== "setup-bridge" && screen !== "pricing" && 
+        {/* FLOATING RESET — accessible from any screen except active tool sessions.
+            Quick Breathe pill always available, including on home, so the user has an
+            instant safety valve regardless of what else is showing (suggestions, panels, etc). */}
+        {screen !== "panic" && screen !== "setup-bridge" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
           <QBPill onPress={() => setScreen("panic")} />
         )}
@@ -12096,21 +12128,27 @@ const isSignalProfileConfigured = () => {
                 </div>
 
                 {showBioFilterSuggestion ? (
-                  /* Bio-filter override — suggestive, with skip back to normal pathway */
+                  /* Bio-filter override — suggestive, with skip back to normal pathway.
+                     Choice persists per (date, bioFilter snapshot) so re-prompts only fire when state changes. */
                   <BioFilterSuggestion
                     kind={showBioFilterSuggestion.kind}
                     bioFilter={showBioFilterSuggestion.bioFilter}
                     openInfo={(title, body) => setInfoModal({ title, body })}
                     onAccept={() => {
                       const k = showBioFilterSuggestion.kind;
+                      const bf = showBioFilterSuggestion.bioFilter;
+                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: getStillformToday(), bioFilter: bf, choice: "accept" })); } catch {}
                       setShowBioFilterSuggestion(null);
                       if (k === "thought-to-body") startPathway("calm");
+                      else if (k === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
                       else if (k === "body-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
                     }}
                     onSkip={() => {
                       const k = showBioFilterSuggestion.kind;
+                      const bf = showBioFilterSuggestion.bioFilter;
+                      try { localStorage.setItem("stillform_biofilter_choice", JSON.stringify({ date: getStillformToday(), bioFilter: bf, choice: "skip" })); } catch {}
                       setShowBioFilterSuggestion(null);
-                      if (k === "thought-to-body") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                      if (k === "thought-to-body" || k === "thought-to-scan") { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
                       else if (k === "body-to-scan") startPathway("calm");
                     }}
                   />
@@ -12124,20 +12162,46 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
-                    {/* Hero CTA — app routes directly based on calibration */}
+                    {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
                     <button onClick={() => {
                       const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
                       const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+                      const hasPain = bioFilter.includes("pain");
+
+                      // Day-memory: if user already chose for this exact (date, bioFilter) combo today,
+                      // honor that choice silently. Updating bio-filter creates a new key → suggestion re-fires.
+                      const priorChoice = (() => {
+                        try {
+                          const raw = JSON.parse(localStorage.getItem("stillform_biofilter_choice") || "null");
+                          if (!raw) return null;
+                          if (raw.date !== getStillformToday()) return null;
+                          if (raw.bioFilter !== bioFilter) return null;
+                          return raw.choice; // "accept" or "skip"
+                        } catch { return null; }
+                      })();
 
                       if (isThoughtFirst) {
-                        // Thought-first → Reframe, but suggest Breathe first if bio-filter flags off-baseline
-                        // (Ochsner & Gross 2005: at high arousal, physiological intervention before cognitive)
-                        if (offBaseline) setShowBioFilterSuggestion({ kind: "thought-to-body", bioFilter });
-                        else { setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); }
+                        if (offBaseline) {
+                          // Pain → Body Scan (Kabat-Zinn / Reiner / Farb). Other off-baseline → Breathe (Ochsner & Gross / Li 2023).
+                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
+                          if (priorChoice === "accept") {
+                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
+                            else startPathway("calm");
+                          } else if (priorChoice === "skip") {
+                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                          } else {
+                            setShowBioFilterSuggestion({ kind, bioFilter });
+                          }
+                        } else {
+                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                        }
                       } else if (isBodyFirst) {
-                        // Body-first → Breathe, suggest Body Scan if off-baseline, or Reframe if stuck
                         if (feelState === "stuck") { setPathway("clarity"); startTool(TOOLS.find(t => t.id === "reframe")); }
-                        else if (offBaseline) setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
+                        else if (offBaseline) {
+                          if (priorChoice === "accept") startTool(TOOLS.find(t => t.id === "scan"));
+                          else if (priorChoice === "skip") startPathway("calm");
+                          else setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
+                        }
                         else startPathway("calm");
                       } else {
                         // Balanced / unclear → one orienting question
