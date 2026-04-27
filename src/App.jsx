@@ -5380,7 +5380,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const transferDays = new Set(
                 recent14Rated
                   .filter((s) => Number.isFinite(s.preRating) && Number.isFinite(s.postRating) && (s.postRating - s.preRating) >= 1)
-                  .map((s) => (String(s.timestamp || "").slice(0, 10)))
+                  .map((s) => TimeKeeper.stillformDayOf(s.timestamp))
                   .filter(Boolean)
               );
               const transferScore14d = Math.round((transferDays.size / 14) * 100);
@@ -7535,11 +7535,11 @@ function MyProgress({ onBack }) {
     ? (sessionsWithRatings.reduce((sum, s) => sum + (s.delta || 0), 0) / sessionsWithRatings.length).toFixed(1)
     : null;
 
-  const daySet = new Set(sessions.map(s => s.timestamp?.slice(0, 10)).filter(Boolean));
+  const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
   let streak = 0;
   for (let i = 0; i < 365; i++) {
     const d = new Date(); d.setDate(d.getDate() - i);
-    if (daySet.has(toLocalDateKey(d))) streak++; else break;
+    if (daySet.has(TimeKeeper.stillformDayOf(d))) streak++; else break;
   }
 
   const emotionFreq = {};
@@ -7659,7 +7659,7 @@ function MyProgress({ onBack }) {
   ));
   const regulationType = (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })();
   const proofRatedSessions = sessions.filter(s => s.preRating && s.postRating && Number.isFinite(s.postRating - s.preRating));
-  const proofActiveDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
+  const proofActiveDays = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean)).size;
   const proofProtocolRuns = sessions.filter(s => s.entryMode && String(s.entryMode).startsWith("protocol-")).length;
   const proofAvgShift = proofRatedSessions.length
     ? (proofRatedSessions.reduce((sum, s) => sum + (s.postRating - s.preRating), 0) / proofRatedSessions.length)
@@ -8124,7 +8124,7 @@ function MyProgress({ onBack }) {
           const ratedDays14Map = recent30Rated
             .filter((s) => withinDays(s.timestamp, 14))
             .reduce((map, s) => {
-              const day = String(s.timestamp || "").slice(0, 10);
+              const day = TimeKeeper.stillformDayOf(s.timestamp);
               if (!day) return map;
               if (!map[day]) map[day] = [];
               map[day].push(s.postRating - s.preRating);
@@ -8219,7 +8219,7 @@ function MyProgress({ onBack }) {
             );
           };
           const protocolRuns = sessions.filter(s => s.entryMode && String(s.entryMode).startsWith("protocol-")).length;
-          const activeDays = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean)).size;
+          const activeDays = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean)).size;
           if (sessions.length < 2) return null;
           return (
             <div style={{ marginBottom: 12 }}>
@@ -10463,7 +10463,7 @@ export default function Stillform() {
       }
       const response = await res.json().catch(() => ({}));
       const sentAt = new Date().toISOString();
-      const sentDay = sentAt.slice(0, 10);
+      const sentDay = TimeKeeper.stillformDay();
       try {
         localStorage.setItem(METRICS_LAST_SENT_AT_KEY, sentAt);
         localStorage.setItem(METRICS_LAST_SENT_DAY_KEY, sentDay);
@@ -12571,12 +12571,12 @@ const isSignalProfileConfigured = () => {
 
               {/* MY PROGRESS — evidence layer, secondary to shell */}
               {(() => {
-                const daySet = new Set(sessions.map(s => (s.timestamp || "").slice(0, 10)).filter(Boolean));
+                const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
                 let streakCount = 0;
                 for (let i = 0; i < 365; i++) {
                   const d = new Date();
                   d.setDate(d.getDate() - i);
-                  if (daySet.has(toLocalDateKey(d))) streakCount++;
+                  if (daySet.has(TimeKeeper.stillformDayOf(d))) streakCount++;
                   else break;
                 }
                 const toolCounts = sessions.reduce((acc, s) => {
