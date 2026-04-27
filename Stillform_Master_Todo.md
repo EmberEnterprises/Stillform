@@ -45,15 +45,20 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 
 ---
 
-## 🟡 LAUNCH-GATING — Test Platforms → Public Launch
+## 🟡 LAUNCH-GATING — Google Play Closed Testing → Public Launch
 
-Launch path: TestFlight + Google Play closed testing → public launch. Reddit is held in reserve as a contingency lever if the app doesn't sell itself in the first week post-launch — NOT a launch step.
+Launch path: Google Play closed testing → public launch. TestFlight blocked until Arlin has access to an iPhone. Reddit held in reserve as a contingency lever if the app doesn't sell itself in the first week post-launch — NOT a launch step.
+
+**ACTIVE — work that can ship now:**
 
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
 - [ ] Language preferences in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
 - [ ] AI-error → Self Mode auto-flip after 2-3 consecutive failures — per Arlin Apr 27, consider: when the AI returns an error or fails to come back online for 2-3 send attempts in a row, automatically flip the user into the existing Self Mode (`runSelfGuidedFallback` + `selfGuidedActive`) for the rest of the session. Right now the user gets the self-guided card per-attempt; this would persist it once the threshold is hit so they get a steady experience instead of repeatedly hitting timeouts. Existing infrastructure handles the per-message case at App.jsx:5805. Pre-launch consideration — not gating but worth thinking through.
-- [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin
-- [ ] TestFlight build + tester invites — Apple Developer already paid, infrastructure ready
+- [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin. Build the Android App Bundle from existing Capacitor android/ project.
+
+**BLOCKED — pending hardware/access:**
+
+- [ ] TestFlight build + tester invites — Apple Developer Program is paid, but BLOCKED on Arlin acquiring iPhone access for build testing. Pick up after Google Play track is established.
 
 ## 📡 CONTINGENCY — If App Doesn't Sell Itself Week 1
 
