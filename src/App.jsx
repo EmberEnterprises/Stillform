@@ -5003,8 +5003,44 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const communicationExpandedRef = useRef(false);
   const stateToStatementSessionIdRef = useRef(null);
   const latestSessionTimestampRef = useRef(null);
-  const [selfGuidedActive, setSelfGuidedActive] = useState(false);
-  const [activeReframeTab, setActiveReframeTab] = useState("ai"); // "ai" | "self"
+  // AI-failure → Self Mode handoff state (Apr 27).
+  // - consecutiveAiFailures: counter of full handleSend cycles that ended in failure (each cycle internally retries 3x)
+  // - showSelfModeOffer: when true, render the "Switch to Self Mode" card (single-failure case)
+  // - selfModeEntryReason: "ai-failure" if user landed in Self Mode because AI was down; null if they chose Self Mode deliberately
+  // - aiBackOnline: when true, render the "AI's back" pill inside Self Mode (only meaningful when entry reason is ai-failure)
+  // - activeReframeTab: which tab the user has open ("ai" | "self")
+  //
+  // All five persist to sessionStorage so a user mid-Self-Mode who closes Reframe
+  // (interruption, accidental nav) can return without losing where they were.
+  // sessionStorage scope is right: survives tool close/reopen within the same browser
+  // session, doesn't persist across full app restarts (fresh launch = fresh state).
+  const SELF_MODE_STATE_KEY = "stillform_reframe_self_mode_state";
+  const readSelfModeState = () => {
+    try {
+      const raw = sessionStorage.getItem(SELF_MODE_STATE_KEY);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return parsed && typeof parsed === "object" ? parsed : null;
+    } catch { return null; }
+  };
+  const initialSelfModeState = readSelfModeState() || {};
+  const [consecutiveAiFailures, setConsecutiveAiFailures] = useState(initialSelfModeState.consecutiveAiFailures || 0);
+  const [showSelfModeOffer, setShowSelfModeOffer] = useState(initialSelfModeState.showSelfModeOffer || false);
+  const [selfModeEntryReason, setSelfModeEntryReason] = useState(initialSelfModeState.selfModeEntryReason || null);
+  const [aiBackOnline, setAiBackOnline] = useState(initialSelfModeState.aiBackOnline || false);
+  const [activeReframeTab, setActiveReframeTab] = useState(initialSelfModeState.activeReframeTab || "ai"); // "ai" | "self"
+  // Persist any time the cluster changes
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SELF_MODE_STATE_KEY, JSON.stringify({
+        consecutiveAiFailures,
+        showSelfModeOffer,
+        selfModeEntryReason,
+        aiBackOnline,
+        activeReframeTab
+      }));
+    } catch {}
+  }, [consecutiveAiFailures, showSelfModeOffer, selfModeEntryReason, aiBackOnline, activeReframeTab]);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
@@ -5039,6 +5075,50 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       onComplete("scan");
     }
   }, [feelState]);
+  // AI-recovery polling — runs ONLY when user is in Self Mode because of AI failure.
+  // Polls a lightweight /health endpoint (no Anthropic call) every 45s. When backend
+  // is reachable again, sets aiBackOnline=true which surfaces the "AI's back" pill
+  // inside the Self Mode tab. User decides whether to continue Self Mode or return to AI.
+  // Stops polling immediately when user returns to AI tab or AI flag clears.
+  useEffect(() => {
+    if (selfModeEntryReason !== "ai-failure") return;
+    if (activeReframeTab !== "self") return;
+    if (aiBackOnline) return; // already detected, no need to keep polling
+    let cancelled = false;
+    const healthUrl = (() => {
+      try {
+        return window?.Capacitor?.isNativePlatform?.()
+          ? "https://stillformapp.com/.netlify/functions/health"
+          : "/.netlify/functions/health";
+      } catch {
+        return "/.netlify/functions/health";
+      }
+    })();
+    const checkHealth = async () => {
+      if (cancelled) return;
+      try {
+        const res = await fetch(healthUrl, { method: "GET" });
+        if (cancelled) return;
+        if (res.ok) {
+          const json = await res.json().catch(() => null);
+          if (json?.ok) {
+            setAiBackOnline(true);
+            return; // effect cleanup will handle stop
+          }
+        }
+      } catch {
+        // Health endpoint unreachable — stay quiet, try again next interval
+      }
+    };
+    // First check after a short delay so we don't immediately race the failure
+    const initialDelay = setTimeout(checkHealth, 5000);
+    const interval = setInterval(checkHealth, 45000);
+    return () => {
+      cancelled = true;
+      clearTimeout(initialDelay);
+      clearInterval(interval);
+    };
+  }, [selfModeEntryReason, activeReframeTab, aiBackOnline]);
   const aiToneChoice = (() => {
     try {
       const stored = localStorage.getItem("stillform_ai_tone") || "balanced";
@@ -5342,39 +5422,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const [lastInput, setLastInput] = useState("");
 
-  const buildOfflineFallback = (textToSend) => {
-    const priorWins = (() => {
-      try {
-        const sessions = getSessionsFromStorage();
-        return sessions.filter(s => typeof s.delta === "number" && s.delta > 0).slice(-3);
-      } catch { return []; }
-    })();
-    const evidence = priorWins.map(s => {
-      const d = s.timestamp ? new Date(s.timestamp) : null;
-      const dateStr = d && !Number.isNaN(d.getTime())
-        ? d.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-        : "a prior session";
-      return `${dateStr}: shifted +${Number(s.delta).toFixed(1)}`;
-    });
-    const evidenceLine = evidence.length
-      ? `You've shifted before — ${evidence.map(e => e.replace("shifted ", "")).join(", ")}. That's real.`
-      : null;
-    return [
-      "Connection dropped. Work through this on your own for now.",
-      "",
-      `You said: "${textToSend.trim().slice(0, 200)}${textToSend.trim().length > 200 ? "..." : ""}"`,
-      "",
-      "Name what you're actually feeling. One word or phrase.",
-      "",
-      "What's the fact — separate from what your mind is adding to it?",
-      "",
-      "What would you tell someone you respect if they said exactly this to you?",
-      "",
-      "One thing you can do in the next 90 seconds. Not later. Now.",
-      ...(evidenceLine ? ["", evidenceLine] : [])
-    ].join("\n");
-  };
-
   const saveSelfGuidedSession = () => {
     try {
       const elapsedMs = Date.now() - startTime.current;
@@ -5393,21 +5440,37 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   };
 
-  const runSelfGuidedFallback = (sourceText, reason = null) => {
-    const safeInput = (sourceText || lastInput || input || "I'm overloaded and need a reset.").trim();
-    const fallbackText = buildOfflineFallback(safeInput);
-    setMessages(prev => [...prev, {
-      role: "ai",
-      text: fallbackText,
-      distortion: null,
-      selfGuided: true
-    }]);
+  // Helper: switch the user to Self Mode because AI failed.
+  // Sets the entry-reason flag so when AI recovers, the pill prompt knows to surface.
+  // Self Mode is the science answer here — Metacognitive Therapy (Wells 2009), structured
+  // five-step protocol that doesn't depend on AI. See Stillform_Science_Sheet.md.
+  const switchToSelfModeFromFailure = () => {
+    setSelfModeEntryReason("ai-failure");
+    setShowSelfModeOffer(false);
+    setActiveReframeTab("self");
     saveSelfGuidedSession();
-    setSelfGuidedActive(true);
-    if (reason) setError(`Connection issue detected. ${reason}`);
-    else setError(null);
     setLoading(false);
-    try { window.plausible("Reframe Offline Fallback", { props: { mode: effectiveMode } }); } catch {}
+    setError(null);
+    try { window.plausible("Self Mode Auto-Switch", { props: { mode: effectiveMode, threshold: consecutiveAiFailures } }); } catch {}
+  };
+
+  // AI-failure trigger. Increments the failure counter and decides between offer and auto-switch:
+  //   - 1st failure: show the offer card. User can accept or keep trying.
+  //   - 2nd+ failure: auto-switch to Self Mode. User has already been offered once;
+  //     after that, protect them from continued timeout cycles.
+  const runSelfGuidedFallback = (sourceText, reason = null) => {
+    const nextCount = consecutiveAiFailures + 1;
+    setConsecutiveAiFailures(nextCount);
+    if (nextCount >= 2) {
+      switchToSelfModeFromFailure();
+    } else {
+      // First failure — offer Self Mode but don't force it
+      setShowSelfModeOffer(true);
+      setLoading(false);
+      if (reason) setError(`Connection issue detected. ${reason}`);
+      else setError(null);
+      try { window.plausible("Self Mode Offered", { props: { mode: effectiveMode } }); } catch {}
+    }
   };
 
   const handleSend = async (retryText) => {
@@ -5730,7 +5793,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         text: parsed.reframe,
         distortion: parsed.distortion
       }]);
-      setSelfGuidedActive(false);
+      // AI succeeded — reset the failure counter and dismiss the offer card.
+      // Don't clear selfModeEntryReason here: that gets cleared when the user actually
+      // returns to AI tab via the pill, OR when they manually use Start fresh.
+      setConsecutiveAiFailures(0);
+      setShowSelfModeOffer(false);
       setError(null);
     } catch (err) {
       if (err.name === "AbortError") {
@@ -6425,7 +6492,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* FEEL STATE — optional single-tap, neutral by default */}
       <div style={{ marginBottom: 16 }}>
-        {selfGuidedActive && (
+        {showSelfModeOffer && (
           <div style={{
             background: "var(--amber-glow)",
             border: "1px solid var(--amber-dim)",
@@ -6434,14 +6501,19 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             marginBottom: 12
           }}>
             <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>
-              Offline fallback active
+              AI is having trouble connecting
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 10 }}>
-              Connection is unstable. Use this guided fallback now — your progress still saves.
+              Self Mode walks you through the same work without AI — structured, five steps, your pace. Your message is saved either way.
             </div>
-            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput || input)}>
-              Open guided fallback →
-            </button>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={switchToSelfModeFromFailure}>
+                Switch to Self Mode →
+              </button>
+              <button className="btn btn-ghost" style={{ fontSize: 12, color: "var(--text-muted)" }} onClick={() => setShowSelfModeOffer(false)}>
+                Keep trying
+              </button>
+            </div>
           </div>
         )}
         {/* WHAT IS PRESENT — pre-populated from morning check-in (read-only) + in-the-moment feel chips */}
@@ -6485,8 +6557,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <button className="btn btn-primary" style={{ fontSize: 14 }} onClick={() => handleSend(lastInput || input)}>
               ↺ Retry
             </button>
-            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => runSelfGuidedFallback(lastInput || input)}>
-              Continue offline
+            <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={switchToSelfModeFromFailure}>
+              Switch to Self Mode
             </button>
             <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={() => setError(null)}>
               Dismiss
@@ -6533,7 +6605,49 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* SELF MODE — MetacognitionTool inline */}
       {activeReframeTab === "self" && (
-        <MetacognitionTool onComplete={onComplete} onSessionComplete={() => { setShowPostRating(true); }} />
+        <>
+          {aiBackOnline && selfModeEntryReason === "ai-failure" && (
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+              background: "var(--surface)", border: "1px solid var(--amber-dim)",
+              borderRadius: 999, padding: "8px 14px", marginBottom: 12,
+              fontSize: 12, fontFamily: "'DM Sans', sans-serif"
+            }}>
+              <div style={{ color: "var(--text-dim)", flex: 1 }}>
+                <span style={{ color: "var(--amber)" }}>●</span> AI's back. Continue here, or return.
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button onClick={() => {
+                  // User chooses to return to AI tab. Clear all the failure-handoff state
+                  // since the user is making a fresh choice now.
+                  setActiveReframeTab("ai");
+                  setSelfModeEntryReason(null);
+                  setAiBackOnline(false);
+                  try { window.plausible("Self Mode Recovery Returned"); } catch {}
+                }} style={{
+                  background: "none", border: "none", color: "var(--amber)",
+                  fontSize: 12, cursor: "pointer", fontFamily: "inherit", padding: 0
+                }}>
+                  Return →
+                </button>
+                <button onClick={() => {
+                  // User chooses to stay in Self Mode. Dismiss the pill but don't
+                  // clear selfModeEntryReason — if AI fails again later they may want
+                  // to know it's recovered. Polling stops because aiBackOnline stays true.
+                  setAiBackOnline(false);
+                  setSelfModeEntryReason(null); // they made their choice; no more pills
+                  try { window.plausible("Self Mode Recovery Dismissed"); } catch {}
+                }} style={{
+                  background: "none", border: "none", color: "var(--text-muted)",
+                  fontSize: 14, cursor: "pointer", fontFamily: "inherit", padding: "0 4px", lineHeight: 1
+                }}>
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+          <MetacognitionTool onComplete={onComplete} onSessionComplete={() => { setShowPostRating(true); }} />
+        </>
       )}
 
       {/* AI MODE */}
@@ -6789,7 +6903,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               setMessages([]);
               setError(null);
               setLoading(false);
-              setSelfGuidedActive(false);
+              setConsecutiveAiFailures(0);
+              setShowSelfModeOffer(false);
+              setSelfModeEntryReason(null);
+              setAiBackOnline(false);
               setInput("");
             }}>
               Start fresh
