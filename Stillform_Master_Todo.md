@@ -9,8 +9,6 @@
 - [ ] Resolve Stuck chip routing for body-first users (what does Stuck mean for body-first?)
 - [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in reframe.js
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
-- [ ] Talk it out "From this morning" chips persist past day rollover — should clear at user's configured morning start time (default 4:30 AM, Settings override) so stale signals aren't injected when today's check-in hasn't happened yet
-- [ ] CRITICAL — Date/time alignment for global launch. Two date methods mixed in App.jsx: `toLocalDateKey()` (local, correct) and `new Date().toISOString().slice(0,10)` (UTC, breaks evening hours west of UTC). 18+ call sites including check-in writes, streak counts, calendar grid, metrics, loop history. Even line 11879 writes the check-in date in UTC while every other write uses local — same field, two formats. Fix: introduce `getStillformToday()` helper that uses local time AND respects user's morning_start setting, migrate all date-key sites. Timestamps with full ISO time stay UTC (sync metadata is correct as-is).
 - [ ] Language preferences missing in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
 
 ---
@@ -34,6 +32,7 @@
 
 ## Completed — April 27, 2026
 
+- [x] Date/time alignment for global launch — added `getStillformToday()` helper that respects user's morning_start setting; migrated all 15 UTC date-key sites (`toISOString().slice(0,10)`) to local time; added date guards on 5 unguarded `stillform_checkin_today` reads (feelState inference, AI checkinContext, "From this morning" chips, progress dashboard, EOD save). All "is it today?" comparisons now consistent across the app. Calendar-day stamps (debrief writes, download filenames) kept as `toLocalDateKey()`. Fixes the morning-chip rollover bug. Commit 9d44050f.
 - [x] Bio-filter routing override — hero CTA now reroutes thought-first users to Breathe when bio-filter flags off-baseline (Ochsner & Gross 2005 alignment); body-first behavior unchanged. Commit efe6abe3.
 - [x] Info buttons on every element — science-verified copy, all 24 locations
 - [x] Screen 2 — Next Move 4 buttons plus lock-in statements (regulation-type personalized)
