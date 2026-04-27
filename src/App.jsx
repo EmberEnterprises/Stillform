@@ -1662,6 +1662,41 @@ const TimeKeeper = {
 // reads inside the same session would always return changed:false anyway.
 const APP_LOAD_TRAVEL = TimeKeeper.detectTravel();
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Bio-filter staleness guard — bio-filter is the user's hardware diagnostic
+// (activated, depleted, pain, sleep, medicated, off-baseline). It drives
+// AI context, win-suppression, body-first routing, and the hero CTA override.
+//
+// PROBLEM: previously stored as a plain string with no date. Yesterday's
+// hardware drove today's routing forever until the user re-checked in.
+//
+// SCHEMA: {"value": "<filter>", "date": "<stillformDay>"}
+// Reads return "" if the stored date doesn't match today's Stillform-day.
+// External callers must use getActiveBioFilter() / setActiveBioFilter() —
+// direct localStorage access on the key bypasses the staleness check.
+// ─────────────────────────────────────────────────────────────────────────────
+function getActiveBioFilter() {
+  try {
+    const raw = localStorage.getItem("stillform_bio_filter");
+    if (!raw) return "";
+    if (raw.startsWith("{")) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.date !== TimeKeeper.stillformDay()) return "";
+      return parsed.value || "";
+    }
+    return ""; // Legacy plain-string format — no date — treat as expired (safe default)
+  } catch { return ""; }
+}
+
+function setActiveBioFilter(value) {
+  try {
+    localStorage.setItem("stillform_bio_filter", JSON.stringify({
+      value: String(value || ""),
+      date: TimeKeeper.stillformDay()
+    }));
+  } catch {}
+}
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
@@ -3210,7 +3245,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         ].map(opt => (
           <button key={opt.id} onClick={() => {
             setBioFilter(opt.id);
-            try { localStorage.setItem("stillform_bio_filter", opt.id); } catch {}
+            setActiveBioFilter(opt.id);
             setPhase("breathe");
           }} style={{
             width: "100%", background: bioFilter === opt.id ? "var(--amber-glow)" : "var(--surface)",
@@ -5411,7 +5446,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           feelState: feelState,
           bioFilter: (() => {
             try {
-              const bf = localStorage.getItem("stillform_bio_filter");
+              const bf = getActiveBioFilter();
               if (!bf || bf === "clear") return null;
               const labels = {
                 activated: "activated — adrenaline, butterflies, energy surging through the body",
@@ -6232,7 +6267,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         try {
           // Suppress during high-activation states — would read as "you used to be better"
           if (feelState === "angry" || feelState === "anxious") return null;
-          const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+          const bioFilter = getActiveBioFilter();
           if (bioFilter.includes("activated")) return null;
           const sessions = getSessionsFromStorage();
           const wins = sessions.filter(s => s.delta && s.delta > 0 && s.durationFormatted);
@@ -6779,7 +6814,7 @@ function ObserveEntryLite({ onClose, onRoute }) {
         ].map(opt => (
           <button key={opt.id} onClick={() => {
             if (opt.id === "body") {
-              const bf = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+              const bf = getActiveBioFilter();
               const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
               onRoute(opt.id, ob ? "understand" : "settle"); return;
             }
@@ -10795,7 +10830,7 @@ const isSignalProfileConfigured = () => {
   // Called after user answers "what fired first?" + "what do you need?"
   const routeObserveEntry = (signalOrigin, needState) => {
     setShowObserveEntry(false);
-    const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+    const bioFilter = getActiveBioFilter();
     const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain") || bioFilter.includes("sleep") || bioFilter.includes("medicated") || bioFilter.includes("off-baseline") || bioFilter.includes("something");
 
     const goMetacognition = () => {
@@ -12069,8 +12104,8 @@ const isSignalProfileConfigured = () => {
                       energy: ciEnergy || "steady",
                       tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
                     });
-                    if (bioArray.length > 0) localStorage.setItem("stillform_bio_filter", bioArray.join(","));
-                    else localStorage.setItem("stillform_bio_filter", "clear");
+                    if (bioArray.length > 0) setActiveBioFilter(bioArray.join(","));
+                    else setActiveBioFilter("clear");
                     if (isOffBaseline) localStorage.setItem("stillform_off_baseline_flagged", new Date().toISOString());
                   } catch {}
                   try {
@@ -12216,7 +12251,7 @@ const isSignalProfileConfigured = () => {
                                 tension: Object.keys(ciTension).length > 0 ? ciTension : null,
                                 offBaseline: true
                               }));
-                              localStorage.setItem("stillform_bio_filter", "off-baseline");
+                              setActiveBioFilter("off-baseline");
                             } catch {}
                             setCiSaved(true);
                             setCiOpen(false);
@@ -12321,7 +12356,7 @@ const isSignalProfileConfigured = () => {
                   <>
                     {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
                     <button onClick={() => {
-                      const bioFilter = (() => { try { return localStorage.getItem("stillform_bio_filter") || ""; } catch { return ""; } })();
+                      const bioFilter = getActiveBioFilter();
                       const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
                       const hasPain = bioFilter.includes("pain");
 
