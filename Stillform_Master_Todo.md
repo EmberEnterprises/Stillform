@@ -9,6 +9,7 @@
 - [ ] Resolve Stuck chip routing for body-first users (what does Stuck mean for body-first?)
 - [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in reframe.js
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
+- [ ] Talk it out "From this morning" chips persist past day rollover — should clear at user's configured morning start time (default 4:30 AM, Settings override) so stale signals aren't injected when today's check-in hasn't happened yet
 
 ---
 
