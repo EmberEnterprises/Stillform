@@ -5250,7 +5250,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (messages.length === 0 && !retryText && feelState) {
       try {
         const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
-        const todayIso = new Date().toISOString().split("T")[0];
+        const todayIso = TimeKeeper.stillformDay();
         entries.unshift({ id: Date.now(), emotions: [feelState], trigger: "", date: todayIso, timestamp: new Date().toISOString(), source: "reframe-auto" });
         localStorage.setItem("stillform_journal", JSON.stringify(entries));
         try { window.plausible("Pulse Entry", { props: { source: "reframe-auto" } }); } catch {}
@@ -5301,7 +5301,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             try {
               const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
               if (entries.length === 0) return null;
-              const todayIso = new Date().toISOString().split("T")[0];
+              const todayIso = TimeKeeper.stillformDay();
               const fmtEntry = e => {
                 const emotions = e.emotions?.length ? `(${e.emotions.join(", ")})` : "";
                 const trigger = e.trigger?.trim();
@@ -5346,7 +5346,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           eodContext: (() => {
             try {
-              const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
+              const yesterday = TimeKeeper.stillformYesterday();
               const eod = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
               if (!eod || eod.date !== yesterday) return null;
               return `YESTERDAY'S CLOSE: energy level ${eod.energy}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
