@@ -8548,7 +8548,6 @@ function MyProgress({ onBack }) {
         {/* MY PATTERNS — diagnostic intelligence, not history */}
         {hasPatterns && (() => {
           // ── DATA COMPUTATION ─────────────────────────────────────────
-          const now = new Date();
           const oneWeekAgo = new Date(TimeKeeper.daysAgoMs(7));
           const twoWeeksAgo = new Date(TimeKeeper.daysAgoMs(14));
 
