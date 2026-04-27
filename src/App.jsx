@@ -4599,18 +4599,45 @@ const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulat
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
-  const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'}; let uploaded=0; const errors=[];
-  for (const key of SYNC_KEYS) {
+  const user=sbGetUser(); if (!user?.id) return {ok:false,reason:'no_user_id'};
+  // Build per-key payload entries in parallel — encryption is independent per key,
+  // so awaiting them concurrently keeps total time bounded by the slowest single
+  // encryption rather than the sum of all of them.
+  const prepared = await Promise.all(SYNC_KEYS.map(async (key) => {
     try {
-      const raw=localStorage.getItem(key); if (raw===null) continue;
+      const raw = localStorage.getItem(key);
+      if (raw === null) return null; // skip absent keys
       // Non-sensitive routing/preference keys stored as plaintext for cross-device restore
       const enc = UNENCRYPTED_SYNC_KEYS.has(key) ? JSON.stringify(raw) : await encryptForCloud(raw);
-      await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key",{method:"POST",headers:{"Prefer":"resolution=merge-duplicates"},body:JSON.stringify({user_id:user.id,data_key:key,encrypted_blob:enc,app_version:APP_VERSION})});
-      uploaded++;
-    } catch { errors.push(key); }
+      return { user_id: user.id, data_key: key, encrypted_blob: enc, app_version: APP_VERSION };
+    } catch {
+      return { __error: true, key };
+    }
+  }));
+  const rows = prepared.filter(p => p && !p.__error);
+  const encryptionErrors = prepared.filter(p => p?.__error).map(p => p.key);
+  if (rows.length === 0) {
+    // Nothing to upload (no keys present locally, or all failed to encrypt)
+    return { ok: encryptionErrors.length === 0, uploaded: 0, errors: encryptionErrors };
   }
-  try { window.plausible?.("Cloud Sync Up",{props:{keys:uploaded}}); } catch {}
-  return {ok:errors.length===0,uploaded,errors};
+  // Single batched POST — Supabase REST natively accepts arrays at this endpoint.
+  // ?on_conflict=user_id,data_key + Prefer: resolution=merge-duplicates upserts the whole batch atomically.
+  // Atomic from the user's perspective: either all rows landed or none. No partial-sync silent inconsistency.
+  try {
+    await sbFetch("/rest/v1/user_data?on_conflict=user_id%2Cdata_key", {
+      method: "POST",
+      headers: { "Prefer": "resolution=merge-duplicates" },
+      body: JSON.stringify(rows)
+    });
+    try { window.plausible?.("Cloud Sync Up", { props: { keys: rows.length } }); } catch {}
+    return { ok: encryptionErrors.length === 0, uploaded: rows.length, errors: encryptionErrors };
+  } catch (e) {
+    // Whole batch failed. Return the same shape as before but mark every attempted key as errored
+    // so caller's existing {ok:false} handling kicks in. No automatic retry — caller has the user-facing
+    // context (manual button vs auto-sync vs background) to decide whether/how to retry.
+    const allErrors = [...encryptionErrors, ...rows.map(r => r.data_key)];
+    return { ok: false, uploaded: 0, errors: allErrors, reason: e?.message };
+  }
 };
 const sbSyncDown = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
