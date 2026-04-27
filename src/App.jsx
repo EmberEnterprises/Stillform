@@ -1652,6 +1652,12 @@ const TimeKeeper = {
   }
 };
 
+// Captures timezone travel status once at module load.
+// Read by Reframe AI context construction. Doesn't re-run on every send —
+// detectTravel() updates the stored timezone after first call so subsequent
+// reads inside the same session would always return changed:false anyway.
+const APP_LOAD_TRAVEL = TimeKeeper.detectTravel();
+
 const THEME_PRESETS = {
   dark: {
     "--bg": "#0A0A0C",
@@ -5351,6 +5357,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               if (!eod || eod.date !== yesterday) return null;
               return `YESTERDAY'S CLOSE: energy level ${eod.energy}, composure held: ${eod.composure}${eod.word ? `, one word: "${eod.word}"` : ""}. Use this as context — don't announce it unless relevant.`;
             } catch { return null; }
+          })(),
+          travelContext: (() => {
+            if (!APP_LOAD_TRAVEL?.changed) return null;
+            return `USER TIMEZONE CHANGED: was ${APP_LOAD_TRAVEL.from}, now ${APP_LOAD_TRAVEL.to}. They may be traveling. References to "this morning" or "yesterday" may not align with local rhythm — adapt if relevant, but don't announce unless they bring it up.`;
           })(),
           calendarContext: integrationContext.calendarContext,
           healthContext: integrationContext.healthContext,

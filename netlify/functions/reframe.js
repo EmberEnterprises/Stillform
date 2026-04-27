@@ -1043,6 +1043,7 @@ exports.handler = async function(event) {
       journalContext = null,
       checkinContext = null,
       eodContext = null,
+      travelContext = null,
       sessionCount = 0,
       priorModeContext = null,
       feelState = null,
@@ -1207,6 +1208,7 @@ exports.handler = async function(event) {
       }
     }
     if (eodContext) contextParts.push(eodContext);
+    if (travelContext) contextParts.push(travelContext);
     if (calendarContext) contextParts.push(`${calendarContext}. CALENDAR INSTRUCTION: If the user's first message is short or vague (like "hi", "hey", "I need help", "what's up"), and there is an upcoming event within 2 hours, open with it directly: "Are we preparing for [event name]?" or "You've got [event] in [X minutes] — want to use this to prepare?" Do not wait for them to bring it up. If the message is longer and clearly about something else, factor the calendar in quietly but don't lead with it.`);
     if (healthContext) contextParts.push(`${healthContext}. Use this to calibrate how much capacity this person is likely working with today. Don't diagnose — just factor it in when relevant.`);
     if (signalProfile) contextParts.push(`USER'S BODY SIGNAL PROFILE: ${signalProfile}. When they describe physical sensations, cross-reference these known signals. If their description matches their profile, name it directly: "That sounds like your [jaw/chest/etc] response — you've mapped this before." This is high-value recognition. Use it sparingly but confidently.`);
