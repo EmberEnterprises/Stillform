@@ -5,11 +5,13 @@
 
 ## IN PROGRESS — Next Session
 
-- [ ] Fix bio-filter routing for thought-first users (CRITICAL — see transfer doc for full spec)
+- [ ] Bio-filter parity in `routeObserveEntry` (line 10491, 10494) — secondary entry point still routes thought signals + thought-first regType to Reframe without offBaseline check. Hero CTA fix landed; this mirror needs the same override.
 - [ ] Resolve Stuck chip routing for body-first users (what does Stuck mean for body-first?)
 - [ ] Add Disconnected chip — hypoarousal state, Body Scan first, feelMap entry in reframe.js
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
 - [ ] Talk it out "From this morning" chips persist past day rollover — should clear at user's configured morning start time (default 4:30 AM, Settings override) so stale signals aren't injected when today's check-in hasn't happened yet
+- [ ] CRITICAL — Date/time alignment for global launch. Two date methods mixed in App.jsx: `toLocalDateKey()` (local, correct) and `new Date().toISOString().slice(0,10)` (UTC, breaks evening hours west of UTC). 18+ call sites including check-in writes, streak counts, calendar grid, metrics, loop history. Even line 11879 writes the check-in date in UTC while every other write uses local — same field, two formats. Fix: introduce `getStillformToday()` helper that uses local time AND respects user's morning_start setting, migrate all date-key sites. Timestamps with full ISO time stay UTC (sync metadata is correct as-is).
+- [ ] Language preferences missing in Settings — needed for global launch, currently no user-facing language selector exists in code (only auto-locale detection for crisis region routing at line 8913)
 
 ---
 
@@ -32,6 +34,7 @@
 
 ## Completed — April 27, 2026
 
+- [x] Bio-filter routing override — hero CTA now reroutes thought-first users to Breathe when bio-filter flags off-baseline (Ochsner & Gross 2005 alignment); body-first behavior unchanged. Commit efe6abe3.
 - [x] Info buttons on every element — science-verified copy, all 24 locations
 - [x] Screen 2 — Next Move 4 buttons plus lock-in statements (regulation-type personalized)
 - [x] Balanced regulation type removed — calibration binary, fallbacks to thought-first
