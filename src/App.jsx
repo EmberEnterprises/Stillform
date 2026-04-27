@@ -10842,6 +10842,7 @@ const isSignalProfileConfigured = () => {
     setShowObserveEntry(false);
     const bioFilter = getActiveBioFilter();
     const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain") || bioFilter.includes("sleep") || bioFilter.includes("medicated") || bioFilter.includes("off-baseline") || bioFilter.includes("something");
+    const hasPain = bioFilter.includes("pain");
 
     const goMetacognition = () => {
       setScreen("tool");
@@ -10865,11 +10866,27 @@ const isSignalProfileConfigured = () => {
 
     if (needState === "understand") {
       if (signalOrigin === "body") { (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm"); return; }
-      if (signalOrigin === "thought") { goReframe(); return; }
+      if (signalOrigin === "thought") {
+        // Hero CTA parity: offBaseline + Pain → Scan (Kabat-Zinn pain pathway), offBaseline + other → Breathe (Ochsner & Gross), else → Reframe
+        if (offBaseline) {
+          if (hasPain) { goScan(); return; }
+          startPathway("calm"); return;
+        }
+        goReframe(); return;
+      }
       if (signalOrigin === "both") { goMetacognition(); return; }
-      // unsure — use regType as tie-break
-      if (regType === "thought-first") { goReframe(); return; }
-      if (regType === "body-first") { goScan(); return; }
+      // unsure — use regType as tie-break, applying same offBaseline narrowing as the corresponding signal branch
+      if (regType === "thought-first") {
+        if (offBaseline) {
+          if (hasPain) { goScan(); return; }
+          startPathway("calm"); return;
+        }
+        goReframe(); return;
+      }
+      if (regType === "body-first") {
+        (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm");
+        return;
+      }
       goMetacognition(); return;
     }
 
