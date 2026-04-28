@@ -78,18 +78,13 @@
 
 ---
 
-## 60 BPM Visual Entrainment
+## Ambient Pulse (Home Screen Glow)
 
-**What it does:** Subtle 1Hz (60 BPM) ambient glow pulse on the home screen
+**What it does:** A slow, subtle ambient glow on the home screen at roughly the rhythm of a calm resting heart rate.
 
-**The science:** Visual entrainment — rhythmic visual stimuli that the brain synchronizes to — can influence heart rate variability and autonomic state. 60 BPM corresponds to a calm resting heart rate. The user's nervous system picks up the rhythm subconsciously.
+**The design intent:** A quiet, non-demanding visual cue that signals "this is a place to slow down." We do not claim the visual itself entrains heart rate or autonomic state. The literature on cross-modal visual entrainment of HRV at 1Hz is unsupportive — most rhythmic-entrainment evidence is for auditory stimuli with motor responses, not passive visual rhythm.
 
-**Who says so:**
-- Thayer & Lane (2000) — heart rate variability as index of regulated emotional responding — *Review of General Psychology*
-- Trost et al. (2017) — rhythmic entrainment to musical beat modulates autonomic nervous system — *PLOS ONE*
-- Kalda & Kello (2012) — visual rhythmic stimulation entrains neural oscillations — *Cognitive Science*
-
-**If they push back:** "It's 1Hz. The same frequency as a calm heartbeat. The UI is a pacer. You feel calmer opening the app and don't know why — that's by design."
+**Why we kept it anyway:** Ambient design that signals slowness sets the tone of the screen. That tone — quiet, unhurried, unrushed — is part of the experience. The pulse stays as design language. We don't overclaim a physiological mechanism that the literature doesn't support.
 
 ---
 
