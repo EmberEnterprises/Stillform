@@ -45,62 +45,45 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 
 ---
 
-## 🔴 OPEN — Surfaced During Apr 27 Testing
+## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
-These are real bugs/architectural questions Arlin identified during phone testing tonight. Listed here so they don't get lost.
-
-### 🧭 Pre-rate flow needs science-grounded redesign for both processing types
-
-**The complaint, in Arlin's words:** "I don't like the set up of calm my body. There's a gap with how these work. The flow is messed up for both processing types."
-
-**What's currently happening:** The Breathe pre-rate screen (which is what "Calm my body" routes body-first users to, and what thought-first users see when bio-filter sends them through Breathe first) shows: PROCESSING PRIMER text → "How steady are you?" 1–5 reactive↔composed scale → WHAT IS PRESENT chip row (Excited / Focused / Anxious / Angry / Flat / Distant / Mixed / Stuck). Both processing types see the same screen with the same prompts in the same order before they get to actually breathe.
-
-**Why this might be wrong:** The science Stillform is built on says the two types have meaningfully different first moves:
-- **Body-first users** — Porges polyvagal: vagal regulation precedes cortical access. Asking for a 1–5 cognitive self-rating + 8 cognitive feel-state chips BEFORE breathing puts cognition in front of body work, which inverts what the calibration says they need. The PROCESSING PRIMER even says "Downshift physiology first; your cognition clears after the body settles" — and then the very next thing on screen is a cognitive rating task.
-- **Thought-first users** — Ochsner & Gross suppression-vs-reappraisal: cognitive entry point comes first. They likely DO benefit from naming state before body work — but they're routed here through bio-filter, not by default. The current screen serves them okay-ish but treats them as a special case rather than a first-class flow.
-- **Convergence vs divergence** — at what beat should the two paths converge? The current screen forces convergence at the entry, which means neither type gets a path tuned to their nervous system.
-
-**What needs to happen:** Sit down with the science sheet open and walk through both types beat by beat. For each beat ask: what does this user's nervous system actually need RIGHT NOW, and is the current screen doing that? Then design from the science instead of patching what's there.
-
-**Pre-work Claude can do silently before the session** (no code changes, just analysis):
-1. Map the current flow for body-first end-to-end — every screen, every chip, every state capture, every transition.
-2. Same for thought-first — side-by-side comparison.
-3. Pull the relevant passages from `Stillform_Science_Sheet.md`: Porges polyvagal (vagal-cortical sequencing), Ochsner & Gross (cognitive vs somatic regulation), Siegel window of tolerance (hyperarousal vs hypoarousal entry needs), Wells MCT (metacognition as separate from emotion content), Kabat-Zinn / Farb (interoception as distinct access point).
-4. Surface the specific decision points: where does each type need to converge with the other, and where should they diverge? When is feel-state capture appropriate (and for whom)? When is rate-on-scale appropriate? Should the PROCESSING PRIMER text differ by type?
-
-**This is not a tonight thing.** Late-head decisions about science-grounded UX are exactly the wrong shape for tired work. Save it for a clean morning session with the science sheet open.
-
-**Likely supersedes:** the static tip removal question (the toggle gets answered in the redesign), the architectural redundancy in post-Reframe screen (similar shape — overlap to be resolved by science-grounded design pass), possibly the trees theme mismatch (if the screen layout changes the trees may move or be replaced).
+These are real bugs/architectural questions still open after the Apr 28 morning research-driven cleanup commits. Items resolved by those commits are listed under "Resolved Apr 28" subsection below.
 
 ### "Calm my body" hero CTA doesn't act on tap
 Body-first user, Composure Check / Settings show normally, but tapping "Calm my body" on home does nothing — no navigation, no state change visible. Static analysis (full trace of click handler → startPathway → startTool → setScreen → BreatheGroundTool mount → hashchange listener) showed no obvious break. **Diagnostic console.log shipped in commit 089acffa98** — next time Arlin taps, browser DevTools console (or Chrome remote debugging via chrome://inspect/#devices) will reveal which branch the click takes. Once that data is available, fix is likely a one-liner. Suspect: stale `stillform_biofilter_choice` localStorage entry routing the click into a silent "skip" path, or React state batching issue specific to mobile WebView.
 
-### Architectural redundancy in post-Reframe screen
-Arlin's complaint: "next move and text are asking essentially the same thing of locking in." The post-Reframe Finish screen stacks four overlapping mechanisms:
-1. **Next Move chips** — action selection (Send a message / Hold a boundary / Delay your response / Let it go)
-2. **Lock-in card** — Schön reflection-on-action with regulation-type personalized statement + 20s countdown
-3. **"What shifted? (optional)" textarea** — state-to-statement, internal naming
-4. **Message draft textarea** — external communication ("Draft one clear message you can send now")
+### Optionality decisions still pending
+The Apr 28 audit identified mechanisms the science sheet names as core training but that are currently optional or skippable. Three commits Apr 28 morning fixed the **placement** issues (chips before regulation removed, post-Reframe screen architectural redundancy resolved). The **gating** decisions remain open:
 
-These overlap conceptually. (1) + (4) both touch sending a message. (2) + (3) both touch consolidation. The user has to navigate redundant prompts that ask similar things. Decision needed: which stay, which merge, which gets removed. The user's prelaunch memory ("Remove static tips once ⓘ buttons done") suggests removing the "What shifted?" toggle entirely. **Defer to a clean session for design decision — late-night work isn't right for this. Likely to be resolved together with the pre-rate flow redesign above (similar shape: overlap that wants science-grounded simplification).**
+1. **Lock-in card confirmation** — currently the user can tap "Finish session" without ever tapping "Locked in" on the Schön reflection-on-action card. Per `Stillform_Science_Sheet.md` and Lavi-Rotenberg 2020 MERIT findings, reflection-on-action consolidation is the named durability mechanism. Should be required to gate Finish.
+2. **Post-rating chip selection** — single tap of an emotion chip is the lightest possible affect labeling intervention. Currently optional. Per Lieberman 2007 (post-regulation timing supported), should be required.
+3. **What Shifted textarea** — Vine 2019 / Nook 2021 say free-text labels are scientifically stronger than predetermined choices. Currently optional toggle. Decision needed: required (stronger consolidation), optional (less friction), or remove (chip already covers labeling).
+4. **Bio-filter for body-first users** — currently skippable via Baseline default. Pain users who skip bio-filter route to Breathe instead of Body Scan, which is clinically incorrect per Eccleston & Crombez 1999. Should be a required gate for body-first users; can stay skippable for thought-first.
+5. **Calibration "Skip this step"** — currently allows users to skip signal mapping or bias profiler entirely, leaving the AI without a profile. JAMA Psychiatry 2025 meta-analysis shows asymmetric attrition risk if hard-gated. Recommended fix: replace skip with "Use defaults" fallback that creates a minimal default profile.
 
-### Stuck chip status — clarification (was confused on Apr 27)
-Earlier note about "Stuck dead-branch cleanup" referred specifically to a dead `if (feelState === "stuck")` branch on the **home screen hero CTA** that referenced an undefined variable. That branch was removed (correct).
-
-The Stuck chip itself IS LIVE and works correctly:
-- Inside Reframe (post-rate and PresentStateChips) — captures feel state, AI gets context, autoMode routing handles it correctly.
-- Inside Breathe pre-rate (the WHAT IS PRESENT row in the screenshot) — captures feel state for AI context, parity with Reframe entry per the chip-parity work on Apr 27.
-
-What does NOT exist: a Stuck chip on the home screen itself (chicken-and-egg — to set it before tool entry, we'd need a chip row on home). Whether to add one is part of the body-first metacognition access gap question already in this doc under ARCHITECTURAL.
+These five gating decisions are deferred to a fresh session post-deploy. Implementing them was deferred today because the placement fixes (commits a121a48a, ae43f4db, c86ec0ba) had to land first to make the gating questions answerable cleanly.
 
 ### Trees in Body Scan / Breathe theme mismatch
-The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`. **May be moot if the pre-rate flow redesign changes this screen significantly.**
-
-### Static tip removal — partial
-User's prelaunch memory: "Remove static tips once ⓘ buttons done." The ⓘ tap-through bug was fixed (the ⓘ next to "What shifted? (optional) / Hide" no longer triggers Hide), but the user said "I thought I asked to be removed" referring to the static tip toggle itself. The toggle should be deleted entirely if the ⓘ button now provides equivalent science explanation. **Tied to pre-rate flow redesign and post-Reframe redundancy decisions above — answer this when those decisions are made.**
+The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`. Small visual fix, easy commit, can ship anytime.
 
 ### Watch deploy → publish flow on Netlify
-Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Worth a checklist note for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
+Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Reminder for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
+
+---
+
+### Resolved Apr 28 morning — kept for reference
+
+These items were genuinely open coming into Apr 28 morning and have been resolved by the three-commit research-driven cleanup. Listed here so the resolution path is documented and findable later.
+
+**🧭 Pre-rate flow needed science-grounded redesign for both processing types** — RESOLVED via commit `ae43f4db`. The chip rows in `BreatheGroundTool` pre-rate (line 3228) and `BodyScanTool` pre-rate (line 3880) have been removed entirely per Nook, Satpute & Ochsner (2021, *Affective Science*) + 2024 BMC Psychology fNIRS replication + 2025 Springer N=226 replication. Pre-regulation affect labeling crystallizes the affective state and impedes subsequent reappraisal/mindful acceptance. The PROCESSING_PRIMER copy ("Downshift physiology first; your cognition clears after the body settles") is no longer contradicted by the screen layout — it now matches what the screen actually does. Chips remain in ReframeTool entry (defensible because Reframe IS the cognitive intervention, not pre-regulation cognitive load).
+
+**Architectural redundancy in post-Reframe screen** — RESOLVED via commit `c86ec0ba`. Two unreachable screens (`showStateToStatement` and `showPostInsight`) were removed from the codebase entirely — both had setters that never fired from any live code path, so 108 lines of orphaned UI plus their helper functions (`finishStateToStatement`, `skipStateToStatement`, `continueFromPostInsight`) sat in the file but never executed. The live What Shifted block had identity confusion (wrapper text said "naming consolidates," placeholder said "draft a message") — that's been resolved by stripping the message-drafting overlay from the textarea. The Send a message Next Move chip now has a proper draft expansion UI underneath it (textarea + Copy/Share/Mark sent), placed between chip selection and Lock-in card per Gollwitzer 1999 + Hallam 2015 implementation intention specificity research.
+
+**Static tip removal — partial** — RESOLVED via commit `c86ec0ba`. The "(optional)" framing on "What shifted?" toggle was misleading because the textarea was doing two contradictory jobs. After the cleanup, the textarea serves only post-regulation affect labeling (Lieberman 2007, Vine 2019), so the toggle now reads "▸ What shifted?" without the "(optional)" qualifier. The decision about whether to make it required or remove the toggle entirely is part of the optionality decisions still pending.
+
+**Stuck chip status clarification** — RESOLVED earlier (Apr 27 chip-parity work). The chip is live and works in Reframe entry and post-rating. Whether home screen needs a Stuck chip is part of the body-first metacognition access question in the ARCHITECTURAL section.
+
+**Science Sheet line 410 outdated** — RESOLVED via commit `a121a48a`. Updated to cite Nook, Satpute & Ochsner (2021), Affective Science (2025) replication, BMC Psychology (2024) fNIRS replication, and Vine et al. (2019). Mechanism updated from "intensification" (Lieberman tradition, older framing) to "crystallization" (Nook 2021 mechanism — labeling solidifies initial appraisals and limits generation of alternative appraisals). The design rule (regulate first, label after) is unchanged but is now defended by the more current literature.
 
 ---
 
@@ -179,7 +162,30 @@ Launch path: Google Play closed testing → public launch. TestFlight blocked un
 
 ---
 
-## Completed — April 27–28, 2026
+## Completed — April 28, 2026 (morning)
+
+Three-commit research-driven cleanup. Triggered by Arlin's pushback "the whole app is based off proven research and if it's been debunked then we need to change it now" after the morning research audit found that `Stillform_Science_Sheet.md` line 410 was citing science contradicted by Nook 2021 + 2024-2025 replications.
+
+- [x] **Science Sheet update** (commit `a121a48a`) — the "What Shifted — Post-Session Affect Labeling" section was citing only the Lieberman 2007 affect-labeling tradition. That framing has been refined by replicated work post-Lieberman: Nook, Satpute & Ochsner (2021, *Affective Science*) showed that emotion naming impedes BOTH cognitive reappraisal AND mindful acceptance strategies — not just intensifies the state, but "crystallizes" it (solidifies initial appraisals, limits generation of alternative appraisals). The 2025 Springer paper (N=226, two studies) replicated. The 2024 BMC Psychology fNIRS paper confirmed at the neural level. Updated section now cites Nook 2021 + 2024-2025 replications + Vine et al. 2019 (free-text labels stronger than predetermined choices). Five new citations added. Mechanism description updated from "intensification" to "crystallization." Design rule unchanged: regulate first, label after — but now defended by current literature instead of dated-only-Lieberman framing. Honest engagement with current research is what the product's "based on proven research" claim requires.
+
+- [x] **Pre-regulation chips removed from Breathe and Body Scan** (commit `ae43f4db`) — `<PresentStateChips>` was rendered in three locations: BreatheGroundTool pre-rate (line 3228), BodyScanTool pre-rate (line 3880), and ReframeTool entry (line 6568). Per Nook 2021 + replications, the first two locations were science violations — pre-regulation labeling crystallizes the affective state. Removed from Breathe and Body Scan pre-rate. Stays in Reframe entry (defensible because Reframe IS cognitive intervention; labeling there is part of the regulation mechanism per Lieberman 2007, not pre-regulation cognitive load). Inline comments left at each removal site citing the research so future contributors don't reintroduce pre-regulation chips without checking the literature. State implications: `feelState` state hooks preserved in BreatheGroundTool/BodyScanTool for post-rating use; `preState` field in saved sessions now reflects morning check-in inference OR null, no longer in-the-moment chip override (acceptable — morning check-in was already primary data source; chips were redundant data parity). The PROCESSING_PRIMER copy ("Downshift physiology first; your cognition clears after the body settles") is no longer contradicted by the screen layout.
+
+- [x] **Post-Reframe screen cleanup + Send-a-message CTA wired in** (commit `c86ec0ba`) — three architectural problems compounded each other in the post-Reframe finish flow. **(A)** Two completely unreachable screens existed in the codebase: `if (showStateToStatement)` block (80 lines, setter only fired from `continueFromPostInsight`) and `if (showPostInsight && postSessionInsight)` block (28 lines, setter never called from anywhere). Verified via grep — zero callers in live code paths. Both screens removed plus their helper functions (`finishStateToStatement`, `skipStateToStatement`, `continueFromPostInsight`) and orphaned state hooks (`showPostInsight`, `showStateToStatement`). **(B)** The live What Shifted block had identity confusion — wrapper text said "naming consolidates the regulated state" while textarea placeholder said "Draft one clear message you can send now" and had Copy/Share/Mark sent buttons attached. Single UI element trying to serve two distinct mechanisms (Lieberman affect labeling vs external communication) with contradictory copy. Stripped the message-drafting overlay; What Shifted now serves only post-regulation affect labeling per Lieberman 2007 / Vine 2019 / Nook 2021. Toggle label changed from "▸ What shifted? (optional)" to "▸ What shifted?". **(C)** Added Send-a-message expansion under Next Move — when the user selects the "Send a message" chip, an expansion appears immediately (BEFORE Lock-in) with "Draft the message" header, textarea, and Copy/Share/Mark sent buttons. Per Gollwitzer 1999 + Hallam et al. 2015 fMRI study + Sheeran 2016 review of intention-behavior gap research: implementation intention specificity at the moment of intention formation is what closes the intention-behavior gap. The chip selection is the science-required if-then plan formation; the textarea is execution rehearsal that helps users carry it out. Drafting is OPTIONAL (chip = required intention formation; drafting = aid). Only "send-message" gets the expansion this commit; "Hold a boundary" might benefit similarly but the literature on boundary-statement drafting is not specifically researched, deferred to v2 if testing surfaces user demand. New state: `messageDraft`, `messageDraftCopied`, `messageDraftSent` separate from `externalAnchorDraft` (which now serves only as What Shifted affect label) so the two textareas don't collide. New helpers: `copyMessageDraft`, `shareMessageDraft`, `markMessageDraftSent` parallel to existing externalAnchor helpers, separate Plausible event namespace ('Message Draft' vs 'State to Statement'). Render order in `showPostRating` screen verified: FEEL CHIPS → POST SESSION INSIGHT → NEXT MOVE chips → SEND A MESSAGE expansion (when active) → LOCK-IN card → WHAT SHIFTED textarea → Self Mode nudge → FINISH session. Each element does ONE job, in the right scientific order. Net line change: 15,960 → 15,881 lines (-79 net) — removed ~180 lines of dead code + duplicate textarea infrastructure, added ~60 lines for new Send-a-message expansion + helpers. Codebase is leaner and more honest about what each piece does.
+
+**Verification across all three commits:**
+- esbuild parse: clean (exit 0)
+- Undefined-component preflight: clean (exit 0)
+- No remaining references to deleted functions or dead state in code (only in explanatory comments)
+- New mechanisms verified present at expected locations
+
+**Companion documents created during this session** (in `/mnt/user-data/outputs/`, not in repo):
+- `OPTIONALITY_PLACEMENT_AUDIT.md` — initial audit mapping science sheet mechanisms to live code
+- `RESEARCH_AUDIT_OPTIONALITY_VERDICTS.md` — research-driven audit using web search of post-2021 literature; identified the Nook 2021 contradiction
+- `PRE_RATE_FLOW_DESIGN_MEMO.md` and `PRE_RATE_FLOW_PROMPT_V2.md` — design analysis with multi-AI input from earlier in the session
+
+---
+
+## Completed — April 27, 2026
 
 - [x] **Undefined-component preflight guard** — new `scripts/check-undefined-components.mjs` script wired into ship-preflight.mjs. Parses App.jsx for every `<PascalCase>` JSX usage and every `(function|const|let|var|class) PascalCase` declaration, fails if any usage has no declaration. Catches the bug class that shipped FocusCheckValidation, PanicMode, and FractalBreathCanvas as silent crashes (esbuild parses these as valid; they only crash when the rendering path is hit at runtime). Whitelists React/library names + ErrorBoundary. Tested both ways (passes against current state, correctly catches artificial regression). Should have existed before today — adding it now closes the gap that let three components ship as undefined references over a 36-hour window. Commit 089acffa98.
 - [x] **PanicMode + FractalBreathCanvas restored** — same yesterday-deletion that took FocusCheckValidation (commit 571074ee7381, "-600 lines") also took these two. PanicMode (329 lines) is the Quick Breathe panic screen — tapping the QB pill anywhere in the app fired `setScreen("panic")` which rendered an undefined component → ErrorBoundary crash. The QB pill (the safety valve users rely on when activated) had been broken since Apr 26. FractalBreathCanvas (99 lines) is the visual grounding canvas inside Breathe, only rendered when the bgtVisualGrounding setting is on. Both restored verbatim from commit efc17183f6b5. Commit 089acffa98.
