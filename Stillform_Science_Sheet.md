@@ -271,7 +271,7 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 **Stillform application:** The published research on regulation practice and autonomic flexibility (Thayer & Lane 2000; Lehrer et al. 2020) suggests repeated practice is associated with HRV gains over time. Stillform does not yet measure HRV directly. The pre/post rating delta tracks self-reported state shift session by session; the Composure Telemetry heat map tracks practice frequency. The training-flexibility claim from the literature is the mechanism we draw from; we will measure it in our own users when biosensor integration ships.
 
-**If they push back:** "Each session is a rep. You're not just calming down — you're training your nervous system to shift faster. That's why it gets easier. Your autonomic flexibility is increasing."
+**If they push back:** "Repeated regulation practice is associated with autonomic flexibility gains in the literature. Stillform tracks self-reported state shift on every session; once watch integration is in, we'll track HRV directly."
 
 ---
 
