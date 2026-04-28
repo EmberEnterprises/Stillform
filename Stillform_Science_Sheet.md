@@ -269,7 +269,7 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 - Appelhans & Luecken (2006) — HRV reflects emotion regulation capacity — *Review of General Psychology*
 - Lehrer & Gevirtz (2014) — HRV biofeedback training improves autonomic regulation — *Frontiers in Public Health*
 
-**Stillform application:** Every completed session is one rep of autonomic flexibility training. The pre/post rating delta measures the shift. The Composure Telemetry heat map tracks practice frequency. Over time, the user's nervous system gets faster at shifting back to baseline — that's Signal Awareness Latency decreasing. The app doesn't just help in the moment; it trains the system to need less help.
+**Stillform application:** The published research on regulation practice and autonomic flexibility (Thayer & Lane 2000; Lehrer et al. 2020) suggests repeated practice is associated with HRV gains over time. Stillform does not yet measure HRV directly. The pre/post rating delta tracks self-reported state shift session by session; the Composure Telemetry heat map tracks practice frequency. The training-flexibility claim from the literature is the mechanism we draw from; we will measure it in our own users when biosensor integration ships.
 
 **If they push back:** "Each session is a rep. You're not just calming down — you're training your nervous system to shift faster. That's why it gets easier. Your autonomic flexibility is increasing."
 
