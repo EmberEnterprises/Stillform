@@ -7,7 +7,7 @@
 
 **What it does:** Extended exhale breathing patterns (4-4-8-2, Box, 4-7-8)
 
-**The science:** Extended exhale activates the vagus nerve, which triggers the parasympathetic nervous system — your body's "brake pedal." This measurably lowers heart rate, blood pressure, and cortisol within 60-90 seconds.
+**The science:** Extended exhale activates the vagus nerve, which triggers the parasympathetic nervous system — your body's "brake pedal." This measurably lowers heart rate and blood pressure within minutes; sustained practice reduces cortisol response over weeks.
 
 **Who says so:**
 - Gerritsen & Band (2018) — "Breath of Life: The Respiratory Vagal Stimulation Model" — *Frontiers in Human Neuroscience*
