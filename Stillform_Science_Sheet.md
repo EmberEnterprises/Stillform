@@ -22,7 +22,7 @@
 
 **What it does:** 6 pressure points with timed holds, auto-advancing
 
-**The science:** Acupressure stimulates specific points that correspond to tension release pathways. The act of focused body attention (interoceptive awareness) also interrupts rumination by redirecting cognitive resources to physical sensation.
+**The science:** Acupressure works through focused interoceptive attention — directing awareness to specific points on the body interrupts rumination by redirecting cognitive resources to physical sensation. The pressure itself adds parasympathetic activation through tactile vagal stimulation.
 
 **Who says so:**
 - Au et al. (2015) — self-administered acupressure reduces anxiety — *Journal of Advanced Nursing*
