@@ -3224,8 +3224,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
           }}>{n}</button>
         ))}
       </div>
-      {/* Current-state capture — same chips as Reframe entry, data parity for body-first users */}
-      <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} compact={true} />
+      {/* Pre-regulation chips removed per Nook 2021 + 2024-2025 replications:
+          emotion labeling before regulation crystallizes affective state and impedes
+          subsequent reappraisal/mindful acceptance. Affect labeling now lives post-regulation only. */}
     </div>
   );
 
@@ -3876,8 +3877,9 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 24, textAlign: "center" }}>
         Six areas, head to feet. Notice what's there before you change anything.
       </div>
-      {/* Current-state capture — same chips as Reframe entry, data parity for body-first users */}
-      <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} compact={true} />
+      {/* Pre-regulation chips removed per Nook 2021 + 2024-2025 replications:
+          emotion naming before mindful acceptance impedes regulation effectiveness.
+          Affect labeling now lives post-regulation only. */}
       <div style={{ display: "flex", justifyContent: "center", marginTop: 24 }}>
         <button className="btn btn-primary" style={{ fontSize: 16, padding: "14px 40px" }} onClick={() => setPhase("scan")}>
           Begin
