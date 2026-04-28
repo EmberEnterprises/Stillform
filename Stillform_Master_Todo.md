@@ -49,6 +49,29 @@ Items tackled in this sequence build on each other and minimize risk. Each item 
 
 These are real bugs/architectural questions Arlin identified during phone testing tonight. Listed here so they don't get lost.
 
+### 🧭 Pre-rate flow needs science-grounded redesign for both processing types
+
+**The complaint, in Arlin's words:** "I don't like the set up of calm my body. There's a gap with how these work. The flow is messed up for both processing types."
+
+**What's currently happening:** The Breathe pre-rate screen (which is what "Calm my body" routes body-first users to, and what thought-first users see when bio-filter sends them through Breathe first) shows: PROCESSING PRIMER text → "How steady are you?" 1–5 reactive↔composed scale → WHAT IS PRESENT chip row (Excited / Focused / Anxious / Angry / Flat / Distant / Mixed / Stuck). Both processing types see the same screen with the same prompts in the same order before they get to actually breathe.
+
+**Why this might be wrong:** The science Stillform is built on says the two types have meaningfully different first moves:
+- **Body-first users** — Porges polyvagal: vagal regulation precedes cortical access. Asking for a 1–5 cognitive self-rating + 8 cognitive feel-state chips BEFORE breathing puts cognition in front of body work, which inverts what the calibration says they need. The PROCESSING PRIMER even says "Downshift physiology first; your cognition clears after the body settles" — and then the very next thing on screen is a cognitive rating task.
+- **Thought-first users** — Ochsner & Gross suppression-vs-reappraisal: cognitive entry point comes first. They likely DO benefit from naming state before body work — but they're routed here through bio-filter, not by default. The current screen serves them okay-ish but treats them as a special case rather than a first-class flow.
+- **Convergence vs divergence** — at what beat should the two paths converge? The current screen forces convergence at the entry, which means neither type gets a path tuned to their nervous system.
+
+**What needs to happen:** Sit down with the science sheet open and walk through both types beat by beat. For each beat ask: what does this user's nervous system actually need RIGHT NOW, and is the current screen doing that? Then design from the science instead of patching what's there.
+
+**Pre-work Claude can do silently before the session** (no code changes, just analysis):
+1. Map the current flow for body-first end-to-end — every screen, every chip, every state capture, every transition.
+2. Same for thought-first — side-by-side comparison.
+3. Pull the relevant passages from `Stillform_Science_Sheet.md`: Porges polyvagal (vagal-cortical sequencing), Ochsner & Gross (cognitive vs somatic regulation), Siegel window of tolerance (hyperarousal vs hypoarousal entry needs), Wells MCT (metacognition as separate from emotion content), Kabat-Zinn / Farb (interoception as distinct access point).
+4. Surface the specific decision points: where does each type need to converge with the other, and where should they diverge? When is feel-state capture appropriate (and for whom)? When is rate-on-scale appropriate? Should the PROCESSING PRIMER text differ by type?
+
+**This is not a tonight thing.** Late-head decisions about science-grounded UX are exactly the wrong shape for tired work. Save it for a clean morning session with the science sheet open.
+
+**Likely supersedes:** the static tip removal question (the toggle gets answered in the redesign), the architectural redundancy in post-Reframe screen (similar shape — overlap to be resolved by science-grounded design pass), possibly the trees theme mismatch (if the screen layout changes the trees may move or be replaced).
+
 ### "Calm my body" hero CTA doesn't act on tap
 Body-first user, Composure Check / Settings show normally, but tapping "Calm my body" on home does nothing — no navigation, no state change visible. Static analysis (full trace of click handler → startPathway → startTool → setScreen → BreatheGroundTool mount → hashchange listener) showed no obvious break. **Diagnostic console.log shipped in commit 089acffa98** — next time Arlin taps, browser DevTools console (or Chrome remote debugging via chrome://inspect/#devices) will reveal which branch the click takes. Once that data is available, fix is likely a one-liner. Suspect: stale `stillform_biofilter_choice` localStorage entry routing the click into a silent "skip" path, or React state batching issue specific to mobile WebView.
 
@@ -59,13 +82,22 @@ Arlin's complaint: "next move and text are asking essentially the same thing of 
 3. **"What shifted? (optional)" textarea** — state-to-statement, internal naming
 4. **Message draft textarea** — external communication ("Draft one clear message you can send now")
 
-These overlap conceptually. (1) + (4) both touch sending a message. (2) + (3) both touch consolidation. The user has to navigate redundant prompts that ask similar things. Decision needed: which stay, which merge, which gets removed. The user's prelaunch memory ("Remove static tips once ⓘ buttons done") suggests removing the "What shifted?" toggle entirely. **Defer to a clean session for design decision — late-night work isn't right for this.**
+These overlap conceptually. (1) + (4) both touch sending a message. (2) + (3) both touch consolidation. The user has to navigate redundant prompts that ask similar things. Decision needed: which stay, which merge, which gets removed. The user's prelaunch memory ("Remove static tips once ⓘ buttons done") suggests removing the "What shifted?" toggle entirely. **Defer to a clean session for design decision — late-night work isn't right for this. Likely to be resolved together with the pre-rate flow redesign above (similar shape: overlap that wants science-grounded simplification).**
+
+### Stuck chip status — clarification (was confused on Apr 27)
+Earlier note about "Stuck dead-branch cleanup" referred specifically to a dead `if (feelState === "stuck")` branch on the **home screen hero CTA** that referenced an undefined variable. That branch was removed (correct).
+
+The Stuck chip itself IS LIVE and works correctly:
+- Inside Reframe (post-rate and PresentStateChips) — captures feel state, AI gets context, autoMode routing handles it correctly.
+- Inside Breathe pre-rate (the WHAT IS PRESENT row in the screenshot) — captures feel state for AI context, parity with Reframe entry per the chip-parity work on Apr 27.
+
+What does NOT exist: a Stuck chip on the home screen itself (chicken-and-egg — to set it before tool entry, we'd need a chip row on home). Whether to add one is part of the body-first metacognition access gap question already in this doc under ARCHITECTURAL.
 
 ### Trees in Body Scan / Breathe theme mismatch
-The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`.
+The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`. **May be moot if the pre-rate flow redesign changes this screen significantly.**
 
 ### Static tip removal — partial
-User's prelaunch memory: "Remove static tips once ⓘ buttons done." The ⓘ tap-through bug was fixed (the ⓘ next to "What shifted? (optional) / Hide" no longer triggers Hide), but the user said "I thought I asked to be removed" referring to the static tip toggle itself. The toggle should be deleted entirely if the ⓘ button now provides equivalent science explanation. Tied to architectural redundancy decision above — answer this when that decision is made.
+User's prelaunch memory: "Remove static tips once ⓘ buttons done." The ⓘ tap-through bug was fixed (the ⓘ next to "What shifted? (optional) / Hide" no longer triggers Hide), but the user said "I thought I asked to be removed" referring to the static tip toggle itself. The toggle should be deleted entirely if the ⓘ button now provides equivalent science explanation. **Tied to pre-rate flow redesign and post-Reframe redundancy decisions above — answer this when those decisions are made.**
 
 ### Watch deploy → publish flow on Netlify
 Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Worth a checklist note for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
