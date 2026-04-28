@@ -6957,6 +6957,227 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   );
 }
 
+function FocusCheckValidation({
+  onBack,
+  onCompleteRun = null,
+  autoReturnToCaller = false,
+  hideBack = false,
+  autoStart = false,
+  compact = false
+}) {
+  const [focusCheckMode, setFocusCheckMode] = useState("idle");
+  const [focusCheckTrials, setFocusCheckTrials] = useState([]);
+  const [focusCheckIndex, setFocusCheckIndex] = useState(0);
+  const [focusCheckResponded, setFocusCheckResponded] = useState(false);
+  const [focusCheckTrialStartedAt, setFocusCheckTrialStartedAt] = useState(0);
+  const [focusCheckStats, setFocusCheckStats] = useState({
+    hits: 0,
+    misses: 0,
+    falseAlarms: 0,
+    correctRejects: 0,
+    totalGo: 0,
+    totalNoGo: 0,
+    reactionTimes: []
+  });
+  const [latestSummary, setLatestSummary] = useState(() => {
+    const history = getFocusCheckHistoryFromStorage();
+    return history.length ? history[history.length - 1] : null;
+  });
+  const autoStartedRef = useRef(false);
+  const currentFocusTrial = focusCheckTrials[focusCheckIndex] || null;
+  const previousSummary = (() => {
+    const history = getFocusCheckHistoryFromStorage();
+    return history.length > 1 ? history[history.length - 2] : null;
+  })();
+  const startFocusCheck = () => {
+    const trials = Array.from({ length: 30 }, (_, idx) => {
+      const type = Math.random() < 0.7 ? "go" : "nogo";
+      return { id: `${Date.now()}-${idx}`, type, label: type === "go" ? "GO" : "NO-GO" };
+    });
+    const totalGo = trials.filter((t) => t.type === "go").length;
+    const totalNoGo = trials.length - totalGo;
+    setFocusCheckTrials(trials);
+    setFocusCheckIndex(0);
+    setFocusCheckResponded(false);
+    setFocusCheckTrialStartedAt(Date.now());
+    setFocusCheckStats({
+      hits: 0,
+      misses: 0,
+      falseAlarms: 0,
+      correctRejects: 0,
+      totalGo,
+      totalNoGo,
+      reactionTimes: []
+    });
+    setFocusCheckMode("running");
+  };
+  const submitFocusResponse = () => {
+    if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
+    const rt = Math.max(0, Date.now() - focusCheckTrialStartedAt);
+    setFocusCheckResponded(true);
+    setFocusCheckStats((prev) => {
+      if (currentFocusTrial.type === "go") {
+        return { ...prev, hits: prev.hits + 1, reactionTimes: [...prev.reactionTimes, rt] };
+      }
+      return { ...prev, falseAlarms: prev.falseAlarms + 1 };
+    });
+    window.setTimeout(() => {
+      setFocusCheckIndex((prev) => prev + 1);
+      setFocusCheckResponded(false);
+    }, 80);
+  };
+  useEffect(() => {
+    if (focusCheckMode !== "running" || !currentFocusTrial || focusCheckResponded) return;
+    setFocusCheckTrialStartedAt(Date.now());
+    const timer = window.setTimeout(() => {
+      setFocusCheckStats((prev) => {
+        if (currentFocusTrial.type === "go") return { ...prev, misses: prev.misses + 1 };
+        return { ...prev, correctRejects: prev.correctRejects + 1 };
+      });
+      setFocusCheckIndex((prev) => prev + 1);
+    }, 1000);
+    return () => window.clearTimeout(timer);
+  }, [focusCheckMode, focusCheckIndex, currentFocusTrial?.id, focusCheckResponded]);
+  useEffect(() => {
+    if (focusCheckMode !== "running") return;
+    if (focusCheckIndex < focusCheckTrials.length) return;
+    const avgReactionMs = focusCheckStats.reactionTimes.length
+      ? Math.round(focusCheckStats.reactionTimes.reduce((sum, value) => sum + value, 0) / focusCheckStats.reactionTimes.length)
+      : null;
+    const accuracy = focusCheckTrials.length
+      ? Math.round(((focusCheckStats.hits + focusCheckStats.correctRejects) / focusCheckTrials.length) * 100)
+      : null;
+    const inhibition = focusCheckStats.totalNoGo
+      ? Math.round((focusCheckStats.correctRejects / focusCheckStats.totalNoGo) * 100)
+      : null;
+    const entry = {
+      timestamp: new Date().toISOString(),
+      trials: focusCheckTrials.length,
+      accuracy,
+      inhibition,
+      avgReactionMs,
+      falseAlarms: focusCheckStats.falseAlarms
+    };
+    try {
+      const history = getFocusCheckHistoryFromStorage();
+      const next = [...history, entry].slice(-20);
+      localStorage.setItem("stillform_focus_check_history", JSON.stringify(next));
+      setLatestSummary(entry);
+    } catch {
+      setLatestSummary(entry);
+    }
+    try { window.plausible("Focus Check Completed"); } catch {}
+    if (typeof onCompleteRun === "function") {
+      try { onCompleteRun(entry); } catch {}
+      if (autoReturnToCaller) {
+        setFocusCheckMode("idle");
+        return;
+      }
+    }
+    setFocusCheckMode("complete");
+  }, [focusCheckMode, focusCheckIndex, focusCheckTrials.length, focusCheckStats, onCompleteRun, autoReturnToCaller]);
+  useEffect(() => {
+    if (focusCheckMode !== "running") return undefined;
+    const onKeyDown = (event) => {
+      if (event.key !== " " && event.key !== "Enter") return;
+      event.preventDefault();
+      submitFocusResponse();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [focusCheckMode, submitFocusResponse]);
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    startFocusCheck();
+  }, [autoStart]);
+  const containerStyle = compact
+    ? { background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }
+    : { maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px" };
+  return (
+    <section style={containerStyle}>
+      {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
+      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Composure Check</h1>}
+      <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
+        30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
+        <br />
+        This checks response inhibition so you can confirm cognitive readiness before a high-stakes decision, message, or meeting.
+      </div>
+      <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
+        {focusCheckMode === "running" && currentFocusTrial && (
+          <div style={{ textAlign: "center" }}>
+            <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>
+              Trial {Math.min(focusCheckIndex + 1, focusCheckTrials.length)} / {focusCheckTrials.length}
+            </div>
+            <div style={{ fontSize: 32, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
+              {currentFocusTrial.label}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
+              {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
+            </div>
+            <button
+              onClick={submitFocusResponse}
+              disabled={focusCheckResponded}
+              style={{
+                background: focusCheckResponded ? "var(--surface2)" : "var(--amber-glow)",
+                border: "0.5px solid var(--amber-dim)",
+                borderRadius: "var(--r-sm)",
+                padding: "10px 16px",
+                fontSize: 12,
+                color: focusCheckResponded ? "var(--text-muted)" : "var(--amber)",
+                cursor: focusCheckResponded ? "not-allowed" : "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              {focusCheckResponded ? "Recorded" : "Respond"}
+            </button>
+            <div style={{ marginTop: 8, fontSize: 10, color: "var(--text-muted)" }}>Keyboard: Space or Enter</div>
+          </div>
+        )}
+        {focusCheckMode !== "running" && !autoStart && (
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+              {latestSummary ? "Latest run saved. Run again anytime." : "No run yet. Start when ready."}
+            </div>
+            <button
+              onClick={startFocusCheck}
+              style={{
+                background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
+                padding: "9px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
+              }}
+            >
+              Start 30s
+            </button>
+          </div>
+        )}
+      </div>
+      {latestSummary && (
+        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Accuracy</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.accuracy ?? "N/A"}%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Inhibition</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.inhibition ?? "N/A"}%</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Avg RT</div>
+              <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{latestSummary.avgReactionMs ? `${latestSummary.avgReactionMs}ms` : "N/A"}</div>
+            </div>
+          </div>
+          {previousSummary && (
+            <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-dim)" }}>
+              Delta vs prior: accuracy {latestSummary.accuracy - (previousSummary.accuracy || 0) >= 0 ? "+" : ""}{latestSummary.accuracy - (previousSummary.accuracy || 0)} pts · inhibition {latestSummary.inhibition - (previousSummary.inhibition || 0) >= 0 ? "+" : ""}{latestSummary.inhibition - (previousSummary.inhibition || 0)} pts
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
 function MicroBiasTool({ onComplete }) {
   const [current, setCurrent] = useState(0);
   const [identified, setIdentified] = useState([]);
