@@ -72,7 +72,11 @@ const checks = [
   // Block direct calls to the private helpers — all external date logic must route through TimeKeeper.
   // The underscore prefix marks them as internal; \\b boundary in JS regex means matches do not include _-prefixed names.
   { label: "TimeKeeper guard: no direct toLocalDateKey() — use TimeKeeper.clockDay/clockDayOf", cmd: "rg", args: ["-n", "\\btoLocalDateKey\\(", "src/App.jsx"], type: "must-not-match" },
-  { label: "TimeKeeper guard: no direct getStillformToday() — use TimeKeeper.stillformDay/stillformDayOf", cmd: "rg", args: ["-n", "\\bgetStillformToday\\(", "src/App.jsx"], type: "must-not-match" }
+  { label: "TimeKeeper guard: no direct getStillformToday() — use TimeKeeper.stillformDay/stillformDayOf", cmd: "rg", args: ["-n", "\\bgetStillformToday\\(", "src/App.jsx"], type: "must-not-match" },
+  // Undefined-component guard. Catches JSX <Foo /> against a Foo not declared anywhere.
+  // Bug class that shipped FocusCheckValidation, PanicMode, and FractalBreathCanvas as silent
+  // crashes — esbuild parses these as valid; they only fail when the path is hit at runtime.
+  { label: "Undefined React components (JSX <Foo /> with no declaration)", cmd: "node", args: ["scripts/check-undefined-components.mjs"], type: "must-match" }
 ];
 
 let failed = false;
