@@ -5019,14 +5019,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [showLockIn, setShowLockIn] = useState(false);
   const [lockInConfirmed, setLockInConfirmed] = useState(false);
   const [lockInCountdown, setLockInCountdown] = useState(20);
-  const [showPostInsight, setShowPostInsight] = useState(false);
-  const [showStateToStatement, setShowStateToStatement] = useState(false);
+  // showPostInsight and showStateToStatement state hooks removed — both governed
+  // dead-code screens that have been deleted. Their setters never fired from
+  // any live code path. Verified via grep: no remaining readers or writers.
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
   const [entryProtocolId, setEntryProtocolId] = useState(null);
   const [externalAnchorDraft, setExternalAnchorDraft] = useState("");
   const [externalAnchorCopied, setExternalAnchorCopied] = useState(false);
   const [externalAnchorSent, setExternalAnchorSent] = useState(false);
+  // Message draft — only shown when Next Move "Send a message" chip is selected.
+  // Separate from externalAnchorDraft (What Shifted affect label) per Apr 28 cleanup
+  // — those were two different mechanisms tangled into one textarea before.
+  const [messageDraft, setMessageDraft] = useState("");
+  const [messageDraftCopied, setMessageDraftCopied] = useState(false);
+  const [messageDraftSent, setMessageDraftSent] = useState(false);
   const [stateToStatementExpanded, setStateToStatementExpanded] = useState(true);
   const [sessionShareSummary, setSessionShareSummary] = useState(null);
   const [postSessionInsight, setPostSessionInsight] = useState(null);
@@ -5424,7 +5431,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Preserve thread so accidental "Done for now" never loses context.
     secureSet(STORAGE_KEY, messages).catch(() => {});
     setPostRating(null);
-    setShowStateToStatement(false);
     setShowPostRating(true);
   };
 
@@ -6040,6 +6046,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorDraft("");
     setExternalAnchorCopied(false);
     setExternalAnchorSent(false);
+    setMessageDraft("");
+    setMessageDraftCopied(false);
+    setMessageDraftSent(false);
     setStateToStatementExpanded(false);
     setPostSessionInsight(null);
     // If the user already selected a Next Move inline, skip the duplicate Next Move screen
@@ -6051,45 +6060,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     }
   };
 
-  const finishStateToStatement = () => {
-    ensureDraftLogged();
-    const hasDraft = externalAnchorDraft.trim().length > 0;
-    logCommunicationEvent(hasDraft ? COMMUNICATION_ACTIONS.completedWithDraft : COMMUNICATION_ACTIONS.completedWithoutDraft);
-    try {
-      window.plausible("State to Statement Completed", {
-        props: {
-          has_anchor: hasDraft ? "yes" : "no"
-        }
-      });
-    } catch {}
-    setShowStateToStatement(false);
-    setExternalAnchorDraft("");
-    setExternalAnchorCopied(false);
-    setExternalAnchorSent(false);
-    setStateToStatementExpanded(false);
-    setSessionShareSummary(null);
-    setPostSessionInsight(null);
-    setShowPostInsight(false);
-    resetStateToStatementTracking();
-    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-complete");
-  };
-
-  const skipStateToStatement = (reason = null) => {
-    const chosenReason = reason || communicationSkipReason || "not-needed";
-    setCommunicationSkipReason(chosenReason);
-    logCommunicationEvent(COMMUNICATION_ACTIONS.skipped, { skipReason: chosenReason });
-    try { window.plausible("State to Statement Skipped"); } catch {}
-    setShowStateToStatement(false);
-    setExternalAnchorCopied(false);
-    setExternalAnchorDraft("");
-    setExternalAnchorSent(false);
-    setStateToStatementExpanded(false);
-    setSessionShareSummary(null);
-    setPostSessionInsight(null);
-    setShowPostInsight(false);
-    resetStateToStatementTracking();
-    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-skip");
-  };
+  // finishStateToStatement, skipStateToStatement, continueFromPostInsight removed
+  // — all three only fired from inside the now-removed showStateToStatement and
+  // showPostInsight dead-code screens. Live finish flow calls finishReframeSession
+  // directly from the showPostRating screen at line 6189.
 
   const handleMergedWatchChooseComplete = (redirectTo) => {
     if (toolBackOverrideRef) toolBackOverrideRef.current = null;
@@ -6102,17 +6076,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       return;
     }
     setShowWatchChooseFlow(false);
-  };
-
-  const continueFromPostInsight = () => {
-    setShowPostInsight(false);
-    setStateToStatementExpanded(false);
-    setExternalAnchorCopied(false);
-    setExternalAnchorSent(false);
-    setExternalAnchorDraft("");
-    resetStateToStatementTracking();
-    markStateToStatementOpportunity({ source: "post-insight-continue" });
-    setShowStateToStatement(true);
   };
 
   const toggleStateToStatementExpanded = () => {
@@ -6161,6 +6124,39 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try { window.plausible("State to Statement Sent Confirmed"); } catch {}
   };
 
+  // Message draft helpers — parallel to the externalAnchor helpers but pointing at
+  // the new messageDraft state. Used by the Next Move "Send a message" expansion.
+  // Telemetry uses a separate Plausible event namespace so the two mechanisms can
+  // be tracked independently in dashboards.
+  const copyMessageDraft = async () => {
+    const text = messageDraft.trim();
+    if (!text) return;
+    try {
+      if (navigator?.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      setMessageDraftCopied(true);
+      try { window.plausible("Message Draft Copied"); } catch {}
+    } catch {}
+  };
+  const shareMessageDraft = async () => {
+    const text = messageDraft.trim();
+    if (!text) return;
+    try {
+      if (navigator?.share) {
+        await navigator.share({ text });
+        try { window.plausible("Message Draft Shared"); } catch {}
+        return;
+      }
+    } catch (err) {
+      if (err?.name === "AbortError") return;
+    }
+    await copyMessageDraft();
+  };
+  const markMessageDraftSent = () => {
+    if (!messageDraft.trim()) return;
+    setMessageDraftSent(true);
+    try { window.plausible("Message Draft Sent Confirmed"); } catch {}
+  };
+
   if (nextMoveTarget) {
     return (
       <NextMoveStep
@@ -6189,115 +6185,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     );
   }
 
-  if (showStateToStatement) {
-    return (
-      <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          What Shifted
-        </div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
-          In one line — what shifted? Naming it locks in the regulated state.
-        </div>
-
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn-primary" onClick={finishStateToStatement}>
-            Finish session
-          </button>
-          <button className="btn btn-ghost" onClick={toggleStateToStatementExpanded}>
-            {stateToStatementExpanded ? "Hide state to statement" : "Add state to statement"}
-          </button>
-          <button className="btn btn-ghost" onClick={() => skipStateToStatement(communicationSkipReason || "not-needed")}>
-            Skip for now
-          </button>
-        </div>
-
-        {stateToStatementExpanded && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-              State-to-Statement (optional)
-            </div>
-            <textarea
-              value={externalAnchorDraft}
-              onChange={(e) => {
-                setExternalAnchorDraft(e.target.value);
-                setExternalAnchorSent(false);
-                setCommunicationSkipReason(null);
-              }}
-              placeholder="In one line — what shifted?"
-              rows={3}
-              style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
-            />
-            <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
-              Purpose: convert your regulated state into one clear message you can send outside Stillform (Slack, email, text, or talking point).
-            </div>
-
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorCopied ? "Copied" : "Copy statement"}
-              </button>
-              <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                Share
-              </button>
-              <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorSent ? "Sent logged" : "Mark sent"}
-              </button>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
-                Skip reason (for data quality)
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {COMMUNICATION_SKIP_REASONS.map((item) => (
-                  <button
-                    key={item.id}
-                    className="btn btn-ghost"
-                    onClick={() => setCommunicationSkipReason(item.id)}
-                    style={{
-                      fontSize: 11,
-                      padding: "6px 10px",
-                      borderColor: communicationSkipReason === item.id ? "var(--amber-dim)" : "var(--border)",
-                      color: communicationSkipReason === item.id ? "var(--amber)" : "var(--text-dim)"
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  if (showPostInsight && postSessionInsight) {
-    return (
-      <div style={{ textAlign: "left", padding: "36px 0 8px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          What the AI has noticed
-        </div>
-        <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
-          <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
-            {postSessionInsight.note}
-          </div>
-          <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-            {new Date(postSessionInsight.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-          </div>
-        </div>
-        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>
-          Guardrails active: insight-only, no labels, no diagnosis.
-        </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn-primary" onClick={continueFromPostInsight}>
-            Continue
-          </button>
-          <button className="btn btn-ghost" onClick={continueFromPostInsight}>
-            Skip insight
-          </button>
-        </div>
-      </div>
-    );
-  }
+  // showStateToStatement screen removed — was unreachable dead code.
+  // The setter setShowStateToStatement(true) only fired from inside continueFromPostInsight,
+  // which only fired from inside showPostInsight, which itself was never reachable
+  // (setShowPostInsight(true) never called from any live code path). Replaced
+  // by the showPostRating screen at line 6302 which is the actual live finish flow.
+  // See commit message for full architectural explanation.
 
   if (showPostRating) {
     const feelChips = [
@@ -6373,6 +6266,42 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               );
             })}
           </div>
+
+          {/* SEND A MESSAGE — draft expansion when "send-message" chip selected.
+              Implementation intention specificity at intention formation per Gollwitzer 1999
+              and Hallam 2015 fMRI study: specificity is what closes the intention-behavior gap.
+              The draft textarea appears immediately on chip selection, before Lock-in.
+              Drafting is OPTIONAL — chip selection itself is the science-required intention
+              formation; this is execution rehearsal that helps the user actually carry it out. */}
+          {postNextMoveId === "send-message" && !lockInConfirmed && (
+            <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+                Draft the message
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                Optional — write it from the regulated state. You can copy, share, or mark sent.
+              </div>
+              <textarea
+                value={messageDraft}
+                onChange={(e) => { setMessageDraft(e.target.value); setMessageDraftSent(false); setMessageDraftCopied(false); }}
+                placeholder="Write the message you want to send."
+                rows={4}
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 10 }}
+              />
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                <button className="btn btn-ghost" onClick={copyMessageDraft} disabled={!messageDraft.trim()}>
+                  {messageDraftCopied ? "Copied" : "Copy"}
+                </button>
+                <button className="btn btn-ghost" onClick={shareMessageDraft} disabled={!messageDraft.trim()}>
+                  Share
+                </button>
+                <button className="btn btn-ghost" onClick={markMessageDraftSent} disabled={!messageDraft.trim()}>
+                  {messageDraftSent ? "Sent logged" : "Mark sent"}
+                </button>
+              </div>
+            </div>
+          )}
+
           {postNextMoveId && !lockInConfirmed && (() => {
             const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || "thought-first"; } catch { return "thought-first"; } })();
             const statement = (LOCK_IN_STATEMENTS[postNextMoveId] || {})[regType] || (LOCK_IN_STATEMENTS[postNextMoveId] || {})["thought-first"] || "";
@@ -6415,19 +6344,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           )}
         </div>
 
-        {/* WHAT SHIFTED — optional, expanded by default */}
+        {/* WHAT SHIFTED — post-regulation affect labeling (Lieberman 2007, Vine 2019, Nook 2021).
+            Free-text labels are more cognitively engaging than predetermined choices, which is
+            why this textarea is the higher-precision version of the FEEL CHIPS row above.
+            Pure consolidation now — message-drafting moved to Next Move "Send a message" expansion. */}
         <div style={{ marginBottom: 24 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <button
               onClick={toggleStateToStatementExpanded}
               style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
             >
-              {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
+              {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted?"}
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." });
+                setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing. Free-text labels are scientifically stronger than predetermined choices (Vine 2019, Nook 2021), which is why this is the higher-precision version of the chips above." });
               }}
               style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
             >
@@ -6442,21 +6374,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 value={externalAnchorDraft}
                 onChange={(e) => { setExternalAnchorDraft(e.target.value); setExternalAnchorSent(false); }}
-                placeholder="Draft one clear message you can send now."
+                placeholder="In one line — what shifted?"
                 rows={3}
                 style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 10 }}
               />
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                  {externalAnchorCopied ? "Copied" : "Copy"}
-                </button>
-                <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                  Share
-                </button>
-                <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
-                  {externalAnchorSent ? "Sent logged" : "Mark sent"}
-                </button>
-              </div>
             </div>
           )}
         </div>
