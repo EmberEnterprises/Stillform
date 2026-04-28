@@ -22,12 +22,15 @@ class ErrorBoundary extends Component {
   }
   render() {
     if (this.state.error) {
+      // Use CSS variables so the boundary respects whichever theme the user has set
+      // (dark, midnight, suede, teal, rose, light). Themes set --amber etc. on
+      // document.documentElement so they're available even when React's tree errors out.
       return (
-        <div style={{ background: "#0A0A0C", color: "#E8EAF0", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "#C8922A", marginBottom: 12 }}>Something went wrong.</div>
-          <div style={{ fontSize: 14, color: "#9496A1", marginBottom: 16, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
+        <div style={{ background: "var(--bg, #0A0A0C)", color: "var(--text, #E8EAF0)", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "var(--amber, #C8922A)", marginBottom: 12 }}>Something went wrong.</div>
+          <div style={{ fontSize: 14, color: "var(--text-muted, #9496A1)", marginBottom: 16, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
           <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
-            style={{ background: "#C8922A", color: "#0A0A0C", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
+            style={{ background: "var(--amber, #C8922A)", color: "var(--btn-primary-text, #0A0A0C)", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
             Restart Stillform
           </button>
         </div>
@@ -6000,6 +6003,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     const saved = saveSession(postState);
     latestSessionTimestampRef.current = saved?.timestamp || null;
     // Save inline next move if selected
+    const hadInlineNextMove = !!postNextMoveId;
     if (postNextMoveId && saved?.timestamp) {
       try {
         saveSessionNextMove(saved.timestamp, {
@@ -6036,7 +6040,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorSent(false);
     setStateToStatementExpanded(false);
     setPostSessionInsight(null);
-    queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
+    // If the user already selected a Next Move inline, skip the duplicate Next Move screen
+    // and go straight to the debrief gate. Otherwise show the Next Move step.
+    if (hadInlineNextMove) {
+      queueDebriefAndCompleteNow(resolvePostReframeRoute(), "reframe-merged-finish");
+    } else {
+      queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
+    }
   };
 
   const finishStateToStatement = () => {
@@ -6405,13 +6415,23 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {/* WHAT SHIFTED — optional, expanded by default */}
         <div style={{ marginBottom: 24 }}>
-          <button
-            onClick={toggleStateToStatementExpanded}
-            style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
-          >
-            <span>{stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}</span>
-            <button onClick={() => setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
-          </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <button
+              onClick={toggleStateToStatementExpanded}
+              style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
+            >
+              {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." });
+              }}
+              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
+            >
+              ⓘ
+            </button>
+          </div>
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
               <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
@@ -6956,6 +6976,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     </div>
   );
 }
+
+const getFocusCheckHistoryFromStorage = () => {
+  try {
+    const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+    return Array.isArray(history) ? history : [];
+  } catch {
+    return [];
+  }
+};
 
 function FocusCheckValidation({
   onBack,
