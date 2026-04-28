@@ -94,9 +94,11 @@ Based on proven neuroscience, we built a system that identifies how each person 
 
 ---
 
-## 2. Current Build State — April 27, 2026
+## 2. Current Build State — April 28, 2026
 
-**Live at stillformapp.com. UAT mode. Password-protected.**
+**Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** App.jsx currently 15,881 lines after Apr 28 morning research-driven cleanup.
+
+**Three Apr 28 morning commits pushed (a121a48a, ae43f4db, c86ec0ba)** — see Section 3 Open Issues for current deploy state and the active ErrorBoundary bug.
 
 ### Infrastructure
 - Hosting: Netlify Pro
@@ -189,9 +191,57 @@ if (isThoughtFirst) {
 
 ## 3. Open Issues — Fix Before Launch (Priority Order)
 
-### Onboarding redesign — pending
+### 🔴 ACTIVE BUG: Post-Reframe ErrorBoundary on Finish session
+**Highest launch-blocker.** After Apr 28 morning commit `c86ec0ba` (post-Reframe screen cleanup), users tapping "Finish session" hit the ErrorBoundary screen ("Something went wrong. Tap below to restart.") on stillformapp.com/#home. Confirmed reproducible after live deploy.
 
-2 intro pages max then calibration then interactive first-use walkthrough. Replaces current multi-step setup flow. This is the only remaining launch-gating engineering item.
+**Static analysis done — code looks structurally clean.** Verified: no orphan references to deleted state (showStateToStatement, showPostInsight) in actual code, only in explanatory comments. finishReframeSession clears all state including new messageDraft. queueDebriefAndComplete sets nextMoveTarget; ToolDebriefGate render path checked. COMMUNICATION_ACTIONS fully defined. NextMoveStep has defensive `typeof onSkip === "function"` check.
+
+**Diagnostic approach when picking this up:**
+1. Get exact reproduction steps from Arlin (which Next Move chip selected, did she tap Lock-in, did she fill What Shifted)
+2. Get JS console error via Chrome remote debug (chrome://inspect/#devices on Mac while phone plugged in via USB) — this gives the actual error message and stack trace, enabling targeted one-line fix
+3. Suspect areas to investigate: getToolDebriefPromptSet return shape, appendToolDebriefToStorage in completeDebriefGate, saveSessionNextMove with bad timestamp, ToolDebriefGate render after secondsLeft===0
+4. Could also be stale browser cache — Arlin may need hard refresh after publish
+
+**Fallback option:** revert commit `c86ec0ba` (the post-Reframe screen cleanup). This restores Reframe finish flow to pre-Apr 28 state while keeping the science sheet update (a121a48a) and pre-regulation chips removal (ae43f4db). The commit being reverted contained: 2 dead-code screen removals, 5 orphan helper function removals, What Shifted block cleanup (removed message-drafting overlay), Send-a-message expansion under Next Move. Reverting loses the Send-a-message CTA but restores working Finish flow.
+
+### 🟡 GitHub Actions Security Gate failing on recent commits
+Commits c86ec0ba and f807bced both show as failed in GitHub Actions, BUT investigation revealed jobs were **CANCELLED — no runner ever assigned**. Not a code-level gate failure. Likely cause: GitHub Actions billing exhausted for the org account (free tier 2000 min/mo), OR transient infrastructure issue. **Action to take:** check Settings → Billing → Actions on GitHub.com (org settings); if at limit, that explains it. Re-running the cancelled jobs should succeed once resource constraint clears. **Does not block Netlify deploy** — Netlify pulls from main HEAD independently of GitHub Actions status.
+
+### 🟢 Apr 28 Morning Commits — Status
+Three commits pushed today:
+- `a121a48a` — Science Sheet update with Nook 2021 + 2024-2025 replications cited; mechanism description updated from "intensification" to "crystallization"
+- `ae43f4db` — Pre-regulation `<PresentStateChips>` removed from BreatheGroundTool (line 3228) and BodyScanTool (line 3880) per Nook, Satpute & Ochsner 2021 + replications. Kept in ReframeTool entry (line 6568) — defensible because Reframe IS cognitive intervention
+- `c86ec0ba` — Post-Reframe screen cleanup (-79 net lines): removed two unreachable dead-code screens (showStateToStatement, showPostInsight), three orphan helper functions, stripped message-drafting overlay from What Shifted block, added new Send-a-message expansion under Next Move per Gollwitzer 1999 implementation intention specificity research. **This commit is the source of the ErrorBoundary bug — see above.**
+
+### 🟡 Post-Reframe Optionality Gating Decisions — Pending
+Five gating decisions identified during Apr 28 morning research-driven cleanup. Placement fixes shipped today; gating decisions deferred to a fresh session post-launch:
+1. Lock-in card confirmation gates Finish button (Schön reflection-on-action / Lavi-Rotenberg 2020 MERIT findings)
+2. Post-rating chip selection required (Lieberman 2007 — post-regulation timing supported)
+3. What Shifted textarea — required vs optional vs remove (Vine 2019 / Nook 2021 free-text labels stronger than predetermined)
+4. Bio-filter required for body-first users (Eccleston & Crombez 1999 — pain users skipping bio-filter route to wrong tool)
+5. Calibration "Skip this step" → "Use defaults" fallback (JAMA Psychiatry 2025 attrition risk)
+
+### 🟡 Science Sheet Audit Findings (Apr 28 afternoon) — Pending Fix
+Full audit in `/mnt/user-data/outputs/SCIENCE_AUDIT_APR28.md`. Three must-fix items:
+
+1. **60 BPM Visual Entrainment section** — citations don't support the claim. Trost 2017 cited as PLOS ONE but is actually in Neuropsychologia and is about MUSICAL not visual entrainment. Kalda & Kello 2012 cannot be located in any database (likely fabricated or seriously misnamed). Recommendation: remove section OR reframe as ambient design not entrainment.
+
+2. **Lieberman et al. (2025) Nature Communications miscitation** — actual authors are Genzer, Rubin, Sened, Rafaeli, Ochsner, Cohen et al. (2025). Kevin Ochsner is on it; Matthew Lieberman is NOT. The "20-30%" specific magnitude needs verification in the paper. AND the framing in the science sheet is opposite to the paper's finding — paper concludes the bias may be ADAPTIVE for empathy and relationship satisfaction.
+
+3. **Acupressure mechanism claim** — "specific points correspond to tension release pathways" leans on TCM meridian theory which has weaker support. The effect is real (Chen 2022 meta-analysis SMD=1.152). Recommendation: keep effect claim, swap mechanism to interoceptive attention.
+
+**Plus 1 should-strengthen:** Paced breathing "60-90 seconds" cortisol claim — soften to "within minutes" for HR/BP, "sustained practice reduces cortisol response" for cortisol.
+
+**Plus 1 opportunity:** Add Balban et al. 2023 cyclic sighing (n=111 RCT, Cell Reports Medicine) — outperformed mindfulness AND box breathing. Direct relevance: Melis Yilmaz Balban is already top scientific outreach candidate. Adding cyclic sigh as a breathing option AND citing the paper strengthens both science sheet AND outreach pitch.
+
+### 🟡 "Calm my body" hero CTA doesn't act on tap — Open
+Body-first user, Composure Check / Settings show normally, but tapping "Calm my body" on home does nothing. Static analysis showed no obvious break. Diagnostic console.log shipped commit `089acffa98` — next time Arlin taps, browser DevTools console (or Chrome remote debug) will reveal which branch the click takes. Suspect: stale `stillform_biofilter_choice` localStorage entry routing into silent skip path, or React state batching issue specific to mobile WebView.
+
+### 🟢 Onboarding redesign — Status
+2 intro pages max, calibration, interactive first-use walkthrough. Status uncertain — earlier transfer doc listed this as "only remaining engineering item" but unclear if shipped or deferred. Verify state on session pickup.
+
+### 🟢 Trees graphic theme mismatch — Easy fix, can ship anytime
+Trees at bottom of breathing screen render in fixed orange/amber regardless of theme. On teal theme this creates dissonance. Fix: change trees to `var(--text-muted)` or desaturated neutral. Glow stays warm amber as the one accent note. Inside `BreatheGroundTool`.
 
 ### Resolved April 27, 2026 — kept for reference
 
@@ -199,24 +249,29 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 - **Bio-filter routing gap** — RESOLVED via `shouldBodyRouteToScan(bioFilter)` helper. Pain/Off-baseline/Something route to Body Scan; Activated/Sleep/Depleted/Medicated route to Breathe. Per Ochsner & Gross (2005). Commit `d74fe6bc`.
 
-- **Disconnected/Distant chip** — RESOLVED. Chip added to both chip arrays at App.jsx:6202 and 7176. New ReframeTool useEffect routes feelState=="distant" → Body Scan via onComplete("scan"). feelMap entry added to reframe.js:1190 with science-grounded prompt. Per Porges (2011) polyvagal + Siegel (1999) window of tolerance: hypoarousal = below window, prefrontal cortex offline, verbal reframing has limited reach until somatic re-engagement. scoreState returns null (off-axis from reactive↔composed dial, same precedent as Stuck). Commit `aaa64d89`.
+- **Disconnected/Distant chip** — RESOLVED. Chip added to both chip arrays at App.jsx:6202 and 7176. New ReframeTool useEffect routes feelState=="distant" → Body Scan via onComplete("scan"). feelMap entry added to reframe.js:1190 with science-grounded prompt. Per Porges (2011) polyvagal + Siegel (1999) window of tolerance. Commit `aaa64d89`.
 
-- **Stuck chip routing question** — CLOSED by implementation. The dead branch at hero CTA (line 12418, was undefined at App scope) was removed. Per the existing design: chips inform AI context, bio-filter is the routing override mechanism. Stuck stays as Reframe-clarity routing for all types; users can still get rerouted to Body Scan via bio-filter signals if their physical state warrants it. The question of "what does Stuck mean for body-first users" is answered: it routes the same way for everyone, and bio-filter handles physiological override separately. Commit `86b89844`.
+- **Stuck chip routing question** — CLOSED by implementation. Dead branch at hero CTA (line 12418) was removed. Per design: chips inform AI context, bio-filter is routing override mechanism. Stuck stays as Reframe-clarity routing for all types. Commit `86b89844`.
+
+- **Apr 27 evening bug fixes** — FocusCheckValidation restored (b98d347f), 4 bugs fixed including getFocusCheckHistoryFromStorage helper and ErrorBoundary CSS vars (3bf9dfa0), PanicMode + FractalBreathCanvas restored with undefined-component preflight guard (089acffa).
 
 ---
 
 ## 4. Launch Sequence
 
-1. **Onboarding redesign** (only remaining engineering item)
-2. **Google Play Console setup** ($25 one-time, account/admin work) — required to start the 14-day closed testing clock
-3. **Build Android App Bundle** from existing Capacitor android/ project, upload to Play Console
-4. **Add 12+ closed testers** (Arlin has 5 Gmail addresses of her own, needs 7 more)
-5. **TestFlight build** — currently BLOCKED on Arlin acquiring iPhone access. Pick up after Google Play track is established. Apple Developer Program already paid.
-6. **Both stores approved → flip to public**
+**Priority order as of Apr 28, 2026:**
+
+1. **Fix post-Reframe ErrorBoundary bug** — primary launch blocker. Get JS console error via Chrome remote debug → targeted fix. OR revert commit c86ec0ba as fallback to restore working Finish flow (loses Send-a-message CTA).
+2. **Verify onboarding redesign status** — was listed as the launch-gating engineering item before Apr 28. Check if shipped or still pending.
+3. **Google Play Console setup** ($25 one-time, account/admin work) — required to start the 14-day closed testing clock
+4. **Build Android App Bundle** from existing Capacitor android/ project, upload to Play Console
+5. **Add 12+ closed testers** (Arlin has 5 Gmail addresses of her own, needs 7 more)
+6. **TestFlight build** — currently BLOCKED on Arlin acquiring iPhone access. Pick up after Google Play track is established. Apple Developer Program already paid.
+7. **Both stores approved → flip to public**
 
 **Reddit launch:** Removed from launch-gating. Held in reserve as a contingency lever only if app doesn't sell itself in week 1 post-launch.
 
-**Remaining blockers:** Onboarding redesign (engineering), Google Play Console setup (account work), TestFlight (hardware-blocked). Testimonials no longer required — dropped from launch-gating Apr 27.
+**Localization (Apr 27 decision):** English (baseline) + Spanish + Brazilian Portuguese + Armenian. Spanish covers US Hispanic + Latin America (500M+). Brazilian Portuguese covers Brazil. Armenian = founder heritage. All Latin script — no RTL, no layout issues. Deferred (post-launch): German, French, Mandarin, Japanese, Korean, Hindi, Arabic. Science-grounded AI prompts need specialist clinical translator, not generic.
 
 ---
 
@@ -230,9 +285,12 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 - Invisible leveling — AI gets smarter by session count. Never announced to user.
 - Completion language: Composure restored / Signal cleared / System calibrated
 - Reddit is a one-shot moment. Do not post without paywall live and at least 1 testimonial.
-- Netlify deploys are MANUAL. Arlin triggers. Claude never triggers.
+- Netlify deploys are MANUAL. Arlin triggers AND publishes (TWO STEP — trigger ≠ publish, confirmed Apr 27). Claude never triggers.
 - Bobby is name-only on LLC. NOT involved in code. Never attribute code changes to Bobby — causes Arlin real anxiety about security.
-- Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr)
+- Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr) — LIVE via Lemon Squeezy
+- **Apr 28 operating rule:** Before claiming any architectural gap exists, proposing to close one, or suggesting changes to Stillform, Claude (1) reads the existing implementation, (2) checks the doc repo, and (3) checks git commit history. Apparent contradictions are usually intentional design.
+- **Apr 28 operating rule:** Arlin's direction is always for the whole app, not one type. She can only see one screen at a time, so Claude must proactively audit every change for whether the equivalent should apply to the other processing type and flag asymmetries before shipping.
+- **Apr 28 operating rule:** Research-grounded changes are placement-first; gating decisions are separate. When current evidence contradicts implementation (e.g. Nook 2021 vs pre-regulation chips), fix placement first, defer optionality/gating decisions to a separate pass to avoid compounding changes.
 
 ---
 
@@ -266,9 +324,13 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 8. People
 
-- **Arlin** — founder, sole product decision-maker, visual thinker, New Jersey Armenian accent affects voice transcription, neurological disability affects cognitive functioning
-- **Bobby (Robert Matthew Geismar)** — name only on LLC paper, NOT involved in development, never attribute code changes to him
+- **Arlin** — founder, sole product decision-maker, visual thinker, New Jersey Armenian accent affects voice transcription, neurological disability dysregulates cognitive functioning. Started building Stillform end of February 2026. Was sick for 5 years before that — these are different periods, never conflate them.
+- **Aria** — Arlin's 8-year-old daughter. Stillform succeeding well matters to Arlin not abstractly but because it matters to her family.
+- **Bobby (Robert Matthew Geismar)** — name only on LLC paper, NOT involved in development. All code is Claude or Cursor prompted by Arlin only. Never attribute code changes to him — causes Arlin real anxiety about security.
 - **Ava** — first testimonial: "The breathe and ground helped. I loved the reframe"
+- **Dr. Melis Yilmaz Balban** — top scientific outreach candidate. Lead author of Balban et al. 2023 Cell Reports Medicine RCT (n=111) showing cyclic sighing outperforms mindfulness. Direct research overlap with Stillform's breathing-as-vagal-regulation framing. Founded NeuroSmart. Non-competing market. Mutual publicity upside.
+- **Arlin's doctor** — expressed interest in Stillform for post-treatment integration windows. Documented as future B2B channel. Strict guardrail: never position as medical tool.
+- **Brother** — said he'd use it after Apple Watch integration. Sharing with neurodivergent community.
 
 ---
 
@@ -276,10 +338,17 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 Primary framework: Metacognitive Therapy (Wells 2009)
 
-Supporting: vagal nerve activation (Gerritsen & Band 2018), interoceptive awareness (Mehling 2012), cognitive reappraisal (Ochsner & Gross 2005), affect labeling (Lieberman 2007), implementation intentions (Gollwitzer 1999), emotional granularity (Barrett et al. 2001), self-efficacy (Bandura 1977), reflective practice (Schön 1983), Window of Tolerance (Siegel 1999, Porges 2011), stress inoculation (Meichenbaum 1985), visual entrainment (Thayer & Lane 2000), autonomic flexibility (Appelhans & Luecken 2006), regulation tendency vs fixed type (Gross 2015, Ochsner & Gross 2005).
+Supporting: vagal nerve activation (Gerritsen & Band 2018), interoceptive awareness (Mehling 2012), cognitive reappraisal (Ochsner & Gross 2005), affect labeling (Lieberman 2007 + Nook 2021 refinement), implementation intentions (Gollwitzer 1999, Gollwitzer & Sheeran 2006 d=0.65), emotional granularity (Barrett et al. 2001), self-efficacy (Bandura 1977), reflective practice (Schön 1983), Window of Tolerance (Siegel 1999, Porges 2011), stress inoculation (Meichenbaum 1985), autonomic flexibility (Appelhans & Luecken 2006), regulation tendency vs fixed type (Gross 2015, Ochsner & Gross 2005), interpersonal emotion perception bias (Genzer, Ochsner et al. 2025).
 
-Full citations in Stillform_Science_Sheet.md.
+**Apr 28 audit findings — three citations need correction in Stillform_Science_Sheet.md:**
+1. "60 BPM Visual Entrainment" section — Trost 2017 miscited (wrong journal, wrong topic), Kalda & Kello 2012 cannot be located. Recommend remove section or reframe.
+2. "Lieberman et al. (2025) Nature Communications" should be "Genzer, Ochsner et al. (2025)" — Matthew Lieberman is NOT an author on that paper.
+3. Acupressure mechanism claim leans on TCM meridian theory — keep effect claim, swap mechanism to interoceptive attention.
+
+**Plus Balban et al. 2023 (Cell Reports Medicine, n=111 RCT) NOT in current science sheet** — should be added. Cyclic sighing outperformed mindfulness AND box breathing for mood improvement and respiratory rate reduction. Dr. Yilmaz Balban is also the top scientific outreach candidate.
+
+Full citations and audit findings in `Stillform_Science_Sheet.md` and `/mnt/user-data/outputs/SCIENCE_AUDIT_APR28.md`.
 
 ---
 
-*ARA Embers LLC · Stillform Project Transfer · April 27, 2026*
+*ARA Embers LLC · Stillform Project Transfer · April 28, 2026*
