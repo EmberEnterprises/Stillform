@@ -52,7 +52,7 @@
 
 **What it does:** Users are assessed for whether they regulate better through physical intervention first or cognitive intervention first, and the app adapts
 
-**The science:** People differ in whether bottom-up (body → brain) or top-down (brain → body) regulation is more effective for them. Forcing a cognitive strategy on someone in physical distress doesn't work. Forcing breathing on someone who needs to think through a situation doesn't work.
+**The science:** People differ in whether bottom-up (body → brain) or top-down (brain → body) regulation is more effective at any given moment. Routing by current state — not fixed type — improves the chance the right intervention lands first. Stillform's calibration identifies a default tendency; the bio-filter and feel-state signals modulate that tendency in real time.
 
 **Who says so:**
 - Price & Hooven (2018) — interoceptive awareness mediates the relationship between emotion regulation and emotional eating — *Appetite*
