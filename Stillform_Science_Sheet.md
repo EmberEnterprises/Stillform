@@ -314,7 +314,7 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 ## Fractal Visual Grounding (Breathing Visuals)
 
-Natural fractal patterns — branching trees, rivers, coastlines — reduce physiological stress by up to 60% compared to non-fractal patterns. The visual cortex responds to mid-range fractal complexity (D ≈ 1.3-1.5) by shifting into alpha wave activity associated with relaxed alertness.
+Natural fractal patterns — branching trees, rivers, coastlines — are associated with measurable physiological relaxation effects in laboratory exposure. The visual cortex responds to mid-range fractal complexity (D ≈ 1.3-1.5) by shifting into alpha wave activity associated with relaxed alertness. The lab-condition effect on skin conductance does not directly translate to a measured outcome on a mobile breathing screen, but the visual is grounded in the same complexity range and serves the same restorative purpose.
 
 - Taylor et al. (University of Oregon) — exposure to mid-complexity fractals reduces stress by up to 60% as measured by skin conductance — *multiple publications, Nonlinear Dynamics, Psychology, and Life Sciences*
 - Hagerhall et al. (2015) — natural fractal patterns induce alpha wave EEG responses associated with relaxed wakefulness — *Nonlinear Dynamics, Psychology, and Life Sciences*
