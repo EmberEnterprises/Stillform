@@ -297,10 +297,10 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 **What it does:** The AI watches for 5 subtle biases that distort how users read other people and social situations: intensity amplification, state projection, attribution error, emotional contagion blindness, and impact gap.
 
-**The science:** People systematically overestimate others' negative emotional intensity by 20-30%. This bias is strongest when the perceiver is stressed, tired, or in pain — exactly when they need accurate reads most. Combined with fundamental attribution error (judging character instead of situation) and emotional contagion (absorbing others' states unconsciously), these microbiases drive reactive decisions in relationships and at work.
+**The science:** People systematically overestimate the intensity of others' negative emotions, and this bias is larger for strangers than for romantic partners. The bias is, on average, adaptive — it predicts greater empathy with strangers and contributes to relationship satisfaction with partners. The Stillform-relevant question isn't whether the bias exists. It's when it stops being adaptive. When a perceiver is depleted, in pain, or sleep-deprived, the over-reading can compound with hardware load and produce reactive decisions in relationships and at work. Combined with fundamental attribution error (judging character instead of situation) and emotional contagion (absorbing others' states unconsciously), these intersections — not the perceptual bias itself — are what Stillform's AI flags.
 
 **Who says so:**
-- Lieberman et al. (2025) — directional bias in interpersonal emotion perception — *Nature Communications*
+- Genzer, Rubin, Sened, Rafaeli, Ochsner, Cohen, & Perry (2025) — "Directional bias in interpersonal emotion perception" — *Nature Communications*
 - Ross (1977) — fundamental attribution error — foundational social psychology
 - Hatfield, Cacioppo & Rapson (1993) — emotional contagion — *Cambridge University Press*
 - Goleman (1995) — emotional intelligence as interpersonal awareness — *Bantam Books*
