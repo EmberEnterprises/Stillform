@@ -148,17 +148,24 @@ Based on proven neuroscience, we built a system that identifies how each person 
 
 ### Key Features Built
 - Composure Check (formerly GO/NO-GO) — 30-trial cognitive inhibition test
-- Bio-filter — physical state check before Reframe
-- Signal Log — emotion tracking with granular chips (Excited, Focused, Anxious, Angry, Flat, Mixed, Stuck)
+- Bio-filter — physical state check before Reframe (with shouldBodyRouteToScan helper for routing)
+- Signal Log — emotion tracking with granular chips (Excited, Focused, Anxious, Angry, Flat, Mixed, Stuck, Distant)
+- Morning outcome chooser — Sharp/Composed/Recover daily intention drives recommended protocol. Per Gollwitzer (1999) Implementation Intentions + Oettingen Mental Contrasting (MCII).
+- AI-error → Self Mode handoff — counter-based (1 fail = offer card, 2+ = auto-switch). New `/health` Netlify endpoint polls every 45s while in Self Mode due to AI failure. Pill prompt when AI recovers. State persists across tool close/reopen via sessionStorage. Self Mode itself = MetacognitionTool, grounded in Wells (2009) MCT.
+- TimeKeeper module — single source of truth for date/time across the app. 8 methods (clockDay, clockDayOf, stillformDay, stillformYesterday, stillformDayOf, daysAgoMs, timezone, detectTravel) + 8 lint preflight guards prevent regression.
 - My Progress — 12-week telemetry, session stats, pattern data
-- Cloud sync — Supabase AES-256 encrypted
+- Cloud sync — Supabase AES-256 encrypted, batched POSTs (single round trip), pre-update auto-backup
+- AI conversation persistence — SecureStore wraps IndexedDB with localStorage fallback, AES-GCM encrypted overflow
+- ErrorBoundary → App Diagnostics — crash logs ride existing opt-in metrics-ingest pipeline
 - Calendar integration — native Android, AI references upcoming events
 - Pre-meeting notifications — 30min plus 15min before event, Settings toggle plus time pickers, native only
 - Biometric lock — Face ID / fingerprint
 - Info buttons on every element — science-backed copy, verified against Stillform_Science_Sheet.md
 - Show/hide password — login screen
 - Stuck chip — cognitive state, routes to Reframe clarity, no body prompts in AI
+- Distant chip — hypoarousal state, routes to Body Scan via ReframeTool useEffect
 - Home link — Stillform logo routes home on all screens except home
+- Internationalization scaffolding — captureDeviceLocale fires Plausible event for demand data, Settings → Language section with "Request a language" mailto button. NO i18next install yet — translation work deferred until translator budget exists.
 
 ### Current Routing Logic (App.jsx line 11968 — hero CTA onClick)
 ```
@@ -182,54 +189,34 @@ if (isThoughtFirst) {
 
 ## 3. Open Issues — Fix Before Launch (Priority Order)
 
-### CRITICAL: Bio-filter routing gap
-
-**The problem:** Thought-first users who flag physical activation in bio-filter still route straight to Reframe. Bio-filter informs AI context but does NOT affect routing for thought-first users. Only body-first gets rerouted by bio-filter.
-
-**Science:** Ochsner and Gross (2005) — at high arousal, physiological intervention must come first regardless of regulation type.
-
-**Fix needed:** Thought-first plus bio-filter active (activated, pain, depleted, sleep) should route to Breathe first. State-based override only. NOT forcing a type switch. Same principle body-first already has.
-
-**Arlin's position:** Bio-filter is the correct routing override mechanism. Feel chips are NOT routing signals — they inform AI context only. Does not want to force users into the other type's default. Wants the system to read current physical signal and adjust.
-
-### CRITICAL: Disconnected chip — agreed, not built
-
-**Label:** Disconnected — umbrella term for hypoarousal, does not make user feel less than.
-
-**Routing:** All types to Body Scan first. Gentle somatic activation, NOT downregulation, NOT Reframe until user is present.
-
-**AI context needed in reframe.js feelMap:** Below-baseline state. System is in hypoarousal not hyperarousal. Gentle language. No breathing down. No cognitive heavy lifting until grounded.
-
-**Science:** Porges Polyvagal Theory, Ogden et al. 2006 Trauma and the Body, Siegel Window of Tolerance.
-
-### IMPORTANT: Stuck chip routing — unresolved question
-
-**Current:** Stuck always routes to Reframe clarity regardless of type.
-
-**Problem for thought-first:** Stuck to Reframe is their default anyway — chip does nothing different.
-
-**Problem for body-first:** What does Stuck mean for them? Cognitively unclear (Reframe makes sense) vs physically frozen (different). This question was not resolved. Needs a decision.
-
-**Arlin's position:** Does not want to force a type into the other type's pathway unless clearly necessary. State-based signal should drive the decision, not the type label. Bio-filter is the right override mechanism, not the feel chip.
-
 ### Onboarding redesign — pending
 
-2 intro pages max then calibration then interactive first-use walkthrough. Replaces current multi-step setup flow.
+2 intro pages max then calibration then interactive first-use walkthrough. Replaces current multi-step setup flow. This is the only remaining launch-gating engineering item.
+
+### Resolved April 27, 2026 — kept for reference
+
+The following were CRITICAL/pending in earlier versions of this doc and are now shipped:
+
+- **Bio-filter routing gap** — RESOLVED via `shouldBodyRouteToScan(bioFilter)` helper. Pain/Off-baseline/Something route to Body Scan; Activated/Sleep/Depleted/Medicated route to Breathe. Per Ochsner & Gross (2005). Commit `d74fe6bc`.
+
+- **Disconnected/Distant chip** — RESOLVED. Chip added to both chip arrays at App.jsx:6202 and 7176. New ReframeTool useEffect routes feelState=="distant" → Body Scan via onComplete("scan"). feelMap entry added to reframe.js:1190 with science-grounded prompt. Per Porges (2011) polyvagal + Siegel (1999) window of tolerance: hypoarousal = below window, prefrontal cortex offline, verbal reframing has limited reach until somatic re-engagement. scoreState returns null (off-axis from reactive↔composed dial, same precedent as Stuck). Commit `aaa64d89`.
+
+- **Stuck chip routing question** — CLOSED by implementation. The dead branch at hero CTA (line 12418, was undefined at App scope) was removed. Per the existing design: chips inform AI context, bio-filter is the routing override mechanism. Stuck stays as Reframe-clarity routing for all types; users can still get rerouted to Body Scan via bio-filter signals if their physical state warrants it. The question of "what does Stuck mean for body-first users" is answered: it routes the same way for everyone, and bio-filter handles physiological override separately. Commit `86b89844`.
 
 ---
 
 ## 4. Launch Sequence
 
-1. Fix bio-filter routing for thought-first users
-2. Resolve Stuck routing question for body-first users
-3. Add Disconnected chip with routing and reframe.js feelMap entry
-4. Onboarding redesign
-5. Android Studio build APK upload to Google Play Console start 14-day closed testing (need 12 Gmail addresses — Arlin has 5 of her own)
-6. Xcode archive upload to App Store Connect TestFlight
-7. Both stores approved then flip to public
-8. Reddit post then launch (r/ADHD, r/neurodivergent, r/anxiety, r/cptsd, r/BPD)
+1. **Onboarding redesign** (only remaining engineering item)
+2. **Google Play Console setup** ($25 one-time, account/admin work) — required to start the 14-day closed testing clock
+3. **Build Android App Bundle** from existing Capacitor android/ project, upload to Play Console
+4. **Add 12+ closed testers** (Arlin has 5 Gmail addresses of her own, needs 7 more)
+5. **TestFlight build** — currently BLOCKED on Arlin acquiring iPhone access. Pick up after Google Play track is established. Apple Developer Program already paid.
+6. **Both stores approved → flip to public**
 
-**Remaining blockers:** Routing fixes plus Disconnected chip plus Onboarding plus Native app setup. Testimonials optional — Ava confirmed, 1 in hand.
+**Reddit launch:** Removed from launch-gating. Held in reserve as a contingency lever only if app doesn't sell itself in week 1 post-launch.
+
+**Remaining blockers:** Onboarding redesign (engineering), Google Play Console setup (account work), TestFlight (hardware-blocked). Testimonials no longer required — dropped from launch-gating Apr 27.
 
 ---
 
@@ -251,9 +238,10 @@ if (isThoughtFirst) {
 
 ## 6. Key Files
 
-- src/App.jsx — entire frontend (15,000+ lines)
-- netlify/functions/reframe.js — AI serverless function (GPT-4o, 1444 lines)
-- scripts/ship-preflight.mjs — 41 must-match security checks (run before every push)
+- src/App.jsx — entire frontend (15,272 lines as of Apr 27, 2026)
+- netlify/functions/reframe.js — AI serverless function (GPT-4o, 1446 lines)
+- netlify/functions/health.js — lightweight GET endpoint for AI-recovery detection (no Anthropic call). Used by ReframeTool's polling effect when in Self Mode due to AI failure.
+- scripts/ship-preflight.mjs — 41 must-match security checks + 8 TimeKeeper guards (run before every push)
 - STILLFORM_PROJECT_TRANSFER.md — this document (single source of truth)
 - Stillform_Science_Sheet.md — all science citations and verification
 - Stillform_Master_Todo.md — build checklist
