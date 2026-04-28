@@ -307,7 +307,7 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 
 **Stillform application:** When a user describes an interpersonal situation, the AI checks for these 5 microbiases. If their bio-filter is active (depleted, pain, under-rested) AND they're reading someone else negatively, the AI connects the dots. "You're running low today — is this really about them, or is your hardware amplifying the signal?" One microbias per response, named cleanly, then move on. Composure isn't just about managing yourself — it's about reading the room accurately.
 
-**If they push back:** "When you're tired, everyone looks hostile. When you're calm, the same email reads as neutral. The bias isn't in them — it's in your read. The AI catches that."
+**If they push back:** "When you're depleted, in pain, or under-rested, your read of someone else can sharpen in ways that aren't always serving you. The AI doesn't tell you the read is wrong. It surfaces the intersection — physical depletion meeting strong negative read — so you can decide what to do with it."
 
 ---
 
