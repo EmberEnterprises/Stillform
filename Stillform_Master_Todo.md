@@ -72,7 +72,7 @@ Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publ
 
 ---
 
-
+## 🟡 LAUNCH-GATING — Google Play Closed Testing → Public Launch
 
 Launch path: Google Play closed testing → public launch. TestFlight blocked until Arlin has access to an iPhone. Reddit held in reserve as a contingency lever if the app doesn't sell itself in the first week post-launch — NOT a launch step.
 
