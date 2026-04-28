@@ -37,7 +37,7 @@
 
 **What it does:** AI helps users reinterpret situations from multiple perspectives before reacting
 
-**The science:** Cognitive reappraisal — reinterpreting the meaning of an emotional trigger — is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. Doing it with a conversation partner (even AI) is more effective than doing it alone.
+**The science:** Cognitive reappraisal — reinterpreting the meaning of an emotional trigger — is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. Stillform delivers reappraisal conversationally because conversational scaffolding lowers friction at the moment of distress, when self-directed reappraisal is hardest to initiate.
 
 **Who says so:**
 - Ochsner & Gross (2005) — "The Cognitive Control of Emotion" — *Trends in Cognitive Sciences*
