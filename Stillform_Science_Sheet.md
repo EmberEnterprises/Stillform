@@ -218,7 +218,7 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 - Ogden, Minton & Pain (2006) — "Trauma and the Body" — body-based approaches widen the window
 - Porges (2011) — Polyvagal Theory — vagal nerve regulation underlies window management
 
-**Stillform application:** Every tool maps to window management. Breathe = calms hyperarousal. Body Scan = releases held tension narrowing the window. Reframe = processes cognitive loops. Bio-filter = detects when physical state has already narrowed the window before you even start. The pre/post rating literally measures how far you've moved back into the zone.
+**Stillform application:** Every tool maps to window management. Breathe = calms hyperarousal. Body Scan = releases held tension narrowing the window. Reframe = processes cognitive loops. Bio-filter = detects when physical state has already narrowed the window before you even start. The pre/post rating tracks self-reported movement toward the regulated zone — a useful signal, not a quantified physiological measurement.
 
 **If they push back:** "You know that zone where you can think clearly and handle things? That's the window. Above it you're spiraling. Below it you're shut down. Every tool in Stillform is designed to put you back in that zone — or keep you there."
 
