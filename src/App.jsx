@@ -2104,7 +2104,7 @@ const getToolDebriefPromptSet = (toolId, regulationType) => {
     prompt: config.prompt,
     options: Array.isArray(config[normalizedType]) && config[normalizedType].length
       ? config[normalizedType]
-      : config.balanced
+      : config["thought-first"]
   };
 };
 
