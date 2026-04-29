@@ -371,8 +371,10 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 ## LAUNCH
 
-- [ ] Both stores approved — flip to public
-- [ ] Reddit launch post (do not post before stores are live)
+- [ ] Master todo complete (this entire document, except translations and Apple Store sections)
+- [ ] Google Play store approved — flip to public
+- [ ] Apple Store: deferred (post-launch)
+- [ ] Reddit post: not a launch step (contingency only — see Store Submission Path section)
 
 ---
 
