@@ -12807,7 +12807,7 @@ const isSignalProfileConfigured = () => {
             const bCount = assessmentAnswers.filter(a => a === "B").length;
             if (tCount > bCount) return "thought-first";
             if (bCount > tCount) return "body-first";
-            return "balanced";
+            return "thought-first"; // tied → thought-first default (balanced regulation type deprecated)
           };
 
           const typeLabels = {
