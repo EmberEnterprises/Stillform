@@ -195,18 +195,16 @@ if (isThoughtFirst) {
 
 ## 3. Open Issues — Fix Before Launch (Priority Order)
 
-### 🔴 ACTIVE BUG: Post-Reframe ErrorBoundary on Finish session
-**Highest launch-blocker.** After Apr 28 morning commit `c86ec0ba` (post-Reframe screen cleanup), users tapping "Finish session" hit the ErrorBoundary screen ("Something went wrong. Tap below to restart.") on stillformapp.com/#home. Confirmed reproducible after live deploy.
+### ✅ RESOLVED: Post-Reframe ErrorBoundary on Finish session (Apr 29)
+**Was the highest launch-blocker.** Verified fixed on live phone via Chrome remote debug.
 
-**Static analysis done — code looks structurally clean.** Verified: no orphan references to deleted state (showStateToStatement, showPostInsight) in actual code, only in explanatory comments. finishReframeSession clears all state including new messageDraft. queueDebriefAndComplete sets nextMoveTarget; ToolDebriefGate render path checked. COMMUNICATION_ACTIONS fully defined. NextMoveStep has defensive `typeof onSkip === "function"` check.
+**Root cause:** `TOOL_DEBRIEF_COPY` constant was referenced at line 2092 (in `getToolDebriefPromptSet`, called by `ToolDebriefGate` during render on session finish) but the constant didn't exist. The debrief data had been written but accidentally nested *inside* `TOOL_ENTRY_PRIMER_COPY` instead of declared as its own top-level constant. When the user finished a Reframe session, `ToolDebriefGate` mounted, called the helper, the helper threw `ReferenceError: TOOL_DEBRIEF_COPY is not defined`, the ErrorBoundary caught it.
 
-**Diagnostic approach when picking this up:**
-1. Get exact reproduction steps from Arlin (which Next Move chip selected, did she tap Lock-in, did she fill What Shifted)
-2. Get JS console error via Chrome remote debug (chrome://inspect/#devices on Mac while phone plugged in via USB) — this gives the actual error message and stack trace, enabling targeted one-line fix
-3. Suspect areas to investigate: getToolDebriefPromptSet return shape, appendToolDebriefToStorage in completeDebriefGate, saveSessionNextMove with bad timestamp, ToolDebriefGate render after secondsLeft===0
-4. Could also be stale browser cache — Arlin may need hard refresh after publish
+**Fix (commit `1ca445ce`, Apr 29):** Extracted the debrief data into its own `TOOL_DEBRIEF_COPY` top-level constant. Cleaned up `TOOL_ENTRY_PRIMER_COPY` to contain only entry primers (its actual purpose). Added missing `breathe` debrief copy in Framing A pattern (Pillar 1 metacognition close — name the strategy used).
 
-**Fallback option:** revert commit `c86ec0ba` (the post-Reframe screen cleanup). This restores Reframe finish flow to pre-Apr 28 state while keeping the science sheet update (a121a48a) and pre-regulation chips removal (ae43f4db). The commit being reverted contained: 2 dead-code screen removals, 5 orphan helper function removals, What Shifted block cleanup (removed message-drafting overlay), Send-a-message expansion under Next Move. Reverting loses the Send-a-message CTA but restores working Finish flow.
+**Diagnostic method that worked:** Chrome remote debug via `chrome://inspect/#devices` once `adb` was available on the Mac (`/Users/kaneg/Library/Android/sdk/platform-tools/adb`). Phone showed up as `SM-S937U R3CY50BE7KV` once Android Studio was installed. Exact error visible in Console panel: `ReferenceError: TOOL_DEBRIEF_COPY is not defined at index-eac377bb.js:1134`. This took roughly two minutes once dev tools were connected; static analysis alone had been stuck for a while.
+
+**Lesson for future bugs:** The phone debug capability is now established. For any future ErrorBoundary or runtime crash, the first move is connect the phone via USB, open `chrome://inspect/#devices`, click inspect on the Stillform tab, reproduce on phone, read the Console panel. This is faster than static analysis for runtime errors.
 
 ### 🟡 GitHub Actions Security Gate failing on recent commits
 Commits c86ec0ba and f807bced both show as failed in GitHub Actions, BUT investigation revealed jobs were **CANCELLED — no runner ever assigned**. Not a code-level gate failure. Likely cause: GitHub Actions billing exhausted for the org account (free tier 2000 min/mo), OR transient infrastructure issue. **Action to take:** check Settings → Billing → Actions on GitHub.com (org settings); if at limit, that explains it. Re-running the cancelled jobs should succeed once resource constraint clears. **Does not block Netlify deploy** — Netlify pulls from main HEAD independently of GitHub Actions status.
