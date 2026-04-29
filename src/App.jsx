@@ -6572,9 +6572,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
-      <div className="disclaimer">
-        Your data is encrypted. <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: "inherit", cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
-      </div>
       <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center" }}>
         <div style={{
           fontSize: 10,
