@@ -299,9 +299,11 @@ These items were genuinely open coming into Apr 28 morning and have been resolve
 
 ---
 
-## 🟡 LAUNCH-GATING — Google Play Closed Testing → Public Launch
+## 🟡 STORE SUBMISSION PATH — Google Play Closed Testing → Public Launch
 
-Launch path: Google Play closed testing → public launch. TestFlight blocked until Arlin has access to an iPhone. Reddit held in reserve as a contingency lever if the app doesn't sell itself in the first week post-launch — NOT a launch step.
+This section covers the store submission mechanics, not the prelaunch product scope. **The launch standard (locked Apr 29) is: master todo complete, except translations and Apple Store.** Every section above this one — encryption, data feed, Settled chip, chip ⓘ button, Reframe entry redesign, tone system, low-demand mode, Self Mode, My Progress, watch integration, Body Scan What Shifted, all of it — is prelaunch. This is the store-mechanics outline only.
+
+Launch path: Google Play closed testing → public launch. Apple Store is the explicit exception — TestFlight blocked until Arlin has access to an iPhone. Reddit is not a launch step; held as a contingency lever for week-1 traction support.
 
 **ACTIVE — work that can ship now:**
 
