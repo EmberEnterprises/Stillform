@@ -483,7 +483,7 @@ But timing matters. Product first. Traction first. Compliance later. Do not chas
 1. **Breathing** — simplified to 2 options (Quick Reset + Deep Regulate). ✅ Shipped.
 2. **Supabase** — confirmed. Building next session (April 9).
 3. **Lemon Squeezy live mode** — switch after cloud sync verified. Needs Bobby to trigger.
-4. **Reddit timing** — paywall live + cloud sync working + 3-5 real testimonials. Not before.
+4. **Reddit timing** — not a launch step. Contingency only — deploy in week 1 post-launch only if organic traction is weak. No testimonial gate.
 5. **TestFlight** — after cloud sync. Users will lose data without it.
 6. **Neuro voice** — web first (Web Speech API). Safari gap acceptable for now.
 7. **Pricing** — locked at $14.99/mo or $9.99/mo annual. Revisit after 100 paying users.
