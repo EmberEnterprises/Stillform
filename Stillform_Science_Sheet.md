@@ -3,6 +3,31 @@
 
 ---
 
+
+---
+
+## Architecture
+
+Stillform is a metacognition tool. Helping people understand their own processes is the mechanism. Composure is the outcome. Every feature serves one of four structural pillars.
+
+**Metacognition (mechanism).** How the user notices what is happening in themselves. Wells (2009) MCT detached mindfulness; Flavell (1979) on metacognition; Brewer et al. (2011) on Default Mode Network suppression during single-pointed attention. Features: Self Mode (explicit MCT 5-step), Reframe (metacognition about interpretive frame), Pattern Recognition / Insight Card (metacognition about patterns), What Shifted (metacognition about state change), Skip tracking (metacognition about avoidance), bio-filter (metacognition about hardware state), calibration (metacognition about regulation tendency).
+
+**Emotional awareness (input).** Mehling et al. (2012) on interoceptive awareness; Critchley & Garfinkel (2017) on interoception and emotion; Lieberman et al. (2007), Nook et al. (2021) on affect labeling; Vine, Bernstein & Nolen-Hoeksema (2019) on free-generated labels; Barrett et al. (2001) on emotional granularity; Seth (2013), Barrett & Simmons (2015) on interoceptive predictive coding. Features: feel chips (post-only after Apr 28 fix), What Shifted free text, bio-filter, granularity tracking.
+
+**Microbiases (outward gaze).** Genzer, Rubin, Sened, Rafaeli, Ochsner, Cohen, & Perry (2025, *Nature Communications*); Ross (1977) on fundamental attribution error; Hatfield, Cacioppo & Rapson (1993) on emotional contagion. Features: AI microbias awareness, intersection-flagging when bio-filter shows depletion plus negative read of others.
+
+**Neuroplasticity (glue).** What makes the practice compound across sessions instead of resetting. Lieberman 2007 and replications — repeated affect labeling reduces amygdala reactivity to same stimulus over time. Lehrer et al. (2020, *Applied Psychophysiology and Biofeedback*) — repeated HRV biofeedback practice produces autonomic flexibility gains. Brewer et al. (2011) — experienced meditators show reduced DMN activation at rest. Meichenbaum (1985) stress inoculation — practice when calm so it is available under pressure. Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015) — memory reconsolidation: memories recalled in activated state and paired with new safety information update at the memory level. Features: streak tracking, daily practice loop, repeated Reframe sessions on recurring triggers, AI session-count graduation.
+
+Stillform does not market neuroplasticity. It uses the science to design the practice so that practice actually compounds.
+
+### Three neuroscience mechanisms grounding existing features (added Apr 28)
+
+**Memory reconsolidation** grounds repeated Reframe on recurring triggers. The user is not just rehearsing a different response — the memory of the trigger itself is updating because it is being recalled in an activated state and paired with a new interpretive frame. Ecker, Ticic & Hulley (2012); Schiller et al. (2010); Lane et al. (2015).
+
+**Predictive processing / interoceptive inference** grounds the bio-filter. Naming "depleted" or "in pain" updates the brain's internal prediction about whether the next sensation should be read as danger or as tired. Seth (2013); Barrett & Simmons (2015).
+
+**Salience network reset** grounds the body-first pathway. Single-pointed attention practices (breath focus, body focus) reset what the salience network treats as urgent. Menon (2011). This is *why* the calm path works for spirals — not just calming down, but redirecting attentional priority.
+
 ## Paced Breathing (Breathe & Ground)
 
 **What it does:** Extended exhale breathing patterns (4-4-8-2, Box, 4-7-8)
