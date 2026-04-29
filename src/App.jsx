@@ -12021,9 +12021,11 @@ const isSignalProfileConfigured = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
     setFirstRunStage(null);
     // Ensure regType is always set before going to home — migrate balanced to thought-first
+    // Apr 29: balanced regulation type fully retired. Migration now overwrites existing
+    // "balanced" values, not just empty ones, to force-migrate any user still flagged balanced.
     try {
-      if (!localStorage.getItem("stillform_regulation_type")) {
-        // Migrate balanced users to thought-first (balanced no longer a valid type)
+      const existing = localStorage.getItem("stillform_regulation_type");
+      if (!existing || existing === "balanced") {
         localStorage.setItem("stillform_regulation_type", "thought-first");
         setRegType("thought-first");
       }
