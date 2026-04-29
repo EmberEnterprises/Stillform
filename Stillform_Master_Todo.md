@@ -74,6 +74,7 @@ Add to FAQ page:
 - Small chips at the top as hyperlinks for all the questions answered (jump-to-section navigation)
 - Search bar below the chips for filtering questions
 - "Can't find what you're looking for" email link at the end (mailto to ARAembersllc@proton.me)
+- **NEW (Apr 29):** Add a FAQ entry explaining how feel chips drive the AI's behavior. The upper-right Reframe mode label was removed Apr 29 (system-internal info, surveillance UI not metacognitive). The chip-to-AI-behavior mapping now lives only in this FAQ section. Draft framing: "Stillform's AI adjusts how it responds based on the chip you select. Excited or Focused — the AI keeps momentum. Stuck — the AI works to break the loop. Anxious, Angry, Flat, or Mixed — the AI slows down to help name what's there. Distant routes you to Body Scan instead, because that state responds better to the body than to talking." (Wording is Arlin's call.)
 
 Real prelaunch UX win for self-service support. ErrorBoundary-blocked for shipping.
 
