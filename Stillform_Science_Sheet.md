@@ -398,19 +398,21 @@ If someone asks "what is Stillform?" in 10 seconds:
 
 ---
 
-## ObserveEntryLite — MCT in Practice (April 23, 2026)
+## ObserveEntryLite — Retired April 29, 2026
 
-The lightweight shell for balanced users implements detached mindfulness (Wells, 2009) in its minimal form:
+The ObserveEntryLite shell was originally built for users whose calibration result was "balanced" — neither thought-first nor body-first. It implemented detached mindfulness (Wells, 2009) as a one-orienting-question gate before routing.
 
-**One orienting question only.** "What's louder right now?" This is the MCT principle of stepping back from the state to observe it — without triggering the full Cognitive Attentional Syndrome (CAS) of additional prompts and self-monitoring.
+**Why it was retired:** The balanced regulation type was deprecated in full on April 29, 2026. Stillform's flow is designed around a single dominant processing type per user (thought-first or body-first), with bio-filter and feel chips as state-based modifiers within the moment. A balanced calibration introduced an extra branching layer the rest of the architecture was not built to support, and complicated the routing logic without producing better outcomes than defaulting to thought-first with state-aware overrides.
 
-**Immediate routing for clear signals.** When the signal is legible (body → settle, mind → clarify), the app routes without asking a second question. This preserves the MCT principle that the observer should catch and release, not analyze.
+**What replaced it:**
+- Calibration assessment ties now default to thought-first (the prior "balanced" outcome).
+- The "Help me figure it out" skip button writes thought-first to localStorage instead of balanced.
+- Existing users still flagged balanced are force-migrated to thought-first on app load.
+- The Hero CTA uses the same routing it always did for thought-first users; the balanced branch (which routed to ObserveEntryLite) is now a defensive fallback that mirrors thought-first behavior.
 
-**Second question only for ambiguous states.** "Both" and "I just feel off" are genuinely ambiguous — they warrant one more orienting step before routing. This is consistent with the MCT principle that intervention should match the clarity of the signal.
+**What was preserved from the MCT framing:** The off-baseline overrides — when bio-filter flags activated, depleted, pain, sleep, or medicated state, the app biases toward somatic support regardless of processing type. This is the two-regulation-pathway principle (Ochsner & Gross, 2005) and remains intact.
 
-**Thought-first and body-first users bypass the shell entirely.** Calibration has already identified the dominant processing pathway. The app routes directly — this is the science working as designed. Asking a calibrated user to describe their signal is redundant and adds friction.
-
-**Off-baseline overrides preserved.** When body-state (activated, depleted, pain, sleep, medicated) is flagged, the app biases toward somatic support regardless of processing type. This is the two-regulation-pathway principle: physiological activation must be addressed at the body level before top-down cognitive processing is effective (Ochsner & Gross, 2005).
+**The detached mindfulness mechanism (Wells, 2009)** still informs the architecture as a whole — particularly Self Mode and What Shifted — but is no longer expressed as a routing gate at the entry point.
 
 ---
 
