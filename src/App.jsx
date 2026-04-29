@@ -14255,6 +14255,9 @@ const isSignalProfileConfigured = () => {
             {(() => {
               const primer = getToolEntryPrimer(activeTool?.id, regType);
               if (!primer) return null;
+              // Decay: show primer for first 5 sessions only (Pillar 1 metacognitive scaffolding for new users; suppressed once internalized — aligns with invisible-leveling principle)
+              const sessionCount = getSessionCountFromStorage();
+              if (sessionCount > 5) return null;
               return (
                 <div
                   style={{
