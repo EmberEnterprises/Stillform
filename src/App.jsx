@@ -10350,7 +10350,17 @@ export default function Stillform() {
       return 0;
     }
   });
-  const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
+  const [regType, setRegType] = useState(() => {
+    try {
+      // Apr 29: balanced regulation type fully retired. Force-migrate on read.
+      const v = localStorage.getItem("stillform_regulation_type");
+      if (v === "balanced") {
+        try { localStorage.setItem("stillform_regulation_type", "thought-first"); } catch {}
+        return "thought-first";
+      }
+      return v || null;
+    } catch { return null; }
+  });
   const [showObserveEntry, setShowObserveEntry] = useState(false);
   const [showBioFilterSuggestion, setShowBioFilterSuggestion] = useState(null);
   const [showSupportSheet, setShowSupportSheet] = useState(false);
