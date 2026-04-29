@@ -13283,6 +13283,8 @@ const isSignalProfileConfigured = () => {
                             const bioArray = ["off-baseline"];
                             try {
                               const today = TimeKeeper.stillformDay();
+                              // New morning check-in (off-baseline) — clear yesterday's persisted feelState
+                              try { localStorage.removeItem("stillform_feelstate"); } catch {}
                               localStorage.setItem("stillform_checkin_today", JSON.stringify({
                                 date: today, energy: ciEnergy || "steady", bio: bioArray,
                                 tension: Object.keys(ciTension).length > 0 ? ciTension : null,
