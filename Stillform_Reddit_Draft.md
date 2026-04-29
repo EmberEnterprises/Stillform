@@ -163,5 +163,5 @@ If it doesn't, I want to know why.
 
 ---
 
-*This is the final post. Arlin wrote it. Do not edit. Post when: paywall live, cloud working, 3-5 testimonials.*
+*This is the final post. Arlin wrote it. Do not edit. Post only as week-1 contingency if organic traction is weak — not as a launch step.*
 
