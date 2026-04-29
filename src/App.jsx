@@ -1465,9 +1465,9 @@ const TOOL_ENTRY_PRIMER_COPY = {
 };
 
 // Tool debrief copy — Framing A: name the strategy you used.
-// Structure: TOOL_DEBRIEF_COPY[toolId] = { prompt, "thought-first": [...], "body-first": [...], balanced: [...] }
+// Structure: TOOL_DEBRIEF_COPY[toolId] = { prompt, "thought-first": [...], "body-first": [...] }
 // Pillar 1 metacognition close — naming the move makes it repeatable.
-// Note: this copy was previously embedded inside TOOL_ENTRY_PRIMER_COPY (Apr 29 fix); breathe debrief was missing entirely and is added here.
+// Note: balanced regulation type was deprecated (see line ~12038 migration comment); only thought-first and body-first remain.
 const TOOL_DEBRIEF_COPY = {
   scan: {
     prompt: "What did the scan teach you about your pattern?",
@@ -1480,11 +1480,6 @@ const TOOL_DEBRIEF_COPY = {
       "I identified exactly where activation concentrates first.",
       "Naming the region made regulation faster.",
       "My body gave usable information before language."
-    ],
-    balanced: [
-      "The scan helped me synchronize body and meaning.",
-      "I can map signal, then choose action more quickly.",
-      "I caught escalation earlier than usual."
     ]
   },
   reframe: {
@@ -1498,11 +1493,6 @@ const TOOL_DEBRIEF_COPY = {
       "I translated activation into clear words without flooding.",
       "I stayed grounded while naming what is true.",
       "I can convert signal into one clean action."
-    ],
-    balanced: [
-      "I regulated first, then chose language deliberately.",
-      "I held context without overexplaining.",
-      "I can move from signal to statement with integrity."
     ]
   },
   breathe: {
@@ -1516,11 +1506,6 @@ const TOOL_DEBRIEF_COPY = {
       "The exhale released tension I had been holding.",
       "My nervous system downshifted before my mind did.",
       "I came back into my body before going anywhere else."
-    ],
-    balanced: [
-      "Breath gave me a clean reset to work from.",
-      "I caught the spiral early and slowed it.",
-      "I returned to baseline before deciding anything."
     ]
   }
 };
