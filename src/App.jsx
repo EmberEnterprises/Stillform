@@ -14267,13 +14267,7 @@ const isSignalProfileConfigured = () => {
                   );
                 })()}
                 <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
-                {activeTool.id === "reframe" ? (
-                  (() => {
-                    const m = activeTool.mode || pathway || "calm";
-                    const names = { calm: "◎ Talk it through", clarity: "✦ Break the loop", hype: "◌ Get ready" };
-                    return names[m] || "✦ Reframe";
-                  })()
-                ) : (
+                {activeTool.id === "reframe" ? null : (
                   <>{activeTool.icon} {activeTool.name}</>
                 )}
               </div>
