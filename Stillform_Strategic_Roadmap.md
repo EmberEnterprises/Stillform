@@ -354,7 +354,7 @@ The meta-analysis found gamification elements "did not improve, and might weaken
 - ⏳ Text still too dim for aging eyes — consider a text size / high contrast accessibility toggle in Settings
 
 ### Ava (Home Screen Only)
-- "The breathe and ground helped. I loved the reframe." — first testimonial
+- Early user feedback (Ava): the Breathe & Ground tool and Reframe were the parts that landed.
 - No full session feedback yet
 
 ### Arlin (Builder/User)
