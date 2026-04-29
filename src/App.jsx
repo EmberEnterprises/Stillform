@@ -8817,7 +8817,7 @@ function MyProgress({ onBack }) {
   const toolDebriefs = getToolDebriefsFromStorage();
   const normalizedRegulationType = regulationType === "thought-first" || regulationType === "body-first"
     ? regulationType
-    : "balanced";
+    : "thought-first";
   const recent30ToolSessions = sessions
     .filter((session) => withinDays(session?.timestamp, 30))
     .map((session) => {
