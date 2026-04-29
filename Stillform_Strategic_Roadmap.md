@@ -467,7 +467,7 @@ Ketamine, psilocybin, EMDR, and other treatments create neuroplasticity windows 
 
 ### Action Items
 - [ ] Get the doctor's name and contact
-- [ ] Ask if they'd try it personally and give a testimonial
+- [ ] Ask if they'd try it personally
 - [ ] Update Terms of Service: not a medical tool, not for use during treatment
 - [ ] Update Privacy Policy: same language
 - [ ] Document as future B2B channel — post-launch, post-traction
