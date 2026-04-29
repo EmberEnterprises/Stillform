@@ -354,7 +354,7 @@ This rule was added Apr 28, 2026 after a fabrication audit found 10 confirmed fa
 - **Arlin** — founder, sole product decision-maker, visual thinker, New Jersey Armenian accent affects voice transcription, neurological disability dysregulates cognitive functioning. Started building Stillform end of February 2026. Was sick for 5 years before that — these are different periods, never conflate them.
 - **Aria** — Arlin's 8-year-old daughter. Stillform succeeding well matters to Arlin not abstractly but because it matters to her family.
 - **Bobby (Robert Matthew Geismar)** — name only on LLC paper, NOT involved in development. All code is Claude or Cursor prompted by Arlin only. Never attribute code changes to him — causes Arlin real anxiety about security.
-- **Ava** — first testimonial: "The breathe and ground helped. I loved the reframe"
+- **Ava** — early user. Gave positive feedback on Breathe & Ground and Reframe.
 - **Dr. Melis Yilmaz Balban** — top scientific outreach candidate. Lead author of Balban et al. 2023 Cell Reports Medicine RCT (n=111) showing cyclic sighing outperforms mindfulness. Direct research overlap with Stillform's breathing-as-vagal-regulation framing. Founded NeuroSmart. Non-competing market. Mutual publicity upside.
 - **Arlin's doctor** — expressed interest in Stillform for post-treatment integration windows. Documented as future B2B channel. Strict guardrail: never position as medical tool.
 - **Brother** — said he'd use it after Apple Watch integration. Sharing with neurodivergent community.
