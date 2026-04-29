@@ -261,19 +261,22 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 4. Launch Sequence
 
-**Priority order as of Apr 28, 2026:**
+**Arlin's launch standard (locked Apr 29):**
 
-1. **Fix post-Reframe ErrorBoundary bug** — primary launch blocker. Get JS console error via Chrome remote debug → targeted fix. OR revert commit c86ec0ba as fallback to restore working Finish flow (loses Send-a-message CTA).
-2. **Verify onboarding redesign status** — was listed as the launch-gating engineering item before Apr 28. Check if shipped or still pending.
-3. **Google Play Console setup** ($25 one-time, account/admin work) — required to start the 14-day closed testing clock
-4. **Build Android App Bundle** from existing Capacitor android/ project, upload to Play Console
-5. **Add 12+ closed testers** (Arlin has 5 Gmail addresses of her own, needs 7 more)
-6. **TestFlight build** — currently BLOCKED on Arlin acquiring iPhone access. Pick up after Google Play track is established. Apple Developer Program already paid.
-7. **Both stores approved → flip to public**
+> The app is launch-ready when the master todo is complete, with two explicit exceptions: translations and Apple Store. Everything else on the master todo is prelaunch. This standard does not move. Stop renegotiating it.
 
-**Reddit launch:** Removed from launch-gating. Held in reserve as a contingency lever only if app doesn't sell itself in week 1 post-launch.
+**What this means in practice:**
 
-**Localization (Apr 27 decision):** English (baseline) + Spanish + Brazilian Portuguese + Armenian. Spanish covers US Hispanic + Latin America (500M+). Brazilian Portuguese covers Brazil. Armenian = founder heritage. All Latin script — no RTL, no layout issues. Deferred (post-launch): German, French, Mandarin, Japanese, Korean, Hindi, Arabic. Science-grounded AI prompts need specialist clinical translator, not generic.
+- The master todo (`Stillform_Master_Todo.md`) is the source of truth for prelaunch scope.
+- Translations beyond English are explicitly deferred to post-launch (Spanish, Brazilian Portuguese, Armenian, then later German, French, Mandarin, Japanese, Korean, Hindi, Arabic). Locked Apr 27.
+- Apple Store / TestFlight is explicitly deferred — currently blocked on iPhone access, picks up after Google Play track is established.
+- Every other item on the master todo is in scope before launch.
+
+**The post-Reframe ErrorBoundary bug** — RESOLVED Apr 29 (see Section 3). Verified on live phone via Chrome remote debug. Root cause was orphaned `TOOL_DEBRIEF_COPY` reference; fixed in commit `1ca445ce`.
+
+**No testimonials are required for launch.** The previous version of this doc listed "3-5 real testimonials" as a launch prerequisite. That was wrong and has been retired. Arlin is not running a testimonial campaign before launch. Any organic testimonials that appear are bonus, not gating.
+
+**Reddit is not a launch step.** Held in reserve as a contingency lever only if organic post-launch traction is weak.
 
 ---
 
