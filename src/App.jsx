@@ -1856,6 +1856,66 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   return bounded.length;
 };
 
+// ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
+// Phase 2 of encryption extension. These read/write from the encrypted store
+// (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
+// the sync helpers to these async siblings one at a time. Once all call sites
+// are migrated, the sync helpers above will be deleted.
+//
+// readJSON falls back to plain localStorage during the migration window, so
+// data that hasn't been written yet through the encrypted path still reads
+// correctly. After full migration, the plain-text fallback in readJSON is
+// removed and the sync helpers are deleted.
+
+const readArrayFromStorageAsync = async (key) => {
+  const value = await readJSON(key, []);
+  return Array.isArray(value) ? value : [];
+};
+
+const getSessionsFromStorageAsync = () => readArrayFromStorageAsync(SESSION_STORAGE_KEY);
+
+const setSessionsInStorageAsync = async (sessions) => {
+  await writeJSON(SESSION_STORAGE_KEY, Array.isArray(sessions) ? sessions : []);
+};
+
+const appendSessionToStorageAsync = async (entry) => {
+  if (!entry) {
+    const existing = await getSessionsFromStorageAsync();
+    return existing.length;
+  }
+  const sessions = await getSessionsFromStorageAsync();
+  sessions.push(entry);
+  await setSessionsInStorageAsync(sessions);
+  return sessions.length;
+};
+
+const appendCommunicationEventAsync = async (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
+  if (!entry) return 0;
+  const events = await readArrayFromStorageAsync(COMMUNICATION_EVENTS_KEY);
+  events.push(entry);
+  const bounded = events.slice(-maxItems);
+  await writeJSON(COMMUNICATION_EVENTS_KEY, bounded);
+  return bounded.length;
+};
+
+const getSessionCountFromStorageAsync = async () => {
+  const sessions = await getSessionsFromStorageAsync();
+  return sessions.length;
+};
+
+const updateSessionByTimestampAsync = async (sessionTimestamp, updater) => {
+  if (!sessionTimestamp || typeof updater !== "function") return null;
+  const sessions = await getSessionsFromStorageAsync();
+  const index = sessions.findIndex((session) => session?.timestamp === sessionTimestamp);
+  if (index < 0) return null;
+  const current = sessions[index];
+  const updated = updater(current);
+  if (!updated || typeof updated !== "object") return null;
+  sessions[index] = updated;
+  await setSessionsInStorageAsync(sessions);
+  return updated;
+};
+
 const updateSessionByTimestamp = (sessionTimestamp, updater) => {
   if (!sessionTimestamp || typeof updater !== "function") return null;
   const sessions = getSessionsFromStorage();
