@@ -12807,7 +12807,7 @@ const isSignalProfileConfigured = () => {
             const bCount = assessmentAnswers.filter(a => a === "B").length;
             if (tCount > bCount) return "thought-first";
             if (bCount > tCount) return "body-first";
-            return "balanced";
+            return "thought-first"; // tied → default to thought-first; balanced regulation type fully retired Apr 29
           };
 
           const typeLabels = {
@@ -12924,8 +12924,9 @@ const isSignalProfileConfigured = () => {
                 {/* Assessment: skip option */}
                 {current.isAssessment && !assessmentComplete && (
                   <button onClick={() => {
-                    try { localStorage.setItem("stillform_regulation_type", "balanced"); } catch {}
-                    setRegType("balanced");
+                    // Skip → default to thought-first; balanced regulation type fully retired Apr 29
+                    try { localStorage.setItem("stillform_regulation_type", "thought-first"); } catch {}
+                    setRegType("thought-first");
                     setAssessmentAnswers([]);
                     setSetupStep(s => s + 1);
                   }} style={{
