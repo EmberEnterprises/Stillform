@@ -1461,8 +1461,14 @@ const TOOL_ENTRY_PRIMER_COPY = {
     reframe: "Name the body signal first, then translate it into language.",
     breathe: "Downshift physiology first; your cognition clears after the body settles.",
     scan: "Track where activation lives physically before deciding what it means."
-  },
+  }
+};
 
+// Tool debrief copy — Framing A: name the strategy you used.
+// Structure: TOOL_DEBRIEF_COPY[toolId] = { prompt, "thought-first": [...], "body-first": [...], balanced: [...] }
+// Pillar 1 metacognition close — naming the move makes it repeatable.
+// Note: this copy was previously embedded inside TOOL_ENTRY_PRIMER_COPY (Apr 29 fix); breathe debrief was missing entirely and is added here.
+const TOOL_DEBRIEF_COPY = {
   scan: {
     prompt: "What did the scan teach you about your pattern?",
     "thought-first": [
@@ -1497,6 +1503,24 @@ const TOOL_ENTRY_PRIMER_COPY = {
       "I regulated first, then chose language deliberately.",
       "I held context without overexplaining.",
       "I can move from signal to statement with integrity."
+    ]
+  },
+  breathe: {
+    prompt: "What did the breath shift for you?",
+    "thought-first": [
+      "Slowing the breath made the loop quieter.",
+      "I could think clearly once the rhythm steadied.",
+      "Cognitive noise dropped before I tried to think."
+    ],
+    "body-first": [
+      "The exhale released tension I had been holding.",
+      "My nervous system downshifted before my mind did.",
+      "I came back into my body before going anywhere else."
+    ],
+    balanced: [
+      "Breath gave me a clean reset to work from.",
+      "I caught the spiral early and slowed it.",
+      "I returned to baseline before deciding anything."
     ]
   }
 };
