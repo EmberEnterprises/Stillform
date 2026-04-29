@@ -34,6 +34,51 @@ This needs a design decision from Arlin. All three are defensible. Option (a) is
 
 ---
 
+## ⚠️ PRELAUNCH — Added April 29, 2026
+
+### Reframe tone — auto-detect + in-Reframe dropdown + personalization default
+
+Full prestige design. Replace the current Settings-only static tone with a three-layer system.
+
+**Layer 1: Auto-detect from state and content.** Use bio-filter, feelState, and input characteristics to suggest a tone for each Reframe call. Rules to design (start point):
+- bio-filter depleted/pain/sleep → suggest Gentle
+- feelState excited or focused → suggest Direct or Motivational
+- input pattern is long technical/analytical → suggest Clinical
+- input shows distress + high emotional charge → suggest Gentle
+- otherwise → Balanced
+
+**Layer 2: In-Reframe dropdown.** Replace the current static "Reframe tone: DIRECT" label box (currently line ~6578) with a dropdown the user can change mid-conversation. Each dropdown option shows the actual prompt-level effect (sourced from netlify/functions/reframe.js toneMap, lines 1173-1179):
+- Balanced — Default Stillform voice; direct, warm, precise
+- Gentle — Softer edges, still specific and honest. No sharp phrasing
+- Direct — Concise, minimal cushioning, cuts to signal
+- Clinical — Structured, analytical, avoids jargon overload
+- Motivational — Forward energy, momentum language, no hype clichés
+
+The dropdown should also surface the *reason* for the auto-selection ("Gentle — because you marked depleted"), making it a metacognitive surface (Pillar 1).
+
+**Layer 3: Personalization default in Settings.** User can set a "default tone" preference. Decision needed: Override mode (user's default always wins) vs Fallback mode (auto-detect wins; default is fallback when signals are ambiguous). Recommendation: Override — Stillform doesn't presume to know better than the user. Final call is Arlin's.
+
+**Why this matters.** Current tone is a Settings-only static choice. Most users won't dig into Settings during distress. Auto-detect surfaces the appropriate tone in the moment; in-Reframe dropdown gives full control without breaking flow; personalization respects the user who knows what they want.
+
+**Status.** Captured Apr 29. Real feature build. ErrorBoundary-blocked for shipping; design and copy ready.
+
+### "Get ready" Reframe mode label needs context
+
+Currently line 14242 in App.jsx, `hype: "◌ Get ready"`. The label appears in the upper-right of Reframe screen when feelState is `excited` or `focused`. Without context, a user who has never used hype mode reads "Get ready" as ambiguous — get ready for what?
+
+Options to evaluate (Arlin's call, not Claude's): rename for clarity ("Lock in", "Get focused", "Sharpen"), add a one-line description below the label, add an info button next to the label, or hide the label and let the AI's behavior carry the mode. Captured for Arlin to decide. Not Claude's call.
+
+### FAQ enhancements — chips + search + email link
+
+Add to FAQ page:
+- Small chips at the top as hyperlinks for all the questions answered (jump-to-section navigation)
+- Search bar below the chips for filtering questions
+- "Can't find what you're looking for" email link at the end (mailto to ARAembersllc@proton.me)
+
+Real prelaunch UX win for self-service support. ErrorBoundary-blocked for shipping.
+
+---
+
 ## ⚠️ PRELAUNCH — Added April 28, 2026
 
 ### Low-demand mode (anyone with impaired cognition)
