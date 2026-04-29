@@ -78,7 +78,7 @@ stillformapp.com
 - "Composure when you're winning" is your differentiator. Nobody else talks about this.
 - The 19 stress-tested scenarios is credibility. Real people, real situations, real proof.
 - Reply to EVERY comment. Indie apps win on Reddit through the founder being present.
-- DO NOT post until: paywall live (not test), cloud sync working, 3-5 real testimonials
+- DO NOT post unless and until organic post-launch traction is weak in week 1. Reddit is contingency, not launch.
 - Tuesday or Wednesday morning, 9-10 AM EST
 
 ---
