@@ -170,18 +170,21 @@ Based on proven neuroscience, we built a system that identifies how each person 
 - Home link — Stillform logo routes home on all screens except home
 - Internationalization scaffolding — captureDeviceLocale fires Plausible event for demand data, Settings → Language section with "Request a language" mailto button. NO i18next install yet — translation work deferred until translator budget exists.
 
-### Current Routing Logic (App.jsx line 11968 — hero CTA onClick)
+### Current Routing Logic (App.jsx hero CTA onClick)
 ```
 offBaseline = bioFilter includes: activated, depleted, pain, sleep, medicated
 
 if (isThoughtFirst) {
-  always Reframe — NO bio-filter override (KNOWN GAP — fix before launch)
+  if (offBaseline) → bio-filter suggestion (Pain → Body Scan, other → Breathe)
+  else → Reframe (calm)
 } else if (isBodyFirst) {
-  if (feelState === "stuck") → Reframe clarity mode
-  else if (offBaseline) → Body Scan
-  else → Breathe
+  if (offBaseline && shouldBodyRouteToScan) → Body Scan suggestion
+  else → Breathe (calm pathway)
 }
+// balanced branch retired Apr 29 — defensive fallback now mirrors thought-first
 ```
+
+**Apr 29 changes:** Balanced regulation type fully retired. ObserveEntryLite shell removed. Calibration ties and skip button default to thought-first. Existing balanced users force-migrated on app load.
 
 ### autoMode (feel state to AI mode)
 - excited or focused = hype
