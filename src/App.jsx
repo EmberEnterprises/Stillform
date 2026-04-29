@@ -2093,7 +2093,7 @@ const getToolEntryPrimer = (toolId, regulationType) => {
   const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
   if (!["reframe", "breathe", "scan"].includes(normalizedTool)) return null;
   const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "thought-first";
-  return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || TOOL_ENTRY_PRIMER_COPY.balanced[normalizedTool] || null;
+  return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || null;
 };
 
 const getToolDebriefPromptSet = (toolId, regulationType) => {
