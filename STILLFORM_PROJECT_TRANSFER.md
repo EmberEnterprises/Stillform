@@ -337,18 +337,42 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 9. Science Foundation
 
-Primary framework: Metacognitive Therapy (Wells 2009)
+### Architecture: metacognition is the mechanism. Composure is the outcome.
 
-Supporting: vagal nerve activation (Gerritsen & Band 2018), interoceptive awareness (Mehling 2012), cognitive reappraisal (Ochsner & Gross 2005), affect labeling (Lieberman 2007 + Nook 2021 refinement), implementation intentions (Gollwitzer 1999, Gollwitzer & Sheeran 2006 d=0.65), emotional granularity (Barrett et al. 2001), self-efficacy (Bandura 1977), reflective practice (Schön 1983), Window of Tolerance (Siegel 1999, Porges 2011), stress inoculation (Meichenbaum 1985), autonomic flexibility (Appelhans & Luecken 2006), regulation tendency vs fixed type (Gross 2015, Ochsner & Gross 2005), interpersonal emotion perception bias (Genzer, Ochsner et al. 2025).
+Stillform is a metacognition tool that helps stabilize composure by helping people understand their own processes. Every feature serves one of four structural pillars. The pillars are how the architecture holds together — the glue and the growth.
 
-**Apr 28 audit findings — three citations need correction in Stillform_Science_Sheet.md:**
-1. "60 BPM Visual Entrainment" section — Trost 2017 miscited (wrong journal, wrong topic), Kalda & Kello 2012 cannot be located. Recommend remove section or reframe.
-2. "Lieberman et al. (2025) Nature Communications" should be "Genzer, Ochsner et al. (2025)" — Matthew Lieberman is NOT an author on that paper.
-3. Acupressure mechanism claim leans on TCM meridian theory — keep effect claim, swap mechanism to interoceptive attention.
+**Pillar 1 — Metacognition (the mechanism).** How the user notices what is happening in themselves. Self Mode is the explicit metacognitive practice (Wells 2009 MCT, detached mindfulness). Pattern recognition / Insight Card is metacognition about patterns over time. What Shifted is metacognition about state change. Skip tracking is metacognition about avoidance. The bio-filter is metacognition about hardware state. Calibration is metacognition about regulation tendency. Reframe is metacognition about interpretive frame.
 
-**Plus Balban et al. 2023 (Cell Reports Medicine, n=111 RCT) NOT in current science sheet** — should be added. Cyclic sighing outperformed mindfulness AND box breathing for mood improvement and respiratory rate reduction. Dr. Yilmaz Balban is also the top scientific outreach candidate.
+**Pillar 2 — Emotional Awareness (the input).** Interoception, affect labeling, granularity. Mehling et al. (2012) on interoceptive awareness as an individual difference; Critchley & Garfinkel (2017) on interoception and emotion. Lieberman et al. (2007), Burklund et al. (2014), Torre & Lieberman (2018) on affect labeling. Nook, Satpute & Ochsner (2021) on labeling timing — confirmed in 2024 fNIRS replication and 2025 N=226 replication, applied in the Apr 28 commit (ae43f4db) that removed pre-regulation chips. Vine, Bernstein & Nolen-Hoeksema (2019) on free-generated labels. Barrett et al. (2001) on emotional granularity.
 
-Full citations and audit findings in `Stillform_Science_Sheet.md` and `/mnt/user-data/outputs/SCIENCE_AUDIT_APR28.md`.
+**Pillar 3 — Microbiases (the outward gaze).** Once self-awareness is steady, accuracy about others becomes available. Genzer, Rubin, Sened, Rafaeli, Ochsner, Cohen, & Perry (2025, *Nature Communications*) — directional bias in interpersonal emotion perception. Ross (1977) — fundamental attribution error. Hatfield, Cacioppo & Rapson (1993) — emotional contagion. Goleman (1995) — emotional intelligence. Stillform's framing matches the Genzer paper's actual finding: the bias is on average adaptive; what the AI flags is the intersection of physical depletion with strong negative read.
+
+**Pillar 4 — Neuroplasticity (the glue).** Why repeated practice compounds across sessions instead of resetting each time. The brain-change happens because the metacognition is repeated, the affect labeling is repeated, the regulation is repeated, and the patterns get noticed across sessions. Lieberman 2007 and replications — repeated affect labeling reduces amygdala reactivity to the same stimulus over time. Lehrer et al. (2020, *Applied Psychophysiology and Biofeedback*) — repeated HRV biofeedback practice produces autonomic flexibility gains. Brewer et al. (2011) — experienced meditators show reduced DMN activation at rest, not just during practice. Stress inoculation (Meichenbaum 1985) — practice when calm so it is available under pressure. **Stillform does not market neuroplasticity. It uses the science to design the practice so that practice actually compounds.**
+
+### Three neuroscience mechanisms grounding existing features (added Apr 28)
+
+**Memory reconsolidation.** Ecker, Ticic & Hulley (2012, *Unlocking the Emotional Brain*); Schiller et al. (2010, *Nature*); Lane et al. (2015, *Behavioral and Brain Sciences*). When a memory is recalled in an emotionally activated state and paired with new safety information, the memory itself updates — not just the response to it. This is the *why* behind why repeated Reframe sessions on the same recurring trigger actually change the user's relationship to it over time. Grounds Reframe. Pillar 4.
+
+**Predictive processing / interoceptive inference.** Seth (2013); Barrett & Simmons (2015); Barrett constructed emotion theory (already referenced in AI prompt foundation). The brain is constantly predicting internal body states. The bio-filter is a predictive-processing intervention: when the user names "depleted" or "in pain," they update the brain's internal prediction about whether the next sensation means danger or tired. Stronger neuroscience grounding for the bio-filter than the original "physical state filtering interpretation" framing. Pillar 2.
+
+**Salience network reset.** Menon (2011) on the salience network. The salience network determines what gets attentional priority. Chronic stress and rumination reflect a salience network stuck on internal threat signals. Single-pointed attention practices (breath focus, body focus) reset salience network targeting. Stillform's body-first interventions are doing exactly this. Explains *why* the calm path works for spirals — not just calming down, but redirecting what the brain treats as urgent. Pillar 1 + Pillar 2 bridge.
+
+### Supporting frameworks under the pillars
+
+Vagal activation (Gerritsen & Band 2018) under Pillar 2. Cognitive reappraisal (Ochsner & Gross 2005, Stover et al. 2024) under Pillar 1. Implementation intentions (Gollwitzer 1999; Gollwitzer & Sheeran 2006, d=0.65) for Next Move under Pillar 1. Window of Tolerance (Siegel 1999, Ogden et al. 2006, Porges 2011) — clinical metaphor, used as explanatory model not a quantified state. Regulation tendency vs fixed type (Gross 2015) — supports calibration as design principle, not validated mechanism. Self-efficacy (Bandura 1977), reflective practice (Schön 1983), autonomic flexibility (Appelhans & Luecken 2006).
+
+### Things explicitly NOT in the science foundation, by decision
+
+- Polyvagal theory's broader claims (social engagement system hierarchy) — debated; use only the parts with empirical support (vagal tone, safety cue detection)
+- "Trauma is stored in the body" framing — popularized but the literal version is contested; use interoception, somatic markers, salience network instead
+- Mirror neurons as basis for empathy — pop-science version overstates the research; ground emotional contagion in Hatfield/Cacioppo/Rapson directly
+- Neurofeedback (EEG-based), vagus nerve stimulation devices — real research, wrong product category
+- Psychedelics-assisted regulation, ketamine-assisted therapy — Stillform does not market or position itself for these use cases. Founder context: Stillform was conceived during ketamine treatment, but the app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning.
+- Cold exposure / Wim Hof — real autonomic effects, doesn't fit the voice or use case
+
+### Apr 28 doc work — completed
+
+All 11 surgical corrections to `Stillform_Science_Sheet.md` committed (commits 175bb6e4 through 9536e676). The 20-30% magnitude in microbias section was verified-as-fabricated against the actual Genzer 2025 paper and removed. Lieberman attribution corrected to Genzer et al. throughout. 60 BPM Visual Entrainment renamed to Ambient Pulse with overclaim removed. Acupressure mechanism, cortisol timing, AI-partner claim, two-pathway framing, autonomic flexibility claim, fractal magnitude, Window of Tolerance phrasing all softened to match what the literature actually supports. Full accounting in `/mnt/user-data/outputs/STILLFORM_AUDIT_FABRICATION_REVIEW.md`.
 
 ---
 
