@@ -13572,8 +13572,21 @@ const isSignalProfileConfigured = () => {
                         }
                         else startPathway("calm");  // Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005)
                       } else {
-                        // Balanced / unclear → one orienting question
-                        setShowObserveEntry(true);
+                        // Defensive fallback — regType should always be thought-first or body-first
+                        // (balanced regulation type fully deprecated). Route as thought-first.
+                        if (offBaseline) {
+                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
+                          if (priorChoice === "accept") {
+                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
+                            else startPathway("calm");
+                          } else if (priorChoice === "skip") {
+                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                          } else {
+                            setShowBioFilterSuggestion({ kind, bioFilter });
+                          }
+                        } else {
+                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                        }
                       }
                     }} style={{
                       width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
