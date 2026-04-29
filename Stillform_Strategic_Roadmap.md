@@ -207,7 +207,7 @@ When user is flat and input is low-energy: "Maybe this isn't stagnation — it's
 
 ### Mandatory Post-Session Rating (PRIORITY — before launch)
 
-After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, testimonial data, tool comparison. Affect labeling research: naming state IS a final regulation act.
+After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, tool comparison data. Affect labeling research: naming state IS a final regulation act.
 
 ### Check-In → Reframe Flow (PRIORITY BUILD)
 
