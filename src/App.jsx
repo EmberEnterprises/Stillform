@@ -5365,7 +5365,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       });
       const images = await Promise.all(files.map(toBase64));
       setPendingImages(images);
-      setInput(prev => prev || "What do I do with this?");
       try { window.plausible("Image Upload", { props: { count: images.length } }); } catch {}
     } catch {
       setError("Failed to load image. Try again.");
