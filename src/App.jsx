@@ -13512,14 +13512,6 @@ const isSignalProfileConfigured = () => {
                       else if (k === "body-to-scan") startPathway("calm");
                     }}
                   />
-                ) : showObserveEntry ? (
-                  /* Balanced / unclear — one orienting question inline */
-                  <ObserveEntryLite
-                    isBodyFirst={isBodyFirst}
-                    isThoughtFirst={isThoughtFirst}
-                    onClose={() => setShowObserveEntry(false)}
-                    onRoute={(signalOrigin, needState) => routeObserveEntry(signalOrigin, needState)}
-                  />
                 ) : (
                   <>
                     {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
