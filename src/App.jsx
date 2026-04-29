@@ -6598,6 +6598,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
+      <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center" }}>
+        <div style={{
+          fontSize: 10,
+          color: "var(--text-muted)",
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          border: "1px solid var(--border)",
+          borderRadius: "var(--r)",
+          padding: "4px 10px",
+          fontFamily: "'IBM Plex Mono', monospace"
+        }}>
+          Reframe tone: {aiToneLabel}
+        </div>
+      </div>
 
 
       <>
