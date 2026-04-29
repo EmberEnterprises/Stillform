@@ -1,5 +1,18 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · April 27, 2026**
+**ARA Embers LLC · April 28, 2026**
+
+---
+
+## Design Lens (apply to every feature decision)
+
+Stillform is a metacognition tool. Helping people understand their own processes is the mechanism. Composure is the outcome. Every feature serves one of four pillars:
+
+1. **Metacognition** (the mechanism) — does this help the user see their own process?
+2. **Emotional awareness** (the input) — does this sharpen interoception, affect labeling, or granularity?
+3. **Microbiases** (the outward gaze) — does this support seeing others accurately, *after* self-awareness is steady?
+4. **Neuroplasticity** (the glue) — does this compound across sessions, or does it reset?
+
+A feature that doesn't clearly serve one of these is dressing. Push back when it shows up.
 
 ---
 
