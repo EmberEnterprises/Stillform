@@ -10279,7 +10279,6 @@ export default function Stillform() {
     }
   });
   const [regType, setRegType] = useState(() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } });
-  const [showObserveEntry, setShowObserveEntry] = useState(false);
   const [showBioFilterSuggestion, setShowBioFilterSuggestion] = useState(null);
   const [showSupportSheet, setShowSupportSheet] = useState(false);
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
@@ -11869,66 +11868,6 @@ const isSignalProfileConfigured = () => {
     }
   };
 
-  // ─── OBSERVE ENTRY ROUTING ──────────────────────────────────────────────────
-  // App-level routing function for ObserveEntryLite shell
-  // Called after user answers "what fired first?" + "what do you need?"
-  const routeObserveEntry = (signalOrigin, needState) => {
-    setShowObserveEntry(false);
-    const bioFilter = getActiveBioFilter();
-    const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain") || bioFilter.includes("sleep") || bioFilter.includes("medicated") || bioFilter.includes("off-baseline") || bioFilter.includes("something");
-    const hasPain = bioFilter.includes("pain");
-
-    const goMetacognition = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") });
-    };
-    const goReframe = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
-    };
-    const goScan = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "scan") });
-    };
-
-    // Priority 1 — off-baseline + body signal → Body Scan (only when shouldBodyRouteToScan; Activated/Sleep/Depleted/Medicated fall through to Breathe)
-    if (offBaseline && shouldBodyRouteToScan(bioFilter) && (signalOrigin === "body" || signalOrigin === "both" || signalOrigin === "unsure") && needState !== "understand") {
-      goScan(); return;
-    }
-
-    if (needState === "settle") { startPathway("calm"); return; }
-
-    if (needState === "understand") {
-      if (signalOrigin === "body") { (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm"); return; }
-      if (signalOrigin === "thought") {
-        // Hero CTA parity: offBaseline + Pain → Scan (Kabat-Zinn pain pathway), offBaseline + other → Breathe (Ochsner & Gross), else → Reframe
-        if (offBaseline) {
-          if (hasPain) { goScan(); return; }
-          startPathway("calm"); return;
-        }
-        goReframe(); return;
-      }
-      if (signalOrigin === "both") { goMetacognition(); return; }
-      // unsure — use regType as tie-break, applying same offBaseline narrowing as the corresponding signal branch
-      if (regType === "thought-first") {
-        if (offBaseline) {
-          if (hasPain) { goScan(); return; }
-          startPathway("calm"); return;
-        }
-        goReframe(); return;
-      }
-      if (regType === "body-first") {
-        (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm");
-        return;
-      }
-      goMetacognition(); return;
-    }
-
-    if (needState === "catch") { goMetacognition(); return; }
-
-    // fallback
-    startPathway("calm");
-  };
 
   const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
     // Route to calibration assessment, not home
@@ -13464,8 +13403,7 @@ const isSignalProfileConfigured = () => {
                       console.log("[Stillform Hero CTA]", {
                         regType, isBodyFirst, isThoughtFirst,
                         bioFilter, offBaseline, hasPain, priorChoice,
-                        showBioFilterSuggestion: !!showBioFilterSuggestion,
-                        showObserveEntry
+                        showBioFilterSuggestion: !!showBioFilterSuggestion
                       });
 
                       if (isThoughtFirst) {
