@@ -1467,7 +1467,7 @@ const TOOL_ENTRY_PRIMER_COPY = {
 // Tool debrief copy — Framing A: name the strategy you used.
 // Structure: TOOL_DEBRIEF_COPY[toolId] = { prompt, "thought-first": [...], "body-first": [...] }
 // Pillar 1 metacognition close — naming the move makes it repeatable.
-// Note: balanced regulation type was deprecated (see line ~12038 migration comment); only thought-first and body-first remain.
+// Note: balanced regulation type fully retired Apr 29 — only thought-first and body-first remain.
 const TOOL_DEBRIEF_COPY = {
   scan: {
     prompt: "What did the scan teach you about your pattern?",
@@ -2093,7 +2093,7 @@ const getToolEntryPrimer = (toolId, regulationType) => {
   const normalizedTool = toolId === "body-scan" ? "scan" : toolId;
   if (!["reframe", "breathe", "scan"].includes(normalizedTool)) return null;
   const normalizedType = regulationType === "thought-first" || regulationType === "body-first" ? regulationType : "thought-first";
-  return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || TOOL_ENTRY_PRIMER_COPY.balanced[normalizedTool] || null;
+  return TOOL_ENTRY_PRIMER_COPY?.[normalizedType]?.[normalizedTool] || null;
 };
 
 const getToolDebriefPromptSet = (toolId, regulationType) => {
@@ -2104,7 +2104,7 @@ const getToolDebriefPromptSet = (toolId, regulationType) => {
     prompt: config.prompt,
     options: Array.isArray(config[normalizedType]) && config[normalizedType].length
       ? config[normalizedType]
-      : config.balanced
+      : config["thought-first"]
   };
 };
 
@@ -2886,7 +2886,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
 
@@ -3574,7 +3574,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
   const formatTime = (ms) => {
@@ -5303,7 +5303,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
   const isClarity = effectiveMode === "clarity";
@@ -7884,78 +7884,6 @@ function MicroBiasTool({ onComplete }) {
 }
 
 
-// ─── OBSERVE ENTRY LITE — single question for balanced users ─────────────────
-// Used only when balanced / unclear. Thought-first and body-first route directly.
-function ObserveEntryLite({ onClose, onRoute }) {
-  const [step, setStep] = useState(0);
-  const [signalOrigin, setSignalOrigin] = useState(null);
-
-  const optBtn = () => ({
-    width: "100%", padding: "14px 18px",
-    background: "var(--surface)", border: "0.5px solid var(--border)",
-    borderRadius: "var(--r)", cursor: "pointer",
-    fontFamily: "'DM Sans', sans-serif", textAlign: "left",
-    WebkitTapHighlightColor: "transparent"
-  });
-
-  if (step === 0) return (
-    <div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What's louder right now?
-      </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>First read. Don't overthink it.</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {[
-          { id: "body", label: "My body is loud", sub: "Tension, chest, gut, jaw — something physical" },
-          { id: "thought", label: "My mind is looping", sub: "Replaying, anticipating, cycling" },
-          { id: "both", label: "Both", sub: "Hard to separate right now" },
-          { id: "unsure", label: "I just feel off", sub: "Something's there, can't place it" },
-        ].map(opt => (
-          <button key={opt.id} onClick={() => {
-            if (opt.id === "body") {
-              const bf = getActiveBioFilter();
-              const ob = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bf.includes(s));
-              onRoute(opt.id, ob ? "understand" : "settle"); return;
-            }
-            if (opt.id === "thought") { onRoute(opt.id, "understand"); return; }
-            setSignalOrigin(opt.id); setStep(1);
-          }} style={optBtn()}>
-            <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
-            <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
-          </button>
-        ))}
-      </div>
-      <button onClick={onClose} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", marginTop: 16, padding: "8px 0", fontFamily: "'DM Sans', sans-serif" }}>
-        ← Back
-      </button>
-    </div>
-  );
-
-  return (
-    <div>
-      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 300, color: "var(--text)", marginBottom: 4 }}>
-        What would help first?
-      </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16 }}>The system routes from here.</div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {[
-          { id: "settle", label: "Settle first", sub: "Something needs to come down before thinking." },
-          { id: "understand", label: "Get clear", sub: "Get some distance from what's happening." },
-          { id: "catch", label: "Stay with it", sub: "Notice it without moving yet." },
-        ].map(opt => (
-          <button key={opt.id} onClick={() => onRoute(signalOrigin, opt.id)} style={optBtn()}>
-            <span style={{ fontWeight: 500, color: "var(--text)", fontSize: 14 }}>{opt.label}</span>
-            <span style={{ fontSize: 12, color: "var(--text-dim)", marginLeft: 8 }}>{opt.sub}</span>
-          </button>
-        ))}
-      </div>
-      <button onClick={() => setStep(0)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", marginTop: 16, padding: "8px 0", fontFamily: "'DM Sans', sans-serif" }}>
-        ← Back
-      </button>
-    </div>
-  );
-}
-
 
 // Bio-filter suggestion — shown when hardware is off-baseline and the science recommends
 // a different tool than the user's default. Suggestive, never forced. State-based, never
@@ -8817,7 +8745,7 @@ function MyProgress({ onBack }) {
   const toolDebriefs = getToolDebriefsFromStorage();
   const normalizedRegulationType = regulationType === "thought-first" || regulationType === "body-first"
     ? regulationType
-    : "balanced";
+    : "thought-first";
   const recent30ToolSessions = sessions
     .filter((session) => withinDays(session?.timestamp, 30))
     .map((session) => {
@@ -10361,7 +10289,6 @@ export default function Stillform() {
       return v || null;
     } catch { return null; }
   });
-  const [showObserveEntry, setShowObserveEntry] = useState(false);
   const [showBioFilterSuggestion, setShowBioFilterSuggestion] = useState(null);
   const [showSupportSheet, setShowSupportSheet] = useState(false);
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
@@ -11951,66 +11878,6 @@ const isSignalProfileConfigured = () => {
     }
   };
 
-  // ─── OBSERVE ENTRY ROUTING ──────────────────────────────────────────────────
-  // App-level routing function for ObserveEntryLite shell
-  // Called after user answers "what fired first?" + "what do you need?"
-  const routeObserveEntry = (signalOrigin, needState) => {
-    setShowObserveEntry(false);
-    const bioFilter = getActiveBioFilter();
-    const offBaseline = bioFilter.includes("activated") || bioFilter.includes("depleted") || bioFilter.includes("pain") || bioFilter.includes("sleep") || bioFilter.includes("medicated") || bioFilter.includes("off-baseline") || bioFilter.includes("something");
-    const hasPain = bioFilter.includes("pain");
-
-    const goMetacognition = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "metacognition") });
-    };
-    const goReframe = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "calm" });
-    };
-    const goScan = () => {
-      setScreen("tool");
-      setActiveTool({ ...TOOLS.find(t => t.id === "scan") });
-    };
-
-    // Priority 1 — off-baseline + body signal → Body Scan (only when shouldBodyRouteToScan; Activated/Sleep/Depleted/Medicated fall through to Breathe)
-    if (offBaseline && shouldBodyRouteToScan(bioFilter) && (signalOrigin === "body" || signalOrigin === "both" || signalOrigin === "unsure") && needState !== "understand") {
-      goScan(); return;
-    }
-
-    if (needState === "settle") { startPathway("calm"); return; }
-
-    if (needState === "understand") {
-      if (signalOrigin === "body") { (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm"); return; }
-      if (signalOrigin === "thought") {
-        // Hero CTA parity: offBaseline + Pain → Scan (Kabat-Zinn pain pathway), offBaseline + other → Breathe (Ochsner & Gross), else → Reframe
-        if (offBaseline) {
-          if (hasPain) { goScan(); return; }
-          startPathway("calm"); return;
-        }
-        goReframe(); return;
-      }
-      if (signalOrigin === "both") { goMetacognition(); return; }
-      // unsure — use regType as tie-break, applying same offBaseline narrowing as the corresponding signal branch
-      if (regType === "thought-first") {
-        if (offBaseline) {
-          if (hasPain) { goScan(); return; }
-          startPathway("calm"); return;
-        }
-        goReframe(); return;
-      }
-      if (regType === "body-first") {
-        (offBaseline && shouldBodyRouteToScan(bioFilter)) ? goScan() : startPathway("calm");
-        return;
-      }
-      goMetacognition(); return;
-    }
-
-    if (needState === "catch") { goMetacognition(); return; }
-
-    // fallback
-    startPathway("calm");
-  };
 
   const beginCalibrationFlow = ({ bridgeOrigin = null } = {}) => {
     // Route to calibration assessment, not home
@@ -13525,14 +13392,6 @@ const isSignalProfileConfigured = () => {
                       else if (k === "body-to-scan") startPathway("calm");
                     }}
                   />
-                ) : showObserveEntry ? (
-                  /* Balanced / unclear — one orienting question inline */
-                  <ObserveEntryLite
-                    isBodyFirst={isBodyFirst}
-                    isThoughtFirst={isThoughtFirst}
-                    onClose={() => setShowObserveEntry(false)}
-                    onRoute={(signalOrigin, needState) => routeObserveEntry(signalOrigin, needState)}
-                  />
                 ) : (
                   <>
                     {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
@@ -13557,8 +13416,7 @@ const isSignalProfileConfigured = () => {
                       console.log("[Stillform Hero CTA]", {
                         regType, isBodyFirst, isThoughtFirst,
                         bioFilter, offBaseline, hasPain, priorChoice,
-                        showBioFilterSuggestion: !!showBioFilterSuggestion,
-                        showObserveEntry
+                        showBioFilterSuggestion: !!showBioFilterSuggestion
                       });
 
                       if (isThoughtFirst) {
@@ -13585,8 +13443,21 @@ const isSignalProfileConfigured = () => {
                         }
                         else startPathway("calm");  // Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005)
                       } else {
-                        // Balanced / unclear → one orienting question
-                        setShowObserveEntry(true);
+                        // Defensive fallback — regType migrates to thought-first on load (Apr 29).
+                        // This branch should be unreachable in practice; route as thought-first if hit.
+                        if (offBaseline) {
+                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
+                          if (priorChoice === "accept") {
+                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
+                            else startPathway("calm");
+                          } else if (priorChoice === "skip") {
+                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                          } else {
+                            setShowBioFilterSuggestion({ kind, bioFilter });
+                          }
+                        } else {
+                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
+                        }
                       }
                     }} style={{
                       width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
