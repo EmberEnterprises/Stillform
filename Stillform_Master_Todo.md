@@ -36,6 +36,91 @@ This needs a design decision from Arlin. All three are defensible. Option (a) is
 
 ## ⚠️ PRELAUNCH — Added April 29, 2026
 
+### 🔒 SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage
+
+**Status:** Currently only Reframe AI conversations are AES-GCM encrypted on-device (uses `secureSet`/`secureGet` infrastructure with IndexedDB fallback). All other sensitive user data is stored as plain JSON in localStorage and is readable by any code running on stillformapp.com, browser extensions, or anyone with device access.
+
+**Unencrypted on-device today (must be encrypted before launch):**
+- `stillform_sessions` — session history
+- `stillform_journal` — Pulse / Signal Log entries (free-text emotional content)
+- `stillform_signal_profile` — body signal mapping
+- `stillform_bias_profile` — cognitive distortion profile
+- `stillform_checkin_history` — morning check-ins
+- `stillform_eod_history` — end of day entries
+- `stillform_communication_events`, `stillform_tool_debriefs`, `stillform_focus_check_history`
+- `stillform_feelstate` (added Apr 29 for chip persistence) — sensitive, not encrypted yet
+- All settings, preferences, regulation type, biometric flags
+
+**Already protected:**
+- Cloud sync to Supabase: AES-GCM encrypted before upload (in place since cloud sync deploy)
+- Reframe AI conversations on-device: encrypted via `secureSet`
+
+**The fix:** Extend existing `secureSet`/`secureGet` infrastructure to wrap all sensitive keys. Not a from-scratch crypto build — same AES-GCM pattern, same key management (per-device key in IndexedDB). Real engineering work but no new primitives needed.
+
+**Why this is launch-critical (not deferrable):** A prestige composure architecture cannot ship with users' raw emotional content sitting in plain text on their device. The cloud is protected; the device is partially protected. The gap closes before launch.
+
+### What Shifted data feed — three-category positive selection framework
+
+**Categories grounded in Russell's circumplex model of affect (Russell 1980, *J. Pers. Soc. Psychol.* 39:1161-1178):**
+
+- **Category A — Regulated shift (the tool worked).** Pre-state negative + post-state positive. Or pre-state high-arousal negative + post-state low-arousal negative (came down off activation). Tool met the user.
+- **Category B — Persistent state (no shift detected).** Post-state same valence quadrant as pre-state. Not necessarily failure — sometimes naming and holding a state is the work. But it is signal.
+- **Category C — Concerning shift (needs human attention).** Pre any state → Post Distant. Or sustained Flat across multiple sessions. Or persistent high-arousal negative without shift across many sessions.
+
+**Decision rules (locked Apr 29):**
+- Three categories, not two. Russell's model is two-dimensional for a reason — binary positive/negative loses information per the literature.
+- Chip is the structured data — free text does NOT override the chip classification. Otherwise the dataset becomes interpretive and not comparable across users.
+- Free text is for the user, not the dataset.
+
+**Why three categories per the science:** Valence and arousal are orthogonal (Russell 1980, replicated and confirmed in Watson 2024 review). High arousal is not automatically "bad" — Excited and Focused are positive states despite high arousal. Low arousal is not automatically "good" — Flat and Distant are negative states despite low arousal. A simple positive/negative collapse would mismeasure half the chip set.
+
+**Per-event log fields:**
+1. Pre-state chip
+2. Post-state chip
+3. Free text answer (kept on-device for the user, not in aggregate)
+4. Tool used (Reframe / Body Scan / other)
+5. Tool mode (calm / clarity / hype for Reframe)
+6. Bio-filter selections at session start
+7. Session count at the time
+8. Timestamp
+9. Computed category (A / B / C)
+
+**Privacy architecture (locked Apr 29):**
+- **Aggregate, anonymous → Plausible.** Stillform sees percentages and trends across all users with no user identifiers. Examples: "23% of sessions are Category A this week," "Reframe has higher Category A rate than Body Scan," "Users in week 4 show higher Category A rate than week 1."
+- **Per-user, encrypted, on-device only → user's own My Progress.** Stillform never sees individual user data. Not via cloud, not via export, not via any pipe. The user owns their pattern surface.
+
+### Body Scan post-completion What Shifted moment
+
+Currently Body Scan completes without asking the user to name what shifted. Add the same What Shifted UI that Reframe has: chip + free text. Same reset behavior — completing What Shifted (not just completing the tool) clears persisted feelState because the user explicitly named change.
+
+**Why:** Without it, Body Scan is a tool that touches state but never captures whether it shifted. We miss the metacognitive close (Pillar 1). The chip stays stuck on whatever was selected before Body Scan even though the state may have moved.
+
+### Add "Settled" chip — low-arousal positive
+
+**The gap:** Stillform's eight current chips (Excited, Focused, Anxious, Angry, Stuck, Mixed, Flat, Distant) leave the entire low-arousal positive quadrant of Russell's circumplex empty. There is no chip a user can tap to say "I feel okay" or "I feel calm" or "I feel settled." This means a user in a regulated state has nothing accurate to select — they can either skip the chips entirely (no data captured) or pick something inaccurate.
+
+**Decision (locked Apr 29):** Add **"Settled"** as a ninth chip. Word choice rationale: "Calm" overlaps with the calm Reframe mode label and would create new confusion. "Steady" reads more cognitive than affective. "Settled" lives in both the body and the mind.
+
+**Routing:** Settled chip routes to calm mode in Reframe (same as no-chip default), since a settled user reaching for Reframe is doing maintenance metacognition, not regulation under stress.
+
+**Why this matters for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) is impossible to detect when users actually arrive at the regulated state we're trying to help them reach. The framework breaks without this chip.
+
+### Chip ⓘ button — define what each chip covers
+
+Add an ⓘ button next to "ANYTHING TO ADD?" or to each chip individually. Tapping it shows brief definitions of what each chip covers. Example: "Stuck" — could mean cognitively stuck, emotionally stuck, decision-paralysis stuck. Right now users have no guidance on which chip to pick when their state could fit several.
+
+**Why this matters for the data feed:** If users interpret the same chip differently, the data is noisy at the source. Definitions reduce that noise without forcing users into rigid categories.
+
+### Category C gentle nudge — referral to existing crisis resources
+
+When a user trends toward Category C across multiple sessions (sustained Flat, persistent high-arousal negative without shift, or any session resulting in Distant), Stillform should surface a gentle nudge toward the existing Crisis Resources screen.
+
+**Honest acknowledgment of evidence base (locked Apr 29):** The literature on app-based escalation prompts ("you've been struggling — here are resources") is **thin, not contested.** Studies haven't been done at scale for this specific intervention type. So when we build the nudge, we're making a clinical-judgment call without strong empirical guidance. We acknowledge that explicitly rather than hide behind ambiguous "contested research" framing.
+
+**The defensible move:** Refer users to the existing Crisis Resources screen (which is real, vetted, professional infrastructure — 988, Crisis Text Line) rather than invent new escalation logic. Stillform is not a clinical replacement. Users who need medication, therapy, or professional support need those things. Stillform's job is to be honest about its own scope and route appropriately.
+
+**Framing principle (Arlin's words, captured for future sessions):** "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." This isn't dismissive — it's the correct scope statement. A user with clinical depression that requires medication is not a Stillform failure. A user who could be helped by Stillform but the tool didn't reach them is a separate signal worth understanding from the data feed.
+
 ### Reframe tone — auto-detect + in-Reframe dropdown + personalization default
 
 Full prestige design. Replace the current Settings-only static tone with a three-layer system.
