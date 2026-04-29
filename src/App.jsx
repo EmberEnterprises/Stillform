@@ -5077,8 +5077,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
-  const [feelState, setFeelState] = useState(() => {
-    // Infer from today's check-in if available — user can always override
+  const [feelState, setFeelStateRaw] = useState(() => {
+    // Persistence priority:
+    //   1. User's last explicit chip selection (held until they change it, What Shifted resets, or new morning check-in)
+    //   2. Morning check-in inference (if user hasn't picked a chip)
+    //   3. null (no chip)
+    // Why persist: state doesn't reset on a clock. Russell 1980 / Frijda 1986 — affect holds until new input shifts it.
+    // The system shouldn't pretend the user changed when they didn't.
+    try {
+      const persisted = JSON.parse(localStorage.getItem("stillform_feelstate") || "null");
+      if (persisted && persisted.value !== undefined && persisted.day === TimeKeeper.stillformDay()) {
+        // Same-day persisted value — honor it (user explicitly set this earlier today)
+        return persisted.value;
+      }
+    } catch {}
+    // Fall back to morning check-in inference
     try {
       const checkin = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
       if (!checkin || checkin.date !== TimeKeeper.stillformDay()) return null;
@@ -5091,6 +5104,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       return null;
     } catch { return null; }
   });
+  // Wrapper: every chip change writes to localStorage so it persists across remounts
+  const setFeelState = (value) => {
+    setFeelStateRaw(value);
+    try {
+      if (value === null || value === undefined) {
+        localStorage.removeItem("stillform_feelstate");
+      } else {
+        localStorage.setItem("stillform_feelstate", JSON.stringify({ value, day: TimeKeeper.stillformDay() }));
+      }
+    } catch {}
+  };
   // Auto-route mode from feel state — no user selection needed
   const autoMode = (() => {
     if (activeMode) return activeMode; // manual override still works if set programmatically
