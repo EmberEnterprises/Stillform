@@ -4972,6 +4972,43 @@ async function secureSet(key, value) {
   }
 }
 
+// ─── readJSON / writeJSON — encrypted JSON helpers for sensitive keys ────────
+// Wraps secureSet/secureGet with the JSON-parse pattern that's used everywhere
+// in the codebase. Replaces:
+//   const x = JSON.parse(localStorage.getItem(KEY) || "null");
+//   localStorage.setItem(KEY, JSON.stringify(value));
+// with:
+//   const x = await readJSON(KEY);
+//   await writeJSON(KEY, value);
+//
+// readJSON checks the encrypted store first (secureGet), then falls back to
+// plain localStorage during the build window — once all call sites are migrated,
+// the plain-fallback path can be removed entirely.
+//
+// writeJSON encrypts via secureSet and removes any stale plain-text copy.
+async function readJSON(key, fallback = null) {
+  try {
+    const enc = await secureGet(key);
+    if (enc !== null && enc !== undefined) return enc;
+  } catch {}
+  // Plain-text fallback — present only during build/migration window.
+  // Once all sensitive keys are migrated, this branch can be removed.
+  try {
+    const raw = localStorage.getItem(key);
+    if (raw === null || raw === undefined) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+async function writeJSON(key, value) {
+  await secureSet(key, value);
+  // Remove any stale plain-text copy so subsequent reads come from the
+  // encrypted store. secureSet also clears the IndexedDB stale copy.
+  try { localStorage.removeItem(key); } catch {}
+}
+
 // ─── IMAGE OCR UTILITY ───────────────────────────────────────────────────────
 // Loads Tesseract.js lazily from CDN — only when user taps the upload button
 // Extracts text from screenshots (emails, texts, social posts) client-side
