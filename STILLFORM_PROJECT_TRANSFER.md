@@ -77,6 +77,7 @@ The AI always:
 - No crisis escalation language anywhere in the product
 - The user interprets the product however they want — Arlin does not position it against other categories
 - Composure applies equally in positive states — excitement, preparation, focus — not only under stress
+- Stillform is a metacognition tool. Helping people understand their own processes is the mechanism. Composure is the outcome. Every feature serves one of four pillars: metacognition (mechanism), emotional awareness (input), microbiases (outward gaze), neuroplasticity (glue). See Section 9 for the architecture.
 
 
 
