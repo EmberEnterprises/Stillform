@@ -34,6 +34,50 @@ This needs a design decision from Arlin. All three are defensible. Option (a) is
 
 ---
 
+## ⚠️ PRELAUNCH — Added April 28, 2026
+
+### Low-demand mode (anyone with impaired cognition)
+
+Single-tap entry from home screen and from Medicated bio-filter chip. Stripped-down experience: ambient pulse + paced breath visual + optional audio. No inputs, no decisions, no chips, no reading required. Exit on tap.
+
+**Who it serves:** Anyone whose cognition is partly offline. Medicated bio-filter users (broad scope: SSRI, post-anesthesia, sleep aids, chemo, recreational), post-panic users still cognitively rattled, sleep-deprived parents at 3am, migraine sufferers, dissociative episodes from trauma, sensory overload, anyone coming down from any altered state.
+
+**What it MUST NOT be labeled as.** Not "ketamine mode." Not "for altered states." Not "crisis mode." The mode is discoverable for any cognitive-bandwidth-limited use case without naming any of them. Suggested labels: "Just sit with me" / "Quiet mode" / a large unlabeled obvious-on-the-home-screen visual.
+
+**Mechanism.** Salience network reset (Menon 2011) + interoceptive grounding (Pillar 2). Body-first pathway stripped of every cognitive demand.
+
+**Optional second-tap calibration once inside.** "How much can you do right now? Nothing / A little / Normal" — serves every Medicated user with k-hole users picking Nothing.
+
+**Status.** Design captured. Code work ErrorBoundary-blocked. Diagnostic step before build: fetch App.jsx and bio-filter logic to confirm current Medicated chip routing, so build is grounded in current behavior not guessed.
+
+**Founder context (private, never marketed).** Stillform was conceived by Arlin during ketamine treatment. The app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning. The low-demand mode serves the broad cognitive-bandwidth-limited population, of which k-hole users are one sub-population.
+
+### Memory reconsolidation grounding for Reframe
+
+Add to Reframe info button copy and Science Sheet Reframe section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015, *BBS*). Frames why repeated Reframe sessions actually update memory, not just response.
+
+### Predictive processing grounding for bio-filter
+
+Add to bio-filter info button copy and Science Sheet bio-filter section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model, not just "filtering interpretation."
+
+### Salience network reset grounding for body-first pathway
+
+Add to Breathe and Body Scan info button copy and Science Sheet body-first section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Menon (2011). Frames why body-first works for spirals: redirects attentional priority, not just "calms down."
+
+### Cyclic sighing as third breathing option
+
+Add as third option alongside Quick Reset and Deep Regulate, OR relabel Deep Regulate with explicit double-inhale instruction. Cite Balban et al. (2023, *Cell Reports Medicine*, n=111 RCT — outperformed mindfulness AND box breathing on mood improvement and respiratory rate reduction). ErrorBoundary-blocked. Strongest scientific outreach lever — Dr. Yilmaz Balban is top outreach candidate.
+
+### ACT cognitive defusion lineage acknowledgment
+
+Self Mode 5-step protocol (Notice, Name, Recognize, Perspective, Choose) overlaps with ACT cognitive defusion. MCT remains primary framework. Add Hayes, Strosahl & Wilson (1999) and Han & Kim (2022) acknowledgment to Self Mode info copy and Science Sheet Self Mode section. ErrorBoundary-blocked for in-app copy.
+
+### In-app info button copy alignment with Apr 28 Science Sheet corrections
+
+11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Wherever those claims appear in App.jsx ⓘ buttons, copy needs to match the corrected Science Sheet. Diagnostic step: grep App.jsx for the changed strings (60-90 seconds, 60 BPM, 20-30%, Lieberman, etc.) and produce a punch list. ErrorBoundary-blocked.
+
+---
+
 ## ⚠️ TESTFLIGHT-BLOCKING — Recommended Order
 
 Items tackled in this sequence build on each other and minimize risk. Each item gets reviewed and signed off before the next is touched.
