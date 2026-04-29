@@ -12924,8 +12924,8 @@ const isSignalProfileConfigured = () => {
                 {/* Assessment: skip option */}
                 {current.isAssessment && !assessmentComplete && (
                   <button onClick={() => {
-                    try { localStorage.setItem("stillform_regulation_type", "balanced"); } catch {}
-                    setRegType("balanced");
+                    try { localStorage.setItem("stillform_regulation_type", "thought-first"); } catch {}
+                    setRegType("thought-first");
                     setAssessmentAnswers([]);
                     setSetupStep(s => s + 1);
                   }} style={{
