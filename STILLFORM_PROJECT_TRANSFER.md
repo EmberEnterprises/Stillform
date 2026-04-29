@@ -193,7 +193,9 @@ if (isThoughtFirst) {
 
 ---
 
-## 3. Open Issues — Fix Before Launch (Priority Order)
+## 3. Open Issues — Tracked Status
+
+This section is a status snapshot, not an exhaustive list of prelaunch work. The full prelaunch scope lives in `Stillform_Master_Todo.md`. Items here are issues that have been triaged with diagnostic notes attached.
 
 ### ✅ RESOLVED: Post-Reframe ErrorBoundary on Finish session (Apr 29)
 **Was the highest launch-blocker.** Verified fixed on live phone via Chrome remote debug.
