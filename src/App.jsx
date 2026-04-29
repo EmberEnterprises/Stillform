@@ -2886,7 +2886,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
 
@@ -3574,7 +3574,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
   const formatTime = (ms) => {
@@ -5303,7 +5303,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const value = localStorage.getItem("stillform_regulation_type");
       return value === "thought-first" || value === "body-first" ? value : "thought-first";
     } catch {
-      return "balanced";
+      return "thought-first";
     }
   })();
   const isClarity = effectiveMode === "clarity";
