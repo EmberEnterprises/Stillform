@@ -309,6 +309,26 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 7. Workflow Rules (Non-Negotiable)
 
+### Citation discipline (operating rule for any Claude session working on Stillform)
+
+This rule was added Apr 28, 2026 after a fabrication audit found 10 confirmed fabrications (10 author/journal/year errors) in a Claude-generated literature audit. The corrections are documented in `/mnt/user-data/outputs/STILLFORM_AUDIT_FABRICATION_REVIEW.md` (the original session artifact — context only, not source-of-truth).
+
+**The standard going forward, for any Claude session:**
+
+- **No author name without a verified source in the same session.** If a Claude session cites an author by name in any Stillform-facing material, that name must have appeared explicitly in a search result Claude pulled in that same session. If Claude cannot point to a search result, write "the 2024 meta-analysis on X" or "a 2023 study" without a name. Pattern-matching plausible names from training-data knowledge is fabrication and is not acceptable.
+
+- **Flag inherited citations explicitly.** Citations that come from existing Stillform docs (Science Sheet, transfer doc, master todo) but were not personally verified by the current Claude session must be flagged as inherited-not-verified-this-session. They are probably real, but "probably real" is not the standard for material with Arlin's name on it.
+
+- **Quote the search result that supports each citation.** When Claude cites a number — effect size, sample size, year, journal — Claude should be able to say which search result it came from. Not memory. Not recollection. The actual snippet.
+
+- **Say "I don't know" when Claude does not know.** The fabrications happened in the spaces where Claude should have said "I don't have a verified author for this paper, only the title and effect size — proceed without an author name?" and instead filled in a plausible name.
+
+- **Verify before final delivery, not after Arlin asks.** Run a verification pass before presenting any literature audit, citation list, or science-claim doc, not after it has been delivered.
+
+**Why this rule is here.** Arlin will be publishing materials that reference Stillform's science foundation. Fabricated citations expose her to legal and professional risk. The next Claude session will not catch its own fabrications without a written rule that holds it to a higher standard than "sounds right." This rule is that standard.
+
+### Other workflow rules
+
 1. Run security gate check locally before every push — verify all 41 checks pass
 2. Run npm run build before every push — build must be clean
 3. Fetch live file fresh before every change — never edit stale local copy
