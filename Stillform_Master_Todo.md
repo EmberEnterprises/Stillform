@@ -77,6 +77,26 @@ Add to FAQ page:
 
 Real prelaunch UX win for self-service support. ErrorBoundary-blocked for shipping.
 
+### Reframe title doesn't reflect mode
+
+All three Reframe modes (calm/clarity/hype) currently share `title: "Talk it out"` in the modeConfig (App.jsx ~line 5871-5899). The mode-specific name is only shown in the upper-right label ("◎ Talk it through" / "✦ Break the loop" / "◌ Get ready"). When user enters Reframe in clarity or hype mode, the main title still reads "Talk it out" — feels like the AI defaulted to calm mode regardless of state. Either: rename each mode's title to match the upper-right label, OR remove the redundant title and lead with the upper-right label only. Arlin reported as bug Apr 29.
+
+### Self Mode needs work
+
+Specific issues TBD by Arlin. Needs in-app exploration to identify what's missing or broken. Self Mode is the explicit MCT 5-step practice (Notice, Name, Recognize, Perspective, Choose) — Pillar 1 anchor feature. Captured Apr 29.
+
+### My Progress needs work
+
+Specific issues TBD by Arlin. Needs in-app exploration. My Progress is the 12-week telemetry / pattern surface — connects to Pillar 4 neuroplasticity (showing the user their compounding practice). Captured Apr 29.
+
+### "Composure is a practice. You're building it." copy is corny
+
+Replace with a less-precious version. Captured Apr 29.
+
+### Processing primer threshold tunable (currently 5 sessions)
+
+Decay logic ships at session > 5 (App.jsx ~line 14257). If 5 is too long after live testing, threshold is one number to change. Captured Apr 29 for revisit after real user data.
+
 ---
 
 ## ⚠️ PRELAUNCH — Added April 28, 2026
