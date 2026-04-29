@@ -5872,7 +5872,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     calm: {
       icon: "◎", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "var(--amber)",
-      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      bg: "transparent",
       border: "var(--amber-dim)",
       inputBg: "var(--amber-glow)",
       aiBubble: "var(--amber-glow)",
@@ -5881,7 +5881,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     clarity: {
       icon: "✦", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "var(--amber)",
-      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      bg: "transparent",
       border: "var(--amber-dim)",
       inputBg: "var(--amber-glow)",
       aiBubble: "var(--amber-glow)",
@@ -5890,7 +5890,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     hype: {
       icon: "◌", title: "Talk it out", subtitle: rotatingSubtitle,
       color: "var(--amber)",
-      bg: "linear-gradient(180deg, var(--amber-glow) 0%, transparent 50%)",
+      bg: "transparent",
       border: "var(--amber-dim)",
       inputBg: "var(--amber-glow)",
       aiBubble: "var(--amber-glow)",
