@@ -6085,6 +6085,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }
       });
     } catch {}
+    // Clear persisted feelState — user just named what shifted, so the prior chip no longer reflects current state
+    try { localStorage.removeItem("stillform_feelstate"); } catch {}
+    setFeelStateRaw(null);
     setShowStateToStatement(false);
     setExternalAnchorDraft("");
     setExternalAnchorCopied(false);
