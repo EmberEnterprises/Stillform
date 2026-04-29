@@ -291,7 +291,7 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 - No AI add-on pricing. One price. Everything included.
 - Invisible leveling — AI gets smarter by session count. Never announced to user.
 - Completion language: Composure restored / Signal cleared / System calibrated
-- Reddit is a one-shot moment. Do not post without paywall live and at least 1 testimonial.
+- Launch standard: master todo complete, except translations and Apple Store. No other launch gates exist. Testimonials are not a prerequisite. Reddit is not a launch step.
 - Netlify deploys are MANUAL. Arlin triggers AND publishes (TWO STEP — trigger ≠ publish, confirmed Apr 27). Claude never triggers.
 - Bobby is name-only on LLC. NOT involved in code. Never attribute code changes to Bobby — causes Arlin real anxiety about security.
 - Pricing: $14.99/mo or $9.99/mo annual ($119.88/yr) — LIVE via Lemon Squeezy
