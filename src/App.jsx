@@ -6970,6 +6970,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           Reset
         </button>
       )}
+      {/* Crisis resources disclaimer — below input area, accessible without crowding header */}
+      <div style={{ marginTop: 16, fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>
+        <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
+      </div>
       </>
     </div>
   );
