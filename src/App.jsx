@@ -13129,6 +13129,8 @@ const isSignalProfileConfigured = () => {
                   const bioArray = [...ciBio].filter(b => b !== "clear");
                   const isOffBaseline = ciBio.has("off-baseline");
                   try {
+                    // New morning check-in — clear yesterday's persisted feelState (new day, fresh state)
+                    try { localStorage.removeItem("stillform_feelstate"); } catch {}
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
