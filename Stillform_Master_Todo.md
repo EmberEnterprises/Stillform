@@ -63,7 +63,12 @@ Captured in Science Sheet new section "System Observation + User Override (Archi
 ### ⏳ Kinesthetic close interaction (engagement craft) — IN DESIGN
 Arlin chose Reading 3 from the close redesign options: kinesthetic / tactile interaction at session close. Engagement craft as design frame, not neuroscience. Replaces the 5-screen text-and-button sequence at session close with a single tactile moment — most likely single tap on slow-pulsing point or long-press to seal. Grounded in Engagement Principles 4 (Kahneman System 1/2 — match interaction style to user state) and 9 (Norman affordance perception). Spec to draft next session.
 
-The current ToolDebriefGate has a 20-second forced wait before Continue enables ("20-second capture required before exit") — this is the most clinical line of copy in the close flow and the most defensible piece to question first. Drop the wait; preserve the metacognitive function via observation-not-quiz framing.
+### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
+The 20-second forced wait dropped. Continue enables on selection alone. Copy softened from "20-second capture required before exit" to "Take a moment to name what you used." Skip button added in footer (same skip pattern as What Shifted and Next Move). All three completeDebriefGate functions (Breathe / Body Scan / Reframe) updated to capture `skipped:boolean` on stored debrief record + new Plausible event "Tool Debrief Completed" with tool + skipped props for cohort visibility into engagement-vs-skip rates per tool.
+
+What stayed: header copy, three preset options + "I need another pass to lock this in" fourth option, Continue as primary CTA, tool-specific and regulation-type-specific options (Pillar 1 metacognition load-bearing science).
+
+This was the small focused engagement craft change that addresses Round 2 consultation finding ("close feels heavy") without committing to the full kinesthetic close redesign. The kinesthetic close spec is still next session.
 
 ### ⏳ Plain-language neuroscience as recurring surface — NOT YET SPEC'D
 Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Wikipedia Random Article principle with Stillform's existing science as corpus. User encounters one specific finding from neuroscience or affective research, translated to plain language, with a one-line tie to what they're doing in Stillform. Converts science from "things in a sheet I'd never open" to moments of recognition. Aesop / Criterion lineage.
