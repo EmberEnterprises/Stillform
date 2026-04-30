@@ -71,46 +71,47 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 **Why this is launch-critical (not deferrable):** A prestige composure architecture cannot ship with users' raw emotional content sitting in plain text on their device. The cloud is protected; the device is partially protected. The gap closes before launch.
 
-### What Shifted data feed — three-category positive selection framework
+### ✅ What Shifted data feed — three-category positive selection framework — RESOLVED Apr 30
 
-**Spec drafted Apr 30 — see `THREE_CATEGORY_DATA_FEED_SPEC.md` in repo root.**
+**Shipped Apr 30** (commit 890469aa, combined with Body Scan What Shifted).
 
-Russell circumplex grounded classifier (Russell 1980, confirmed Watson 2024). Three categories locked Apr 29:
-- **Category A — Regulated shift** (negative→positive valence; high-arousal-negative→low-arousal-negative; Stuck→positive; Mixed→positive)
-- **Category B — Persistent state** (same quadrant; same chip; Mixed→negative differentiation)
-- **Category C — Concerning shift** (any→Distant; Distant→Distant; sustained Flat ≥5 sessions in 14 days; sustained HAN ≥5 sessions in 14 days)
+Russell circumplex three-category classifier implemented (Russell 1980 J.Pers.Soc.Psychol. 39:1161-1178, confirmed Watson 2024). Pure function `classifyShiftDirection(preState, postState, sessionContext)` returns Category A (regulated shift), Category B (persistent state), Category C (concerning shift), or null with reason. Schema versioned at v1 — never recompute existing entries.
 
-Decision rules locked: chip is structured data, free text is for user only (privacy rule), three categories not two (Russell's model is orthogonal valence×arousal).
+**Architecture:**
+- SHIFT_CHIP_QUADRANTS maps all 9 chips to Russell quadrants (HAP/LAP/HAN/LAN/cognitive/undifferentiated)
+- Pattern-context helper (`getRecentSustainedPatterns`) computes sustained Flat ≥5 / sustained HAN ≥5 in 14-day window
+- Storage key `stillform_shift_events`, capped at 2000 entries
+- buildShiftEvent helper assembles full event with bioFilter, sessionCount, regulationType frozen at write-time
 
-Spec covers: complete chip-to-quadrant mapping, formal rules per category with subcategories, edge cases (no pre-state, regulated-to-negative-non-pattern, unknown chip), full schema with `schemaVersion` versioning, classifyShiftDirection() pure function spec, pattern-context helper, wiring into Reframe finishStateToStatement + Body Scan handleWhatShiftedLockIn, My Progress surfacing (4 read-only views: headline pattern, 3-line compounding chart, tool-specific Cat-A rates, concerning patterns), Plausible 'Shift Classified' aggregate event with no PII, ship checklist.
+**Wired into:**
+- Reframe finishStateToStatement — classifier runs on State-to-Statement complete + skip paths
+- Body Scan What Shifted — handleWhatShiftedLockIn + handleWhatShiftedSkip
+- Plausible "Shift Classified" event with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text
 
-**Privacy architecture preserved:** Aggregate-anonymous → Plausible (Stillform sees percentages across users), per-user-encrypted on-device → My Progress (Stillform never sees individual data).
+**Privacy architecture preserved:** Aggregate-anonymous → Plausible (Stillform sees percentages across users); per-user encrypted on-device → My Progress (Stillform never sees individual data).
 
-~250 lines of code in classifier+wiring commit; My Progress visual integration follows in My Progress redesign work. Build order: ships AFTER prestige refresh + Settled chip + Body Scan What Shifted (which provides the second classifier source).
+Spec at THREE_CATEGORY_DATA_FEED_SPEC.md (committed to repo root). My Progress visual integration ships in My Progress redesign (deferred — needs real categorized data accumulation post-publish).
 
-### Body Scan post-completion What Shifted moment
 
-**Spec drafted Apr 30 — see `BODY_SCAN_WHAT_SHIFTED_SPEC.md` in repo root.**
+### ✅ Body Scan post-completion What Shifted moment — RESOLVED Apr 30
 
-Currently Body Scan completes without asking the user to name what shifted. Add the same What Shifted UI that Reframe has: post-state chip picker + optional free-text label + skip path. Same reset behavior — completing What Shifted (not just the tool) clears persisted feelState because the user explicitly named change. Closes Pillar 1 metacognitive gap.
+**Shipped Apr 30** (commit 890469aa, combined with three-category data feed).
 
-Spec covers exact UI structure, copy, state additions to BodyScanTool, handlers (handleWhatShiftedLockIn / handleWhatShiftedSkip), storage helper (appendBodyScanShiftToStorage with separate localStorage key), Plausible events, edge cases, and ship checklist. ~120 lines of code total in a single commit.
+What Shifted screen added to BodyScanTool. After 6-point sequence completes, "Signal cleared" → 2s pause → What Shifted screen (post-state chip picker + collapsed-by-default optional free-text label + Lock it in / Skip buttons). Russell-grouped chip ordering. Pre-state shown as "Started: X" for orientation. Lock-In disabled until post-state selected. After lock-in or skip, queueDebriefAndCompleteNow runs the existing ToolDebriefGate. Closes Pillar 1 metacognitive gap.
 
-**Build order:** ships AFTER prestige refresh + Settled chip, BEFORE three-category data feed (which hooks into the post-state classification this work produces). Tutorial + FAQ updates batch with three-category data feed so they ship together.
+State additions: showWhatShifted, postStateChip, shiftLabel, shiftLabelExpanded, shiftSkipReason. Handlers: handleWhatShiftedLockIn / handleWhatShiftedSkip. Pre-push audit caught wrong-tool placement bug (handlers initially placed in BreatheGroundTool scope) — fixed before push.
 
-### Add "Settled" chip — low-arousal positive
+Spec at BODY_SCAN_WHAT_SHIFTED_SPEC.md (committed to repo root).
 
-**Spec drafted Apr 30 — see `SETTLED_CHIP_SPEC.md` in repo root.**
+### ✅ Add "Settled" chip — low-arousal positive — RESOLVED Apr 30
 
-**The gap:** Stillform's eight current chips (Excited, Focused, Anxious, Angry, Stuck, Mixed, Flat, Distant) leave the entire low-arousal positive quadrant of Russell's circumplex empty. There is no chip a user can tap to say "I feel okay" or "I feel calm" or "I feel settled." Users in a regulated state currently skip the chips (no data) or pick inaccurate (Focused = high-arousal; Flat = low-arousal *negative*).
+**Shipped Apr 30** (commits 768b56ed in App.jsx + ad4a43f1 in reframe.js).
 
-**Decision (locked Apr 29):** Add **"Settled"** as a ninth chip. Word choice: "Calm" overlaps with calm Reframe mode label, "Steady" reads cognitive not affective, "Settled" lives in both body and mind.
+Settled added as 9th chip. Russell-circumplex-grouped chip ordering implemented at all chip render sites: Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant. AI prompt branch added in reframe.js feelMap for maintain-state framing (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression). Chip definition copy committed via CHIP_DEFINITIONS_DRAFT.md (Arlin approved).
 
-Spec covers: chip array updates at 2 locations in App.jsx (~lines 6512 and 8140), Russell-circumplex-grouped chip ordering (Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant), AI prompt branch in reframe.js calm mode for maintain-state framing (no protective suppression, no Self Mode nudge, post-session insight surfacing enabled), chip ⓘ definition copy ready for the ⓘ system ship, edge cases, ship checklist. ~25 lines of code total, single commit, mostly mechanical.
+**Why this mattered for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) was impossible to detect when users actually arrived at the regulated state. With Settled live, the three-category framework works end-to-end.
 
-**Routing:** Settled chip routes to calm mode in Reframe (same as no-chip default), since a settled user reaching for Reframe is doing maintenance metacognition, not regulation under stress.
-
-**Why this matters for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) is impossible to detect when users actually arrive at the regulated state we're trying to help them reach. The framework breaks without this chip.
+Spec at SETTLED_CHIP_SPEC.md (committed to repo root).
 
 ### ✅ Chip ⓘ button — define what each chip covers — RESOLVED Apr 30
 
@@ -209,7 +210,28 @@ Decay logic ships at session > 5 (App.jsx ~line 14257). If 5 is too long after l
 
 ## ⚠️ PRELAUNCH — Added April 28, 2026
 
-### Low-demand mode (anyone with impaired cognition)
+### ⚠️ Low-demand mode (anyone with impaired cognition) — Phase 1 SHIPPED Apr 30
+
+**Phase 1 (Breathe) shipped Apr 30** (commit 81e2c0b7). Decision-locked architecture: low-demand is a state-of-existing-tool, not a separate tool. Triggered by `bioFilter.includes("medicated")`. No home-screen entry — activates within existing flow when bio-filter signals it.
+
+**Phase 1 changes:**
+- isLowDemand derived state at top of BreatheGroundTool
+- Phase init bypass: phase=='breathe' on entry (skips pre-rate, skips bio-filter screen)
+- Audio force-enabled in low-demand (overrides user's saved setting). Per the science: paced auditory cueing is mechanism for cognitively-compromised users (Balban 2023, Ochsner & Gross 2005), not preference. Audio infrastructure was already built — this commit gates it on for the cohort that needs it.
+- Three-rounds-done screen replaced with low-demand minimal-completion render: pulse circle + "Tap anywhere to close" label. Bypasses three-button decision.
+- Tap-anywhere-to-exit with 1.5s grace period (lowDemandGraceOverRef prevents entry-tap from immediately dismissing).
+- Debrief gate + Next Move screen bypassed entirely. Direct call to onComplete(undefined). No metacognitive demand on a cognitively-impaired user.
+- Session still auto-saves with source='low-demand-complete' for record integrity.
+
+**Phase 2 (Body Scan) — IN-FLIGHT, paused.** Architectural decision pending Arlin's call (4 options surfaced via ask_user_input_v0 widget; user dismissed without selecting; awaiting decision when user returns to it).
+
+**Phase 3 (Reframe) — NOT STARTED.** Most complex of the three because AI behavior changes too (shorter sentences, simpler language, no questions demanding reasoning), not just UI stripping. ~100-150 lines across App.jsx + reframe.js. Spec needed before build.
+
+---
+
+ORIGINAL ENTRY (preserved for context — Phase 1 closes some of this; Phases 2+3 still address the rest):
+
+
 
 Single-tap entry from home screen and from Medicated bio-filter chip. Stripped-down experience: ambient pulse + paced breath visual + optional audio. No inputs, no decisions, no chips, no reading required. Exit on tap.
 
