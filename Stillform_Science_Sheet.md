@@ -28,6 +28,82 @@ Stillform does not market neuroplasticity. It uses the science to design the pra
 
 **Salience network reset** grounds the body-first pathway. Single-pointed attention practices (breath focus, body focus) reset what the salience network treats as urgent. Menon (2011). This is *why* the calm path works for spirals — not just calming down, but redirecting attentional priority.
 
+## Engagement Principles (Behavioral Science Foundation)
+
+The Pillars above are the neuroscience that makes the practice work. The Principles below are the behavioral science that makes the practice land in the user's life. Two parallel research traditions, both rigorous, both citable. Stillform is grounded in both because being scientifically correct is not the same as being engaging — and a tool the user does not return to does not produce the neuroplasticity the science predicts.
+
+This section captures the empirical research on human-software interaction that grounds Stillform's engagement craft. None of these citations are neuroscience. All of them are peer-reviewed behavioral, cognitive, and design research literature.
+
+### Principle 1: Behavior happens at the convergence of motivation, ability, and trigger
+
+**Fogg (2009)** — "A Behavior Model for Persuasive Design" (Persuasive '09). Behavior B occurs when Motivation, Ability, and a Trigger converge at the same moment. The single most-cited framework in app behavior design. Stanford Persuasive Technology Lab.
+
+**Stillform application:** Morning and EOD anchors are the triggers. The simplicity of the home CTA is ability (one tap to enter the practice). Motivation is the felt need to regulate that draws the user to the app. When all three converge, the session happens. When any one is weak, the session does not happen even if the other two are strong. The Fogg model is the diagnostic frame Stillform uses to understand why a user did or did not return on a given day.
+
+### Principle 2: Habits form through context-cue pairing, not through repetition alone
+
+**Wood & Rünger (2016)** — "Psychology of Habit" *Annual Review of Psychology* 67:289-314. Habits form when the same action is performed in the same context until the context itself becomes the trigger. Repetition without context pairing produces conscious behavior, not habits.
+
+**Stillform application:** The morning anchor leverages contextual pairing — same time of day, same physical environment (probably bed or kitchen), same internal state (waking). Over weeks the context itself becomes the cue. The EOD anchor does the same in reverse. This is why Stillform's daily practice loop is anchored to natural transitions in the user's day rather than asking the user to remember to practice at arbitrary times. The streak counter is not gamification — it is reinforcement of the context-cue pairing the research predicts.
+
+### Principle 3: Autonomy, competence, and relatedness drive sustained engagement
+
+**Deci & Ryan (2000)** — Self-Determination Theory. *Psychological Inquiry* 11(4):227-268. And subsequent decades of research. Three basic psychological needs predict whether engagement persists: autonomy (the user makes meaningful choices), competence (the user feels they are getting better), relatedness (the user feels seen and understood).
+
+**Stillform application:** Autonomy is built into every override pathway — the "I don't feel regulated yet" button, the chip selection, the tool override, the skip buttons throughout. Competence is honored through the Cognitive Function Measurement spec (planned) — users see measurable evidence the practice is working at the function level. Relatedness is the AI's calibration to the user's specific signal profile, bias profile, and session history, which makes the user feel met rather than processed. Each Stillform engagement choice is examined against whether it preserves or violates these three needs.
+
+### Principle 4: System 1 states require System 1 interactions
+
+**Kahneman (2011)** — *Thinking, Fast and Slow*. System 1 is fast, intuitive, embodied. System 2 is slow, deliberate, cognitive. Asking for System 2 work when the user is in a System 1 state produces friction; matching the system to the state produces flow.
+
+**Stillform application:** When the user has just completed a regulation session, they are in a System 1 state (post-regulation, embodied, integrated). Asking them for System 2 work at that moment (typing a reflection, choosing among detailed options, performing self-rating cognition) creates friction. The kinesthetic close interaction (planned) lands in System 1 — gesture, felt, automatic — which matches the state the user is in. Conversely, Reframe's cognitive reappraisal work happens precisely when the user needs to engage System 2 to update interpretive frames; that is the right moment for cognitive work.
+
+### Principle 5: Defaults shape behavior more than instructions do
+
+**Thaler & Sunstein (2008)** — *Nudge*. Choice architecture research. **Ariely (2008)** — *Predictably Irrational*. Defaults determine outcomes more reliably than user education. The default option is the option most users select.
+
+**Stillform application:** The system observation + user override pattern (documented in the dedicated section below) is the architecture this principle predicts. Default is the system's read; override is the user's correction. Asking the user to confirm each time would produce decision fatigue and lower engagement. Setting the right default and providing an override pathway respects the research while preserving user authority.
+
+### Principle 6: Variable reward sustains engagement; predictable reward does not
+
+**Eyal (2014)** — *Hooked*. **Skinner's variable reinforcement schedule research** (1957). When the reward for an action is the same every time, engagement decays. When the reward varies in small honest ways, engagement persists.
+
+**Stillform application:** Variable reward done unethically is what Instagram and slot machines exploit. Variable reward done ethically is what makes Duolingo's varying praise, Strava's surprise segment placements, and Letterboxd's diary-as-record feel alive. Stillform's variable rewards are honest: each Reframe session produces a different conversation because the AI is responsive to what the user actually said; each Body Scan reveals different tension patterns because the body is different each day; each post-session What Shifted captures a different shift because no two sessions land identically. The session structure is consistent (predictable enough to feel safe); the contents within each session are variable (alive enough to feel discovered).
+
+### Principle 7: The intention-behavior gap is closed by implementation specificity
+
+**Gollwitzer (1999)** — implementation intentions, *American Psychologist* 54(7):493-503. **Sheeran & Webb (2016)** — "The Intention-Behavior Gap" *Social and Personality Psychology Compass* 10(9):503-518. People who form specific if-then plans ("if I am at X location at Y time, I will do Z") are 2-3x more likely to execute on intentions than people who form general intentions.
+
+**Stillform application:** The Next Move screen is implementation-intention formation directly grounded in this research. The Send-a-message expansion under Next Move is intention-execution specificity per Hallam et al. 2015 fMRI study. The chip selection at Next Move is the if-then plan formation; the optional drafting is execution rehearsal. This is why Next Move is a discrete decision moment rather than a gesture — the cognitive work of forming a specific implementation intention is what the research says actually closes the gap.
+
+### Principle 8: Ultradian rhythm shapes available cognitive bandwidth across the day
+
+**Kleitman (1963)**, **Rossi (1991)** — Ultradian rhythm research. The body cycles through 90-120 minute periods of higher and lower cognitive capacity throughout the day. The same person at 9am and 3pm has measurably different available bandwidth.
+
+**Stillform application:** The bio-filter is partly a real-time read on this. A user opening Stillform during a low-bandwidth ultradian trough may have the same external situation as a user opening Stillform at peak, but their available cognitive resources are different. The system's responsiveness to bio-filter state is grounded in this research as well as the predictive processing science. Future Stillform features that adapt to time-of-day patterns can cite this research base.
+
+### Principle 9: Affordance perception determines whether interaction happens
+
+**Norman (1988, 2013)** — *The Design of Everyday Things*. Affordance research. **Tognazzini, Cooper, Krug** — foundational interaction design literature. Whether a user perceives an element as actionable determines whether they act on it. Buttons must look tappable; sliders must look draggable; hold-to-confirm must look anchored.
+
+**Stillform application:** Engagement craft choices in the visual language — the prestige refresh, the hairline borders, the slow weighted motion, the metallic accent — all serve affordance perception. The kinesthetic close interaction (planned) succeeds or fails on whether the user perceives the gesture as available. Norman's research is the foundation under every interaction-design choice in Stillform.
+
+### Principle 10: Attention-respectful design predicts long-term retention
+
+**Pielot et al. (2014, 2017)** — research on notification timing and dismissal. **Mehrotra et al. (2016)** — research on interruption costs. **Tristan Harris / Center for Humane Technology** — Time Well Spent research. Products that respect users' time and attention produce higher long-term retention than products that extract attention through dark patterns.
+
+**Stillform application:** The product principle "the less you need the app, the more it's working" is grounded in this research. Stillform is built to make sessions effective enough that users do not need to spend more time in the app than the practice requires. No infinite scroll, no dark patterns, no engagement-for-engagement's-sake mechanics. The research literature lets Stillform defend these choices as both ethical and empirically correct.
+
+---
+
+**How the Pillars and Principles work together:**
+
+Every feature in Stillform is grounded in at least one Pillar (neuroscience that makes the practice work on the brain) and at least one Principle (behavioral science that makes the practice land in the user's life). When a feature is missing one or the other, that is the gap engagement craft is designed to close.
+
+Example: the morning anchor is grounded in Pillar 4 (neuroplasticity through repeated practice) AND Principle 2 (context-cue habit formation). Both are required for the feature to actually work. If the practice produced neuroplasticity but the user never returned to do it, the neuroscience would be irrelevant. If the user returned habitually but the practice itself did nothing on the brain, the engagement would be unethical extraction. The intersection is what makes Stillform real.
+
+---
+
 ## Paced Breathing (Breathe & Ground)
 
 **What it does:** Three patterns. Quick Reset (4-4-6, ~60s), Deep Regulate (4-4-8-2, ~3min), Cyclic Sighing (4-1-8, ~5min). All emphasize extended exhale.
