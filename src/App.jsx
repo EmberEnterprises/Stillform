@@ -5774,6 +5774,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [selfModeEntryReason, setSelfModeEntryReason] = useState(initialSelfModeState.selfModeEntryReason || null);
   const [aiBackOnline, setAiBackOnline] = useState(initialSelfModeState.aiBackOnline || false);
   const [activeReframeTab, setActiveReframeTab] = useState(initialSelfModeState.activeReframeTab || "ai"); // "ai" | "self"
+  const [showStartNewConfirm, setShowStartNewConfirm] = useState(false);
   // Persist any time the cluster changes
   useEffect(() => {
     try {
@@ -7748,25 +7749,114 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               </div>
             )}
             {messages.length > 1 && (
-              <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={handleDoneForNow}>
+              <button
+                onClick={handleDoneForNow}
+                style={{
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  color: "var(--text-dim)",
+                  fontSize: 13,
+                  cursor: "pointer",
+                  padding: "8px 14px",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
                 Done for now
               </button>
             )}
-            <button className="btn btn-ghost" style={{ fontSize: 13, color: "var(--text-dim)" }} onClick={() => {
-              try { localStorage.removeItem(STORAGE_KEY); } catch {}
-              setMessages([]);
-              setError(null);
-              setLoading(false);
-              setConsecutiveAiFailures(0);
-              setShowSelfModeOffer(false);
-              setSelfModeEntryReason(null);
-              setAiBackOnline(false);
-              setInput("");
-            }}>
-              Start fresh
+            <button
+              onClick={() => setShowStartNewConfirm(true)}
+              style={{
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                color: "var(--text-dim)",
+                fontSize: 13,
+                cursor: "pointer",
+                padding: "8px 14px",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              Start new
             </button>
           </div>
           
+        </div>
+      )}
+      {showStartNewConfirm && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          zIndex: 1000, padding: 20
+        }}
+          onClick={() => setShowStartNewConfirm(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--surface)",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              padding: "20px 18px",
+              maxWidth: 400,
+              width: "100%"
+            }}
+          >
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 9,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "var(--amber)",
+              marginBottom: 10
+            }}>
+              Start a new conversation?
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 16 }}>
+              This thread will close. The session will be logged to My Progress; the messages won't be saved.
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+              <button
+                onClick={() => setShowStartNewConfirm(false)}
+                style={{
+                  background: "none",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  color: "var(--text-dim)",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  padding: "8px 14px",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  // Log the session before wiping — preserves practice-count integrity even when user starts new mid-thread.
+                  // Cost-bounded: writes one session row with timestamp + mode + preState chip if available.
+                  // Conversation transcript is NOT saved (transcripts never sync to cloud per SYNC_KEYS architecture).
+                  try { saveSession(null); } catch {}
+                  try { localStorage.removeItem(STORAGE_KEY); } catch {}
+                  setMessages([]);
+                  setError(null);
+                  setLoading(false);
+                  setConsecutiveAiFailures(0);
+                  setShowSelfModeOffer(false);
+                  setSelfModeEntryReason(null);
+                  setAiBackOnline(false);
+                  setInput("");
+                  setShowStartNewConfirm(false);
+                  try { window.plausible("Reframe Start New", { props: { mode: effectiveMode || "none" } }); } catch {}
+                }}
+                className="btn btn-primary"
+                style={{ fontSize: 12, padding: "8px 14px" }}
+              >
+                Start new
+              </button>
+            </div>
+          </div>
         </div>
       )}
       {messages.length === 0 && loading && (
