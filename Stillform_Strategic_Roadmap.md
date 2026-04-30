@@ -31,314 +31,78 @@ The document below is preserved as historical context. Do not act on the Apr 8 c
 
 ---
 
-# STILLFORM — Strategic Roadmap & Open Questions (Apr 8 vintage below)
-### Everything from the April 8 Radiology Session
-### Not just what was discussed — what needs to happen next
+## RETURN-LOOP ARCHITECTURE — Why Everything Must Ship Before Launch
+
+The seven testers (Ava, Bobby, Ari, Michelle, Paula, Ive, Jonny) tested Stillform, said it was cool, and bounced. Plausible confirms Arlin has been the only user for the past month. This is not a bug in user acquisition — it is the diagnostic signal for what is missing.
+
+The seven testers experienced **layer one only**: the regulation tool. The substance is real and the science is right. They had a "this is cool" reaction to the first session. Then nothing pulled them back. Cool is the most damning compliment a product can get — impressive but not necessary.
+
+The launch product is a different product than what the testers used. The launch product has **three layers** that together produce return:
+
+**Layer 1: The Regulation Tool (SHIPPED).** Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. Verified by testers as "cool."
+
+**Layer 2: The Return-Loop Infrastructure (PARTIALLY SHIPPED, MOSTLY PENDING).** What pulls the user back when they are not in the app. Watch integration, HRV measurement, Health Connect / HealthKit, biometric lock, notifications infrastructure. Some pieces have shipped (notifications infrastructure via Capacitor); the integrations and HRV are pending and gated on Bobby's Lemon Squeezy live mode switch and on Arlin getting Android Studio installed locally.
+
+**Layer 3: The Engagement Craft Layer (DIAGNOSED, MOSTLY PENDING).** Recognition between sessions, kinesthetic close interaction, plain-language neuroscience surface, Cognitive Function Measurement (the moonshot). All grounded in Engagement Principles section of Science Sheet (Fogg behavior model, Wood & Rünger habit research, Self-Determination Theory, Kahneman System 1/2, Ariely defaults, Eyal variable reward, Gollwitzer implementation intentions, Kleitman ultradian rhythm, Norman affordance perception, Pielot/Mehrotra/Harris attention-respectful design).
+
+Shipping any one layer alone produces the cool-and-bounce pattern at scale. All three together is the actual launch product.
+
+This is why "EVERYTHING needs to be done before launch" is not perfectionism — it is the architecture of return.
 
 ---
 
-## BLOCKERS STATUS (as of April 8)
+## CURRENT BLOCKERS (April 30, 2026)
 
-- ✅ Lemon Squeezy approved (test mode, products created)
-- ✅ Apple Developer Program purchased ($99/yr) — TestFlight unlocked
-- ✅ Latest build published on Netlify
-- ✅ Science sheet: 18 peer-reviewed sections
-- ✅ Ship checklist: 11 items
-- ⏳ DUNS — applied April 4, expected ~May 4. Apple approved without it (5-day verification). Google Play org account blocked until DUNS arrives.
-- ❌ Cloud infrastructure (Supabase) — next session
-- ❌ Paywall end-to-end test — blocked on cloud
-- ❌ Google Play closed testing — blocked on DUNS (~May 4)
-- ❌ TestFlight — Xcode compile not yet verified
+### Pending integrations (return-loop infrastructure)
+- **Watch integration** — Wear OS haptic breathing companion. Test device: Galaxy Watch Ultra. Requires Android Studio installed locally on Mac (storage constraint flagged in memory; OneDrive option noted).
+- **Health Connect / HealthKit** — HRV, sleep, heart rate. Continuous biometric signal flowing into Stillform's data layer.
+- **Biometric lock** — Face ID / fingerprint on Reframe and Signal Log entry.
 
----
+### Pending engagement craft (return moments + delight)
+- **Cognitive Function Measurement** — moonshot, 6-8 weeks focused build. Spec at COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md.
+- **Plain-language neuroscience surface** — second engagement mechanic. Not yet spec'd. Wikipedia Random Article principle with Stillform's existing science as corpus.
+- **Kinesthetic close interaction** — direction chosen (Reading 3, single tap on slow-pulsing point or long-press to seal). Spec to draft next session, grounded in Engagement Principles 4 and 9.
 
-## CRITICAL PATH — IN ORDER
+### Pending low-demand mode (cohort coverage)
+- **Phase 2 (Body Scan)** — spec drafted Apr 30 (LOW_DEMAND_PHASE_2_SPEC.md), awaiting Arlin's direction on 5 open questions.
+- **Phase 3 (Reframe)** — spec drafted Apr 30 (LOW_DEMAND_PHASE_3_SPEC.md), awaiting Arlin's direction on 5 open questions. Most complex of the three because AI behavior changes too.
 
-### 1. Cloud Infrastructure (NEXT SESSION — April 9)
+### Post-launch only (not blocking initial release)
+- Translations (Spanish, Brazilian Portuguese, Armenian)
+- Apple Store / TestFlight broad release (Arlin needs iPhone access)
 
-**Why it's #1:** Nothing else matters if user data lives in localStorage. One cache clear = total loss. No real accounts = no subscription verification = honor system paywall. No cloud = no cross-device sync = users locked to one browser.
-
-**Build:**
-- Supabase free tier (Postgres + Auth + Row-level security)
-- Email/password auth → ties to Lemon Squeezy subscription
-- All localStorage data mirrors to Supabase on every save
-- On login: pull cloud data to device (merge strategy needed for conflicts)
-- Lemon Squeezy webhook → Supabase → app checks subscription on load
-- Auto-backup before any schema migration
-
-**What this unlocks:**
-- Real paywall (server-verified, not localStorage)
-- Real accounts (email-based, cross-device)
-- Data survives cache clears, device switches, reinstalls
-- Foundation for every future feature (Neuro, watch, web-to-native sync)
-
-**Open question:** Merge strategy — if someone uses the app on two devices before cloud sync is set up, what happens when they create an account? Last-write-wins? Merge? Prompt user?
-
-### 2. Paywall End-to-End Test
-
-**Why it's #2:** Can't launch without confirming the money works.
-
-**Test:**
-- Start Free Trial → pricing screen → Lemon Squeezy checkout
-- 4242 4242 4242 4242 test card
-- Confirm redirect back sets subscription
-- Confirm trial countdown works (14 days)
-- Confirm expired trial forces paywall (no back button)
-- Post-cloud: confirm Supabase verifies subscription server-side
-
-### 3. TestFlight (Apple Developer now purchased)
-
-**Build:**
-- Open Xcode project (npx cap open ios)
-- Configure signing with new Apple Developer account
-- Archive → Distribute → App Store Connect
-- Add testers to TestFlight
-- 10+ testers running real sessions on real devices
-
-**Open question:** Does the current Capacitor build compile clean? Haven't tested since initializing. May need dependency updates.
-
-### 4. Google Play Closed Testing
-
-**Build:**
-- Google Play Console ($25 org account)
-- Android App Bundle from Android Studio
-- 12+ testers, 14-day closed testing clock starts
-- Clock must run before public launch
-
-**Open question:** Mac storage. Android Studio needs ~8GB. OneDrive overflow may be needed.
+### Resolved earlier in April (no longer blockers)
+- Lemon Squeezy live (Bobby confirmed live mode switch)
+- Apple Developer Program purchased ($99/yr)
+- DUNS confirmed
+- Cloud infrastructure (Supabase) shipped Apr 15 — three-table schema, RLS, AES-256 encryption, pre-update backup
+- Paywall end-to-end working
 
 ---
 
-## FEATURES READY TO BUILD — PRIORITIZED
+## DECISION FRAME — What Earns a Place Before Launch
 
-### Tier 1: Build Before Launch
+Each pending item evaluated against: does this contribute to the return loop?
 
-**✅ SHIPPED April 8:**
-- Pulse tab removed from Reframe — feel state auto-logs to Signal Log on session start
-- Post-session rating gate in Reframe ("Where are you now?" chips, maps to 1–5 numeric scale on save)
-- Morning check-in "Set my tone →" now hands off directly to Reframe
-- Pulse entries now use ISO date format — AI "today" filter works correctly
-- AI fatigue guardrail in reframe.js — standard rises with conversation depth, not falls
-- Feel state → numeric score mapping: angry=1, anxious=2, flat=2, mixed=3, excited=4, focused=5
-- Pulse renamed consistently everywhere user-facing (Signal Log killed)
-- What's New panel updated (DUNS status, naming)
+- **Watch integration** — yes (haptic breathing without opening the app is a return-loop primitive)
+- **HRV / Health** — yes (biometric signal flowing in is data the user owns and returns to see)
+- **Biometric lock** — no, but it is privacy/integrity (ships before launch for that reason, not as return mechanic)
+- **Cognitive Function Measurement** — yes (in-app exercise plus the results-over-time become a return reason)
+- **Plain-language neuroscience surface** — yes (each landed surface is a small return moment)
+- **Kinesthetic close interaction** — partial (in-session delight does not produce return on its own but compounds with the rest)
+- **Low-demand mode Phases 2/3** — yes (covers cohort that would otherwise bounce after one session because the standard flow does not work for them)
 
-**✅ SHIPPED April 9:**
-- Pulse merged into My Progress — one scrolling page, one destination
-- Biometric gate moved to My Progress
-- Separate Pulse screen removed
-- Privacy policy: Anthropic → OpenAI
-- Morning check-in context: graceful null handling
-- Pulse date format: ISO throughout
-- Sync claim removed everywhere
-- Feel state → numeric score mapping (angry=1, anxious=2, flat=2, mixed=3, excited=4, focused=5)
+Items shipping post-launch (translations, broad TestFlight) do not gate return because the cohorts they serve are not the early-launch cohort.
 
-**Image Upload with OCR (ROADMAP — build after Supabase):**
-- Use case: emails, texts, social media posts — user screenshots something stressing them and uploads it to Reframe
-- Method: Tesseract.js (browser-based OCR, free, no external service, data never leaves device — fits privacy-first positioning)
-- Flow: upload icon in Reframe → pick screenshot → OCR extracts text → drops into input pre-populated → user edits/adds context → sends to AI
-- AI receives it as plain text, no special handling needed — existing tone interpretation prompts already cover this use case
-- Accuracy caveat: Tesseract handles clean screenshots well, weaker on dark mode or stylized fonts — revisit with Google Cloud Vision if accuracy is a real complaint post-launch
-- Privacy policy: no update needed if using Tesseract.js (client-side only). Update required if switching to cloud OCR.
-- Ship checklist items when building: Plausible event ("Image Upload"), FAQ entry, tutorial mention
+---
 
-**Still to build:**
+## ENGAGEMENT CRAFT RESEARCH FOUNDATION — established April 30
 
+The Science Sheet now contains a parallel Engagement Principles section grounding Stillform's engagement craft in 10 citation-grounded behavioral science principles. Each principle has a Stillform application paragraph naming which existing or planned feature it grounds.
 
+**Operating rule:** every feature should be grounded in at least one Pillar (neuroscience) AND at least one Principle (behavioral science). Missing one or the other is the gap engagement craft is designed to close.
 
-
-### Session Notes Visible to User (BUILD — post-cloud)
-
-**Problem:** AI writes session notes after every Reframe. User never sees them. No proof the system is learning. Your Patterns shows numbers only.
-
-**Fix:** Two note types per session:
-
-**1. Internal note (existing, unchanged):**
-- Blunt, honest, for AI context only
-- "User still deflecting on dismissal. Third time. Bio-filter was active."
-- Never shown to user. Feeds next session.
-
-**2. User-facing insight (NEW):**
-- Shown in Your Patterns under "What the AI has noticed"
-- Last 3-5 insights visible
-- Filtered through strict guardrails
-
-**User-facing insight guardrails (NON-NEGOTIABLE):**
-- NEVER label: no "you have anger issues" / "you're anxious-attached"
-- NEVER judge: no "you overreact" / "you keep making the same mistake"
-- NEVER repeat vulnerabilities as labels: no "your father abandoned you"
-- NEVER use clinical language: no "attachment style" / "trauma response"
-- NEVER claim pattern from fewer than 3 instances
-- ALWAYS frame as growth: "You caught it faster" / "First time you described holding your ground"
-- ALWAYS frame patterns as awareness: "This has come up a few times" not "You always do this"
-- Tone: coach's observation, not therapist's note, not chart entry
-
-**Generation prompt for user-facing insight:**
-"Write ONE sentence the user will read about this session. Frame it as growth, awareness, or strength. Never label, diagnose, judge, or reference specific vulnerabilities. If nothing meaningful happened, return null — do not force an insight."
-
-**Where it surfaces:**
-- Your Patterns: new section "What the AI has noticed" below stats
-- After session 5+: one insight shown after post-rating before Done
-- Insight must feel earned, not generic
-
-### Offline Reframe Fallback (PRIORITY — before launch)
-
-**Problem:** When GPT-4o API fails, Reframe is dead. User typed something vulnerable and gets nothing back. Single point of failure on the most important feature.
-
-**Fix:** API failure triggers a self-guided structured reframe. No internet needed.
-
-**Flow:**
-1. User's message is preserved (they don't retype)
-2. Screen shifts: "Connection issue. Let's work through this manually."
-3. "What's the feeling right now?" → same feel-state chips
-4. "What's your brain adding that might not be true?" → text input
-5. "What would you tell a friend dealing with this?" → text input
-6. "One thing you can do right now." → text input
-7. Completion: "You just reframed it yourself. That's the skill."
-
-**Evidence layer:**
-- Pull session history from localStorage
-- Show: "You've done this X times. Average shift: X points."
-- Reference specific past session: "Last Tuesday you came in Angry and left Focused."
-- Reinforce: "The AI helps you see patterns faster. The work is yours."
-
-**Why this matters beyond error recovery:**
-- Teaches users the reframe skill without AI dependency
-- Proves the scaffolding philosophy: the app becomes unnecessary
-- AI going down = the moment the user discovers they don't need it
-- Saves to session history. AI sees it next time: "You worked through that on your own. That's growth."
-- Turns a failure into the most powerful moment in the app
-
-**Technical:** 3 retries with exponential backoff. After 3 failures, offline mode activates. Manual reframe saves as session with flag "self-guided: true" so AI knows later.
-
-
-### Pulse → Reframe Direct Flow (BUILD BEFORE LAUNCH)
-
-**Problem:** User logs a Pulse entry (Angry — "boss talked over me") and it goes to a list. Dead end. Pulse and Reframe are two separate boxes.
-
-**Fix:** After saving a Pulse entry, prompt: "Want to reframe this?" → Yes opens Reframe with that entry pre-loaded.
-
-**Flow:**
-1. User logs Pulse: chips + note
-2. Save completes
-3. Prompt appears: "Want to talk through this?" → Yes / Done
-4. Yes → Reframe opens with entry pre-loaded as first context
-5. AI opens with: "You just logged [emotion] — [note]. What happened?"
-6. Full Reframe session proceeds with that Pulse entry as anchor
-
-**Why this matters:**
-- Connects the two core features into one system
-- The Pulse becomes the trigger, Reframe becomes the response
-- No more logging emotions into a void
-- The AI starts with specific context instead of a blank "What's on your mind?"
-- Creates the feedback loop: state detection → interpretation → perspective
-
-**Technical:** Pass Pulse entry as `priorToolContext` in the Reframe API call. "User just logged: [chips] — [note]. Start from here."
-
-**AI prompt addition for flat/stagnation states:**
-When user is flat and input is low-energy: "Maybe this isn't stagnation — it's incubation. What's brewing underneath?" Don't push harder on low energy. Reframe the stillness as productive.
-
-### Mandatory Post-Session Rating (PRIORITY — before launch)
-
-After every session (breathing, body scan, Reframe), full-screen "Where are you now?" before Done appears. Same chips as entry. NOT skippable. One tap, 3 seconds. Enables pre/post delta, AI context, tool comparison data. Affect labeling research: naming state IS a final regulation act.
-
-### Check-In → Reframe Flow (PRIORITY BUILD)
-
-**Morning Flow:**
-1. Check-in opens → energy + hardware (quick taps)
-2. "Set my tone →" transitions directly into Reframe MORNING MODE
-3. AI has check-in data pre-loaded: "You're running depleted today. What's on your plate?"
-4. Brief exchange — priming, forward-looking, 90 seconds
-5. AI closes: "You're set. Go."
-6. Morning mode AI behavior: sharp, directional, primes for what's ahead, flags blind spots from bio-filter state
-
-**Evening Flow:**
-1. EOD check-in → 3 taps (energy vs morning, composure, one word)
-2. "Want to clear anything before bed?" → Yes / No
-3. No → "Sleep well. See you tomorrow."
-4. Yes → Reframe EVENING MODE (closure, not analysis)
-5. Evening mode AI behavior:
-   - Shorter responses than any other mode
-   - "Put it down" language, not "let's work through it"
-   - Never opens new threads. Never says "tell me more."
-   - If they vent: let them, then close: "You said it. It's out. Now sleep."
-   - Actively resists going deep: "That's a tomorrow problem. Tonight the only job is sleep."
-   - Goal is calming, winding down, releasing — NOT processing
-   - Never sends them to bed thinking harder than when they arrived
-6. AI closes: "You're set. Sleep."
-
-**Tomorrow morning AI has yesterday's EOD:**
-"Yesterday you closed heavy with worse energy. You still showed up today. What's different this morning?"
-
-**Three time-based Reframe modes:**
-- Morning: Prime (forward, sharp, directional)
-- Anytime: Full Reframe (existing 3 modes — Talk/Loop/Ready)
-- Evening: Close (backward, release, calm, short)
-
-**Technical:** Mode auto-detected from time of day when entering through check-in flow. Manual Reframe access uses existing 3 modes regardless of time.
-
-**Neuro Voice Companion**
-- Wake word "Neuro" while app is open
-- Voice commands: "Breathe," "Body scan," "Talk it out," "Check in"
-- Speech-to-text for Reframe input (Web Speech API)
-- Text-to-speech for AI responses (SpeechSynthesis)
-- Full voice conversation mode for "Talk it out"
-- Build order: mic button → AI reads back → voice commands → wake word → full guided sessions
-- **Why it matters:** Accessibility for visual thinkers, people in crisis who can't type, hands-free use. Dynamic voice companion that knows your state ≠ pre-recorded scripts (Calm). Different product category.
-
-**Breathing Simplification**
-- Research shows specific patterns don't matter — attention to breath is the active ingredient
-- Consider simplifying: "Slow down" (extended exhale) and "Quick reset" (shorter cycle)
-- Or keep all four but stop implying scientific superiority of specific ratios
-- **Open question:** Does removing pattern choice reduce user agency? Agency may matter psychologically even if pattern doesn't matter physiologically.
-
-**Fractal Breathing Visual**
-- Prototype built and user-tested (effective for grounding during CT scan)
-- Integration: Settings toggle "Visual grounding: on/off"
-- Background behind breathing ring, synced to breath pace
-- Ship when user testing shows demand, not before
-- **Integrity rule:** Don't add visuals to look innovative. Add them when someone needs them.
-
-### Tier 2: Build After Launch
-
-**Confirmation Loop — "Does That Land?"**
-After Reframe session, AI offers one summary: "It sounds like the real issue isn't [what they said] — it's [what the AI detected]." User reacts: Yes / Not quite / Off base. Yes = validated insight. Not quite = AI adjusts ("What am I missing?"). Off base = AI logs the miss. Over time builds per-user preference profile — which reframe styles land vs miss. Turns self-assessment into a recognition task. Future: extend to friction detection (stalling, rapid deletions, false starts). Depends on cloud for longitudinal learning. Basic version works with localStorage.
-
-**Galaxy Watch Companion**
-- Haptic breathing companion on wrist
-- User's brother specifically waiting for this
-- Requires Android Studio locally on Mac
-- IS the lock screen button — tap wrist, breathing starts
-
-**Visual Emotional Input**
-- For visual thinkers who can't translate images to words
-- Select from visual metaphors instead of typing in Reframe
-- Weather patterns, pressure gauges, color gradients, textures
-- AI reads visual selection, responds accordingly
-- Accessibility feature, not novelty
-
-**Lock Screen Quick Access**
-- Native Android: persistent notification with "◎ Breathe" / "✶ Talk it out" buttons
-- Native iOS: Lock Screen widget (iOS 16+)
-- PWA can't touch lock screen — native only
-
-**Interpersonal Microbiases Layer 2**
-- Expand Blind Spot Profiler with 5 interpersonal scenarios
-- "Your partner goes quiet after a disagreement. What's your first thought?"
-- Maps interpersonal defaults for the AI
-- Layer 1 (AI prompts) already shipped
-
-**If-Then Planning Screen**
-- After calibration: "When [signal area] activates → open [tool]"
-- Makes implementation intentions conscious and explicit
-- Research says explicit if-then plans are dramatically stronger than implicit ones
-
-**Proactive AI Check-In**
-- AI initiates: "You haven't checked in today — everything ok?"
-- Requires push notification infrastructure (native)
-- Calendar integration discussed in prior session
-- Morning nudge + evening nudge + "I noticed [pattern]" = three touchpoints
-- Research: single push notification in first 90 days = 3x retention
+**Award case framing:** "Stillform's claims are grounded in two parallel research traditions — neuroscience for what the practice does inside the brain, and behavioral science for what the practice does in the user's life." Stronger case than either alone. Most products skip one or the other. Stillform sits in the intersection.
 
 ---
 
