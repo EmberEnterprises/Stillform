@@ -2139,6 +2139,181 @@ const appendToolDebriefToStorage = (entry, maxItems = TOOL_DEBRIEF_MAX_ITEMS) =>
   return next;
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SHIFT CLASSIFIER — Russell circumplex three-category framework
+// Russell 1980 (J. Pers. Soc. Psychol. 39:1161-1178), confirmed Watson 2024.
+// Per THREE_CATEGORY_DATA_FEED_SPEC.md.
+// Category A — Regulated shift (the tool worked)
+// Category B — Persistent state (no shift detected, sometimes the work is holding)
+// Category C — Concerning shift (per-session: any→Distant; pattern: ≥5 sustained Flat or HAN in 14 days)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const SHIFT_CHIP_QUADRANTS = {
+  excited:  { valence: "+", arousal: "high", quadrant: "HAP" },
+  focused:  { valence: "+", arousal: "high", quadrant: "HAP" },
+  settled:  { valence: "+", arousal: "low",  quadrant: "LAP" },
+  anxious:  { valence: "-", arousal: "high", quadrant: "HAN" },
+  angry:    { valence: "-", arousal: "high", quadrant: "HAN" },
+  flat:     { valence: "-", arousal: "low",  quadrant: "LAN" },
+  distant:  { valence: "-", arousal: "low",  quadrant: "LAN-distant" },
+  stuck:    { valence: "-", arousal: "mid",  quadrant: "cognitive" },
+  mixed:    { valence: "mixed", arousal: "mid", quadrant: "undifferentiated" }
+};
+
+const SHIFT_CATEGORY_PATTERN_THRESHOLD = 5;
+const SHIFT_CATEGORY_PATTERN_WINDOW_DAYS = 14;
+const SHIFT_SCHEMA_VERSION = 1;
+const SHIFT_EVENT_STORAGE_KEY = "stillform_shift_events";
+const SHIFT_EVENT_MAX_ITEMS = 2000;
+
+const getShiftEventsFromStorage = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(SHIFT_EVENT_STORAGE_KEY) || "[]");
+    return Array.isArray(parsed) ? parsed.filter((e) => e && typeof e === "object") : [];
+  } catch { return []; }
+};
+
+const appendShiftEventToStorage = (entry, maxItems = SHIFT_EVENT_MAX_ITEMS) => {
+  if (!entry) return getShiftEventsFromStorage();
+  const existing = getShiftEventsFromStorage();
+  const next = [entry, ...existing].slice(0, maxItems);
+  try { localStorage.setItem(SHIFT_EVENT_STORAGE_KEY, JSON.stringify(next)); } catch {}
+  return next;
+};
+
+// Reads recent shift events to compute pattern context (sustained Flat / sustained HAN)
+function getRecentSustainedPatterns(shiftEvents) {
+  const cutoff = Date.now() - SHIFT_CATEGORY_PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const recent = (shiftEvents || [])
+    .filter(e => e && e.timestamp && new Date(e.timestamp).getTime() > cutoff)
+    .filter(e => e.postState)
+    .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+  let sustainedFlat = 0;
+  let sustainedHAN = 0;
+  let breakingFlat = false;
+  let breakingHAN = false;
+
+  for (const event of recent) {
+    if (!breakingFlat) {
+      if (event.postState === "flat") sustainedFlat++;
+      else breakingFlat = true;
+    }
+    if (!breakingHAN) {
+      if (event.postState === "anxious" || event.postState === "angry") sustainedHAN++;
+      else breakingHAN = true;
+    }
+    if (breakingFlat && breakingHAN) break;
+  }
+  return { recentSustainedFlat: sustainedFlat, recentSustainedHAN: sustainedHAN };
+}
+
+// Pure classifier — same inputs always produce same output. Easy to test.
+function classifyShiftDirection(preState, postState, sessionContext = {}) {
+  if (!preState && !postState) return { category: null, nullReason: "no-pre-state" };
+  if (!preState) return { category: null, nullReason: "no-pre-state" };
+  if (!postState) return { category: null, nullReason: "skipped" };
+
+  const pre = SHIFT_CHIP_QUADRANTS[preState];
+  const post = SHIFT_CHIP_QUADRANTS[postState];
+  if (!pre || !post) return { category: null, nullReason: "unknown-chip" };
+
+  // CATEGORY C — concerning (per-session: post-state Distant)
+  if (post.quadrant === "LAN-distant") {
+    return { category: "concerning", subcategory: "distant-post-state" };
+  }
+
+  // CATEGORY C — concerning (pattern: sustained Flat or HAN)
+  const recentFlat = sessionContext.recentSustainedFlat || 0;
+  const recentHAN = sessionContext.recentSustainedHAN || 0;
+  if (recentFlat >= SHIFT_CATEGORY_PATTERN_THRESHOLD &&
+      post.quadrant === "LAN" && postState === "flat") {
+    return { category: "concerning", subcategory: "sustained-flat" };
+  }
+  if (recentHAN >= SHIFT_CATEGORY_PATTERN_THRESHOLD && post.quadrant === "HAN") {
+    return { category: "concerning", subcategory: "sustained-HAN" };
+  }
+
+  // CATEGORY A — regulated shift
+  if ((pre.quadrant === "HAN" || pre.quadrant === "LAN") &&
+      (post.quadrant === "HAP" || post.quadrant === "LAP")) {
+    return { category: "regulated", subcategory: "negative-to-positive" };
+  }
+  if (pre.quadrant === "HAN" && post.quadrant === "LAN" && postState !== "distant") {
+    return { category: "regulated", subcategory: "high-arousal-down" };
+  }
+  if (preState === "stuck" && (post.quadrant === "HAP" || post.quadrant === "LAP")) {
+    return { category: "regulated", subcategory: "stuck-to-clarity" };
+  }
+  if (preState === "mixed" && (post.quadrant === "HAP" || post.quadrant === "LAP") &&
+      postState !== "mixed") {
+    return { category: "regulated", subcategory: "mixed-to-positive" };
+  }
+
+  // CATEGORY B — persistent
+  if (pre.quadrant === post.quadrant) {
+    return { category: "persistent", subcategory: "same-quadrant" };
+  }
+  if (preState === postState) {
+    return { category: "persistent", subcategory: "same-chip" };
+  }
+  if (preState === "mixed" && post.valence === "-") {
+    return { category: "persistent", subcategory: "mixed-to-negative-differentiation" };
+  }
+
+  // Edge case: regulated → non-pattern negative
+  if ((pre.quadrant === "HAP" || pre.quadrant === "LAP") &&
+      (post.quadrant === "HAN" || post.quadrant === "LAN")) {
+    return { category: null, nullReason: "regulated-to-negative-non-pattern" };
+  }
+
+  // Final fallback (should rarely hit; logs as persistent for data continuity)
+  return { category: "persistent", subcategory: "unmatched-rule" };
+}
+
+// Helper — build full shift event for storage. Used by both Reframe and Body Scan.
+function buildShiftEvent({ source, toolId, toolMode, preState, postState, shiftLabel, sessionTimestamp, regulationType }) {
+  const allEvents = getShiftEventsFromStorage();
+  const patternContext = getRecentSustainedPatterns(allEvents);
+  let bioFilter = [];
+  try {
+    const stored = localStorage.getItem("stillform_bio_filter");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) bioFilter = parsed;
+    }
+  } catch {}
+  const sessionCount = (() => {
+    try { return getSessionCountFromStorage(); } catch { return 0; }
+  })();
+  const { category, subcategory, nullReason } = classifyShiftDirection(preState, postState, patternContext);
+  const cleanLabel = String(shiftLabel || "").trim();
+  return {
+    id: `shift_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    schemaVersion: SHIFT_SCHEMA_VERSION,
+    timestamp: new Date().toISOString(),
+    date: TimeKeeper.clockDay(),
+    stillformDate: TimeKeeper.stillformDay(),
+    source,
+    sessionTimestamp: sessionTimestamp || null,
+    toolId,
+    toolMode: toolMode || null,
+    preState: preState || null,
+    postState: postState || null,
+    category,
+    subcategory: subcategory || null,
+    nullReason: nullReason || null,
+    shiftLabel: cleanLabel || null,
+    hasLabel: cleanLabel.length > 0,
+    bioFilter,
+    sessionCount,
+    regulationType: regulationType || null,
+    recentSustainedFlat: patternContext.recentSustainedFlat,
+    recentSustainedHAN: patternContext.recentSustainedHAN
+  };
+}
+
+
 const normalizeSessionToolId = (toolId) => {
   const id = String(toolId || "").trim().toLowerCase();
   if (!id) return null;
@@ -3634,6 +3809,12 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
+  // What Shifted post-completion moment (BODY_SCAN_WHAT_SHIFTED_SPEC.md)
+  const [showWhatShifted, setShowWhatShifted] = useState(false);
+  const [postStateChip, setPostStateChip] = useState(null);
+  const [shiftLabel, setShiftLabel] = useState("");
+  const [shiftLabelExpanded, setShiftLabelExpanded] = useState(false);
+  const [shiftSkipReason, setShiftSkipReason] = useState(null);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override via chips
     try {
@@ -3701,6 +3882,76 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     setNextMoveTarget(null);
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "body-scan-next-move-skip");
   };
+  // What Shifted handlers (BODY_SCAN_WHAT_SHIFTED_SPEC.md)
+  const handleWhatShiftedLockIn = () => {
+    if (!postStateChip) return; // disabled in UI when no chip selected, this is a guard
+    const cleanLabel = String(shiftLabel || "").trim();
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: "body-scan-what-shifted",
+        toolId: "scan",
+        toolMode: null,
+        preState: feelState,
+        postState: postStateChip,
+        shiftLabel: cleanLabel,
+        sessionTimestamp: latestSessionTimestampRef.current,
+        regulationType
+      });
+      appendShiftEventToStorage(shiftEvent);
+      window.plausible("Body Scan What Shifted Completed", {
+        props: {
+          had_label: cleanLabel.length > 0 ? "yes" : "no",
+          pre_state: feelState || "none",
+          post_state: postStateChip
+        }
+      });
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: shiftEvent.subcategory || "none",
+          tool: "body-scan",
+          mode: "none"
+        }
+      });
+    } catch {}
+    // User named the shift, so post-state replaces stale pre-state chip
+    try { localStorage.setItem("stillform_feelstate", JSON.stringify({ value: postStateChip, day: TimeKeeper.stillformDay() })); } catch {}
+    setShowWhatShifted(false);
+    setShiftLabelExpanded(false);
+    queueDebriefAndCompleteNow(null, "body-scan-what-shifted-complete");
+  };
+
+  const handleWhatShiftedSkip = (reasonOverride) => {
+    const reason = reasonOverride || shiftSkipReason || "not-needed";
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: "body-scan-what-shifted-skip",
+        toolId: "scan",
+        toolMode: null,
+        preState: feelState,
+        postState: null, // skip = no post-state chip
+        shiftLabel: null,
+        sessionTimestamp: latestSessionTimestampRef.current,
+        regulationType
+      });
+      appendShiftEventToStorage({ ...shiftEvent, skipped: true, skipReason: reason });
+      window.plausible("Body Scan What Shifted Skipped", {
+        props: { skip_reason: reason }
+      });
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: "skipped",
+          tool: "body-scan",
+          mode: "none"
+        }
+      });
+    } catch {}
+    setShowWhatShifted(false);
+    setShiftLabelExpanded(false);
+    queueDebriefAndCompleteNow(null, "body-scan-what-shifted-skip");
+  };
+
   const completeDebriefGate = (reflectionText) => {
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -3970,6 +4221,119 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       />
     );
   }
+  if (showWhatShifted) {
+    // BODY SCAN WHAT SHIFTED — Russell circumplex post-state moment + optional free-text label
+    // Per BODY_SCAN_WHAT_SHIFTED_SPEC.md and THREE_CATEGORY_DATA_FEED_SPEC.md
+    const feelChips = [
+      { id: "excited", label: "Excited" },
+      { id: "focused", label: "Focused" },
+      { id: "settled", label: "Settled" },
+      { id: "anxious", label: "Anxious" },
+      { id: "angry", label: "Angry" },
+      { id: "stuck", label: "Stuck" },
+      { id: "mixed", label: "Mixed" },
+      { id: "flat", label: "Flat" },
+      { id: "distant", label: "Distant" }
+    ];
+    const preChipLabel = feelChips.find(c => c.id === feelState)?.label || null;
+    const lockInEnabled = !!postStateChip;
+
+    return (
+      <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 24, padding: "24px 16px 8px" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+          What Shifted
+        </div>
+        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 24 }}>
+          Your body just moved through six points. Name where it lands now — that's what locks the regulation in.
+        </div>
+
+        {preChipLabel && (
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+            Started: {preChipLabel}
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
+          {feelChips.map(f => (
+            <button
+              key={f.id}
+              onClick={() => setPostStateChip(f.id)}
+              style={{
+                background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
+                border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
+                borderRadius: 20,
+                padding: "8px 16px",
+                fontSize: 13,
+                color: postStateChip === f.id ? "var(--amber)" : "var(--text-dim)",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+                transition: "border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige)"
+              }}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {!shiftLabelExpanded && (
+          <button
+            onClick={() => setShiftLabelExpanded(true)}
+            style={{
+              background: "transparent",
+              border: "none",
+              color: "var(--text-dim)",
+              fontSize: 13,
+              cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+              padding: "8px 0",
+              marginBottom: 16
+            }}>
+            ▸ What shifted in your body?
+          </button>
+        )}
+
+        {shiftLabelExpanded && (
+          <div style={{ marginBottom: 16 }}>
+            <textarea
+              value={shiftLabel}
+              onChange={(e) => setShiftLabel(e.target.value)}
+              placeholder="In one line — what's different in your body now? (optional)"
+              rows={3}
+              style={{
+                width: "100%",
+                background: "var(--surface2)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "10px 12px",
+                fontSize: 13,
+                color: "var(--text)",
+                fontFamily: "'DM Sans', sans-serif",
+                outline: "none",
+                resize: "vertical",
+                marginBottom: 8
+              }}
+            />
+            <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+              Naming the somatic shift — even in one line — strengthens the pattern. Optional.
+            </div>
+          </div>
+        )}
+
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
+          <button
+            className="btn btn-primary"
+            onClick={handleWhatShiftedLockIn}
+            disabled={!lockInEnabled}
+            style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
+            Lock it in
+          </button>
+          <button className="btn btn-ghost" onClick={() => handleWhatShiftedSkip()}>
+            Skip
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (done) {
     if (!scanSavedRef.current) {
       scanSavedRef.current = true;
@@ -3977,7 +4341,8 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       scanElapsedRef.current = saved?.elapsed || 0;
       latestSessionTimestampRef.current = saved?.timestamp || null;
     }
-    if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => queueDebriefAndComplete("reframe-calm", "scan-complete-auto"), 2000); }
+    // What Shifted gate — replace the old 2s auto-route to Reframe with the metacognitive close
+    if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => setShowWhatShifted(true), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
     const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
@@ -4007,7 +4372,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           </div>
         )}
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
-          MOVING TO REFRAME…
+          NAMING THE SHIFT…
         </div>
         <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => queueDebriefAndComplete(undefined, "scan-complete-exit")}>Exit session</button>
         
@@ -6268,6 +6633,31 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }
       });
     } catch {}
+
+    // SHIFT CLASSIFIER — Russell circumplex three-category framework (THREE_CATEGORY_DATA_FEED_SPEC.md)
+    // Builds and persists shift event with computed category. Stillform sees aggregate-anonymous via Plausible only.
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: "reframe-state-to-statement",
+        toolId: "reframe",
+        toolMode: effectiveMode,
+        preState: feelState,
+        postState: postRating,
+        shiftLabel: externalAnchorDraft.trim(),
+        sessionTimestamp: sessionShareSummary?.timestamp || null,
+        regulationType
+      });
+      appendShiftEventToStorage(shiftEvent);
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: shiftEvent.subcategory || "none",
+          tool: "reframe",
+          mode: effectiveMode || "none"
+        }
+      });
+    } catch {}
+
     // Clear persisted feelState — user just named what shifted, so the prior chip no longer reflects current state
     try { localStorage.removeItem("stillform_feelstate"); } catch {}
     setFeelStateRaw(null);
@@ -6288,6 +6678,30 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setCommunicationSkipReason(chosenReason);
     logCommunicationEvent(COMMUNICATION_ACTIONS.skipped, { skipReason: chosenReason });
     try { window.plausible("State to Statement Skipped"); } catch {}
+
+    // SHIFT CLASSIFIER — log skip as null-category event (preserves data integrity)
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: "reframe-state-to-statement-skip",
+        toolId: "reframe",
+        toolMode: effectiveMode,
+        preState: feelState,
+        postState: postRating,  // may or may not be set; classifier handles null
+        shiftLabel: null,
+        sessionTimestamp: sessionShareSummary?.timestamp || null,
+        regulationType
+      });
+      appendShiftEventToStorage(shiftEvent);
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: shiftEvent.subcategory || "skipped",
+          tool: "reframe",
+          mode: effectiveMode || "none"
+        }
+      });
+    } catch {}
+
     setShowStateToStatement(false);
     setExternalAnchorCopied(false);
     setExternalAnchorDraft("");
