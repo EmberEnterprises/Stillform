@@ -264,14 +264,16 @@ All 12 land at once when Arlin triggers. Closing language candidates draft sits 
 
 ## KNOWN ISSUES
 
-- Paywall is localStorage honor system — server-side verification planned
 - Annual checkout link is same URL as monthly (both variants on one page) — by design
 - Chrome 146 changed "Install app" to "Add to Home Screen" — Chrome UI change, not bug
 - beforeinstallprompt may not fire on repeated install/uninstall — Chrome throttle
 
+### Resolved (no longer issues)
+- ~~Paywall is localStorage honor system — server-side verification planned~~ — RESOLVED Apr 15. Cloud sync shipped (Supabase three-table schema, RLS, AES-256). Lemon Squeezy live; paywall server-verified.
+
 ---
 
-*ARA Embers LLC · Punch List · April 8, 2026*
+*ARA Embers LLC · Punch List · last updated April 30, 2026*
 
 
 ---
