@@ -48,23 +48,64 @@ const styles = `
   input, textarea { -webkit-user-select: text; user-select: text; }
 
   :root {
-    --bg:         #0A0A0C;
-    --surface:    #141418;
-    --surface2:   #1A1A1F;
-    --border:     rgba(255,255,255,0.07);
-    --border-hi:  rgba(255,255,255,0.12);
-    --amber:      #C8922A;
-    --amber-dim:  rgba(200,146,42,0.25);
-    --amber-glow: rgba(200,146,42,0.07);
-    --amber-20:   rgba(200,146,42,0.20);
+    /* GROUNDS — deeper, slightly cooler, with material undertone (per design system Apr 30) */
+    --bg:         #08080A;
+    --surface:    #111114;
+    --surface2:   #16161A;
+
+    /* BORDERS — hairline, printed-not-drawn */
+    --border:     rgba(255,255,255,0.06);
+    --border-hi:  rgba(255,255,255,0.10);
+    --border-printed: rgba(255,255,255,0.04);
+
+    /* ACCENT — antiqued metallic, used at <5% of any screen, never as fill */
+    --amber:      #B8862B;
+    --amber-dim:  rgba(184,134,43,0.35);
+    --amber-glow: rgba(184,134,43,0.06);
+    --amber-20:   rgba(184,134,43,0.20);
+    --amber-deep: #8C6420;
+    --amber-line: rgba(184,134,43,0.35);
+
+    /* TEXT — cream-on-black for editorial, primary white for system */
     --text:       #E8EAF0;
-    --text-dim:   #9496A1;
-    --text-muted: #95979f;
-    --green:      #4a8c6a;
-    --green-glow: rgba(74,140,106,0.08);
+    --text-cream: #EDE8DC;
+    --text-dim:   rgba(232,234,240,0.62);
+    --text-muted: rgba(232,234,240,0.40);
+
+    /* STATE — subtle tonal shifts, never bold */
+    --state-positive: #8FA88A;
+    --state-negative: #B47A6A;
+    --state-neutral:  #A8A29A;
+
+    /* legacy aliases */
+    --green:      #8FA88A;
+    --green-glow: rgba(143,168,138,0.08);
+
+    /* RADIUS — tighter, printed feel */
     --r-sm: 2px;
     --r:    3px;
-    --r-lg: 6px;
+    --r-lg: 4px;
+
+    /* SPACING SCALE — defined rhythm, no arbitrary values */
+    --space-2: 2px;
+    --space-4: 4px;
+    --space-8: 8px;
+    --space-12: 12px;
+    --space-16: 16px;
+    --space-24: 24px;
+    --space-32: 32px;
+    --space-48: 48px;
+    --space-64: 64px;
+    --space-80: 80px;
+
+    /* MOTION — weighted, ceremonial timing */
+    --motion-quick:    180ms;
+    --motion-default:  300ms;
+    --motion-weighted: 480ms;
+    --motion-slow:     650ms;
+    --ease-prestige:   cubic-bezier(0.22, 0.61, 0.36, 1);
+    --ease-page-turn:  cubic-bezier(0.32, 0.08, 0.24, 1);
+    --ease-shutter:    cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
 
   html, body, #root { height: 100%; background: var(--bg); }
@@ -75,23 +116,39 @@ const styles = `
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     font-weight: 400;
+    font-size: 15px;
+    line-height: 1.55;
     position: relative;
     overflow-x: hidden;
-    /* Grain texture — prestige signal */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+    /* Subtle grain — material depth, not decoration */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.018'/%3E%3C/svg%3E");
   }
 
   .app::before {
+    /* Cinematic radial — saturated dark with subtle dimensionality (Linear/MUBI convention) */
     content: '';
     position: fixed;
     top: -40%;
     left: -20%;
-    width: 60%;
-    height: 60%;
-    background: radial-gradient(ellipse, rgba(200,146,42,0.03) 0%, transparent 70%);
+    width: 80%;
+    height: 80%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.018) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
   }
+
+  /* TYPOGRAPHIC SCALE — use these utility classes, do not invent sizes */
+  .t-display-xl { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 48px; line-height: 1.15; letter-spacing: -0.01em; color: var(--text-cream); }
+  .t-display-lg { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 36px; line-height: 1.20; letter-spacing: -0.005em; color: var(--text-cream); }
+  .t-display-md { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 28px; line-height: 1.30; }
+  .t-display-sm { font-family: 'Cormorant Garamond', serif; font-weight: 400; font-size: 22px; line-height: 1.35; }
+  .t-body-lg    { font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 17px; line-height: 1.65; }
+  .t-body-md    { font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 15px; line-height: 1.55; }
+  .t-body-sm    { font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 13px; line-height: 1.50; }
+  .t-caption    { font-family: 'DM Sans', sans-serif; font-weight: 400; font-size: 12px; line-height: 1.45; letter-spacing: 0.01em; color: var(--text-dim); }
+  .t-mono-md    { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 12px; line-height: 1.40; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-dim); }
+  .t-mono-sm    { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 10px; line-height: 1.30; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
+  .t-mono-xs    { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 9px;  line-height: 1.20; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); }
 
   .nav {
     display: flex;
@@ -119,41 +176,47 @@ const styles = `
   .nav-actions { display: flex; gap: 12px; align-items: center; }
 
   .btn {
-    padding: 10px 22px;
-    border-radius: var(--r);
+    padding: 14px 28px;
+    border-radius: var(--r-lg);
     font-family: 'DM Sans', sans-serif;
     font-size: 13px;
     font-weight: 400;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.08em;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige), background-color var(--motion-default) var(--ease-prestige);
     border: none;
   }
 
-  .btn-ghost {
-    background: transparent;
-    color: var(--text-dim);
-    border: 0.5px solid var(--border-hi);
-  }
-
-  .btn-ghost:hover { border-color: var(--amber-dim); color: var(--amber); }
-
+  /* Primary — dignified, not loud. Outline with accent text. (Hermès/Aesop convention) */
   .btn-primary {
-    background: var(--amber);
-    color: var(--btn-primary-text, #0A0A0C);
-    font-weight: 500;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2);
+    background: var(--surface);
+    color: var(--amber);
+    border: 0.5px solid var(--amber-line);
+    font-weight: 400;
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.025);
   }
 
-  .btn-primary:hover { opacity: 0.9; }
+  .btn-primary:hover { border-color: var(--amber); color: var(--amber); background: var(--surface2); }
+  .btn-primary:active { background: var(--ground-deep, var(--bg)); transform: scale(0.985); transition: transform var(--motion-quick) var(--ease-shutter); }
 
+  /* Secondary — quieter outline, neutral text */
   .btn-secondary {
-    background: var(--surface2);
+    background: transparent;
     color: var(--text);
     border: 0.5px solid var(--border-hi);
   }
 
-  .btn-secondary:hover { border-color: var(--amber-dim); }
+  .btn-secondary:hover { border-color: var(--amber-line); color: var(--amber); }
+
+  /* Ghost — borderless, subtle */
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-dim);
+    border: none;
+    padding: 14px 20px;
+  }
+
+  .btn-ghost:hover { color: var(--amber); }
 
   /* HOME */
   .home {
