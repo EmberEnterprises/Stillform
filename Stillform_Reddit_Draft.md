@@ -1,6 +1,8 @@
 # REDDIT POST DRAFT — for Arlin to personalize
 ## Universal version — speaks to everyone, not just ND community
 
+> **Status (April 30, 2026):** Reddit is no longer a launch step per launch standard locked Apr 29. Held as a contingency lever only if organic post-launch traction is weak. Drafts below preserved for future use; no action needed on this doc until/unless contingency is triggered.
+
 ---
 
 ## DRAFT 1 — The real one
