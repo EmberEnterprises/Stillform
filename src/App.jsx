@@ -110,7 +110,18 @@ const styles = `
     --ease-shutter:    cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
 
-  html, body, #root { height: 100%; background: var(--bg); }
+  html, body, #root {
+    height: 100%;
+    background: var(--bg);
+    /* Mac-only crispness — forces grayscale antialiasing instead of subpixel.
+       Subpixel rendering produces RGB color fringes on glyphs that fight with
+       any non-solid background (gradients, transparency) and read as 'blurry'
+       on Mac. iOS already uses grayscale by default; these properties have no
+       effect on mobile. */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
 
   .app {
     min-height: 100vh;
@@ -120,19 +131,20 @@ const styles = `
     font-weight: 400;
     position: relative;
     overflow-x: hidden;
-    /* Subtle grain — material depth, not decoration */
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.018'/%3E%3C/svg%3E");
+    /* Grain texture removed Apr 30 — was disrupting subpixel rendering on Mac and adding nothing on phone.
+       References (Aesop, Hermès, MUBI, Linear) use no grain; depth comes from the radial gradient alone. */
   }
 
   .app::before {
-    /* Cinematic radial — saturated dark with subtle dimensionality (Linear/MUBI convention) */
+    /* Cinematic radial — single depth effect, slightly strengthened to compensate for grain removal.
+       Reference: Linear's deep-blue-black with ~2% radial lightness shift toward center. */
     content: '';
     position: fixed;
-    top: -40%;
-    left: -20%;
-    width: 80%;
-    height: 80%;
-    background: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.018) 0%, transparent 60%);
+    top: -30%;
+    left: -10%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.025) 0%, transparent 70%);
     pointer-events: none;
     z-index: 0;
   }
