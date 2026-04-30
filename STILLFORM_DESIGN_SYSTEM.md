@@ -120,11 +120,20 @@ These three are used only where the data layer needs to signal direction. They a
 
 ### The triad
 
-**Cormorant Garamond** (serif, headlines + identity)
-**DM Sans** (sans, body + system text)
-**IBM Plex Mono** (mono, metadata + instrument moments)
+**Lyon Display** (serif, headlines + identity) — Commercial Type, ~$300 web license
+**Söhne** (sans, body + system text) — Klim Type Foundry, ~$390 web license
+**Berkeley Mono** (mono, metadata + instrument moments) — Berkeley Graphics, ~$75 web license
 
-All three are **free** (Google Fonts). No purchase required. Verified.
+These are the actual fonts that the editorial-luxury references use. Lyon is what Aesop, The Gentlewoman, and high-end magazines run. Söhne is what Linear, GitHub, and premium editorial publications use. Berkeley Mono is the Teenage Engineering / Nothing OS instrument-grade mono.
+
+Total premium font cost: ~$765 for all three one-time web licenses. Locked Apr 30 — Arlin's call: "I am not a bargain shopper. The intelligence is $19.99; the visuals must match it."
+
+**Fallback chain (in case of font load failure or pre-purchase preview):**
+- Lyon Display fallback: Cormorant Garamond (free, similar literary serif proportions)
+- Söhne fallback: DM Sans (free, similar humanist sans rhythm)
+- Berkeley Mono fallback: IBM Plex Mono (free, similar instrument-grade mono)
+
+The fallback chain is what runs in development before the paid licenses are purchased. Production runs the paid triad.
 
 ### When to use each
 
@@ -351,28 +360,25 @@ These are real questions but they're not blocking the screen rebuild. Capture th
 
 **4. Dark mode is the only mode.** Light mode is in the current code but the references all anchored on dark. v1 of the prestige refresh ships dark-only. Light mode can return post-refresh as a real adaptation, not a parallel system.
 
-**5. Theme variants (Suede, Teal, Rose, Midnight).** These exist in current code as palette overrides. They were a pre-prestige decision. The refresh should consolidate to a single canonical palette unless you specifically want to keep theme variation. Worth a real conversation — keeping themes means specifying each one against the new system. My recommendation: ship one canonical palette in the refresh, restore theme variation post-launch as separate work.
+**5. Theme variants (Suede, Teal, Rose, Midnight) — kept, recalibrated as part of refresh.** Locked Apr 30. These exist as CSS palette overrides in current code; recalibrating them against the new design system is light work (palette token swaps, no structural changes). Each theme inherits the new typography, spacing, motion, and component vocabulary — only ground/accent/border tokens shift per theme. Implementation: after the canonical palette ships and is verified, do one pass per theme variant against the new tokens. Each theme commit is small.
 
 ---
 
 ## What's actually paid
 
-You asked. Honest answer: **nothing in this spec requires a paid font or any other purchase.**
+**Premium font triad — locked Apr 30:**
 
-- Cormorant Garamond, DM Sans, IBM Plex Mono — all free via Google Fonts (already in use)
-- All colors are CSS values, no licensing required
-- All motion is custom CSS, no library purchase needed
-- All component patterns are buildable with the existing stack (React + Tailwind core utilities)
+- **Lyon Display** — Commercial Type — https://commercialtype.com/catalog/lyon — ~$300 web license
+- **Söhne** — Klim Type Foundry — https://klim.co.nz/retail-fonts/sohne/ — ~$390 web license
+- **Berkeley Mono** — Berkeley Graphics — https://berkeleygraphics.com/typefaces/berkeley-mono/ — ~$75 web license
 
-If we go further into specific premium directions later, candidates that would cost money:
+**Total: ~$765 one-time for all three web licenses.**
 
-- **Lyon, Portrait, or GT Sectra** as a Cormorant alternative — these are the actual fonts Aesop / Hermès / The Gentlewoman use. Roughly $200-400 each as desktop or web licenses. Cormorant Garamond is the closest free alternative and is genuinely good — references explicitly noted Cormorant as a viable substitute. Recommend not buying premium serif in v1; revisit once the rest of the system is locked.
+Each foundry sells directly. Arlin purchases through their respective sites and receives the web font files (`.woff2` typically) plus license documentation. License files go in repo, web font files go in `public/fonts/`, `@font-face` declarations get added to the CSS top of App.jsx.
 
-- **Söhne or Inter Display** as a DM Sans upgrade — Söhne is what Linear and many editorial publications use. ~$300-600 web license. Inter is free and very good. DM Sans is also free and good. Recommend not buying premium sans in v1.
+**Other costs:** none. No paid CSS framework, no paid motion library, no paid component library. The rest of the design system is buildable with the existing stack (React + Tailwind core utilities + custom CSS).
 
-- **Berkeley Mono** as an IBM Plex Mono upgrade — the Teenage Engineering / Nothing OS aesthetic. ~$75 web license. **This one is plausibly worth it** — it's relatively cheap and would add a specific instrument-grade quality. But IBM Plex Mono works and the upgrade is marginal. Defer.
-
-**Honest recommendation: ship the prestige refresh with the existing free font triad.** Cormorant + DM Sans + IBM Plex Mono is a credible editorial-luxury pairing. The reason Stillform reads as low-fi isn't the fonts — it's the calibration, scale, weight, leading, and tracking. Those are free fixes. If after the refresh you still feel the typography is the limiting factor, revisit then with actual evidence of which font choice would specifically help.
+**Implementation note:** until fonts are purchased and dropped into `public/fonts/`, the build runs against the free fallback triad (Cormorant Garamond + DM Sans + IBM Plex Mono via Google Fonts). The visual scale, spacing, palette, and motion all work identically with fallbacks — only the precise letterforms differ. This means rebuild work can begin before fonts are purchased; fonts swap in as a single CSS commit when they arrive.
 
 ---
 
@@ -400,7 +406,11 @@ When the rebuild starts, work in this order:
 
 5. **Pass through every remaining screen** to catch leftover wellness-default treatments.
 
+6. **Theme variant recalibration** — after canonical palette ships and verifies, recalibrate Suede / Teal / Rose / Midnight against the new system. One commit per variant. Light work — only ground/accent/border tokens shift per theme; typography/spacing/motion/components inherited from canonical.
+
 Each screen rebuild is verified on phone debug before moving to the next. No screen is "done" until it renders on Arlin's phone and matches the spec.
+
+**Font integration timing:** the rebuild can begin against fallback fonts (free triad) before the paid fonts are purchased. When the paid fonts arrive, fonts swap in via a single CSS commit. The rest of the visual work continues uninterrupted.
 
 ---
 
