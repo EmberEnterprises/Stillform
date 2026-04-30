@@ -3171,10 +3171,27 @@ const BREATHING_PATTERNS = [
 ];
 
 function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoModal }) {
-  const [phase, setPhase] = useState(quickStart ? "breathe" : "pre-rate"); // pre-rate | breathe | ground | post-rate | done
+  // LOW-DEMAND MODE — when bioFilter signals cognitive impairment, the tool renders
+  // a stripped variant: no chip rows, no pre/post rating, no bio-filter screen,
+  // no Reframe handoff. Audio force-enabled. Per master todo "Low-demand mode"
+  // (cognitive-bandwidth-limited population: SSRI users, post-anesthesia, sleep aids,
+  // chemo, recreational, sleep-deprived parents, migraine, dissociative episodes, etc).
+  // Trigger: bioFilter.includes("medicated"). Architecture: state-of-existing-tool, not separate tool.
+  const isLowDemand = (() => {
+    try {
+      const bf = getActiveBioFilter();
+      return bf.includes("medicated");
+    } catch { return false; }
+  })();
+
+  // In low-demand: skip pre-rate (no number to pick), skip bio-filter (already known),
+  // jump straight to breathe phase regardless of quickStart.
+  const [phase, setPhase] = useState(
+    isLowDemand ? "breathe" : (quickStart ? "breathe" : "pre-rate")
+  );
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
-  const [bioFilter, setBioFilter] = useState(null);
+  const [bioFilter, setBioFilter] = useState(isLowDemand ? "medicated" : null);
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override via chips
     try {
@@ -3190,6 +3207,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
+  // Low-demand: 1.5s grace period before tap-anywhere-to-exit becomes active.
+  // Prevents the entry tap from immediately dismissing the completion screen.
+  const lowDemandGraceOverRef = useRef(false);
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
@@ -3280,10 +3300,23 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   const [cycle, setCycle] = useState(1);
   const [running, setRunning] = useState(false);
   const [breatheDone, setBreatheDone] = useState(false);
+
+  // Low-demand grace timer — when breath sequence finishes in low-demand mode,
+  // start a 1.5s window before tap-anywhere-to-exit activates. Prevents a stray
+  // tap during the breath-to-completion transition from dismissing the session.
+  useEffect(() => {
+    if (!isLowDemand) return;
+    if (!breatheDone) return;
+    lowDemandGraceOverRef.current = false;
+    const timer = setTimeout(() => { lowDemandGraceOverRef.current = true; }, 1500);
+    return () => clearTimeout(timer);
+  }, [breatheDone]);
   const [keepGoing, setKeepGoing] = useState(false);
 
   // Audio
   const [audioOn, setAudioOn] = useState(() => {
+    // Low-demand mode force-enables audio (paced auditory cueing is mechanism, not preference).
+    if (isLowDemand) return true;
     try { return localStorage.getItem("stillform_audio") === "on"; } catch { return false; }
   });
   const audioCtx = useRef(null);
@@ -3737,6 +3770,59 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             </button>
           )}
         </div>
+      ) : isLowDemand ? (
+        // LOW-DEMAND completion — minimal demand, no decisions, no chip rows, no Reframe handoff.
+        // Single action: tap anywhere to exit (with grace period to avoid accidental dismiss).
+        // Session still auto-saves so record integrity is preserved.
+        (() => {
+          // Side effect: auto-save once, on first render of this branch.
+          if (!latestSessionTimestampRef.current) {
+            const saved = saveSession(["breathe"], "low-demand-complete");
+            if (saved?.timestamp) latestSessionTimestampRef.current = saved.timestamp;
+          }
+          return (
+            <div
+              onClick={() => {
+                // 1.5s grace period — set on first render via ref below
+                if (!lowDemandGraceOverRef.current) return;
+                // Bypass debrief + Next Move entirely. A medicated user just navigated
+                // to "tap to close" — asking for reflection text or "what's your next move"
+                // is exactly the cognitive demand low-demand mode is designed to remove.
+                // Session already auto-saved above; no debrief entry is recorded for this
+                // session (intentional — debrief is metacognitive work, not appropriate here).
+                onComplete(undefined);
+              }}
+              style={{
+                position: "fixed",
+                inset: 0,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                background: "var(--bg)",
+                cursor: "pointer",
+                padding: 24
+              }}>
+              <div style={{
+                width: 80, height: 80, borderRadius: "50%",
+                background: "var(--amber-glow)",
+                border: "0.5px solid var(--amber-dim)",
+                animation: "pulse 3s ease-in-out infinite",
+                marginBottom: 32
+              }} />
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 9,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "var(--text-muted)",
+                opacity: 0.6
+              }}>
+                Tap anywhere to close
+              </div>
+            </div>
+          );
+        })()
       ) : (
         <div className="complete">
           <div className="complete-icon">✓</div>
