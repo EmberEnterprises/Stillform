@@ -48,10 +48,13 @@ const styles = `
   input, textarea { -webkit-user-select: text; user-select: text; }
 
   :root {
-    /* GROUNDS — deeper, slightly cooler, with material undertone (per design system Apr 30) */
+    /* GROUNDS — surface matches bg so cards read as bordered-on-ground (Aesop/MUBI/Espresso convention).
+       Surface2 is a whisper above for genuinely-nested elements (modals, inset stats).
+       Apr 30: previous --surface was too elevated, made cards read as gray-on-black low-fi.
+       Reference: prestige editorial cards sit ON the ground, defined by hairlines, not by lighter fills. */
     --bg:         #08080A;
-    --surface:    #111114;
-    --surface2:   #16161A;
+    --surface:    #08080A;
+    --surface2:   #0C0C10;
 
     /* BORDERS — hairline, printed-not-drawn */
     --border:     rgba(255,255,255,0.06);
@@ -1759,10 +1762,11 @@ const shouldBodyRouteToScan = (bioFilter) => (
 
 const THEME_PRESETS = {
   dark: {
-    /* Calibrated Apr 30 — matches :root tokens for prestige refresh */
+    /* Calibrated Apr 30 — matches :root tokens for prestige refresh.
+       Surfaces flattened to ground so cards are defined by hairlines, not fills. */
     "--bg": "#08080A",
-    "--surface": "#111114",
-    "--surface2": "#16161A",
+    "--surface": "#08080A",
+    "--surface2": "#0C0C10",
     "--border": "rgba(255,255,255,0.06)",
     "--border-hi": "rgba(255,255,255,0.10)",
     "--amber": "#B8862B",
@@ -1777,8 +1781,8 @@ const THEME_PRESETS = {
   },
   midnight: {
     "--bg": "#070b18",
-    "--surface": "#0f1526",
-    "--surface2": "#141d33",
+    "--surface": "#070b18",
+    "--surface2": "#0a0f1f",
     "--border": "rgba(200,220,255,0.10)",
     "--border-hi": "rgba(200,220,255,0.18)",
     "--amber": "#7aa8ff",
@@ -1792,9 +1796,9 @@ const THEME_PRESETS = {
     "--green-glow": "rgba(122,191,164,0.12)"
   },
   suede: {
-    "--bg": "#000000",
-    "--surface": "#1a1612",
-    "--surface2": "#231e18",
+    "--bg": "#0a0805",
+    "--surface": "#0a0805",
+    "--surface2": "#100c08",
     "--border": "rgba(255,255,255,0.07)",
     "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#c9956a",
@@ -1808,9 +1812,9 @@ const THEME_PRESETS = {
     "--green-glow": "rgba(138,171,138,0.10)"
   },
   teal: {
-    "--bg": "#000000",
-    "--surface": "#0a1a1c",
-    "--surface2": "#0f2224",
+    "--bg": "#020809",
+    "--surface": "#020809",
+    "--surface2": "#061012",
     "--border": "rgba(255,255,255,0.07)",
     "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#3dbdb5",
@@ -1825,9 +1829,9 @@ const THEME_PRESETS = {
     "--btn-primary-text": "#031a1b"
   },
   rose: {
-    "--bg": "#000000",
-    "--surface": "#1a0f14",
-    "--surface2": "#22141c",
+    "--bg": "#0a0509",
+    "--surface": "#0a0509",
+    "--surface2": "#0f070c",
     "--border": "rgba(255,255,255,0.07)",
     "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#d4607e",
@@ -1842,12 +1846,12 @@ const THEME_PRESETS = {
     "--btn-primary-text": "#1a0810"
   },
   light: {
-    "--bg": "#f0f2f8",
-    "--surface": "#ffffff",
-    "--surface2": "#e8ecf4",
+    "--bg": "#f5f6fa",
+    "--surface": "#f5f6fa",
+    "--surface2": "#eef0f5",
     "--border": "rgba(16,24,40,0.10)",
     "--border-hi": "rgba(16,24,40,0.18)",
-    "--amber": "#C8922A",
+    "--amber": "#B8862B",
     "--amber-dim": "rgba(200,146,42,0.30)",
     "--amber-glow": "rgba(200,146,42,0.10)",
     "--amber-20": "rgba(200,146,42,0.20)",
@@ -12419,7 +12423,7 @@ const isSignalProfileConfigured = () => {
             { id: "suede",    label: "Suede",     bg: "#0f0d0b", accent: "#c9956a" },
             { id: "teal",     label: "Teal",      bg: "#030d0e", accent: "#2e7a74" },
             { id: "rose",     label: "Rose",      bg: "#0e090c", accent: "#7a3a50" },
-            { id: "light",    label: "Light",     bg: "#f0f2f8", accent: "#C8922A" }
+            { id: "light",    label: "Light",     bg: "#f5f6fa", accent: "#B8862B" }
           ];
 
           // Page 1 — Make it yours
@@ -13530,21 +13534,19 @@ const isSignalProfileConfigured = () => {
                     }} style={{
                       width: "100%", background: "var(--surface)", color: "var(--amber)",
                       border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
-                      borderRadius: "var(--r-lg)", padding: "20px 24px", fontSize: 16, fontWeight: 400,
+                      borderRadius: "var(--r-lg)", padding: "24px 24px", fontSize: 16, fontWeight: 400,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                      boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.025)",
-                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                      gap: 4, textAlign: "center",
                       WebkitTapHighlightColor: "transparent", marginBottom: 8,
                       transition: "border-color var(--motion-default) var(--ease-prestige), background-color var(--motion-default) var(--ease-prestige)"
                     }}>
-                      <div>
-                        <div>{isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}</div>
-                        <div style={{ fontSize: 12, fontWeight: 400, marginTop: 2, opacity: 0.75 }}>
-                          {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
-                        </div>
-
+                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, lineHeight: 1.2 }}>
+                        {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
                       </div>
-                      <span style={{ fontSize: 18, opacity: 0.6 }}>→</span>
+                      <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
+                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
+                      </div>
                     </button>
 
 
