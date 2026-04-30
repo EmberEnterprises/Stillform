@@ -26,11 +26,11 @@ class ErrorBoundary extends Component {
       // (dark, midnight, suede, teal, rose, light). Themes set --amber etc. on
       // document.documentElement so they're available even when React's tree errors out.
       return (
-        <div style={{ background: "var(--bg, #0A0A0C)", color: "var(--text, #E8EAF0)", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "var(--amber, #C8922A)", marginBottom: 12 }}>Something went wrong.</div>
+        <div style={{ background: "var(--bg, #08080A)", color: "var(--text, #E8EAF0)", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "var(--amber, #B8862B)", marginBottom: 12 }}>Something went wrong.</div>
           <div style={{ fontSize: 14, color: "var(--text-muted, #9496A1)", marginBottom: 16, lineHeight: 1.6 }}>Your data is safe. Tap below to restart.</div>
           <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
-            style={{ background: "var(--amber, #C8922A)", color: "var(--btn-primary-text, #0A0A0C)", border: "none", padding: "14px 28px", cursor: "pointer", borderRadius: 3, fontSize: 15, fontWeight: 500 }}>
+            style={{ background: "var(--surface, #111114)", color: "var(--amber, #B8862B)", border: "0.5px solid color-mix(in srgb, var(--amber, #B8862B) 50%, transparent)", padding: "14px 28px", cursor: "pointer", borderRadius: 4, fontSize: 14, fontWeight: 400 }}>
             Restart Stillform
           </button>
         </div>
@@ -1759,27 +1759,28 @@ const shouldBodyRouteToScan = (bioFilter) => (
 
 const THEME_PRESETS = {
   dark: {
-    "--bg": "#0A0A0C",
-    "--surface": "#141418",
-    "--surface2": "#1A1A1F",
-    "--border": "rgba(255,255,255,0.07)",
-    "--border-hi": "rgba(255,255,255,0.12)",
-    "--amber": "#C8922A",
-    "--amber-dim": "rgba(200,146,42,0.25)",
-    "--amber-glow": "rgba(200,146,42,0.07)",
-    "--amber-20": "rgba(200,146,42,0.20)",
+    /* Calibrated Apr 30 — matches :root tokens for prestige refresh */
+    "--bg": "#08080A",
+    "--surface": "#111114",
+    "--surface2": "#16161A",
+    "--border": "rgba(255,255,255,0.06)",
+    "--border-hi": "rgba(255,255,255,0.10)",
+    "--amber": "#B8862B",
+    "--amber-dim": "rgba(184,134,43,0.35)",
+    "--amber-glow": "rgba(184,134,43,0.06)",
+    "--amber-20": "rgba(184,134,43,0.20)",
     "--text": "#E8EAF0",
-    "--text-dim": "#9496A1",
-    "--text-muted": "#95979f",
-    "--green": "#4a8c6a",
-    "--green-glow": "rgba(74,140,106,0.08)"
+    "--text-dim": "rgba(232,234,240,0.62)",
+    "--text-muted": "rgba(232,234,240,0.40)",
+    "--green": "#8FA88A",
+    "--green-glow": "rgba(143,168,138,0.08)"
   },
   midnight: {
     "--bg": "#070b18",
     "--surface": "#0f1526",
     "--surface2": "#141d33",
-    "--border": "rgba(200,220,255,0.20)",
-    "--border-hi": "rgba(200,220,255,0.35)",
+    "--border": "rgba(200,220,255,0.10)",
+    "--border-hi": "rgba(200,220,255,0.18)",
     "--amber": "#7aa8ff",
     "--amber-dim": "rgba(122,168,255,0.30)",
     "--amber-glow": "rgba(122,168,255,0.12)",
@@ -1794,8 +1795,8 @@ const THEME_PRESETS = {
     "--bg": "#000000",
     "--surface": "#1a1612",
     "--surface2": "#231e18",
-    "--border": "rgba(255,255,255,0.12)",
-    "--border-hi": "rgba(255,255,255,0.22)",
+    "--border": "rgba(255,255,255,0.07)",
+    "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#c9956a",
     "--amber-dim": "rgba(201,149,106,0.30)",
     "--amber-glow": "rgba(201,149,106,0.10)",
@@ -1810,8 +1811,8 @@ const THEME_PRESETS = {
     "--bg": "#000000",
     "--surface": "#0a1a1c",
     "--surface2": "#0f2224",
-    "--border": "rgba(255,255,255,0.12)",
-    "--border-hi": "rgba(255,255,255,0.22)",
+    "--border": "rgba(255,255,255,0.07)",
+    "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#3dbdb5",
     "--amber-dim": "rgba(61,189,181,0.30)",
     "--amber-glow": "rgba(61,189,181,0.10)",
@@ -1827,8 +1828,8 @@ const THEME_PRESETS = {
     "--bg": "#000000",
     "--surface": "#1a0f14",
     "--surface2": "#22141c",
-    "--border": "rgba(255,255,255,0.12)",
-    "--border-hi": "rgba(255,255,255,0.22)",
+    "--border": "rgba(255,255,255,0.07)",
+    "--border-hi": "rgba(255,255,255,0.13)",
     "--amber": "#d4607e",
     "--amber-dim": "rgba(212,96,126,0.30)",
     "--amber-glow": "rgba(212,96,126,0.10)",
@@ -1844,8 +1845,8 @@ const THEME_PRESETS = {
     "--bg": "#f0f2f8",
     "--surface": "#ffffff",
     "--surface2": "#e8ecf4",
-    "--border": "rgba(16,24,40,0.18)",
-    "--border-hi": "rgba(16,24,40,0.30)",
+    "--border": "rgba(16,24,40,0.10)",
+    "--border-hi": "rgba(16,24,40,0.18)",
     "--amber": "#C8922A",
     "--amber-dim": "rgba(200,146,42,0.30)",
     "--amber-glow": "rgba(200,146,42,0.10)",
@@ -6589,9 +6590,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   </div>
                   {showLockIn && (
                     <button onClick={() => setLockInConfirmed(true)} style={{
-                      background: "var(--amber)", border: "none", borderRadius: "var(--r)",
-                      padding: "8px 20px", fontSize: 12, color: "var(--btn-primary-text, #0A0A0C)",
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500
+                      background: "var(--surface)", color: "var(--amber)",
+                      border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                      borderRadius: "var(--r-lg)", padding: "8px 20px", fontSize: 12,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 400,
+                      transition: "border-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       Locked in
                     </button>
@@ -12411,7 +12414,7 @@ const isSignalProfileConfigured = () => {
           const visualGroundingOn = (() => { try { return localStorage.getItem("stillform_visual_grounding") !== "off"; } catch { return true; } })();
           const signalMappingConfigured = isSignalProfileConfigured();
           const themeOptions = [
-            { id: "dark",     label: "Dark",     bg: "#0A0A0C", accent: "#C8922A" },
+            { id: "dark",     label: "Dark",     bg: "#08080A", accent: "#B8862B" },
             { id: "midnight", label: "Midnight",  bg: "#070b18", accent: "#7aa8ff" },
             { id: "suede",    label: "Suede",     bg: "#0f0d0b", accent: "#c9956a" },
             { id: "teal",     label: "Teal",      bg: "#030d0e", accent: "#2e7a74" },
@@ -14016,10 +14019,10 @@ const isSignalProfileConfigured = () => {
                       onClick={handleLoopNudgeAction}
                       style={{
                         flex: 1,
-                        background: "var(--amber)",
-                        color: "#0A0A0C",
-                        border: "none",
-                        borderRadius: "var(--r)",
+                        background: "var(--surface)",
+                        color: "var(--amber)",
+                        border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                        borderRadius: "var(--r-lg)",
                         padding: "9px 10px",
                         fontSize: 11,
                         fontFamily: "'DM Sans', sans-serif",
@@ -14206,9 +14209,9 @@ const isSignalProfileConfigured = () => {
                           onClick={submitUatFeedback}
                           disabled={uatSubmitting || tooShort}
                           style={{
-                            background: "var(--amber)",
-                            color: "#0A0A0C",
-                            border: "none",
+                            background: "var(--surface)",
+                            color: "var(--amber)",
+                            border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
                             borderRadius: "var(--r-sm)",
                             padding: "8px 12px",
                             fontSize: 11,
