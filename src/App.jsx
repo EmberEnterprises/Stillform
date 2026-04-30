@@ -6440,8 +6440,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const rotatingSubtitle = promptPool[Math.floor(Date.now() / 3600000) % promptPool.length];
 
   const modeConfig = {
+    // title and subtitle fields removed Apr 30 — verified unused (mc.title and mc.subtitle never referenced).
+    // Mode identity is carried by the icon (◎/✦/◌) plus AI prompt behavior, not by a title field.
     calm: {
-      icon: "◎", title: "Talk it out", subtitle: rotatingSubtitle,
+      icon: "◎",
       color: "var(--amber)",
       bg: "transparent",
       border: "var(--amber-dim)",
@@ -6450,7 +6452,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "var(--amber)"
     },
     clarity: {
-      icon: "✦", title: "Talk it out", subtitle: rotatingSubtitle,
+      icon: "✦",
       color: "var(--amber)",
       bg: "transparent",
       border: "var(--amber-dim)",
@@ -6459,7 +6461,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       sendBg: "var(--amber)"
     },
     hype: {
-      icon: "◌", title: "Talk it out", subtitle: rotatingSubtitle,
+      icon: "◌",
       color: "var(--amber)",
       bg: "transparent",
       border: "var(--amber-dim)",
