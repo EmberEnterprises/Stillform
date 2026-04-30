@@ -246,6 +246,25 @@ These gaps are real prelaunch work. None are "must close before publish" — but
 
 *Phase 2 + 3 of low-demand mode — paused.* Phase 2 (Body Scan low-demand) hit an architectural decision Arlin needs to make: when a medicated user opens Body Scan directly (not routed there from bio-filter), what should happen? Four options surfaced via ask_user_input_v0 widget. User dismissed without selecting. Awaiting decision when she returns. Phase 3 (Reframe low-demand) not started — most complex of three because AI behavior changes (shorter sentences, simpler language, no questions demanding reasoning), not just UI stripping. Spec needed before build.
 
+*Four-round consultation arc (Apr 30 evening).* Arlin felt 'good bones, not reaching for the stars' and asked for outside AI feedback. Four rounds run; track exhausted by Round 4. In chronological order:
+
+- Round 1 (STILLFORM_CONSULTATION_PROMPT.md): What's missing at brand altitude? Three of four AIs converged on 'rename the umbrella concept' (sovereignty / cognitive access / self-continuity / identity). Arlin correctly identified this as wrong: she'd already collapsed self-mastery and composure into one term deliberately.
+- Round 2 (STILLFORM_COMPREHENSIVE_CONSULTATION.md): Where does experience break the claim? Three convergent gaps: closing language frames as outcome not rehearsal; tool selection at low EF is unowned load; data view reads as state-tracking not practice-tracking. Useful surface punch list. Arlin: 'this is kind of disappointing... not legit major shifts.'
+- Round 3 (STILLFORM_ARCHITECTURAL_CONSULTATION.md): What does the SHAPE look like? Three AIs proposed major architectural shifts (Death of the Tool / Constant Thread / Zero-setup onboarding). All proposed removing things Arlin had already built. GPT pushed back hard. Arlin: the AIs were describing the architecture she already built and calling it new.
+- Round 4 (STILLFORM_ROUND_4_CONSULTATION.md): Drafted but not sent. Arlin's read: consultation track was producing diminishing returns; the spark wouldn't come from another round.
+
+*The actual diagnosis (named by Arlin, not AIs).* After Round 3 disappointment: 'I got a bunch of science based prompts that are flat and not interested in engaging for the user. It feels more like a chore than something I actually want to do.' Aria asked her to win an award. The product has truth, rigor, and integrity. What's missing is engagement craft — the layer that makes a serious tool feel alive without becoming gamified.
+
+*The reframe to engagement mechanics from non-wellness products.* Nine candidates examined: Duolingo's League, Strava's Local Legend, Beli's relative ranking, Letterboxd's diary, Wikipedia's Random Article, NYT Games scarcity, Headspace voice persona (rejected as wrong for Stillform), Notion's empty page, Strava's Year-End recap. Arlin selected two for further pursuit:
+1. Plain-language neuroscience as recurring surface (Wikipedia Random Article principle with Stillform's science as corpus)
+2. Cognitive function measurement as evidence of neuroplasticity — chosen as the moonshot
+
+*Cognitive Function Measurement spec drafted (COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md).* Five candidate functions evaluated: affect labeling speed (Lieberman 2007), interoceptive latency (Mehling 2012), cognitive defusion / reframe generation (ACT), bias recognition speed (CBT/MCT), HRV biofeedback coherence (Lehrer 2020). Recommended Phase 1: candidates 1-3. Differentiation: every wellness app measures sessions/minutes/streaks; nobody measures the cognitive functions the practice trains. Stillform would be first. 6-8 weeks focused build. Lumosity-overclaim risk explicitly designed against.
+
+*Closing language candidates also drafted (CLOSING_LANGUAGE_CANDIDATES.md).* Round 2 surface fix worth shipping in parallel. All seven closing screens covered with three voice options each (minimal / rehearsal-frame / quieter). Awaiting Arlin's direction before code wiring.
+
+*Body-first pre-rate friction also flagged (GPT Round 3 catch).* Body-first users go through 1-5 self-rating + bio-filter screen before the breath. Cognition before physiology contradicts body-first claim. Real prelaunch fix; defer scoping to next session.
+
 ---
 
 ### 🟡 GitHub Actions Security Gate failing on recent commits
