@@ -95,7 +95,7 @@ Based on proven neuroscience, we built a system that identifies how each person 
 
 ---
 
-## 2. Current Build State — April 28, 2026
+## 2. Current Build State — April 30, 2026
 
 **Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** App.jsx currently 15,881 lines after Apr 28 morning research-driven cleanup.
 
@@ -207,6 +207,46 @@ This section is a status snapshot, not an exhaustive list of prelaunch work. The
 **Diagnostic method that worked:** Chrome remote debug via `chrome://inspect/#devices` once `adb` was available on the Mac (`/Users/kaneg/Library/Android/sdk/platform-tools/adb`). Phone showed up as `SM-S937U R3CY50BE7KV` once Android Studio was installed. Exact error visible in Console panel: `ReferenceError: TOOL_DEBRIEF_COPY is not defined at index-eac377bb.js:1134`. This took roughly two minutes once dev tools were connected; static analysis alone had been stuck for a while.
 
 **Lesson for future bugs:** The phone debug capability is now established. For any future ErrorBoundary or runtime crash, the first move is connect the phone via USB, open `chrome://inspect/#devices`, click inspect on the Stillform tab, reproduce on phone, read the Console panel. This is faster than static analysis for runtime errors.
+
+### ✅ RESOLVED Apr 30: Major build session — 12 code commits, 5 doc commits
+
+The largest single-day build session since launch standard locked Apr 29. Work shipped reflects the prelaunch standard: master todo complete except translations and Apple Store.
+
+**Code commits shipped Apr 30 (in order):**
+1. `5ad058eb` Prestige refresh 1 — CSS root calibration (palette deepened, accent antiqued #C8922A→#B8862B, hairline borders 0.06, full spacing scale 2-80px, motion tokens 180/300/480/650ms with prestige/page-turn/shutter easing)
+2. `8c10f851` Prestige refresh 2 — theme-aware outlines via color-mix; 6 amber-fill buttons converted to outline-with-accent-text
+3. `a16865a9` Prestige refresh 3 — THEME_PRESETS calibrated to match new :root; 3 more buttons; ErrorBoundary updated
+4. `a13cbae3` Prestige refresh 4 — cards-on-ground convention (--surface flattened to match --bg across 7 themes); Talk it out hero CTA serif headline centered, arrow removed
+5. `721a3220` Prestige refresh 5 — Mac rendering fix (-webkit-font-smoothing: antialiased + grayscale, removed grain texture, strengthened radial gradient)
+6. `41f184d5` Home page banner: "Composure is a practice. You're building it." → "Composure is the foundation. You are its architect." Reasoning: composure is OUTCOME (per Science Sheet line 11), metacognition is MECHANISM. Tool = composure architecture.
+7. `768b56ed` + `ad4a43f1` Settled chip — 9th feel chip closes Russell circumplex low-arousal-positive coverage gap. Russell-grouped chip ordering. AI feelMap entry added (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression).
+8. `890469aa` Body Scan What Shifted + three-category data feed — Russell circumplex classifier (Russell 1980 J.Pers.Soc.Psychol. 39:1161-1178). Categories: Regulated (A) / Persistent (B) / Concerning (C). Schema versioned at v1, never recompute. Storage key `stillform_shift_events`. Plausible "Shift Classified" aggregate event (4 props, no PII). Body Scan post-completion What Shifted screen wired (post-state chip + optional free-text label + skip path).
+9. `d10bad23` Removed dead `title: "Talk it out"` and `subtitle` fields from Reframe modeConfig (verified mc.title and mc.subtitle never referenced).
+10. `d207ef16` Chip ⓘ button system — CHIP_DEFINITIONS registry as top-level constant (line 1555). 9 user-facing definitions covering all chips. ⓘ buttons wired at all 3 chip render sites. Reuses existing setInfoModal pattern. ARIA labels added.
+11. `818f8444` Cyclic Sighing breathing pattern — third option alongside Quick Reset and Deep Regulate. Per Balban et al. 2023 (Cell Reports Medicine 4:100895, Stanford RCT n=111). Protocol: Inhale 1 (deep nasal) 4s + Inhale 2 (top-off nasal) 1s + Exhale (slow oral) 8s. 1:2 ratio. Default behavior preserved (Quick Reset stays default; opt-in via Settings). Strengthens Dr. Yilmaz Balban outreach credibility (top scientific outreach candidate per memory).
+12. `81e2c0b7` **Low-demand mode Phase 1 (Breathe)** — state-of-existing-tool architecture (NOT separate tool). Triggered by `bioFilter.includes("medicated")`. Audio force-enabled. Pre-rate, bio-filter screen, three-rounds-done decision, post-rate, debrief gate, Next Move all bypassed. Pulse circle + "Tap anywhere to close" + 1.5s grace period. Session auto-saves with source='low-demand-complete'.
+
+**Documentation commits shipped Apr 30:**
+- Master Todo: 4 items marked ✅ RESOLVED (Composure copy fix, Reframe title, Chip ⓘ button, Cyclic sighing); Body Scan What Shifted, Three-category data feed, Settled chip marked ✅ RESOLVED in subsequent update; Low-demand mode entry updated to reflect Phase 1 shipped + Phase 2 paused
+- 5 specs committed to repo root: BODY_SCAN_WHAT_SHIFTED_SPEC.md, SETTLED_CHIP_SPEC.md, THREE_CATEGORY_DATA_FEED_SPEC.md, STILLFORM_DESIGN_SYSTEM.md, MY_PROGRESS_REDESIGN_SPEC.md
+- CHIP_DEFINITIONS_DRAFT.md committed (Arlin approved before code wiring)
+
+**Conceptual decisions made Apr 30 (NOT YET SHIPPED — captured for context):**
+
+*Composure / self-mastery legibility decision (locked Apr 30 evening).* Four-AI consultation (ChatGPT, Gemini, Claude in fresh session, Copilot) returned convergent signal: 3-of-4 said "composure is one altitude too low" and proposed alternative umbrellas (sovereignty, self-continuity, cognitive access, identity/pedagogy). Arlin's response: "those all fall under self-mastery, which is what contributes to composure." She had collapsed self-mastery and composure into one term deliberately. The four AIs were each naming a facet of self-mastery without seeing the whole. Final decision: composure stays as the umbrella; self-mastery is the through-line that carries it. Composure is the visible silhouette; self-mastery is the practice. Internal vocabulary uses both; public surface stays composure-led.
+
+*The integrity gap (named by Arlin Apr 30).* Words don't mean anything without action behind them. The reason the four AIs sensed something missing wasn't brand altitude — it's that the user-facing experience doesn't yet fully *be* what the brand says. The user is positioned as operator of a regulation toolkit more than practitioner of self-mastery. Five specific gaps identified in COMPOSURE_SELF_MASTERY_LEGIBILITY.md (sitting in /mnt/user-data/outputs/, not yet committed because Arlin hasn't decided whether to commit pending action work):
+1. AI posture in reframe.js currently optimizes for regulation, not for demonstrating self-mastery to the user — highest-leverage fix
+2. Self Mode is the explicit self-mastery practice but is named generically ("Self Mode")
+3. Closing language ("Composure restored," "Signal cleared") frames as outcome, not rehearsal
+4. My Progress framing tracks regulation, not pattern of staying-yourself
+5. Bio-filter requires user to perform diagnostic at moment of low executive function
+
+These gaps are real prelaunch work. None are "must close before publish" — but the integrity principle (claim must match action) means they accumulate as debt against the brand promise.
+
+*Phase 2 + 3 of low-demand mode — paused.* Phase 2 (Body Scan low-demand) hit an architectural decision Arlin needs to make: when a medicated user opens Body Scan directly (not routed there from bio-filter), what should happen? Four options surfaced via ask_user_input_v0 widget. User dismissed without selecting. Awaiting decision when she returns. Phase 3 (Reframe low-demand) not started — most complex of three because AI behavior changes (shorter sentences, simpler language, no questions demanding reasoning), not just UI stripping. Spec needed before build.
+
+---
 
 ### 🟡 GitHub Actions Security Gate failing on recent commits
 Commits c86ec0ba and f807bced both show as failed in GitHub Actions, BUT investigation revealed jobs were **CANCELLED — no runner ever assigned**. Not a code-level gate failure. Likely cause: GitHub Actions billing exhausted for the org account (free tier 2000 min/mo), OR transient infrastructure issue. **Action to take:** check Settings → Billing → Actions on GitHub.com (org settings); if at limit, that explains it. Re-running the cancelled jobs should succeed once resource constraint clears. **Does not block Netlify deploy** — Netlify pulls from main HEAD independently of GitHub Actions status.
