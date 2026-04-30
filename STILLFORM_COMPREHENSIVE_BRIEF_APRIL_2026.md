@@ -1,7 +1,5 @@
 # STILLFORM — Comprehensive Product Brief
-## April 22, 2026 | ARA Embers LLC
-
-> ⚠️ **This doc reflects April 22 state and is partially stale.** Significant work shipped April 30: Settled chip (9th feel chip closing Russell circumplex LAP gap), Body Scan What Shifted screen, three-category data feed (Russell circumplex classifier), chip ⓘ button system, Cyclic Sighing breathing pattern (Balban et al. 2023), low-demand mode Phase 1 (Breathe), prestige refresh (5 commits). Plus engagement craft research foundation established in Science Sheet (Engagement Principles section, 10 citation-grounded behavioral science principles parallel to the four neuroscience Pillars). Current top priority: Cognitive Function Measurement spec (the moonshot — 6-8 weeks focused build). For current state see STILLFORM_PROJECT_TRANSFER.md Section 3 and Stillform_Master_Todo.md.
+## Last updated April 30, 2026 | ARA Embers LLC
 
 > **How to use this document:** This is a product brief and positioning doc — it describes what Stillform is, what it does, and the decisions behind it. It is NOT a strict line-by-line code snapshot. Technical implementation details (line numbers, function names) live in STILLFORM_PROJECT_TRANSFER.md. Where implementation status matters, this doc notes it explicitly (e.g. "data flow not yet confirmed on device"). Everything else reflects current product intent and shipped behavior as of April 22, 2026.
 
@@ -36,7 +34,7 @@ The product philosophy: regulate yourself → see yourself clearly → see other
 
 ---
 
-## Current Build State (April 22, 2026)
+## Current Build State (updated April 30, 2026)
 
 **Live at stillformapp.com — HTTP 200. UAT mode. Password-protected for testers.**
 
@@ -44,20 +42,20 @@ The product philosophy: regulate yourself → see yourself clearly → see other
 
 - **Hosting:** Netlify Pro — stillformapp.com via Cloudflare
 - **Repo:** GitHub: EmberEnterprises/Stillform
-- **Framework:** React + Vite (src/App.jsx — ~14,500 lines)
-- **AI:** OpenAI GPT-4o via Netlify serverless function (netlify/functions/reframe.js)
+- **Framework:** React + Vite (src/App.jsx — ~16,700 lines as of Apr 30)
+- **AI:** OpenAI GPT-4o via Netlify serverless function (netlify/functions/reframe.js — ~1,450 lines)
 - **Analytics:** Plausible — live
 - **PWA:** manifest.json + sw.js — installable on iOS and Android
 - **Native:** Capacitor 8 — Android platform synced, iOS initialized
 - **Cloud sync:** Supabase (three-table schema: user_data, backups, user_profiles; RLS + AES-256)
-- **Payments:** Lemon Squeezy (test mode approved; Bobby triggers live mode switch)
+- **Payments:** Lemon Squeezy LIVE (Bobby confirmed live mode switch)
 - **Netlify deploys:** MANUAL — Arlin triggers in Netlify after Claude pushes to GitHub
 
 ### Pricing
 
 - $14.99/month or $9.99/month annual ($119.88/year, 33% off)
 - One price. Everything included. No add-ons.
-- 14-day free trial (not yet live — blocked on Lemon Squeezy live mode)
+- 14-day free trial — Lemon Squeezy live mode active
 
 ---
 
@@ -313,27 +311,39 @@ adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk
 
 ## What's Left Before Launch
 
-### Blocking
-1. **Paywall live** — Bobby triggers Lemon Squeezy live mode switch (test mode is approved, products created)
-2. **Galaxy Watch** — wear APK install + validation on Galaxy Watch Ultra
-3. **Apple Watch + HealthKit** — need iPhone + Apple Watch device (currently blocked on hardware)
-4. **Google Play closed testing build** — 14-day clock must run before public launch
-5. **TestFlight build** — iOS App Store requirement
-6. **3–5 real testimonials** — required before Reddit launch
-7. **Reddit post** — one shot, don't post without paywall + testimonials
+**Launch standard (locked April 29, 2026):** master todo complete, except translations and Apple Store. No testimonial gate. Reddit not a launch step. The seven testers tested the regulation tool and bounced (cool-and-bounced pattern). The launch product needs the return-loop infrastructure and engagement craft layer to ship together to avoid replicating that pattern at scale.
 
-### Should Do Before Launch
-8. In-app check-in reminders for web (since system push notifications are native-only)
-9. Biometric lock native test on device
-10. Calendar + Health → AI context verification on Android (permissions granted, data flow not confirmed)
-11. Science sheet update for metacognition features
+### Three layers that must ship together (return-loop architecture)
 
-### Post-Launch (Deliberate Updates)
+**Layer 1 — Regulation tool (SHIPPED).** Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. This is what the testers experienced.
+
+**Layer 2 — Return-loop infrastructure (PARTIALLY SHIPPED, MOSTLY PENDING).**
+- Watch integration (Wear OS haptic breathing companion — Galaxy Watch Ultra is the test device; requires Android Studio installed locally)
+- Health Connect / HealthKit (HRV, sleep, heart rate — continuous biometric signal flowing in)
+- Biometric lock (Face ID / fingerprint on Reframe and Signal Log — privacy/integrity, not return mechanic)
+- Notifications infrastructure (already shipped via Capacitor — needs the actual return triggers wired in)
+
+**Layer 3 — Engagement craft (DIAGNOSED, MOSTLY PENDING).**
+- Cognitive Function Measurement (the moonshot — 6-8 weeks focused build; spec at COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md)
+- Plain-language neuroscience surface (second engagement mechanic — not yet spec'd)
+- Kinesthetic close interaction (direction chosen Apr 30 — single tap on slow-pulsing point or long-press to seal; spec next session)
+- Low-demand mode Phase 2 (Body Scan) and Phase 3 (Reframe) — specs drafted Apr 30, await direction
+
+### Post-launch (not blocking initial release)
+- Translations (Spanish, Brazilian Portuguese, Armenian)
+- Apple Store / TestFlight broad release (Arlin needs iPhone access)
 - Tablet/iPad responsive layout
 - Sound packs
 - Shareable composure card
 - PDF/CSV export polish
-- Apple Watch / HealthKit (when device available)
+
+### Resolved earlier in April (no longer blockers)
+- Lemon Squeezy live (Bobby confirmed live mode switch)
+- Apple Developer Program purchased — TestFlight unlocked
+- DUNS confirmed
+- Cloud infrastructure (Supabase) — three-table schema, RLS, AES-256 encryption, pre-update backup
+- Paywall end-to-end working
+- Pre-regulation chip rows removed from Breathe and Body Scan (commit ae43f4db, per Nook 2021 + replications)
 
 ---
 
