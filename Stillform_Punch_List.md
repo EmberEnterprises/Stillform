@@ -29,6 +29,55 @@
 
 ---
 
+## APRIL 30, 2026 SESSION — All work logged
+
+### Code commits shipped Apr 30 (12 user-facing)
+
+- [x] **Prestige refresh 1-5** (commits 5ad058eb, 8c10f851, a16865a9, a13cbae3, 721a3220) — CSS root calibration, theme-aware outlines, THEME_PRESETS calibrated, cards-on-ground convention, Mac rendering fix
+- [x] **Home banner copy update** (commit 41f184d5) — "Composure is the foundation. You are its architect."
+- [x] **Settled chip** (commits 768b56ed + ad4a43f1) — 9th feel chip, Russell circumplex LAP gap closed; AI feelMap entry added; ⓘ definition committed
+- [x] **Body Scan What Shifted + three-category data feed** (commit 890469aa) — Russell circumplex classifier, Categories A/B/C, post-completion What Shifted screen, schema v1
+- [x] **Dead modeConfig field cleanup** (commit d10bad23)
+- [x] **Chip ⓘ button system** (commit d207ef16) — CHIP_DEFINITIONS registry, 9 user-facing definitions, ⓘ buttons at 3 chip render sites
+- [x] **Cyclic Sighing breathing pattern** (commit 818f8444) — Balban et al. 2023 Stanford RCT protocol; opt-in via Settings; default behavior preserved
+- [x] **Low-demand mode Phase 1 (Breathe)** (commit 81e2c0b7) — state-of-existing-tool; bioFilter.includes("medicated") trigger; pulse circle + tap-to-close + 1.5s grace; session auto-saves
+
+### Documentation commits shipped Apr 30 (10+)
+
+- [x] Master Todo: 4 entries marked ✅ RESOLVED + Phase 1 of low-demand documented
+- [x] Transfer doc: Apr 30 session log + composure/self-mastery decision + integrity gap analysis
+- [x] Science Sheet: Cyclic Sighing + Russell circumplex chip framework + three-category data feed
+- [x] CHIP_DEFINITIONS_DRAFT.md committed (Arlin approved)
+- [x] Master Todo: more entries marked RESOLVED (Reframe title, Chip ⓘ, Cyclic sighing)
+- [x] Round 4 architectural consultation prompt drafted (never sent)
+- [x] Closing Language candidates draft
+- [x] Round 4 prompt update
+- [x] Cognitive Function Measurement spec drafted
+- [x] Master Todo: Cognitive Function Measurement added as 🌟 NEW TOP PRIORITY
+- [x] Transfer doc: full four-round consultation arc captured
+- [x] Strategic Roadmap: Apr 30 current state at top, Apr 8 content preserved as historical
+- [x] Science Sheet: System Observation + User Override (Architectural Conditioning Pattern) section
+- [x] Body-first pre-rate fix spec — RETRACTED with retraction notice
+- [x] Low-Demand Phase 2 (Body Scan) spec
+- [x] Low-Demand Phase 3 (Reframe) spec
+- [x] Science Sheet: Engagement Principles section (10 behavioral science principles)
+- [x] Master Todo: Engagement Craft Research Foundation section
+- [x] Transfer doc: Apr 30 evening engagement craft reframe captured
+
+### Specs awaiting Arlin's direction (next session)
+
+- [ ] **Cognitive Function Measurement spec review** — 6 open questions on naming, candidate set, cadence, Self Mode integration, failure framing, phase ordering
+- [ ] **Low-Demand Phase 2 (Body Scan) spec review** — 5 open questions on auto-advance, tension data, audio specifics, component refactor, mirror to Phase 3
+- [ ] **Low-Demand Phase 3 (Reframe) spec review** — 5 open questions on AI override prompt language, State-to-Statement skip, default mode, component refactor, testing rigor
+- [ ] **Kinesthetic close interaction spec** — to draft next session, grounded in Engagement Principles 4 and 9
+- [ ] **Plain-language neuroscience surface spec** — second engagement mechanic, never spec'd
+
+### Currently in publish queue (12 user-facing code commits awaiting Netlify trigger)
+
+All 12 land at once when Arlin triggers. Closing language candidates draft sits separately as NOT shipping (decided Apr 30).
+
+---
+
 ## BACKFILLED ITEMS — IMPLEMENTED BUT PREVIOUSLY MISSING FROM THIS SHIP LIST
 
 ### UAT + feedback operations
