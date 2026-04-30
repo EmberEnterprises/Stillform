@@ -34,6 +34,18 @@ This needs a design decision from Arlin. All three are defensible. Option (a) is
 
 ---
 
+## ⚠️ PRELAUNCH — Whole-app prestige refresh (Added April 30, 2026)
+
+**Spec drafted Apr 30 — see `STILLFORM_DESIGN_SYSTEM.md` in repo root.**
+
+Arlin's diagnosis: "It looks like a 32-bit NES platform. Whole app needs to be prestige." Refresh authorized as prelaunch work. Visual language synthesized from 5 AI reference passes converging on editorial luxury family (Aesop + MUBI + Cartier + Linear, not wellness apps). Spec covers calibrated palette, type scale, spacing rhythm, motion tokens, component vocabulary, implementation order. Ships with existing free font triad — no paid fonts required.
+
+This work blocks visible execution of Self Mode redesign and My Progress redesign (both already specced — `SELF_MODE_FOUR_WAY_SYNTHESIS.md` and `MY_PROGRESS_REDESIGN_SPEC.md`). Both redesigns are designed against the new system, not the current one. Build the design system first, then the redesigns land into it cleanly.
+
+Implementation order in spec: CSS variables → typography → components → screens (Home → Reframe entry → Self Mode → My Progress → Body Scan → Breathe → Pulse → Settings → FAQ). Each screen verified on phone debug before next.
+
+---
+
 ## ⚠️ PRELAUNCH — Added April 29, 2026
 
 ### 🔒 SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage
