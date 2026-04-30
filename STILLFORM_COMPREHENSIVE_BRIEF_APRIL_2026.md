@@ -1,6 +1,8 @@
 # STILLFORM — Comprehensive Product Brief
 ## April 22, 2026 | ARA Embers LLC
 
+> ⚠️ **This doc reflects April 22 state and is partially stale.** Significant work shipped April 30: Settled chip (9th feel chip closing Russell circumplex LAP gap), Body Scan What Shifted screen, three-category data feed (Russell circumplex classifier), chip ⓘ button system, Cyclic Sighing breathing pattern (Balban et al. 2023), low-demand mode Phase 1 (Breathe), prestige refresh (5 commits). Plus engagement craft research foundation established in Science Sheet (Engagement Principles section, 10 citation-grounded behavioral science principles parallel to the four neuroscience Pillars). Current top priority: Cognitive Function Measurement spec (the moonshot — 6-8 weeks focused build). For current state see STILLFORM_PROJECT_TRANSFER.md Section 3 and Stillform_Master_Todo.md.
+
 > **How to use this document:** This is a product brief and positioning doc — it describes what Stillform is, what it does, and the decisions behind it. It is NOT a strict line-by-line code snapshot. Technical implementation details (line numbers, function names) live in STILLFORM_PROJECT_TRANSFER.md. Where implementation status matters, this doc notes it explicitly (e.g. "data flow not yet confirmed on device"). Everything else reflects current product intent and shipped behavior as of April 22, 2026.
 
 ---
