@@ -120,20 +120,17 @@ These three are used only where the data layer needs to signal direction. They a
 
 ### The triad
 
-**Lyon Display** (serif, headlines + identity) — Commercial Type, ~$300 web license
-**Söhne** (sans, body + system text) — Klim Type Foundry, ~$390 web license
-**Berkeley Mono** (mono, metadata + instrument moments) — Berkeley Graphics, ~$75 web license
+**Cormorant Garamond** (serif, headlines + identity) — Google Fonts, free
+**DM Sans** (sans, body + system text) — Google Fonts, free
+**IBM Plex Mono** (mono, metadata + instrument moments) — Google Fonts, free
 
-These are the actual fonts that the editorial-luxury references use. Lyon is what Aesop, The Gentlewoman, and high-end magazines run. Söhne is what Linear, GitHub, and premium editorial publications use. Berkeley Mono is the Teenage Engineering / Nothing OS instrument-grade mono.
+All three free via Google Fonts. Already loaded in the current build — no font integration work required.
 
-Total premium font cost: ~$765 for all three one-time web licenses. Locked Apr 30 — Arlin's call: "I am not a bargain shopper. The intelligence is $19.99; the visuals must match it."
+**Pricing review Apr 30:** the editorial-luxury references the design system anchors against use Lyon Display + Söhne + Berkeley Mono in production (Aesop, Linear, Teenage Engineering). Pricing review found Web + App licenses for all three would total ~$812. Comparison passes against free alternatives (Fraunces, EB Garamond, Inter, JetBrains Mono) confirmed there is no full-fidelity free substitute for Lyon Display specifically — paid fonts genuinely deliver something free fonts don't at editorial scale. **However**, the fidelity gap is most visible to designers staring at type all day; users on phones, against the rest of the calibrated system (palette, spacing, motion, hierarchy), see a much smaller difference than the price gap suggests.
 
-**Fallback chain (in case of font load failure or pre-purchase preview):**
-- Lyon Display fallback: Cormorant Garamond (free, similar literary serif proportions)
-- Söhne fallback: DM Sans (free, similar humanist sans rhythm)
-- Berkeley Mono fallback: IBM Plex Mono (free, similar instrument-grade mono)
+**Decision:** ship the prestige refresh with the existing free triad. Paid font upgrade deferred to post-launch as a discrete project. Once the rest of the design system is live and Stillform is operating in market, decide whether typography is genuinely the limiting factor based on real evidence rather than abstract specification.
 
-The fallback chain is what runs in development before the paid licenses are purchased. Production runs the paid triad.
+**Why this is fine:** the reason Stillform currently reads as low-fi is not the fonts. It is the calibration — wrong scale, wrong leading, wrong tracking, wrong weight discipline, wrong color application. All of those fixes are free. Cormorant Garamond at the right scale with the right leading and the right hierarchy in the right palette is a credible editorial-luxury serif. The same fonts that read as 32-bit NES today will read as editorial luxury tomorrow because the calibration around them has changed.
 
 ### When to use each
 
@@ -366,19 +363,17 @@ These are real questions but they're not blocking the screen rebuild. Capture th
 
 ## What's actually paid
 
-**Premium font triad — locked Apr 30:**
+**Nothing in v1.** Decision locked Apr 30 — current free triad ships with the prestige refresh. Paid font upgrade deferred to post-launch.
 
-- **Lyon Display** — Commercial Type — https://commercialtype.com/catalog/lyon — ~$300 web license
-- **Söhne** — Klim Type Foundry — https://klim.co.nz/retail-fonts/sohne/ — ~$390 web license
-- **Berkeley Mono** — Berkeley Graphics — https://berkeleygraphics.com/typefaces/berkeley-mono/ — ~$75 web license
+**Post-launch upgrade path** (for reference, not for v1):
 
-**Total: ~$765 one-time for all three web licenses.**
+- **Lyon Display** — Commercial Type — https://commercialtype.com/catalog/lyon — would replace Cormorant Garamond at headlines. Highest-leverage upgrade because headlines carry the most prestige weight. Smallest viable purchase: Lyon Display Light, Web license only = ~$50. Add weights and App license incrementally as needed.
+- **Söhne** — Klim Type Foundry — https://klim.co.nz/retail-fonts/sohne/ — would replace DM Sans at body/system text. Smaller fidelity gain than Lyon — Inter (free) is the credible stand-in if going free, DM Sans (current) is also fine.
+- **Berkeley Mono** — Berkeley Graphics — https://berkeleygraphics.com/typefaces/berkeley-mono/ — would replace IBM Plex Mono. Smallest fidelity gain — IBM Plex Mono is genuinely close.
 
-Each foundry sells directly. Arlin purchases through their respective sites and receives the web font files (`.woff2` typically) plus license documentation. License files go in repo, web font files go in `public/fonts/`, `@font-face` declarations get added to the CSS top of App.jsx.
+**Upgrade timing:** once the prestige refresh ships and Stillform is in market, evaluate whether typography is genuinely the limiting factor based on actual user feedback and Arlin's lived-in experience of the live app. Buy the upgrade incrementally — Lyon Light Web first ($50), add weights and license types as evidence dictates.
 
-**Other costs:** none. No paid CSS framework, no paid motion library, no paid component library. The rest of the design system is buildable with the existing stack (React + Tailwind core utilities + custom CSS).
-
-**Implementation note:** until fonts are purchased and dropped into `public/fonts/`, the build runs against the free fallback triad (Cormorant Garamond + DM Sans + IBM Plex Mono via Google Fonts). The visual scale, spacing, palette, and motion all work identically with fallbacks — only the precise letterforms differ. This means rebuild work can begin before fonts are purchased; fonts swap in as a single CSS commit when they arrive.
+**Other costs in v1:** none. No paid CSS framework, no paid motion library, no paid component library. The rest of the design system is buildable with the existing stack (React + Tailwind core utilities + custom CSS).
 
 ---
 
@@ -410,7 +405,7 @@ When the rebuild starts, work in this order:
 
 Each screen rebuild is verified on phone debug before moving to the next. No screen is "done" until it renders on Arlin's phone and matches the spec.
 
-**Font integration timing:** the rebuild can begin against fallback fonts (free triad) before the paid fonts are purchased. When the paid fonts arrive, fonts swap in via a single CSS commit. The rest of the visual work continues uninterrupted.
+**Font integration:** none required for v1. Current fonts (Cormorant Garamond + DM Sans + IBM Plex Mono) are already loaded and stay loaded. The prestige refresh changes how these fonts are scaled, weighted, leaded, tracked, and paired against the calibrated palette — not which fonts render. Post-launch font upgrades (if any) become discrete CSS commits at that time, not v1 scope.
 
 ---
 
