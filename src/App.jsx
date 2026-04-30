@@ -64,7 +64,6 @@ const styles = `
     --amber-glow: rgba(184,134,43,0.06);
     --amber-20:   rgba(184,134,43,0.20);
     --amber-deep: #8C6420;
-    --amber-line: rgba(184,134,43,0.35);
 
     /* TEXT — cream-on-black for editorial, primary white for system */
     --text:       #E8EAF0;
@@ -116,8 +115,6 @@ const styles = `
     color: var(--text);
     font-family: 'DM Sans', sans-serif;
     font-weight: 400;
-    font-size: 15px;
-    line-height: 1.55;
     position: relative;
     overflow-x: hidden;
     /* Subtle grain — material depth, not decoration */
@@ -187,17 +184,17 @@ const styles = `
     border: none;
   }
 
-  /* Primary — dignified, not loud. Outline with accent text. (Hermès/Aesop convention) */
+  /* Primary — dignified, not loud. Outline with accent text. Theme-aware. */
   .btn-primary {
     background: var(--surface);
     color: var(--amber);
-    border: 0.5px solid var(--amber-line);
+    border: 0.5px solid color-mix(in srgb, var(--amber) 50%, transparent);
     font-weight: 400;
     box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.025);
   }
 
   .btn-primary:hover { border-color: var(--amber); color: var(--amber); background: var(--surface2); }
-  .btn-primary:active { background: var(--ground-deep, var(--bg)); transform: scale(0.985); transition: transform var(--motion-quick) var(--ease-shutter); }
+  .btn-primary:active { background: var(--bg); transform: scale(0.985); transition: transform var(--motion-quick) var(--ease-shutter); }
 
   /* Secondary — quieter outline, neutral text */
   .btn-secondary {
@@ -206,7 +203,7 @@ const styles = `
     border: 0.5px solid var(--border-hi);
   }
 
-  .btn-secondary:hover { border-color: var(--amber-line); color: var(--amber); }
+  .btn-secondary:hover { border-color: color-mix(in srgb, var(--amber) 60%, transparent); color: var(--amber); }
 
   /* Ghost — borderless, subtle */
   .btn-ghost {
@@ -7798,8 +7795,11 @@ function FocusCheckValidation({
             <button
               onClick={startFocusCheck}
               style={{
-                background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)",
-                padding: "9px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap"
+                background: "var(--surface)", color: "var(--amber)",
+                border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                borderRadius: "var(--r-lg)", padding: "9px 12px", fontSize: 12, cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap",
+                transition: "border-color var(--motion-default) var(--ease-prestige)"
               }}
             >
               Start 30s
@@ -9557,7 +9557,7 @@ function MyProgress({ onBack }) {
             <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
               <pre style={{ margin: 0, whiteSpace: "pre-wrap", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 14px", color: "var(--text)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, lineHeight: 1.6 }}>{shareCardText}</pre>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <button onClick={copyShareCard} style={{ background: "var(--amber)", color: "#0A0A0C", border: "none", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>Copy</button>
+                <button onClick={copyShareCard} style={{ background: "var(--surface)", color: "var(--amber)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)", borderRadius: "var(--r-lg)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 400, transition: "border-color var(--motion-default) var(--ease-prestige)" }}>Copy</button>
                 <button onClick={downloadShareCard} style={{ background: "none", border: "0.5px solid var(--border)", color: "var(--text)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Download .txt</button>
                 <button onClick={exportShareCardPdf} style={{ background: "none", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Export PDF</button>
               </div>
@@ -13346,7 +13346,7 @@ const isSignalProfileConfigured = () => {
                             // Launch body scan to identify the signal
                             startTool({ ...TOOLS.find(t => t.id === "scan"), returnTo: "home" });
                           }} style={{
-                            flex: 1, background: "var(--amber)", color: "#0A0A0C", border: "none",
+                            flex: 1, background: "var(--surface)", color: "var(--amber)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
                             borderRadius: "var(--r-lg)", padding: "10px", fontSize: 13, fontWeight: 500,
                             cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
                           }}>I have a minute →</button>
@@ -13409,9 +13409,11 @@ const isSignalProfileConfigured = () => {
                     </div>
 
                     <button onClick={saveCheckin} style={{
-                      width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
-                      borderRadius: "var(--r)", padding: "12px", fontSize: 14, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                      width: "100%", background: "var(--surface)", color: "var(--amber)",
+                      border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                      borderRadius: "var(--r-lg)", padding: "12px", fontSize: 14, fontWeight: 400,
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      transition: "border-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       Done. Start the day. →
                     </button>
@@ -13523,12 +13525,14 @@ const isSignalProfileConfigured = () => {
                         }
                       }
                     }} style={{
-                      width: "100%", background: "var(--amber)", color: "var(--btn-primary-text, #0A0A0C)", border: "none",
-                      borderRadius: "var(--r)", padding: "20px 24px", fontSize: 16, fontWeight: 500,
+                      width: "100%", background: "var(--surface)", color: "var(--amber)",
+                      border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                      borderRadius: "var(--r-lg)", padding: "20px 24px", fontSize: 16, fontWeight: 400,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 0 rgba(0,0,0,0.2)",
+                      boxShadow: "inset 0 0.5px 0 rgba(255,255,255,0.025)",
                       display: "flex", justifyContent: "space-between", alignItems: "center",
-                      WebkitTapHighlightColor: "transparent", marginBottom: 8
+                      WebkitTapHighlightColor: "transparent", marginBottom: 8,
+                      transition: "border-color var(--motion-default) var(--ease-prestige), background-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       <div>
                         <div>{isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}</div>
@@ -13729,7 +13733,7 @@ const isSignalProfileConfigured = () => {
                     </div>
 
                     <button onClick={saveEod} style={{
-                      width: "100%", background: "var(--amber)", color: "#0A0A0C", border: "none",
+                      width: "100%", background: "var(--surface)", color: "var(--amber)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
                       borderRadius: "var(--r)", padding: "12px", fontSize: 13, fontWeight: 500,
                       cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
                     }}>Close the loop →</button>
@@ -14065,7 +14069,7 @@ const isSignalProfileConfigured = () => {
                         if (result.outcome === "accepted") setInstallPrompt(null);
                         setInstallDismissed(true);
                       }
-                    }} style={{ background: "var(--amber)", border: "none", color: "#0A0A0C", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 500 }}>Install</button>
+                    }} style={{ background: "var(--surface)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 400, transition: "border-color var(--motion-default) var(--ease-prestige)" }}>Install</button>
                   </div>
                 </div>
               )}
