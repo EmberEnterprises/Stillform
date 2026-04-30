@@ -6509,15 +6509,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   }
 
   if (showPostRating) {
+    // Russell circumplex grouping: HAP → LAP → HAN → cognitive-span → LAN
+    // Settled added Apr 30 — closes low-arousal-positive coverage gap
     const feelChips = [
       { id: "excited", label: "Excited" },
       { id: "focused", label: "Focused" },
+      { id: "settled", label: "Settled" },
       { id: "anxious", label: "Anxious" },
       { id: "angry", label: "Angry" },
-      { id: "flat", label: "Flat" },
-      { id: "distant", label: "Distant" },
+      { id: "stuck", label: "Stuck" },
       { id: "mixed", label: "Mixed" },
-      { id: "stuck", label: "Stuck" }
+      { id: "flat", label: "Flat" },
+      { id: "distant", label: "Distant" }
     ];
     // Load insight once when screen appears
     const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
@@ -8137,14 +8140,17 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
         )}
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: compact ? "center" : "flex-start" }}>
           {[
+            // Russell circumplex grouping: HAP → LAP → HAN → cognitive-span → LAN
+            // Settled added Apr 30 — closes low-arousal-positive coverage gap
             { id: "excited", label: "Excited" },
             { id: "focused", label: "Focused" },
+            { id: "settled", label: "Settled" },
             { id: "anxious", label: "Anxious" },
             { id: "angry", label: "Angry" },
-            { id: "flat", label: "Flat" },
-            { id: "distant", label: "Distant" },
+            { id: "stuck", label: "Stuck" },
             { id: "mixed", label: "Mixed" },
-            { id: "stuck", label: "Stuck" }
+            { id: "flat", label: "Flat" },
+            { id: "distant", label: "Distant" }
           ].map(f => (
             <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
               background: feelState === f.id ? "var(--amber-glow)" : "transparent",
