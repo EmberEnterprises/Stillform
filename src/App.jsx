@@ -16029,7 +16029,7 @@ const isSignalProfileConfigured = () => {
             color: "var(--text-dim)", letterSpacing: "0.04em"
           }}>
             <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
-            Composure is a practice. You're building it.
+            Composure is the foundation. You are its architect.
           </div>
         )}
 
