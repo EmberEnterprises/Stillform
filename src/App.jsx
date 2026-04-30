@@ -8082,281 +8082,195 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
 
 
 function MetacognitionTool({ onComplete, onSessionComplete }) {
-  // Self Mode — Detached Mindfulness protocol per Wells (2005, J. Rat-Emo Cognitive-Behav Ther 23:337-355).
-  // Four steps: Notice (meta-awareness) → Name (cognitive de-centering) → Watch (attentional detachment +
-  // altered self-awareness as observer) → Release (minimal goal-directed coping). Apr 30 redesign retired
-  // the prior Recognize/Perspective steps because they invited analytical processing and goal-directed coping,
-  // which Wells explicitly contraindicates during DM. Watch step is the heart of the intervention — it is
-  // the catch-and-release moment the literature studies and validates.
-
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
-  const [watchSecondsRemaining, setWatchSecondsRemaining] = useState(30);
-  const [watchTimerActive, setWatchTimerActive] = useState(false);
   const startTrackedRef = useRef(false);
   if (step === 0 && !startTrackedRef.current) {
     startTrackedRef.current = true;
     try { window.plausible?.("Reframe Watch Sequence Started"); } catch {}
   }
 
-  // Watch step countdown — auto-runs once user reaches step 2
-  useEffect(() => {
-    if (step !== 2) return;
-    setWatchTimerActive(true);
-    setWatchSecondsRemaining(30);
-    const interval = setInterval(() => {
-      setWatchSecondsRemaining(s => {
-        if (s <= 1) {
-          clearInterval(interval);
-          setWatchTimerActive(false);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [step]);
+  const recognizedPatternText = String(responses[2] || "").toLowerCase();
+  const indicatesNewPattern = /\b(no|not really|never|first time|new|don'?t think so|dont think so)\b/.test(recognizedPatternText);
 
-  const TOTAL_STEPS = 4; // Notice, Name, Watch, Release
-  const STEP_LABELS = ["Notice", "Name", "Watch", "Release"];
-
-  const releaseChoices = [
+  const prompts = [
     {
-      label: "Settle the body",
-      desc: "Move into Breathe",
-      action: () => onComplete("breathe")
+      label: "Notice",
+      question: "What's happening in your body right now?",
+      sub: "Scan without judgment. Where are you holding it?",
+      placeholder: "Where is it sitting right now?"
     },
     {
-      label: "Stay with it",
-      desc: "You watched it. That's the practice.",
-      action: () => {
-        try {
-          appendSessionToStorage({
-            timestamp: new Date().toISOString(),
-            duration: 0,
-            tools: ["metacognition"],
-            exitPoint: "self-regulated",
-            source: "metacognition",
-            responses
-          });
-        } catch {}
-        setStep(TOTAL_STEPS);
-      }
+      label: "Name",
+      question: "What thought just fired?",
+      sub: "The first one. Before the story built around it.",
+      placeholder: "The raw thought. Not the story."
     },
     {
-      label: "Talk it through",
-      desc: "Move into Reframe with the AI",
-      action: () => onComplete("reframe-calm")
+      label: "Recognize",
+      question: "Have you been here before?",
+      sub: "Is this thought familiar? Does it have a pattern?",
+      placeholder: "This pattern tends to show up when..."
+    },
+    {
+      label: "Perspective",
+      question: indicatesNewPattern
+        ? "What would help you stay steady right now?"
+        : "What do you actually need in this moment?",
+      sub: indicatesNewPattern
+        ? "Something simple. One support, one boundary, or one next step."
+        : "Not what you should do. What does this moment actually call for?",
+      placeholder: indicatesNewPattern
+        ? "Space, clarity, or one concrete action."
+        : "What would steady you right now?"
+    },
+    {
+      label: "Choose",
+      question: "What are you doing next?",
+      sub: "You observed it. You named it. Now decide.",
+      placeholder: ""
     }
   ];
 
-  // Completion screen — quiet, no metric celebration (Wells: DM is not goal-directed)
-  if (step >= TOTAL_STEPS) {
+  const choices = [
+    { label: "Breathe", desc: "Regulate first", action: () => onComplete("breathe") },
+    { label: "Sit with it", desc: "I see it. That's enough.", action: () => {
+      // Save as metacognition session
+      try {
+        appendSessionToStorage({
+          timestamp: new Date().toISOString(),
+          duration: 0,
+          tools: ["metacognition"],
+          exitPoint: "self-regulated",
+          source: "metacognition",
+          responses
+        });
+      } catch {}
+      setStep(prompts.length);
+    }},
+    { label: "Talk it through", desc: "Use Reframe", action: () => onComplete("reframe-calm") },
+    { label: "Move on", desc: "No tools needed", action: () => {
+      try {
+        appendSessionToStorage({
+          timestamp: new Date().toISOString(),
+          duration: 0,
+          tools: ["metacognition"],
+          exitPoint: "autonomous",
+          source: "metacognition",
+          responses
+        });
+        try { window.plausible?.("Reframe Watch Sequence Autonomous"); } catch {}
+      } catch {}
+      setStep(prompts.length);
+    }}
+  ];
+
+  // Completion screen
+  if (step >= prompts.length) {
+    const autonomousCount = (() => {
+      try {
+        return getSessionsFromStorage()
+          .filter(s => s.source === "metacognition" && (s.exitPoint === "autonomous" || s.exitPoint === "self-regulated")).length;
+      } catch { return 0; }
+    })();
+    const isAutonomous = responses && Object.values(responses).length > 0;
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
         <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
-          You watched it.
+          You watched it. You named it. You chose.
         </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
-          That is the practice. Not the analysis, not the plan. Watching the thought without engaging is itself the regulation.
+        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
+          That's the skill. Seeing your own mind in motion and choosing what to do with it.
         </p>
+        {autonomousCount >= 1 && (
+          <div style={{ background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 20, textAlign: "left" }}>
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+              Signal Awareness
+            </div>
+            <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>
+              {autonomousCount === 1
+                ? "First time choosing without a tool. That's the observer activating."
+                : `${autonomousCount} times now. The observer is getting faster.`}
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+              This is the skill compounding. The less you need the app, the more it's working.
+            </div>
+          </div>
+        )}
         <button className="btn btn-primary" onClick={() => onSessionComplete ? onSessionComplete() : onComplete()}>Continue →</button>
       </div>
     );
   }
 
-  // Step header — same shape across all steps for orientation, but content per-step is distinct
-  const Header = () => (
-    <>
+  const prompt = prompts[step];
+  const isChoiceStep = step === prompts.length - 1;
+  const markStepNotApplicable = () => {
+    setResponses((r) => ({ ...r, [step]: "[not-applicable]" }));
+    setStep((s) => s + 1);
+  };
+
+  return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
       <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
-        {STEP_LABELS[step]} — {step + 1} of {TOTAL_STEPS}
+        {prompt.label} — {step + 1} of {prompts.length}
       </div>
-    </>
-  );
 
-  // Progress dots — same across all steps
-  const ProgressDots = () => (
-    <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 24 }}>
-      {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
-        <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= step ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
-      ))}
-    </div>
-  );
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
+        {prompt.question}
+      </h2>
+      <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
+        {prompt.sub}
+      </p>
 
-  // ── Step 0: NOTICE — meta-awareness, body-focused
-  if (step === 0) {
-    const text = responses[0] || "";
-    return (
-      <div style={{ maxWidth: 400, margin: "0 auto" }}>
-        <Header />
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
-          What's happening in your body right now?
-        </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-          Scan without judgment. Where are you holding it?
-        </p>
-        <div style={{ display: "flex", gap: 6 }}>
-          <textarea
-            style={{
-              flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-              padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
-              lineHeight: 1.6, resize: "none", minHeight: 80
-            }}
-            placeholder="Where is it sitting right now?"
-            value={text}
-            onChange={e => setResponses(r => ({ ...r, 0: e.target.value }))}
-            autoFocus
-          />
-          <MicButton onTranscript={t => setResponses(r => ({ ...r, 0: (r[0] || "") + (r[0] ? " " : "") + t }))} />
-        </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button className="btn btn-primary" style={{ flex: 1 }}
-            disabled={!text.trim()}
-            onClick={() => setStep(1)}>
-            Name it →
-          </button>
-          <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={() => { setResponses(r => ({ ...r, 0: "[not-applicable]" })); setStep(1); }}>
-            Skip
-          </button>
-        </div>
-        <ProgressDots />
-      </div>
-    );
-  }
-
-  // ── Step 1: NAME — cognitive de-centering, single short quoted input
-  if (step === 1) {
-    const text = responses[1] || "";
-    const MAX_LEN = 120;
-    return (
-      <div style={{ maxWidth: 400, margin: "0 auto" }}>
-        <Header />
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
-          What thought just fired?
-        </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-          The first one. Before the story built around it.
-        </p>
-        <div style={{ position: "relative" }}>
-          <input
-            type="text"
-            maxLength={MAX_LEN}
-            style={{
-              width: "100%", background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-              padding: "16px 20px", color: "var(--text)",
-              fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic", fontWeight: 400,
-              lineHeight: 1.4, boxSizing: "border-box"
-            }}
-            placeholder="The raw thought. Not the story."
-            value={text}
-            onChange={e => setResponses(r => ({ ...r, 1: e.target.value }))}
-            autoFocus
-          />
-          <div style={{ fontSize: 10, color: "var(--text-dim)", textAlign: "right", marginTop: 6, fontFamily: "'IBM Plex Mono', monospace" }}>
-            {text.length}/{MAX_LEN}
-          </div>
-        </div>
-        <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-          <button className="btn btn-primary" style={{ flex: 1 }}
-            disabled={!text.trim()}
-            onClick={() => setStep(2)}>
-            Watch it →
-          </button>
-          <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={() => { setResponses(r => ({ ...r, 1: "[not-applicable]" })); setStep(2); }}>
-            Skip
-          </button>
-        </div>
-        <ProgressDots />
-      </div>
-    );
-  }
-
-  // ── Step 2: WATCH — attentional detachment, the heart of DM
-  // No input field. Instruction + 30s ambient pacing + Continue / Stay longer
-  if (step === 2) {
-    const namedThought = responses[1] && responses[1] !== "[not-applicable]" ? responses[1] : null;
-    return (
-      <div style={{ maxWidth: 400, margin: "0 auto" }}>
-        <Header />
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16, textAlign: "center" }}>
-          Just watch.
-        </h2>
-        {namedThought && (
-          <div style={{
-            fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
-            color: "var(--text-dim)", textAlign: "center", marginBottom: 32,
-            padding: "0 16px", lineHeight: 1.4
-          }}>
-            "{namedThought}"
-          </div>
-        )}
-        <p style={{ color: "var(--text-dim)", fontSize: 14, marginBottom: 32, lineHeight: 1.7, textAlign: "center", padding: "0 8px" }}>
-          Hold the thought. Don't analyze it. Don't push it away. Notice it has its own behavior — it moves, shifts, fades on its own. You are watching it, not producing it.
-        </p>
-        {/* Ambient pacing — soft circle, slow pulse, countdown numeral inside */}
-        <div style={{ display: "flex", justifyContent: "center", marginBottom: 32 }}>
-          <div style={{
-            width: 120, height: 120, borderRadius: "50%",
-            border: "1px solid var(--border)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            background: watchTimerActive ? "var(--amber-glow)" : "transparent",
-            transition: "background 4s ease-in-out",
-            animation: watchTimerActive ? "watchpulse 4s ease-in-out infinite" : "none"
-          }}>
-            <div style={{
-              fontFamily: "'IBM Plex Mono', monospace",
-              fontSize: 28, fontWeight: 300,
-              color: watchTimerActive ? "var(--amber)" : "var(--text-dim)"
-            }}>
-              {watchSecondsRemaining}
-            </div>
-          </div>
-        </div>
-        <style>{`@keyframes watchpulse { 0%, 100% { opacity: 0.6; transform: scale(1); } 50% { opacity: 1; transform: scale(1.04); } }`}</style>
+      {isChoiceStep ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <button className="btn btn-primary" onClick={() => setStep(3)}>
-            {watchSecondsRemaining === 0 ? "Continue →" : "Continue (skip wait) →"}
-          </button>
-          {watchSecondsRemaining === 0 && (
-            <button className="btn btn-ghost" onClick={() => { setWatchSecondsRemaining(30); setWatchTimerActive(true); }}>
-              Stay longer
-            </button>
-          )}
-        </div>
-        <ProgressDots />
-      </div>
-    );
-  }
-
-  // ── Step 3: RELEASE — minimal goal-directed coping, three choices
-  if (step === 3) {
-    return (
-      <div style={{ maxWidth: 400, margin: "0 auto" }}>
-        <Header />
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
-          What now?
-        </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
-          You watched it. Choose one — or none.
-        </p>
-        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          {releaseChoices.map((c, i) => (
+          {choices.map((c, i) => (
             <button key={i} onClick={c.action} style={{
               background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-              padding: "16px 20px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
+              padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
             }}>
-              <div style={{ fontSize: 15, fontWeight: 500, color: "var(--text)" }}>{c.label}</div>
+              <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.label}</div>
               <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{c.desc}</div>
             </button>
           ))}
         </div>
-        <ProgressDots />
-      </div>
-    );
-  }
+      ) : (
+        <>
+          <div style={{ display: "flex", gap: 6 }}>
+            <textarea
+              style={{
+                flex: 1, background: "var(--bg)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                padding: "14px 16px", color: "var(--text)", fontFamily: "'DM Sans', sans-serif", fontSize: 14,
+                lineHeight: 1.6, resize: "none", minHeight: 80
+              }}
+              placeholder={prompt.placeholder}
+              value={responses[step] || ""}
+              onChange={e => setResponses(r => ({ ...r, [step]: e.target.value }))}
+              autoFocus
+            />
+            <MicButton onTranscript={t => setResponses(r => ({ ...r, [step]: (r[step] || "") + (r[step] ? " " : "") + t }))} />
+          </div>
+          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+            <button className="btn btn-primary" style={{ flex: 1 }}
+              disabled={!(responses[step] || "").trim()}
+              onClick={() => setStep(s => s + 1)}>
+              {step === 0 ? "Name it →" : step === 1 ? "Recognize →" : step === 2 ? "Get perspective →" : step === 3 ? "Choose →" : "Next →"}
+            </button>
+            <button className="btn btn-ghost" style={{ flexShrink: 0 }} onClick={markStepNotApplicable}>
+              Skip
+            </button>
+          </div>
+        </>
+      )}
 
-  return null;
+      <div style={{ display: "flex", gap: 6, justifyContent: "center", marginTop: 24 }}>
+        {prompts.map((_, i) => (
+          <div key={i} style={{ width: 8, height: 8, borderRadius: "50%", background: i <= step ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function SignalMapTool({ onComplete, skipIntro = false }) {
