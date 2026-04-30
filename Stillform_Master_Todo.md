@@ -73,33 +73,20 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ### What Shifted data feed — three-category positive selection framework
 
-**Categories grounded in Russell's circumplex model of affect (Russell 1980, *J. Pers. Soc. Psychol.* 39:1161-1178):**
+**Spec drafted Apr 30 — see `THREE_CATEGORY_DATA_FEED_SPEC.md` in repo root.**
 
-- **Category A — Regulated shift (the tool worked).** Pre-state negative + post-state positive. Or pre-state high-arousal negative + post-state low-arousal negative (came down off activation). Tool met the user.
-- **Category B — Persistent state (no shift detected).** Post-state same valence quadrant as pre-state. Not necessarily failure — sometimes naming and holding a state is the work. But it is signal.
-- **Category C — Concerning shift (needs human attention).** Pre any state → Post Distant. Or sustained Flat across multiple sessions. Or persistent high-arousal negative without shift across many sessions.
+Russell circumplex grounded classifier (Russell 1980, confirmed Watson 2024). Three categories locked Apr 29:
+- **Category A — Regulated shift** (negative→positive valence; high-arousal-negative→low-arousal-negative; Stuck→positive; Mixed→positive)
+- **Category B — Persistent state** (same quadrant; same chip; Mixed→negative differentiation)
+- **Category C — Concerning shift** (any→Distant; Distant→Distant; sustained Flat ≥5 sessions in 14 days; sustained HAN ≥5 sessions in 14 days)
 
-**Decision rules (locked Apr 29):**
-- Three categories, not two. Russell's model is two-dimensional for a reason — binary positive/negative loses information per the literature.
-- Chip is the structured data — free text does NOT override the chip classification. Otherwise the dataset becomes interpretive and not comparable across users.
-- Free text is for the user, not the dataset.
+Decision rules locked: chip is structured data, free text is for user only (privacy rule), three categories not two (Russell's model is orthogonal valence×arousal).
 
-**Why three categories per the science:** Valence and arousal are orthogonal (Russell 1980, replicated and confirmed in Watson 2024 review). High arousal is not automatically "bad" — Excited and Focused are positive states despite high arousal. Low arousal is not automatically "good" — Flat and Distant are negative states despite low arousal. A simple positive/negative collapse would mismeasure half the chip set.
+Spec covers: complete chip-to-quadrant mapping, formal rules per category with subcategories, edge cases (no pre-state, regulated-to-negative-non-pattern, unknown chip), full schema with `schemaVersion` versioning, classifyShiftDirection() pure function spec, pattern-context helper, wiring into Reframe finishStateToStatement + Body Scan handleWhatShiftedLockIn, My Progress surfacing (4 read-only views: headline pattern, 3-line compounding chart, tool-specific Cat-A rates, concerning patterns), Plausible 'Shift Classified' aggregate event with no PII, ship checklist.
 
-**Per-event log fields:**
-1. Pre-state chip
-2. Post-state chip
-3. Free text answer (kept on-device for the user, not in aggregate)
-4. Tool used (Reframe / Body Scan / other)
-5. Tool mode (calm / clarity / hype for Reframe)
-6. Bio-filter selections at session start
-7. Session count at the time
-8. Timestamp
-9. Computed category (A / B / C)
+**Privacy architecture preserved:** Aggregate-anonymous → Plausible (Stillform sees percentages across users), per-user-encrypted on-device → My Progress (Stillform never sees individual data).
 
-**Privacy architecture (locked Apr 29):**
-- **Aggregate, anonymous → Plausible.** Stillform sees percentages and trends across all users with no user identifiers. Examples: "23% of sessions are Category A this week," "Reframe has higher Category A rate than Body Scan," "Users in week 4 show higher Category A rate than week 1."
-- **Per-user, encrypted, on-device only → user's own My Progress.** Stillform never sees individual user data. Not via cloud, not via export, not via any pipe. The user owns their pattern surface.
+~250 lines of code in classifier+wiring commit; My Progress visual integration follows in My Progress redesign work. Build order: ships AFTER prestige refresh + Settled chip + Body Scan What Shifted (which provides the second classifier source).
 
 ### Body Scan post-completion What Shifted moment
 
