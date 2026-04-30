@@ -244,6 +244,31 @@ CBT targets the *content* of thoughts — "is this thought rational?" MCT target
 ---
 
 
+## System Observation + User Override (Architectural Conditioning Pattern)
+
+**What it does:** Stillform names what it observes — "Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL" — and gives the user explicit override pathways when the felt state doesn't match the system's read. The "I don't feel regulated yet" button is the most direct example, but the pattern is structural: chip selection, tool routing, and post-rating all carry this design.
+
+**The science:** This is the architectural mechanism by which Stillform builds interoceptive accuracy without overriding user authority. Three findings ground it.
+
+First, **affect granularity is trainable** through repeated paired association of precise labels with real internal states (Barrett 2001 and successors). Generic praise — "great job, you got this" — does not condition because there is no specific referent for the body to attach to. Specific naming — "composure restored," paired with the actual physiological state of post-regulation — gives the body a precise label for a precise state. Over many sessions, the user's internal sense of "what composure feels like" sharpens and aligns with the named referent.
+
+Second, **interoceptive accuracy requires the user remaining the higher authority** on their own state. If the system declares the user regulated and the user feels otherwise, gaslighting risk is real (Mehling et al. 2012; Garfinkel et al. 2015 on interoceptive accuracy vs. sensibility). The override pathway is what makes the conditioning loop honest. Each tap of "I don't feel regulated yet" is data — for this user, this kind of session, this kind of state shift didn't produce the felt experience yet — and is evidence to the user that their own interoception is treated as the ground truth.
+
+Third, the **observation + override pattern parallels supervised learning in the user's own perceptual system.** The system makes a prediction ("composure restored"); the user either accepts the label as matching their experience or supplies a correction. Over time, the predictions become more accurate for that specific user, AND the user's labels for their own internal states become more granular — both directions of improvement are happening simultaneously. This is the pattern that distinguishes Stillform's closing language from outcome-coded wellness app copy: the words are doing conditioning work, not summarization work.
+
+**Who says so:**
+- Barrett et al. (2001) — emotional granularity as trainable through specific labeling — *Cognition and Emotion*
+- Lieberman et al. (2007) — affect labeling reduces amygdala activity; precise labels activate prefrontal regulation — *Psychological Science*
+- Mehling et al. (2012) — interoceptive awareness as multidimensional construct (MAIA) — *PLOS ONE*
+- Garfinkel et al. (2015) — interoceptive accuracy vs. sensibility; the gap between objective state and felt state is real and trainable — *Biological Psychology*
+- Critchley & Garfinkel (2017) — interoception and emotional awareness — *Current Opinion in Behavioral Sciences*
+
+**Why this is load-bearing for Stillform's integrity:** without the override pathway, the closing language would be the system telling the user how they feel, which would be both gaslight-coded and conditioning-incorrect (no correction signal, no learning). With the override pathway, the closing language is the system offering a precise label the user can accept or refuse based on felt experience. Future maintenance: the override pathway is structural, not redundant; do not "clean up" or remove the "I don't feel regulated yet" button or its equivalents in adjacent flows. Do not soften the closing language to remove the precise observation; precise observation paired with override authority is what makes the conditioning work.
+
+**If they push back:** "The closing language isn't the system grading the user — it's the system offering a precise observation the user can override. Together they train interoceptive accuracy faster than either would alone."
+
+---
+
 ## Affect Labeling (Pulse Emotion Chips)
 
 **What it does:** Users tap emotion chips (Anger, Anxiety, Dread, etc.) to name what they're feeling
