@@ -172,9 +172,13 @@ Add to FAQ page:
 
 Real prelaunch UX win for self-service support. ErrorBoundary-blocked for shipping.
 
-### Reframe title doesn't reflect mode
+### ✅ Reframe title doesn't reflect mode — RESOLVED Apr 30
 
-All three Reframe modes (calm/clarity/hype) currently share `title: "Talk it out"` in the modeConfig (App.jsx ~line 5871-5899). The mode-specific name is only shown in the upper-right label ("◎ Talk it through" / "✦ Break the loop" / "◌ Get ready"). When user enters Reframe in clarity or hype mode, the main title still reads "Talk it out" — feels like the AI defaulted to calm mode regardless of state. Either: rename each mode's title to match the upper-right label, OR remove the redundant title and lead with the upper-right label only. Arlin reported as bug Apr 29.
+**Investigation finding:** the bug as described in the original master todo entry doesn't exist in the codebase. Audit found that `modeConfig.title` and `modeConfig.subtitle` were defined but NEVER referenced anywhere in the rendering. The only 'Talk it out' the user sees is the home page CTA at App.jsx line 13977, which is already conditional based on regulation type (`isThoughtFirst ? 'Talk it out' : isBodyFirst ? 'Calm my body' : 'Start here'`). Inside Reframe, mode identity is carried by the icon glyph (◎ calm / ✦ clarity / ◌ hype) plus AI prompt behavior — not by any title field.
+
+The original Apr 29 bug report likely captured a state that existed before the Reframe entry redesign work landed; the fix happened as part of that redesign without this todo being updated.
+
+**Resolution Apr 30:** removed the dead `title` and `subtitle` fields from modeConfig (6 dead lines across calm/clarity/hype entries). No user-facing change. App.jsx commit removes dead code only.
 
 ### Self Mode needs work
 
