@@ -112,9 +112,13 @@ Spec covers: chip array updates at 2 locations in App.jsx (~lines 6512 and 8140)
 
 **Why this matters for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) is impossible to detect when users actually arrive at the regulated state we're trying to help them reach. The framework breaks without this chip.
 
-### Chip ⓘ button — define what each chip covers
+### ✅ Chip ⓘ button — define what each chip covers — RESOLVED Apr 30
 
-Add an ⓘ button next to "ANYTHING TO ADD?" or to each chip individually. Tapping it shows brief definitions of what each chip covers. Example: "Stuck" — could mean cognitively stuck, emotionally stuck, decision-paralysis stuck. Right now users have no guidance on which chip to pick when their state could fit several.
+**Shipped Apr 30:** CHIP_DEFINITIONS registry added to App.jsx as top-level constant. ⓘ buttons wired at all 3 chip render sites (Body Scan What Shifted, showPostRating, PresentStateChips). Per CHIP_DEFINITIONS_DRAFT.md (Arlin approved Apr 30 after copy review).
+
+Each chip definition is ~40-60 words, anchored to reframe.js feelMap voice but rewritten for user-facing context — no clinical jargon, no pathologizing, body and mind both named, tells user what selecting the chip does in the system. Tapping ⓘ opens existing setInfoModal pattern (same modal already used for bio-filter ⓘ, Lock-in ⓘ, etc).
+
+ARIA labels added on every ⓘ button — addresses part of the prelaunch ARIA sweep item below.
 
 **Why this matters for the data feed:** If users interpret the same chip differently, the data is noisy at the source. Definitions reduce that noise without forcing users into rigid categories.
 
