@@ -3158,6 +3158,15 @@ const BREATHING_PATTERNS = [
     { name: "Hold", duration: 4, instruction: "Hold." },
     { name: "Exhale", duration: 8, instruction: "Out through your mouth. Long and slow." },
     { name: "Rest", duration: 2, instruction: "Rest." }
+  ]},
+  // Cyclic sighing — Balban et al. 2023 (Cell Reports Medicine 4:100895). RCT n=111.
+  // Two consecutive nasal inhales, then long oral exhale. 1:2 inhale-to-exhale ratio.
+  // Outperformed mindfulness meditation, box breathing, and cyclic hyperventilation
+  // for mood improvement and physiological arousal reduction.
+  { id: "cyclic_sigh", name: "Cyclic Sighing", desc: "5 minutes. The most-studied breath for downregulation.", phases: [
+    { name: "Inhale", duration: 4, instruction: "Deep breath in through your nose." },
+    { name: "Inhale", duration: 1, instruction: "Small top-off — fill your lungs completely." },
+    { name: "Exhale", duration: 8, instruction: "Slow, complete exhale through your mouth." }
   ]}
 ];
 
@@ -15659,7 +15668,8 @@ const isSignalProfileConfigured = () => {
                   </div>
                   {[
                     { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
-                    { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." }
+                    { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." },
+                    { id: "cyclic_sigh", name: "Cyclic Sighing", use: "5 minutes. Two short inhales, one long exhale.", why: "Outperformed mindfulness, box breathing, and other patterns for mood and arousal reduction in a 2023 Stanford RCT (Balban et al., n=111). The most-studied breath for downregulation." }
                   ].map(p => {
                     const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
                     return (
