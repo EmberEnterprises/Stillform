@@ -103,9 +103,13 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ### Body Scan post-completion What Shifted moment
 
-Currently Body Scan completes without asking the user to name what shifted. Add the same What Shifted UI that Reframe has: chip + free text. Same reset behavior — completing What Shifted (not just completing the tool) clears persisted feelState because the user explicitly named change.
+**Spec drafted Apr 30 — see `BODY_SCAN_WHAT_SHIFTED_SPEC.md` in repo root.**
 
-**Why:** Without it, Body Scan is a tool that touches state but never captures whether it shifted. We miss the metacognitive close (Pillar 1). The chip stays stuck on whatever was selected before Body Scan even though the state may have moved.
+Currently Body Scan completes without asking the user to name what shifted. Add the same What Shifted UI that Reframe has: post-state chip picker + optional free-text label + skip path. Same reset behavior — completing What Shifted (not just the tool) clears persisted feelState because the user explicitly named change. Closes Pillar 1 metacognitive gap.
+
+Spec covers exact UI structure, copy, state additions to BodyScanTool, handlers (handleWhatShiftedLockIn / handleWhatShiftedSkip), storage helper (appendBodyScanShiftToStorage with separate localStorage key), Plausible events, edge cases, and ship checklist. ~120 lines of code total in a single commit.
+
+**Build order:** ships AFTER prestige refresh + Settled chip, BEFORE three-category data feed (which hooks into the post-state classification this work produces). Tutorial + FAQ updates batch with three-category data feed so they ship together.
 
 ### Add "Settled" chip — low-arousal positive
 
