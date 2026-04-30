@@ -3269,6 +3269,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "breathe-ground-next-move-skip");
   };
   const completeDebriefGate = (reflectionText) => {
+    const skipped = reflectionText === null;
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
@@ -3278,9 +3279,11 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       regulationType,
       source: debriefTarget?.source || "breathe-ground",
       reflectionText: String(reflectionText || "").trim(),
+      skipped,
       preState: feelState || null,
       route: debriefTarget?.redirectTo || null
     });
+    try { window.plausible("Tool Debrief Completed", { props: { tool: "breathe", skipped: skipped ? "yes" : "no" } }); } catch {}
     const nextRoute = debriefTarget?.redirectTo || undefined;
     setDebriefTarget(null);
     onComplete(nextRoute);
@@ -4096,6 +4099,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   };
 
   const completeDebriefGate = (reflectionText) => {
+    const skipped = reflectionText === null;
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
@@ -4105,9 +4109,11 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       regulationType,
       source: debriefTarget?.source || "body-scan",
       reflectionText: String(reflectionText || "").trim(),
+      skipped,
       preState: feelState || null,
       route: debriefTarget?.redirectTo || null
     });
+    try { window.plausible("Tool Debrief Completed", { props: { tool: "scan", skipped: skipped ? "yes" : "no" } }); } catch {}
     const nextRoute = debriefTarget?.redirectTo || undefined;
     setDebriefTarget(null);
     onComplete(nextRoute);
@@ -4803,21 +4809,13 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 function ToolDebriefGate({ toolId, regulationType, onContinue }) {
   const promptSet = getToolDebriefPromptSet(toolId, regulationType);
   const [selected, setSelected] = useState("");
-  const [secondsLeft, setSecondsLeft] = useState(20);
 
   useEffect(() => {
-    setSecondsLeft(20);
     setSelected("");
   }, [toolId, regulationType]);
 
-  useEffect(() => {
-    if (secondsLeft <= 0) return;
-    const timer = setTimeout(() => setSecondsLeft((prev) => Math.max(0, prev - 1)), 1000);
-    return () => clearTimeout(timer);
-  }, [secondsLeft]);
-
   const options = Array.isArray(promptSet?.options) ? promptSet.options : [];
-  const continueEnabled = secondsLeft === 0 && !!selected;
+  const continueEnabled = !!selected;
 
   return (
     <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
@@ -4829,7 +4827,7 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
           {promptSet?.prompt || "Choose one line that best fits this session."}
         </div>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
-          20-second capture required before exit.
+          Take a moment to name what you used.
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 14 }}>
@@ -4873,9 +4871,23 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
         </div>
 
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, color: secondsLeft > 0 ? "var(--text-muted)" : "var(--amber)", letterSpacing: "0.08em" }}>
-            {secondsLeft > 0 ? `READY IN ${secondsLeft}s` : "READY"}
-          </div>
+          <button
+            onClick={() => onContinue(null)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-muted)",
+              fontSize: 11,
+              cursor: "pointer",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              padding: "8px 4px",
+              WebkitTapHighlightColor: "transparent"
+            }}
+          >
+            Skip
+          </button>
           <button
             className="btn btn-primary"
             disabled={!continueEnabled}
@@ -6711,6 +6723,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     queueDebriefAndCompleteNow(target.redirectTo || null, target.source || "reframe-next-move");
   };
   const completeDebriefGate = (reflectionText) => {
+    const skipped = reflectionText === null;
     appendToolDebriefToStorage({
       id: `debrief_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
       timestamp: new Date().toISOString(),
@@ -6720,8 +6733,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       regulationType,
       source: debriefTarget?.source || "reframe",
       reflectionText: String(reflectionText || "").trim(),
+      skipped,
       route: debriefTarget?.redirectTo || null
     });
+    try { window.plausible("Tool Debrief Completed", { props: { tool: "reframe", skipped: skipped ? "yes" : "no" } }); } catch {}
     const nextRoute = debriefTarget?.redirectTo || undefined;
     setDebriefTarget(null);
     onComplete(nextRoute);
