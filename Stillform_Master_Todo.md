@@ -193,9 +193,10 @@ Arlin's diagnosis: data heavy with redundancy. Heavy compute should run backend/
 
 Visual treatment held until whole-app design system locks (whole-app prestige refresh authorized Apr 30). Some redundancy may resolve naturally during the design system pass; new patterns may emerge. Build the spec into the new design system rather than the current one.
 
-### "Composure is a practice. You're building it." copy is corny
+### ✅ "Composure is a practice. You're building it." copy is corny — RESOLVED Apr 30
 
 Replace with a less-precious version. Captured Apr 29.
+**RESOLVED Apr 30:** replaced with "Composure is the foundation. You are its architect." Foundation/architect frame is precise to what Stillform actually is — composure is the outcome (the foundation that gets built), user is the architect (active agent), Stillform is the architecture/practice through which it's built. Per Science Sheet line 11: composure is outcome, metacognition is mechanism. Committed to App.jsx line 16032.
 
 ### Processing primer threshold tunable (currently 5 sessions)
 
