@@ -113,9 +113,13 @@ Spec covers exact UI structure, copy, state additions to BodyScanTool, handlers 
 
 ### Add "Settled" chip — low-arousal positive
 
-**The gap:** Stillform's eight current chips (Excited, Focused, Anxious, Angry, Stuck, Mixed, Flat, Distant) leave the entire low-arousal positive quadrant of Russell's circumplex empty. There is no chip a user can tap to say "I feel okay" or "I feel calm" or "I feel settled." This means a user in a regulated state has nothing accurate to select — they can either skip the chips entirely (no data captured) or pick something inaccurate.
+**Spec drafted Apr 30 — see `SETTLED_CHIP_SPEC.md` in repo root.**
 
-**Decision (locked Apr 29):** Add **"Settled"** as a ninth chip. Word choice rationale: "Calm" overlaps with the calm Reframe mode label and would create new confusion. "Steady" reads more cognitive than affective. "Settled" lives in both the body and the mind.
+**The gap:** Stillform's eight current chips (Excited, Focused, Anxious, Angry, Stuck, Mixed, Flat, Distant) leave the entire low-arousal positive quadrant of Russell's circumplex empty. There is no chip a user can tap to say "I feel okay" or "I feel calm" or "I feel settled." Users in a regulated state currently skip the chips (no data) or pick inaccurate (Focused = high-arousal; Flat = low-arousal *negative*).
+
+**Decision (locked Apr 29):** Add **"Settled"** as a ninth chip. Word choice: "Calm" overlaps with calm Reframe mode label, "Steady" reads cognitive not affective, "Settled" lives in both body and mind.
+
+Spec covers: chip array updates at 2 locations in App.jsx (~lines 6512 and 8140), Russell-circumplex-grouped chip ordering (Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant), AI prompt branch in reframe.js calm mode for maintain-state framing (no protective suppression, no Self Mode nudge, post-session insight surfacing enabled), chip ⓘ definition copy ready for the ⓘ system ship, edge cases, ship checklist. ~25 lines of code total, single commit, mostly mechanical.
 
 **Routing:** Settled chip routes to calm mode in Reframe (same as no-chip default), since a settled user reaching for Reframe is doing maintenance metacognition, not regulation under stress.
 
