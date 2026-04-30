@@ -239,9 +239,13 @@ Add to bio-filter info button copy and Science Sheet bio-filter section. Science
 
 Add to Breathe and Body Scan info button copy and Science Sheet body-first section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Menon (2011). Frames why body-first works for spirals: redirects attentional priority, not just "calms down."
 
-### Cyclic sighing as third breathing option
+### ✅ Cyclic sighing as third breathing option — RESOLVED Apr 30
 
-Add as third option alongside Quick Reset and Deep Regulate, OR relabel Deep Regulate with explicit double-inhale instruction. Cite Balban et al. (2023, *Cell Reports Medicine*, n=111 RCT — outperformed mindfulness AND box breathing on mood improvement and respiratory rate reduction). ErrorBoundary-blocked. Strongest scientific outreach lever — Dr. Yilmaz Balban is top outreach candidate.
+**Shipped Apr 30:** Cyclic Sighing added as third breathing pattern alongside Quick Reset and Deep Regulate. Protocol implements published Balban et al. 2023 (Cell Reports Medicine 4:100895, n=111 Stanford RCT under Spiegel/Huberman/Balban) exactly: Inhale 1 (deep, nasal) 4s + Inhale 2 (top-off, nasal) 1s + Exhale (slow, oral) 8s. 1:2 inhale-to-exhale ratio. 5 minutes recommended (~23 cycles).
+
+Settings picker entry cites the published study. Default behavior preserved — Quick Reset stays default for new users; cyclic_sigh is opt-in.
+
+**Outreach implication:** Now that Stillform implements her published protocol, this is the single strongest credibility lever for outreach to Dr. Melis Yilmaz Balban (founder of NeuroSmart, top outreach candidate per memory). Direct research overlap, non-competing market.
 
 ### ACT cognitive defusion lineage acknowledgment
 
