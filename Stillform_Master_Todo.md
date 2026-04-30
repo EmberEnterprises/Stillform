@@ -41,6 +41,51 @@ Open questions for Arlin's review listed in spec.
 
 ---
 
+## 🌟 ENGAGEMENT CRAFT — Research Foundation (Added April 30, 2026 evening)
+
+**Spec drafted Apr 30 — see Stillform_Science_Sheet.md "Engagement Principles" section.**
+
+After three rounds of consultation produced surface fixes and architectural overcorrections, Arlin diagnosed the actual gap as engagement craft — not architecture. After acknowledging that diagnosis, she pushed further: "data/research that helps with user engagement outside of neuroscience" and "human behavior in app data proven research."
+
+The science sheet now contains a parallel Engagement Principles section that grounds Stillform's engagement craft in 10 citation-grounded behavioral science principles — Fogg's Behavior Model, Wood & Rünger habit research, Self-Determination Theory, Kahneman System 1/2, Ariely defaults, Eyal variable reward, Gollwitzer implementation intentions, ultradian rhythm, Norman affordance perception, Pielot/Mehrotra/Harris attention-respectful design.
+
+**Why this matters for the award case:** Stillform's claims are grounded in two parallel research traditions — neuroscience for what the practice does inside the brain, and behavioral science for what the practice does in the user's life. Stronger case than either alone. Most products skip one or the other. Stillform sits in the intersection.
+
+**Operating rule going forward:** every feature in Stillform should be grounded in at least one Pillar (neuroscience) AND at least one Principle (behavioral science). Missing one or the other is the gap engagement craft is designed to close.
+
+**Open engagement craft items spec'd or pending:**
+
+### ✅ Closing language reconsideration — RESOLVED Apr 30 (NOT shipping)
+After Round 2 consultation found 4 AIs converged on "closing language frames as outcome not rehearsal," CLOSING_LANGUAGE_CANDIDATES.md was drafted with three voice options across 7 close screens. Arlin's pushback: "the current language has a science behind it too" and "feels more prestige and less putting words into someone's mouth." 
+
+Captured in Science Sheet new section "System Observation + User Override (Architectural Conditioning Pattern)" — the current language ("Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL") is precise observation paired with explicit override pathways ("I don't feel regulated yet" button). Together they train interoceptive accuracy via supervised-learning-like pattern: system makes prediction, user accepts or corrects, both directions improve over time. Round 2 AIs read words in isolation without seeing override architecture; they were wrong. **Closing language stays as-is.**
+
+### ⏳ Kinesthetic close interaction (engagement craft) — IN DESIGN
+Arlin chose Reading 3 from the close redesign options: kinesthetic / tactile interaction at session close. Engagement craft as design frame, not neuroscience. Replaces the 5-screen text-and-button sequence at session close with a single tactile moment — most likely single tap on slow-pulsing point or long-press to seal. Grounded in Engagement Principles 4 (Kahneman System 1/2 — match interaction style to user state) and 9 (Norman affordance perception). Spec to draft next session.
+
+The current ToolDebriefGate has a 20-second forced wait before Continue enables ("20-second capture required before exit") — this is the most clinical line of copy in the close flow and the most defensible piece to question first. Drop the wait; preserve the metacognitive function via observation-not-quiz framing.
+
+### ⏳ Plain-language neuroscience as recurring surface — NOT YET SPEC'D
+Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Wikipedia Random Article principle with Stillform's existing science as corpus. User encounters one specific finding from neuroscience or affective research, translated to plain language, with a one-line tie to what they're doing in Stillform. Converts science from "things in a sheet I'd never open" to moments of recognition. Aesop / Criterion lineage.
+
+### ⏳ Asynchronous metacognitive close — REFRAMED as kinesthetic close
+Round 3 finding from Gemini and Copilot flagged the close as too synchronous. After Arlin's pushback that ambient mode contradicts "less you need the app, the more it's working," this reframed as the kinesthetic close above. Same gap addressed; different solution.
+
+### ⏳ Surface refinements (small, anytime)
+- Sub-labels under tools ("Train how you talk to yourself under load") — CoPilot Round 2
+- Plainspoken inclusive home copy ("Composure, built for people who carry a lot") — CoPilot Round 2
+- Body Scan verb-form authorship ("I'm staying here" not "hold for 30 seconds") — Claude Round 2
+- Cormorant aesthetic question (demote to ceremonial moments?) — Claude Round 2 — possibly resolved by Apr 30 prestige refresh; needs phone-test
+- Composure self-mastery legibility doc commit — sitting in /mnt/user-data/outputs, conceptual decision already made
+
+### ❌ Round 4 consultation prompt — DRAFTED but Arlin's read: track exhausted
+STILLFORM_ROUND_4_CONSULTATION.md committed but never sent. The diagnosis came from Arlin, not from another consultation.
+
+### ❌ Body-first pre-rate friction fix — RETRACTED
+BODY_FIRST_PRE_RATE_FIX_SPEC.md drafted then retracted Apr 30 after Arlin caught Claude not checking master todo first. Master todo line 321 already had "Body-first metacognition access gap — VERIFIED ALREADY IMPLEMENTED Apr 27" with explicit note: "Going forward: read the existing flow before claiming a gap." Master todo line 361 already had "Pre-rate flow needed science-grounded redesign — RESOLVED via commit ae43f4db" (chip rows removed per Nook 2021). The 1-5 numeric pre-rate that remains is the minimal residual measurement that drives shift delta tracking and three-category data feed. Not a science violation. Spec retracted with full retraction notice.
+
+---
+
 ## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
 ### Body-first metacognition access gap
