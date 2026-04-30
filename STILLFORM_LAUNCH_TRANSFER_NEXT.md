@@ -1,6 +1,8 @@
 # STILLFORM Launch Transfer — Next Session Snapshot
 
-Last refreshed: April 17, 2026 (from current `main`).
+Last refreshed: April 30, 2026.
+
+⚠️ This doc is now stale-vintage. Most of its content reflects April 17 state. For current state see STILLFORM_PROJECT_TRANSFER.md Section 3 (Apr 30 RESOLVED entry) and Stillform_Master_Todo.md (current top priority is Cognitive Function Measurement; engagement craft research foundation now established in Stillform_Science_Sheet.md as Engagement Principles section).
 
 ## Source of truth
 
