@@ -30,16 +30,59 @@ Stillform does not market neuroplasticity. It uses the science to design the pra
 
 ## Paced Breathing (Breathe & Ground)
 
-**What it does:** Extended exhale breathing patterns (4-4-8-2, Box, 4-7-8)
+**What it does:** Three patterns. Quick Reset (4-4-6, ~60s), Deep Regulate (4-4-8-2, ~3min), Cyclic Sighing (4-1-8, ~5min). All emphasize extended exhale.
 
 **The science:** Extended exhale activates the vagus nerve, which triggers the parasympathetic nervous system — your body's "brake pedal." This measurably lowers heart rate and blood pressure within minutes; sustained practice reduces cortisol response over weeks.
 
+**Cyclic Sighing specifically:** The most-studied breath protocol for downregulation. Two consecutive nasal inhales (deep, then top-off) followed by a long oral exhale. 1:2 inhale-to-exhale ratio. Stanford RCT (n=111) at Spiegel/Huberman/Balban lab compared cyclic sighing to box breathing, cyclic hyperventilation, and mindfulness meditation across one month of daily 5-min practice. Cyclic sighing produced the greatest mood improvement and respiratory rate reduction (p<0.05 vs. mindfulness). Stillform's implementation is the published protocol exactly: Inhale 1 (deep, nasal) 4s + Inhale 2 (top-off, nasal) 1s + Exhale (slow, oral) 8s.
+
 **Who says so:**
+- Balban et al. (2023) — *Cell Reports Medicine* 4(1):100895 — "Brief structured respiration practices enhance mood and reduce physiological arousal." n=111 RCT, NCT05304000.
 - Gerritsen & Band (2018) — "Breath of Life: The Respiratory Vagal Stimulation Model" — *Frontiers in Human Neuroscience*
 - Zaccaro et al. (2018) — slow breathing techniques improve autonomic function, emotional control, and psychological well-being — *Frontiers in Human Neuroscience*
 - Ma et al. (2017) — diaphragmatic breathing reduces cortisol levels — *Frontiers in Psychology*
 
-**If they push back:** "This isn't meditation. It's respiratory pacing based on autonomic nervous system research. The military uses Box Breathing (4-4-4-4) for exactly this reason."
+**If they push back:** "This is respiratory pacing based on autonomic nervous system research. The cyclic sighing pattern specifically outperformed mindfulness meditation in a 2023 Stanford RCT."
+
+---
+
+## The Feel-Chip System (9 Russell Circumplex States)
+
+**What it is:** Nine feel chips representing the user's emotional state. Excited / Focused / Settled / Anxious / Angry / Stuck / Mixed / Flat / Distant. The user taps the chip that names their state at session entry, and again at session close (What Shifted screen).
+
+**The science:** The 9 chips are not arbitrary — they're grounded in James Russell's 1980 dimensional model of affect, the dominant framework in affective neuroscience for organizing emotional states by valence (positive/negative) and arousal (high/low). Russell's model maps emotions onto a circumplex with four quadrants: high-arousal positive (HAP), low-arousal positive (LAP), high-arousal negative (HAN), and low-arousal negative (LAN). Stillform's chips cover all four quadrants plus three additional categories: a cognitive state (Stuck — unclear thinking, not affective activation), an undifferentiated state (Mixed — multiple states active simultaneously), and a hypoarousal state (Distant — disconnected from the body, below window of tolerance).
+
+The Russell circumplex gives the chip system data integrity: every chip selection is mappable to a defined coordinate in affective space, which means the data can be analyzed across users without losing meaning, and Category A (regulated shift) is detectable when a user moves from a negative quadrant to a positive quadrant within a session.
+
+**Settled (added Apr 30) closes a coverage gap.** Before Settled, Stillform had no LAP chip — no way for a user to say "I feel calm" without inaccurately picking Focused (which is HAP) or Flat (which is LAN). Settled is the chip a regulated user reaches for. Without it, the data feed couldn't detect when users actually arrived at the regulated state Stillform is trying to help them reach.
+
+**Distant is hypoarousal, not just "low energy" or "withdrawn."** Distant maps to the polyvagal freeze/shutdown response (Porges 2011). When Distant is selected, Stillform routes the user to Body Scan first (not Reframe), because verbal reframing has limited reach when the prefrontal cortex is offline. Words alone won't reach a user in shutdown; the body has to re-engage first.
+
+**Who says so:**
+- Russell (1980) — "A circumplex model of affect" — *Journal of Personality and Social Psychology* 39(6):1161-1178
+- Watson (2024) — confirmed circumplex structure in modern affective measurement
+- Posner, Russell & Peterson (2005) — neuroscience grounding for the circumplex model
+- Porges (2011) — polyvagal theory; freeze/shutdown response (grounds Distant routing to Body Scan)
+- Siegel (1999) — window of tolerance (grounds Distant as below-window state)
+
+## The Three-Category Data Feed (Russell Circumplex Classifier)
+
+**What it does:** Every Reframe and Body Scan close runs the user's pre-state and post-state chips through a classifier that returns one of three categories: A (Regulated shift), B (Persistent state), or C (Concerning shift). Categories are computed at write-time and stored. Schema versioned at v1; never recomputed.
+
+**The science:** Russell's circumplex gives the categories defensible structure:
+- **Category A (Regulated shift)** — pre-state in HAN or LAN, post-state in HAP or LAP. The session moved the user from negative-valence to positive-valence quadrant. This is what regulation success looks like measurably.
+- **Category B (Persistent state)** — pre and post in the same quadrant, OR same chip selected. The user did the work; the state didn't shift this session. Sometimes the work is the holding, not the shifting. Per Hayes (ACT) and Kabat-Zinn — sustained acceptance under unresolved state IS the practice. Not failure.
+- **Category C (Concerning shift)** — two paths: (1) per-session: post-state is Distant (hypoarousal as session result is a signal). (2) Pattern-based: ≥5 sustained Flat or ≥5 sustained HAN in 14-day window. Pattern-based catches what single sessions miss — the user whose individual sessions look fine but whose 14-day window shows a concerning trajectory.
+
+The classifier is a pure function: same inputs always produce same output. Easy to test, easy to audit. Per-user encrypted on-device; never sees a server. Aggregate-anonymous Plausible event fires with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text.
+
+**Why this matters:** Stillform doesn't tell the user how they're doing. The user tells Stillform via the chip they picked. The classifier reads what the user said (twice — entry and close) and surfaces the pattern over time. The user owns the data; Stillform reflects it back.
+
+**Who says so:**
+- Russell (1980) — circumplex grounding
+- Hayes, Strosahl & Wilson (2011) — ACT, sustained acceptance as practice (Category B legitimacy)
+- Kabat-Zinn (1990) — mindfulness-based stress reduction; the practice is the holding
+- Porges (2011) — Distant as hypoarousal signal (Category C grounding)
 
 ---
 
