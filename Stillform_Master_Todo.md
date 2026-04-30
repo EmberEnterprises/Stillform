@@ -16,6 +16,31 @@ A feature that doesn't clearly serve one of these is dressing. Push back when it
 
 ---
 
+## 🌟 NEW TOP PRIORITY (Added April 30, 2026 evening) — Cognitive Function Measurement
+
+**Spec drafted Apr 30 — see COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md in repo root.**
+
+After three rounds of consultation produced surface fixes and architectural overcorrections, Arlin diagnosed the actual gap: 'I got a bunch of science based prompts that are flat and not interested in engaging for the user. It feels more like a chore than something I actually want to do.' This is engagement craft, not architecture.
+
+Out of nine engagement mechanics from non-wellness products examined, Arlin chose: cognitive function measurement as evidence of neuroplasticity. Small repeatable cognitive exercises grounded in Stillform's existing cited literature, performed periodically by the user, with results tracked over time. Improvements over weeks are measurable evidence the practice is producing the neuroplasticity Stillform claims.
+
+This is the moonshot. Multi-week build (6-8 weeks focused work). Centerpiece feature.
+
+**Differentiation:** every wellness app measures sessions/minutes/streaks. Nobody measures the cognitive functions the practice trains. Stillform would be first.
+
+**Recommended Phase 1 (3 of 5 candidates):**
+- Affect labeling speed (Lieberman 2007) — measures the function chips train
+- Interoceptive latency (Mehling 2012) — measures the function body work trains
+- Cognitive defusion / reframe generation (ACT lineage) — measures the function Reframe trains
+
+**Lumosity overclaim risk explicitly designed against.** Spec mandates narrow honest framing — 'this specific function is faster than it was, which is consistent with the practice working' — never 'your brain is X% better.'
+
+**Why this matters for the award case Aria asked for:** Stillform claims neuroplasticity. With this, Stillform proves it for each user individually. Nobody else in wellness has it. It's grounded in real science. It's executed at prestige altitude. It does something the user can't get anywhere else.
+
+Open questions for Arlin's review listed in spec.
+
+---
+
 ## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
 ### Body-first metacognition access gap
