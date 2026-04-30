@@ -6564,7 +6564,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }]);
       // AI succeeded — reset the failure counter and dismiss the offer card.
       // Don't clear selfModeEntryReason here: that gets cleared when the user actually
-      // returns to AI tab via the pill, OR when they manually use Start fresh.
+      // returns to AI tab via the pill, OR when they manually use Start new.
       setConsecutiveAiFailures(0);
       setShowSelfModeOffer(false);
       setError(null);
