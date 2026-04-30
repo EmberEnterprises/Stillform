@@ -1543,6 +1543,54 @@ const TOOL_ENTRY_PRIMER_COPY = {
 // Structure: TOOL_DEBRIEF_COPY[toolId] = { prompt, "thought-first": [...], "body-first": [...] }
 // Pillar 1 metacognition close — naming the move makes it repeatable.
 // Note: balanced regulation type fully retired Apr 29 — only thought-first and body-first remain.
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CHIP_DEFINITIONS — user-facing definitions surfaced via ⓘ button next to each chip
+// Voice anchored to reframe.js feelMap (authoritative AI voice) but rewritten for
+// user-facing context: no clinical jargon, no pathologizing, body and mind named,
+// tells user what selecting the chip does in the system.
+// Per CHIP_DEFINITIONS_DRAFT.md (approved Apr 30).
+// ─────────────────────────────────────────────────────────────────────────────
+
+const CHIP_DEFINITIONS = {
+  excited: {
+    title: "Excited",
+    body: "High energy, positive — your system is up and forward. Could be anticipation, momentum, hype, or genuine joy moving through. Selecting Excited tells Stillform you're not here to come down. The system stays out of your way, helps you direct the energy, and quietly watches for the moves you might overcommit to when everything feels possible."
+  },
+  focused: {
+    title: "Focused",
+    body: "Locked in. Mind sharp, body settled around the work. Different from Excited — Focused is steady, not pushed. Selecting Focused tells Stillform you're already in the state, not trying to enter it. Responses stay tight and operational. The system won't try to regulate you because there's nothing that needs regulating."
+  },
+  settled: {
+    title: "Settled",
+    body: "Low arousal, positive valence. Body soft, breath even, nervous system at rest. Mind clear without effort. Not high energy, not low energy — at-ease. The state regulation tools are designed to produce. Selecting Settled tells Stillform you're already in the regulated state and you want to use it, not change it."
+  },
+  anxious: {
+    title: "Anxious",
+    body: "The threat-detection system is on. Could be a specific worry or low-grade dread without an obvious target. Body usually shows up first — chest, stomach, jaw. Selecting Anxious tells Stillform to slow down with you, separate what's actually happening from what your brain is adding to it, and not rush you toward feeling better."
+  },
+  angry: {
+    title: "Angry",
+    body: "Heat, tension, sharper edges to your thinking. Could be at someone, at a situation, at yourself. Selecting Angry tells Stillform to acknowledge it fully before going anywhere — the state isn't a problem, the action you might take from inside it is what matters. Decisions slow down. The system helps you separate the feeling from what to do with it."
+  },
+  stuck: {
+    title: "Stuck",
+    body: "Something hasn't clicked yet. Not strong feeling, not no feeling — a cognitive state where the thinking is unclear but you know it. Decision paralysis. Replaying without resolving. Selecting Stuck tells Stillform to skip the body work and go straight to the thinking. One question at a time. You bring the specifics; the system helps the picture come into focus."
+  },
+  mixed: {
+    title: "Mixed",
+    body: "More than one state active at once. Could be a fight you regret but also feel justified about. Could be excited and scared. Could be sad about something good. Selecting Mixed tells Stillform not to try to resolve the complexity into a single feeling — the contradiction is real. The system helps you identify which thread is loudest right now without flattening the others."
+  },
+  flat: {
+    title: "Flat",
+    body: "Low energy, low motivation, things-are-grey. Not depression as a diagnosis — a state. The system feels tired, not broken. Selecting Flat tells Stillform not to cheerlead, not to push, and not to tell you it's okay to feel off. The system meets the energy you have with directness, and helps you find one concrete thing — not a vague reset, an actual specific action."
+  },
+  distant: {
+    title: "Distant",
+    body: "Disconnected from the body. Things feel far away, muffled, like you're watching from outside. Different from Flat — Flat is low energy still in the body; Distant is a kind of stepping-out. Selecting Distant tells Stillform that words alone won't reach, and the system routes you to Body Scan first to help you re-enter the room before re-entering the thought."
+  }
+};
+
 const TOOL_DEBRIEF_COPY = {
   scan: {
     prompt: "What did the scan teach you about your pattern?",
@@ -4255,22 +4303,31 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
           {feelChips.map(f => (
-            <button
-              key={f.id}
-              onClick={() => setPostStateChip(f.id)}
-              style={{
-                background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
-                border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
-                borderRadius: 20,
-                padding: "8px 16px",
-                fontSize: 13,
-                color: postStateChip === f.id ? "var(--amber)" : "var(--text-dim)",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif",
-                transition: "border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige)"
-              }}>
-              {f.label}
-            </button>
+            <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
+              <button
+                onClick={() => setPostStateChip(f.id)}
+                style={{
+                  background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
+                  border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
+                  borderRadius: 20,
+                  padding: "8px 16px",
+                  fontSize: 13,
+                  color: postStateChip === f.id ? "var(--amber)" : "var(--text-dim)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  transition: "border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige)"
+                }}>
+                {f.label}
+              </button>
+              {CHIP_DEFINITIONS[f.id] && setInfoModal && (
+                <button
+                  onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
+                  aria-label={`What does ${f.label} mean?`}
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
+                  ⓘ
+                </button>
+              )}
+            </div>
           ))}
         </div>
 
@@ -6949,15 +7006,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             {feelChips.map(f => (
-              <button key={f.id} onClick={() => setPostRating(f.id)} style={{
-                background: postRating === f.id ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "8px 20px", fontSize: 13,
-                color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-              }}>
-                {f.label}
-              </button>
+              <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
+                <button onClick={() => setPostRating(f.id)} style={{
+                  background: postRating === f.id ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 20, padding: "8px 20px", fontSize: 13,
+                  color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                }}>
+                  {f.label}
+                </button>
+                {CHIP_DEFINITIONS[f.id] && setInfoModal && (
+                  <button
+                    onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
+                    aria-label={`What does ${f.label} mean?`}
+                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
+                    ⓘ
+                  </button>
+                )}
+              </div>
             ))}
           </div>
         </div>
@@ -8568,15 +8635,25 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             { id: "flat", label: "Flat" },
             { id: "distant", label: "Distant" }
           ].map(f => (
-            <button key={f.id} onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
-              background: feelState === f.id ? "var(--amber-glow)" : "transparent",
-              border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-              borderRadius: 20, padding: "5px 14px", fontSize: 12,
-              color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
-              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-            }}>
-              {f.label}
-            </button>
+            <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
+              <button onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
+                background: feelState === f.id ? "var(--amber-glow)" : "transparent",
+                border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
+                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+              }}>
+                {f.label}
+              </button>
+              {CHIP_DEFINITIONS[f.id] && setInfoModal && (
+                <button
+                  onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
+                  aria-label={`What does ${f.label} mean?`}
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 3px", lineHeight: 1, marginLeft: -2 }}>
+                  ⓘ
+                </button>
+              )}
+            </div>
           ))}
         </div>
       </div>
