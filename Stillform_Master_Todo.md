@@ -173,9 +173,13 @@ All three Reframe modes (calm/clarity/hype) currently share `title: "Talk it out
 
 Specific issues TBD by Arlin. Needs in-app exploration to identify what's missing or broken. Self Mode is the explicit MCT 5-step practice (Notice, Name, Recognize, Perspective, Choose) — Pillar 1 anchor feature. Captured Apr 29.
 
-### My Progress needs work
+### My Progress redesign
 
-Specific issues TBD by Arlin. Needs in-app exploration. My Progress is the 12-week telemetry / pattern surface — connects to Pillar 4 neuroplasticity (showing the user their compounding practice). Captured Apr 29.
+**Spec drafted Apr 30 — see `MY_PROGRESS_REDESIGN_SPEC.md` in repo root.**
+
+Arlin's diagnosis: data heavy with redundancy. Heavy compute should run backend/PDF for deeper analysis; live screen should surface trends and patterns only. Eight sections collapse to four (headline pattern, compounding view, patterns and intelligence, archive and export). Earns Pillar 4 neuroplasticity claim by surfacing the science behind each pattern (Lieberman 2007, Wood & Rünger 2016, Schultz 1998, Lehrer 2020, Brewer 2011, Meichenbaum 1985, Wells 2009). Privacy architecture preserved — on-device only, Stillform never sees individual user data.
+
+Visual treatment held until whole-app design system locks (whole-app prestige refresh authorized Apr 30). Some redundancy may resolve naturally during the design system pass; new patterns may emerge. Build the spec into the new design system rather than the current one.
 
 ### "Composure is a practice. You're building it." copy is corny
 
