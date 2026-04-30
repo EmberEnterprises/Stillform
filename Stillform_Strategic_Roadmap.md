@@ -1,4 +1,37 @@
 # STILLFORM — Strategic Roadmap & Open Questions
+
+---
+
+## ⚡ CURRENT STATE — April 30, 2026 (TOP OF FILE)
+
+**Most of this document below is stale (Apr 8 vintage).** Critical updates:
+
+**All Apr 8 blockers cleared.** Lemon Squeezy live (Bobby confirmed live mode switch). Apple Developer purchased. DUNS confirmed. Cloud infrastructure (Supabase) shipped Apr 15. Paywall end-to-end working. Three-table schema with RLS + AES-256 encryption. Pre-update backup system live.
+
+**Launch standard locked Apr 29.** Master todo complete except translations + Apple Store. No testimonial gate. Reddit not a launch step. 
+
+**The current top priority is NOT what's written below — it's Cognitive Function Measurement.** See COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md and Stillform_Master_Todo.md top section.
+
+**Apr 30 single-day session shipped:**
+- 12 code commits (prestige refresh 5x, Settled chip, Body Scan What Shifted, three-category data feed, dead modeConfig cleanup, chip ⓘ system, Cyclic Sighing pattern, low-demand mode Phase 1)
+- 7+ documentation commits (master todo, transfer doc, science sheet, multiple specs and consultation prompts)
+- Four-round AI consultation arc; track exhausted; spark came from Arlin's own diagnosis: engagement craft, not architecture
+
+**For full Apr 30 context:** STILLFORM_PROJECT_TRANSFER.md Section 3 has the complete arc.
+
+**Blockers remaining (different from Apr 8 list):**
+- Cognitive Function Measurement build (6-8 weeks) — moonshot feature
+- Closing language pass (drafted in CLOSING_LANGUAGE_CANDIDATES.md, awaiting Arlin direction)
+- Body-first pre-rate friction (GPT Round 3 catch — needs design)
+- Low-demand mode Phase 2 (Body Scan) and Phase 3 (Reframe) — Phase 1 shipped Apr 30; Phase 2 architectural decision pending
+- Translations (Spanish, Brazilian Portuguese, Armenian) — post-launch
+- TestFlight — blocked on Arlin getting iPhone access
+
+The document below is preserved as historical context. Do not act on the Apr 8 critical path without checking against current state above first.
+
+---
+
+# STILLFORM — Strategic Roadmap & Open Questions (Apr 8 vintage below)
 ### Everything from the April 8 Radiology Session
 ### Not just what was discussed — what needs to happen next
 
