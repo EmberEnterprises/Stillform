@@ -4839,6 +4839,276 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   );
 }
 
+// ============================================================================
+// SCIENCE CARD — Plain-Language Neuroscience Surface
+// 20 hand-written static fallback cards. Used when AI generation fails.
+// Each card drawn directly from the verified corpus in reframe.js.
+// ============================================================================
+const STATIC_SCIENCE_CARDS = [
+  { topic: "cyclic_sighing", body: "Stanford researchers studied this exact pattern. In a 28-day RCT, cyclic sighing — two nasal inhales then a long oral exhale — produced the greatest mood improvement and respiratory rate reduction of the four practices tested. It outperformed mindfulness meditation at the same dose.", citation: "Balban et al. 2023 · Cell Reports Medicine" },
+  { topic: "slow_breathing_general", body: "Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. The mechanism is consistent across patterns: extended exhale, vagal activation, parasympathetic shift. The breath is the lever; the body responds.", citation: "Zaccaro et al. 2018 · Frontiers in Human Neuroscience" },
+  { topic: "affect_labeling", body: "Putting a name on an emotion directly reduces amygdala activation. fMRI studies show this happens automatically, even without conscious intent to regulate. You don't have to analyze the feeling. Naming it turns down the alarm.", citation: "Lieberman et al. 2007 · Psychological Science" },
+  { topic: "cognitive_reappraisal", body: "Reinterpreting an emotional trigger is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. The same situation, seen differently, lands differently in the body.", citation: "Ochsner & Gross 2005 · Trends in Cognitive Sciences" },
+  { topic: "interoception_emotion", body: "Interoceptive awareness — the ability to accurately sense what your body is doing — is linked to emotional regulation. The more accurately you read the body, the better you regulate the mind.", citation: "Mehling et al. 2012 · PLOS ONE" },
+  { topic: "granularity_protective", body: "People who can make fine-grained distinctions between emotions regulate better. Higher granularity protects against binge drinking, aggression, and self-harm. The more precisely you name what you feel, the less likely you are to reach for harmful coping.", citation: "Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science" },
+  { topic: "sleep_amygdala", body: "Sleep deprivation amplifies the brain's threat-detection. A person running on too little sleep perceives neutral faces as threatening. The hardware shapes the perception before the mind gets a vote.", citation: "Goldstein et al. 2007 · Current Biology" },
+  { topic: "dmn_breathing", body: "The brain has a circuit that drives rumination — the default mode network. It quiets when attention is held by something concrete, like a breath count. You can't ruminate and follow a 4-1-8 pattern at the same time.", citation: "Doll et al. 2015 · Social Cognitive and Affective Neuroscience" },
+  { topic: "hrv_biofeedback", body: "Heart rate variability is an index of regulated emotional responding. The more flexibly your nervous system shifts between states, the more emotionally regulated you tend to be. The capacity is trainable — not fixed.", citation: "Lehrer & Gevirtz 2014 · Frontiers in Public Health" },
+  { topic: "implementation_intentions", body: "If-then planning dramatically increases follow-through on intended behavior. Pre-deciding your response — when calm — bypasses decision paralysis at the moment of distress.", citation: "Gollwitzer 1999 · American Psychologist" },
+  { topic: "mct_detached_mindfulness", body: "The shift from \"I am anxious\" to \"I'm noticing anxiety\" is the foundation of metacognitive therapy. Observing the state instead of being fused with it is the entire mechanism.", citation: "Wells 2009 · Metacognitive Therapy framework" },
+  { topic: "stress_inoculation", body: "Practicing regulation when calm trains the skills that deploy automatically under pressure. Special operators, surgeons, and first responders use this principle. Daily practice, before it's needed, builds the capacity for when it is.", citation: "Meichenbaum 1985 · Stress Inoculation Training" },
+  { topic: "window_of_tolerance", body: "There is a zone where you can think clearly, regulate emotions, and function. Above it: hyperarousal — panic, rage, overwhelm. Below it: hypoarousal — numbness, shutdown. Regulation practice widens the window over time.", citation: "Siegel 1999 · The Developing Mind" },
+  { topic: "acupressure_anxiety", body: "Self-administered acupressure reduces anxiety. The pressure itself is part of the mechanism — but so is the focused attention on the body that pressure requires. Two things at once: tactile and attentional.", citation: "Au et al. 2015 · Journal of Advanced Nursing" },
+  { topic: "reappraisal_neuroimaging", body: "Reappraisal consistently reduces negative emotion in neuroimaging studies. The effect is reliable enough to show up across studies, methods, and populations. The brain genuinely processes the reinterpreted situation differently.", citation: "Buhle et al. 2014 · Cerebral Cortex" },
+  { topic: "pain_attention", body: "Pain demands attentional resources and disrupts cognitive function. When the body is sending a pain signal, less of you is available for thinking clearly about anything else. The bio-filter is honest about this.", citation: "Eccleston & Crombez 1999 · Pain" },
+  { topic: "granularity_trainable", body: "Emotional granularity increases with repeated self-assessment. Naming what you feel — over and over, accurately — builds the capacity itself. The chips are training disguised as chips.", citation: "Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology" },
+  { topic: "affect_labeling_implicit", body: "Affect labeling works as implicit emotion regulation. You don't have to consciously try. The act of naming the feeling is itself the regulation. The brain treats the naming as the work.", citation: "Torre & Lieberman 2018 · Emotion Review" },
+  { topic: "diaphragmatic_cortisol", body: "Diaphragmatic breathing reduces cortisol levels — measurably. The body's stress chemistry is responsive to how you breathe. The lever is real.", citation: "Ma et al. 2017 · Frontiers in Psychology" },
+  { topic: "mct_efficacy", body: "Meta-analysis of metacognitive therapy across anxiety and depression found effect sizes exceeding CBT in several conditions. Observing the state — rather than challenging the content of thoughts — produces measurable clinical outcomes.", citation: "Normann & Morina 2018 · Frontiers in Psychology" }
+];
+
+// LocalStorage helpers for variety guard — last 5 card topics retained
+const SCIENCE_CARD_HISTORY_KEY = "stillform_card_history";
+function getRecentCardTopics() {
+  try {
+    const raw = localStorage.getItem(SCIENCE_CARD_HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(-5) : [];
+  } catch { return []; }
+}
+function appendCardTopicToHistory(topic) {
+  if (!topic) return;
+  try {
+    const current = getRecentCardTopics();
+    const next = [...current, topic].slice(-5);
+    localStorage.setItem(SCIENCE_CARD_HISTORY_KEY, JSON.stringify(next));
+  } catch {}
+}
+
+// Pick a static fallback card that's not in recentTopics if possible
+function pickStaticFallbackCard(recentTopics = []) {
+  const eligible = STATIC_SCIENCE_CARDS.filter(c => !recentTopics.includes(c.topic));
+  const pool = eligible.length > 0 ? eligible : STATIC_SCIENCE_CARDS;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+// ============================================================================
+// ScienceCard — post-session card showing one finding from the science library
+// Appears AFTER post-rate / What Shifted, BEFORE ToolDebriefGate
+// ============================================================================
+function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null, feelStateBefore = null, feelStateAfter = null, sessionCount = 0, onContinue }) {
+  const [card, setCard] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
+  const [showInfo, setShowInfo] = React.useState(false);
+  const fetchedRef = React.useRef(false);
+
+  React.useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const fetchCard = async () => {
+      const recentTopics = getRecentCardTopics();
+      const authToken = (typeof sbGetSession === "function" && sbGetSession()?.access_token) || "";
+      const installId = typeof getOrCreateInstallId === "function" ? getOrCreateInstallId() : null;
+
+      try {
+        const response = await fetch(REFRAME_API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(authToken ? { Authorization: `Bearer ${authToken}` } : {})
+          },
+          body: JSON.stringify({
+            input: "science_card_request",
+            mode: "science_card",
+            lastTool: toolId,
+            lastBreathPattern,
+            lastBodyScanArea,
+            feelStateBefore,
+            feelStateAfter,
+            recentTopics,
+            sessionCount,
+            install_id: installId,
+            user_id: (typeof sbGetUser === "function" && sbGetUser()?.id) || null
+          })
+        });
+        const data = await response.json();
+        if (response.ok && data && data.body && data.citation) {
+          setCard({ openingLine: data.openingLine, body: data.body, citation: data.citation, topic: data.topic, source: "ai" });
+          appendCardTopicToHistory(data.topic);
+        } else {
+          // AI failed — use static fallback
+          const fallback = pickStaticFallbackCard(recentTopics);
+          setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source: "static" });
+          appendCardTopicToHistory(fallback.topic);
+        }
+      } catch (err) {
+        // Network error — static fallback
+        const fallback = pickStaticFallbackCard(recentTopics);
+        setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source: "static" });
+        appendCardTopicToHistory(fallback.topic);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCard();
+  }, [toolId, lastBreathPattern, lastBodyScanArea, feelStateBefore, feelStateAfter, sessionCount]);
+
+  React.useEffect(() => {
+    if (card && !loading) {
+      try {
+        window.plausible("Science Card Shown", {
+          props: {
+            topic: card.topic || "unknown",
+            tool: toolId || "unknown",
+            source: card.source || "unknown",
+            hadOpeningLine: card.openingLine ? "yes" : "no"
+          }
+        });
+      } catch {}
+    }
+  }, [card, loading, toolId]);
+
+  const handleContinue = () => {
+    try { window.plausible("Science Card Continued", { props: { topic: card?.topic || "unknown", source: card?.source || "unknown" } }); } catch {}
+    onContinue();
+  };
+  const handleSkip = () => {
+    try { window.plausible("Science Card Skipped", { props: { topic: card?.topic || "unknown", source: card?.source || "unknown" } }); } catch {}
+    onContinue();
+  };
+  const handleInfoOpen = () => {
+    setShowInfo(true);
+    try { window.plausible("Science Card Info Opened"); } catch {}
+  };
+
+  if (loading) {
+    return (
+      <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
+        <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "32px 16px", textAlign: "center" }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.6 }}>
+            Loading…
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!card) return null;
+
+  return (
+    <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
+      <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "20px 18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+            The science behind this
+          </div>
+          <button
+            onClick={handleInfoOpen}
+            aria-label="About these cards"
+            style={{
+              background: "none", border: "0.5px solid var(--border)", borderRadius: "50%",
+              width: 22, height: 22, display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", color: "var(--text-muted)", fontSize: 11,
+              fontFamily: "'IBM Plex Mono', monospace", padding: 0,
+              WebkitTapHighlightColor: "transparent"
+            }}
+          >
+            ⓘ
+          </button>
+        </div>
+
+        {card.openingLine && (
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 400, color: "var(--text)", lineHeight: 1.3, marginBottom: 12 }}>
+            {card.openingLine}
+          </div>
+        )}
+
+        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 14, fontFamily: "'DM Sans', sans-serif" }}>
+          {card.body}
+        </div>
+
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 16, fontStyle: "italic" }}>
+          {card.citation}
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <button
+            onClick={handleSkip}
+            style={{
+              background: "none",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r)",
+              color: "var(--text-muted)",
+              fontSize: 12,
+              cursor: "pointer",
+              padding: "8px 14px",
+              fontFamily: "'DM Sans', sans-serif"
+            }}
+          >
+            Skip
+          </button>
+          <button
+            onClick={handleContinue}
+            className="btn btn-primary"
+            style={{ fontSize: 12, padding: "8px 14px" }}
+          >
+            Continue
+          </button>
+        </div>
+      </div>
+
+      {showInfo && (
+        <div
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1000, padding: 20
+          }}
+          onClick={() => setShowInfo(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "var(--surface)",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              padding: "22px 18px",
+              maxWidth: 440,
+              width: "100%",
+              maxHeight: "85vh",
+              overflowY: "auto"
+            }}
+          >
+            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+              The science behind this
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+              <p style={{ marginTop: 0 }}>This card surfaces one finding from the research grounding Stillform's tools. Three things to know about how these cards work:</p>
+              <p>Most cards are AI-generated at session close. The AI is given a curated library of peer-reviewed studies — the same studies documented in Stillform's Science Sheet — and writes a card in plain language tied to what you just practiced. The AI is not allowed to cite studies outside this library, invent findings, or attribute claims to researchers not in the corpus.</p>
+              <p>If the AI is unavailable, you'll see a hand-written static card. The static cards come from the same library, are written in the same voice, and are vetted before shipping.</p>
+              <p>If the AI can't find a study that closely matches what you just did, you may see a more general card about regulation practice itself. Better to give you broadly true information than falsely-specific information.</p>
+              <p style={{ marginBottom: 0 }}>Every citation here ties back to a real study or established framework.</p>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
+              <button
+                onClick={() => setShowInfo(false)}
+                className="btn btn-primary"
+                style={{ fontSize: 12, padding: "8px 14px" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function ToolDebriefGate({ toolId, regulationType, onContinue }) {
   const promptSet = getToolDebriefPromptSet(toolId, regulationType);
   const [selected, setSelected] = useState("");
