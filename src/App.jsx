@@ -4772,7 +4772,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
                 <div style={{ display: "flex", gap: 8, marginTop: 16, alignItems: "center" }}>
                   <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }}
                     onClick={(e) => { e.stopPropagation(); startHold(); }}>
-                    Start {holdTarget}s hold
+                    Stay here for {holdTarget}s
                   </button>
                   <button onClick={(e) => { e.stopPropagation(); toggleAudio(); }} style={{
                     background: audioOn ? "var(--amber-glow)" : "var(--surface)",
@@ -4794,7 +4794,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               {(holding || holdCount > 0) && (
                 <div style={{ marginTop: 16 }}>
                   <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 8, letterSpacing: "0.08em" }}>
-                    {holding ? `HOLDING — ${holdTarget - holdCount}s remaining` : "HOLD COMPLETE"}
+                    {holding ? `Staying — ${holdTarget - holdCount}s` : "Stayed."}
                   </div>
                   <div style={{ background: "var(--border)", borderRadius: "var(--r)", height: 4, overflow: "hidden" }}>
                     <div style={{ width: `${holdProgress}%`, height: "100%", background: holdProgress >= 100 ? "var(--green)" : "var(--amber)", transition: "width 1s linear" }} />
