@@ -43,7 +43,7 @@ The launch product is a different product than what the testers used. The launch
 
 **Layer 2: The Return-Loop Infrastructure (PARTIALLY SHIPPED, MOSTLY PENDING).** What pulls the user back when they are not in the app. Watch integration, HRV measurement, Health Connect / HealthKit, biometric lock, notifications infrastructure. Some pieces have shipped (notifications infrastructure via Capacitor); the integrations and HRV are pending and gated on Bobby's Lemon Squeezy live mode switch and on Arlin getting Android Studio installed locally.
 
-**Layer 3: The Engagement Craft Layer (DIAGNOSED, MOSTLY PENDING).** Recognition between sessions, kinesthetic close interaction, plain-language neuroscience surface, Cognitive Function Measurement (the moonshot). All grounded in Engagement Principles section of Science Sheet (Fogg behavior model, Wood & Rünger habit research, Self-Determination Theory, Kahneman System 1/2, Ariely defaults, Eyal variable reward, Gollwitzer implementation intentions, Kleitman ultradian rhythm, Norman affordance perception, Pielot/Mehrotra/Harris attention-respectful design).
+**Layer 3: The Engagement Craft Layer (PARTIALLY SHIPPED MAY 1, MOSTLY PENDING).** Recognition between sessions still pending. Plain-Language Neuroscience Surface SHIPPED May 1 (post-session card with 36-entry verified corpus + 20 static fallbacks + ⓘ transparency modal). Kinesthetic close interaction direction chosen but spec not yet drafted. Cognitive Function Measurement is the moonshot, 6-8 weeks of focused build. All grounded in Engagement Principles section of Science Sheet (Fogg behavior model, Wood & Rünger habit research, Self-Determination Theory, Kahneman System 1/2, Ariely defaults, Eyal variable reward, Gollwitzer implementation intentions, Kleitman ultradian rhythm, Norman affordance perception, Pielot/Mehrotra/Harris attention-respectful design).
 
 Shipping any one layer alone produces the cool-and-bounce pattern at scale. All three together is the actual launch product.
 
@@ -60,8 +60,10 @@ This is why "EVERYTHING needs to be done before launch" is not perfectionism —
 
 ### Pending engagement craft (return moments + delight)
 - **Cognitive Function Measurement** — moonshot, 6-8 weeks focused build. Spec at COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md.
-- **Plain-language neuroscience surface** — second engagement mechanic. Not yet spec'd. Wikipedia Random Article principle with Stillform's existing science as corpus.
-- **Kinesthetic close interaction** — direction chosen (Reading 3, single tap on slow-pulsing point or long-press to seal). Spec to draft next session, grounded in Engagement Principles 4 and 9.
+- **Kinesthetic close interaction** — direction chosen (Reading 3, single tap on slow-pulsing point or long-press to seal). Spec to draft, grounded in Engagement Principles 4 and 9.
+
+### Engagement craft shipped (May 1, 2026)
+- **Plain-language neuroscience surface** — SHIPPED May 1. Post-session card with 36-entry verified corpus + 20 static fallbacks + ⓘ transparency modal. Spec at PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md. See master todo and transfer doc Section 2.5 for full context. Pending Protection C corpus verification before user-facing exposure.
 
 ### Pending low-demand mode (cohort coverage)
 - **Phase 2 (Body Scan)** — spec drafted Apr 30 (LOW_DEMAND_PHASE_2_SPEC.md), awaiting Arlin's direction on 5 open questions.
