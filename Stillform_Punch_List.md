@@ -29,6 +29,36 @@
 
 ---
 
+## MAY 1, 2026 SESSION — All work logged
+
+### Code commits shipped May 1 (8 substantive + 3 follow-up build fixes)
+
+- [x] **Hero CTA reflection sweep** (commit 6e82d689) — replaces breathing border with metallic light catch, 8s cycle, ~1.5s sweep
+- [x] **Composure self-mastery legibility doc** (commit e643cf80) — committed as dated artifact with header flagging stale action items
+- [x] **Tool sub-labels** (commit b34e8765) — TOOLS array desc strings replaced with "How you..." unified framing + Self Mode unfinished-business flag
+- [x] **Body Scan voice refinement** (commit afad053c) — Stay/Staying/Stayed during pressure phase
+- [x] **Plain-Language Science Card spec** (commit 5a773785) — v2 with verified corpus
+- [x] **Science Card server side** (commit c18d7fc3) — corpus, routing, validation, science_card branch in reframe.js
+- [x] **Science Card frontend foundation** (commit 2d9007ce) — component + static cards + ⓘ modal
+- [x] **Science Card wiring** (commit 6cf4b8fe) — close flow integration in 3 tools
+- [x] **Build fix 1** (commit 821faa09) — React.* namespace replaced with named hook imports
+- [x] **Build fix 2** (commit 64c2e3b1) — literal backslash-n syntax fixed in scienceCardShown declarations
+- [x] **Build fix 3** (commit fc4e8158) — comment dividers changed from = to - to avoid Security Gate false positive
+
+### Documentation commits May 1
+
+- [x] Master Todo updated with science card SHIPPED status + engineering lessons + market positioning correction
+- [x] Transfer Doc Section 2.5 added with full May 1 session log
+- [x] Strategic Roadmap: Layer 3 status updated, science card moved from pending to shipped
+- [x] Punch List: this section
+
+### Pending
+
+- [ ] **Protection C corpus verification** — Arlin reads 36 corpus entries + 20 static cards in PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md, flags anything off
+- [ ] **Netlify trigger** — Arlin triggers when ready; deploys all queued commits including science card feature
+
+---
+
 ## APRIL 30, 2026 SESSION — All work logged
 
 ### Code commits shipped Apr 30 (12 user-facing)
