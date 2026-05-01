@@ -759,6 +759,15 @@ const styles = `
     100% { opacity: 1; transform: scale(1); }
   }
 
+  @keyframes heroBreath {
+    0%, 100% { border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
+    50%      { border-color: color-mix(in srgb, var(--amber) 70%, transparent); }
+  }
+  .hero-cta-breathe {
+    animation: heroBreath 6s ease-in-out infinite;
+  }
+  .reduced-motion .hero-cta-breathe { animation: none !important; }
+
   @keyframes deltaGlow {
     0% { text-shadow: 0 0 0 rgba(201,147,58,0); }
     50% { text-shadow: 0 0 28px rgba(201,147,58,0.5); }
@@ -14242,7 +14251,9 @@ const isSignalProfileConfigured = () => {
                           setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
                         }
                       }
-                    }} style={{
+                    }}
+                    className="hero-cta-breathe"
+                    style={{
                       width: "100%", background: "var(--surface)", color: "var(--amber)",
                       border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
                       borderRadius: "var(--r-lg)", padding: "24px 24px", fontSize: 16, fontWeight: 400,
@@ -14250,7 +14261,7 @@ const isSignalProfileConfigured = () => {
                       display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
                       gap: 4, textAlign: "center",
                       WebkitTapHighlightColor: "transparent", marginBottom: 8,
-                      transition: "border-color var(--motion-default) var(--ease-prestige), background-color var(--motion-default) var(--ease-prestige)"
+                      transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, lineHeight: 1.2 }}>
                         {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
