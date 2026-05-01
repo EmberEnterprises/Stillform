@@ -4924,13 +4924,13 @@ function pickStaticFallbackCard(recentTopics = []) {
 // Appears AFTER post-rate / What Shifted, BEFORE ToolDebriefGate
 // ============================================================================
 function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null, feelStateBefore = null, feelStateAfter = null, sessionCount = 0, onContinue }) {
-  const [card, setCard] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
-  const [showInfo, setShowInfo] = React.useState(false);
-  const fetchedRef = React.useRef(false);
+  const [card, setCard] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showInfo, setShowInfo] = useState(false);
+  const fetchedRef = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (fetchedRef.current) return;
     fetchedRef.current = true;
 
@@ -4983,7 +4983,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
     fetchCard();
   }, [toolId, lastBreathPattern, lastBodyScanArea, feelStateBefore, feelStateAfter, sessionCount]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (card && !loading) {
       try {
         window.plausible("Science Card Shown", {
