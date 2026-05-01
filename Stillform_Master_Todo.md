@@ -81,8 +81,53 @@ What stayed: header copy, three preset options + "I need another pass to lock th
 
 This was the small focused engagement craft change that addresses Round 2 consultation finding ("close feels heavy") without committing to the full kinesthetic close redesign. The kinesthetic close spec is still next session.
 
-### ⏳ Plain-language neuroscience as recurring surface — NOT YET SPEC'D
-Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Wikipedia Random Article principle with Stillform's existing science as corpus. User encounters one specific finding from neuroscience or affective research, translated to plain language, with a one-line tie to what they're doing in Stillform. Converts science from "things in a sheet I'd never open" to moments of recognition. Aesop / Criterion lineage.
+### ✅ Plain-Language Neuroscience Surface — SHIPPED May 1, 2026 (8 commits + 3 follow-up build fixes)
+Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Now live as the Plain-Language Neuroscience Surface — post-session card that surfaces one finding from a verified 36-entry corpus tied to what the user just practiced.
+
+**Architecture:**
+- AI-generated at runtime via reframe.js with mode='science_card'
+- 36-entry verified corpus, every entry traceable to a Science Sheet section (Protection C: paraphrased from Science Sheet's own framing, not training-data recall)
+- 20 hand-written static fallback cards activate on any AI failure
+- Variety guard via stillform_card_history localStorage (last 5 topics retained)
+- Three protections: SEVERE-failure system prompt rule (A) + server-side citation validation against SCIENCE_CARD_VALID_CITATIONS Set (B) + Arlin verification pass on corpus before ship (C — pending)
+- ⓘ button on card opens info modal explaining the three card types (AI-generated / static fallback / generic)
+- 4 Plausible events: Science Card Shown / Continued / Skipped / Info Opened
+- Once per session. Skip button. Shows on first session.
+
+**Insertion point:** post-session, after What Shifted (Body Scan) and post-rate (all tools), BEFORE ToolDebriefGate. Each tool's `if (debriefTarget)` block now renders ScienceCard first if scienceCardShown is false.
+
+**Cost:** ~$0.002/card via gpt-4o; ~$1.50/user/year at 2 sessions/day. Negligible against subscription.
+
+**Ship arc — 8 commits + 3 build fixes May 1:**
+- 5a773785 — Spec v2 with verified corpus + 20 static cards + ⓘ modal copy + 3 protections
+- c18d7fc3 — Server side: corpus + routing + system prompt builder + science_card branch in handler + Protection B validation
+- 2d9007ce — Frontend foundation: ScienceCard component + STATIC_SCIENCE_CARDS array + helpers + ⓘ modal + 4 Plausible events
+- 6cf4b8fe — Wiring: ScienceCard inserted into close flow of Breathe, Body Scan, Reframe with scienceCardShown state per tool
+- 821faa09 — FIX: ScienceCard React imports (had used React.useState namespace pattern; codebase uses named hook imports; build was failing on Vite's "React is not defined")
+- 64c2e3b1 — FIX: Literal backslash-n in scienceCardShown state declarations (Python string escaping issue in build script; three places had broken JSX syntax)
+- fc4e8158 — FIX: Decorative comment dividers tripping Security Gate (// =====... matched git conflict marker regex; replaced with dashes)
+- Final state on main: all checks pass, Security Gate green
+
+**Engineering lessons from the three broken commits:**
+- React component patterns must match existing codebase (named hooks, not namespace) — should be checked before writing component
+- Python scripts that build JS files must not embed `\n` in string replacements — triple-quoted strings or direct file write only
+- Decorative comment dividers must avoid `=======` pattern (matches git conflict marker regex in Security Gate)
+- After every code commit, file should be re-read from main and visually inspected for obvious issues — three commits today shipped with bugs that re-reading would have caught
+- "Shipped clean, ready for trigger" is the wrong framing when only Security Gate proves clean — should be "shipped, awaiting Security Gate green"
+
+**Pending — Protection C corpus verification:**
+Arlin reads 36 corpus entries + 20 static cards in PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md, flags any entry where plain-language summary doesn't match Science Sheet's framing of that study. Until verified, science card feature is shipped but not corpus-validated. Bad corpus entry would mean inaccurate card lands on real user.
+
+### ✅ Stillform discipline / market positioning correction (May 1, 2026)
+After repeated drift toward repair-coded / trauma-coded / intensity-coded language across yesterday's consultation rounds and this morning's home copy proposals, Arlin named the actual market correctly: "This is a self mastery tool using metacognition with composure as its final outcome... Anyone who wants to enhance themselves are [our market]." Safeguards exist for users in distress — they are not the market.
+
+**Key reframes locked:**
+- Composure is a discipline (not therapy, not wellness, not consumer-tech enhancement)
+- Composure Architecture is the load-bearing definition (already present in 5 places in product)
+- "Composure is the foundation. You are its architect." (home banner copy from Apr 30) is doing the plainspoken inclusive work — already shipped
+- Future copy must NOT pull toward repair / trauma / intensity / "carry a lot" framing
+
+This positioning correction has implications for: future Reframe AI prompt language, marketing surfaces, the Science Sheet introduction, and any user-facing description of what Stillform IS.
 
 ### ⏳ Asynchronous metacognitive close — REFRAMED as kinesthetic close
 Round 3 finding from Gemini and Copilot flagged the close as too synchronous. After Arlin's pushback that ambient mode contradicts "less you need the app, the more it's working," this reframed as the kinesthetic close above. Same gap addressed; different solution.
