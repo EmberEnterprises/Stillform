@@ -193,6 +193,53 @@ if (isThoughtFirst) {
 
 ---
 
+## 2.5 May 1, 2026 Session Log — Plain-Language Neuroscience Surface ship + voice corrections
+
+### Shipped today (10+ commits)
+
+1. **6e82d689** — Hero CTA reflection sweep replacing breathing border
+2. **e643cf80** — COMPOSURE_SELF_MASTERY_LEGIBILITY.md committed as dated artifact
+3. **b34e8765** — Tool sub-labels with unified "How you..." framing + Self Mode unfinished-business note
+4. **afad053c** — Body Scan voice refinement: Stay/Staying/Stayed
+5. **5a773785** — Plain-Language Neuroscience Surface spec v2 with verified corpus, 20 static cards, ⓘ modal copy, 3 protections
+6. **c18d7fc3** — Science card server side: 36-entry corpus + routing + validation + science_card branch in reframe.js
+7. **2d9007ce** — Science card frontend foundation: ScienceCard component + 20 static fallback cards + ⓘ modal + 4 Plausible events
+8. **6cf4b8fe** — Science card wiring into close flow of Breathe, Body Scan, Reframe
+9. **821faa09 / 64c2e3b1 / fc4e8158** — Three follow-up fix commits cleaning up build errors (React namespace, literal backslash-n, comment-divider Security Gate trip)
+
+### Stillform discipline / market positioning correction
+
+Arlin pushed back on repeated drift toward repair-coded / trauma-coded / intensity-coded copy across yesterday's consultation rounds and this morning's home copy proposals. The corrected positioning, locked May 1:
+
+- **Composure is a discipline** — not therapy, not wellness, not "enhancement" in the consumer-tech sense
+- **Anyone who wants to enhance themselves is the market** — not people in distress
+- Safeguards exist for users in distress because Stillform is capable enough that they might try to use it as a clinical substitute. Responsible accommodation of edge cases is NOT the same as positioning the product for those edge cases
+- **Composure Architecture** is already the load-bearing definition (present in 5 places in product). Don't generate new framings.
+- "Composure is the foundation. You are its architect." (Apr 30 home banner copy by Arlin) is already doing the plainspoken inclusive work
+
+Future Claude reading this: do NOT propose copy with phrases like "for people who carry a lot," "for the intensity carriers," "internal weather affects external function," or other repair-coded framings. The market is enhancement-seekers practicing composure as a discipline. The aesthetic IS the egalitarianism — anyone can be an architect of their own composure.
+
+### Engineering accountability — three broken builds today
+
+Of my 8 substantive code commits today, 3 had real bugs that broke the Vite build:
+- React.useState/useEffect/useRef in ScienceCard component when codebase imports hooks as named exports (build would have failed on "React is not defined")
+- Literal backslash-n characters in three scienceCardShown state declarations from a Python escape pollution issue (broke JSX parsing)
+- Decorative `// =====` comment dividers triggered Security Gate's git conflict marker regex (`=======`)
+
+Another instance of Claude (via Cursor, with the same EmberEnterprises GitHub token) made 3 follow-up commits to fix these. The science card feature is now working on main; latest CI run on fc4e8158 is green.
+
+What I missed and what changes:
+- Should have checked existing import pattern in App.jsx BEFORE writing the new component. The pattern was visible in the file.
+- Python scripts embedding JS code should never use `\n` threaded through `str.replace()`. Either triple-quoted Python strings or direct file write via create_file.
+- Decorative comment dividers must use dashes or other non-conflict-pattern characters.
+- After every code commit, file should be re-read from main and visually inspected. "Shipped clean, ready for trigger" is wrong framing when only Security Gate green confirms clean.
+
+### Pending — Protection C corpus verification
+
+Plain-Language Neuroscience Surface is shipped but not corpus-verified. Before any user encounters a card, Arlin reads the 36 corpus entries + 20 static fallback cards in PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md and flags any entry where the plain-language summary doesn't match what the Science Sheet says about that study. Without this verification, an inaccurate card could land on a real user.
+
+Verification can happen at Arlin's pace — no decisions required, just flagging.
+
 ## 3. Open Issues — Tracked Status
 
 This section is a status snapshot, not an exhaustive list of prelaunch work. The full prelaunch scope lives in `Stillform_Master_Todo.md`. Items here are issues that have been triaged with diagnostic notes attached.
