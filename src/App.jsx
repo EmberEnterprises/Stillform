@@ -759,14 +759,38 @@ const styles = `
     100% { opacity: 1; transform: scale(1); }
   }
 
-  @keyframes heroBreath {
-    0%, 100% { border-color: color-mix(in srgb, var(--amber) 35%, transparent); }
-    50%      { border-color: color-mix(in srgb, var(--amber) 70%, transparent); }
+  @keyframes heroReflection {
+    0%       { transform: translateX(-150%) skewX(-12deg); }
+    18%      { transform: translateX(150%) skewX(-12deg); }
+    100%     { transform: translateX(150%) skewX(-12deg); }
   }
-  .hero-cta-breathe {
-    animation: heroBreath 6s ease-in-out infinite;
+  .hero-cta-reflect {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
   }
-  .reduced-motion .hero-cta-breathe { animation: none !important; }
+  .hero-cta-reflect::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 0%,
+      transparent 35%,
+      color-mix(in srgb, var(--amber) 18%, transparent) 47%,
+      color-mix(in srgb, var(--amber) 28%, transparent) 50%,
+      color-mix(in srgb, var(--amber) 18%, transparent) 53%,
+      transparent 65%,
+      transparent 100%
+    );
+    width: 60%;
+    transform: translateX(-150%) skewX(-12deg);
+    animation: heroReflection 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+  .hero-cta-reflect > * { position: relative; z-index: 1; }
+  .reduced-motion .hero-cta-reflect::before { animation: none !important; opacity: 0; }
 
   @keyframes deltaGlow {
     0% { text-shadow: 0 0 0 rgba(201,147,58,0); }
@@ -14252,7 +14276,7 @@ const isSignalProfileConfigured = () => {
                         }
                       }
                     }}
-                    className="hero-cta-breathe"
+                    className="hero-cta-reflect"
                     style={{
                       width: "100%", background: "var(--surface)", color: "var(--amber)",
                       border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
