@@ -71,6 +71,109 @@ function checkRateLimit(ip) {
   return true;
 }
 
+// ============================================================================
+// SCIENCE CARD CORPUS — verified against Stillform_Science_Sheet.md
+// Every entry's plain-language finding paraphrases what the Science Sheet
+// itself says about that study. AI is forbidden from citing studies, frameworks,
+// or researchers not in this list. Validation enforces this server-side before
+// any card reaches the user.
+// ============================================================================
+const SCIENCE_CARD_CORPUS = {
+  cyclic_sighing: { citation: "Balban et al. 2023 · Cell Reports Medicine", finding: "Stanford RCT compared four breath practices over 28 days. Cyclic sighing — two nasal inhales followed by a long oral exhale — produced the greatest mood improvement and respiratory rate reduction. Outperformed mindfulness meditation at the same dose." },
+  breath_vagal_model: { citation: "Gerritsen & Band 2018 · Frontiers in Human Neuroscience", finding: "Slow breathing works through the vagus nerve. The respiratory pattern itself is the lever — extended exhale activates the parasympathetic system." },
+  slow_breathing_general: { citation: "Zaccaro et al. 2018 · Frontiers in Human Neuroscience", finding: "Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. Mechanism is consistent: extended exhale, vagal activation, parasympathetic shift." },
+  diaphragmatic_cortisol: { citation: "Ma et al. 2017 · Frontiers in Psychology", finding: "Diaphragmatic breathing reduces cortisol levels measurably. The body's stress chemistry is responsive to how you breathe." },
+  acupressure_anxiety: { citation: "Au et al. 2015 · Journal of Advanced Nursing", finding: "Self-administered acupressure reduces anxiety. The pressure itself is part of the mechanism, but so is the focused attention on the body that pressure requires." },
+  interoception_emotion: { citation: "Mehling et al. 2012 · PLOS ONE", finding: "Interoceptive awareness — the ability to accurately sense what your body is doing — is linked to emotional regulation. The more accurately you read the body, the better you regulate the mind." },
+  interoception_emotional_awareness: { citation: "Critchley & Garfinkel 2017 · Current Opinion in Behavioral Sciences", finding: "Emotional awareness is built on interoception. You can't accurately know what you feel without accurately reading what the body is doing." },
+  cognitive_reappraisal: { citation: "Ochsner & Gross 2005 · Trends in Cognitive Sciences", finding: "Reinterpreting an emotional trigger — cognitive reappraisal — is the most well-researched emotion regulation strategy. Reduces amygdala activation, increases prefrontal cortex engagement." },
+  reappraisal_neuroimaging: { citation: "Buhle et al. 2014 · Cerebral Cortex", finding: "Reappraisal consistently reduces negative emotion in neuroimaging studies. The effect is reliable across studies, methods, and populations." },
+  reappraisal_prefrontal: { citation: "Denny et al. 2015 · Neuroscience & Biobehavioral Reviews", finding: "Reappraisal engages the lateral and medial prefrontal cortex — brain regions responsible for flexible thinking and self-control." },
+  affect_labeling: { citation: "Lieberman et al. 2007 · Psychological Science", finding: "Putting a name on an emotion — affect labeling — directly reduces amygdala activation and increases prefrontal cortex engagement. fMRI shows this happens automatically." },
+  affect_labeling_implicit: { citation: "Torre & Lieberman 2018 · Emotion Review", finding: "Affect labeling works as implicit emotion regulation. You don't have to consciously try to regulate. The act of naming the feeling is itself the regulation." },
+  affect_labeling_vlpfc: { citation: "Burklund et al. 2014 · Psychological Science", finding: "Affect labeling activates the right ventrolateral prefrontal cortex — a brain region tied to inhibition and emotional control." },
+  granularity_regulation: { citation: "Barrett et al. 2001 · Cognition & Emotion", finding: "People who can make fine-grained distinctions between emotions regulate better. The skill is trainable, improves with practice." },
+  granularity_protective: { citation: "Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science", finding: "Higher emotional granularity protects against binge drinking, aggression, and self-harm. The more precisely you can name what you feel, the less likely you are to reach for harmful coping." },
+  granularity_trainable: { citation: "Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology", finding: "Emotional granularity increases with repeated self-assessment. Naming what you feel — over and over, accurately — builds the capacity itself." },
+  sleep_amygdala: { citation: "Goldstein et al. 2007 · Current Biology", finding: "Sleep deprivation amplifies amygdala reactivity. Running on too little sleep, neutral faces register as threatening. Hardware shapes perception before the mind gets a vote." },
+  misattribution_arousal: { citation: "Schachter & Singer 1962 · Psychological Review", finding: "People misattribute physical arousal to emotional causes. A racing heart from caffeine can feel like anxiety. Body signals are interpretable, and interpretation isn't always accurate." },
+  pain_attention: { citation: "Eccleston & Crombez 1999 · Pain", finding: "Pain demands attentional resources and disrupts cognitive function. When the body is sending a pain signal, less of you is available for thinking clearly." },
+  interoception_regulation_strategy: { citation: "Price & Hooven 2018 · Appetite", finding: "Interoceptive awareness mediates the relationship between emotion regulation and emotional eating. Reading the body accurately changes what regulation strategy works." },
+  regulation_individual_differences: { citation: "Webb et al. 2012 · Psychological Bulletin", finding: "Different regulation strategies have different effect sizes depending on the person. There is no one strategy best for everyone." },
+  mct_detached_mindfulness: { citation: "Wells 2009 · Metacognitive Therapy framework", finding: "Detached mindfulness — observing thoughts and feelings without engaging, suppressing, or arguing with them — is a clinical practice. The shift from 'I am anxious' to 'I'm noticing anxiety' is the entire mechanism." },
+  mct_efficacy: { citation: "Normann & Morina 2018 · Frontiers in Psychology", finding: "Meta-analysis of MCT efficacy across anxiety and depression — effect sizes exceeded CBT in several conditions." },
+  implementation_intentions: { citation: "Gollwitzer 1999 · American Psychologist", finding: "If-then planning dramatically increases follow-through on intended behavior. Pre-deciding bypasses decision paralysis at the moment." },
+  implementation_intentions_meta: { citation: "Gollwitzer & Sheeran 2006 · Advances in Experimental Social Psychology", finding: "Meta-analysis of implementation intentions found medium-to-large effect on goal attainment across hundreds of studies." },
+  dmn_discovery: { citation: "Raichle et al. 2001 · PNAS", finding: "The brain has a default mode of activity during rest — a network that drives mind-wandering, rumination, and self-referential thought." },
+  dmn_meditation: { citation: "Brewer et al. 2011 · PNAS", finding: "Meditation reduces default mode network activity. The neural circuit responsible for rumination quiets when attention is held elsewhere." },
+  dmn_breathing: { citation: "Doll et al. 2015 · Social Cognitive and Affective Neuroscience", finding: "Mindful breathing shifts brain activation from default mode network to task-positive network. Can't ruminate and follow a breath count at the same time." },
+  hrv_emotion_regulation: { citation: "Thayer & Lane 2000 · Review of General Psychology", finding: "Heart rate variability is an index of regulated emotional responding. The more flexibly your nervous system shifts between states, the more emotionally regulated you tend to be." },
+  hrv_capacity: { citation: "Appelhans & Luecken 2006 · Review of General Psychology", finding: "HRV reflects emotion regulation capacity. The body's flexibility is the regulation capacity." },
+  hrv_biofeedback: { citation: "Lehrer & Gevirtz 2014 · Frontiers in Public Health", finding: "HRV biofeedback training improves autonomic regulation. Capacity is trainable, not fixed." },
+  stress_inoculation: { citation: "Meichenbaum 1985 · Stress Inoculation Training", finding: "Controlled, manageable exposure to stress paired with regulation practice builds resilience. Practicing when calm trains skills that deploy automatically under pressure." },
+  sit_clinical: { citation: "Saunders et al. 1996 · Clinical Psychology Review", finding: "Stress Inoculation Training is effective across anxiety disorders, PTSD, and performance anxiety." },
+  window_of_tolerance: { citation: "Siegel 1999 · The Developing Mind", finding: "There is a zone where you can think clearly, regulate emotions, and function — the window of tolerance. Above it: hyperarousal. Below it: hypoarousal. Regulation practice widens the window over time." },
+  polyvagal: { citation: "Porges 2011 · The Polyvagal Theory", finding: "The vagus nerve is central to the body's ability to shift between states. Polyvagal theory describes how the nervous system manages threat, calm, and connection." },
+  interpersonal_perception_bias: { citation: "Genzer et al. 2025 · Nature Communications", finding: "People systematically overestimate the intensity of others' negative emotions. Bias is on average adaptive — predicting greater empathy with strangers. Stops being adaptive when perceiver is depleted, in pain, or sleep-deprived." },
+  fractal_grounding: { citation: "Hagerhall et al. 2015 · Nonlinear Dynamics, Psychology, and Life Sciences", finding: "Natural fractal patterns at mid-range complexity induce alpha wave EEG responses associated with relaxed wakefulness. Visual cortex responds to the geometry itself." }
+};
+
+// Routing table: tool/pattern → topic chain. AI picks first not in recentTopics.
+const SCIENCE_CARD_ROUTES = {
+  breathe_cyclic: ["cyclic_sighing", "breath_vagal_model", "slow_breathing_general", "diaphragmatic_cortisol"],
+  breathe_other: ["slow_breathing_general", "breath_vagal_model", "diaphragmatic_cortisol", "dmn_breathing"],
+  scan: ["acupressure_anxiety", "interoception_emotion", "interoception_emotional_awareness"],
+  reframe: ["cognitive_reappraisal", "reappraisal_neuroimaging", "reappraisal_prefrontal", "affect_labeling"],
+  metacognition: ["mct_detached_mindfulness", "mct_efficacy", "implementation_intentions"],
+  big_shift: ["hrv_emotion_regulation", "hrv_capacity", "window_of_tolerance"],
+  no_shift: ["stress_inoculation", "sit_clinical", "granularity_trainable"],
+  generic: ["window_of_tolerance", "mct_detached_mindfulness", "hrv_capacity"]
+};
+
+// Set of valid citation strings for server-side validation (Protection B)
+const SCIENCE_CARD_VALID_CITATIONS = new Set(Object.values(SCIENCE_CARD_CORPUS).map(c => c.citation));
+
+// Build the science card system prompt for the AI
+function buildScienceCardSystemPrompt(allowedTopics) {
+  const corpusEntries = allowedTopics.map(topic => {
+    const entry = SCIENCE_CARD_CORPUS[topic];
+    return `[${topic}] ${entry.citation}\n  Finding: ${entry.finding}`;
+  }).join("\n\n");
+
+  return `You are writing a brief science card for a Stillform user who just completed a session. The card surfaces one specific finding from the research grounding Stillform's tools, in plain language, tied to what they just practiced.
+
+VOICE FOUNDATION (from Stillform's calm-mode AI):
+- No clinical labels applied to the user
+- No "love language" — don't say you care, show through quality
+- Plain language; if a technical term is necessary, define it in the same sentence
+- Show, don't tell
+- Honest, specific, not generic
+- No emoji, no marketing voice, no hype, no exclamation points
+- No first-person AI voice ("I think this is interesting" — never)
+
+SCIENCE CARD-SPECIFIC RULES:
+- Reference exactly ONE study or framework per card
+- The study/framework MUST come from the corpus list below
+- DO NOT cite studies, researchers, or frameworks not in the corpus — this is a SEVERE failure
+- DO NOT invent findings, statistics, or claims
+- 60-120 words in body. Hard cap.
+- End on the finding. NOT on a prescription, suggestion, advice, or "what this means for you" observation.
+- Always include the citation in the exact format provided in the corpus
+- The opening line is optional. When present, reference what the user actually did in plain language ("You used Cyclic Sighing." not "You completed a paced respiratory protocol.")
+
+ALLOWED CORPUS (you may ONLY cite from this list):
+
+${corpusEntries}
+
+OUTPUT FORMAT — return strictly this JSON, no surrounding text:
+{
+  "openingLine": "<optional reference to what user did, or null>",
+  "body": "<60-120 word plain language finding from one corpus entry>",
+  "citation": "<exact citation string from the corpus entry you used>",
+  "topic": "<the topic key in brackets above, e.g. cyclic_sighing>"
+}`;
+}
+
 const SCIENCE_MECHANISMS = {
   calm: {
     body_first_reset: {
@@ -1071,6 +1174,142 @@ exports.handler = async function(event) {
         body: JSON.stringify({ error: "Authentication context required." })
       };
     }
+
+    // ========================================================================
+    // SCIENCE CARD MODE — early return before the reframe machinery.
+    // Generates a single post-session card grounded in the verified corpus.
+    // ========================================================================
+    if (mode === "science_card") {
+      const sessionContext = (() => {
+        try { return JSON.parse(event.body); } catch { return {}; }
+      })();
+      const lastTool = sessionContext.lastTool || null;
+      const lastBreathPattern = sessionContext.lastBreathPattern || null;
+      const recentTopics = Array.isArray(sessionContext.recentTopics) ? sessionContext.recentTopics : [];
+      const feelStateBefore = sessionContext.feelStateBefore || null;
+      const feelStateAfter = sessionContext.feelStateAfter || null;
+
+      // Determine route key based on session context
+      let routeKey = "generic";
+      if (lastTool === "breathe") {
+        routeKey = lastBreathPattern === "cyclic_sighing" ? "breathe_cyclic" : "breathe_other";
+      } else if (lastTool === "scan") {
+        routeKey = "scan";
+      } else if (lastTool === "reframe") {
+        routeKey = "reframe";
+      } else if (lastTool === "metacognition") {
+        routeKey = "metacognition";
+      }
+
+      // Detect big shift / no shift to override route if applicable
+      const scoreState = (s) => {
+        if (!s) return null;
+        const map = { settled: 5, focused: 4, content: 4, calm: 5, neutral: 3, tense: 2, distant: 2, anxious: 1, overwhelmed: 1 };
+        return map[s] != null ? map[s] : null;
+      };
+      const preScore = scoreState(feelStateBefore);
+      const postScore = scoreState(feelStateAfter);
+      if (preScore != null && postScore != null) {
+        const delta = postScore - preScore;
+        if (delta >= 3) routeKey = "big_shift";
+        else if (delta === 0) routeKey = "no_shift";
+      }
+
+      // Build allowed topics — start with route chain, fall back to generic if all are recent
+      const routeTopics = SCIENCE_CARD_ROUTES[routeKey] || SCIENCE_CARD_ROUTES.generic;
+      let allowedTopics = routeTopics.filter(t => !recentTopics.includes(t));
+      if (allowedTopics.length === 0) {
+        // All route topics were recent — fall back to generic chain minus recent
+        allowedTopics = SCIENCE_CARD_ROUTES.generic.filter(t => !recentTopics.includes(t));
+        if (allowedTopics.length === 0) {
+          // Even generic is exhausted — use full generic chain (variety guard relaxes after long sessions)
+          allowedTopics = SCIENCE_CARD_ROUTES.generic;
+        }
+      }
+
+      const cardSystemPrompt = buildScienceCardSystemPrompt(allowedTopics);
+
+      // Build session context message for the AI
+      const ctxParts = [];
+      if (lastTool) ctxParts.push(`User just completed: ${lastTool}${lastBreathPattern ? ` (${lastBreathPattern})` : ""}`);
+      if (feelStateBefore && feelStateAfter) ctxParts.push(`Feel state: ${feelStateBefore} → ${feelStateAfter}`);
+      else if (feelStateAfter) ctxParts.push(`Feel state at close: ${feelStateAfter}`);
+      const ctxMessage = ctxParts.length > 0 ? ctxParts.join(". ") : "User just completed a session.";
+
+      const cardController = new AbortController();
+      const cardTimeout = setTimeout(() => cardController.abort(), 15000);
+      try {
+        const cardResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          signal: cardController.signal,
+          body: JSON.stringify({
+            model: "gpt-4o",
+            max_tokens: 350,
+            temperature: 0.6,
+            messages: [
+              { role: "system", content: cardSystemPrompt },
+              { role: "user", content: ctxMessage }
+            ]
+          })
+        });
+        const cardData = await cardResponse.json();
+        if (!cardResponse.ok) {
+          console.error("Science card API error:", JSON.stringify(cardData));
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Science card generation failed.", fallback: true }) };
+        }
+
+        const rawText = cardData.choices?.[0]?.message?.content || "";
+        let card;
+        try {
+          // Strip markdown code fences if present, then parse
+          const cleaned = rawText.replace(/^```json\s*|\s*```$/g, "").trim();
+          card = JSON.parse(cleaned);
+        } catch (e) {
+          console.error("Science card JSON parse failed:", rawText);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Science card parse failed.", fallback: true }) };
+        }
+
+        // Protection B: Server-side validation. Citation MUST match a known corpus entry.
+        if (!card.citation || !SCIENCE_CARD_VALID_CITATIONS.has(card.citation)) {
+          console.error("Science card validation failed — citation not in corpus:", card.citation);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Card citation outside corpus.", fallback: true }) };
+        }
+
+        // Validate body length (60-120 words target; allow 30-200 word range to be lenient)
+        const wordCount = (card.body || "").trim().split(/\s+/).length;
+        if (wordCount < 30 || wordCount > 200) {
+          console.error("Science card length validation failed — words:", wordCount);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Card length out of bounds.", fallback: true }) };
+        }
+
+        // Validate topic key matches corpus (defensive — should already be true if citation is valid)
+        if (!card.topic || !SCIENCE_CARD_CORPUS[card.topic]) {
+          console.error("Science card topic key invalid:", card.topic);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Card topic not in corpus.", fallback: true }) };
+        }
+
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({
+            openingLine: card.openingLine || null,
+            body: card.body,
+            citation: card.citation,
+            topic: card.topic,
+            source: "ai"
+          })
+        };
+      } catch (err) {
+        console.error("Science card error:", err.message);
+        return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Science card generation failed.", fallback: true }) };
+      } finally {
+        clearTimeout(cardTimeout);
+      }
+    }
+    // ========================================================================
+    // END SCIENCE CARD MODE
+    // ========================================================================
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
