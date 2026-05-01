@@ -1,25 +1,29 @@
-# Plain-Language Neuroscience Surface — Spec
+# Plain-Language Neuroscience Surface — Spec (REVISED)
 
-*Drafted May 1, 2026. Awaiting Arlin's review of 6 open questions before build.*
+*Drafted May 1, 2026. Decisions locked. Corpus verified against Science Sheet. Ready for Arlin's verification pass before code.*
 
 ---
 
-## What this is
+## What changed from v1
 
-A small post-session card surfacing one specific finding from the science Stillform is grounded in, translated to plain language, tied to what the user just practiced. AI-generated at runtime via the existing reframe.js Netlify function. Once per session.
+- Six open questions are now decisions: skip button = yes, AI failure = static fallback (~20 cards), first session = yes, frequency = once per session, "what this means for you" line = no, citation = always with full attribution
+- ⓘ button added — small info icon on the card opens a modal explaining the three card types
+- Three protections applied to my own corpus-drafting work (not just runtime AI) — no false claims, every entry traceable to Science Sheet text
+- Corpus rebuilt from Science Sheet only — every entry has a source reference
+- 20 static fallback cards drafted — same constraints as the runtime AI
 
-The card converts Stillform's science from "things in a sheet I'd never open" into moments of recognition. The user just used Cyclic Sighing; the card tells them about Stanford's Balban et al. 2023 RCT in plain language. The science they were told grounds the practice becomes *real* to them in 15 seconds of reading.
+---
 
-## Why this matters
+## Decisions locked
 
-Per the May 1 diagnosis: testers experienced Stillform's regulation tool, called it cool, and bounced. The product gives the user something *during* sessions; it gives them nothing *between* sessions. The plain-language science card is one of three engagement-craft return mechanisms designed to address this (alongside Cognitive Function Measurement and the kinesthetic close).
-
-The card is grounded in:
-- **Engagement Principle 6** — variable reward done ethically (each card is different, tied to what the user actually practiced; small surprise inside a consistent structure)
-- **Engagement Principle 9** — Norman affordance perception (the card is something the user *encounters*, not something pushed at them)
-- **Engagement Principle 10** — attention-respectful design (no notification, no badge, no infinite scroll; appears once at a moment the user is already settled)
-
-It is also a small return-loop primitive. The user comes to associate session completion with learning something specific about themselves and the science. That association is part of what produces return.
+| Question | Decision |
+|---|---|
+| Skip button on card? | Yes — matches close flow pattern |
+| AI generation failure? | Static fallback — ~20 hand-written cards drawn from corpus |
+| First-ever session? | Yes — show on first session |
+| Frequency? | Once per session — every session, no daily cap |
+| "What this means for you" observation line? | No — let user make their own connection |
+| Citation format? | Always full attribution — Author year · Journal/Framework |
 
 ---
 
@@ -27,56 +31,54 @@ It is also a small return-loop primitive. The user comes to associate session co
 
 ### When the card appears
 
-After session completion, as part of the close flow. Specifically: after the post-rate screen, after the What Shifted screen if that was reached, BEFORE the ToolDebriefGate. The card sits in its own moment — one screen, one card, one Continue button.
+Post-session, after What Shifted (if reached), BEFORE ToolDebriefGate. The card sits in its own moment — one screen, one card, two buttons (Skip + Continue).
 
-If the user skips the post-rate or What Shifted screens, the card still appears (the session completed; the science still applies). The card never appears mid-session — only at the close.
+### Card layout
 
-### What the card looks like
+- System label: THE SCIENCE BEHIND THIS (Plex Mono mono-uppercase amber) with ⓘ button right-aligned
+- Optional opening line referencing what the user did (Cormorant)
+- Body: 60-120 words, plain language, ends on the finding (DM Sans)
+- Citation: Author year · Journal (Plex Mono small)
+- Footer: Skip button (ghost) + Continue button (primary)
+
+### ⓘ info modal copy
 
 ```
-┌─────────────────────────────────────┐
-│ THE SCIENCE BEHIND THIS              │  ← Plex Mono, mono uppercase, amber
-│                                      │
-│ You used Cyclic Sighing.             │  ← optional first line, Cormorant
-│                                      │
-│ Stanford researchers studied this    │
-│ exact pattern — a double inhale      │  ← body, DM Sans, plain language
-│ through the nose followed by a       │
-│ long exhale through the mouth.       │
-│ In their 2023 randomized trial,      │
-│ five minutes a day reduced anxiety   │
-│ more than mindfulness meditation.    │
-│                                      │
-│ Balban et al. 2023 · Cell Reports    │  ← citation line, Plex Mono small
-│                                      │
-│           [ Continue ]               │  ← single button, primary
-└─────────────────────────────────────┘
+THE SCIENCE BEHIND THIS
+
+This card surfaces one finding from the research grounding 
+Stillform's tools. Three things you should know about how 
+these cards work:
+
+Most cards are AI-generated at session close. The AI is given 
+a curated library of peer-reviewed studies — the same studies 
+documented in Stillform's Science Sheet — and writes a card 
+in plain language tied to what you just practiced. The AI is 
+NOT allowed to cite studies outside this library, invent 
+findings, or attribute claims to researchers not in the corpus.
+
+If the AI is unavailable, you'll see a hand-written static card. 
+The static cards come from the same library, are written in the 
+same voice, and are vetted before shipping.
+
+If the AI can't find a study that closely matches what you just 
+did, you may see a more general card about regulation practice 
+itself. Better to give you broadly true information than 
+falsely-specific information.
+
+You can read more about the underlying science in Stillform's 
+Science Sheet. Every citation here ties back to a real study 
+or established framework.
 ```
 
-Visual treatment matches Stillform's prestige aesthetic — hairline border, deep ground, amber accent on the system label. The card is a deliberate object on a black surface. Not a notification. Not a popup. A moment.
+### What the card body does NOT contain
 
-### What's in the card
-
-- **System label:** "THE SCIENCE BEHIND THIS" (Plex Mono, mono uppercase, amber)
-- **Optional opening line:** references what the user did ("You used Cyclic Sighing." / "You worked with shoulders & neck tension." / "You named what shifted as 'I made space for clarity.'")
-- **Body:** 60-120 words, plain language, single paragraph, ends on the finding (no prescription, no advice)
-- **Citation line:** author year + journal (Plex Mono small)
-- **Continue button:** primary CTA, takes user to ToolDebriefGate
-
-### What the card does NOT contain
-
-- No prescription (*"so try doing it again tomorrow"* — no)
-- No "you should" / "you ought to" / "try" / "remember to"
-- No emoji
-- No exclamation points
+- No prescription or advice
+- No "what this means for you today" tie-back
+- No first-person AI voice
+- No emoji, exclamation points, "fun fact" framing
 - No clinical labels applied to the user
-- No promises or claims about what the user will experience next time
-- No marketing voice ("isn't that amazing?" — no)
-- No "fun fact"-coded language
-- No comparison to other apps or other approaches
-- No first-person AI voice ("I think this is interesting" — no)
-
-The card is a quiet observation from the science library, not a coach speaking to the user.
+- No marketing voice
 
 ---
 
@@ -84,207 +86,408 @@ The card is a quiet observation from the science library, not a coach speaking t
 
 ### Generation flow
 
-1. Session ends, user reaches post-rate / What Shifted close flow
-2. Just before ToolDebriefGate would appear, frontend calls `/.netlify/functions/reframe.js` with a new mode parameter (`mode: "science_card"`)
-3. Server receives session context (tool used, breath pattern if applicable, feel state shift, recent card topics if any)
-4. Server uses dedicated science-card system prompt (described below) to generate the card
-5. Server returns JSON `{ "openingLine": string|null, "body": string, "citation": string, "topic": string }`
-6. Frontend renders the card, user reads, taps Continue, ToolDebriefGate appears as normal
+1. Session ends → user reaches close flow
+2. After What Shifted (if shown), frontend calls `reframe.js` with `mode: "science_card"` plus session context
+3. Server uses science-card system prompt
+4. On success: returns `{ openingLine, body, citation, topic, source: "ai" }`
+5. On failure: frontend selects random static card, marks `source: "static"`
+6. Frontend renders → user taps Skip or Continue → ToolDebriefGate appears
 
-### System prompt structure
+### System prompt (4 layers)
 
-The science card system prompt has FOUR layers, in this order:
+**Layer 1 — Stillform voice foundation** (reused from existing reframe.js):
+No clinical labels, no love language, plain language, show-don't-tell, honest and specific, no emoji, no marketing voice.
 
-**Layer 1: Stillform voice foundation** — pulled directly from existing reframe.js calm-mode prompt:
-- No clinical labels applied to the user
-- No "love language" (don't say you care; show through quality)
-- Plain language; if a technical term is necessary, define it in the same sentence
-- Show, don't tell
-- Honest, specific, not generic
-- No emoji, no marketing voice, no hype
+**Layer 2 — Science card-specific rules:**
+- Reference exactly ONE study/framework per card
+- Study MUST come from the corpus in Layer 3
+- Do NOT cite studies, researchers, or frameworks not in the corpus
+- Do NOT invent findings, statistics, or claims
+- If no corpus entry matches, return a card from a generally-applicable corpus entry
+- 60-120 words body. Hard cap.
+- End on the finding. Not on prescription, suggestion, or what-this-means-for-you observation.
+- Always include citation in format: `Author year · Journal` (or `Framework name`)
+- Optional opening line should reference what user did, in plain language
 
-**Layer 2: Science-card-specific rules** — new for this surface:
-- Reference ONE study or framework per card, only from the curated corpus below
-- Do NOT invent findings. If no study in the corpus matches the user's session, return a card grounded in the broader practice (e.g., "regulation in general," not "what you specifically did")
-- 60-120 words in the body. Hard cap.
-- End on the finding. Not on a prescription, suggestion, or advice.
-- The opening line is optional but should reference what the user actually did when present
-- Always cite author + year + journal name (or framework if not a single study)
-- The user just completed a session. They are settled. Match that tone.
+**Layer 3 — Verified corpus** (see below)
 
-**Layer 3: Curated science corpus** — embedded in the prompt as a structured list. Each entry is `{topic_key, study_name, plain_finding, study_type}`. Drafted v1 corpus below (~30 entries):
+**Layer 4 — Session context:**
+- lastTool, lastBreathPattern, lastBodyScanArea, feelStateBefore, feelStateAfter, recentTopics (last 5), sessionCount
 
-| Topic key | Study/framework | Plain-language finding |
-|---|---|---|
-| `cyclic_sighing` | Balban et al. 2023, Cell Reports Medicine | RCT: 5 min/day cyclic sighing reduced anxiety more than mindfulness in 28 days |
-| `physiological_sigh` | Vlemincx et al. 2010 | Spontaneous sighs reset breathing patterns and downregulate sympathetic activation |
-| `box_breathing` | Hopper et al. 2019 | 4-4-4-4 pattern improves heart rate variability and stress recovery |
-| `paced_breathing_general` | Lehrer & Gevirtz 2014 | Slow breathing (5-7 breaths/min) increases vagal tone and HRV |
-| `affect_labeling` | Lieberman 2007, Psychological Science | Naming an emotion reduces amygdala activity and increases prefrontal regulation |
-| `cognitive_reappraisal` | Ochsner & Gross 2005 | Reframing a stimulus changes its emotional impact at the neural level |
-| `memory_reconsolidation` | Schiller et al. 2010, Nature | Recalling a memory makes it temporarily updateable; reframing during recall changes future emotional response |
-| `interoceptive_awareness` | Mehling 2012 / Garfinkel 2015 | Accurate body-state perception predicts emotional regulation capacity |
-| `predictive_processing_emotion` | Barrett 2017 | The brain constructs emotion from interoceptive prediction; updating predictions changes felt experience |
-| `granularity_emotional` | Barrett 2001 | Specific emotion vocabulary correlates with better regulation outcomes |
-| `polyvagal_shutdown` | Porges 2011 | When the system shuts down (Distant), reactivation requires somatic re-engagement before words land |
-| `acupressure_tension_release` | Hou et al. 2010 / Field 2014 | Pressure on specific points reduces measured muscle tension and cortisol |
-| `body_scan_attention` | Kabat-Zinn 1990 / Mehling 2012 | Sustained attention to body areas trains interoceptive accuracy |
-| `implementation_intentions` | Gollwitzer 1999 | If-then plans bridge intention-behavior gap; specificity 2-3x more likely to be acted on |
-| `intention_behavior_gap` | Sheeran & Webb 2016 | Implementation intentions plus contextual triggers close the gap most reliably |
-| `habit_formation_context` | Wood & Rünger 2016 | Habits form through context-cue pairing; repetition without context produces conscious behavior, not habits |
-| `metacognition_in_dialogue` | Wells 2009 | Detached mindfulness — observing thoughts without engaging — reduces rumination |
-| `acceptance_commitment` | Hayes 2006 | Cognitive defusion (separating from thoughts) reduces their emotional pull |
-| `self_compassion` | Neff 2003 | Self-compassion under pressure correlates with better regulation than self-criticism |
-| `prefrontal_under_load` | Arnsten 2009 | Stress reduces prefrontal cortex availability; bottom-up regulation restores it |
-| `vagal_tone_regulation` | Porges 2009 | Vagal tone is trainable; higher tone correlates with emotion regulation capacity |
-| `narrative_self_distance` | Ayduk & Kross 2010 | Self-distanced reflection ("you/he/she") reduces emotional reactivity vs. immersed ("I/me") |
-| `emotional_suppression_cost` | Gross 2002 | Suppressing emotion increases cardiovascular load without reducing felt experience |
-| `reappraisal_vs_suppression` | Gross 2015 | Reappraisal reduces emotion at the source; suppression hides it without reducing it |
-| `hrv_emotion_regulation` | Thayer & Lane 2009 | HRV is a biomarker of emotion regulation capacity; trainable |
-| `naming_to_regulate` | Lieberman 2018 | Affect labeling activates ventrolateral prefrontal cortex; downregulates amygdala |
-| `breathing_and_attention` | Zelano et al. 2016 | Nasal breathing entrains hippocampal and amygdalar rhythms; supports attention |
-| `state_dependent_thinking` | Schwarz & Clore 1983 | Current physiological state biases cognitive judgment; regulating the body changes the thinking |
-| `practice_neuroplasticity` | Davidson 2008 | Repeated practice of regulation produces measurable structural brain changes |
-| `composure_skill_not_trait` | Lazarus 1991 / Gross 2015 | Emotional regulation is a trainable skill, not a fixed personality trait |
+---
 
-(Corpus expands over time. Each entry is plain-language source-of-truth for that topic. AI translates the finding into Stillform-voice copy at generation time.)
+## VERIFIED CORPUS (v1) — every entry traceable to Science Sheet
 
-**Layer 4: Session context** — passed at runtime:
-- `lastTool`: "breathe" | "scan" | "reframe" | "metacognition"
-- `lastBreathPattern`: "cyclic_sighing" | "box" | "quick_reset" | "deep_regulate" | "478" (if applicable)
-- `lastBodyScanArea`: name of last area worked (if scan)
-- `feelStateBefore`: chip name or null
-- `feelStateAfter`: chip name or null
-- `recentTopics`: array of last 3-5 card topics shown to this user
-- `sessionCount`: total sessions for this user
+### Breathing & autonomic
 
-The AI uses this to (1) pick a relevant topic from the corpus that matches what the user did, (2) avoid recently-shown topics, (3) calibrate the opening line if the session has clear contextual hooks.
+**`cyclic_sighing`** — Balban et al. 2023 · Cell Reports Medicine
+*Source: Science Sheet "Paced Breathing" section*
+Stanford RCT compared four breath practices over 28 days. Cyclic sighing — two nasal inhales followed by a long oral exhale — produced the greatest mood improvement and respiratory rate reduction. Outperformed mindfulness meditation at the same dose.
 
-### Routing logic
+**`breath_vagal_model`** — Gerritsen & Band 2018 · Frontiers in Human Neuroscience
+*Source: Science Sheet "Paced Breathing" section*
+Slow breathing works through the vagus nerve. The respiratory pattern itself is the lever — extended exhale activates the parasympathetic system, the body's brake pedal.
 
-Tool to topic mapping (fallback chain — AI picks first match that's not in `recentTopics`):
+**`slow_breathing_general`** — Zaccaro et al. 2018 · Frontiers in Human Neuroscience
+*Source: Science Sheet "Paced Breathing" section*
+Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. Mechanism is consistent: extended exhale, vagal activation, parasympathetic shift.
 
-- **Breathe (Cyclic Sighing)** → cyclic_sighing → physiological_sigh → paced_breathing_general → vagal_tone_regulation
-- **Breathe (Box)** → box_breathing → paced_breathing_general → hrv_emotion_regulation
-- **Breathe (Quick Reset / Deep Regulate / 4-7-8)** → paced_breathing_general → vagal_tone_regulation → breathing_and_attention
-- **Body Scan** → body_scan_attention → interoceptive_awareness → acupressure_tension_release
-- **Reframe (any mode)** → cognitive_reappraisal → affect_labeling → memory_reconsolidation → reappraisal_vs_suppression
-- **Self Mode** → metacognition_in_dialogue → narrative_self_distance → granularity_emotional
-- **Big shift detected** (delta ≥ 3) → state_dependent_thinking → reappraisal_vs_suppression → composure_skill_not_trait
-- **No-shift session** (delta = 0 or null) → habit_formation_context → practice_neuroplasticity → composure_skill_not_trait
+**`diaphragmatic_cortisol`** — Ma et al. 2017 · Frontiers in Psychology
+*Source: Science Sheet "Paced Breathing" section*
+Diaphragmatic breathing reduces cortisol levels — measurably. The body's stress chemistry is responsive to how you breathe.
 
-### Cost & infrastructure
+### Body Scan & interoception
 
-- Per call: ~600-1000 tokens prompt + ~200 tokens output = ~$0.002 per card
-- At 2 sessions/user/day average: ~$0.004/user/day = ~$1.50/user/year
-- Negligible against subscription pricing
-- Reuses existing reframe.js Netlify function infrastructure (no new endpoint)
-- Reuses existing rate limiting (10 req/IP/min — well above session frequency)
-- Reuses existing OpenAI API key + secret management
+**`acupressure_anxiety`** — Au et al. 2015 · Journal of Advanced Nursing
+*Source: Science Sheet "Body Scan (Acupressure)" section*
+Self-administered acupressure reduces anxiety. Pressure is part of the mechanism — but so is the focused attention on the body that pressure requires.
 
-### Storage & analytics
+**`interoception_emotion`** — Mehling et al. 2012 · PLOS ONE
+*Source: Science Sheet "Body Scan (Acupressure)" section*
+Interoceptive awareness — the ability to accurately sense what your body is doing — is linked to emotional regulation. The more accurately you read the body, the better you regulate the mind.
 
-- Generated cards are NOT stored (transient — generated, displayed, discarded)
-- Card topic IS logged to `stillform_card_history` (last 5 topics retained, used for `recentTopics` parameter)
-- Plausible event `Science Card Shown` fires with props `{ topic, tool, hadOpeningLine }`
-- Plausible event `Science Card Continued` fires when user taps Continue (measures whether card is being read or skipped past)
+**`interoception_emotional_awareness`** — Critchley & Garfinkel 2017 · Current Opinion in Behavioral Sciences
+*Source: Science Sheet "Body Scan (Acupressure)" section*
+Emotional awareness is built on interoception. You can't accurately know what you feel without accurately reading what the body is doing.
+
+### Reframe & cognitive reappraisal
+
+**`cognitive_reappraisal`** — Ochsner & Gross 2005 · Trends in Cognitive Sciences
+*Source: Science Sheet "Reframe (AI Cognitive Reappraisal)" section*
+Reinterpreting an emotional trigger — cognitive reappraisal — is the most well-researched emotion regulation strategy. Reduces amygdala activation, increases prefrontal cortex engagement.
+
+**`reappraisal_neuroimaging`** — Buhle et al. 2014 · Cerebral Cortex
+*Source: Science Sheet "Reframe (AI Cognitive Reappraisal)" section*
+Reappraisal consistently reduces negative emotion in neuroimaging studies. Effect is reliable across studies, methods, populations.
+
+**`reappraisal_prefrontal`** — Denny et al. 2015 · Neuroscience & Biobehavioral Reviews
+*Source: Science Sheet "Reframe (AI Cognitive Reappraisal)" section*
+Reappraisal engages the lateral and medial prefrontal cortex — brain regions responsible for flexible thinking and self-control.
+
+### Affect labeling
+
+**`affect_labeling`** — Lieberman et al. 2007 · Psychological Science
+*Source: Science Sheet "Affect Labeling" section*
+Putting a name on an emotion — affect labeling — directly reduces amygdala activation and increases prefrontal cortex engagement. fMRI shows this happens automatically.
+
+**`affect_labeling_implicit`** — Torre & Lieberman 2018 · Emotion Review
+*Source: Science Sheet "Affect Labeling" section*
+Affect labeling works as implicit emotion regulation — meaning you don't have to consciously try to regulate. The act of naming the feeling is itself the regulation.
+
+**`affect_labeling_vlpfc`** — Burklund et al. 2014 · Psychological Science
+*Source: Science Sheet "Affect Labeling" section*
+Affect labeling activates the right ventrolateral prefrontal cortex — a brain region tied to inhibition and emotional control.
+
+### Emotional granularity
+
+**`granularity_regulation`** — Barrett et al. 2001 · Cognition & Emotion
+*Source: Science Sheet "Emotional Granularity" section*
+People who can make fine-grained distinctions between emotions regulate better. The skill is trainable, improves with practice.
+
+**`granularity_protective`** — Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science
+*Source: Science Sheet "Emotional Granularity" section*
+Higher emotional granularity protects against binge drinking, aggression, and self-harm. The more precisely you can name what you feel, the less likely you reach for harmful coping.
+
+**`granularity_trainable`** — Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology
+*Source: Science Sheet "Emotional Granularity" section*
+Emotional granularity increases with repeated self-assessment. Naming what you feel — over and over, accurately — builds the capacity itself.
+
+### Bio-filter
+
+**`sleep_amygdala`** — Goldstein et al. 2007 · Current Biology
+*Source: Science Sheet "Bio-Filter" section*
+Sleep deprivation amplifies amygdala reactivity. Running on too little sleep, neutral faces register as threatening. Hardware shapes perception before the mind gets a vote.
+
+**`misattribution_arousal`** — Schachter & Singer 1962 · Psychological Review
+*Source: Science Sheet "Bio-Filter" section*
+People misattribute physical arousal to emotional causes. A racing heart from caffeine can feel like anxiety. Body signals are interpretable, and interpretation isn't always accurate.
+
+**`pain_attention`** — Eccleston & Crombez 1999 · Pain
+*Source: Science Sheet "Bio-Filter" section*
+Pain demands attentional resources and disrupts cognitive function. When the body is sending a pain signal, less of you is available for thinking clearly.
+
+### Two-pathway routing
+
+**`interoception_regulation_strategy`** — Price & Hooven 2018 · Appetite
+*Source: Science Sheet "Two-Pathway System" section*
+Interoceptive awareness mediates the relationship between emotion regulation and emotional eating. Reading the body accurately changes what regulation strategy works.
+
+**`regulation_individual_differences`** — Webb et al. 2012 · Psychological Bulletin
+*Source: Science Sheet "Two-Pathway System" section*
+Different regulation strategies have different effect sizes depending on the person. There is no one strategy best for everyone — knowing your tendency is part of the work.
+
+### MCT (primary framework)
+
+**`mct_detached_mindfulness`** — Wells 2009 · Metacognitive Therapy framework
+*Source: Science Sheet "Metacognitive Therapy (MCT)" section*
+Detached mindfulness — observing thoughts and feelings without engaging, suppressing, or arguing with them — is a clinical practice. The shift from "I am anxious" to "I'm noticing anxiety" is the entire mechanism.
+
+**`mct_efficacy`** — Normann & Morina 2018 · Frontiers in Psychology
+*Source: Science Sheet "Metacognitive Therapy (MCT)" section*
+Meta-analysis of MCT efficacy across anxiety and depression — effect sizes exceeded CBT in several conditions.
+
+### Implementation intentions
+
+**`implementation_intentions`** — Gollwitzer 1999 · American Psychologist
+*Source: Science Sheet "Implementation Intentions" section*
+"If X happens, I will do Y" planning dramatically increases follow-through. Pre-deciding bypasses decision paralysis at the moment.
+
+**`implementation_intentions_meta`** — Gollwitzer & Sheeran 2006 · Advances in Experimental Social Psychology
+*Source: Science Sheet "Implementation Intentions" section*
+Meta-analysis of implementation intentions found medium-to-large effect on goal attainment across hundreds of studies.
+
+### Default Mode Network
+
+**`dmn_discovery`** — Raichle et al. 2001 · PNAS
+*Source: Science Sheet "Default Mode Network Interruption" section*
+The brain has a default mode of activity during rest — a network that drives mind-wandering, rumination, self-referential thought.
+
+**`dmn_meditation`** — Brewer et al. 2011 · PNAS
+*Source: Science Sheet "Default Mode Network Interruption" section*
+Meditation reduces default mode network activity. The neural circuit responsible for rumination quiets when attention is held elsewhere.
+
+**`dmn_breathing`** — Doll et al. 2015 · Social Cognitive and Affective Neuroscience
+*Source: Science Sheet "Default Mode Network Interruption" section*
+Mindful breathing shifts brain activation from default mode network to task-positive network. Can't ruminate and follow a breath count at the same time.
+
+### Autonomic flexibility / HRV
+
+**`hrv_emotion_regulation`** — Thayer & Lane 2000 · Review of General Psychology
+*Source: Science Sheet "Autonomic Flexibility" section*
+Heart rate variability is an index of regulated emotional responding. The more flexibly your nervous system shifts between states, the more emotionally regulated you tend to be.
+
+**`hrv_capacity`** — Appelhans & Luecken 2006 · Review of General Psychology
+*Source: Science Sheet "Autonomic Flexibility" section*
+HRV reflects emotion regulation capacity. The body's flexibility is the regulation capacity.
+
+**`hrv_biofeedback`** — Lehrer & Gevirtz 2014 · Frontiers in Public Health
+*Source: Science Sheet "Autonomic Flexibility" section*
+HRV biofeedback training improves autonomic regulation. Capacity is trainable, not fixed.
+
+### Stress inoculation
+
+**`stress_inoculation`** — Meichenbaum 1985 · Stress Inoculation Training
+*Source: Science Sheet "Stress Inoculation" section*
+Controlled, manageable exposure to stress paired with regulation practice builds resilience. Practicing when calm trains skills that deploy automatically under pressure.
+
+**`sit_clinical`** — Saunders et al. 1996 · Clinical Psychology Review
+*Source: Science Sheet "Stress Inoculation" section*
+Stress Inoculation Training is effective across anxiety disorders, PTSD, performance anxiety. Mechanism translates across domains.
+
+### Window of Tolerance
+
+**`window_of_tolerance`** — Siegel 1999 · The Developing Mind
+*Source: Science Sheet "Window of Tolerance" section*
+There's a zone where you can think clearly, regulate emotions, and function — the window of tolerance. Above it: hyperarousal. Below it: hypoarousal. Regulation practice widens the window over time.
+
+**`polyvagal`** — Porges 2011 · The Polyvagal Theory
+*Source: Science Sheet "Window of Tolerance" section*
+The vagus nerve is central to the body's ability to shift between states. Polyvagal theory describes how the nervous system manages threat, calm, and connection.
+
+### Interpersonal microbiases
+
+**`interpersonal_perception_bias`** — Genzer et al. 2025 · Nature Communications
+*Source: Science Sheet "Interpersonal Microbiases" section*
+People systematically overestimate the intensity of others' negative emotions. Bias is on average adaptive — predicting greater empathy with strangers. Stops being adaptive when perceiver is depleted, in pain, or sleep-deprived.
+
+### Fractal Visual Grounding
+
+**`fractal_grounding`** — Hagerhall et al. 2015 · Nonlinear Dynamics, Psychology, and Life Sciences
+*Source: Science Sheet "Fractal Visual Grounding" section*
+Natural fractal patterns at mid-range complexity induce alpha wave EEG responses associated with relaxed wakefulness. Visual cortex responds to the geometry itself.
+
+---
+
+## Static fallback cards (20)
+
+Each drawn directly from a corpus entry. Same constraints: under 120 words, plain language, end on finding, full citation.
+
+**Card 1 — Cyclic Sighing**
+> Stanford researchers studied this exact pattern. In a 28-day RCT, cyclic sighing — two nasal inhales then a long oral exhale — produced the greatest mood improvement and respiratory rate reduction of the four practices tested. It outperformed mindfulness meditation at the same dose.
+>
+> *Balban et al. 2023 · Cell Reports Medicine*
+
+**Card 2 — Slow breathing**
+> Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. The mechanism is consistent across patterns: extended exhale, vagal activation, parasympathetic shift. The breath is the lever; the body responds.
+>
+> *Zaccaro et al. 2018 · Frontiers in Human Neuroscience*
+
+**Card 3 — Affect labeling**
+> Putting a name on an emotion directly reduces amygdala activation. fMRI studies show this happens automatically, even without conscious intent to regulate. You don't have to analyze the feeling. Naming it turns down the alarm.
+>
+> *Lieberman et al. 2007 · Psychological Science*
+
+**Card 4 — Cognitive reappraisal**
+> Reinterpreting an emotional trigger is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. The same situation, seen differently, lands differently in the body.
+>
+> *Ochsner & Gross 2005 · Trends in Cognitive Sciences*
+
+**Card 5 — Interoception**
+> Interoceptive awareness — the ability to accurately sense what your body is doing — is linked to emotional regulation. The more accurately you read the body, the better you regulate the mind.
+>
+> *Mehling et al. 2012 · PLOS ONE*
+
+**Card 6 — Emotional granularity**
+> People who can make fine-grained distinctions between emotions regulate better. Higher granularity protects against binge drinking, aggression, and self-harm. The more precisely you name what you feel, the less likely you are to reach for harmful coping.
+>
+> *Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science*
+
+**Card 7 — Sleep & threat perception**
+> Sleep deprivation amplifies the brain's threat-detection. A person running on too little sleep perceives neutral faces as threatening. The hardware shapes the perception before the mind gets a vote.
+>
+> *Goldstein et al. 2007 · Current Biology*
+
+**Card 8 — DMN interruption**
+> The brain has a circuit that drives rumination — the default mode network. It quiets when attention is held by something concrete, like a breath count. You can't ruminate and follow a 4-1-8 pattern at the same time.
+>
+> *Doll et al. 2015 · Social Cognitive and Affective Neuroscience*
+
+**Card 9 — HRV & regulation**
+> Heart rate variability is an index of regulated emotional responding. The more flexibly your nervous system shifts between states, the more emotionally regulated you tend to be. The capacity is trainable — not fixed.
+>
+> *Lehrer & Gevirtz 2014 · Frontiers in Public Health*
+
+**Card 10 — Implementation intentions**
+> "If X happens, I will do Y" planning dramatically increases follow-through on intended behavior. Pre-deciding your response — when calm — bypasses decision paralysis at the moment of distress.
+>
+> *Gollwitzer 1999 · American Psychologist*
+
+**Card 11 — MCT detached mindfulness**
+> The shift from "I am anxious" to "I'm noticing anxiety" is the foundation of metacognitive therapy. Observing the state instead of being fused with it is the entire mechanism.
+>
+> *Wells 2009 · Metacognitive Therapy framework*
+
+**Card 12 — Stress inoculation**
+> Practicing regulation when calm trains the skills that deploy automatically under pressure. Special operators, surgeons, and first responders use this principle. Daily practice, before it's needed, builds the capacity for when it is.
+>
+> *Meichenbaum 1985 · Stress Inoculation Training*
+
+**Card 13 — Window of tolerance**
+> There's a zone where you can think clearly, regulate emotions, and function. Above it: hyperarousal — panic, rage, overwhelm. Below it: hypoarousal — numbness, shutdown. Regulation practice widens the window over time.
+>
+> *Siegel 1999 · The Developing Mind*
+
+**Card 14 — Acupressure & anxiety**
+> Self-administered acupressure reduces anxiety. The pressure itself is part of the mechanism — but so is the focused attention on the body that pressure requires. Two things at once: tactile and attentional.
+>
+> *Au et al. 2015 · Journal of Advanced Nursing*
+
+**Card 15 — Reappraisal in neuroimaging**
+> Reappraisal consistently reduces negative emotion in neuroimaging studies. The effect is reliable enough to show up across studies, methods, and populations. The brain genuinely processes the reinterpreted situation differently.
+>
+> *Buhle et al. 2014 · Cerebral Cortex*
+
+**Card 16 — Pain & attention**
+> Pain demands attentional resources and disrupts cognitive function. When the body is sending a pain signal, less of you is available for thinking clearly about anything else. The bio-filter is honest about this.
+>
+> *Eccleston & Crombez 1999 · Pain*
+
+**Card 17 — Granularity trainable**
+> Emotional granularity increases with repeated self-assessment. Naming what you feel — over and over, accurately — builds the capacity itself. The chips are training disguised as chips.
+>
+> *Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology*
+
+**Card 18 — Affect labeling implicit**
+> Affect labeling works as implicit emotion regulation. You don't have to consciously try. The act of naming the feeling is itself the regulation. The brain treats the naming as the work.
+>
+> *Torre & Lieberman 2018 · Emotion Review*
+
+**Card 19 — Diaphragmatic breathing & cortisol**
+> Diaphragmatic breathing reduces cortisol levels — measurably. The body's stress chemistry is responsive to how you breathe. The lever is real.
+>
+> *Ma et al. 2017 · Frontiers in Psychology*
+
+**Card 20 — MCT efficacy**
+> Meta-analysis of metacognitive therapy across anxiety and depression found effect sizes exceeding CBT in several conditions. Observing the state — rather than challenging the content of thoughts — produces measurable clinical outcomes.
+>
+> *Normann & Morina 2018 · Frontiers in Psychology*
+
+---
+
+## Routing logic (tool → topic chain)
+
+When AI generates a card, picks first topic in the chain that's NOT in `recentTopics`. Falls back to a generally-applicable topic if all session-specific options are recent.
+
+| Tool / Pattern | Topic chain |
+|---|---|
+| Breathe (Cyclic Sighing) | cyclic_sighing → breath_vagal_model → slow_breathing_general → diaphragmatic_cortisol |
+| Breathe (Deep Regulate / Quick Reset / 4-7-8) | slow_breathing_general → breath_vagal_model → diaphragmatic_cortisol → dmn_breathing |
+| Body Scan | acupressure_anxiety → interoception_emotion → interoception_emotional_awareness |
+| Reframe | cognitive_reappraisal → reappraisal_neuroimaging → reappraisal_prefrontal → affect_labeling |
+| Self Mode | mct_detached_mindfulness → mct_efficacy → implementation_intentions |
+| Big shift (delta ≥ 3) | hrv_emotion_regulation → hrv_capacity → window_of_tolerance |
+| No-shift session (delta = 0/null) | stress_inoculation → sit_clinical → granularity_trainable |
+| Generic fallback | window_of_tolerance → mct_detached_mindfulness → hrv_capacity |
+
+---
+
+## Storage & analytics
+
+- Generated cards NOT stored beyond display (transient)
+- `stillform_card_history` localStorage — last 5 topics retained for `recentTopics`
+- Plausible event `Science Card Shown` — props: topic, tool, source ("ai" | "static"), hadOpeningLine
+- Plausible event `Science Card Continued` — fires on Continue tap
+- Plausible event `Science Card Skipped` — fires on Skip tap
+- Plausible event `Science Card Info Opened` — fires on ⓘ tap
+
+---
+
+## Defense-in-depth — three protections
+
+**Protection A: Hard system prompt rule.** Layer 2 explicitly forbids citing studies outside corpus, inventing findings, attributing claims to researchers not in corpus. Phrased as SEVERE failure clause.
+
+**Protection B: Server-side validation.** Before returning to frontend, `reframe.js` checks that the AI's `citation` field matches a known corpus entry's citation string. Mismatch → discard, return static fallback.
+
+**Protection C: Corpus verified before ship.** Every entry includes a Science Sheet source reference. Each plain-language summary is a paraphrase of what Science Sheet itself says about that study. Arlin reviews corpus and flags any entry where summary feels off.
 
 ---
 
 ## Implementation files
 
 ### `netlify/functions/reframe.js`
-- Add new branch for `mode === "science_card"` 
-- New system prompt assembled from Layers 1-4
-- Returns structured JSON
-- Same auth, rate limiting, error handling
+- New branch: `if (mode === "science_card") { ... }`
+- New system prompt with corpus + rules
+- Citation validation against corpus before return
+- Returns: `{ openingLine, body, citation, topic, source }`
+- ~120 lines added
 
 ### `src/App.jsx`
-- New `ScienceCard` component (~80 lines including styling)
-- Insertion point in the close flow (after What Shifted, before ToolDebriefGate)
-- New localStorage helper for `stillform_card_history` (~15 lines)
-- New Plausible events
-- Loading state for the ~1-2s API call
+- New `ScienceCard` component (~80 lines + ⓘ modal)
+- Static fallback array (20 cards)
+- Insertion point in close flow
+- localStorage helper for `stillform_card_history`
+- 4 Plausible events
+- Loading state for API call
+- ~150 lines added
 
-### Total estimated code change
-~150 lines across the two files. Plus ~30 corpus entries that need final review/approval.
+### Total: ~270 lines across two files + 36 corpus entries (drafted, awaiting verification)
 
 ---
 
-## Open questions for Arlin
+## Pre-build checklist for Arlin
 
-### Q1 — Skip option on the card?
+Before code is written:
 
-The card is post-session, after the user has done real work. Options:
+1. **Corpus entries** — read each plain-finding line. Flag any that feel off
+2. **Static fallback cards** — read each card. Flag any out of voice
+3. **ⓘ modal copy** — confirm it accurately describes architecture
+4. **Corpus completeness** — anything important missing from Science Sheet that should be here?
+5. **Routing chains** — does tool→topic mapping make sense?
 
-- **A: Yes — Skip button** (matches the rest of the close flow, respects user authority)
-- **B: No — Continue is the only button** (the card is short enough that skip is unnecessary; making it skippable signals it's optional information)
-- **C: Skip after first card; subsequent cards get Continue only** (treat the introduction as worth requiring; later cards are familiar)
-
-### Q2 — What if AI generation fails?
-
-The Netlify function call could fail (network, API down, etc.). Options:
-
-- **A: Show a static fallback card** (one generic card written by hand, "Regulation is a trainable skill — Lazarus 1991" or similar)
-- **B: Skip the card screen entirely on failure** (user goes straight to ToolDebriefGate, no card that session)
-- **C: Show a "Could not load" state with retry**
-
-### Q3 — Cards on first-ever session?
-
-A user's very first session ever — show the card, or wait until session 2?
-
-- **A: Show on first session** (immediate value; user encounters the science as core to the experience)
-- **B: Wait until session 2** (first session is already a lot; don't add new screens until they've seen the basic close flow)
-- **C: Wait until session 5** (matches existing Reframe AI's "session count threshold" pattern for journal context)
-
-### Q4 — Frequency cap or fully every-session?
-
-You picked "once per session" earlier. Confirming:
-
-- **A: Every session, no cap** (~2 cards/day for daily users; over 700 cards/year)
-- **B: Every session up to 2/day, then suppress** (caps the daily exposure)
-- **C: Every session for first 30 days, then taper to once/day** (frequent introduction, then steady state)
-
-### Q5 — Should the card optionally include a one-line "what this means for you"?
-
-I argued against prescription in the card body. But there's a middle path: a single optional last line that connects the science back to the user's specific session without telling them what to do.
-
-Example: *"Stanford researchers studied this exact pattern... five minutes a day reduced anxiety more than mindfulness meditation. **Today you did three minutes.**"*
-
-The bold last line is observation, not prescription. It tells the user where they are relative to the science, lets them draw their own inference.
-
-- **A: Yes — include this last line when session-context allows it** (richer personalization)
-- **B: No — keep the card pure science, no observation about the user** (cleaner, less risk of feeling tracked)
-
-### Q6 — Citation format
-
-What does the citation line look like?
-
-- **A: Author year · Journal** (e.g., *"Balban et al. 2023 · Cell Reports Medicine"*)
-- **B: Author year only** (e.g., *"Balban et al. 2023"*)
-- **C: Author year, with journal name written out fully** (e.g., *"Balban, Yilmaz, Lieberman, Spiegel & Huberman, 2023, in Cell Reports Medicine"*)
+Once verified, code proceeds.
 
 ---
 
 ## What this is NOT
 
-- Not a notification system (does not push outside session flow)
-- Not a content library the user can browse (transient cards, generated and discarded)
-- Not "Did You Know" trivia (every card is grounded in the science of what the user actually practiced)
-- Not a marketing surface (no "Stillform uses cutting-edge research" voice)
-- Not a replacement for the Science Sheet (Science Sheet is the corpus + canonical reasoning; cards are the user-facing 15-second moments)
-- Not the Cognitive Function Measurement moonshot (separate spec; CFM is in-app exercises measuring trainable cognitive functions; this is plain-language science cards surfacing existing research)
+- Not a notification system
+- Not a content library user can browse
+- Not "Did You Know" trivia
+- Not a marketing surface
+- Not a replacement for the Science Sheet
+- Not the Cognitive Function Measurement moonshot (separate)
+- Not the kinesthetic close interaction (separate)
 
 ---
 
-## Future expansion (not in v1)
-
-- Card collection / "Studies you've encountered" surface (lets user revisit prior cards) — would require storing card text, not just topic
-- User-uploadable studies (community-contributed corpus) — cost & quality control implications
-- Cards in morning anchor as well as post-session (different mode, different topic logic)
-- Generative deep-dive (user taps card, gets longer plain-language explanation)
-- Citation links to source studies (would require URL field in corpus + privacy/cost analysis on outbound clicks)
-
----
-
-*ARA Embers LLC · Plain-Language Neuroscience Surface Spec · May 1, 2026*
+*ARA Embers LLC · Plain-Language Neuroscience Surface Spec v2 · May 1, 2026*
