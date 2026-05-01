@@ -3238,7 +3238,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     } catch { return null; }
   });
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
-  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   // Low-demand: 1.5s grace period before tap-anywhere-to-exit becomes active.
   // Prevents the entry tap from immediately dismissing the completion screen.
@@ -3281,6 +3281,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   };
   const getSessionCount = () => getSessionCountFromStorage();
   const queueDebriefAndCompleteNow = (redirectTo = null, source = "breathe-ground") => {
+    setScienceCardShown(false);
     setDebriefTarget({ redirectTo: redirectTo || null, source });
   };
   const queueDebriefAndComplete = (redirectTo = null, source = "breathe-ground") => {
@@ -3484,6 +3485,18 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     );
   }
   if (debriefTarget) {
+    if (!scienceCardShown) {
+      return (
+        <ScienceCard
+          toolId="breathe"
+          lastBreathPattern={breathPattern || null}
+          feelStateBefore={debriefTarget.preState || feelState || null}
+          feelStateAfter={debriefTarget.postState || null}
+          sessionCount={getSessionCountFromStorage()}
+          onContinue={() => setScienceCardShown(true)}
+        />
+      );
+    }
     return (
       <ToolDebriefGate
         toolId="breathe"
@@ -3986,7 +3999,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   const startTime = useRef(Date.now());
   const latestSessionTimestampRef = useRef(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
-  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   // What Shifted post-completion moment (BODY_SCAN_WHAT_SHIFTED_SPEC.md)
   const [showWhatShifted, setShowWhatShifted] = useState(false);
@@ -4041,6 +4054,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   };
   const getSessionCount = () => getSessionCountFromStorage();
   const queueDebriefAndCompleteNow = (redirectTo = null, source = "body-scan") => {
+    setScienceCardShown(false);
     setDebriefTarget({ redirectTo: redirectTo || null, source });
   };
   const queueDebriefAndComplete = (redirectTo = null, source = "body-scan") => {
@@ -4395,6 +4409,18 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     );
   }
   if (debriefTarget) {
+    if (!scienceCardShown) {
+      return (
+        <ScienceCard
+          toolId="scan"
+          lastBodyScanArea={areas[currentArea]?.name || null}
+          feelStateBefore={debriefTarget.preState || feelState || null}
+          feelStateAfter={debriefTarget.postState || null}
+          sessionCount={getSessionCountFromStorage()}
+          onContinue={() => setScienceCardShown(true)}
+        />
+      );
+    }
     return (
       <ToolDebriefGate
         toolId="scan"
@@ -6091,7 +6117,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   }, [consecutiveAiFailures, showSelfModeOffer, selfModeEntryReason, aiBackOnline, activeReframeTab]);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
-  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   const [feelState, setFeelStateRaw] = useState(() => {
     // Persistence priority:
@@ -7012,6 +7038,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
   const resolvePostReframeRoute = () => (entryMode === "evening" ? "eod-close" : undefined);
   const queueDebriefAndCompleteNow = (redirectTo = null, source = "reframe") => {
+    setScienceCardShown(false);
     setDebriefTarget({ redirectTo: redirectTo || null, source });
   };
   const queueDebriefAndComplete = (redirectTo = null, source = "reframe") => {
@@ -7266,6 +7293,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     );
   }
   if (debriefTarget) {
+    if (!scienceCardShown) {
+      return (
+        <ScienceCard
+          toolId="reframe"
+          feelStateBefore={debriefTarget.preState || feelState || null}
+          feelStateAfter={debriefTarget.postState || postRating || null}
+          sessionCount={getSessionCountFromStorage()}
+          onContinue={() => setScienceCardShown(true)}
+        />
+      );
+    }
     return (
       <ToolDebriefGate
         toolId="reframe"
