@@ -1247,28 +1247,28 @@ const TOOLS = [
     id: "breathe",
     icon: "◎",
     name: "Breathe",
-    desc: "Use breath to steady the system so clear thought is easier to access.",
+    desc: "How you regulate the body so the mind returns.",
     time: "3 min"
   },
   {
     id: "scan",
     icon: "◉",
     name: "Body Scan",
-    desc: "Read where your system is carrying the signal, then work with it through focused acupressure.",
+    desc: "How you locate what the body's holding.",
     time: "10 min"
   },
   {
     id: "reframe",
     icon: "✦",
     name: "Reframe",
-    desc: "Clarify the story your mind is building so you can respond from discernment, not momentum.",
+    desc: "How you navigate through the load.",
     time: "Open"
   },
   {
     id: "metacognition",
     icon: "✦",
     name: "Self Mode",
-    desc: "Step out of the state, see what your system is doing clearly, and choose your next move deliberately.",
+    desc: "How you train the move you make alone.",
     time: "5 min"
   },
   {

@@ -63,6 +63,17 @@ Captured in Science Sheet new section "System Observation + User Override (Archi
 ### ⏳ Kinesthetic close interaction (engagement craft) — IN DESIGN
 Arlin chose Reading 3 from the close redesign options: kinesthetic / tactile interaction at session close. Engagement craft as design frame, not neuroscience. Replaces the 5-screen text-and-button sequence at session close with a single tactile moment — most likely single tap on slow-pulsing point or long-press to seal. Grounded in Engagement Principles 4 (Kahneman System 1/2 — match interaction style to user state) and 9 (Norman affordance perception). Spec to draft next session.
 
+### ⏳ Self Mode is not where it could be (flagged May 1, 2026)
+Self Mode is the differentiated tool — it's the trainable solo metacognitive practice (Notice/Name/Recognize/Perspective/Choose) that ideally makes Reframe less necessary over time. But it's named generically ("Self Mode" reads as anonymous), it's described in ways that previously overlapped with Reframe (now improved with the "How you train the move you make alone" sub-label, but the broader work remains), and the 5-step structure could be more visible/honored as the explicit muscle being trained.
+
+What's not right yet:
+- The name itself is generic and doesn't signal what the practice is
+- The 5 steps are present but not visually weighted as the architecture they are (compared to Reframe's chat which is unmistakably "what this is")
+- The relationship between Self Mode and Reframe (Self Mode = solo training; Reframe = with-partner work in real time) isn't legible to a user encountering both
+- Nothing in the product surfaces the user's growing capacity at the 5 steps over time — it's the trainable thing but the training isn't measured (the Cognitive Function Measurement moonshot would address this)
+
+Not for now — Arlin flagged this as ongoing work to come back to. Future session task: redesign Self Mode's framing, naming, and visual treatment so it stands as the differentiated practice it is.
+
 ### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
 The 20-second forced wait dropped. Continue enables on selection alone. Copy softened from "20-second capture required before exit" to "Take a moment to name what you used." Skip button added in footer (same skip pattern as What Shifted and Next Move). All three completeDebriefGate functions (Breathe / Body Scan / Reframe) updated to capture `skipped:boolean` on stored debrief record + new Plausible event "Tool Debrief Completed" with tool + skipped props for cohort visibility into engagement-vs-skip rates per tool.
 
