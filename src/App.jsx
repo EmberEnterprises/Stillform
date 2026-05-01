@@ -4867,11 +4867,11 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   );
 }
 
-// ============================================================================
+// --------------------------------------------------------------------
 // SCIENCE CARD — Plain-Language Neuroscience Surface
 // 20 hand-written static fallback cards. Used when AI generation fails.
 // Each card drawn directly from the verified corpus in reframe.js.
-// ============================================================================
+// --------------------------------------------------------------------
 const STATIC_SCIENCE_CARDS = [
   { topic: "cyclic_sighing", body: "Stanford researchers studied this exact pattern. In a 28-day RCT, cyclic sighing — two nasal inhales then a long oral exhale — produced the greatest mood improvement and respiratory rate reduction of the four practices tested. It outperformed mindfulness meditation at the same dose.", citation: "Balban et al. 2023 · Cell Reports Medicine" },
   { topic: "slow_breathing_general", body: "Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. The mechanism is consistent across patterns: extended exhale, vagal activation, parasympathetic shift. The breath is the lever; the body responds.", citation: "Zaccaro et al. 2018 · Frontiers in Human Neuroscience" },
@@ -4921,10 +4921,10 @@ function pickStaticFallbackCard(recentTopics = []) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// ============================================================================
+// --------------------------------------------------------------------
 // ScienceCard — post-session card showing one finding from the science library
 // Appears AFTER post-rate / What Shifted, BEFORE ToolDebriefGate
-// ============================================================================
+// --------------------------------------------------------------------
 function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null, feelStateBefore = null, feelStateAfter = null, sessionCount = 0, onContinue }) {
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(true);

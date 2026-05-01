@@ -71,13 +71,13 @@ function checkRateLimit(ip) {
   return true;
 }
 
-// ============================================================================
+// --------------------------------------------------------------------
 // SCIENCE CARD CORPUS — verified against Stillform_Science_Sheet.md
 // Every entry's plain-language finding paraphrases what the Science Sheet
 // itself says about that study. AI is forbidden from citing studies, frameworks,
 // or researchers not in this list. Validation enforces this server-side before
 // any card reaches the user.
-// ============================================================================
+// --------------------------------------------------------------------
 const SCIENCE_CARD_CORPUS = {
   cyclic_sighing: { citation: "Balban et al. 2023 · Cell Reports Medicine", finding: "Stanford RCT compared four breath practices over 28 days. Cyclic sighing — two nasal inhales followed by a long oral exhale — produced the greatest mood improvement and respiratory rate reduction. Outperformed mindfulness meditation at the same dose." },
   breath_vagal_model: { citation: "Gerritsen & Band 2018 · Frontiers in Human Neuroscience", finding: "Slow breathing works through the vagus nerve. The respiratory pattern itself is the lever — extended exhale activates the parasympathetic system." },
@@ -1175,10 +1175,10 @@ exports.handler = async function(event) {
       };
     }
 
-    // ========================================================================
+    // --------------------------------------------------------------------
     // SCIENCE CARD MODE — early return before the reframe machinery.
     // Generates a single post-session card grounded in the verified corpus.
-    // ========================================================================
+    // --------------------------------------------------------------------
     if (mode === "science_card") {
       const sessionContext = (() => {
         try { return JSON.parse(event.body); } catch { return {}; }
@@ -1307,9 +1307,9 @@ exports.handler = async function(event) {
         clearTimeout(cardTimeout);
       }
     }
-    // ========================================================================
+    // --------------------------------------------------------------------
     // END SCIENCE CARD MODE
-    // ========================================================================
+    // --------------------------------------------------------------------
 
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
