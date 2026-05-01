@@ -3238,7 +3238,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     } catch { return null; }
   });
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
-  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
+  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   // Low-demand: 1.5s grace period before tap-anywhere-to-exit becomes active.
   // Prevents the entry tap from immediately dismissing the completion screen.
@@ -3999,7 +4000,8 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   const startTime = useRef(Date.now());
   const latestSessionTimestampRef = useRef(null);
   const contextEntryRef = useRef(consumePendingSessionEntryContext());
-  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
+  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   // What Shifted post-completion moment (BODY_SCAN_WHAT_SHIFTED_SPEC.md)
   const [showWhatShifted, setShowWhatShifted] = useState(false);
@@ -6117,7 +6119,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   }, [consecutiveAiFailures, showSelfModeOffer, selfModeEntryReason, aiBackOnline, activeReframeTab]);
   const [showWatchChooseFlow, setShowWatchChooseFlow] = useState(false);
-  const [debriefTarget, setDebriefTarget] = useState(null);\n  const [scienceCardShown, setScienceCardShown] = useState(false);
+  const [debriefTarget, setDebriefTarget] = useState(null);
+  const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   const [feelState, setFeelStateRaw] = useState(() => {
     // Persistence priority:
