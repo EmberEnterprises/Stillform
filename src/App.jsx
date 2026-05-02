@@ -8178,12 +8178,40 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           }}
         >
           Self Mode
-          <span
-            title="Work through this on your own without AI. Structured self-observation — for users who prefer to process independently."
-            style={{ fontSize: 11, color: "var(--text-muted)", cursor: "help", fontFamily: "sans-serif" }}
-          >
-            ⓘ
-          </span>
+          {setInfoModal ? (
+            <span
+              role="button"
+              aria-label="What is Self Mode?"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                setInfoModal({
+                  title: "What is Self Mode?",
+                  body: "Self Mode is the structured solo practice for working through a moment without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 1999; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
+                });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setInfoModal({
+                    title: "What is Self Mode?",
+                    body: "Self Mode is the structured solo practice for working through a moment without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 1999; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
+                  });
+                }
+              }}
+              style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer", fontFamily: "sans-serif", lineHeight: 1 }}
+            >
+              ⓘ
+            </span>
+          ) : (
+            <span
+              title="Work through this on your own without AI. Structured self-observation — for users who prefer to process independently."
+              style={{ fontSize: 11, color: "var(--text-muted)", cursor: "help", fontFamily: "sans-serif" }}
+            >
+              ⓘ
+            </span>
+          )}
         </button>
       </div>
 
