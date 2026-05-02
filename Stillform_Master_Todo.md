@@ -74,6 +74,28 @@ What's not right yet:
 
 Not for now — Arlin flagged this as ongoing work to come back to. Future session task: redesign Self Mode's framing, naming, and visual treatment so it stands as the differentiated practice it is.
 
+### ⏳ Pattern Disruption Layer (architectural direction, May 3, 2026)
+
+The move from legibility-only product to active disruptor. Stillform's existing tools make patterns visible; this layer adds mechanical disruption when a pattern repeats. Arlin's framing: *"this is where it stops being flat and is actually more of a useful tool, and also brings back users, which creates retention."*
+
+Full spec in repo: `PATTERN_DISRUPTION_SPEC.md`
+
+Core architecture:
+- **Three data points** of the same loop signal triggers detection — pooled across Self Mode entries, Reframe sessions, Pulse chip selections, bio-filter readings. Not three sessions; three data points of the loop signal.
+- **AI runs full read** on session history. Eight loop-signal dimensions surfaced as system prompt guidance (same feeling, same action, same context, same somatic, same posture, same distortion, same arc, same chip selection). Open-ended judgment, not rigid rules.
+- **Body-first detection vector explicit:** chip + bio-filter signals weighted as full data points so calm/body-process users (who don't surface loops verbally) get caught.
+- **Push notification + in-app prompt** fire immediately on detection. Both APNs (iOS) and FCM (Android). Prompt-on-open requires interaction, not dismissable as banner.
+- **Two-strikes-and-drop dismissal:** pattern offered, dismissed → re-fired once → dismissed again → pattern instance closed. Fresh accrual of three new data points opens a new instance.
+- **AI-down backup case:** AI catches up on gap-period data when service restores. No special language, no apology framing.
+- **Acceptance routes into a new disruptor tool** (~90 sec mechanic, attentional capture by novel stimulus + somatic anchoring; not EMDR, not bilateral stimulation).
+- **Transparency surface in Settings** shows what AI is watching for. No off-switch for detection itself — user opted into AI-assisted composure architecture.
+
+Open questions called out in spec §7 (six items, biggest is the disruptor mechanic itself).
+
+Ship-or-hold timing: deferred to Arlin. Spec recommendation defers the call; both prelaunch (as part of Self Mode redesign) and post-launch (as v1.1 announcement) are defensible.
+
+Engineering scope: 3-5 days focused work across detection, dispatch, state machine, disruptor tool, transparency surface, end-to-end testing. Capacitor push-notifications and local-notifications already initialized.
+
 ### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
 The 20-second forced wait dropped. Continue enables on selection alone. Copy softened from "20-second capture required before exit" to "Take a moment to name what you used." Skip button added in footer (same skip pattern as What Shifted and Next Move). All three completeDebriefGate functions (Breathe / Body Scan / Reframe) updated to capture `skipped:boolean` on stored debrief record + new Plausible event "Tool Debrief Completed" with tool + skipped props for cohort visibility into engagement-vs-skip rates per tool.
 
