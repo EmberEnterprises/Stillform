@@ -425,9 +425,9 @@ Settings picker entry cites the published study. Default behavior preserved — 
 
 **Outreach implication:** Now that Stillform implements her published protocol, this is the single strongest credibility lever for outreach to Dr. Melis Yilmaz Balban (founder of NeuroSmart, top outreach candidate per memory). Direct research overlap, non-competing market.
 
-### ACT cognitive defusion lineage acknowledgment
+### ✅ ACT cognitive defusion lineage acknowledgment — RESOLVED May 3 (commit 2218f2b0)
 
-Self Mode 5-step protocol (Notice, Name, Recognize, Perspective, Choose) overlaps with ACT cognitive defusion. MCT remains primary framework. Add Hayes, Strosahl & Wilson (1999) and Han & Kim (2022) acknowledgment to Self Mode info copy and Science Sheet Self Mode section. ErrorBoundary-blocked for in-app copy.
+**RESOLVED May 3 (commit 2218f2b0):** Upgraded the Self Mode tab info from static tooltip to full info modal. Names primary lineage as Metacognitive Therapy (Wells 2009) and explicitly acknowledges ACT cognitive defusion (Hayes, Strosahl & Wilson 1999; Han & Kim 2022) as parallel research converging on the same underlying mechanism — creating distance between you and the thought you're having. MCT remains primary framework as required.
 
 ### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections — RESOLVED May 3 (commit 71f64903)
 
