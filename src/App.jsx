@@ -1752,6 +1752,116 @@ const UAT_QUESTION_OPTIONS = [
 ];
 const VALID_THEME_IDS = new Set(["dark", "midnight", "suede", "teal", "rose", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
+// Tone-mode determines how user's stored default tone interacts with auto-detect.
+// "override" — user's default tone always wins; auto-detect is suppressed
+// "fallback" — auto-detect runs; user's default fills in when auto returns no confident suggestion
+const VALID_AI_TONE_MODE_IDS = new Set(["override", "fallback"]);
+
+// Layer 1 of the three-layer tone system: auto-detect from state and content.
+// Returns { tone, reason } where tone is one of VALID_AI_TONE_IDS or null
+// (null = no confident suggestion, fall back to user default).
+//
+// Rules per master todo spec:
+// - bio-filter depleted/pain/sleep -> Gentle
+// - feelState excited or focused -> Motivational (excited) or Direct (focused)
+// - input pattern is long technical/analytical -> Clinical
+// - input shows distress + high emotional charge -> Gentle
+// - otherwise -> null (no auto suggestion; default applies)
+//
+// Reason is a short user-facing string explaining the inference, e.g.
+// "Because you marked depleted" — surfaces in the dropdown so the choice is
+// metacognitive (Pillar 1), not opaque.
+function detectSuggestedTone({ bioFilter, feelState, input } = {}) {
+  // 1. Bio-filter: physical state has highest priority — gentle is the right
+  // call when hardware is compromised, regardless of mood state.
+  if (bioFilter && Array.isArray(bioFilter)) {
+    if (bioFilter.includes("depleted")) {
+      return { tone: "gentle", reason: "Because you marked depleted" };
+    }
+    if (bioFilter.includes("pain")) {
+      return { tone: "gentle", reason: "Because pain is present" };
+    }
+    if (bioFilter.includes("sleep")) {
+      return { tone: "gentle", reason: "Because you flagged sleep deprivation" };
+    }
+  } else if (typeof bioFilter === "string" && bioFilter) {
+    // Some call sites pass a single string (legacy / single-select bio-filter)
+    if (bioFilter === "depleted") return { tone: "gentle", reason: "Because you marked depleted" };
+    if (bioFilter === "pain") return { tone: "gentle", reason: "Because pain is present" };
+    if (bioFilter === "sleep") return { tone: "gentle", reason: "Because you flagged sleep deprivation" };
+  }
+
+  // 2. Feel state: forward-energy states get matching forward tones.
+  if (feelState === "excited") {
+    return { tone: "motivational", reason: "Because you're feeling excited" };
+  }
+  if (feelState === "focused") {
+    return { tone: "direct", reason: "Because you're already focused — keep it tight" };
+  }
+
+  // 3. Input pattern: long, structured, low-emotional-charge inputs suggest
+  // the user wants analytical engagement.
+  const inputText = String(input || "").trim();
+  if (inputText.length >= 240) {
+    // Long input. Look for analytical signal vs distress signal.
+    const distressMarkers = /\b(can't|cant|hate|terrified|panic|crying|exhaust(ed|ing)?|broken|done|hopeless|spiral(ing|ling)?|losing it|breaking down)\b/i;
+    const intensifierMarkers = /[!?]{2,}|\.\.\.+|UGH|FUCK|SHIT|WTF/;
+    if (distressMarkers.test(inputText) || intensifierMarkers.test(inputText)) {
+      return { tone: "gentle", reason: "Because the message reads as activated" };
+    }
+    // Long but composed — analytical territory
+    return { tone: "clinical", reason: "Because the message is detailed and structured" };
+  }
+
+  // 4. Short input with distress markers also routes to gentle
+  if (inputText.length > 0) {
+    const distressMarkers = /\b(can't|cant|hate|terrified|panic|hopeless|broken|done|spiral(ing|ling)?)\b/i;
+    if (distressMarkers.test(inputText)) {
+      return { tone: "gentle", reason: "Because the message reads as activated" };
+    }
+  }
+
+  // 5. No confident signal — return null; user default applies
+  return { tone: null, reason: null };
+}
+
+// Resolve the tone to actually use given the three layers.
+// Priority: session override > settings override-mode default > auto-detect > user default
+// Returns { tone, source, reason } where source is one of:
+//   "session"  — user picked manually inside this Reframe session
+//   "default"  — settings is in override mode; user's stored default wins
+//   "auto"     — settings is in fallback mode and auto-detect returned a suggestion
+//   "fallback" — settings is in fallback mode but auto returned null; user default fills
+function resolveActiveTone({ sessionOverride, userDefault, toneMode, autoDetected }) {
+  if (sessionOverride && VALID_AI_TONE_IDS.has(sessionOverride)) {
+    return { tone: sessionOverride, source: "session", reason: "You set this for this session" };
+  }
+  if (toneMode === "override") {
+    return { tone: userDefault, source: "default", reason: "Your default tone (set in Settings)" };
+  }
+  // fallback mode
+  if (autoDetected && autoDetected.tone) {
+    return { tone: autoDetected.tone, source: "auto", reason: autoDetected.reason };
+  }
+  return { tone: userDefault, source: "fallback", reason: "Your default tone (Settings · auto-detect found no signal)" };
+}
+
+const AI_TONE_LABELS = {
+  balanced: "Balanced",
+  gentle: "Gentle",
+  direct: "Direct",
+  clinical: "Clinical",
+  motivational: "Motivational"
+};
+
+const AI_TONE_DESCRIPTIONS = {
+  balanced: "Default Stillform voice — direct, warm, precise",
+  gentle: "Softer edges, still specific and honest",
+  direct: "Concise, minimal cushioning, cuts to signal",
+  clinical: "Structured, analytical, avoids jargon overload",
+  motivational: "Forward energy, momentum language, no hype clichés"
+};
+
 const TOOL_ENTRY_PRIMER_COPY = {
   "thought-first": {
     reframe: "Start with one concrete signal, then separate facts from story.",
@@ -5757,7 +5867,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone","stillform_biometric_enabled","stillform_language"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -5825,7 +5935,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -6578,7 +6688,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       clearInterval(interval);
     };
   }, [selfModeEntryReason, activeReframeTab, aiBackOnline]);
-  const aiToneChoice = (() => {
+  // Three-layer tone resolution.
+  // Layer 1: auto-detect (computed below from live state + input)
+  // Layer 2: in-Reframe session override (sessionToneOverride state)
+  // Layer 3: user's stored default (aiToneUserDefault) + tone-mode preference
+  //
+  // Resolution priority:
+  //   session override (user picked it manually this session) >
+  //   override-mode default (user set Settings to "always use my default") >
+  //   auto-detect (when in fallback mode AND auto returned a confident suggestion) >
+  //   user default (when in fallback mode and auto found no signal)
+  const aiToneUserDefault = (() => {
     try {
       const stored = localStorage.getItem("stillform_ai_tone") || "balanced";
       return VALID_AI_TONE_IDS.has(stored) ? stored : "balanced";
@@ -6586,13 +6706,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       return "balanced";
     }
   })();
-  const aiToneLabel = ({
-
-    gentle: "Gentle",
-    direct: "Direct",
-    clinical: "Clinical",
-    motivational: "Motivational"
-  })[aiToneChoice] || "Balanced";
+  const aiToneMode = (() => {
+    try {
+      const stored = localStorage.getItem("stillform_ai_tone_mode") || "override";
+      return VALID_AI_TONE_MODE_IDS.has(stored) ? stored : "override";
+    } catch {
+      return "override";
+    }
+  })();
+  // Session override — null until the user manually picks a tone in the dropdown
+  const [sessionToneOverride, setSessionToneOverride] = useState(null);
+  // Dropdown open/closed state for the in-Reframe tone picker
+  const [toneDropdownOpen, setToneDropdownOpen] = useState(false);
   const effectiveMode = autoMode;
   const regulationType = (() => {
     try {
@@ -6731,6 +6856,26 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [input, setInput] = useState("");
   const inputNormalized = String(input || "").trim().toLowerCase();
   const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
+
+  // Resolve the actual tone for this turn. Re-runs every render so it picks up
+  // changes to feelState, input, and bio-filter. The output drives both the
+  // dropdown UI and the aiTone value sent to the reframe.js function.
+  const autoDetectedTone = (() => {
+    try {
+      const bioFilter = getActiveBioFilter();
+      return detectSuggestedTone({ bioFilter, feelState, input });
+    } catch {
+      return { tone: null, reason: null };
+    }
+  })();
+  const activeTone = resolveActiveTone({
+    sessionOverride: sessionToneOverride,
+    userDefault: aiToneUserDefault,
+    toneMode: aiToneMode,
+    autoDetected: autoDetectedTone
+  });
+  const aiToneChoice = activeTone.tone;
+  const aiToneLabel = AI_TONE_LABELS[aiToneChoice] || "Balanced";
 
   // Somatic interrupt — detects rapid typing, shows body nudge
   const keystrokeTimestamps = useRef([]);
@@ -8081,19 +8226,140 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
-      <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center" }}>
-        <div style={{
-          fontSize: 10,
-          color: "var(--text-muted)",
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          border: "1px solid var(--border)",
-          borderRadius: "var(--r)",
-          padding: "4px 10px",
-          fontFamily: "'IBM Plex Mono', monospace"
-        }}>
-          Reframe tone: {aiToneLabel}
-        </div>
+      <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center", position: "relative" }}>
+        <button
+          type="button"
+          onClick={() => setToneDropdownOpen(o => !o)}
+          aria-expanded={toneDropdownOpen}
+          aria-label={`Reframe tone: ${aiToneLabel}. Tap to change.`}
+          style={{
+            fontSize: 10,
+            color: "var(--text-muted)",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--r)",
+            padding: "4px 10px",
+            fontFamily: "'IBM Plex Mono', monospace",
+            background: toneDropdownOpen ? "var(--surface2)" : "transparent",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            transition: "background var(--motion-quick) var(--ease-prestige), border-color var(--motion-quick) var(--ease-prestige)"
+          }}
+        >
+          <span>Reframe tone: {aiToneLabel}</span>
+          <span style={{ fontSize: 9, opacity: 0.6, transform: toneDropdownOpen ? "rotate(180deg)" : "none", transition: "transform var(--motion-quick) var(--ease-prestige)" }}>▾</span>
+        </button>
+        {toneDropdownOpen && (
+          <>
+            {/* backdrop to close on outside tap */}
+            <div
+              onClick={() => setToneDropdownOpen(false)}
+              style={{ position: "fixed", inset: 0, zIndex: 50, background: "transparent" }}
+              aria-hidden="true"
+            />
+            <div
+              role="listbox"
+              aria-label="Choose Reframe tone"
+              style={{
+                position: "absolute",
+                top: "calc(100% + 6px)",
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "var(--ground-elev)",
+                border: "0.5px solid var(--border-hi)",
+                borderRadius: "var(--r-default)",
+                boxShadow: "0 8px 24px rgba(0,0,0,0.45)",
+                padding: "8px 0",
+                minWidth: 280,
+                maxWidth: "90vw",
+                zIndex: 51,
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              {/* Reason header — surfaces why this tone was selected */}
+              {activeTone.reason && (
+                <div style={{
+                  padding: "4px 14px 8px",
+                  borderBottom: "0.5px solid var(--border-printed)",
+                  fontSize: 10,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "var(--text-muted)",
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  {activeTone.source === "auto" && "Auto · "}
+                  {activeTone.source === "session" && "Session · "}
+                  {activeTone.source === "default" && "Default · "}
+                  {activeTone.source === "fallback" && "Default · "}
+                  <span style={{ textTransform: "none", letterSpacing: 0, fontFamily: "'DM Sans', sans-serif" }}>{activeTone.reason}</span>
+                </div>
+              )}
+              {/* Option rows */}
+              {["balanced", "gentle", "direct", "clinical", "motivational"].map(toneId => {
+                const isActive = aiToneChoice === toneId;
+                return (
+                  <button
+                    key={toneId}
+                    type="button"
+                    role="option"
+                    aria-selected={isActive}
+                    onClick={() => {
+                      setSessionToneOverride(toneId);
+                      setToneDropdownOpen(false);
+                    }}
+                    style={{
+                      width: "100%",
+                      background: isActive ? "var(--amber-glow)" : "transparent",
+                      border: "none",
+                      borderLeft: isActive ? "2px solid var(--amber)" : "2px solid transparent",
+                      padding: "10px 14px",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 2,
+                      transition: "background var(--motion-quick) var(--ease-prestige)"
+                    }}
+                  >
+                    <span style={{ fontSize: 13, color: isActive ? "var(--amber)" : "var(--text)", fontWeight: isActive ? 500 : 400 }}>
+                      {AI_TONE_LABELS[toneId]}
+                    </span>
+                    <span style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.45 }}>
+                      {AI_TONE_DESCRIPTIONS[toneId]}
+                    </span>
+                  </button>
+                );
+              })}
+              {/* Reset session override link, only shown if session has overridden auto/default */}
+              {sessionToneOverride && (
+                <div style={{ padding: "8px 14px", borderTop: "0.5px solid var(--border-printed)" }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSessionToneOverride(null);
+                      setToneDropdownOpen(false);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--text-muted)",
+                      fontSize: 11,
+                      fontFamily: "'DM Sans', sans-serif",
+                      cursor: "pointer",
+                      padding: 0,
+                      letterSpacing: "0.02em"
+                    }}
+                  >
+                    ← Use auto-detect / default again
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
 
@@ -12512,6 +12778,14 @@ export default function Stillform() {
       return "balanced";
     }
   });
+  const [aiToneMode, setAiToneMode] = useState(() => {
+    try {
+      const stored = localStorage.getItem("stillform_ai_tone_mode") || "override";
+      return VALID_AI_TONE_MODE_IDS.has(stored) ? stored : "override";
+    } catch {
+      return "override";
+    }
+  });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [checkoutMessage, setCheckoutMessage] = useState(null);
   const [openLog, setOpenLog] = useState(null);
@@ -12524,12 +12798,16 @@ export default function Stillform() {
       const restoredTheme = localStorage.getItem("stillform_theme");
       const restoredHC = localStorage.getItem("stillform_high_contrast") === "on";
       const restoredRegType = localStorage.getItem("stillform_regulation_type");
+      const restoredTone = localStorage.getItem("stillform_ai_tone");
+      const restoredToneMode = localStorage.getItem("stillform_ai_tone_mode");
       if (restoredTheme && ["dark","midnight","suede","teal","rose","light"].includes(restoredTheme)) {
         setThemeChoice(restoredTheme);
         applyThemePreset(restoredTheme, restoredHC);
       }
       if (restoredRegType) setRegType(restoredRegType);
       if (restoredHC !== highContrastMode) setHighContrastMode(restoredHC);
+      if (restoredTone && VALID_AI_TONE_IDS.has(restoredTone)) setAiToneChoice(restoredTone);
+      if (restoredToneMode && VALID_AI_TONE_MODE_IDS.has(restoredToneMode)) setAiToneMode(restoredToneMode);
       refreshSettings();
     } catch {}
   };
@@ -12634,6 +12912,13 @@ export default function Stillform() {
     if (!VALID_AI_TONE_IDS.has(nextTone)) return;
     try { localStorage.setItem("stillform_ai_tone", nextTone); } catch {}
     setAiToneChoice(nextTone);
+    refreshSettings();
+  };
+
+  const setAiToneModeSelection = (nextMode) => {
+    if (!VALID_AI_TONE_MODE_IDS.has(nextMode)) return;
+    try { localStorage.setItem("stillform_ai_tone_mode", nextMode); } catch {}
+    setAiToneMode(nextMode);
     refreshSettings();
   };
 
@@ -16550,13 +16835,18 @@ const isSignalProfileConfigured = () => {
                   </button>
                   {settingsSubOpen.aiTone && (
                     <div style={{ marginTop: 10 }}>
-                      {/* AI Reframe Tone */}
+                      {/* Default tone selection */}
                 <div style={{ marginBottom: 16 }}>
-                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>AI Reframe Tone</div>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>Default tone</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                    The tone Reframe uses unless something else takes over. You can change it for a single session from inside Reframe.
+                  </div>
                   {[
-                    { id: "gentle", label: "Gentle" },
-                    { id: "direct", label: "Direct & blunt" }, { id: "clinical", label: "Clinical / technical" },
-                    { id: "motivational", label: "Motivational" }
+                    { id: "balanced", label: "Balanced", desc: "Default Stillform voice — direct, warm, precise" },
+                    { id: "gentle", label: "Gentle", desc: "Softer edges, still specific and honest" },
+                    { id: "direct", label: "Direct", desc: "Concise, minimal cushioning, cuts to signal" },
+                    { id: "clinical", label: "Clinical", desc: "Structured, analytical, avoids jargon overload" },
+                    { id: "motivational", label: "Motivational", desc: "Forward energy, momentum language, no hype clichés" }
                   ].map(t => {
                     const selected = aiToneChoice === t.id;
                     return (
@@ -16564,11 +16854,42 @@ const isSignalProfileConfigured = () => {
                         width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
                         border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
                         borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
-                        display: "flex", justifyContent: "space-between", alignItems: "center",
-                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif"
+                        display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif", gap: 12
                       }}>
-                        <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
-                        {selected && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2, lineHeight: 1.45 }}>{t.desc}</div>
+                        </div>
+                        {selected && <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 2 }}>✓</div>}
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Tone mode — override vs fallback */}
+                <div style={{ marginBottom: 16 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>How your default applies</div>
+                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                    Stillform can also auto-suggest a tone based on your bio-filter, feel state, and what you write. This setting controls whether your default takes precedence.
+                  </div>
+                  {[
+                    { id: "override", label: "Use my default", desc: "Your default tone always applies. Auto-suggestion is off." },
+                    { id: "fallback", label: "Auto-suggest, default as fallback", desc: "Stillform suggests a tone when there's a clear signal (e.g. depleted → gentle). Otherwise your default applies." }
+                  ].map(m => {
+                    const selected = aiToneMode === m.id;
+                    return (
+                      <button key={m.id} type="button" onClick={() => setAiToneModeSelection(m.id)} style={{
+                        width: "100%", background: selected ? "var(--amber-glow)" : "var(--surface)",
+                        border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
+                        borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 4,
+                        display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+                        cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif", gap: 12
+                      }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{m.label}</div>
+                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2, lineHeight: 1.45 }}>{m.desc}</div>
+                        </div>
+                        {selected && <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 2 }}>✓</div>}
                       </button>
                     );
                   })}
@@ -17592,7 +17913,7 @@ const isSignalProfileConfigured = () => {
                         try { await sbSignOut().catch(() => {}); } catch {}
                         try { sbClearSession(); } catch {}
                         setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                         keysToRemove.forEach(key => localStorage.removeItem(key));
                         Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                         window.location.reload();
