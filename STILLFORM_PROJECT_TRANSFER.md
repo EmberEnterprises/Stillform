@@ -240,6 +240,102 @@ Plain-Language Neuroscience Surface is shipped but not corpus-verified. Before a
 
 Verification can happen at Arlin's pace — no decisions required, just flagging.
 
+### May 1 evening — Corpus rebuild and primary-source verification
+
+After the Plain-Language Neuroscience Surface shipped, the work shifted to the corpus content itself. Three iterations:
+
+- **v3 corpus** drafted, abandoned for being too long-winded (80-100 words/finding) and overcorrected toward Science Sheet defensive completeness rather than 15-second readability
+- **v4 corpus** drafted with locked structure: 22 studies × 2-3 angles each (mechanism / effect size / application) = 50 findings, 40-50 words each, multi-angle architecture so a returning user sees a different angle of the same study across sessions
+- **v5 corpus** built by primary-source verification of every study against PubMed/PMC/journal pages
+
+**Locked architectural decisions:**
+
+- Multi-finding-per-study structure: same study, multiple angles spread across the user's return visits
+- "Read the study →" link on every finding, with paywall note where applicable; free where possible (PMC, author lab pages); abstract page where paywalled
+- "Finding" replaces "card" as user-facing language
+- **Ownership principle (load-bearing):** Stillform owns its tools, instruments, and practices. Stillform NEVER claims ownership of the science. Science is the researchers'; implementation is Stillform's. The principle was sharpened twice in the May 1 session — overcorrection is also a form of ownership claim (e.g., "delivers the granularity training" understates what Stillform built; "IS the granularity training" correctly identifies the chip system as the practice that instantiates the published mechanism).
+
+**Locked ⓘ modal copy** (replaces v2 copy in App.jsx on next code update):
+
+```
+THE SCIENCE BEHIND THIS
+
+The findings shown here are drawn from the peer-reviewed 
+research underlying Stillform's tools.
+
+Drawn from a curated library that grounds Stillform's 
+mechanisms. AI-generated when available, static otherwise.
+
+The "Read the study" link goes to the source research. Some 
+studies are openly published; others remain behind academic 
+paywalls.
+
+Stillform isn't affiliated with any of these journals or 
+publishers. The science stands on its own; we cite it 
+because it's proven.
+```
+
+### May 1 evening — Primary-source verification (v4 → v5)
+
+Saved to `/mnt/user-data/outputs/V5_CORPUS_VERIFICATION_COMPLETE.md` (679 lines, 7,940 words). Each of 22 studies verified against PubMed, PMC, or journal page. Every URL fetched live. Each v4 finding compared against the actual abstract / paper text to catch overstatements.
+
+**8 citation/journal corrections found in the Science Sheet** (these propagated into the v4 corpus and are now corrected in v5):
+
+1. **Au et al. 2015** — Journal: *Journal of Advanced Nursing* → **Acupuncture in Medicine** (33(5):353-9)
+2. **Critchley & Garfinkel 2017** — Journal: *Current Opinion in Behavioral Sciences* → **Current Opinion in Psychology** (17:7-14)
+3. **"Goldstein et al. 2007"** for sleep amygdala → **Yoo et al. 2007** in Current Biology (Goldstein is on the 2014 Walker review, not the 2007 primary paper)
+4. **Doll et al. 2015 SCAN** for breathing-DMN claim → **Doll et al. 2016 NeuroImage** (the 2015 paper is about resting-state mindfulness; the 2016 paper is the breath-attention paper)
+5. **Lehrer & Gevirtz 2014** — Journal: *Frontiers in Public Health* → **Frontiers in Psychology** (5:756)
+6. **Eccleston & Crombez 1999** — Journal: *Pain* → **Psychological Bulletin** (125(3):356-66)
+7. **Mehling et al. 2012** — Treated as if it established interoception-emotion correlations directly. Actually the instrument paper (introduces MAIA scale); subsequent studies using MAIA established the correlations
+8. **Ma et al. 2017 cortisol** — Science Sheet says "reduces cortisol levels"; actual finding was significant time effect on cortisol, but NO significant group×time interaction. Strongest findings were on negative affect and sustained attention. Cortisol claim should be softened or framed precisely.
+
+**6 content overstatements fixed in v5 corpus** (places I, the v4-corpus-author Claude, added precision the source didn't support):
+
+- Ma 2017 cortisol claim ("measurably reduced" overstated the actual time-effect-only finding)
+- Mehling 2012 framing (instrument paper, not correlation paper)
+- Ochsner & Gross 2005 "most well-researched" (editorial superlative, not in source)
+- Buhle 2014 generic claim ("reduces negative emotion across designs/methods/populations") replaced with the actual specific finding (cognitive control + lateral temporal cortex + bilateral amygdala modulation, NOT vmPFC)
+- Yoo 2007 stimulus description ("perceived neutral faces as threatening" replaced with "60% greater amygdala activation in response to increasingly aversive stimuli")
+- Genzer 2025 application ("stops being adaptive when depleted" was Stillform extrapolation, not finding from paper)
+
+**10 studies whose v4 entries were largely accurate** with only minor refinement:
+Balban 2023, Lieberman 2007, Torre & Lieberman 2018, Barrett 2001, Kashdan 2015, Hoemann 2021, Meichenbaum 1985, Gollwitzer 1999, Siegel 1999, Wells 2009 / Normann & Morina 2018.
+
+**Honest meta-finding:** The corrections are mostly at the documentation layer — citation errors that propagated from Science Sheet to corpus, plus places where summaries got progressively simpler at each layer. The tools themselves are grounded in real, well-supported research. Nothing in this verification suggests the product was built on misunderstood science. What it does suggest: documentation discipline at every layer matters, and a reviewer who only checks "did this match the Science Sheet" will not catch errors that originated in the Science Sheet.
+
+### Pending — actions out of v5 verification
+
+1. Update Science Sheet to fix the 8 citation/journal errors and soften the Ma 2017 cortisol framing
+2. Replace v4 corpus in `netlify/functions/reframe.js` with v5 (50 findings across 22 studies, multi-angle keys, `paywalled` flag per entry, `source_url` field, "Read the study →" link rendering, multi-finding-per-study routing logic)
+3. Replace `STATIC_SCIENCE_CARDS` in `src/App.jsx` with 20 selected v5 findings
+4. Replace ⓘ modal copy in App.jsx with the locked v4 modal text above
+5. Manual deploy via Netlify (Arlin triggers)
+
+### IP / copyright risk assessment (May 1 evening)
+
+Question raised after v5 verification surfaced the cyclic sighing implementation. Risk surfaces and reads:
+
+- **Cyclic sighing protocol (Balban 2023).** Breathing techniques themselves are not patentable or copyrightable — they are biological practices. The Cell Reports Medicine paper is published CC BY-NC-ND 4.0 (paper text restricted from commercial use; underlying technique is not). No Stanford patent on the protocol exists (the Stanford team and Huberman have publicly promoted the technique through free media). Stillform attributes the source on every science card surfacing the work. **No IP issue.**
+
+- **MAIA scale (Mehling 2012).** The 32-item instrument itself is copyrighted; researchers wanting to administer it follow permission protocols. **Stillform does not administer the MAIA in-product** — we reference interoception research as inspiration for Body Scan but do not deploy the questionnaire. If at any future point we wanted to administer the MAIA in-app, that would need permissions/licensing.
+
+- **Window of Tolerance (Siegel 1999), MCT (Wells 2009), cognitive reappraisal, affect labeling, granularity, implementation intentions.** All scientific concepts and frameworks. Not protected as IP.
+
+- **Acupressure points and protocol.** Traditional Chinese medicine origin, thousands of years old. No IP.
+
+- **Science card prose.** All Stillform corpus entries are original, paraphrased findings in Stillform's own voice with citations. Editorial fair use of academic findings, equivalent to science journalism. No reproduction of paper abstracts, figures, or copyrighted text.
+
+- **Trademark "Stillform"** — separate question; Arlin's locked plan is to file after 100 paying customers; ™ used until then.
+
+**Where real legal review is the right move (not Claude):**
+- Before commercial scaling beyond launch
+- Before launching B2B / clinical channels
+- For trademark filing
+- If any future product surface incorporates a proprietary instrument, validated clinical scale, or branded therapeutic protocol
+
+**The clear-eyed read:** No copyright or patent issue I can see for the launch as currently specified. "No issue I can see" is not the same as "legal clearance." Real legal review for the surfaces above before scaling significantly.
+
 ## 3. Open Issues — Tracked Status
 
 This section is a status snapshot, not an exhaustive list of prelaunch work. The full prelaunch scope lives in `Stillform_Master_Todo.md`. Items here are issues that have been triaged with diagnostic notes attached.
