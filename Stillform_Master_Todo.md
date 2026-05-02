@@ -170,6 +170,57 @@ BODY_FIRST_PRE_RATE_FIX_SPEC.md drafted then retracted Apr 30 after Arlin caught
 
 ---
 
+### AI-as-actor voice audit — review only, May 2
+
+**Captured May 2, 2026 — review only, no edits.**
+
+The audit found that across info modals, FAQ items, system prompts in reframe.js, and one literal UI surface ("What the AI has noticed"), the app reaches for "the AI does X for you" framing instead of "you do X; the AI processes what you give it."
+
+The mechanism is correct — AI does read inputs, process them, and surface user data. The voice register is what's off. Subject of every sentence keeps landing on the AI when it should land on the user.
+
+**Items found (high-leverage first):**
+
+1. **reframe.js system prompts** (CALM_SYSTEM, CLARITY_SYSTEM, HYPE_SYSTEM) — tell the AI to think of itself as "companion" or "coach." Shapes every AI response. Highest-leverage single edit because it cascades through all responses.
+
+2. **"What the AI has noticed"** (App.jsx lines 8073, 8152, 11851) — literal screen title + count label visible to user. UI surface, not info modal.
+
+3. **FAQ "What does the AI do in Reframe?"** (line 16580) — "It identifies what is actually happening... introduces a perspective that interrupts that pattern... separates what is factually present from your read." Three sentences put AI in the diagnostician seat.
+
+4. **FAQ "Does the AI learn about me?"** (line 16584) — "It begins surfacing cross-session observations directly." AI as the one with observations.
+
+5. **FAQ "What is Next Move?"** — "The AI reads your session context and surfaces the relevant options."
+
+6. **FAQ "What is the Bio-Filter?"** — "AI contextualizes your input accurately rather than coaching past..."
+
+7. **FAQ "Can I attach screenshots?"** — "The AI reads visual context to improve coaching."
+
+8. **Reframe info modal "Why Reframe?"** (lines 8608, 8617) — "the AI introduces a perspective that interrupts the loop you're already in." (Shipped May 2 by Claude — Claude's own drift to fix.)
+
+9. **Bio-filter info modal extension** (line 4147) — "the AI updates the predictive model with the actual hardware state." (Shipped May 2 by Claude.)
+
+10. **"Why name your state?" modal** (line 10010) — "the AI can meet you accurately... how the AI interprets what you type." (Shipped May 2 by Claude.)
+
+11. **Privacy/screenshot disclosure** (line 16539) — "the image is sent to the AI model for interpretation."
+
+12. **Hero CTA "Calm my body"** subtitle "Start where the pressure lands" — assumes pressure (separate but related narrowing problem already on audit).
+
+**Voice that would match Arlin's framing:**
+- User reads their own state. The system organizes the inputs.
+- User notices their patterns. The system surfaces what they've already given it.
+- User does the work. The system asks the next question.
+- Stillform is the architecture. The user is the operator.
+
+**Notes for whoever does this work:**
+- Items 8, 9, 10 are Claude's own drift from May 2 and don't count as relitigation.
+- Item 1 (reframe.js system prompts) is invasive — changes how the AI behaves, not just how the app describes itself. Needs care.
+- Item 2 ("What the AI has noticed") is a literal user-facing surface; copy change is also a UX change.
+- Items 3-7 are FAQ canon; whatever voice lands here sets register for the whole app.
+- Hero CTA Group 2 items partially overlap with the existing "narrowing assumptions" surface refinement work — possibly batchable.
+
+**Out of scope today.** Captured for a deliberate voice pass when Arlin chooses to do it.
+
+---
+
 ## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
 ### GPT-4o data picture audit + existing guardrails review (Added May 3, 2026)
