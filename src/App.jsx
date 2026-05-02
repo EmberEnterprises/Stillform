@@ -8276,6 +8276,26 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
         if (w === 0 || h === 0) { setup(); animRef.current = requestAnimationFrame(animate); return; }
         const dpr = window.devicePixelRatio || 1;
         const t = (Date.now() - startRef.current) / 1000;
+        // Read theme-shifted color for trees once per frame so they follow the active theme
+        // (canvas can't use CSS vars directly; we resolve --text-muted to RGB+A here).
+        // Glow + particles stay amber as the warmth anchor — only the trees shift.
+        let treeRgb = [168, 144, 112]; // safe neutral fallback
+        let treeBaseAlpha = 1.0;       // multiplier on top of per-branch depth alpha
+        try {
+          const raw = getComputedStyle(document.documentElement).getPropertyValue("--text-muted").trim();
+          const rgbaMatch = raw.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*([0-9.]+))?\s*\)/);
+          if (rgbaMatch) {
+            treeRgb = [parseInt(rgbaMatch[1], 10), parseInt(rgbaMatch[2], 10), parseInt(rgbaMatch[3], 10)];
+            if (rgbaMatch[4] !== undefined) treeBaseAlpha = parseFloat(rgbaMatch[4]);
+          } else if (raw.startsWith("#")) {
+            const hex = raw.slice(1);
+            if (hex.length === 6) {
+              treeRgb = [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+            } else if (hex.length === 3) {
+              treeRgb = [parseInt(hex[0] + hex[0], 16), parseInt(hex[1] + hex[1], 16), parseInt(hex[2] + hex[2], 16)];
+            }
+          }
+        } catch {}
         ctx.save();
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         ctx.fillStyle = "rgba(10,10,12,0.18)";
@@ -8318,7 +8338,7 @@ function FractalBreathCanvas({ breathScale = 0.5 }) {
           ctx.beginPath();
           ctx.moveTo(b.x, b.y);
           ctx.lineTo(ex, ey);
-          ctx.strokeStyle = `rgba(${180 + Math.floor(warmth * 40)},${120 + Math.floor(warmth * 20)},${40 + Math.floor(warmth * 18)},${alpha})`;
+          ctx.strokeStyle = `rgba(${treeRgb[0]},${treeRgb[1]},${treeRgb[2]},${alpha * treeBaseAlpha})`;
           ctx.lineWidth = Math.max(0.5, (maxDepth - b.depth) * 0.9);
           ctx.lineCap = "round";
           ctx.stroke();
