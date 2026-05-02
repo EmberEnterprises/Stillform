@@ -116,7 +116,7 @@ Example: the morning anchor is grounded in Pillar 4 (neuroplasticity through rep
 - Balban et al. (2023) — *Cell Reports Medicine* 4(1):100895 — "Brief structured respiration practices enhance mood and reduce physiological arousal." n=111 RCT, NCT05304000.
 - Gerritsen & Band (2018) — "Breath of Life: The Respiratory Vagal Stimulation Model" — *Frontiers in Human Neuroscience*
 - Zaccaro et al. (2018) — slow breathing techniques improve autonomic function, emotional control, and psychological well-being — *Frontiers in Human Neuroscience*
-- Ma et al. (2017) — diaphragmatic breathing reduces cortisol levels — *Frontiers in Psychology*
+- Ma et al. (2017) — diaphragmatic breathing reduces negative affect and improves sustained attention; significant time effect on cortisol observed across the breathing intervention period (group×time interaction did not reach significance) — *Frontiers in Psychology*
 
 **If they push back:** "This is respiratory pacing based on autonomic nervous system research. The cyclic sighing pattern specifically outperformed mindfulness meditation in a 2023 Stanford RCT."
 
@@ -169,9 +169,9 @@ The classifier is a pure function: same inputs always produce same output. Easy 
 **The science:** Acupressure works through focused interoceptive attention — directing awareness to specific points on the body interrupts rumination by redirecting cognitive resources to physical sensation. The pressure itself adds parasympathetic activation through tactile vagal stimulation.
 
 **Who says so:**
-- Au et al. (2015) — self-administered acupressure reduces anxiety — *Journal of Advanced Nursing*
-- Mehling et al. (2012) — interoceptive awareness is linked to emotional regulation — *PLOS ONE*
-- Critchley & Garfinkel (2017) — interoception and emotional awareness — *Current Opinion in Behavioral Sciences*
+- Au et al. (2015) — self-administered acupressure reduces anxiety — *Acupuncture in Medicine*
+- Mehling et al. (2012) — Multidimensional Assessment of Interoceptive Awareness (MAIA): development and validation of the 32-item self-report scale that subsequent research has used to link interoceptive awareness to emotion regulation outcomes — *PLOS ONE*
+- Critchley & Garfinkel (2017) — interoception and emotional awareness — *Current Opinion in Psychology*
 
 **If they push back:** "Body Scan isn't alternative medicine. It's structured interoceptive attention — the same principle behind MBSR body scans, just faster and with pressure points."
 
@@ -214,9 +214,9 @@ The classifier is a pure function: same inputs always produce same output. Easy 
 **The science:** Physical states like sleep deprivation, chronic pain, and hormonal changes directly alter emotional perception. A person running on 4 hours of sleep perceives neutral faces as threatening. Misattribution of arousal — reading a biological signal as an emotional one — is well-documented.
 
 **Who says so:**
-- Goldstein et al. (2007) — sleep deprivation amplifies amygdala reactivity — *Current Biology*
+- Yoo et al. (2007) — sleep deprivation amplifies amygdala reactivity (60% greater amygdala activation in response to negative emotional stimuli) — *Current Biology*
 - Schachter & Singer (1962) — two-factor theory of emotion / misattribution of arousal — *Psychological Review*
-- Eccleston & Crombez (1999) — pain demands attentional resources and disrupts cognitive function — *Pain*
+- Eccleston & Crombez (1999) — pain demands attentional resources and disrupts cognitive function — *Psychological Bulletin*
 
 **If they push back:** "'I feel overwhelmed' might actually be 'my system is physically depleted.' The bio-filter prevents misidentifying a hardware problem as a software problem."
 
@@ -337,7 +337,7 @@ Third, the **observation + override pattern parallels supervised learning in the
 - Lieberman et al. (2007) — affect labeling reduces amygdala activity; precise labels activate prefrontal regulation — *Psychological Science*
 - Mehling et al. (2012) — interoceptive awareness as multidimensional construct (MAIA) — *PLOS ONE*
 - Garfinkel et al. (2015) — interoceptive accuracy vs. sensibility; the gap between objective state and felt state is real and trainable — *Biological Psychology*
-- Critchley & Garfinkel (2017) — interoception and emotional awareness — *Current Opinion in Behavioral Sciences*
+- Critchley & Garfinkel (2017) — interoception and emotional awareness — *Current Opinion in Psychology*
 
 **Why this is load-bearing for Stillform's integrity:** without the override pathway, the closing language would be the system telling the user how they feel, which would be both gaslight-coded and conditioning-incorrect (no correction signal, no learning). With the override pathway, the closing language is the system offering a precise label the user can accept or refuse based on felt experience. Future maintenance: the override pathway is structural, not redundant; do not "clean up" or remove the "I don't feel regulated yet" button or its equivalents in adjacent flows. Do not soften the closing language to remove the precise observation; precise observation paired with override authority is what makes the conditioning work.
 
@@ -419,7 +419,7 @@ Third, the **observation + override pattern parallels supervised learning in the
 **Who says so:**
 - Raichle et al. (2001) — "A default mode of brain function" — discovery of DMN — *PNAS*
 - Brewer et al. (2011) — meditation reduces DMN activity — *PNAS*
-- Doll et al. (2015) — mindful breathing shifts activation from DMN to task-positive networks — *Social Cognitive and Affective Neuroscience*
+- Doll et al. (2016) — mindful attention to breath reduces amygdala activation and increases amygdala-prefrontal cortex connectivity — *NeuroImage*
 
 **Stillform application:** The breathing ring, tick marks, and counting demand task-positive attention. The visual focus + counting rhythm + controlled breathing create a triple-lock on DMN suppression. Rumination literally can't run while you're tracking a 4-4-8-2 pattern.
 
@@ -436,7 +436,7 @@ Third, the **observation + override pattern parallels supervised learning in the
 **Who says so:**
 - Thayer & Lane (2000) — HRV as index of regulated emotional responding — *Review of General Psychology*
 - Appelhans & Luecken (2006) — HRV reflects emotion regulation capacity — *Review of General Psychology*
-- Lehrer & Gevirtz (2014) — HRV biofeedback training improves autonomic regulation — *Frontiers in Public Health*
+- Lehrer & Gevirtz (2014) — HRV biofeedback training improves autonomic regulation — *Frontiers in Psychology*
 
 **Stillform application:** The published research on regulation practice and autonomic flexibility (Thayer & Lane 2000; Lehrer et al. 2020) suggests repeated practice is associated with HRV gains over time. Stillform does not yet measure HRV directly. The pre/post rating delta tracks self-reported state shift session by session; the Composure Telemetry heat map tracks practice frequency. The training-flexibility claim from the literature is the mechanism we draw from; we will measure it in our own users when biosensor integration ships.
 
