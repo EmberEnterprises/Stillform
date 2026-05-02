@@ -8140,9 +8140,34 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {/* FINISH */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
+          {/* Lock-in gate: if user picked a Next Move, the lock-in card must be confirmed before finishing.
+              Schön (1983) reflection-on-action consolidates the regulated insight; without it the move doesn't
+              durably encode (Lavi-Rotenberg 2020). Locked May 3 by Arlin: required, no ghost exit. */}
+          {postNextMoveId && !lockInConfirmed && (
+            <div style={{
+              fontSize: 11,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              textAlign: "center",
+              maxWidth: 280,
+              lineHeight: 1.6
+            }}>
+              Tap "Locked in" above to consolidate before finishing.
+            </div>
+          )}
           <button
             className="btn btn-primary"
-            onClick={() => finishReframeSession({ postState: postRating, anchorDraft: externalAnchorDraft })}
+            disabled={postNextMoveId && !lockInConfirmed}
+            onClick={() => {
+              if (postNextMoveId && !lockInConfirmed) return;
+              finishReframeSession({ postState: postRating, anchorDraft: externalAnchorDraft });
+            }}
+            style={{
+              opacity: (postNextMoveId && !lockInConfirmed) ? 0.4 : 1,
+              cursor: (postNextMoveId && !lockInConfirmed) ? "not-allowed" : "pointer"
+            }}
           >
             Finish session
           </button>
@@ -8150,7 +8175,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <button
               className="btn btn-ghost"
               style={{ fontSize: 13, color: "var(--amber)", borderColor: "var(--amber-dim)" }}
-              onClick={() => finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft })}
+              disabled={postNextMoveId && !lockInConfirmed}
+              onClick={() => {
+                if (postNextMoveId && !lockInConfirmed) return;
+                finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft });
+              }}
             >
               Skip and finish
             </button>
