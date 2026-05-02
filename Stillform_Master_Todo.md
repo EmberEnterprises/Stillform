@@ -202,7 +202,7 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## ⚠️ PRELAUNCH — Added April 29, 2026
 
-### 🔒 SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage
+### ✅ SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage — RESOLVED May 3 (commit ef8d8008)
 
 **Status:** Currently only Reframe AI conversations are AES-GCM encrypted on-device (uses `secureSet`/`secureGet` infrastructure with IndexedDB fallback). All other sensitive user data is stored as plain JSON in localStorage and is readable by any code running on stillformapp.com, browser extensions, or anyone with device access.
 
