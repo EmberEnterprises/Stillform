@@ -6879,9 +6879,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   })();
   const isClarity = effectiveMode === "clarity";
   const isHype = effectiveMode === "hype";
-  const openingText = isHype
-    ? "What are you walking into? Name it and what's making it hard."
-    : "What's on your mind?";
+  const openingText = "What's on your mind?";
   const STORAGE_KEY = `stillform_reframe_session_${effectiveMode}`;
   const markLastReframeMode = (nextMode) => {
     try { localStorage.setItem("stillform_reframe_last_mode", nextMode); } catch {}
@@ -8842,7 +8840,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 className="ai-input"
                 style={{ borderColor: input.length > 1800 ? "rgba(200,100,50,0.6)" : mc.border, width: "100%", boxSizing: "border-box" }}
-                placeholder={speech.listening ? "Listening..." : isHype ? "What are you about to face?" : (isClarity && !looksLikePositiveState) ? "What keeps pulling your mind back?" : "What's on your mind..."}
+                placeholder={speech.listening ? "Listening..." : "What's on your mind..."}
                 value={input}
                 maxLength={2000}
                 onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}
