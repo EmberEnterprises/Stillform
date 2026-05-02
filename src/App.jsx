@@ -255,6 +255,96 @@ const styles = `
 
   .btn-ghost:hover { color: var(--amber); }
 
+  /* COMPONENT VOCABULARY — design system step 3 (Apr 30 spec section 209+) */
+
+  /* Instrument card — when a card is genuinely needed (sessions list, settings).
+     Sits with hairline definition + inset top highlight for material depth.
+     Spec: bg ground-elev, hairline border, 4px radius, inset top edge, no shadow. */
+  .card {
+    background: var(--ground-elev);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-default);
+    padding: var(--space-16);
+    box-shadow: inset 0 0.5px 0 rgba(255,255,255,0.025);
+  }
+
+  /* Editorial block — single typographic unit, no bg/border, sits on ground.
+     Spec: small mono label, large serif headline, body text, optional hairline rule.
+     This class applies the spacing rhythm; child elements use t-mono-sm, t-display-md, etc. */
+  .editorial-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    padding: 0;
+    background: transparent;
+    border: none;
+  }
+  .editorial-block > .label { /* small mono label */
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 10px;
+    line-height: 1.30;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin: 0;
+  }
+  .editorial-block > .headline { /* serif display */
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 400;
+    font-size: 28px;
+    line-height: 1.30;
+    color: var(--text-cream);
+    margin: 0;
+  }
+  .editorial-block > .body {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--text);
+    margin: 0;
+  }
+
+  /* Hairline divider — 0.5px in border-printed. Default full width.
+     For Aesop-convention 24-40px centered rule, use .divider.short. */
+  .divider {
+    border: none;
+    border-top: 0.5px solid var(--border-printed);
+    margin: var(--space-32) 0;
+    width: 100%;
+  }
+  .divider.short {
+    width: 32px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .divider.accent {
+    border-top-color: var(--amber-dim);
+  }
+
+  /* Form inputs — instrument feel, not consumer SaaS.
+     Tighter radius, hairline border, subtle elevation. */
+  .field {
+    background: var(--ground-elev);
+    border: 0.5px solid var(--border);
+    border-radius: var(--r-tight);
+    padding: 12px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    width: 100%;
+    transition: border-color var(--motion-default) var(--ease-prestige);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--amber-dim);
+  }
+  .field::placeholder {
+    color: var(--text-muted);
+  }
+
   /* HOME */
   .home {
     display: flex;
