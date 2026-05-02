@@ -63,7 +63,7 @@ These are real open items. Today went through the gating-decisions sequence part
 
 ### Decisions not yet started
 - **Decision 4 (Bio-filter for body-first users):** Currently skippable. Master todo line 565 + line 437 captures the case. Science Sheet describes bio-filter (lines 210-221) and cites Eccleston & Crombez 1999 but does not lock optional vs required. Clinical case for required-for-body-first stands. Not previously decided.
-- **Decision 5 (Calibration "Skip this step"):** Currently allows skipping signal mapping or bias profiler entirely. JAMA Psychiatry 2025 meta-analysis flags asymmetric attrition risk if hard-gated. Recommended fix per master todo: replace skip with "Use defaults" fallback.
+- **Decision 5 (Calibration "Skip this step"):** RESOLVED May 2. "Skip this step →" replaced with "Use defaults →"; deferred-calibration flag set instead of silent skip; AI receives context note instructing it to engage as new user without pattern claims; flag auto-clears when SignalMapTool or MicroBiasTool saves real data. Citations: Liu et al. 2025 (mental health app attrition meta-analysis), UXCam/Zigpoll 2026 (onboarding pre-fill defaults pattern). Earlier "JAMA Psychiatry 2025" citation that appeared in this section was fabricated by Claude and has been corrected.
 
 ## 5. Open prelaunch items (other categories)
 
