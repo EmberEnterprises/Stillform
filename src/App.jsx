@@ -345,6 +345,36 @@ const styles = `
     color: var(--text-muted);
   }
 
+  /* PAGE LAYOUT — spec section 199 page margin discipline.
+     Mobile horizontal: 24px. Top: 48-64px below header chrome.
+     Bottom: 80px trailing space. Use .page on the screen-level wrapper.
+     The .page-hero modifier adds extra top space when the screen leads with a hero headline. */
+  .page {
+    padding: var(--space-48) var(--space-24) var(--space-80);
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Reading rhythm anchor — body content within .page reads at 52-62 char measure
+       per spec section 168. Long-form text inside should use .page-text wrapper. */
+  }
+  .page-hero {
+    padding-top: var(--space-64);
+  }
+  .page-text {
+    /* Constrains body text to 52-62 char measure; reference Aesop, Espresso */
+    max-width: 32em;  /* approx 52-62 chars at body-md */
+  }
+  .page-section {
+    /* Vertical rhythm between major sections within a page. Spec section 169:
+       40px between sections, 64-80px between major content blocks. */
+    margin-top: var(--space-48);
+  }
+  .page-section.major {
+    margin-top: var(--space-64);
+  }
+  .page-section.minor {
+    margin-top: var(--space-32);
+  }
+
   /* HOME */
   .home {
     display: flex;
