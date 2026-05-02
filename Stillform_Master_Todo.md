@@ -74,7 +74,7 @@ What's not right yet:
 
 Not for now — Arlin flagged this as ongoing work to come back to. Future session task: redesign Self Mode's framing, naming, and visual treatment so it stands as the differentiated practice it is.
 
-### ⏳ Pattern Disruption Layer (architectural direction, May 3, 2026)
+### ⏳ Pattern Disruption Layer (architectural direction, May 2, 2026)
 
 The move from legibility-only product to active disruptor. Stillform's existing tools make patterns visible; this layer adds mechanical disruption when a pattern repeats. Arlin's framing: *"this is where it stops being flat and is actually more of a useful tool, and also brings back users, which creates retention."*
 
@@ -223,19 +223,19 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 
 ## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
-### GPT-4o data picture audit + existing guardrails review (Added May 3, 2026)
+### GPT-4o data picture audit + existing guardrails review (Added May 2, 2026)
 
-**The ask (Arlin, May 3):** Before adding more guardrails to the AI surface, understand what GPT-4o's data substrate actually is — what it does with the data we send, what its retention is, what its defaults are — AND review the guardrails Stillform already implemented against that substrate. The point is not to layer more guardrails on assumptions; the point is to verify the guardrails we have actually complement how GPT-4o behaves, across the whole app.
+**The ask (Arlin, May 2):** Before adding more guardrails to the AI surface, understand what GPT-4o's data substrate actually is — what it does with the data we send, what its retention is, what its defaults are — AND review the guardrails Stillform already implemented against that substrate. The point is not to layer more guardrails on assumptions; the point is to verify the guardrails we have actually complement how GPT-4o behaves, across the whole app.
 
 **Why now:** Stillform is no longer just-Reframe-uses-AI. The AI surface has expanded:
 - Reframe text conversations → GPT-4o chat completions
 - Reframe screenshot vision → GPT-4o vision (`detail:"low"`, max 15MB per image)
 - Science cards → GPT-4o chat completions (separate call, its own validation layer)
-- Unified text aggregator (shipped May 3) → feeds buildUnifiedTextContext into every Reframe call, which now includes Self Mode responses, What Shifted free-text, grounding writes, Signal Log entries
+- Unified text aggregator (shipped May 2) → feeds buildUnifiedTextContext into every Reframe call, which now includes Self Mode responses, What Shifted free-text, grounding writes, Signal Log entries
 
 Every textarea the user fills in now has a path to GPT-4o via the unified aggregator. The guardrail layer was designed when Reframe was the only AI surface. It needs review against current scope.
 
-**Single AI provider confirmed:** reframe.js calls only `https://api.openai.com/v1/chat/completions` with `model: "gpt-4o"` (verified May 3 by reading the function). Two call sites (main Reframe response + science card generation) — same endpoint, same key, same retention regime. No Anthropic API calls, no Claude in the picture. The audit is single-substrate.
+**Single AI provider confirmed:** reframe.js calls only `https://api.openai.com/v1/chat/completions` with `model: "gpt-4o"` (verified May 2 by reading the function). Two call sites (main Reframe response + science card generation) — same endpoint, same key, same retention regime. No Anthropic API calls, no Claude in the picture. The audit is single-substrate.
 
 **What needs to be answered (proposed scope of audit doc):**
 
@@ -299,7 +299,7 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## ⚠️ PRELAUNCH — Added April 29, 2026
 
-### ✅ SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage — RESOLVED May 3 (commit ef8d8008)
+### ✅ SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage — RESOLVED May 2 (commit ef8d8008)
 
 **Status:** Currently only Reframe AI conversations are AES-GCM encrypted on-device (uses `secureSet`/`secureGet` infrastructure with IndexedDB fallback). All other sensitive user data is stored as plain JSON in localStorage and is readable by any code running on stillformapp.com, browser extensions, or anyone with device access.
 
@@ -384,7 +384,7 @@ When a user trends toward Category C across multiple sessions (sustained Flat, p
 
 **Framing principle (Arlin's words, captured for future sessions):** "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." This isn't dismissive — it's the correct scope statement. A user with clinical depression that requires medication is not a Stillform failure. A user who could be helped by Stillform but the tool didn't reach them is a separate signal worth understanding from the data feed.
 
-### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default — RESOLVED May 3 (commit f36cdb63)
+### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default — RESOLVED May 2 (commit f36cdb63)
 
 Full prestige design. Replace the current Settings-only static tone with a three-layer system.
 
@@ -408,7 +408,7 @@ The dropdown should also surface the *reason* for the auto-selection ("Gentle �
 
 **Why this matters.** Current tone is a Settings-only static choice. Most users won't dig into Settings during distress. Auto-detect surfaces the appropriate tone in the moment; in-Reframe dropdown gives full control without breaking flow; personalization respects the user who knows what they want.
 
-**Status.** **RESOLVED May 3 (commit f36cdb63):** All three layers shipped.
+**Status.** **RESOLVED May 2 (commit f36cdb63):** All three layers shipped.
 
 - **Layer 1 (auto-detect):** detectSuggestedTone helper computes tone from bio-filter / feelState / input per render. Rules per spec: depleted/pain/sleep -> gentle, excited -> motivational, focused -> direct, long+distress -> gentle, long+composed -> clinical, otherwise null.
 - **Layer 2 (in-Reframe dropdown):** Static tone label replaced with tappable dropdown showing Reason header (Auto/Session/Default) + 5 options with descriptions + reset link. Manual selection sets sessionToneOverride which takes top priority.
@@ -416,11 +416,11 @@ The dropdown should also surface the *reason* for the auto-selection ("Gentle �
 
 `stillform_ai_tone_mode` added to SYNC_KEYS / UNENCRYPTED_SYNC_KEYS / keysToRemove. rehydrateAfterSync extended to restore tone + mode after cloud sync. resolveActiveTone surfaces source ('auto' / 'session' / 'default' / 'fallback') so user always sees why a tone is active.
 
-### ✅ Unified text capture for AI context — RESOLVED May 3 (commits 20a0810a + bbb0f07b + 556a91bc + 3f033319)
+### ✅ Unified text capture for AI context — RESOLVED May 2 (commits 20a0810a + bbb0f07b + 556a91bc + 3f033319)
 
-**Spec source:** Arlin direction May 3 — "I want AI to capture all text areas, not just in self mode, in all of them. So specifically in what shifted captured by AI. So we have the data points so we can move forward and guide them the correct way."
+**Spec source:** Arlin direction May 2 — "I want AI to capture all text areas, not just in self mode, in all of them. So specifically in what shifted captured by AI. So we have the data points so we can move forward and guide them the correct way."
 
-**Shipped May 3:** New `buildUnifiedTextContext` aggregator in App.jsx pulls recent text from every persistence store on the device:
+**Shipped May 2:** New `buildUnifiedTextContext` aggregator in App.jsx pulls recent text from every persistence store on the device:
 - `stillform_shift_events` → shiftLabel free-text from Body Scan + Reframe What Shifted moments
 - `stillform_sessions` → responses{} from Self Mode 5-step protocol (Notice / Name / Recognize / Perspective / Choose)
 - `stillform_grounding_data` → text from grounding 5-senses writes
@@ -454,7 +454,7 @@ Currently line 14242 in App.jsx, `hype: "◌ Get ready"`. The label appears in t
 
 Options to evaluate (Arlin's call, not Claude's): rename for clarity ("Lock in", "Get focused", "Sharpen"), add a one-line description below the label, add an info button next to the label, or hide the label and let the AI's behavior carry the mode. Captured for Arlin to decide. Not Claude's call.
 
-### ✅ FAQ enhancements — chips + search + email link + collapse-by-question + feel chip entry — RESOLVED May 3 (commit bdf3570a)
+### ✅ FAQ enhancements — chips + search + email link + collapse-by-question + feel chip entry — RESOLVED May 2 (commit bdf3570a)
 
 Add to FAQ page:
 - Small chips at the top as hyperlinks for all the questions answered (jump-to-section navigation)
@@ -466,7 +466,7 @@ Add to FAQ page:
 
 Real prelaunch UX win for self-service support.
 
-**RESOLVED May 3 (commit bdf3570a):** Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, and mailto email link with pre-filled subject all shipped. The 'How do the feel chips work?' entry already existed in the FAQ items array (Apr 29 work). Two useState hooks added (faqSearchQuery, faqExpandedSet) alongside existing faqBackScreen. Stable question IDs (slugified) used for both chip nav and expanded-state tracking.
+**RESOLVED May 2 (commit bdf3570a):** Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, and mailto email link with pre-filled subject all shipped. The 'How do the feel chips work?' entry already existed in the FAQ items array (Apr 29 work). Two useState hooks added (faqSearchQuery, faqExpandedSet) alongside existing faqBackScreen. Stable question IDs (slugified) used for both chip nav and expanded-state tracking.
 
 ### ✅ Reframe title doesn't reflect mode — RESOLVED Apr 30
 
@@ -540,17 +540,17 @@ Single-tap entry from home screen and from Medicated bio-filter chip. Stripped-d
 
 **Founder context (private, never marketed).** Stillform was conceived by Arlin during ketamine treatment. The app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning. The low-demand mode serves the broad cognitive-bandwidth-limited population, of which k-hole users are one sub-population.
 
-### ✅ Memory reconsolidation grounding for Reframe — RESOLVED May 3 (commit b3292a97)
+### ✅ Memory reconsolidation grounding for Reframe — RESOLVED May 2 (commit b3292a97)
 
-**RESOLVED May 3 (commit b3292a97):** Added "Why Reframe?" info button next to the AI tab in ReframeTool. Cites Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015). Frames why repeated Reframe sessions on a recurring trigger update what the trigger means at the memory level. Connects to the Pattern Disruption Layer spec — repeat Reframes are reconsolidation opportunities, not redundant work.
+**RESOLVED May 2 (commit b3292a97):** Added "Why Reframe?" info button next to the AI tab in ReframeTool. Cites Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015). Frames why repeated Reframe sessions on a recurring trigger update what the trigger means at the memory level. Connects to the Pattern Disruption Layer spec — repeat Reframes are reconsolidation opportunities, not redundant work.
 
-### ✅ Predictive processing grounding for bio-filter — RESOLVED May 3 (commit b3292a97)
+### ✅ Predictive processing grounding for bio-filter — RESOLVED May 2 (commit b3292a97)
 
-**RESOLVED May 3 (commit b3292a97):** Extended the existing "Why the bio-filter?" modal (line 3889) with a second paragraph citing Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model of itself — the same situation interpreted through a depleted body produces a different prediction than the same situation interpreted through a rested body.
+**RESOLVED May 2 (commit b3292a97):** Extended the existing "Why the bio-filter?" modal (line 3889) with a second paragraph citing Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model of itself — the same situation interpreted through a depleted body produces a different prediction than the same situation interpreted through a rested body.
 
-### ✅ Salience network reset grounding for body-first pathway — RESOLVED May 3 (commit b3292a97)
+### ✅ Salience network reset grounding for body-first pathway — RESOLVED May 2 (commit b3292a97)
 
-**RESOLVED May 3 (commit b3292a97):** Added "Why Body Scan?" info button next to the "Body scan." header in BodyScanTool intro phase. Cites Menon (2011). Frames Body Scan as an attentional rerouting tool, not a calming technique — pulling attention into the body interrupts the salience network's stuck cognitive priority. Sharper than the previous "calms down" framing.
+**RESOLVED May 2 (commit b3292a97):** Added "Why Body Scan?" info button next to the "Body scan." header in BodyScanTool intro phase. Cites Menon (2011). Frames Body Scan as an attentional rerouting tool, not a calming technique — pulling attention into the body interrupts the salience network's stuck cognitive priority. Sharper than the previous "calms down" framing.
 
 ### ✅ Cyclic sighing as third breathing option — RESOLVED Apr 30
 
@@ -560,13 +560,13 @@ Settings picker entry cites the published study. Default behavior preserved — 
 
 **Outreach implication:** Now that Stillform implements her published protocol, this is the single strongest credibility lever for outreach to Dr. Melis Yilmaz Balban (founder of NeuroSmart, top outreach candidate per memory). Direct research overlap, non-competing market.
 
-### ✅ ACT cognitive defusion lineage acknowledgment — RESOLVED May 3 (commit 2218f2b0)
+### ✅ ACT cognitive defusion lineage acknowledgment — RESOLVED May 2 (commit 2218f2b0)
 
-**RESOLVED May 3 (commit 2218f2b0):** Upgraded the Self Mode tab info from static tooltip to full info modal. Names primary lineage as Metacognitive Therapy (Wells 2009) and explicitly acknowledges ACT cognitive defusion (Hayes, Strosahl & Wilson 1999; Han & Kim 2022) as parallel research converging on the same underlying mechanism — creating distance between you and the thought you're having. MCT remains primary framework as required.
+**RESOLVED May 2 (commit 2218f2b0):** Upgraded the Self Mode tab info from static tooltip to full info modal. Names primary lineage as Metacognitive Therapy (Wells 2009) and explicitly acknowledges ACT cognitive defusion (Hayes, Strosahl & Wilson 1999; Han & Kim 2022) as parallel research converging on the same underlying mechanism — creating distance between you and the thought you're having. MCT remains primary framework as required.
 
-### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections — RESOLVED May 3 (commit 71f64903)
+### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections — RESOLVED May 2 (commit 71f64903)
 
-11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Audit completed May 3 against all 18 info modals in App.jsx.
+11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Audit completed May 2 against all 18 info modals in App.jsx.
 
 **Two real misalignments fixed:**
 1. "Why name your state?" modal claimed pre-Reframe-entry naming reduces amygdala activation — now contradicted by Nook 2021 crystallization correction. Reframed to position chip selection as context-setting for the AI, not as the amygdala-reduction effect (which is preserved for POST-regulation labeling claims).
@@ -610,10 +610,10 @@ Body-first user, Composure Check / Settings show normally, but tapping "Calm my 
 ### Optionality decisions still pending
 The Apr 28 audit identified mechanisms the science sheet names as core training but that are currently optional or skippable. Three commits Apr 28 morning fixed the **placement** issues (chips before regulation removed, post-Reframe screen architectural redundancy resolved). The **gating** decisions remain open:
 
-1. **Lock-in card confirmation** — **RESOLVED May 3 (commit `432e4018`).** Required when Next Move selected. Finish button disabled (40% opacity, not-allowed cursor) when `postNextMoveId && !lockInConfirmed`. Instructional line above: "Tap 'Locked in' above to consolidate before finishing." Schön (1983) reflection-on-action + Lavi-Rotenberg 2020 MERIT — durability mechanism preserved. Gate is on the primary path the science endorses; sessions without a Next Move don't engage the Lock-in card so don't get gated.
-2. **Post-rating chip selection** — **RESOLVED May 3 (commit `9a64577b`).** Required with "Unsure" as the legitimate honest exit. 10th chip "Unsure" added to post-rating row in both Reframe and Body Scan What Shifted (memory #18 symmetry). Finish button disabled when postRating is null. classifyShiftDirection gains explicit unsure handler returning `nullReason: "user-unsure"` — distinct from skipped, distinct from unknown-chip. CHIP_DEFINITIONS has full ⓘ definition for Unsure. SHIFT_CHIP_QUADRANTS deliberately does not include Unsure (no quadrant); classifier short-circuits cleanly. Avg Shift unaffected. Lieberman 2007 + Vine 2019 + Nook 2021 — affect-labeling mechanism preserved without forcing inaccurate labels.
-3. **What Shifted textarea** — Vine 2019 / Nook 2021 say free-text labels are scientifically stronger than predetermined choices. **Decision May 3 (Arlin):** keep What Shifted as the optional precision layer (per Science Sheet directive — it stays). The May 3 stance is not 'do we keep it?' but 'do we capture and surface what users write?' — captured via the unified text aggregator commit `20a0810a` + `3f033319`. AI now receives recent What Shifted text from buildUnifiedTextContext alongside Self Mode responses, grounding writes, and Signal Log. Required-vs-optional toggle decision deferred — the data capture and AI continuity are the priority that was actually blocking, and they shipped.
-4. **Bio-filter for body-first users** — currently skippable via Baseline default. Pain users who skip bio-filter route to Breathe instead of Body Scan, which is clinically incorrect per Eccleston & Crombez 1999. Should be a required gate for body-first users; can stay skippable for thought-first.
+1. **Lock-in card confirmation** — **RESOLVED May 2 (commit `432e4018`).** Required when Next Move selected. Finish button disabled (40% opacity, not-allowed cursor) when `postNextMoveId && !lockInConfirmed`. Instructional line above: "Tap 'Locked in' above to consolidate before finishing." Schön (1983) reflection-on-action + Lavi-Rotenberg 2020 MERIT — durability mechanism preserved. Gate is on the primary path the science endorses; sessions without a Next Move don't engage the Lock-in card so don't get gated.
+2. **Post-rating chip selection** — **RESOLVED May 2 (commit `9a64577b`).** Required with "Unsure" as the legitimate honest exit. 10th chip "Unsure" added to post-rating row in both Reframe and Body Scan What Shifted (memory #18 symmetry). Finish button disabled when postRating is null. classifyShiftDirection gains explicit unsure handler returning `nullReason: "user-unsure"` — distinct from skipped, distinct from unknown-chip. CHIP_DEFINITIONS has full ⓘ definition for Unsure. SHIFT_CHIP_QUADRANTS deliberately does not include Unsure (no quadrant); classifier short-circuits cleanly. Avg Shift unaffected. Lieberman 2007 + Vine 2019 + Nook 2021 — affect-labeling mechanism preserved without forcing inaccurate labels.
+3. **What Shifted textarea** — Vine 2019 / Nook 2021 say free-text labels are scientifically stronger than predetermined choices. **Decision May 2 (Arlin):** keep What Shifted as the optional precision layer (per Science Sheet directive — it stays). The May 2 stance is not 'do we keep it?' but 'do we capture and surface what users write?' — captured via the unified text aggregator commit `20a0810a` + `3f033319`. AI now receives recent What Shifted text from buildUnifiedTextContext alongside Self Mode responses, grounding writes, and Signal Log. Required-vs-optional toggle decision deferred — the data capture and AI continuity are the priority that was actually blocking, and they shipped.
+4. **Bio-filter for body-first users** — **RESOLVED May 2** via App.jsx commit `fd09bf0b`. Skip → button removed from BreatheGroundTool's bio-filter screen — bio-filter is now a required gate for everyone (calibration type isn't the right variable; pain demands attentional resources regardless of body-first vs thought-first). Pre-selection from getActiveBioFilter() reads today's prior reading and pre-highlights the matching option in amber-glow state with hint "Your last reading is highlighted — confirm or update." When user selects "Pain active" inside Breathe entry flow, routes to new "bio-filter-suggest-scan" sub-phase showing soft suggestion (Eccleston & Crombez 1999 + Kabat-Zinn 1982 + Reiner 2013 + Farb 2013) with two paths: "Body Scan first" (calls onComplete("scan")) or "Continue to Breathe anyway" (preserves autonomy). Bio-filter value saves before suggestion appears so AI context updates either way.
 5. **Calibration "Skip this step"** — **RESOLVED May 2** via App.jsx + reframe.js commits.
 
 **The change:** "Skip this step →" replaced with "Use defaults →" on calibration step 2 (the Signal Profile + Pattern Check step). Tapping it sets `localStorage.stillform_calibration_deferred = "yes"` and proceeds to home. No fake profiles are created — `signalProfile` and `biasProfile` remain null. Instead, AI receives a context note explaining the user has not completed calibration, instructing it to engage as a new user, avoid pattern claims about body signals or thinking patterns, and limit itself to discovery questions when relevant.
@@ -628,10 +628,10 @@ When the user later completes calibration (either at first run from this entry p
 
 **A note on a prior fabricated citation (called out for the record):** an earlier version of this entry attributed the recommended fix to a "JAMA Psychiatry 2025 meta-analysis on hard-gating attrition risk." Claude wrote that citation today (May 2) without verification and propagated it through master todo, transfer doc, state-of-may-2 doc, and conversation responses. After Arlin pushed back, web search confirmed the cited study does not exist as described. The architectural argument for the fix stands on the verified sources above; the fabricated citation is replaced.
 
-Decisions 1 and 2 resolved May 3 (commits 432e4018 and 9a64577b). Decision 3 reframed and partially addressed via the unified text aggregator (the question shifted from "should we keep it?" to "should we capture what's written?" — and capture shipped). Decisions 4 and 5 deferred to a follow-on session because they're clinical/UX calls that need fresh judgment after the May 3 gating-decision sequence runs to natural pause. Implementing all five today was originally deferred because the placement fixes (commits a121a48a, ae43f4db, c86ec0ba) had to land first to make the gating questions answerable cleanly.
+Decisions 1 and 2 resolved May 2 (commits 432e4018 and 9a64577b). Decision 3 reframed and partially addressed via the unified text aggregator (the question shifted from "should we keep it?" to "should we capture what's written?" — and capture shipped). Decisions 4 and 5 RESOLVED May 2 (commits fd09bf0b for Decision 4 bio-filter required + Pain→Body Scan suggestion, and 954e5d96 + e485c5c7 for Decision 5 calibration Use defaults). Implementing all five today was originally deferred because the placement fixes (commits a121a48a, ae43f4db, c86ec0ba) had to land first to make the gating questions answerable cleanly.
 
-### Trees in Body Scan / Breathe theme mismatch
-The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`. Small visual fix, easy commit, can ship anytime.
+### ✅ Trees in Body Scan / Breathe theme mismatch — RESOLVED May 2 (commit `5ef150d8`)
+FractalBreathCanvas trees now use `var(--text-muted)` per-frame so they follow the active theme. Amber glow under the ring preserved as the warmth anchor.
 
 ### Watch deploy → publish flow on Netlify
 Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Reminder for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
@@ -644,9 +644,9 @@ These items were genuinely open coming into Apr 28 morning and have been resolve
 
 **🧭 Pre-rate flow needed science-grounded redesign for both processing types** — RESOLVED via commit `ae43f4db`. The chip rows in `BreatheGroundTool` pre-rate (line 3228) and `BodyScanTool` pre-rate (line 3880) have been removed entirely per Nook, Satpute & Ochsner (2021, *Affective Science*) + 2024 BMC Psychology fNIRS replication + 2025 Springer N=226 replication. Pre-regulation affect labeling crystallizes the affective state and impedes subsequent reappraisal/mindful acceptance. The PROCESSING_PRIMER copy ("Downshift physiology first; your cognition clears after the body settles") is no longer contradicted by the screen layout — it now matches what the screen actually does. Chips remain in ReframeTool entry (defensible because Reframe IS the cognitive intervention, not pre-regulation cognitive load).
 
-**Architectural redundancy in post-Reframe screen** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 3). Apr 28 commit removed two unreachable screens (`showStateToStatement` and `showPostInsight`) from the codebase entirely — both had setters that never fired from any live code path, so 108 lines of orphaned UI plus their helper functions (`finishStateToStatement`, `skipStateToStatement`, `continueFromPostInsight`) sat in the file but never executed. The Send a message Next Move chip got a proper draft expansion UI underneath it (textarea + Copy/Share/Mark sent), placed between chip selection and Lock-in card per Gollwitzer 1999 + Hallam 2015 implementation intention specificity research. May 3 commit completed the cleanup the Apr 28 commit message claimed but didn't fully ship: the live What Shifted textarea still had stale "(optional)" qualifier on the toggle and stale "Draft one clear message you can send now" placeholder inherited from the message-drafting era. Both fixed May 3.
+**Architectural redundancy in post-Reframe screen** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 2). Apr 28 commit removed two unreachable screens (`showStateToStatement` and `showPostInsight`) from the codebase entirely — both had setters that never fired from any live code path, so 108 lines of orphaned UI plus their helper functions (`finishStateToStatement`, `skipStateToStatement`, `continueFromPostInsight`) sat in the file but never executed. The Send a message Next Move chip got a proper draft expansion UI underneath it (textarea + Copy/Share/Mark sent), placed between chip selection and Lock-in card per Gollwitzer 1999 + Hallam 2015 implementation intention specificity research. May 2 commit completed the cleanup the Apr 28 commit message claimed but didn't fully ship: the live What Shifted textarea still had stale "(optional)" qualifier on the toggle and stale "Draft one clear message you can send now" placeholder inherited from the message-drafting era. Both fixed May 2.
 
-**Static tip removal — partial** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 3). Apr 28 commit established the architectural intent (textarea serves post-regulation affect labeling only — Lieberman 2007, Vine 2019). May 3 commit finished the actual UI cleanup: "(optional)" qualifier removed from toggle (now reads "▸ What shifted?") and stale "Draft one clear message you can send now" placeholder replaced with "In one line — what shifted?" — consistent with Science Sheet section 563-588. The decision about whether What Shifted should be required or optional remains the user's call (decision 3 of the May 3 gating-decisions sequence).
+**Static tip removal — partial** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 2). Apr 28 commit established the architectural intent (textarea serves post-regulation affect labeling only — Lieberman 2007, Vine 2019). May 2 commit finished the actual UI cleanup: "(optional)" qualifier removed from toggle (now reads "▸ What shifted?") and stale "Draft one clear message you can send now" placeholder replaced with "In one line — what shifted?" — consistent with Science Sheet section 563-588. The decision about whether What Shifted should be required or optional remains the user's call (decision 3 of the May 2 gating-decisions sequence).
 
 **Stuck chip status clarification** — RESOLVED earlier (Apr 27 chip-parity work). The chip is live and works in Reframe entry and post-rating. Whether home screen needs a Stuck chip is part of the body-first metacognition access question in the ARCHITECTURAL section.
 
