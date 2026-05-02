@@ -452,11 +452,8 @@ The Apr 28 audit identified mechanisms the science sheet names as core training 
 
 These five gating decisions are deferred to a fresh session post-deploy. Implementing them was deferred today because the placement fixes (commits a121a48a, ae43f4db, c86ec0ba) had to land first to make the gating questions answerable cleanly.
 
-### ✅ Trees in Body Scan / Breathe theme mismatch — RESOLVED May 2 (no longer applicable)
-
-Audit May 2: there are no trees in the current codebase. Comprehensive search across `BreatheGroundTool`, `BodyScanTool`, and `public/` assets found no tree/forest/silhouette/landscape graphics. The breathing screen renders only the SVG ring (track + arc + tick marks + center circle); the body scan renders only the body schematic SVGs. Whatever decorative tree element existed when this entry was written has been removed in a prior refactor — most likely during the Apr 30 prestige refresh authorization or earlier visual cleanup work.
-
-Nothing to fix. Closing as no-longer-applicable rather than leaving as a phantom todo for future sessions to trip on.
+### Trees in Body Scan / Breathe theme mismatch
+The trees graphic at the bottom of the breathing screen renders in fixed orange/amber color regardless of active theme. On the teal theme this creates dissonance (orange trees against teal breathing ring). **The amber glow under the ring is doing useful work as a warmth anchor and Arlin wants to keep it.** Recommended fix: change trees to `var(--text-muted)` or a desaturated neutral so they shift with theme (brown-ish on dark, muted teal-gray on teal, muted rose on rose). Glow stays warm amber as the one accent note. Trees are a grounding visual element — quiet color makes more design sense than competing accent. Inside `BreatheGroundTool`. Small visual fix, easy commit, can ship anytime.
 
 ### Watch deploy → publish flow on Netlify
 Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Reminder for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
