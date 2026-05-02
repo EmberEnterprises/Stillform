@@ -3670,7 +3670,24 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   );
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
-  const [bioFilter, setBioFilter] = useState(isLowDemand ? "medicated" : null);
+  const [bioFilter, setBioFilter] = useState(isLowDemand ? "medicated" : (() => {
+    // Pre-select last bio-filter answer if from today's Stillform-day.
+    // getActiveBioFilter returns "" if stale or missing, otherwise the stored value
+    // (which may be a single id like "pain" or a comma-joined string like "depleted,sleep"
+    // from morning check-in). The screen below uses single-id state, so pick the first
+    // token that matches one of the screen's options.
+    try {
+      const stored = getActiveBioFilter();
+      if (!stored) return null;
+      const SCREEN_OPTIONS = ["clear", "activated", "depleted", "gut", "sleep", "hormonal", "pain", "medicated"];
+      const tokens = String(stored).split(",").map(t => t.trim());
+      // Prefer non-clear flags first (they're the clinically meaningful signals).
+      const nonClear = tokens.find(t => SCREEN_OPTIONS.includes(t) && t !== "clear");
+      if (nonClear) return nonClear;
+      const anyMatch = tokens.find(t => SCREEN_OPTIONS.includes(t));
+      return anyMatch || null;
+    } catch { return null; }
+  })());
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override via chips
     try {
@@ -4138,6 +4155,55 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   );
 
   // Bio-filter — physical state check before session
+  // Decision 4 (May 2): required gate — Skip removed. Pre-selection from getActiveBioFilter
+  // honors today's prior reading so the user confirms in one tap rather than re-entering.
+  // Decision 5b: when Pain is selected, route to "bio-filter-suggest-scan" sub-phase
+  // showing the BioFilterSuggestion-style soft suggestion to switch to Body Scan
+  // (Eccleston & Crombez 1999 — pain demands attentional resources before cognition lands).
+  if (phase === "bio-filter-suggest-scan") return (
+    <div style={{ maxWidth: 400, margin: "0 auto" }}>
+      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 6 }}>
+        Quick check before Breathe.
+      </h2>
+      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+        Pain present
+      </div>
+      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 20 }}>
+        Pain pulls cognitive resources before you can think clearly. A short body scan locates and softens it first — that's the most effective sequence the research supports. You opened Breathe, but Body Scan is the closer fit right now.
+      </div>
+      <button onClick={() => onComplete("scan")} style={{
+        width: "100%", padding: "14px 18px",
+        background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+        borderRadius: "var(--r)", cursor: "pointer",
+        fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+        WebkitTapHighlightColor: "transparent", marginBottom: 8
+      }}>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--amber)", marginBottom: 2 }}>Body Scan first</div>
+        <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>Locate the signal, then breathe.</div>
+      </button>
+      <button onClick={() => setPhase("breathe")} style={{
+        width: "100%", padding: "10px 18px",
+        background: "transparent", border: "0.5px solid var(--border)",
+        borderRadius: "var(--r)", cursor: "pointer",
+        fontFamily: "'DM Sans', sans-serif", textAlign: "left",
+        color: "var(--text-muted)", fontSize: 13,
+        WebkitTapHighlightColor: "transparent", marginBottom: 12
+      }}>
+        Continue to Breathe anyway
+      </button>
+      <button onClick={() => setInfoModal({
+        title: "Why Body Scan first?",
+        body: "Pain demands attentional resources before cognition can do its work (Eccleston & Crombez, 1999). A short body scan is the most-researched intervention — Kabat-Zinn (1982) MBSR, Reiner et al. (2013) showed measurable pain reduction from a 10-minute scan, and Farb et al. (2013) showed it shifts processing from cognitive evaluation to bottom-up sensing. This is a state-based suggestion. Your processing type is unchanged."
+      })} style={{
+        background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer",
+        fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase"
+      }}>
+        ⓘ Why
+      </button>
+    </div>
+  );
+
+  // Bio-filter — physical state check before session
   if (phase === "bio-filter") return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6 }}>
@@ -4147,7 +4213,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When the bio-filter surfaces depleted, in pain, sleep-deprived, the AI updates the predictive model with the actual hardware state. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
-        Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.
+        Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.{bioFilter && <span style={{ display: "block", marginTop: 8, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>Your last reading is highlighted — confirm or update.</span>}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
         {[
@@ -4163,7 +4229,13 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
           <button key={opt.id} onClick={() => {
             setBioFilter(opt.id);
             setActiveBioFilter(opt.id);
-            setPhase("breathe");
+            // Decision 5b: Pain inside Breathe → suggest Body Scan instead.
+            // User can switch (clinical fit) or continue to Breathe (autonomy preserved).
+            if (opt.id === "pain") {
+              setPhase("bio-filter-suggest-scan");
+            } else {
+              setPhase("breathe");
+            }
           }} style={{
             width: "100%", background: bioFilter === opt.id ? "var(--amber-glow)" : "var(--surface)",
             border: `0.5px solid ${bioFilter === opt.id ? "var(--amber-dim)" : "var(--border)"}`,
@@ -4180,12 +4252,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
           </button>
         ))}
       </div>
-      <button onClick={() => { setBioFilter("clear"); setPhase("breathe"); }} style={{
-        background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer",
-        fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase"
-      }}>
-        Skip →
-      </button>
+      {/* Skip button removed — Decision 4 (May 2): bio-filter is now required.
+          Pre-selection from today's prior reading reduces friction; the gate is on engagement,
+          not on a specific answer. User can still confirm "Baseline" with one tap if accurate. */}
     </div>
   );
 
