@@ -429,9 +429,15 @@ Settings picker entry cites the published study. Default behavior preserved — 
 
 Self Mode 5-step protocol (Notice, Name, Recognize, Perspective, Choose) overlaps with ACT cognitive defusion. MCT remains primary framework. Add Hayes, Strosahl & Wilson (1999) and Han & Kim (2022) acknowledgment to Self Mode info copy and Science Sheet Self Mode section. ErrorBoundary-blocked for in-app copy.
 
-### In-app info button copy alignment with Apr 28 Science Sheet corrections
+### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections — RESOLVED May 3 (commit 71f64903)
 
-11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Wherever those claims appear in App.jsx ⓘ buttons, copy needs to match the corrected Science Sheet. Diagnostic step: grep App.jsx for the changed strings (60-90 seconds, 60 BPM, 20-30%, Lieberman, etc.) and produce a punch list. ErrorBoundary-blocked.
+11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Audit completed May 3 against all 18 info modals in App.jsx.
+
+**Two real misalignments fixed:**
+1. "Why name your state?" modal claimed pre-Reframe-entry naming reduces amygdala activation — now contradicted by Nook 2021 crystallization correction. Reframed to position chip selection as context-setting for the AI, not as the amygdala-reduction effect (which is preserved for POST-regulation labeling claims).
+2. "Sessions" modal claimed each session is autonomic flexibility training — overclaim per Science Sheet line 441 which explicitly says Stillform doesn't measure HRV directly. Softened to "regulation practice" with literature framed as "mechanism Stillform draws from."
+
+16 other modals audited and confirmed aligned with current Science Sheet (Yoo 2007 bio-filter, Lieberman + Vine + Nook for What Shifted, Schön for Lock-in, Barrett for Signal Log, Gollwitzer for Next Move + outcome, Meichenbaum for Day Streak, no overclaim for analytical metrics).
 
 ---
 
