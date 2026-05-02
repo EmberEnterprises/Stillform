@@ -48,18 +48,24 @@ const styles = `
   input, textarea { -webkit-user-select: text; user-select: text; }
 
   :root {
-    /* GROUNDS — surface matches bg so cards read as bordered-on-ground (Aesop/MUBI/Espresso convention).
-       Surface2 is a whisper above for genuinely-nested elements (modals, inset stats).
-       Apr 30: previous --surface was too elevated, made cards read as gray-on-black low-fi.
-       Reference: prestige editorial cards sit ON the ground, defined by hairlines, not by lighter fills. */
-    --bg:         #08080A;
-    --surface:    #08080A;
-    --surface2:   #0C0C10;
+    /* GROUNDS — surface matches bg so default cards read as bordered-on-ground
+       (Aesop/MUBI/Espresso convention). The --ground-elev tokens exist for
+       situations that genuinely need elevation (modals, inputs, nested forms),
+       not for default cards. Apr 30 design system spec confirms both:
+       "instrument cards" on ground with hairlines, "modals/nested" on elev. */
+    --bg:           #08080A;
+    --surface:      #08080A;   /* default surface = ground (cards on ground) */
+    --surface2:     #0C0C10;   /* whisper-above for inset stats */
+    --ground-elev:  #111114;   /* genuine elevation: modals, primary inputs */
+    --ground-elev-2:#16161A;   /* secondary elevation: nested inputs in modals */
 
     /* BORDERS — hairline, printed-not-drawn */
-    --border:     rgba(255,255,255,0.06);
-    --border-hi:  rgba(255,255,255,0.10);
+    --border:         rgba(255,255,255,0.06);
+    --border-hi:      rgba(255,255,255,0.10);
     --border-printed: rgba(255,255,255,0.04);
+    /* Spec-aliased names for design-system-aware components */
+    --border-hairline: var(--border);
+    --border-emphasis: var(--border-hi);
 
     /* ACCENT — antiqued metallic, used at <5% of any screen, never as fill */
     --amber:      #B8862B;
@@ -67,12 +73,21 @@ const styles = `
     --amber-glow: rgba(184,134,43,0.06);
     --amber-20:   rgba(184,134,43,0.20);
     --amber-deep: #8C6420;
+    /* Spec-aliased names */
+    --accent:      var(--amber);
+    --accent-deep: var(--amber-deep);
+    --accent-glow: var(--amber-glow);
+    --accent-line: var(--amber-dim);
 
     /* TEXT — cream-on-black for editorial, primary white for system */
     --text:       #E8EAF0;
     --text-cream: #EDE8DC;
     --text-dim:   rgba(232,234,240,0.62);
     --text-muted: rgba(232,234,240,0.40);
+    /* Spec-aliased names — design-system-aware components can use either */
+    --text-primary: var(--text);
+    --text-quiet:   var(--text-dim);
+    --text-faint:   var(--text-muted);
 
     /* STATE — subtle tonal shifts, never bold */
     --state-positive: #8FA88A;
@@ -83,10 +98,14 @@ const styles = `
     --green:      #8FA88A;
     --green-glow: rgba(143,168,138,0.08);
 
-    /* RADIUS — tighter, printed feel */
-    --r-sm: 2px;
-    --r:    3px;
-    --r-lg: 4px;
+    /* RADIUS — tighter, printed feel; aligned with design system spec 2/4/6 */
+    --r-tight:    2px;     /* inputs, small buttons, status pills */
+    --r-default:  4px;     /* cards, primary buttons */
+    --r-large:    6px;     /* modals, hero containers — used sparingly */
+    /* Legacy aliases for existing components — point to spec-correct values */
+    --r-sm: var(--r-tight);    /* was 2px — unchanged */
+    --r:    var(--r-default);  /* was 3px — now 4 per spec */
+    --r-lg: var(--r-large);    /* was 4px — now 6 per spec */
 
     /* SPACING SCALE — defined rhythm, no arbitrary values */
     --space-2: 2px;
@@ -112,7 +131,13 @@ const styles = `
 
   html, body, #root {
     height: 100%;
-    background: var(--bg);
+    /* Cinematic depth via barely-visible radial gradient at center.
+       Per spec: "saturated dark with subtle dimensionality" (Linear, Hermès).
+       2% lightness shift toward center, transparent past 60%. Body is not
+       flat #08080A; it has the slightest center-glow on ground. */
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(255,255,255,0.018) 0%, transparent 60%),
+      var(--bg);
     /* Mac-only crispness — forces grayscale antialiasing instead of subpixel.
        Subpixel rendering produces RGB color fringes on glyphs that fight with
        any non-solid background (gradients, transparency) and read as 'blurry'
