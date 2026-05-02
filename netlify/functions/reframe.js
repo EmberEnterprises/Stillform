@@ -1210,7 +1210,7 @@ exports.handler = async function(event) {
       // Determine route key based on session context
       let routeKey = "generic";
       if (lastTool === "breathe") {
-        routeKey = lastBreathPattern === "cyclic_sighing" ? "breathe_cyclic" : "breathe_other";
+        routeKey = lastBreathPattern === "cyclic_sigh" ? "breathe_cyclic" : "breathe_other";
       } else if (lastTool === "scan") {
         routeKey = "scan";
       } else if (lastTool === "reframe") {
