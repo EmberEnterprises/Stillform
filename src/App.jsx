@@ -2701,9 +2701,9 @@ function buildShiftEvent({ source, toolId, toolMode, preState, postState, shiftL
   };
 }
 
-// =============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
 // Unified text context aggregator
-// =============================================================================
+// ─────────────────────────────────────────────────────────────────────────────
 // Purpose: pull the recent user-written text from EVERY persistence store on the
 // device into a single structured context that AI can read at session start.
 //
