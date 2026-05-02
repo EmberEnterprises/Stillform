@@ -3886,7 +3886,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         State read.
       </h2>
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
-        <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+        <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When the bio-filter surfaces depleted, in pain, sleep-deprived, the AI updates the predictive model with the actual hardware state. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
         Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.
@@ -4789,9 +4789,23 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
   if (phase === "intro") return (
     <div style={{ maxWidth: 400, margin: "0 auto", padding: "0 8px" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6, textAlign: "center" }}>
-        Body scan.
-      </h2>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "baseline", gap: 6, marginBottom: 6 }}>
+        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, margin: 0 }}>
+          Body scan.
+        </h2>
+        {setInfoModal && (
+          <button
+            onClick={() => setInfoModal({
+              title: "Why Body Scan?",
+              body: "Body Scan redirects attention from cognitive content to physical sensation. The science: focused interoceptive attention shifts which brain network is in the foreground. The salience network — the system that decides what your brain attends to — gets reset by deliberate attention to body signals (Menon 2011). When the loop is in your head, the salience network is stuck on cognitive content. Pulling attention into the body interrupts that priority and lets attention re-allocate.\n\nThis is why body-first works for spirals where reframing alone doesn't land. You can't think your way out of a state your nervous system is still in. The body scan isn't a calming technique — it's an attentional rerouting that creates the conditions for cognition to clear afterward."
+            })}
+            aria-label="Why Body Scan?"
+            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
+          >
+            ⓘ
+          </button>
+        )}
+      </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 24, textAlign: "center" }}>
         Six areas, head to feet. Notice what's there before you change anything.
       </div>
@@ -8119,10 +8133,38 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             borderBottom: activeReframeTab === "ai" ? "2px solid var(--amber)" : "2px solid transparent",
             padding: "8px 0", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase",
             color: activeReframeTab === "ai" ? "var(--amber)" : "var(--text-muted)",
-            cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.2s"
+            cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", transition: "all 0.2s",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
           }}
         >
           AI
+          {setInfoModal && (
+            <span
+              role="button"
+              aria-label="Why Reframe with AI?"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                setInfoModal({
+                  title: "Why Reframe?",
+                  body: "Reframe is conversational reappraisal — the AI introduces a perspective that interrupts the loop you're already in. Cognitive reappraisal is the most-supported emotion regulation strategy in neuroimaging research; conversational scaffolding lowers the friction at the moment of distress, when self-directed reappraisal is hardest.\n\nThe deeper mechanism: memory reconsolidation. When a memory or pattern is recalled in an activated state and paired with new information that contradicts the original interpretation, the memory itself updates — not just the immediate response (Ecker, Ticic & Hulley 2012; Schiller et al. 2010, Nature; Lane et al. 2015). Repeated Reframe sessions on a recurring trigger don't just give you new tools to manage the trigger — they update what the trigger means at the memory level. This is why Stillform tracks repeat Reframes on the same theme: each pass through is a reconsolidation opportunity, not redundant work."
+                });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setInfoModal({
+                    title: "Why Reframe?",
+                    body: "Reframe is conversational reappraisal — the AI introduces a perspective that interrupts the loop you're already in. Cognitive reappraisal is the most-supported emotion regulation strategy in neuroimaging research; conversational scaffolding lowers the friction at the moment of distress, when self-directed reappraisal is hardest.\n\nThe deeper mechanism: memory reconsolidation. When a memory or pattern is recalled in an activated state and paired with new information that contradicts the original interpretation, the memory itself updates — not just the immediate response (Ecker, Ticic & Hulley 2012; Schiller et al. 2010, Nature; Lane et al. 2015). Repeated Reframe sessions on a recurring trigger don't just give you new tools to manage the trigger — they update what the trigger means at the memory level. This is why Stillform tracks repeat Reframes on the same theme: each pass through is a reconsolidation opportunity, not redundant work."
+                  });
+                }
+              }}
+              style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer", fontFamily: "sans-serif", lineHeight: 1 }}
+            >
+              ⓘ
+            </span>
+          )}
         </button>
         <button
           onClick={() => setActiveReframeTab("self")}
