@@ -29,6 +29,41 @@
 
 ---
 
+## MAY 2, 2026 SESSION — All work logged
+
+### Code commits shipped May 2 (5 corpus shipment commits + 1 bug fix)
+
+- [x] **Transfer Doc Section 2.5 expanded** (commit 8b7c22b9) — v5 corpus verification log + IP risk assessment
+- [x] **Science Sheet 8 citation corrections** (commit 24dcab4c) — journal name fixes + Ma 2017 cortisol nuance
+- [x] **reframe.js v5 corpus replacement** (commit ae230472) — 50 multi-angle findings across 22 verified studies, routes table updated, AI prompt voice updated, ownership rule added, validator loosened 30→20 word minimum
+- [x] **reframe.js source_url + paywalled API response** (commit 05b8c022) — looked up from corpus by topic, passed to client
+- [x] **App.jsx v5 STATIC_SCIENCE_CARDS + Read the study link + locked v4 modal copy** (commit e5956049) — 20 v5 entries with paywalled flag and source_url, link rendering with paywalled suffix and Plausible event, four-paragraph modal text
+- [x] **Cyclic sighing routing fix** (commit 2f331770) — `lastBreathPattern === "cyclic_sighing"` corrected to `"cyclic_sigh"` to match App.jsx pattern ID
+
+### Engineering accountability — May 2 introduced bug
+
+The cyclic sighing routing bug was introduced May 1 by me (Claude) in commit c18d7fc3 (Science Card server-side build). I wrote `lastBreathPattern === "cyclic_sighing"` without grepping App.jsx for the canonical pattern ID — it's `"cyclic_sigh"` (no -ing). Bug went undetected for a full day.
+
+Caught in this session only because Arlin pushed back when I said "this was a pre-existing bug" — turned out git blame on the line pointed straight to my May 1 commit. Without her pushback I would have shipped the deploy with the broken routing still on prod.
+
+What this means for future sessions:
+- Same class of mistake as May 1's three broken builds (writing code without reading surrounding context first)
+- Operating rule from yesterday — "After every code commit, file should be re-read from main and visually inspected" — caught build errors but doesn't catch *correct-syntax* logic bugs against caller assumptions
+- Better fix: before writing any code that compares to a string identifier (pattern IDs, route keys, mode names), grep the codebase for what the actual canonical value is. Do not assume.
+- Track record this week: if I introduce a bug, I am unlikely to catch it without Arlin's pushback. The diagnostic discipline lives with Arlin, not me.
+
+### Documentation commits May 2
+
+- [x] Transfer Doc Section 2.5 expanded with v5 verification log + IP risk assessment
+- [x] Science Sheet 8 citation corrections
+- [x] Punch List: this section
+
+### Pending
+
+- [ ] **Netlify trigger + publish** — Arlin triggers and publishes when ready; deploys all 6 queued commits
+
+---
+
 ## MAY 1, 2026 SESSION — All work logged
 
 ### Code commits shipped May 1 (8 substantive + 3 follow-up build fixes)
