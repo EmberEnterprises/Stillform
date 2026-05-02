@@ -319,7 +319,7 @@ Currently line 14242 in App.jsx, `hype: "◌ Get ready"`. The label appears in t
 
 Options to evaluate (Arlin's call, not Claude's): rename for clarity ("Lock in", "Get focused", "Sharpen"), add a one-line description below the label, add an info button next to the label, or hide the label and let the AI's behavior carry the mode. Captured for Arlin to decide. Not Claude's call.
 
-### FAQ enhancements — chips + search + email link + collapse-by-question + feel chip entry
+### ✅ FAQ enhancements — chips + search + email link + collapse-by-question + feel chip entry — RESOLVED May 3 (commit bdf3570a)
 
 Add to FAQ page:
 - Small chips at the top as hyperlinks for all the questions answered (jump-to-section navigation)
@@ -329,7 +329,9 @@ Add to FAQ page:
 - **Add FAQ entry "How do the feel chips work?" (added Apr 29):** Comprehensive entry grounded in published mechanism. Covers: (1) affect labeling regulation effect (Lieberman 2007), (2) state-matched routing — Distant→Body Scan, calm/clarity/hype mode bias, (3) auto-log to Signal Log + bio-filter pairing, (4) pre/post tracking and longitudinal pattern, (5) persistence across the day until What Shifted or next morning check-in, (6) protective behaviors at high activation (Ghost Echo suppression, Self Mode nudge for angry/anxious/mixed states), (7) granularity over time (Barrett 2001 family). Replaces the upper-right Reframe mode label that was removed Apr 29. Draft text in `/mnt/user-data/outputs/FAQ_DRAFTS.md`.
 - **What each chip means** lives on the chips themselves via ⓘ button (separate item below), not in the FAQ. Definitions belong at point-of-selection where the user actually needs them, not buried in a help section.
 
-Real prelaunch UX win for self-service support. ErrorBoundary-blocked for shipping.
+Real prelaunch UX win for self-service support.
+
+**RESOLVED May 3 (commit bdf3570a):** Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, and mailto email link with pre-filled subject all shipped. The 'How do the feel chips work?' entry already existed in the FAQ items array (Apr 29 work). Two useState hooks added (faqSearchQuery, faqExpandedSet) alongside existing faqBackScreen. Stable question IDs (slugified) used for both chip nav and expanded-state tracking.
 
 ### ✅ Reframe title doesn't reflect mode — RESOLVED Apr 30
 
