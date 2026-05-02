@@ -1162,6 +1162,7 @@ exports.handler = async function(event) {
       imageData = null,
       imageMimeType = "image/jpeg",
       journalContext = null,
+      textHistoryContext = null,
       checkinContext = null,
       eodContext = null,
       travelContext = null,
@@ -1493,6 +1494,18 @@ exports.handler = async function(event) {
       } else {
         contextParts.push(`PULSE ENTRIES (for context only — DO NOT reference patterns yet, user is still building trust):\n${journalContext}`);
       }
+    }
+
+    // Unified text history — recent text the user has written across all tools
+    // (What Shifted from Reframe + Body Scan, Self Mode 5-step responses, grounding writes,
+    // Signal Log entries with triggers). Pulled synchronously from the device; AI-down
+    // resilient — when AI returns from an outage, this naturally surfaces text the user
+    // wrote during the gap because it reads whatever is stored locally.
+    if (textHistoryContext && sessionCount >= 3) {
+      contextParts.push(`${textHistoryContext}\nUse these to recognize patterns and demonstrate continuity. If a theme is recurring across tools, name it naturally — never quote entries back verbatim. If the text was written during a period when you (the AI) were unavailable, do not flag that explicitly; just engage with what the user has been working on.`);
+    }
+    if (textHistoryContext && sessionCount < 3) {
+      contextParts.push(`${textHistoryContext}\nFor context only — do not reference patterns yet, user is still building trust. Engage naturally with what they bring up; do not surface this material proactively.`);
     }
 
     // AI session notes — compressed history from previous sessions
