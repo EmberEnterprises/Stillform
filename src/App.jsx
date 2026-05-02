@@ -2701,6 +2701,147 @@ function buildShiftEvent({ source, toolId, toolMode, preState, postState, shiftL
   };
 }
 
+// =============================================================================
+// Unified text context aggregator
+// =============================================================================
+// Purpose: pull the recent user-written text from EVERY persistence store on the
+// device into a single structured context that AI can read at session start.
+//
+// AI-down resilience: this function is read-only and synchronous. It does not
+// touch the network. Whatever the user wrote during an AI outage (What Shifted
+// labels in shift events, Self Mode responses on session records, grounding
+// writes, Signal Log entries) is captured locally regardless of AI status. When
+// AI returns, this function naturally surfaces that text — no special "catch up"
+// path needed because the data layer was never AI-dependent in the first place.
+//
+// Storage stores it reads from:
+//   - stillform_shift_events  → shiftLabel free-text from Body Scan + Reframe What Shifted
+//   - stillform_sessions      → responses{} from Self Mode 5-step protocol
+//   - stillform_grounding_data → text from grounding 5-senses writes
+//   - stillform_journal       → existing Signal Log entries (already fed via journalContext)
+//
+// Output shape: a structured string the AI prompt template can include verbatim.
+// Each entry tagged with origin + relative date so the AI can reason about
+// recency. Hard cap on length to keep token budget bounded.
+function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
+  const now = Date.now();
+  const cutoff = now - (dayLookback * 24 * 60 * 60 * 1000);
+  const all = [];
+
+  // 1. Shift events with non-empty shiftLabel (post-Reframe + post-Body-Scan What Shifted)
+  try {
+    const events = getShiftEventsFromStorage();
+    for (const e of events) {
+      if (!e || !e.shiftLabel) continue;
+      const ts = e.timestamp ? new Date(e.timestamp).getTime() : 0;
+      if (ts < cutoff) continue;
+      const tool = e.toolId === "scan" ? "Body Scan" : "Reframe";
+      all.push({
+        ts,
+        date: e.date || "",
+        origin: `What Shifted (${tool})`,
+        text: String(e.shiftLabel).trim(),
+        preState: e.preState || null,
+        postState: e.postState || null
+      });
+    }
+  } catch {}
+
+  // 2. Self Mode session responses (the 5-step protocol: Notice / Name / Recognize / Perspective / Choose)
+  try {
+    const sessions = getSessionsFromStorage();
+    for (const s of sessions) {
+      if (!s || !s.responses || typeof s.responses !== "object") continue;
+      const ts = s.timestamp ? new Date(s.timestamp).getTime() : 0;
+      if (ts < cutoff) continue;
+      const labels = ["Notice", "Name", "Recognize", "Perspective", "Choose"];
+      const filled = [];
+      for (let i = 0; i < labels.length; i++) {
+        const v = String(s.responses[i] || "").trim();
+        if (v) filled.push(`${labels[i]}: ${v}`);
+      }
+      if (filled.length === 0) continue;
+      all.push({
+        ts,
+        date: s.timestamp ? s.timestamp.slice(0, 10) : "",
+        origin: "Self Mode",
+        text: filled.join(" | "),
+        preState: s.preState || null,
+        postState: null
+      });
+    }
+  } catch {}
+
+  // 3. Grounding writes (5-senses)
+  try {
+    const grounding = secureRead("stillform_grounding_data", []);
+    if (Array.isArray(grounding)) {
+      for (const g of grounding) {
+        if (!g || !Array.isArray(g.steps)) continue;
+        const ts = g.timestamp ? new Date(g.timestamp).getTime() : 0;
+        if (ts < cutoff) continue;
+        const written = g.steps.filter(st => st && st.text && String(st.text).trim().length > 0);
+        if (written.length === 0) continue;
+        const summary = written.map(st => `${st.sense}: ${String(st.text).trim()}`).join(" | ");
+        all.push({
+          ts,
+          date: g.timestamp ? g.timestamp.slice(0, 10) : "",
+          origin: "Grounding",
+          text: summary,
+          preState: null,
+          postState: null
+        });
+      }
+    }
+  } catch {}
+
+  // 4. Signal Log entries with trigger text (manually authored, not auto-logged)
+  // Already partially covered by journalContext, but consolidating here gives AI a single
+  // unified text feed. The reframe.js prompt can deduplicate naturally.
+  try {
+    const journal = secureRead("stillform_journal", []);
+    if (Array.isArray(journal)) {
+      for (const j of journal) {
+        if (!j || j.source === "reframe-auto") continue;
+        const trig = String(j.trigger || "").trim();
+        if (!trig) continue;
+        const ts = j.timestamp ? new Date(j.timestamp).getTime() : (j.date ? new Date(j.date).getTime() : 0);
+        if (ts < cutoff) continue;
+        const emo = Array.isArray(j.emotions) && j.emotions.length ? ` (${j.emotions.join(", ")})` : "";
+        const out = j.outcome ? ` → ${j.outcome}` : "";
+        all.push({
+          ts,
+          date: j.date || "",
+          origin: "Signal Log",
+          text: `${trig}${emo}${out}`,
+          preState: null,
+          postState: null
+        });
+      }
+    }
+  } catch {}
+
+  // Sort newest first, cap to maxEntries
+  all.sort((a, b) => b.ts - a.ts);
+  const capped = all.slice(0, maxEntries);
+  if (capped.length === 0) return null;
+
+  // Format for AI prompt: tagged origin + date + text. Keep compact.
+  // Header tells the AI what this is and how to treat it (pattern recognition only,
+  // do not quote back unless the user asks; do reference patterns naturally).
+  const lines = capped.map(e => {
+    const stateTag = (e.preState || e.postState)
+      ? ` [${e.preState || "?"}→${e.postState || "?"}]`
+      : "";
+    const dateTag = e.date ? `[${e.date}] ` : "";
+    return `${dateTag}${e.origin}${stateTag}: ${e.text}`;
+  });
+  return [
+    "RECENT REFLECTIONS (text the user has written across all tools in the last " + dayLookback + " days, for pattern recognition — do not quote back unless the user explicitly asks):",
+    ...lines
+  ].join("\n");
+}
+
 
 const normalizeSessionToolId = (toolId) => {
   const id = String(toolId || "").trim().toLowerCase();
@@ -7183,6 +7324,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               }
               return ctx || null;
             } catch { return null; }
+          })(),
+          // Unified text context — recent text the user has written across all tools
+          // (What Shifted labels from Reframe + Body Scan, Self Mode 5-step responses,
+          // grounding 5-senses writes). Pulled synchronously from localStorage; runs
+          // regardless of AI status. When AI returns from a down period, this naturally
+          // surfaces text written during the gap because it reads whatever's stored.
+          textHistoryContext: (() => {
+            try { return buildUnifiedTextContext({ maxEntries: 20, dayLookback: 14 }); }
+            catch { return null; }
           })(),
           checkinContext: (() => {
             try {
