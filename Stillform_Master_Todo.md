@@ -138,6 +138,7 @@ Round 3 finding from Gemini and Copilot flagged the close as too synchronous. Af
 - Body Scan verb-form authorship ("I'm staying here" not "hold for 30 seconds") — Claude Round 2
 - Cormorant aesthetic question (demote to ceremonial moments?) — Claude Round 2 — possibly resolved by Apr 30 prestige refresh; needs phone-test
 - Composure self-mastery legibility doc commit — sitting in /mnt/user-data/outputs, conceptual decision already made
+- **Fractal aesthetic expansion (May 2 idea, captured not committed)** — Arlin liked the trees. Possible directions if the existing audio/visual roadmap leaves room: branches that visibly extend on inhale and settle on exhale (synchronizing gaze with breath, not bilateral stimulation); additional fractal forms unlocked over session milestones (ferns, water rings, crystalline growth) as engagement-craft palette; pure "watch and breathe" mode that strips all UI and lets the canvas carry the session. NONE of this is EMDR or bilateral stimulation — the explicit rule from May 2 conversation is no EMDR-coded mechanics, with or without the name. Aesthetic and gaze-synchrony only.
 
 ### ❌ Round 4 consultation prompt — DRAFTED but Arlin's read: track exhausted
 STILLFORM_ROUND_4_CONSULTATION.md committed but never sent. The diagnosis came from Arlin, not from another consultation.
