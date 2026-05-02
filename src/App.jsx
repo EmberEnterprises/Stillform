@@ -2724,8 +2724,7 @@ function buildShiftEvent({ source, toolId, toolMode, preState, postState, shiftL
 // Each entry tagged with origin + relative date so the AI can reason about
 // recency. Hard cap on length to keep token budget bounded.
 function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
-  const now = Date.now();
-  const cutoff = now - (dayLookback * 24 * 60 * 60 * 1000);
+  const cutoff = TimeKeeper.daysAgoMs(dayLookback);
   const all = [];
 
   // 1. Shift events with non-empty shiftLabel (post-Reframe + post-Body-Scan What Shifted)
@@ -2763,7 +2762,7 @@ function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
       if (filled.length === 0) continue;
       all.push({
         ts,
-        date: s.timestamp ? s.timestamp.slice(0, 10) : "",
+        date: TimeKeeper.clockDayOf(s.timestamp) || "",
         origin: "Self Mode",
         text: filled.join(" | "),
         preState: s.preState || null,
@@ -2785,7 +2784,7 @@ function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
         const summary = written.map(st => `${st.sense}: ${String(st.text).trim()}`).join(" | ");
         all.push({
           ts,
-          date: g.timestamp ? g.timestamp.slice(0, 10) : "",
+          date: TimeKeeper.clockDayOf(g.timestamp) || "",
           origin: "Grounding",
           text: summary,
           preState: null,
