@@ -287,7 +287,7 @@ When a user trends toward Category C across multiple sessions (sustained Flat, p
 
 **Framing principle (Arlin's words, captured for future sessions):** "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." This isn't dismissive — it's the correct scope statement. A user with clinical depression that requires medication is not a Stillform failure. A user who could be helped by Stillform but the tool didn't reach them is a separate signal worth understanding from the data feed.
 
-### Reframe tone — auto-detect + in-Reframe dropdown + personalization default
+### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default — RESOLVED May 3 (commit f36cdb63)
 
 Full prestige design. Replace the current Settings-only static tone with a three-layer system.
 
@@ -311,7 +311,13 @@ The dropdown should also surface the *reason* for the auto-selection ("Gentle �
 
 **Why this matters.** Current tone is a Settings-only static choice. Most users won't dig into Settings during distress. Auto-detect surfaces the appropriate tone in the moment; in-Reframe dropdown gives full control without breaking flow; personalization respects the user who knows what they want.
 
-**Status.** Captured Apr 29. Real feature build. ErrorBoundary-blocked for shipping; design and copy ready.
+**Status.** **RESOLVED May 3 (commit f36cdb63):** All three layers shipped.
+
+- **Layer 1 (auto-detect):** detectSuggestedTone helper computes tone from bio-filter / feelState / input per render. Rules per spec: depleted/pain/sleep -> gentle, excited -> motivational, focused -> direct, long+distress -> gentle, long+composed -> clinical, otherwise null.
+- **Layer 2 (in-Reframe dropdown):** Static tone label replaced with tappable dropdown showing Reason header (Auto/Session/Default) + 5 options with descriptions + reset link. Manual selection sets sessionToneOverride which takes top priority.
+- **Layer 3 (Settings personalization):** Default tone selection now includes Balanced (was missing). New 'How your default applies' toggle: 'Use my default' (override) vs 'Auto-suggest, default as fallback' (fallback). Override is recommended default per spec.
+
+`stillform_ai_tone_mode` added to SYNC_KEYS / UNENCRYPTED_SYNC_KEYS / keysToRemove. rehydrateAfterSync extended to restore tone + mode after cloud sync. resolveActiveTone surfaces source ('auto' / 'session' / 'default' / 'fallback') so user always sees why a tone is active.
 
 ### "Get ready" Reframe mode label needs context
 
