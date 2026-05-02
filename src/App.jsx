@@ -7511,6 +7511,19 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return `User's identified decision patterns: ${biases.join(", ")}`;
             } catch { return null; }
           })(),
+          // Decision 5 (May 2): when calibration was deferred via "Use defaults" and
+          // no real profiles exist yet, tell AI to adapt — no pattern claims about
+          // body signals or thinking. Discovery questions are allowed; interrogation isn't.
+          // Auto-clears when SignalMapTool or MicroBiasTool saves real data.
+          deferredCalibration: (() => {
+            try {
+              const deferred = localStorage.getItem("stillform_calibration_deferred") === "yes";
+              const hasSignal = !!secureRead("stillform_signal_profile", null);
+              const hasBias = !!(secureRead("stillform_bias_profile", null) || []).length;
+              if (!deferred || (hasSignal && hasBias)) return null;
+              return "DEFERRED CALIBRATION: User has not completed signal mapping or bias profiling. Engage as a new user — do not make pattern claims about their body signals, sensations, or thinking patterns. Discovery questions are fine when relevant to what they bring up; interrogation is not. The user can complete calibration any time from Settings.";
+            } catch { return null; }
+          })(),
           priorToolContext: (() => {
             try {
               const sessions = getSessionsFromStorage();
@@ -9887,6 +9900,8 @@ function MicroBiasTool({ onComplete }) {
       try {
         secureWrite("stillform_bias_profile", nextIdentified);
       } catch {}
+      // Decision 5 (May 2): clear deferred-calibration flag when real bias data is saved.
+      try { localStorage.removeItem("stillform_calibration_deferred"); } catch {}
       setDone(true);
     }
   };
@@ -10463,6 +10478,11 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     const updated = { ...signals, [key]: value };
     setSignals(updated);
     try { secureWrite("stillform_signal_profile", updated); } catch {}
+    // Decision 5 (May 2): clear deferred-calibration flag when real signal data is saved.
+    // The flag is set by "Use defaults" on the calibration setup screen; once the user
+    // completes calibration (either at first run or later from Settings), AI starts
+    // receiving real profile data and the deferred-context note stops firing.
+    try { localStorage.removeItem("stillform_calibration_deferred"); } catch {}
   };
 
   useEffect(() => {
@@ -14936,6 +14956,13 @@ const isSignalProfileConfigured = () => {
                       finalizeOnboarding();
                       goHomeSafely();
                     } else {
+                      // Decision 5 (May 2): "Use defaults" instead of silent skip.
+                      // Sets a deferred flag so AI knows the user hasn't completed
+                      // calibration and adapts behavior (no pattern claims, discovery
+                      // questions over first sessions). Profiles remain null — no fake
+                      // data. The user can complete calibration any time from Settings;
+                      // SignalMapTool and MicroBiasTool save handlers clear the flag.
+                      try { localStorage.setItem("stillform_calibration_deferred", "yes"); } catch {}
                       setSetupStep(s => s + 1);
                     }
                   }} style={{
@@ -14943,7 +14970,7 @@ const isSignalProfileConfigured = () => {
                     fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
                     textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
                   }}>
-                    {isLast ? "Calibration complete → Enter system" : "Skip this step →"}
+                    {isLast ? "Calibration complete → Enter system" : "Use defaults →"}
                   </button>
                 )}
               </div>
