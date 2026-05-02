@@ -1307,6 +1307,9 @@ exports.handler = async function(event) {
           return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Card topic not in corpus.", fallback: true }) };
         }
 
+        // Look up source metadata from corpus (the source_url and paywalled flag belong to the topic, not to AI output)
+        const corpusEntry = SCIENCE_CARD_CORPUS[card.topic];
+
         return {
           statusCode: 200,
           headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
@@ -1315,6 +1318,8 @@ exports.handler = async function(event) {
             body: card.body,
             citation: card.citation,
             topic: card.topic,
+            source_url: corpusEntry.source_url || null,
+            paywalled: corpusEntry.paywalled === true,
             source: "ai"
           })
         };
