@@ -187,6 +187,54 @@ const styles = `
   .t-mono-sm    { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 10px; line-height: 1.30; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-dim); }
   .t-mono-xs    { font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 9px;  line-height: 1.20; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); }
 
+  /* Weight modifiers — spec section 137-139 */
+  /* Display headlines: .heavy bumps serif weight from 300 to 400 (display-xl/lg) when more presence needed */
+  .t-display-xl.heavy,
+  .t-display-lg.heavy { font-weight: 400; }
+  /* Body: .strong = medium 500 for emphasis per spec section 139 */
+  .t-body-lg.strong,
+  .t-body-md.strong,
+  .t-body-sm.strong { font-weight: 500; }
+  /* Quiet variants — same scale at lower color, for de-emphasized contexts */
+  .t-body-lg.quiet,
+  .t-body-md.quiet,
+  .t-body-sm.quiet { color: var(--text-dim); }
+  .t-body-lg.faint,
+  .t-body-md.faint,
+  .t-body-sm.faint { color: var(--text-muted); }
+  .t-display-md.cream,
+  .t-display-sm.cream { color: var(--text-cream); }
+
+  /* Italic emphasis — spec section 176: "use almost never. when you do, single word in a sentence — Hermès convention".
+     Apply to a span, not a full headline. Cormorant italic is the only legitimate italic in the system. */
+  .t-emphasis {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  /* Prose rhythm — spec section 169: "24px between paragraphs, 40px between sections".
+     Wrap a content block in .t-prose; direct child <p> / .t-body-* elements get automatic paragraph rhythm.
+     Headlines (.t-display-*) inside .t-prose get more breathing room above (40px to next paragraph). */
+  .t-prose > * + * { margin-top: var(--space-24); }
+  .t-prose > * + .t-display-xl,
+  .t-prose > * + .t-display-lg,
+  .t-prose > * + .t-display-md,
+  .t-prose > * + .t-display-sm { margin-top: var(--space-48); }
+  .t-prose > .t-display-xl + *,
+  .t-prose > .t-display-lg + *,
+  .t-prose > .t-display-md + *,
+  .t-prose > .t-display-sm + * { margin-top: var(--space-24); }
+  /* Mono labels stay tight to the headline they precede — Aesop convention */
+  .t-prose > .t-mono-sm + .t-display-xl,
+  .t-prose > .t-mono-sm + .t-display-lg,
+  .t-prose > .t-mono-sm + .t-display-md,
+  .t-prose > .t-mono-sm + .t-display-sm,
+  .t-prose > .t-mono-xs + .t-display-xl,
+  .t-prose > .t-mono-xs + .t-display-lg,
+  .t-prose > .t-mono-xs + .t-display-md,
+  .t-prose > .t-mono-xs + .t-display-sm { margin-top: var(--space-8); }
+
   .nav {
     display: flex;
     align-items: center;
