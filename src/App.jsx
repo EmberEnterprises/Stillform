@@ -1823,12 +1823,11 @@ const APP_LOAD_TRAVEL = TimeKeeper.detectTravel();
 // ─────────────────────────────────────────────────────────────────────────────
 function getActiveBioFilter() {
   try {
-    const raw = localStorage.getItem("stillform_bio_filter");
-    if (!raw) return "";
-    if (raw.startsWith("{")) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.date !== TimeKeeper.stillformDay()) return "";
-      return parsed.value || "";
+    const stored = secureRead("stillform_bio_filter", null);
+    if (!stored) return "";
+    if (typeof stored === "object") {
+      if (stored?.date !== TimeKeeper.stillformDay()) return "";
+      return stored.value || "";
     }
     return ""; // Legacy plain-string format — no date — treat as expired (safe default)
   } catch { return ""; }
@@ -1836,10 +1835,10 @@ function getActiveBioFilter() {
 
 function setActiveBioFilter(value) {
   try {
-    localStorage.setItem("stillform_bio_filter", JSON.stringify({
+    secureWrite("stillform_bio_filter", {
       value: String(value || ""),
       date: TimeKeeper.stillformDay()
-    }));
+    });
   } catch {}
 }
 
@@ -2019,7 +2018,7 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
   events.push(entry);
   const bounded = events.slice(-maxItems);
-  try { localStorage.setItem(COMMUNICATION_EVENTS_KEY, JSON.stringify(bounded)); } catch {}
+  try { secureWrite(COMMUNICATION_EVENTS_KEY, bounded); } catch {}
   return bounded.length;
 };
 
@@ -2205,7 +2204,7 @@ const saveSessionNextMoveFollowUp = (sessionTimestamp, { didIt, helped } = {}) =
 
 const getToolDebriefsFromStorage = () => {
   try {
-    const parsed = JSON.parse(localStorage.getItem(TOOL_DEBRIEF_STORAGE_KEY) || "[]");
+    const parsed = secureRead(TOOL_DEBRIEF_STORAGE_KEY, []);
     return Array.isArray(parsed) ? parsed.filter((entry) => entry && typeof entry === "object") : [];
   } catch {
     return [];
@@ -2216,7 +2215,7 @@ const appendToolDebriefToStorage = (entry, maxItems = TOOL_DEBRIEF_MAX_ITEMS) =>
   if (!entry) return getToolDebriefsFromStorage();
   const existing = getToolDebriefsFromStorage();
   const next = [entry, ...existing].slice(0, maxItems);
-  try { localStorage.setItem(TOOL_DEBRIEF_STORAGE_KEY, JSON.stringify(next)); } catch {}
+  try { secureWrite(TOOL_DEBRIEF_STORAGE_KEY, next); } catch {}
   return next;
 };
 
@@ -2358,11 +2357,8 @@ function buildShiftEvent({ source, toolId, toolMode, preState, postState, shiftL
   const patternContext = getRecentSustainedPatterns(allEvents);
   let bioFilter = [];
   try {
-    const stored = localStorage.getItem("stillform_bio_filter");
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed)) bioFilter = parsed;
-    }
+    const stored = secureRead("stillform_bio_filter", null);
+    if (Array.isArray(stored)) bioFilter = stored;
   } catch {}
   const sessionCount = (() => {
     try { return getSessionCountFromStorage(); } catch { return 0; }
@@ -2942,24 +2938,23 @@ const setPendingSessionEntryContext = (entryMode, entryProtocolId) => {
       entryProtocolId: entryProtocolId || null,
       createdAt: Date.now()
     };
-    localStorage.setItem("stillform_session_entry_context", JSON.stringify(payload));
+    secureWrite("stillform_session_entry_context", payload);
   } catch {}
 };
 
 const consumePendingSessionEntryContext = (maxAgeMs = 2 * 60 * 60 * 1000) => {
   try {
-    const raw = localStorage.getItem("stillform_session_entry_context");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    localStorage.removeItem("stillform_session_entry_context");
-    if (!parsed || typeof parsed !== "object") return null;
+    const parsed = secureRead("stillform_session_entry_context", null);
+    if (!parsed) return null;
+    secureDelete("stillform_session_entry_context");
+    if (typeof parsed !== "object") return null;
     if (!parsed.createdAt || (Date.now() - Number(parsed.createdAt)) > maxAgeMs) return null;
     return {
       entryMode: parsed.entryMode || null,
       entryProtocolId: parsed.entryProtocolId || null
     };
   } catch {
-    try { localStorage.removeItem("stillform_session_entry_context"); } catch {}
+    try { secureDelete("stillform_session_entry_context"); } catch {}
     return null;
   }
 };
@@ -3518,7 +3513,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     }
     const elapsed = groundElapsedRef.current;
     const count = getSessionCount();
-    const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+    const signalProfile = (() => { try { return secureRead("stillform_signal_profile", null); } catch { return null; } })();
     const lastShift = (() => { try { return JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); } catch { return null; } })();
     return (
       <div className="complete">
@@ -3582,9 +3577,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     } else {
       // Save grounding engagement data
       try {
-        const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+        const gd = secureRead("stillform_grounding_data", []);
         gd.push({ timestamp: new Date().toISOString(), steps: updated, skipped: false, totalMs: updated.reduce((s, e) => s + e.timeMs, 0) });
-        localStorage.setItem("stillform_grounding_data", JSON.stringify(gd));
+        secureWrite("stillform_grounding_data", gd);
       } catch {}
       setGroundDone(true);
     }
@@ -3593,9 +3588,9 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   const skipGrounding = () => {
     const timeOnStep = Date.now() - groundStepStart;
     try {
-      const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+      const gd = secureRead("stillform_grounding_data", []);
       gd.push({ timestamp: new Date().toISOString(), steps: [...groundData, { step: current + 1, sense: steps[current].sense, timeMs: timeOnStep, wrote: false, text: null }], skipped: true, skippedAt: current + 1, totalMs: groundData.reduce((s, e) => s + e.timeMs, 0) + timeOnStep });
-      localStorage.setItem("stillform_grounding_data", JSON.stringify(gd));
+      secureWrite("stillform_grounding_data", gd);
     } catch {}
     setGroundDone(true);
   };
@@ -4110,7 +4105,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       });
     } catch {}
     // User named the shift, so post-state replaces stale pre-state chip
-    try { localStorage.setItem("stillform_feelstate", JSON.stringify({ value: postStateChip, day: TimeKeeper.stillformDay() })); } catch {}
+    try { secureWrite("stillform_feelstate", { value: postStateChip, day: TimeKeeper.stillformDay() }); } catch {}
     setShowWhatShifted(false);
     setShiftLabelExpanded(false);
     queueDebriefAndCompleteNow(null, "body-scan-what-shifted-complete");
@@ -4564,7 +4559,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => setShowWhatShifted(true), 2000); }
     const elapsed = scanElapsedRef.current;
     const sessionCount = getSessionCount();
-    const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+    const signalProfile = (() => { try { return secureRead("stillform_signal_profile", null); } catch { return null; } })();
     return (
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
@@ -6036,6 +6031,140 @@ async function writeJSON(key, value) {
   try { localStorage.removeItem(key); } catch {}
 }
 
+// ─── SecureCache — in-memory plaintext cache for synchronous reads ───────────
+// Why this exists: secureGet/secureSet are async (crypto.subtle is Promise-based).
+// But the codebase has many synchronous read patterns inside React renders,
+// inline IIFEs, and effect setup blocks where we cannot await. Without sync
+// reads, every encrypt-then-read cycle introduces visible flicker on cold load.
+//
+// The fix: at app boot, decrypt all sensitive keys once into an in-memory map.
+// All subsequent reads are sync (return from map). Writes update both the
+// in-memory map (sync) and the encrypted persistence layer (async, fire-and-
+// forget). The decryption key is held in CryptoStore (already in memory after
+// first use), so writes don't re-derive the key per call.
+//
+// Boot flow: primeSecureCache(SENSITIVE_KEYS) runs before the app renders.
+// The splash screen blocks render until the prime completes. Cost: one-time
+// ~50-200ms latency at cold boot. Benefit: zero flicker on every screen that
+// reads sensitive data, and no render-layer refactor across the whole app.
+//
+// Migration: primeSecureCache reads encrypted storage first (secureGet); if
+// no encrypted blob exists, falls back to plain localStorage and triggers an
+// immediate encrypted re-write so the next boot reads from encrypted storage.
+const SecureCache = (() => {
+  // Map<storageKey, parsedValue>
+  const cache = new Map();
+  // Has primeSecureCache run successfully? Used to gate sync reads.
+  let primed = false;
+
+  const isPrimed = () => primed;
+  const markPrimed = () => { primed = true; };
+
+  const has = (key) => cache.has(key);
+  const get = (key) => cache.get(key);
+  const set = (key, value) => { cache.set(key, value); };
+  const del = (key) => { cache.delete(key); };
+
+  return { isPrimed, markPrimed, has, get, set, del };
+})();
+
+// List of sensitive keys to prime + keep encrypted at rest.
+// Adding a key here makes it (a) decrypted into SecureCache at boot,
+// (b) read sync via secureRead, (c) written sync via secureWrite (with async
+// encrypted persistence behind the scenes), (d) auto-migrated from plain text
+// on first boot after this code ships.
+const SECURE_KEYS = [
+  "stillform_journal",
+  "stillform_signal_profile",
+  "stillform_bias_profile",
+  "stillform_checkin_history",
+  "stillform_eod_history",
+  "stillform_communication_events",
+  "stillform_tool_debriefs",
+  "stillform_focus_check_history",
+  "stillform_feelstate",
+  "stillform_sessions",
+  "stillform_saved_reframes",
+  "stillform_ai_session_notes",
+  "stillform_grounding_data",
+  "stillform_bio_filter",
+  "stillform_session_entry_context",
+  "stillform_loop_nudge_events"
+];
+
+// Prime the SecureCache at app boot. Returns a Promise that resolves when
+// every sensitive key has been decrypted into memory (or a plaintext fallback
+// has been read + immediately re-encrypted for next boot).
+async function primeSecureCache() {
+  for (const key of SECURE_KEYS) {
+    try {
+      const encryptedRaw = localStorage.getItem(key);
+      if (encryptedRaw) {
+        const parsed = JSON.parse(encryptedRaw);
+        if (parsed?.__enc) {
+          // Already encrypted — decrypt and cache
+          const decrypted = await CryptoStore.decrypt(parsed);
+          SecureCache.set(key, decrypted);
+        } else {
+          // Plain text — migrate by re-encrypting in place
+          SecureCache.set(key, parsed);
+          // Fire-and-forget re-encrypt; if it fails, plain text remains and
+          // we try again on next boot. No data is lost in either case.
+          secureSet(key, parsed).catch(() => {});
+        }
+        continue;
+      }
+      // No localStorage entry — try IndexedDB fallback (large blobs)
+      const fallback = await SecureStore.get(key);
+      if (fallback) {
+        const decrypted = fallback?.__enc ? await CryptoStore.decrypt(fallback) : fallback;
+        SecureCache.set(key, decrypted);
+      }
+    } catch {
+      // Per-key failure shouldn't block the rest of boot. Cache stays empty
+      // for this key; secureRead returns the fallback for the caller.
+    }
+  }
+  SecureCache.markPrimed();
+}
+
+// Synchronous read from the in-memory cache. Returns fallback if the key has
+// not been primed yet OR was missing from storage. Safe to call inside React
+// renders, inline IIFEs, and effect setup blocks.
+//
+// IMPORTANT: callers must pass a sensible fallback. The intent is that a key
+// in SECURE_KEYS is already cached by the time anyone calls secureRead on it.
+// If the cache is unprimed (e.g. boot sequence error), we return fallback
+// rather than throwing — the app keeps running, the user sees default state,
+// and the issue is non-fatal.
+function secureRead(key, fallback = null) {
+  if (SecureCache.has(key)) return SecureCache.get(key);
+  return fallback;
+}
+
+// Synchronous-from-caller write. Updates the in-memory cache immediately so
+// subsequent secureRead calls see the new value with no delay. The encrypted
+// persistence write is fire-and-forget — writes will fail silently to the
+// secureSet error path but the cache still holds the new value for the rest
+// of the session.
+//
+// This is intentional: we trade write durability per-call (which would require
+// awaiting the encrypted write) for sync semantics that match how the codebase
+// is structured. If a write fails to persist, the next boot will re-read from
+// whatever last successfully persisted — same as any other write failure.
+function secureWrite(key, value) {
+  SecureCache.set(key, value);
+  // Persist async; suppress errors so caller doesn't have to await
+  secureSet(key, value).catch(() => {});
+}
+
+// Synchronous delete — cache + persistence
+function secureDelete(key) {
+  SecureCache.del(key);
+  try { localStorage.removeItem(key); } catch {}
+  SecureStore.remove(key).catch(() => {});
+}
+
 // ─── IMAGE OCR UTILITY ───────────────────────────────────────────────────────
 // Loads Tesseract.js lazily from CDN — only when user taps the upload button
 // Extracts text from screenshots (emails, texts, social posts) client-side
@@ -6151,7 +6280,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Why persist: state doesn't reset on a clock. Russell 1980 / Frijda 1986 — affect holds until new input shifts it.
     // The system shouldn't pretend the user changed when they didn't.
     try {
-      const persisted = JSON.parse(localStorage.getItem("stillform_feelstate") || "null");
+      const persisted = secureRead("stillform_feelstate", null);
       if (persisted && persisted.value !== undefined && persisted.day === TimeKeeper.stillformDay()) {
         // Same-day persisted value — honor it (user explicitly set this earlier today)
         return persisted.value;
@@ -6175,9 +6304,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setFeelStateRaw(value);
     try {
       if (value === null || value === undefined) {
-        localStorage.removeItem("stillform_feelstate");
+        secureDelete("stillform_feelstate");
       } else {
-        localStorage.setItem("stillform_feelstate", JSON.stringify({ value, day: TimeKeeper.stillformDay() }));
+        secureWrite("stillform_feelstate", { value, day: TimeKeeper.stillformDay() });
       }
     } catch {}
   };
@@ -6303,10 +6432,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         localStorage.removeItem(oldKey);
       }
       // Migrate saved reframes missing mode tag
-      const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+      const saved = secureRead("stillform_saved_reframes", []);
       let changed = false;
       saved.forEach(r => { if (!r.mode) { r.mode = "calm"; changed = true; } });
-      if (changed) localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
+      if (changed) secureWrite("stillform_saved_reframes", saved);
     } catch {}
   }, []);
 
@@ -6327,7 +6456,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try {
       const sessions = getSessionsFromStorage();
       if (!Array.isArray(sessions) || sessions.length < 5) return null;
-      const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+      const notes = secureRead("stillform_ai_session_notes", []);
       if (!Array.isArray(notes) || notes.length === 0) return null;
       const latest = [...notes].reverse().find((n) => n?.noteType === "user-facing" || !n?.noteType);
       if (!latest?.note) return null;
@@ -6376,14 +6505,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }).then(r => r.json()).then(data => {
         if (data?.reframe) {
           try {
-            const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+            const notes = secureRead("stillform_ai_session_notes", []);
             const userFacingNote = toUserFacingInsight(data.reframe);
             if (userFacingNote) {
               notes.push({ timestamp: new Date().toISOString(), mode: effectiveMode, note: userFacingNote, noteType: "user-facing" });
             }
             // Keep this feed light and useful.
             if (notes.length > 20) notes.splice(0, notes.length - 20);
-            localStorage.setItem("stillform_ai_session_notes", JSON.stringify(notes));
+            secureWrite("stillform_ai_session_notes", notes);
           } catch {}
         }
       }).catch(() => {});
@@ -6502,9 +6631,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const saveReframe = (msg, idx) => {
     try {
-      const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+      const saved = secureRead("stillform_saved_reframes", []);
       saved.push({ text: msg.text, distortion: msg.distortion, timestamp: new Date().toISOString(), mode: effectiveMode });
-      localStorage.setItem("stillform_saved_reframes", JSON.stringify(saved));
+      secureWrite("stillform_saved_reframes", saved);
       setSavedIds(prev => new Set([...prev, idx]));
     } catch {}
   };
@@ -6518,7 +6647,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
 
   const getSavedReframes = () => {
-    try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").filter(r => r.mode === effectiveMode); } catch { return []; }
+    try { return secureRead("stillform_saved_reframes", []).filter(r => r.mode === effectiveMode); } catch { return []; }
   };
 
   // Persist encrypted messages on every change
@@ -6618,10 +6747,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Auto-log feel state to Pulse on first message of session
     if (messages.length === 0 && !retryText && feelState) {
       try {
-        const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+        const entries = secureRead("stillform_journal", []);
         const todayIso = TimeKeeper.stillformDay();
         entries.unshift({ id: Date.now(), emotions: [feelState], trigger: "", date: todayIso, timestamp: new Date().toISOString(), source: "reframe-auto" });
-        localStorage.setItem("stillform_journal", JSON.stringify(entries));
+        secureWrite("stillform_journal", entries);
         try { window.plausible("Pulse Entry", { props: { source: "reframe-auto" } }); } catch {}
       } catch {}
     }
@@ -6668,7 +6797,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })),
           journalContext: (() => {
             try {
-              const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+              const entries = secureRead("stillform_journal", []);
               if (entries.length === 0) return null;
               const todayIso = TimeKeeper.stillformDay();
               const fmtEntry = e => {
@@ -6788,7 +6917,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           signalProfile: (() => {
             try {
-              const p = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+              const p = secureRead("stillform_signal_profile", null);
               if (!p) return null;
               const parts = [];
               if (p.firstAreas?.length) parts.push(`Body signals first in: ${p.firstAreas.join(", ")}`);
@@ -6799,7 +6928,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           })(),
           biasProfile: (() => {
             try {
-              const biases = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null");
+              const biases = secureRead("stillform_bias_profile", null);
               if (!biases?.length) return null;
               return `User's identified decision patterns: ${biases.join(", ")}`;
             } catch { return null; }
@@ -6816,7 +6945,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               let ctx = `The user just completed: ${used.join(" → ")} before opening Reframe. They've already done physical regulation. You don't need to suggest breathing or grounding — move directly to cognitive work.`;
               // Add grounding pattern if available
               try {
-                const gd = JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]");
+                const gd = secureRead("stillform_grounding_data", []);
                 if (gd.length > 0) {
                   const recent = gd[gd.length - 1];
                   if (recent.skipped) {
@@ -6851,7 +6980,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           sessionEntryMode: entryMode,
           sessionNotes: (() => {
             try {
-              const notes = JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]");
+              const notes = secureRead("stillform_ai_session_notes", []);
               const internalNotes = (Array.isArray(notes) ? notes : []).filter((n) => n?.noteType !== "user-facing");
               if (internalNotes.length === 0) return null;
               return internalNotes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
@@ -7183,7 +7312,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
 
     // Clear persisted feelState — user just named what shifted, so the prior chip no longer reflects current state
-    try { localStorage.removeItem("stillform_feelstate"); } catch {}
+    try { secureDelete("stillform_feelstate"); } catch {}
     setFeelStateRaw(null);
     setShowStateToStatement(false);
     setExternalAnchorDraft("");
@@ -8693,7 +8822,7 @@ function PanicMode({ onComplete }) {
 
 const getFocusCheckHistoryFromStorage = () => {
   try {
-    const history = JSON.parse(localStorage.getItem("stillform_focus_check_history") || "[]");
+    const history = secureRead("stillform_focus_check_history", []);
     return Array.isArray(history) ? history : [];
   } catch {
     return [];
@@ -8804,7 +8933,7 @@ function FocusCheckValidation({
     try {
       const history = getFocusCheckHistoryFromStorage();
       const next = [...history, entry].slice(-20);
-      localStorage.setItem("stillform_focus_check_history", JSON.stringify(next));
+      secureWrite("stillform_focus_check_history", next);
       setLatestSummary(entry);
     } catch {
       setLatestSummary(entry);
@@ -8966,7 +9095,7 @@ function MicroBiasTool({ onComplete }) {
     } else {
       // Save identified patterns
       try {
-        localStorage.setItem("stillform_bias_profile", JSON.stringify(nextIdentified));
+        secureWrite("stillform_bias_profile", nextIdentified);
       } catch {}
       setDone(true);
     }
@@ -9442,7 +9571,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
 function SignalMapTool({ onComplete, skipIntro = false }) {
   const [step, setStep] = useState(skipIntro ? 1 : 0);
   const [signals, setSignals] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_signal_profile")) || {}; } catch { return {}; }
+    try { return secureRead("stillform_signal_profile", null) || {}; } catch { return {}; }
   });
 
   const bodyAreas = [
@@ -9543,7 +9672,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
   const save = (key, value) => {
     const updated = { ...signals, [key]: value };
     setSignals(updated);
-    try { localStorage.setItem("stillform_signal_profile", JSON.stringify(updated)); } catch {}
+    try { secureWrite("stillform_signal_profile", updated); } catch {}
   };
 
   useEffect(() => {
@@ -9739,7 +9868,7 @@ function MyProgress({ onBack }) {
   const [shareCardStatus, setShareCardStatus] = useState("");
   const [viewEntry, setViewEntry] = useState(null);
   const [journalEntries, setJournalEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+    try { return secureRead("stillform_journal", []); } catch { return []; }
   });
   const latestFocusHistory = getFocusCheckHistoryFromStorage();
   const focusCheckSummary = latestFocusHistory.length ? latestFocusHistory[latestFocusHistory.length - 1] : null;
@@ -9764,9 +9893,9 @@ function MyProgress({ onBack }) {
   ) ? focusCheckSummary.avgReactionMs - previousFocusSummary.avgReactionMs : null;
 
   const sessions = getSessionsFromStorage();
-  const savedReframes = (() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]"); } catch { return []; } })();
-  const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
-  const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+  const savedReframes = (() => { try { return secureRead("stillform_saved_reframes", []); } catch { return []; } })();
+  const biasProfile = (() => { try { return secureRead("stillform_bias_profile", null); } catch { return null; } })();
+  const signalProfile = (() => { try { return secureRead("stillform_signal_profile", null); } catch { return null; } })();
 
   const toolNames = { breathe: "Breathe", ground: "Breathe", "body-scan": "Body Scan", reframe: "Reframe", sigh: "Breathe", metacognition: "Self Mode" };
   const toolCounts = {};
@@ -9894,8 +10023,8 @@ function MyProgress({ onBack }) {
       return 0;
     }
   })();
-  const groundingHistory = (() => { try { return JSON.parse(localStorage.getItem("stillform_grounding_data") || "[]"); } catch { return []; } })();
-  const aiSessionNotes = (() => { try { return JSON.parse(localStorage.getItem("stillform_ai_session_notes") || "[]"); } catch { return []; } })();
+  const groundingHistory = (() => { try { return secureRead("stillform_grounding_data", []); } catch { return []; } })();
+  const aiSessionNotes = (() => { try { return secureRead("stillform_ai_session_notes", []); } catch { return []; } })();
   const aiInternalSessionNotes = (Array.isArray(aiSessionNotes) ? aiSessionNotes : []).filter((n) => n?.noteType !== "user-facing");
   const aiUserFacingInsights = (Array.isArray(aiSessionNotes) ? aiSessionNotes : []).filter((n) => (
     n?.noteType === "user-facing" || !n?.noteType
@@ -11902,6 +12031,13 @@ export default function Stillform() {
   // Widget action check — calls native plugin, routes before splash ends
   useEffect(() => {
     const init = async () => {
+      // Prime the SecureCache FIRST. This decrypts all sensitive keys into
+      // memory so synchronous secureRead calls inside renders return real data
+      // immediately (no flicker on cold load). Migration of plain-text data
+      // to encrypted storage also happens during prime — keys that were stored
+      // unencrypted get re-encrypted in place on first boot after this ships.
+      try { await primeSecureCache(); } catch {}
+
       try {
         const params = new URLSearchParams(window.location.search);
         const preview = (params.get("preview") || "").trim().toLowerCase();
@@ -12137,7 +12273,7 @@ export default function Stillform() {
 
   // Journal state — must be before any early return (React Rules of Hooks)
   const [journalEntries, setJournalEntries] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]"); } catch { return []; }
+    try { return secureRead("stillform_journal", []); } catch { return []; }
   });
 
   const [syncEmail, setSyncEmail] = useState("");
@@ -13006,11 +13142,11 @@ export default function Stillform() {
 // Returns the top divergent area if 3+ check-ins in last 7 days show tension in an unmapped area
 const getSignalDivergence = () => {
   try {
-    const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+    const profile = secureRead("stillform_signal_profile", null);
     const mappedAreas = (profile?.firstAreas || []).map(a => a.toLowerCase());
     if (!mappedAreas.length) return null;
 
-    const history = JSON.parse(localStorage.getItem("stillform_checkin_history") || "[]");
+    const history = secureRead("stillform_checkin_history", []);
     const sevenDaysAgo = TimeKeeper.daysAgoMs(7);
     const recent = history.filter(c => new Date(c.timestamp || c.date).getTime() > sevenDaysAgo);
     if (recent.length < 3) return null;
@@ -13037,7 +13173,7 @@ const getSignalDivergence = () => {
 
 const isSignalProfileConfigured = () => {
     try {
-      const profile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null");
+      const profile = secureRead("stillform_signal_profile", null);
       return Array.isArray(profile?.firstAreas) && profile.firstAreas.length > 0;
     } catch {
       return false;
@@ -14282,7 +14418,7 @@ const isSignalProfileConfigured = () => {
                   const isOffBaseline = ciBio.has("off-baseline");
                   try {
                     // New morning check-in — clear yesterday's persisted feelState (new day, fresh state)
-                    try { localStorage.removeItem("stillform_feelstate"); } catch {}
+                    try { secureDelete("stillform_feelstate"); } catch {}
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
                       date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
@@ -14436,7 +14572,7 @@ const isSignalProfileConfigured = () => {
                             try {
                               const today = TimeKeeper.stillformDay();
                               // New morning check-in (off-baseline) — clear yesterday's persisted feelState
-                              try { localStorage.removeItem("stillform_feelstate"); } catch {}
+                              try { secureDelete("stillform_feelstate"); } catch {}
                               localStorage.setItem("stillform_checkin_today", JSON.stringify({
                                 date: today, energy: ciEnergy || "steady", bio: bioArray,
                                 tension: Object.keys(ciTension).length > 0 ? ciTension : null,
@@ -14925,7 +15061,7 @@ const isSignalProfileConfigured = () => {
                         {(() => {
                           // Show one data-backed cue at rest — priority order per spec
                           try {
-                            const sessions = JSON.parse(localStorage.getItem("stillform_sessions") || "[]");
+                            const sessions = secureRead("stillform_sessions", []);
                             if (!Array.isArray(sessions) || sessions.length < 3) return null;
                             // 1. Signal Awareness — autonomous exits
                             const autoExits = sessions.filter(s => s.autonomousExit).length;
@@ -16456,7 +16592,7 @@ const isSignalProfileConfigured = () => {
                 </div>
                 {/* Re-run calibration */}
                 <div style={{ marginBottom: 10, padding: "8px 0", borderBottom: "0.5px solid var(--border)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); localStorage.removeItem("stillform_signal_profile"); localStorage.removeItem("stillform_bias_profile"); localStorage.removeItem("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
+                  <button onClick={() => { try { localStorage.removeItem("stillform_regulation_type"); secureDelete("stillform_signal_profile"); secureDelete("stillform_bias_profile"); secureDelete("stillform_bio_filter"); } catch {} setRegType(null); beginCalibrationFlow({ bridgeOrigin: "settings" }); }} style={{
                     width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                     display: "flex", justifyContent: "space-between", alignItems: "center"
                   }}>
@@ -16841,13 +16977,13 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return JSON.parse(localStorage.getItem("stillform_journal") || "[]").length; } catch { return 0; } })()} entries</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return secureRead("stillform_journal", []).length; } catch { return 0; } })()} entries</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
                 </button>
                 {openLog === "journal" && (() => {
                   try {
-                    const entries = JSON.parse(localStorage.getItem("stillform_journal") || "[]");
+                    const entries = secureRead("stillform_journal", []);
                     if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No signal entries yet.</div>;
                     return (
                       <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
@@ -16873,13 +17009,13 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]").length; } catch { return 0; } })()} saved</div>
+                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return secureRead("stillform_saved_reframes", []).length; } catch { return 0; } })()} saved</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
                 </button>
                 {openLog === "reframes" && (() => {
                   try {
-                    const saved = JSON.parse(localStorage.getItem("stillform_saved_reframes") || "[]");
+                    const saved = secureRead("stillform_saved_reframes", []);
                     if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
                     const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" };
                     return (
@@ -16902,7 +17038,7 @@ const isSignalProfileConfigured = () => {
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 20 }}>
                   <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
                   <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
-                    {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_signal_profile") || "{}"); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Personalization"; } catch { return "Not set up yet"; } })()}
+                    {(() => { try { const s = secureRead("stillform_signal_profile", {}); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Personalization"; } catch { return "Not set up yet"; } })()}
                   </div>
                 </div>
 
