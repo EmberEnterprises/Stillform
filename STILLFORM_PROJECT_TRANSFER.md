@@ -435,7 +435,7 @@ Five gating decisions identified during Apr 28 morning research-driven cleanup. 
 2. Post-rating chip selection required (Lieberman 2007 — post-regulation timing supported)
 3. What Shifted textarea — required vs optional vs remove (Vine 2019 / Nook 2021 free-text labels stronger than predetermined)
 4. Bio-filter required for body-first users (Eccleston & Crombez 1999 — pain users skipping bio-filter route to wrong tool)
-5. Calibration "Skip this step" → "Use defaults" fallback (JAMA Psychiatry 2025 attrition risk)
+5. Calibration "Skip this step" → "Use defaults" fallback (Liu et al. 2025 meta-analysis on mental health app attrition + UXCam/Zigpoll 2026 onboarding research) — RESOLVED May 2
 
 ### 🟡 Science Sheet Audit Findings (Apr 28 afternoon) — Pending Fix
 Full audit in `/mnt/user-data/outputs/SCIENCE_AUDIT_APR28.md`. Three must-fix items:
