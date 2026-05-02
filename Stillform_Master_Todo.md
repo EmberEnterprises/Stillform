@@ -405,17 +405,17 @@ Single-tap entry from home screen and from Medicated bio-filter chip. Stripped-d
 
 **Founder context (private, never marketed).** Stillform was conceived by Arlin during ketamine treatment. The app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning. The low-demand mode serves the broad cognitive-bandwidth-limited population, of which k-hole users are one sub-population.
 
-### Memory reconsolidation grounding for Reframe
+### ✅ Memory reconsolidation grounding for Reframe — RESOLVED May 3 (commit b3292a97)
 
-Add to Reframe info button copy and Science Sheet Reframe section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015, *BBS*). Frames why repeated Reframe sessions actually update memory, not just response.
+**RESOLVED May 3 (commit b3292a97):** Added "Why Reframe?" info button next to the AI tab in ReframeTool. Cites Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015). Frames why repeated Reframe sessions on a recurring trigger update what the trigger means at the memory level. Connects to the Pattern Disruption Layer spec — repeat Reframes are reconsolidation opportunities, not redundant work.
 
-### Predictive processing grounding for bio-filter
+### ✅ Predictive processing grounding for bio-filter — RESOLVED May 3 (commit b3292a97)
 
-Add to bio-filter info button copy and Science Sheet bio-filter section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model, not just "filtering interpretation."
+**RESOLVED May 3 (commit b3292a97):** Extended the existing "Why the bio-filter?" modal (line 3889) with a second paragraph citing Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model of itself — the same situation interpreted through a depleted body produces a different prediction than the same situation interpreted through a rested body.
 
-### Salience network reset grounding for body-first pathway
+### ✅ Salience network reset grounding for body-first pathway — RESOLVED May 3 (commit b3292a97)
 
-Add to Breathe and Body Scan info button copy and Science Sheet body-first section. Science Sheet Architecture section (Apr 28) covers the architectural framing; in-app copy still pending. ErrorBoundary-blocked for in-app copy. Cite Menon (2011). Frames why body-first works for spirals: redirects attentional priority, not just "calms down."
+**RESOLVED May 3 (commit b3292a97):** Added "Why Body Scan?" info button next to the "Body scan." header in BodyScanTool intro phase. Cites Menon (2011). Frames Body Scan as an attentional rerouting tool, not a calming technique — pulling attention into the body interrupts the salience network's stuck cognitive priority. Sharper than the previous "calms down" framing.
 
 ### ✅ Cyclic sighing as third breathing option — RESOLVED Apr 30
 
