@@ -4873,26 +4873,26 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 // Each card drawn directly from the verified corpus in reframe.js.
 // --------------------------------------------------------------------
 const STATIC_SCIENCE_CARDS = [
-  { topic: "cyclic_sighing", body: "Stanford researchers studied this exact pattern. In a 28-day RCT, cyclic sighing — two nasal inhales then a long oral exhale — produced the greatest mood improvement and respiratory rate reduction of the four practices tested. It outperformed mindfulness meditation at the same dose.", citation: "Balban et al. 2023 · Cell Reports Medicine" },
-  { topic: "slow_breathing_general", body: "Slow breathing techniques improve autonomic function, emotional control, and psychological well-being. The mechanism is consistent across patterns: extended exhale, vagal activation, parasympathetic shift. The breath is the lever; the body responds.", citation: "Zaccaro et al. 2018 · Frontiers in Human Neuroscience" },
-  { topic: "affect_labeling", body: "Putting a name on an emotion directly reduces amygdala activation. fMRI studies show this happens automatically, even without conscious intent to regulate. You don't have to analyze the feeling. Naming it turns down the alarm.", citation: "Lieberman et al. 2007 · Psychological Science" },
-  { topic: "cognitive_reappraisal", body: "Reinterpreting an emotional trigger is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. The same situation, seen differently, lands differently in the body.", citation: "Ochsner & Gross 2005 · Trends in Cognitive Sciences" },
-  { topic: "interoception_emotion", body: "Interoceptive awareness — the ability to accurately sense what your body is doing — is linked to emotional regulation. The more accurately you read the body, the better you regulate the mind.", citation: "Mehling et al. 2012 · PLOS ONE" },
-  { topic: "granularity_protective", body: "People who can make fine-grained distinctions between emotions regulate better. Higher granularity protects against binge drinking, aggression, and self-harm. The more precisely you name what you feel, the less likely you are to reach for harmful coping.", citation: "Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science" },
-  { topic: "sleep_amygdala", body: "Sleep deprivation amplifies the brain's threat-detection. A person running on too little sleep perceives neutral faces as threatening. The hardware shapes the perception before the mind gets a vote.", citation: "Goldstein et al. 2007 · Current Biology" },
-  { topic: "dmn_breathing", body: "The brain has a circuit that drives rumination — the default mode network. It quiets when attention is held by something concrete, like a breath count. You can't ruminate and follow a 4-1-8 pattern at the same time.", citation: "Doll et al. 2015 · Social Cognitive and Affective Neuroscience" },
-  { topic: "hrv_biofeedback", body: "Heart rate variability is an index of regulated emotional responding. The more flexibly your nervous system shifts between states, the more emotionally regulated you tend to be. The capacity is trainable — not fixed.", citation: "Lehrer & Gevirtz 2014 · Frontiers in Public Health" },
-  { topic: "implementation_intentions", body: "If-then planning dramatically increases follow-through on intended behavior. Pre-deciding your response — when calm — bypasses decision paralysis at the moment of distress.", citation: "Gollwitzer 1999 · American Psychologist" },
-  { topic: "mct_detached_mindfulness", body: "The shift from \"I am anxious\" to \"I'm noticing anxiety\" is the foundation of metacognitive therapy. Observing the state instead of being fused with it is the entire mechanism.", citation: "Wells 2009 · Metacognitive Therapy framework" },
-  { topic: "stress_inoculation", body: "Practicing regulation when calm trains the skills that deploy automatically under pressure. Special operators, surgeons, and first responders use this principle. Daily practice, before it's needed, builds the capacity for when it is.", citation: "Meichenbaum 1985 · Stress Inoculation Training" },
-  { topic: "window_of_tolerance", body: "There is a zone where you can think clearly, regulate emotions, and function. Above it: hyperarousal — panic, rage, overwhelm. Below it: hypoarousal — numbness, shutdown. Regulation practice widens the window over time.", citation: "Siegel 1999 · The Developing Mind" },
-  { topic: "acupressure_anxiety", body: "Self-administered acupressure reduces anxiety. The pressure itself is part of the mechanism — but so is the focused attention on the body that pressure requires. Two things at once: tactile and attentional.", citation: "Au et al. 2015 · Journal of Advanced Nursing" },
-  { topic: "reappraisal_neuroimaging", body: "Reappraisal consistently reduces negative emotion in neuroimaging studies. The effect is reliable enough to show up across studies, methods, and populations. The brain genuinely processes the reinterpreted situation differently.", citation: "Buhle et al. 2014 · Cerebral Cortex" },
-  { topic: "pain_attention", body: "Pain demands attentional resources and disrupts cognitive function. When the body is sending a pain signal, less of you is available for thinking clearly about anything else. The bio-filter is honest about this.", citation: "Eccleston & Crombez 1999 · Pain" },
-  { topic: "granularity_trainable", body: "Emotional granularity increases with repeated self-assessment. Naming what you feel — over and over, accurately — builds the capacity itself. The chips are training disguised as chips.", citation: "Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology" },
-  { topic: "affect_labeling_implicit", body: "Affect labeling works as implicit emotion regulation. You don't have to consciously try. The act of naming the feeling is itself the regulation. The brain treats the naming as the work.", citation: "Torre & Lieberman 2018 · Emotion Review" },
-  { topic: "diaphragmatic_cortisol", body: "Diaphragmatic breathing reduces cortisol levels — measurably. The body's stress chemistry is responsive to how you breathe. The lever is real.", citation: "Ma et al. 2017 · Frontiers in Psychology" },
-  { topic: "mct_efficacy", body: "Meta-analysis of metacognitive therapy across anxiety and depression found effect sizes exceeding CBT in several conditions. Observing the state — rather than challenging the content of thoughts — produces measurable clinical outcomes.", citation: "Normann & Morina 2018 · Frontiers in Psychology" }
+  { topic: "cyclic_sighing_effect", body: "A 2023 Stanford randomized trial of 111 participants compared three breathwork patterns with mindfulness meditation across one month of daily 5-minute practice. Cyclic sighing produced greater mood improvement and respiratory rate reduction than mindfulness meditation (p < 0.05).", citation: "Balban et al. 2023 · Cell Reports Medicine", paywalled: false, source_url: "https://pubmed.ncbi.nlm.nih.gov/36630953/" },
+  { topic: "slow_breathing_mechanism", body: "Slow breathing techniques (under 10 breaths per minute) enhance autonomic, cerebral, and psychological flexibility. Reviews link slow breathing to parasympathetic activity, central nervous system changes, and EEG theta power related to emotional control.", citation: "Zaccaro et al. 2018 · Frontiers in Human Neuroscience", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6137615/" },
+  { topic: "diaphragmatic_effect", body: "A 2017 study trained 40 adults in diaphragmatic breathing across 8 weeks. The breathing group showed significantly reduced negative affect and improved sustained attention compared to controls. Cortisol levels decreased over the study period, though the comparison between groups did not reach statistical significance.", citation: "Ma et al. 2017 · Frontiers in Psychology", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5455070/" },
+  { topic: "acupressure_effect", body: "A 2015 systematic review and meta-analysis compared acupressure to sham control across multiple randomized trials in adults. The review found acupressure produced a significant reduction in anxiety outcomes versus sham comparison.", citation: "Au et al. 2015 · Acupuncture in Medicine", paywalled: true, source_url: "https://pubmed.ncbi.nlm.nih.gov/26002571/" },
+  { topic: "interoception_emotion_mechanism", body: "Interoception describes how the body's internal signals — heartbeat, breath, gut activity — are transmitted, processed in the brain, and represented in conscious experience. Influential theories propose that emotional feelings arise from these physiological signals being interpreted by the brain.", citation: "Critchley & Garfinkel 2017 · Current Opinion in Psychology", paywalled: false, source_url: "https://www.sciencedirect.com/science/article/pii/S2352250X17300106" },
+  { topic: "reappraisal_meta_mechanism", body: "A 2014 meta-analysis of 48 neuroimaging studies found that reappraisal activates cognitive control regions and lateral temporal cortex while modulating the bilateral amygdala. The proposed mechanism: cognitive control modifies semantic representations of an emotional stimulus, and these altered representations attenuate amygdala activity.", citation: "Buhle et al. 2014 · Cerebral Cortex", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4193464/" },
+  { topic: "affect_labeling_mechanism", body: "Putting a name on an emotion — affect labeling — diminishes the response of the amygdala and other limbic regions while increasing activity in the right ventrolateral prefrontal cortex. The shift happens in fMRI even when participants are not explicitly trying to regulate.", citation: "Lieberman et al. 2007 · Psychological Science", paywalled: false, source_url: "https://sanlab.psych.ucla.edu/wp-content/uploads/sites/31/2015/05/Lieberman_AL-2007.pdf" },
+  { topic: "affect_labeling_implicit_mechanism", body: "Affect labeling produces effects across four domains — experiential, autonomic, neural, and behavioral — that match those seen during explicit emotion regulation, even though affect labeling does not feel like a regulatory process while it's happening.", citation: "Torre & Lieberman 2018 · Emotion Review", paywalled: true, source_url: "https://static1.squarespace.com/static/651b09f505bc433349d85ab7/t/651d2f2843e6d165beeccb23/1696411432954/Torre(2018)ER.pdf" },
+  { topic: "granularity_protective_effect", body: "A 2015 review consolidated multiple studies finding that under intense distress, individuals with higher emotional granularity were less likely to resort to maladaptive coping — binge drinking, aggression, self-injurious behavior — and showed less neural reactivity to rejection.", citation: "Kashdan, Barrett & McKnight 2015 · Current Directions in Psychological Science", paywalled: false, source_url: "https://c3po.media.mit.edu/wp-content/uploads/sites/45/2016/01/Kashdan-Barrett-Mcknight_2015.pdf" },
+  { topic: "granularity_trainable_mechanism", body: "Emotional granularity — the ability to experience emotions in precise, context-specific terms — is a skill that can be acquired and improved through practice. The 2021 study found granularity increased as participants engaged in repeated structured self-assessment of their emotional states.", citation: "Hoemann, Barrett & Quigley 2021 · Frontiers in Psychology", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC8355493/" },
+  { topic: "sleep_amygdala_effect", body: "A 2007 fMRI study found sleep-deprived participants showed a 60% greater magnitude of amygdala activation in response to negative emotional stimuli compared to sleep-rested controls. The volumetric extent of amygdala activation was three-fold larger in the deprivation group.", citation: "Yoo et al. 2007 · Current Biology", paywalled: false, source_url: "https://pubmed.ncbi.nlm.nih.gov/17956744/" },
+  { topic: "dmn_breathing_mechanism", body: "Attention to breath as a basic mindfulness practice reduces emotional responses in the amygdala while increasing functional connectivity between the amygdala and prefrontal cortex. The breath becomes a focal point that engages the brain's regulatory architecture.", citation: "Doll et al. 2016 · NeuroImage", paywalled: true, source_url: "https://pubmed.ncbi.nlm.nih.gov/27033686/" },
+  { topic: "hrv_mechanism", body: "Heart rate variability biofeedback works by strengthening the baroreceptor reflex — the homeostatic system that adjusts heart rate against blood pressure changes. Recent proposals also implicate vagal afferent pathways to frontal cortical areas as part of the mechanism.", citation: "Lehrer & Gevirtz 2014 · Frontiers in Psychology", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC4104929/" },
+  { topic: "sit_application", body: "Stillform's daily practice during low-stakes moments is the inoculation phase. Setting tone when nothing is wrong builds the response that runs when something is. Practice during winning is what makes composure available during losing.", citation: "Meichenbaum 1985 · Stress Inoculation Training, Pergamon Press", paywalled: true, source_url: "https://archive.org/details/stressinoculatio0000meic" },
+  { topic: "implementation_intentions_effect", body: "A 2006 meta-analysis by Gollwitzer and Sheeran across 94 independent studies and over 8,000 participants found implementation intentions produced a medium-to-large effect on goal attainment (Cohen's d = 0.65). The effect held across achievement, relationship, and health domains.", citation: "Gollwitzer & Sheeran 2006 · Advances in Experimental Social Psychology", paywalled: true, source_url: "https://cancercontrol.cancer.gov/sites/default/files/2020-06/goal_intent_attain.pdf" },
+  { topic: "window_mechanism", body: "The window of tolerance is the optimal arousal zone in which a person can think clearly, regulate emotions, and engage socially. Above the window: hyperarousal — panic, rage, overwhelm. Below: hypoarousal — numbness, shutdown, dissociation.", citation: "Siegel 1999 · The Developing Mind, Guilford Press", paywalled: true, source_url: "https://www.guilford.com/books/The-Developing-Mind/Daniel-Siegel/9781462543045" },
+  { topic: "mct_mechanism", body: "Metacognitive therapy targets how a person responds to thoughts (rumination, worry, suppression) rather than the content of those thoughts. The shift is from analyzing what a thought says to observing the thinking pattern itself — engaging the metacognitive level rather than the cognitive content.", citation: "Wells 2009 · Metacognitive Therapy, Guilford Press", paywalled: true, source_url: "https://www.guilford.com/books/Metacognitive-Therapy-for-Anxiety-and-Depression/Adrian-Wells/9781609184964/summary" },
+  { topic: "mct_effect", body: "A 2018 meta-analysis evaluated 25 trials of metacognitive therapy across anxiety, depression, and other psychological complaints. The analysis found large effect sizes for symptom reduction in adult patients and indicated MCT was superior to waitlist and active treatment control conditions in many comparisons.", citation: "Normann & Morina 2018 · Frontiers in Psychology", paywalled: false, source_url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6246690/" },
+  { topic: "misattribution_application", body: "The bio-filter is built on the well-documented phenomenon of misattributing arousal. What feels like overwhelm may be the system running on too little sleep, depletion, or pain — a hardware signal interpreted as a software experience.", citation: "Schachter & Singer 1962 · Psychological Review", paywalled: true, source_url: "https://en.wikipedia.org/wiki/Two-factor_theory_of_emotion" },
+  { topic: "pain_mechanism", body: "Pain demands attention. It interrupts ongoing cognitive activity by forcing prioritization of the pain signal. The interruptive function depends on both the threat value of the pain and the demands of the environment — pain is selected for action from within complex motivational landscapes to urge escape.", citation: "Eccleston & Crombez 1999 · Psychological Bulletin", paywalled: true, source_url: "https://pubmed.ncbi.nlm.nih.gov/10349356/" }
 ];
 
 // LocalStorage helpers for variety guard — last 5 card topics retained
@@ -4964,18 +4964,18 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
         });
         const data = await response.json();
         if (response.ok && data && data.body && data.citation) {
-          setCard({ openingLine: data.openingLine, body: data.body, citation: data.citation, topic: data.topic, source: "ai" });
+          setCard({ openingLine: data.openingLine, body: data.body, citation: data.citation, topic: data.topic, source_url: data.source_url || null, paywalled: data.paywalled === true, source: "ai" });
           appendCardTopicToHistory(data.topic);
         } else {
           // AI failed — use static fallback
           const fallback = pickStaticFallbackCard(recentTopics);
-          setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source: "static" });
+          setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source_url: fallback.source_url || null, paywalled: fallback.paywalled === true, source: "static" });
           appendCardTopicToHistory(fallback.topic);
         }
       } catch (err) {
         // Network error — static fallback
         const fallback = pickStaticFallbackCard(recentTopics);
-        setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source: "static" });
+        setCard({ openingLine: null, body: fallback.body, citation: fallback.citation, topic: fallback.topic, source_url: fallback.source_url || null, paywalled: fallback.paywalled === true, source: "static" });
         appendCardTopicToHistory(fallback.topic);
       } finally {
         setLoading(false);
@@ -5059,9 +5059,31 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
           {card.body}
         </div>
 
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 16, fontStyle: "italic" }}>
+        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", marginBottom: 10, fontStyle: "italic" }}>
           {card.citation}
         </div>
+
+        {card.source_url && (
+          <div style={{ marginBottom: 16 }}>
+            <a
+              href={card.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => { try { window.plausible("Science Card Source Opened", { props: { topic: card.topic || "unknown", paywalled: card.paywalled ? "yes" : "no" } }); } catch {} }}
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 10,
+                color: "var(--amber)",
+                letterSpacing: "0.06em",
+                textDecoration: "none",
+                borderBottom: "0.5px dotted var(--amber-dim)",
+                paddingBottom: 1
+              }}
+            >
+              Read the study →{card.paywalled ? " (paywalled)" : ""}
+            </a>
+          </div>
+        )}
 
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
           <button
@@ -5115,11 +5137,10 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
               The science behind this
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
-              <p style={{ marginTop: 0 }}>This card surfaces one finding from the research grounding Stillform's tools. Three things to know about how these cards work:</p>
-              <p>Most cards are AI-generated at session close. The AI is given a curated library of peer-reviewed studies — the same studies documented in Stillform's Science Sheet — and writes a card in plain language tied to what you just practiced. The AI is not allowed to cite studies outside this library, invent findings, or attribute claims to researchers not in the corpus.</p>
-              <p>If the AI is unavailable, you'll see a hand-written static card. The static cards come from the same library, are written in the same voice, and are vetted before shipping.</p>
-              <p>If the AI can't find a study that closely matches what you just did, you may see a more general card about regulation practice itself. Better to give you broadly true information than falsely-specific information.</p>
-              <p style={{ marginBottom: 0 }}>Every citation here ties back to a real study or established framework.</p>
+              <p style={{ marginTop: 0 }}>The findings shown here are drawn from the peer-reviewed research underlying Stillform's tools.</p>
+              <p>Drawn from a curated library that grounds Stillform's mechanisms. AI-generated when available, static otherwise.</p>
+              <p>The "Read the study" link goes to the source research. Some studies are openly published; others remain behind academic paywalls.</p>
+              <p style={{ marginBottom: 0 }}>Stillform isn't affiliated with any of these journals or publishers. The science stands on its own; we cite it because it's proven.</p>
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 16 }}>
               <button
