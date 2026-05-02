@@ -1924,6 +1924,10 @@ const CHIP_DEFINITIONS = {
   distant: {
     title: "Distant",
     body: "Disconnected from the body. Things feel far away, muffled, like you're watching from outside. Different from Flat — Flat is low energy still in the body; Distant is a kind of stepping-out. Selecting Distant tells Stillform that words alone won't reach, and the system routes you to Body Scan first to help you re-enter the room before re-entering the thought."
+  },
+  unsure: {
+    title: "Unsure",
+    body: "You don't have a clear name for what's present right now. That's a real signal too — sometimes the system hasn't settled enough yet to tell you, and naming a state you don't actually feel would be inaccurate. Selecting Unsure tells Stillform you completed the session but the post-state isn't legible yet. The data is preserved as 'user-unsure' — different from skipping. Stillform will check back next time without assumptions about where you landed."
   }
 };
 
@@ -2596,6 +2600,10 @@ function classifyShiftDirection(preState, postState, sessionContext = {}) {
   if (!preState && !postState) return { category: null, nullReason: "no-pre-state" };
   if (!preState) return { category: null, nullReason: "no-pre-state" };
   if (!postState) return { category: null, nullReason: "skipped" };
+  // User explicitly said they don't know — distinct from skipped (no engagement)
+  // and from unknown-chip (chip outside the canonical set). Preserves the signal
+  // that the user completed the session but the post-state isn't legible yet.
+  if (postState === "unsure") return { category: null, nullReason: "user-unsure" };
 
   const pre = SHIFT_CHIP_QUADRANTS[preState];
   const post = SHIFT_CHIP_QUADRANTS[postState];
@@ -4732,6 +4740,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   if (showWhatShifted) {
     // BODY SCAN WHAT SHIFTED — Russell circumplex post-state moment + optional free-text label
     // Per BODY_SCAN_WHAT_SHIFTED_SPEC.md and THREE_CATEGORY_DATA_FEED_SPEC.md
+    // Unsure added May 3 — gating decision: post-state required, with honest "I don't know yet" exit (parity with Reframe)
     const feelChips = [
       { id: "excited", label: "Excited" },
       { id: "focused", label: "Focused" },
@@ -4741,7 +4750,8 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       { id: "stuck", label: "Stuck" },
       { id: "mixed", label: "Mixed" },
       { id: "flat", label: "Flat" },
-      { id: "distant", label: "Distant" }
+      { id: "distant", label: "Distant" },
+      { id: "unsure", label: "Unsure" }
     ];
     const preChipLabel = feelChips.find(c => c.id === feelState)?.label || null;
     const lockInEnabled = !!postStateChip;
@@ -7941,6 +7951,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   if (showPostRating) {
     // Russell circumplex grouping: HAP → LAP → HAN → cognitive-span → LAN
     // Settled added Apr 30 — closes low-arousal-positive coverage gap
+    // Unsure added May 3 — gating decision: post-rating required, with honest "I don't know yet" exit
     const feelChips = [
       { id: "excited", label: "Excited" },
       { id: "focused", label: "Focused" },
@@ -7950,7 +7961,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       { id: "stuck", label: "Stuck" },
       { id: "mixed", label: "Mixed" },
       { id: "flat", label: "Flat" },
-      { id: "distant", label: "Distant" }
+      { id: "distant", label: "Distant" },
+      { id: "unsure", label: "Unsure" }
     ];
     // Load insight once when screen appears
     const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
@@ -8140,9 +8152,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {/* FINISH */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
-          {/* Lock-in gate: if user picked a Next Move, the lock-in card must be confirmed before finishing.
-              Schön (1983) reflection-on-action consolidates the regulated insight; without it the move doesn't
-              durably encode (Lavi-Rotenberg 2020). Locked May 3 by Arlin: required, no ghost exit. */}
+          {/* Gating, May 3 (Arlin's gating decisions):
+              1. Lock-in: if user picked a Next Move, lock-in must be confirmed before finishing
+                 (Schön 1983 reflection-on-action consolidation — Lavi-Rotenberg 2020).
+              2. Post-rating: a chip must be selected before finishing. "Unsure" is the legitimate
+                 honest exit for users who don't have a clear name yet — preserves the affect-labeling
+                 mechanism (Lieberman 2007 post-regulation timing) without forcing inaccurate labels. */}
           {postNextMoveId && !lockInConfirmed && (
             <div style={{
               fontSize: 11,
@@ -8157,33 +8172,34 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               Tap "Locked in" above to consolidate before finishing.
             </div>
           )}
+          {!postRating && !(postNextMoveId && !lockInConfirmed) && (
+            <div style={{
+              fontSize: 11,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              textAlign: "center",
+              maxWidth: 280,
+              lineHeight: 1.6
+            }}>
+              Pick a chip above — Unsure is fine if you don't have a name yet.
+            </div>
+          )}
           <button
             className="btn btn-primary"
-            disabled={postNextMoveId && !lockInConfirmed}
+            disabled={(postNextMoveId && !lockInConfirmed) || !postRating}
             onClick={() => {
-              if (postNextMoveId && !lockInConfirmed) return;
+              if ((postNextMoveId && !lockInConfirmed) || !postRating) return;
               finishReframeSession({ postState: postRating, anchorDraft: externalAnchorDraft });
             }}
             style={{
-              opacity: (postNextMoveId && !lockInConfirmed) ? 0.4 : 1,
-              cursor: (postNextMoveId && !lockInConfirmed) ? "not-allowed" : "pointer"
+              opacity: ((postNextMoveId && !lockInConfirmed) || !postRating) ? 0.4 : 1,
+              cursor: ((postNextMoveId && !lockInConfirmed) || !postRating) ? "not-allowed" : "pointer"
             }}
           >
             Finish session
           </button>
-          {!postRating && (
-            <button
-              className="btn btn-ghost"
-              style={{ fontSize: 13, color: "var(--amber)", borderColor: "var(--amber-dim)" }}
-              disabled={postNextMoveId && !lockInConfirmed}
-              onClick={() => {
-                if (postNextMoveId && !lockInConfirmed) return;
-                finishReframeSession({ postState: null, anchorDraft: externalAnchorDraft });
-              }}
-            >
-              Skip and finish
-            </button>
-          )}
         </div>
       </div>
     );
