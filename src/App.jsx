@@ -11703,6 +11703,8 @@ export default function Stillform() {
     }
   }, [setupBridgeStep, screen]);
   const [faqBackScreen, setFaqBackScreen] = useState("home");
+  const [faqSearchQuery, setFaqSearchQuery] = useState("");
+  const [faqExpandedSet, setFaqExpandedSet] = useState(() => new Set());
   const [preferredCrisisRegion, setPreferredCrisisRegion] = useState(null);
   const [showOtherCrisisResources, setShowOtherCrisisResources] = useState(false);
   const [showHomeContextTip, setShowHomeContextTip] = useState(() => {
@@ -16001,16 +16003,9 @@ const isSignalProfileConfigured = () => {
         )}
 
         {/* FAQ */}
-        {screen === "faq" && (
-          <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
-            <button className="intervention-back" onClick={() => setScreen(faqBackScreen || "home")}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
-            <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 32, fontFamily: "'Cormorant Garamond', serif" }}>
-              Composure is being in control of how you show up — in any moment that matters.
-            </div>
-
-            {[
-              {
+        {screen === "faq" && (() => {
+          const FAQ_ITEMS = [
+{
                 q: "What is Stillform?",
                 a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation actually takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
               },
@@ -16122,14 +16117,202 @@ const isSignalProfileConfigured = () => {
                 q: "Does Stillform work on tablets?",
                 a: "The web app runs on any browser, including tablets and iPads. The layout is optimized for phones but functional on larger screens. A dedicated tablet layout is planned."
               }
-            ].map((item, i) => (
-              <div key={i} style={{ marginBottom: 20 }}>
-                <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)", marginBottom: 6 }}>{item.q}</div>
-                <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7 }}>{item.a}</div>
+          ];
+          // Make a stable id from the question for chip nav and expanded-set tracking
+          const idFor = (q) => q.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+          // Filter by search query — match against question + answer text
+          const query = (faqSearchQuery || "").trim().toLowerCase();
+          const filteredItems = query
+            ? FAQ_ITEMS.filter(item =>
+                item.q.toLowerCase().includes(query) ||
+                item.a.toLowerCase().includes(query)
+              )
+            : FAQ_ITEMS;
+          const toggleExpanded = (id) => {
+            setFaqExpandedSet(prev => {
+              const next = new Set(prev);
+              if (next.has(id)) next.delete(id); else next.add(id);
+              return next;
+            });
+          };
+          const scrollToQuestion = (id) => {
+            // Auto-expand and scroll to the section
+            setFaqExpandedSet(prev => {
+              const next = new Set(prev);
+              next.add(id);
+              return next;
+            });
+            // Defer scroll until React has rendered the expanded state
+            setTimeout(() => {
+              try {
+                const el = document.getElementById(`faq-q-${id}`);
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              } catch {}
+            }, 50);
+          };
+          return (
+            <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+              <button className="intervention-back" onClick={() => setScreen(faqBackScreen || "home")}>← Back</button>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
+              <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 24, fontFamily: "'Cormorant Garamond', serif" }}>
+                Composure is being in control of how you show up — in any moment that matters.
               </div>
-            ))}
-          </section>
-        )}
+
+              {/* Search bar */}
+              <input
+                type="text"
+                value={faqSearchQuery}
+                onChange={(e) => setFaqSearchQuery(e.target.value)}
+                placeholder="Search the FAQ"
+                aria-label="Search the FAQ"
+                style={{
+                  width: "100%",
+                  background: "var(--ground-elev)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r-tight)",
+                  padding: "12px 14px",
+                  color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 14,
+                  lineHeight: 1.5,
+                  marginBottom: 20,
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+
+              {/* Chip navigation — jump to any question. Filtered by search if active. */}
+              {filteredItems.length > 0 && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 32 }}>
+                  {filteredItems.map((item, i) => {
+                    const id = idFor(item.q);
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => scrollToQuestion(id)}
+                        style={{
+                          background: "transparent",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r-tight)",
+                          padding: "6px 10px",
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: 11,
+                          color: "var(--text-dim)",
+                          cursor: "pointer",
+                          letterSpacing: "0.02em",
+                          transition: "border-color var(--motion-quick) var(--ease-prestige), color var(--motion-quick) var(--ease-prestige)"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = "var(--amber-dim)";
+                          e.currentTarget.style.color = "var(--amber)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = "var(--border)";
+                          e.currentTarget.style.color = "var(--text-dim)";
+                        }}
+                      >
+                        {item.q.replace(/\?$/, "")}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* No results state */}
+              {filteredItems.length === 0 && (
+                <div style={{
+                  fontSize: 13,
+                  color: "var(--text-dim)",
+                  fontStyle: "italic",
+                  textAlign: "center",
+                  padding: "32px 16px",
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  No questions match that search.
+                </div>
+              )}
+
+              {/* Question list — collapse-by-question */}
+              {filteredItems.map((item, i) => {
+                const id = idFor(item.q);
+                const isOpen = faqExpandedSet.has(id);
+                return (
+                  <div key={i} id={`faq-q-${id}`} style={{ marginBottom: 8, borderBottom: "0.5px solid var(--border-printed)", paddingBottom: 8 }}>
+                    <button
+                      onClick={() => toggleExpanded(id)}
+                      style={{
+                        width: "100%",
+                        background: "transparent",
+                        border: "none",
+                        textAlign: "left",
+                        padding: "12px 0",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 12,
+                        color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 14,
+                        fontWeight: 500,
+                        lineHeight: 1.45
+                      }}
+                      aria-expanded={isOpen}
+                    >
+                      <span style={{
+                        flexShrink: 0,
+                        marginTop: 2,
+                        color: "var(--text-muted)",
+                        fontSize: 11,
+                        transition: "transform var(--motion-quick) var(--ease-prestige)",
+                        transform: isOpen ? "rotate(90deg)" : "rotate(0deg)",
+                        display: "inline-block",
+                        width: 12
+                      }}>▸</span>
+                      <span style={{ flex: 1 }}>{item.q}</span>
+                    </button>
+                    {isOpen && (
+                      <div style={{
+                        fontSize: 13,
+                        color: "var(--text-dim)",
+                        lineHeight: 1.7,
+                        paddingLeft: 24,
+                        paddingBottom: 12,
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {item.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {/* "Can't find what you're looking for" mailto */}
+              <div style={{
+                marginTop: 48,
+                paddingTop: 24,
+                borderTop: "0.5px solid var(--border-printed)",
+                textAlign: "center",
+                fontSize: 13,
+                color: "var(--text-dim)",
+                lineHeight: 1.6,
+                fontFamily: "'DM Sans', sans-serif"
+              }}>
+                Can't find what you're looking for?{" "}
+                <a
+                  href="mailto:ARAembersllc@proton.me?subject=Stillform%20FAQ%20Question"
+                  style={{
+                    color: "var(--amber)",
+                    textDecoration: "none",
+                    borderBottom: "0.5px dotted var(--amber-dim)"
+                  }}
+                >
+                  Email us
+                </a>
+                .
+              </div>
+            </section>
+          );
+        })()}
 
         {/* CRISIS RESOURCES — international hotlines */}
         {screen === "crisis" && (
