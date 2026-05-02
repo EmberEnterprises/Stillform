@@ -172,6 +172,52 @@ BODY_FIRST_PRE_RATE_FIX_SPEC.md drafted then retracted Apr 30 after Arlin caught
 
 ## 🚨 ARCHITECTURAL — Decide Before TestFlight
 
+### GPT-4o data picture audit + existing guardrails review (Added May 3, 2026)
+
+**The ask (Arlin, May 3):** Before adding more guardrails to the AI surface, understand what GPT-4o's data substrate actually is — what it does with the data we send, what its retention is, what its defaults are — AND review the guardrails Stillform already implemented against that substrate. The point is not to layer more guardrails on assumptions; the point is to verify the guardrails we have actually complement how GPT-4o behaves, across the whole app.
+
+**Why now:** Stillform is no longer just-Reframe-uses-AI. The AI surface has expanded:
+- Reframe text conversations → GPT-4o chat completions
+- Reframe screenshot vision → GPT-4o vision (`detail:"low"`, max 15MB per image)
+- Science cards → GPT-4o chat completions (separate call, its own validation layer)
+- Unified text aggregator (shipped May 3) → feeds buildUnifiedTextContext into every Reframe call, which now includes Self Mode responses, What Shifted free-text, grounding writes, Signal Log entries
+
+Every textarea the user fills in now has a path to GPT-4o via the unified aggregator. The guardrail layer was designed when Reframe was the only AI surface. It needs review against current scope.
+
+**Single AI provider confirmed:** reframe.js calls only `https://api.openai.com/v1/chat/completions` with `model: "gpt-4o"` (verified May 3 by reading the function). Two call sites (main Reframe response + science card generation) — same endpoint, same key, same retention regime. No Anthropic API calls, no Claude in the picture. The audit is single-substrate.
+
+**What needs to be answered (proposed scope of audit doc):**
+
+*GPT-4o substrate side:*
+- OpenAI API data retention — current default is 30 days for abuse monitoring; verify what Stillform's account is on (standard, zero-retention, enterprise tier)
+- Training opt-out status of the API key — API data is opted out of training by default but verify
+- Vision-API-specific policies — does image data have different retention than text?
+- What `detail: "low"` actually transmits to OpenAI vs the original image bytes
+- Whether system-prompt content is logged or treated differently than user-turn content
+- What appears in Netlify function logs vs OpenAI's logs (we currently `console.error` full payloads on API errors — that lands in Netlify, separate retention)
+- Whether the API key is rotated on a known cadence and what the procedure is
+- Whether OpenAI's response is logged anywhere on our side beyond the user's device
+
+*Stillform guardrail side (review what's already shipped):*
+- System prompt rules — never quote entries back verbatim, session-count gating (≥3 vs <3), "for context only — do not reference patterns yet" framing
+- Voice contract validation — does it leak any user data when validation fails and falls back?
+- Voice repair retry path — same question, does the repair call carry user context?
+- Banned-phrase post-processing filter on AI output — verify what it catches and what it misses
+- Rate limiting (10 req/IP/min) — does it leak user identifiers?
+- AES-256 encryption at rest on device — verified via SECURE_KEYS list (16 keys); does anything sensitive bypass?
+- The Apr 15 OCR→GPT-4o vision migration's guardrails (type whitelist, 3-file max, 10MB/file, 20MB total, server-side validation) — still aligned with current scope?
+- Crisis detection + liability guard flags fire Plausible events — verify those carry no user content
+- The new textHistoryContext field — does the prompt instruction "never quote entries back verbatim, do not flag AI-down gaps" actually hold against GPT-4o's behavior, or does it sometimes leak?
+
+**Output of this work:**
+A single document mapping data flow per AI surface (Reframe text, Reframe vision, science cards, unified aggregator), retention regime per surface, existing guardrails per surface, and gaps identified. From that document, decide which guardrails need strengthening, which can be relaxed, and which were assumptions that don't hold against actual substrate behavior.
+
+**Pre-launch or post-launch:** This should be pre-TestFlight. The privacy policy makes data-handling claims that depend on the substrate behaving as we believe it does. Shipping to TestFlight without verifying creates real liability if the policy and the reality are misaligned.
+
+**Open question for Arlin:** is there a known testing methodology you want here (e.g., probe specific prompts to see if GPT-4o leaks them back, compare retention across tiers, etc.) or should this be desk-research-first against OpenAI's published documentation?
+
+---
+
 ### Body-first metacognition access gap
 **The problem:** Body-first calibration currently routes the hero CTA into Breathe by default. Body work is the entry, Reframe is a follow-on. But Stillform is a metacognition tool that architects composure — composure requires both somatic regulation AND metacognition. A body-first user whose state is already regulated (no body tension, no off-baseline) and who needs to think something through has no direct path to Reframe — they're forced through Breathe first.
 
