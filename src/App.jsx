@@ -1752,6 +1752,16 @@ const UAT_QUESTION_OPTIONS = [
 ];
 const VALID_THEME_IDS = new Set(["dark", "midnight", "suede", "teal", "rose", "light"]);
 const VALID_AI_TONE_IDS = new Set(["balanced", "gentle", "direct", "clinical", "motivational"]);
+// Text scale options for the Settings text-size toggle. Stored as numeric
+// strings in localStorage so they survive cross-device sync. Step sizes
+// (1.0 / 1.15 / 1.30) match iOS standard accessibility text scale steps.
+// Applied via CSS `zoom` on the React root mount point — see useEffect
+// near textScale state declaration. Zoom is non-standard but supported in
+// WebKit/Chromium (Capacitor WebView on iOS and Android, and Chrome/Safari/
+// Edge on web). Standards-compliant alternatives (root font-size, rem
+// conversion, text-size-adjust) cannot scale the ~889 inline `fontSize:
+// NN` (px) declarations across App.jsx without a full style refactor.
+const VALID_TEXT_SCALES = new Set([1, 1.15, 1.30]);
 // Tone-mode determines how user's stored default tone interacts with auto-detect.
 // "override" — user's default tone always wins; auto-detect is suppressed
 // "fallback" — auto-detect runs; user's default fills in when auto returns no confident suggestion
@@ -6086,7 +6096,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6154,7 +6164,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -12169,6 +12179,16 @@ export default function Stillform() {
         applyThemePreset(savedTheme, true);
       }
     } catch {}
+    // Apply text scale on startup if previously set above default. The
+    // useEffect on textScale state will also fire on mount, but applying
+    // here too prevents a brief flash at default scale before React mounts.
+    try {
+      const savedScale = parseFloat(localStorage.getItem("stillform_text_scale") || "1");
+      if (VALID_TEXT_SCALES.has(savedScale) && savedScale !== 1) {
+        const root = document.getElementById("root");
+        if (root) root.style.zoom = String(savedScale);
+      }
+    } catch {}
     // Cloud sync init — version check + restore data if signed in
     sbVersionCheck().catch(() => {});
     if (sbIsSignedIn()) {
@@ -13043,6 +13063,12 @@ export default function Stillform() {
   const [highContrastMode, setHighContrastMode] = useState(() => {
     try { return localStorage.getItem("stillform_high_contrast") === "on"; } catch { return false; }
   });
+  const [textScale, setTextScale] = useState(() => {
+    try {
+      const raw = parseFloat(localStorage.getItem("stillform_text_scale") || "1");
+      return VALID_TEXT_SCALES.has(raw) ? raw : 1;
+    } catch { return 1; }
+  });
   const [themeChoice, setThemeChoice] = useState(() => {
     try {
       const stored = localStorage.getItem("stillform_theme") || "dark";
@@ -13087,6 +13113,10 @@ export default function Stillform() {
       }
       if (restoredRegType) setRegType(restoredRegType);
       if (restoredHC !== highContrastMode) setHighContrastMode(restoredHC);
+      const restoredScale = parseFloat(localStorage.getItem("stillform_text_scale") || "1");
+      if (VALID_TEXT_SCALES.has(restoredScale) && restoredScale !== textScale) {
+        setTextScale(restoredScale);
+      }
       if (restoredTone && VALID_AI_TONE_IDS.has(restoredTone)) setAiToneChoice(restoredTone);
       if (restoredToneMode && VALID_AI_TONE_MODE_IDS.has(restoredToneMode)) setAiToneMode(restoredToneMode);
       refreshSettings();
@@ -13163,6 +13193,16 @@ export default function Stillform() {
       setThemeChoice(themeToApply);
     }
   }, [themeChoice, highContrastMode]);
+  // Apply text scale via CSS zoom on the React mount point. Zoom on the
+  // root container (rather than html) keeps any future browser-chrome
+  // interactions clean and ensures every UI element inside the app —
+  // including modals — scales together. App has no React portals
+  // (verified May 3, 2026), so all UI lives inside this root subtree.
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.getElementById("root");
+    if (root) root.style.zoom = String(textScale);
+  }, [textScale]);
   const metricsAuthToken = sbGetSession()?.access_token || "";
   const nativePlatform = (() => {
     try { return window?.Capacitor?.getPlatform?.() || "web"; } catch { return "web"; }
@@ -14542,6 +14582,47 @@ const isSignalProfileConfigured = () => {
                           </div>
                           {opt.label}
                           {active && <div style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--amber)", marginTop: -4 }} />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Text size */}
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Text size</div>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                    Scale all text and UI proportionally. If something looks off at a larger size, switch back to Default.
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[
+                      { value: 1, label: "Default", sample: 13 },
+                      { value: 1.15, label: "Larger", sample: 15 },
+                      { value: 1.30, label: "Largest", sample: 17 },
+                    ].map(opt => {
+                      const isActive = textScale === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => {
+                            setTextScale(opt.value);
+                            try { localStorage.setItem("stillform_text_scale", String(opt.value)); } catch {}
+                          }}
+                          style={{
+                            flex: 1,
+                            background: isActive ? "var(--amber-glow)" : "var(--surface)",
+                            border: `1.5px solid ${isActive ? "var(--amber)" : "var(--border)"}`,
+                            borderRadius: "var(--r-lg)",
+                            padding: "12px 8px",
+                            cursor: "pointer",
+                            fontFamily: "'DM Sans', sans-serif",
+                            display: "flex", flexDirection: "column", alignItems: "center", gap: 6
+                          }}
+                        >
+                          <span style={{ fontSize: opt.sample, color: "var(--text)", fontWeight: 500 }}>Aa</span>
+                          <span style={{ fontSize: 11, color: isActive ? "var(--text)" : "var(--text-dim)", letterSpacing: "0.02em" }}>
+                            {opt.label}
+                          </span>
                         </button>
                       );
                     })}
