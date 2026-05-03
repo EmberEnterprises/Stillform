@@ -19,9 +19,11 @@ public class WatchBridge {
     /**
      * Send a breathing pattern to the connected watch.
      * Call this when a breathing session starts on the phone.
-     * 
+     *
      * @param context App context
-     * @param pattern One of: "calm", "box", "478", "quick"
+     * @param pattern One of: "quick", "deep", "cyclic_sigh".
+     *                Must match a pattern id in BREATHING_PATTERNS (src/App.jsx)
+     *                and a switch case in WearBreatheActivity.onCreate.
      */
     public static void startBreathingOnWatch(Context context, String pattern) {
         executor.execute(() -> {

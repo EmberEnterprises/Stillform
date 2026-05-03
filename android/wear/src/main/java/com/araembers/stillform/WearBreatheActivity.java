@@ -45,20 +45,29 @@ public class WearBreatheActivity extends Activity {
         countLabel = findViewById(R.id.count_label);
         cycleLabel = findViewById(R.id.cycle_label);
 
-        // Check for pattern from phone via intent extras
+        // Check for pattern from phone via intent extras.
+        // Pattern IDs and durations must match BREATHING_PATTERNS in src/App.jsx.
+        // Phone-side default is "quick" (see watchBridge.startBreathing default arg in App.jsx).
         String pattern = getIntent().getStringExtra("pattern");
         if (pattern != null) {
             switch (pattern) {
-                case "box":
-                    phaseDurations = new int[]{4, 4, 4, 4};
-                    break;
-                case "478":
-                    phaseDurations = new int[]{4, 7, 8, 0};
+                case "quick":
+                    // Quick Reset: 4 inhale, 4 hold, 6 exhale (no rest).
+                    phaseDurations = new int[]{4, 4, 6, 0};
                     phaseNames = new String[]{"Inhale", "Hold", "Exhale", ""};
                     break;
-                case "quick":
-                    phaseDurations = new int[]{4, 0, 6, 2};
-                    phaseNames = new String[]{"Inhale", "", "Exhale", "Rest"};
+                case "deep":
+                    // Deep Regulate: 4 inhale, 4 hold, 8 exhale, 2 rest.
+                    // Matches the default declared at top of class.
+                    phaseDurations = new int[]{4, 4, 8, 2};
+                    phaseNames = new String[]{"Inhale", "Hold", "Exhale", "Rest"};
+                    break;
+                case "cyclic_sigh":
+                    // Cyclic Sighing (Balban et al. 2023, Cell Reports Medicine 4:100895):
+                    // primary nasal inhale (4), secondary top-off inhale (1), long oral exhale (8).
+                    // The "Hold" slot is repurposed as the second inhale; label updated accordingly.
+                    phaseDurations = new int[]{4, 1, 8, 0};
+                    phaseNames = new String[]{"Inhale", "Inhale", "Exhale", ""};
                     break;
             }
         }
