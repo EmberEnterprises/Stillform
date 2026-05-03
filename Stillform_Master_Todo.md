@@ -92,7 +92,7 @@ What's not right yet:
 - The relationship between Self Mode and Reframe (Self Mode = solo training; Reframe = with-partner work in real time) isn't legible to a user encountering both
 - Nothing in the product surfaces the user's growing capacity at the 5 steps over time — it's the trainable thing but the training isn't measured (the Cognitive Function Measurement moonshot would address this)
 
-Not for now — Arlin flagged this as ongoing work to come back to. Future session task: redesign Self Mode's framing, naming, and visual treatment so it stands as the differentiated practice it is.
+Not for now — Arlin flagged this as ongoing work to come back to. Future session task: redesign Self Mode's framing, naming, and visual treatment so it stands as the differentiated practice it is. Track also includes Arlin-driven in-app exploration to surface any specific bugs or unintuitive flows in the current Self Mode build (originally tracked separately, captured Apr 29; consolidated here May 3).
 
 ### ⏳ Pattern Disruption Layer (architectural direction, May 2, 2026)
 
@@ -306,12 +306,6 @@ Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question 
 
 ### ✅ Reframe title doesn't reflect mode — RESOLVED Apr 30
 Investigation found the bug as described didn't exist in code; modeConfig.title and subtitle were defined but never referenced. Removed dead title/subtitle fields. Full record in Completed archive.
-
-### Self Mode needs work
-
-Specific issues TBD by Arlin. Needs in-app exploration to identify what's missing or broken. Self Mode is the explicit MCT 5-step practice (Notice, Name, Recognize, Perspective, Choose) — Pillar 1 anchor feature. Captured Apr 29.
-
-Note: also tracked at higher detail in Engagement Craft Active section ("Self Mode is not where it could be" — flagged May 1, 2026). Two entries cover slightly different aspects: this one captures Arlin-driven exploration of specific issues; the Engagement Craft entry captures the visible-architecture/naming gap. May want to consolidate after Arlin's exploration.
 
 ### My Progress redesign
 
