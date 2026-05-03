@@ -160,11 +160,11 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 
 7. **FAQ "Can I attach screenshots?"** — "The AI reads visual context to improve coaching."
 
-8. **Reframe info modal "Why Reframe?"** (lines 8608, 8617) — "the AI introduces a perspective that interrupts the loop you're already in." (Shipped May 2 by Claude — Claude's own drift to fix.)
+8. ✅ **Reframe info modal "Why Reframe?"** — RESOLVED May 3, 2026. Was: "the AI introduces a perspective that interrupts the loop you're already in." Now: "you step back from the loop you're already in by surfacing a different angle on it. The work is yours; the system organizes what you give it and asks the next question." Fixed in both duplicate strings (click handler + keydown handler).
 
-9. **Bio-filter info modal extension** (line 4147) — "the AI updates the predictive model with the actual hardware state." (Shipped May 2 by Claude.)
+9. ✅ **Bio-filter info modal extension** — RESOLVED May 3, 2026. Was: "the AI updates the predictive model with the actual hardware state." Now: "you mark depleted, in pain, sleep-deprived, the system carries that hardware state into how your input is read." User as actor (marks); system as substrate.
 
-10. **"Why name your state?" modal** (line 10010) — "the AI can meet you accurately... how the AI interprets what you type." (Shipped May 2 by Claude.)
+10. ✅ **"Why name your state?" modal** — RESOLVED May 3, 2026. Was: "tells Stillform what is present so the AI can meet you accurately... how the AI interprets what you type." Now: "tells Stillform what's present so what comes next meets you accurately... how your input is read." Removed "AI" as sentence subject in both phrases without introducing developer jargon (tried "routing" first, dropped because it's not a user word).
 
 11. **Privacy/screenshot disclosure** (line 16539) — "the image is sent to the AI model for interpretation."
 
@@ -177,8 +177,8 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 - Stillform is the architecture. The user is the operator.
 
 **Notes for whoever does this work:**
-- Items 8, 9, 10 are Claude's own drift from May 2 and don't count as relitigation.
-- Item 1 (reframe.js system prompts) is invasive — changes how the AI behaves, not just how the app describes itself. Needs care.
+- Items 8, 9, 10 (Claude's own drift from May 2) RESOLVED May 3, 2026. Items 1-7 and 11-12 remain captured for a deliberate voice pass.
+- Item 1 (reframe.js system prompts) is invasive — changes how the AI behaves, not just how the app describes itself. Needs care. Note: the May 3 reframe.js prompt rewrite (commit 43d51a6) addressed the "you are infrastructure / composure companion" opening register but the audit's full sweep across CALM/CLARITY/HYPE wasn't the goal of that commit; items 1's broader scope remains.
 - Item 2 ("What the AI has noticed") is a literal user-facing surface; copy change is also a UX change.
 - Items 3-7 are FAQ canon; whatever voice lands here sets register for the whole app.
 - Hero CTA Group 2 items partially overlap with the existing "narrowing assumptions" surface refinement work — possibly batchable.
