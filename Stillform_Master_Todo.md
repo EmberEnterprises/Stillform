@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · April 28, 2026**
+**ARA Embers LLC · last updated May 3, 2026**
 
 ---
 
@@ -16,7 +16,42 @@ A feature that doesn't clearly serve one of these is dressing. Push back when it
 
 ---
 
-## 🌟 NEW TOP PRIORITY (Added April 30, 2026 evening) — Cognitive Function Measurement
+## 🔒 LOCKED DECISIONS — do not re-propose
+
+These are decisions that have been made and locked. If a new Claude session reads from outside critique and surfaces any of these as problems, point them here. Re-proposing wastes session time and erodes trust in the framework.
+
+### Closing language stays as-is (locked May 1, 2026)
+After Round 2 consultation found 4 AIs converged on "closing language frames as outcome not rehearsal," CLOSING_LANGUAGE_CANDIDATES.md was drafted with three voice options across 7 close screens. Arlin's pushback: "the current language has a science behind it too" and "feels more prestige and less putting words into someone's mouth." Captured in Science Sheet section "System Observation + User Override (Architectural Conditioning Pattern)" — the current language ("Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL") is precise observation paired with explicit override pathways ("I don't feel regulated yet" button). Together they train interoceptive accuracy via supervised-learning-like pattern: system makes prediction, user accepts or corrects, both directions improve over time. Round 2 AIs read words in isolation without seeing override architecture; they were wrong.
+
+### Stillform discipline / market positioning correction (locked May 1, 2026)
+After repeated drift toward repair-coded / trauma-coded / intensity-coded language across consultation rounds and home copy proposals, Arlin named the actual market correctly: "This is a self mastery tool using metacognition with composure as its final outcome... Anyone who wants to enhance themselves are [our market]." Safeguards exist for users in distress — they are not the market.
+
+**Key reframes locked:**
+- Composure is a discipline (not therapy, not wellness, not consumer-tech enhancement)
+- Composure Architecture is the load-bearing definition (already present in 5 places in product)
+- "Composure is the foundation. You are its architect." (home banner copy from Apr 30) is doing the plainspoken inclusive work — already shipped
+- Future copy must NOT pull toward repair / trauma / intensity / "carry a lot" framing
+
+This positioning correction has implications for: future Reframe AI prompt language, marketing surfaces, the Science Sheet introduction, and any user-facing description of what Stillform IS.
+
+### Body-first pre-rate decision (locked Apr 30, 2026)
+Body-first pre-rate friction is NOT an open architectural gap. The pre-regulation chip rows in BreatheGroundTool and BodyScanTool were removed Apr 28 (commit `ae43f4db`) per Nook 2021 + replications. The residual 1-5 numeric pre-rate is intentional — it captures the user's self-rated state for shift-delta tracking ("Last session: +2") and feeds the three-category data feed (Categories A/B/C). Removing the 1-5 would break the data layer. Body-first metacognition access was verified already implemented Apr 27 — body-first users go Pre-rate → Bio-filter → Breathe → Post-rate → Ground, and the grounding-complete screen has "Continue to Reframe →" as primary CTA. A spec proposing to fix this gap was drafted then retracted Apr 30 because the gap doesn't exist. See project transfer Section 5 locked decision "Apr 30 do-not-re-propose" for the full lesson.
+
+### Round 4 consultation track exhausted (locked Apr 30, 2026)
+Round 4 consultation prompt was drafted but never sent. After three rounds of multi-AI consultation produced surface fixes and architectural overcorrections, Arlin's read: track exhausted. The diagnosis came from her, not from another consultation. The actual gap was engagement craft — not architecture. Source doc not preserved.
+
+### Low-demand mode designed for broad cognitive-bandwidth-limited population (locked Apr 28, 2026)
+Low-demand mode serves anyone whose cognition is partly offline — Medicated bio-filter users (broad scope: SSRI, post-anesthesia, sleep aids, chemo, recreational), post-panic users still cognitively rattled, sleep-deprived parents at 3am, migraine sufferers, dissociative episodes from trauma, sensory overload, anyone coming down from any altered state.
+
+**Why we designed for the broad population, not k-hole users specifically.** Three reasons. (1) Most Medicated chip selections are NOT k-hole users — they're someone on an SSRI, someone post-dental anesthesia, someone who took a sleep aid, someone on chemo, someone with a migraine, a sleep-deprived parent. Overfitting to k-hole users would underserve the actual majority. (2) The clinical/regulatory boundary. The moment Stillform positions itself for any specific altered-state use case, it crosses the medical-adjacent boundary the transfer doc explicitly guards against. The mode must be discoverable for any cognitive-bandwidth-limited use case without naming any of them. (3) The design that works for the broadest population is the same design that serves k-hole users — minimal demand, no decisions, no reading, no input. Designing for the broad case produces a feature that serves the specific case without ever naming it.
+
+**What it MUST NOT be labeled as.** Not "ketamine mode." Not "for altered states." Not "crisis mode." If a future session asks "why doesn't this route k-hole users somewhere specific?" — the answer is above. We chose the broad design deliberately.
+
+**Founder context (private, never marketed).** Stillform was conceived by Arlin during ketamine treatment. The app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning. The low-demand mode serves the broad cognitive-bandwidth-limited population, of which k-hole users are one sub-population.
+
+---
+
+## 🌟 NEW TOP PRIORITY — Cognitive Function Measurement
 
 **Spec drafted Apr 30 — see COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md in repo root.**
 
@@ -41,24 +76,9 @@ Open questions for Arlin's review listed in spec.
 
 ---
 
-## 🌟 ENGAGEMENT CRAFT — Research Foundation (Added April 30, 2026 evening)
+## 🌟 ENGAGEMENT CRAFT — Active items
 
-**Spec drafted Apr 30 — see Stillform_Science_Sheet.md "Engagement Principles" section.**
-
-After three rounds of consultation produced surface fixes and architectural overcorrections, Arlin diagnosed the actual gap as engagement craft — not architecture. After acknowledging that diagnosis, she pushed further: "data/research that helps with user engagement outside of neuroscience" and "human behavior in app data proven research."
-
-The science sheet now contains a parallel Engagement Principles section that grounds Stillform's engagement craft in 10 citation-grounded behavioral science principles — Fogg's Behavior Model, Wood & Rünger habit research, Self-Determination Theory, Kahneman System 1/2, Ariely defaults, Eyal variable reward, Gollwitzer implementation intentions, ultradian rhythm, Norman affordance perception, Pielot/Mehrotra/Harris attention-respectful design.
-
-**Why this matters for the award case:** Stillform's claims are grounded in two parallel research traditions — neuroscience for what the practice does inside the brain, and behavioral science for what the practice does in the user's life. Stronger case than either alone. Most products skip one or the other. Stillform sits in the intersection.
-
-**Operating rule going forward:** every feature in Stillform should be grounded in at least one Pillar (neuroscience) AND at least one Principle (behavioral science). Missing one or the other is the gap engagement craft is designed to close.
-
-**Open engagement craft items spec'd or pending:**
-
-### ✅ Closing language reconsideration — RESOLVED Apr 30 (NOT shipping)
-After Round 2 consultation found 4 AIs converged on "closing language frames as outcome not rehearsal," CLOSING_LANGUAGE_CANDIDATES.md was drafted with three voice options across 7 close screens. Arlin's pushback: "the current language has a science behind it too" and "feels more prestige and less putting words into someone's mouth." 
-
-Captured in Science Sheet new section "System Observation + User Override (Architectural Conditioning Pattern)" — the current language ("Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL") is precise observation paired with explicit override pathways ("I don't feel regulated yet" button). Together they train interoceptive accuracy via supervised-learning-like pattern: system makes prediction, user accepts or corrects, both directions improve over time. Round 2 AIs read words in isolation without seeing override architecture; they were wrong. **Closing language stays as-is.**
+Foundation is in `Stillform_Strategic_Roadmap.md` (Engagement Craft Research Foundation section). Active items below.
 
 ### ⏳ Kinesthetic close interaction (engagement craft) — IN DESIGN
 Arlin chose Reading 3 from the close redesign options: kinesthetic / tactile interaction at session close. Engagement craft as design frame, not neuroscience. Replaces the 5-screen text-and-button sequence at session close with a single tactile moment — most likely single tap on slow-pulsing point or long-press to seal. Grounded in Engagement Principles 4 (Kahneman System 1/2 — match interaction style to user state) and 9 (Norman affordance perception). Spec to draft next session.
@@ -97,62 +117,12 @@ Ship-or-hold timing: deferred to Arlin. Spec recommendation defers the call; bot
 Engineering scope: 3-5 days focused work across detection, dispatch, state machine, disruptor tool, transparency surface, end-to-end testing. Capacitor push-notifications and local-notifications already initialized.
 
 ### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
-The 20-second forced wait dropped. Continue enables on selection alone. Copy softened from "20-second capture required before exit" to "Take a moment to name what you used." Skip button added in footer (same skip pattern as What Shifted and Next Move). All three completeDebriefGate functions (Breathe / Body Scan / Reframe) updated to capture `skipped:boolean` on stored debrief record + new Plausible event "Tool Debrief Completed" with tool + skipped props for cohort visibility into engagement-vs-skip rates per tool.
+20-second forced wait dropped; Continue enables on selection alone; skip button added. Full record in Completed — April 30 archive.
 
-What stayed: header copy, three preset options + "I need another pass to lock this in" fourth option, Continue as primary CTA, tool-specific and regulation-type-specific options (Pillar 1 metacognition load-bearing science).
+### ✅ Plain-Language Neuroscience Surface — SHIPPED May 1, 2026
+Post-session card surfacing one finding from a verified 36-entry corpus tied to what the user just practiced. AI-generated at runtime with three protections (system prompt rule, server-side citation validation, corpus verification). 20 static fallbacks. Full architecture, ship arc, and engineering lessons in Completed — May 1 archive.
 
-This was the small focused engagement craft change that addresses Round 2 consultation finding ("close feels heavy") without committing to the full kinesthetic close redesign. The kinesthetic close spec is still next session.
-
-### ✅ Plain-Language Neuroscience Surface — SHIPPED May 1, 2026 (8 commits + 3 follow-up build fixes)
-Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Now live as the Plain-Language Neuroscience Surface — post-session card that surfaces one finding from a verified 36-entry corpus tied to what the user just practiced.
-
-**Architecture:**
-- AI-generated at runtime via reframe.js with mode='science_card'
-- 36-entry verified corpus, every entry traceable to a Science Sheet section (Protection C: paraphrased from Science Sheet's own framing, not training-data recall)
-- 20 hand-written static fallback cards activate on any AI failure
-- Variety guard via stillform_card_history localStorage (last 5 topics retained)
-- Three protections: SEVERE-failure system prompt rule (A) + server-side citation validation against SCIENCE_CARD_VALID_CITATIONS Set (B) + Arlin verification pass on corpus before ship (C — pending)
-- ⓘ button on card opens info modal explaining the three card types (AI-generated / static fallback / generic)
-- 4 Plausible events: Science Card Shown / Continued / Skipped / Info Opened
-- Once per session. Skip button. Shows on first session.
-
-**Insertion point:** post-session, after What Shifted (Body Scan) and post-rate (all tools), BEFORE ToolDebriefGate. Each tool's `if (debriefTarget)` block now renders ScienceCard first if scienceCardShown is false.
-
-**Cost:** ~$0.002/card via gpt-4o; ~$1.50/user/year at 2 sessions/day. Negligible against subscription.
-
-**Ship arc — 8 commits + 3 build fixes May 1:**
-- 5a773785 — Spec v2 with verified corpus + 20 static cards + ⓘ modal copy + 3 protections
-- c18d7fc3 — Server side: corpus + routing + system prompt builder + science_card branch in handler + Protection B validation
-- 2d9007ce — Frontend foundation: ScienceCard component + STATIC_SCIENCE_CARDS array + helpers + ⓘ modal + 4 Plausible events
-- 6cf4b8fe — Wiring: ScienceCard inserted into close flow of Breathe, Body Scan, Reframe with scienceCardShown state per tool
-- 821faa09 — FIX: ScienceCard React imports (had used React.useState namespace pattern; codebase uses named hook imports; build was failing on Vite's "React is not defined")
-- 64c2e3b1 — FIX: Literal backslash-n in scienceCardShown state declarations (Python string escaping issue in build script; three places had broken JSX syntax)
-- fc4e8158 — FIX: Decorative comment dividers tripping Security Gate (// =====... matched git conflict marker regex; replaced with dashes)
-- Final state on main: all checks pass, Security Gate green
-
-**Engineering lessons from the three broken commits:**
-- React component patterns must match existing codebase (named hooks, not namespace) — should be checked before writing component
-- Python scripts that build JS files must not embed `\n` in string replacements — triple-quoted strings or direct file write only
-- Decorative comment dividers must avoid `=======` pattern (matches git conflict marker regex in Security Gate)
-- After every code commit, file should be re-read from main and visually inspected for obvious issues — three commits today shipped with bugs that re-reading would have caught
-- "Shipped clean, ready for trigger" is the wrong framing when only Security Gate proves clean — should be "shipped, awaiting Security Gate green"
-
-**Pending — Protection C corpus verification:**
-Arlin reads 36 corpus entries + 20 static cards in PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md, flags any entry where plain-language summary doesn't match Science Sheet's framing of that study. Until verified, science card feature is shipped but not corpus-validated. Bad corpus entry would mean inaccurate card lands on real user.
-
-### ✅ Stillform discipline / market positioning correction (May 1, 2026)
-After repeated drift toward repair-coded / trauma-coded / intensity-coded language across yesterday's consultation rounds and this morning's home copy proposals, Arlin named the actual market correctly: "This is a self mastery tool using metacognition with composure as its final outcome... Anyone who wants to enhance themselves are [our market]." Safeguards exist for users in distress — they are not the market.
-
-**Key reframes locked:**
-- Composure is a discipline (not therapy, not wellness, not consumer-tech enhancement)
-- Composure Architecture is the load-bearing definition (already present in 5 places in product)
-- "Composure is the foundation. You are its architect." (home banner copy from Apr 30) is doing the plainspoken inclusive work — already shipped
-- Future copy must NOT pull toward repair / trauma / intensity / "carry a lot" framing
-
-This positioning correction has implications for: future Reframe AI prompt language, marketing surfaces, the Science Sheet introduction, and any user-facing description of what Stillform IS.
-
-### ⏳ Asynchronous metacognitive close — REFRAMED as kinesthetic close
-Round 3 finding from Gemini and Copilot flagged the close as too synchronous. After Arlin's pushback that ambient mode contradicts "less you need the app, the more it's working," this reframed as the kinesthetic close above. Same gap addressed; different solution.
+**Pending — Protection C corpus verification:** Arlin reads 36 corpus entries + 20 static cards in PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md, flags any entry where plain-language summary doesn't match Science Sheet's framing of that study. Until verified, science card feature is shipped but not corpus-validated.
 
 ### ⏳ Surface refinements (small, anytime)
 - Sub-labels under tools ("Train how you talk to yourself under load") — CoPilot Round 2
@@ -160,13 +130,8 @@ Round 3 finding from Gemini and Copilot flagged the close as too synchronous. Af
 - Body Scan verb-form authorship ("I'm staying here" not "hold for 30 seconds") — Claude Round 2
 - Cormorant aesthetic question (demote to ceremonial moments?) — Claude Round 2 — possibly resolved by Apr 30 prestige refresh; needs phone-test
 - Composure self-mastery legibility doc commit — sitting in /mnt/user-data/outputs, conceptual decision already made
+- **Text size / high contrast accessibility toggle in Settings** (added May 2 — surfaced from Bobby's first user session feedback, lost in earlier docs cleanup). Bobby's feedback: text still too dim for aging eyes. Toggle for text size and/or high contrast in Settings. Connects to existing accessibility line items (ARIA labels line ~702, chip touch targets line ~710 — verify line numbers).
 - **Fractal aesthetic expansion (May 2 idea, captured not committed)** — Arlin liked the trees. Possible directions if the existing audio/visual roadmap leaves room: branches that visibly extend on inhale and settle on exhale (synchronizing gaze with breath, not bilateral stimulation); additional fractal forms unlocked over session milestones (ferns, water rings, crystalline growth) as engagement-craft palette; pure "watch and breathe" mode that strips all UI and lets the canvas carry the session. NONE of this is EMDR or bilateral stimulation — the explicit rule from May 2 conversation is no EMDR-coded mechanics, with or without the name. Aesthetic and gaze-synchrony only.
-
-### ❌ Round 4 consultation prompt — DRAFTED but Arlin's read: track exhausted
-STILLFORM_ROUND_4_CONSULTATION.md committed but never sent. The diagnosis came from Arlin, not from another consultation.
-
-### ❌ Body-first pre-rate friction fix — RETRACTED
-BODY_FIRST_PRE_RATE_FIX_SPEC.md drafted then retracted Apr 30 after Arlin caught Claude not checking master todo first. Master todo line 321 already had "Body-first metacognition access gap — VERIFIED ALREADY IMPLEMENTED Apr 27" with explicit note: "Going forward: read the existing flow before claiming a gap." Master todo line 361 already had "Pre-rate flow needed science-grounded redesign — RESOLVED via commit ae43f4db" (chip rows removed per Nook 2021). The 1-5 numeric pre-rate that remains is the minimal residual measurement that drives shift delta tracking and three-category data feed. Not a science violation. Spec retracted with full retraction notice.
 
 ---
 
@@ -260,28 +225,28 @@ Every textarea the user fills in now has a path to GPT-4o via the unified aggreg
 - Crisis detection + liability guard flags fire Plausible events — verify those carry no user content
 - The new textHistoryContext field — does the prompt instruction "never quote entries back verbatim, do not flag AI-down gaps" actually hold against GPT-4o's behavior, or does it sometimes leak?
 
-**Output of this work:**
-A single document mapping data flow per AI surface (Reframe text, Reframe vision, science cards, unified aggregator), retention regime per surface, existing guardrails per surface, and gaps identified. From that document, decide which guardrails need strengthening, which can be relaxed, and which were assumptions that don't hold against actual substrate behavior.
+**Status as of May 3:**
+- Phase 1 drafted May 2 — substrate side (data retention, training opt-out, vision policy, logging). See `GPT4O_DATA_PICTURE_AUDIT.md` in repo. Citations web-verified May 2.
+- Phase 2 drafted May 2 — model behavior side (GPT-4o native pulls, Model Spec instruction hierarchy, OpenAI safety routing, MCT mechanism alignment). See `GPT4O_BEHAVIOR_AND_MCT_AUDIT.md` in repo. Citations web-verified May 2.
+- Phase 3 PENDING — actual guardrails review against substrate findings, mapping each shipped guardrail to which native pull it corrects/duplicates/conflicts with. Plus actioning anything found.
+- Today's prompt rewrites (May 2 CBT→MCT shift) connect to this — the new MCT-aligned prompts need verification against the substrate guardrails picture.
 
-**Pre-launch or post-launch:** This should be pre-TestFlight. The privacy policy makes data-handling claims that depend on the substrate behaving as we believe it does. Shipping to TestFlight without verifying creates real liability if the policy and the reality are misaligned.
-
-**Open question for Arlin:** is there a known testing methodology you want here (e.g., probe specific prompts to see if GPT-4o leaks them back, compare retention across tiers, etc.) or should this be desk-research-first against OpenAI's published documentation?
+**Pre-launch or post-launch:** Phase 3 should be pre-TestFlight. The privacy policy makes data-handling claims that depend on the substrate behaving as we believe it does. Shipping to TestFlight without verifying creates real liability if the policy and the reality are misaligned.
 
 ---
 
-### Body-first metacognition access gap
-**The problem:** Body-first calibration currently routes the hero CTA into Breathe by default. Body work is the entry, Reframe is a follow-on. But Stillform is a metacognition tool that architects composure — composure requires both somatic regulation AND metacognition. A body-first user whose state is already regulated (no body tension, no off-baseline) and who needs to think something through has no direct path to Reframe — they're forced through Breathe first.
+### AI stress testing protocol (added May 2 — surfaced from old ideas sweep; reconciled May 3)
+**Pre-deploy gate, not optional.** Before any AI prompt change ships, run the existing **19-scenario AI Framework regression test list** in `Stillform_Punch_List.md` (under "Added April 8 — Afternoon Session" → "AI Framework"). The list covers the kind of self-diminishment / silencing / advocacy scenarios the prompts are supposed to catch (boss talked over user, missing degree credibility, immigrant outsider, medical leave betrayal, ADHD freeze, etc.).
 
-The dead-code Stuck routing at `App.jsx:12199` was the planned bridge (body-first + Stuck chip → Reframe clarity), but it's broken because:
-1. `feelState` is declared inside each tool component, not at App level — the check at line 12199 always evaluates `undefined === "stuck"` → false
-2. Even if the scope were fixed, the Stuck chip currently only exists *inside* Reframe, so a user on home has no way to set it before tapping the hero CTA — chicken-and-egg
+Pass criterion per scenario: AI names the pattern, reflects the strength, builds confidence to act. Fail criterion: AI gives generic comfort ("that must be frustrating") or matches negative framing.
 
-**Three options to decide between:**
-- **(a)** Secondary CTA on body-first home: a small "Just need to think this through →" link below the main Breathe CTA, routes directly to Reframe calm
-- **(b)** Add chip row to home screen so users self-select state before tool entry. Stuck routes to Reframe, others route to default
-- **(c)** Make hero CTA conditional: if bio-filter is "clear" (body baseline) AND user taps an "I want to process" affordance, route to Reframe; otherwise Breathe
+**Especially relevant given May 2 prompt rewrites** — the new MCT-aligned prompts in `netlify/functions/reframe.js` have not yet been stress tested against the 19 scenarios. Reading the punch list confirms these scenarios already exist as work-product, not aspirational; what was missing was the pre-deploy discipline of running them. Master todo and punch list now reference each other.
 
-This needs a design decision from Arlin. All three are defensible. Option (a) is the smallest surgical change. Option (b) is the most data-rich. Option (c) is the most automatic.
+### Composure-applied-both-directions verification (added May 2 — surfaced from old ideas sweep)
+The AI must build BOTH outward composure (listener stops filtering input by status, background, bias) AND inward composure (speaker stops shrinking, qualifying, performing credibility). Verification needed: does the current prompt set produce both? May connect to the AI-as-actor voice audit (12 surfaces, captured commit `d8a6507e`) — if not already a verification dimension there, add it.
+
+### Terms of Service + Privacy Policy "not a medical tool" language (added May 2 — liability item)
+Both legal docs need explicit language: "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment." This is liability-critical for the KetaRevive integration and the mental-health-adjacent positioning. Termly privacy policy is set up; verify whether this specific language is present. If not, add to both docs before TestFlight broad release.
 
 ---
 
@@ -300,79 +265,19 @@ Implementation order in spec: CSS variables → typography → components → sc
 ## ⚠️ PRELAUNCH — Added April 29, 2026
 
 ### ✅ SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage — RESOLVED May 2 (commit ef8d8008)
+Extended existing AES-GCM `secureSet`/`secureGet` infrastructure to wrap all sensitive localStorage keys. Full record in Completed — May 2 archive.
 
-**Status:** Currently only Reframe AI conversations are AES-GCM encrypted on-device (uses `secureSet`/`secureGet` infrastructure with IndexedDB fallback). All other sensitive user data is stored as plain JSON in localStorage and is readable by any code running on stillformapp.com, browser extensions, or anyone with device access.
+### ✅ What Shifted three-category data feed — RESOLVED Apr 30 (commit 890469aa)
+Russell circumplex three-category classifier shipped. Pure function classifyShiftDirection. Full record (architecture, wiring, privacy preservation) in Completed — April 30 / May 1 archive.
 
-**Unencrypted on-device today (must be encrypted before launch):**
-- `stillform_sessions` — session history
-- `stillform_journal` — Pulse / Signal Log entries (free-text emotional content)
-- `stillform_signal_profile` — body signal mapping
-- `stillform_bias_profile` — cognitive distortion profile
-- `stillform_checkin_history` — morning check-ins
-- `stillform_eod_history` — end of day entries
-- `stillform_communication_events`, `stillform_tool_debriefs`, `stillform_focus_check_history`
-- `stillform_feelstate` (added Apr 29 for chip persistence) — sensitive, not encrypted yet
-- All settings, preferences, regulation type, biometric flags
+### ✅ Body Scan post-completion What Shifted moment — RESOLVED Apr 30 (commit 890469aa)
+What Shifted screen added to BodyScanTool. Full record in Completed archive.
 
-**Already protected:**
-- Cloud sync to Supabase: AES-GCM encrypted before upload (in place since cloud sync deploy)
-- Reframe AI conversations on-device: encrypted via `secureSet`
-
-**The fix:** Extend existing `secureSet`/`secureGet` infrastructure to wrap all sensitive keys. Not a from-scratch crypto build — same AES-GCM pattern, same key management (per-device key in IndexedDB). Real engineering work but no new primitives needed.
-
-**Why this is launch-critical (not deferrable):** A prestige composure architecture cannot ship with users' raw emotional content sitting in plain text on their device. The cloud is protected; the device is partially protected. The gap closes before launch.
-
-### ✅ What Shifted data feed — three-category positive selection framework — RESOLVED Apr 30
-
-**Shipped Apr 30** (commit 890469aa, combined with Body Scan What Shifted).
-
-Russell circumplex three-category classifier implemented (Russell 1980 J.Pers.Soc.Psychol. 39:1161-1178, confirmed Watson 2024). Pure function `classifyShiftDirection(preState, postState, sessionContext)` returns Category A (regulated shift), Category B (persistent state), Category C (concerning shift), or null with reason. Schema versioned at v1 — never recompute existing entries.
-
-**Architecture:**
-- SHIFT_CHIP_QUADRANTS maps all 9 chips to Russell quadrants (HAP/LAP/HAN/LAN/cognitive/undifferentiated)
-- Pattern-context helper (`getRecentSustainedPatterns`) computes sustained Flat ≥5 / sustained HAN ≥5 in 14-day window
-- Storage key `stillform_shift_events`, capped at 2000 entries
-- buildShiftEvent helper assembles full event with bioFilter, sessionCount, regulationType frozen at write-time
-
-**Wired into:**
-- Reframe finishStateToStatement — classifier runs on State-to-Statement complete + skip paths
-- Body Scan What Shifted — handleWhatShiftedLockIn + handleWhatShiftedSkip
-- Plausible "Shift Classified" event with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text
-
-**Privacy architecture preserved:** Aggregate-anonymous → Plausible (Stillform sees percentages across users); per-user encrypted on-device → My Progress (Stillform never sees individual data).
-
-Spec at THREE_CATEGORY_DATA_FEED_SPEC.md (committed to repo root). My Progress visual integration ships in My Progress redesign (deferred — needs real categorized data accumulation post-publish).
-
-
-### ✅ Body Scan post-completion What Shifted moment — RESOLVED Apr 30
-
-**Shipped Apr 30** (commit 890469aa, combined with three-category data feed).
-
-What Shifted screen added to BodyScanTool. After 6-point sequence completes, "Signal cleared" → 2s pause → What Shifted screen (post-state chip picker + collapsed-by-default optional free-text label + Lock it in / Skip buttons). Russell-grouped chip ordering. Pre-state shown as "Started: X" for orientation. Lock-In disabled until post-state selected. After lock-in or skip, queueDebriefAndCompleteNow runs the existing ToolDebriefGate. Closes Pillar 1 metacognitive gap.
-
-State additions: showWhatShifted, postStateChip, shiftLabel, shiftLabelExpanded, shiftSkipReason. Handlers: handleWhatShiftedLockIn / handleWhatShiftedSkip. Pre-push audit caught wrong-tool placement bug (handlers initially placed in BreatheGroundTool scope) — fixed before push.
-
-Spec at BODY_SCAN_WHAT_SHIFTED_SPEC.md (committed to repo root).
-
-### ✅ Add "Settled" chip — low-arousal positive — RESOLVED Apr 30
-
-**Shipped Apr 30** (commits 768b56ed in App.jsx + ad4a43f1 in reframe.js).
-
-Settled added as 9th chip. Russell-circumplex-grouped chip ordering implemented at all chip render sites: Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant. AI prompt branch added in reframe.js feelMap for maintain-state framing (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression). Chip definition copy committed via CHIP_DEFINITIONS_DRAFT.md (Arlin approved).
-
-**Why this mattered for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) was impossible to detect when users actually arrived at the regulated state. With Settled live, the three-category framework works end-to-end.
-
-Spec at SETTLED_CHIP_SPEC.md (committed to repo root).
+### ✅ Add "Settled" chip — low-arousal positive — RESOLVED Apr 30 (commits 768b56ed + ad4a43f1)
+Settled added as 9th chip; Russell-circumplex-grouped chip ordering implemented at all chip render sites; AI prompt branch added for maintain-state framing. Full record in Completed archive.
 
 ### ✅ Chip ⓘ button — define what each chip covers — RESOLVED Apr 30
-
-**Shipped Apr 30:** CHIP_DEFINITIONS registry added to App.jsx as top-level constant. ⓘ buttons wired at all 3 chip render sites (Body Scan What Shifted, showPostRating, PresentStateChips). Per CHIP_DEFINITIONS_DRAFT.md (Arlin approved Apr 30 after copy review).
-
-Each chip definition is ~40-60 words, anchored to reframe.js feelMap voice but rewritten for user-facing context — no clinical jargon, no pathologizing, body and mind both named, tells user what selecting the chip does in the system. Tapping ⓘ opens existing setInfoModal pattern (same modal already used for bio-filter ⓘ, Lock-in ⓘ, etc).
-
-ARIA labels added on every ⓘ button — addresses part of the prelaunch ARIA sweep item below.
-
-**Why this matters for the data feed:** If users interpret the same chip differently, the data is noisy at the source. Definitions reduce that noise without forcing users into rigid categories.
+CHIP_DEFINITIONS registry added; ⓘ buttons wired at all 3 chip render sites; ARIA labels added. Full record in Completed archive.
 
 ### Category C gentle nudge — referral to existing crisis resources
 
@@ -385,68 +290,10 @@ When a user trends toward Category C across multiple sessions (sustained Flat, p
 **Framing principle (Arlin's words, captured for future sessions):** "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." This isn't dismissive — it's the correct scope statement. A user with clinical depression that requires medication is not a Stillform failure. A user who could be helped by Stillform but the tool didn't reach them is a separate signal worth understanding from the data feed.
 
 ### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default — RESOLVED May 2 (commit f36cdb63)
-
-Full prestige design. Replace the current Settings-only static tone with a three-layer system.
-
-**Layer 1: Auto-detect from state and content.** Use bio-filter, feelState, and input characteristics to suggest a tone for each Reframe call. Rules to design (start point):
-- bio-filter depleted/pain/sleep → suggest Gentle
-- feelState excited or focused → suggest Direct or Motivational
-- input pattern is long technical/analytical → suggest Clinical
-- input shows distress + high emotional charge → suggest Gentle
-- otherwise → Balanced
-
-**Layer 2: In-Reframe dropdown.** Replace the current static "Reframe tone: DIRECT" label box (currently line ~6578) with a dropdown the user can change mid-conversation. Each dropdown option shows the actual prompt-level effect (sourced from netlify/functions/reframe.js toneMap, lines 1173-1179):
-- Balanced — Default Stillform voice; direct, warm, precise
-- Gentle — Softer edges, still specific and honest. No sharp phrasing
-- Direct — Concise, minimal cushioning, cuts to signal
-- Clinical — Structured, analytical, avoids jargon overload
-- Motivational — Forward energy, momentum language, no hype clichés
-
-The dropdown should also surface the *reason* for the auto-selection ("Gentle — because you marked depleted"), making it a metacognitive surface (Pillar 1).
-
-**Layer 3: Personalization default in Settings.** User can set a "default tone" preference. Decision needed: Override mode (user's default always wins) vs Fallback mode (auto-detect wins; default is fallback when signals are ambiguous). Recommendation: Override — Stillform doesn't presume to know better than the user. Final call is Arlin's.
-
-**Why this matters.** Current tone is a Settings-only static choice. Most users won't dig into Settings during distress. Auto-detect surfaces the appropriate tone in the moment; in-Reframe dropdown gives full control without breaking flow; personalization respects the user who knows what they want.
-
-**Status.** **RESOLVED May 2 (commit f36cdb63):** All three layers shipped.
-
-- **Layer 1 (auto-detect):** detectSuggestedTone helper computes tone from bio-filter / feelState / input per render. Rules per spec: depleted/pain/sleep -> gentle, excited -> motivational, focused -> direct, long+distress -> gentle, long+composed -> clinical, otherwise null.
-- **Layer 2 (in-Reframe dropdown):** Static tone label replaced with tappable dropdown showing Reason header (Auto/Session/Default) + 5 options with descriptions + reset link. Manual selection sets sessionToneOverride which takes top priority.
-- **Layer 3 (Settings personalization):** Default tone selection now includes Balanced (was missing). New 'How your default applies' toggle: 'Use my default' (override) vs 'Auto-suggest, default as fallback' (fallback). Override is recommended default per spec.
-
-`stillform_ai_tone_mode` added to SYNC_KEYS / UNENCRYPTED_SYNC_KEYS / keysToRemove. rehydrateAfterSync extended to restore tone + mode after cloud sync. resolveActiveTone surfaces source ('auto' / 'session' / 'default' / 'fallback') so user always sees why a tone is active.
+Three-layer system shipped: auto-detect from state/content, in-Reframe dropdown override, Settings personalization default. Full record (Layer 1 detectSuggestedTone helper, Layer 2 dropdown wiring, Layer 3 'Use my default' vs 'Auto-suggest') in Completed — May 2 archive.
 
 ### ✅ Unified text capture for AI context — RESOLVED May 2 (commits 20a0810a + bbb0f07b + 556a91bc + 3f033319)
-
-**Spec source:** Arlin direction May 2 — "I want AI to capture all text areas, not just in self mode, in all of them. So specifically in what shifted captured by AI. So we have the data points so we can move forward and guide them the correct way."
-
-**Shipped May 2:** New `buildUnifiedTextContext` aggregator in App.jsx pulls recent text from every persistence store on the device:
-- `stillform_shift_events` → shiftLabel free-text from Body Scan + Reframe What Shifted moments
-- `stillform_sessions` → responses{} from Self Mode 5-step protocol (Notice / Name / Recognize / Perspective / Choose)
-- `stillform_grounding_data` → text from grounding 5-senses writes
-- `stillform_journal` → existing Signal Log entries (consolidated)
-
-Defaults: 20 entries, 14-day lookback, sorted newest first. Uses `TimeKeeper.clockDayOf` for proper local-day extraction (preflight caught initial UTC-slice violation; corrected in 556a91bc). Returns a structured string with each entry tagged by origin and date.
-
-**Wired into reframe.js:** New `textHistoryContext` parameter alongside `journalContext`. Same session-count gating: at sessionCount ≥ 3, AI uses for pattern recognition and continuity; at < 3, context only (don't surface proactively). AI is instructed never to quote text back verbatim, never to explicitly flag AI-down gaps in conversation.
-
-**AI-down resilience (Arlin's specific architectural ask):** Aggregator is a synchronous read of localStorage. No network dependency. When the user writes into any textarea during an AI outage:
-1. Text persists locally regardless of network state (storage was always local-first)
-2. The runSelfGuidedFallback path handles the AI-down user experience at the UI layer
-3. When AI returns, buildUnifiedTextContext reads whatever's in localStorage — including everything written during the gap
-4. No special "catch up" code needed because the data layer was never AI-dependent
-
-Edge case handled: AI-failure produces a session record with no responses (offline-fallback marker). If user then completes Self Mode after auto-switch, the next save creates a second record with the actual responses. Aggregator's filter requires non-empty responses — only the second is included.
-
-**What this enables:** AI references continuity across tools without the user re-explaining; recurring themes get named gently; Self Mode work no longer disappears from AI's perspective; Body Scan What Shifted writes inform future Reframe conversations.
-
-**Storage layer unchanged.** Pure read-side aggregation. Zero risk to existing data.
-
-**Pre-deploy stumbles (operating-rule violations on Claude's part, called out for the record):**
-- Initial commit shipped `s.timestamp.slice(0, 10)` — TimeKeeper guard caught it. The TimeKeeper API existed specifically to prevent this; should have used `TimeKeeper.clockDayOf` from the start. Fixed in 556a91bc.
-- Initial commit used `// ===` decorative dividers in comment header — preflight's merge-marker check matched the pattern. Replaced with U+2500 box-drawing chars (which match the existing TimeKeeper comment style at line 2022). Fixed in 3f033319.
-Both round-trips were preventable by reading existing code patterns first.
-
+buildUnifiedTextContext aggregator pulls recent text from every persistence store on the device for AI continuity. AI-down resilient (synchronous local-first read). Full record including AI-down resilience architecture and pre-deploy stumbles in Completed — May 2 archive.
 
 ### "Get ready" Reframe mode label needs context
 
@@ -454,31 +301,17 @@ Currently line 14242 in App.jsx, `hype: "◌ Get ready"`. The label appears in t
 
 Options to evaluate (Arlin's call, not Claude's): rename for clarity ("Lock in", "Get focused", "Sharpen"), add a one-line description below the label, add an info button next to the label, or hide the label and let the AI's behavior carry the mode. Captured for Arlin to decide. Not Claude's call.
 
-### ✅ FAQ enhancements — chips + search + email link + collapse-by-question + feel chip entry — RESOLVED May 2 (commit bdf3570a)
-
-Add to FAQ page:
-- Small chips at the top as hyperlinks for all the questions answered (jump-to-section navigation)
-- Search bar below the chips for filtering questions
-- "Can't find what you're looking for" email link at the end (mailto to ARAembersllc@proton.me)
-- **Collapse FAQ entries by question (added Apr 29):** Each Q is collapsed by default; tapping the question expands the answer. Reduces scroll fatigue, makes the FAQ usable as a reference, and lets the chip-jump navigation actually land cleanly on a target question.
-- **Add FAQ entry "How do the feel chips work?" (added Apr 29):** Comprehensive entry grounded in published mechanism. Covers: (1) affect labeling regulation effect (Lieberman 2007), (2) state-matched routing — Distant→Body Scan, calm/clarity/hype mode bias, (3) auto-log to Signal Log + bio-filter pairing, (4) pre/post tracking and longitudinal pattern, (5) persistence across the day until What Shifted or next morning check-in, (6) protective behaviors at high activation (Ghost Echo suppression, Self Mode nudge for angry/anxious/mixed states), (7) granularity over time (Barrett 2001 family). Replaces the upper-right Reframe mode label that was removed Apr 29. Draft text in `/mnt/user-data/outputs/FAQ_DRAFTS.md`.
-- **What each chip means** lives on the chips themselves via ⓘ button (separate item below), not in the FAQ. Definitions belong at point-of-selection where the user actually needs them, not buried in a help section.
-
-Real prelaunch UX win for self-service support.
-
-**RESOLVED May 2 (commit bdf3570a):** Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, and mailto email link with pre-filled subject all shipped. The 'How do the feel chips work?' entry already existed in the FAQ items array (Apr 29 work). Two useState hooks added (faqSearchQuery, faqExpandedSet) alongside existing faqBackScreen. Stable question IDs (slugified) used for both chip nav and expanded-state tracking.
+### ✅ FAQ enhancements — RESOLVED May 2 (commit bdf3570a)
+Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, mailto email link with pre-filled subject. Full record in Completed — May 2 archive.
 
 ### ✅ Reframe title doesn't reflect mode — RESOLVED Apr 30
-
-**Investigation finding:** the bug as described in the original master todo entry doesn't exist in the codebase. Audit found that `modeConfig.title` and `modeConfig.subtitle` were defined but NEVER referenced anywhere in the rendering. The only 'Talk it out' the user sees is the home page CTA at App.jsx line 13977, which is already conditional based on regulation type (`isThoughtFirst ? 'Talk it out' : isBodyFirst ? 'Calm my body' : 'Start here'`). Inside Reframe, mode identity is carried by the icon glyph (◎ calm / ✦ clarity / ◌ hype) plus AI prompt behavior — not by any title field.
-
-The original Apr 29 bug report likely captured a state that existed before the Reframe entry redesign work landed; the fix happened as part of that redesign without this todo being updated.
-
-**Resolution Apr 30:** removed the dead `title` and `subtitle` fields from modeConfig (6 dead lines across calm/clarity/hype entries). No user-facing change. App.jsx commit removes dead code only.
+Investigation found the bug as described didn't exist in code; modeConfig.title and subtitle were defined but never referenced. Removed dead title/subtitle fields. Full record in Completed archive.
 
 ### Self Mode needs work
 
 Specific issues TBD by Arlin. Needs in-app exploration to identify what's missing or broken. Self Mode is the explicit MCT 5-step practice (Notice, Name, Recognize, Perspective, Choose) — Pillar 1 anchor feature. Captured Apr 29.
+
+Note: also tracked at higher detail in Engagement Craft Active section ("Self Mode is not where it could be" — flagged May 1, 2026). Two entries cover slightly different aspects: this one captures Arlin-driven exploration of specific issues; the Engagement Craft entry captures the visible-architecture/naming gap. May want to consolidate after Arlin's exploration.
 
 ### My Progress redesign
 
@@ -489,9 +322,7 @@ Arlin's diagnosis: data heavy with redundancy. Heavy compute should run backend/
 Visual treatment held until whole-app design system locks (whole-app prestige refresh authorized Apr 30). Some redundancy may resolve naturally during the design system pass; new patterns may emerge. Build the spec into the new design system rather than the current one.
 
 ### ✅ "Composure is a practice. You're building it." copy is corny — RESOLVED Apr 30
-
-Replace with a less-precious version. Captured Apr 29.
-**RESOLVED Apr 30:** replaced with "Composure is the foundation. You are its architect." Foundation/architect frame is precise to what Stillform actually is — composure is the outcome (the foundation that gets built), user is the architect (active agent), Stillform is the architecture/practice through which it's built. Per Science Sheet line 11: composure is outcome, metacognition is mechanism. Committed to App.jsx line 16032.
+Replaced with "Composure is the foundation. You are its architect." Foundation/architect frame is precise to what Stillform actually is. Full record in Completed archive.
 
 ### Processing primer threshold tunable (currently 5 sessions)
 
@@ -501,169 +332,67 @@ Decay logic ships at session > 5 (App.jsx ~line 14257). If 5 is too long after l
 
 ## ⚠️ PRELAUNCH — Added April 28, 2026
 
-### ⚠️ Low-demand mode (anyone with impaired cognition) — Phase 1 SHIPPED Apr 30
+### ⚠️ Low-demand mode — Phase 1 SHIPPED Apr 30, Phases 2-3 OPEN
 
-**Phase 1 (Breathe) shipped Apr 30** (commit 81e2c0b7). Decision-locked architecture: low-demand is a state-of-existing-tool, not a separate tool. Triggered by `bioFilter.includes("medicated")`. No home-screen entry — activates within existing flow when bio-filter signals it.
+Decision-locked architecture: low-demand is a state-of-existing-tool, not a separate tool. Triggered by `bioFilter.includes("medicated")`. The broad-design rationale is captured in Locked Decisions section above (do not re-propose).
 
-**Phase 1 changes:**
-- isLowDemand derived state at top of BreatheGroundTool
-- Phase init bypass: phase=='breathe' on entry (skips pre-rate, skips bio-filter screen)
-- Audio force-enabled in low-demand (overrides user's saved setting). Per the science: paced auditory cueing is mechanism for cognitively-compromised users (Balban 2023, Ochsner & Gross 2005), not preference. Audio infrastructure was already built — this commit gates it on for the cohort that needs it.
-- Three-rounds-done screen replaced with low-demand minimal-completion render: pulse circle + "Tap anywhere to close" label. Bypasses three-button decision.
-- Tap-anywhere-to-exit with 1.5s grace period (lowDemandGraceOverRef prevents entry-tap from immediately dismissing).
-- Debrief gate + Next Move screen bypassed entirely. Direct call to onComplete(undefined). No metacognitive demand on a cognitively-impaired user.
-- Session still auto-saves with source='low-demand-complete' for record integrity.
+**Phase 1 (Breathe) shipped Apr 30** (commit 81e2c0b7). Implementation detail in Completed — April 30 / May 1 archive.
 
 **Phase 2 (Body Scan) — IN-FLIGHT, paused.** Architectural decision pending Arlin's call (4 options surfaced via ask_user_input_v0 widget; user dismissed without selecting; awaiting decision when user returns to it).
 
 **Phase 3 (Reframe) — NOT STARTED.** Most complex of the three because AI behavior changes too (shorter sentences, simpler language, no questions demanding reasoning), not just UI stripping. ~100-150 lines across App.jsx + reframe.js. Spec needed before build.
 
----
-
-ORIGINAL ENTRY (preserved for context — Phase 1 closes some of this; Phases 2+3 still address the rest):
-
-
-
-Single-tap entry from home screen and from Medicated bio-filter chip. Stripped-down experience: ambient pulse + paced breath visual + optional audio. No inputs, no decisions, no chips, no reading required. Exit on tap.
-
-**Who it serves:** Anyone whose cognition is partly offline. Medicated bio-filter users (broad scope: SSRI, post-anesthesia, sleep aids, chemo, recreational), post-panic users still cognitively rattled, sleep-deprived parents at 3am, migraine sufferers, dissociative episodes from trauma, sensory overload, anyone coming down from any altered state.
-
-**Why we designed for the broad population, not k-hole users specifically (decision rationale).** It would be possible to design low-demand mode primarily around k-hole users — Arlin's founder context, the specific cognitive-impairment profile of dissociative anesthetics, the integration window literature. We deliberately chose not to. Three reasons. (1) Most Medicated chip selections are not k-hole users. They're someone on an SSRI, someone post-dental anesthesia, someone who took a sleep aid, someone on chemo, someone with a migraine, a sleep-deprived parent. Overfitting the mode to k-hole users would underserve the actual majority. (2) The clinical/regulatory boundary. The moment Stillform positions itself for any specific altered-state use case, it crosses the medical-adjacent boundary the transfer doc explicitly guards against. The mode must be discoverable for any cognitive-bandwidth-limited use case without naming any of them. (3) The design that works for the broadest population is the same design that serves k-hole users — minimal demand, no decisions, no reading, no input. Designing for the broad case produces a feature that serves the specific case without ever naming it. If a future session asks "why doesn't this route k-hole users somewhere specific?" — that is the answer. We chose the broad design deliberately.
-
-**What it MUST NOT be labeled as.** Not "ketamine mode." Not "for altered states." Not "crisis mode." The mode is discoverable for any cognitive-bandwidth-limited use case without naming any of them. Suggested labels: "Just sit with me" / "Quiet mode" / a large unlabeled obvious-on-the-home-screen visual.
-
-**Mechanism.** Salience network reset (Menon 2011) + interoceptive grounding (Pillar 2). Body-first pathway stripped of every cognitive demand.
-
-**Optional second-tap calibration once inside.** "How much can you do right now? Nothing / A little / Normal" — serves every Medicated user with k-hole users picking Nothing.
-
-**Status.** Design captured. Code work ErrorBoundary-blocked. Diagnostic step before build: fetch App.jsx and bio-filter logic to confirm current Medicated chip routing, so build is grounded in current behavior not guessed.
-
-**Founder context (private, never marketed).** Stillform was conceived by Arlin during ketamine treatment. The app is not a ketamine companion tool. B2B clinical channel via Arlin's doctor remains the path for any treatment-adjacent positioning. The low-demand mode serves the broad cognitive-bandwidth-limited population, of which k-hole users are one sub-population.
-
 ### ✅ Memory reconsolidation grounding for Reframe — RESOLVED May 2 (commit b3292a97)
-
-**RESOLVED May 2 (commit b3292a97):** Added "Why Reframe?" info button next to the AI tab in ReframeTool. Cites Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015). Frames why repeated Reframe sessions on a recurring trigger update what the trigger means at the memory level. Connects to the Pattern Disruption Layer spec — repeat Reframes are reconsolidation opportunities, not redundant work.
+"Why Reframe?" info button added; cites Ecker/Ticic/Hulley 2012, Schiller 2010, Lane 2015. Connects to Pattern Disruption Layer spec.
 
 ### ✅ Predictive processing grounding for bio-filter — RESOLVED May 2 (commit b3292a97)
-
-**RESOLVED May 2 (commit b3292a97):** Extended the existing "Why the bio-filter?" modal (line 3889) with a second paragraph citing Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model of itself — the same situation interpreted through a depleted body produces a different prediction than the same situation interpreted through a rested body.
+"Why the bio-filter?" modal extended with Seth 2013, Barrett & Simmons 2015 citations.
 
 ### ✅ Salience network reset grounding for body-first pathway — RESOLVED May 2 (commit b3292a97)
-
-**RESOLVED May 2 (commit b3292a97):** Added "Why Body Scan?" info button next to the "Body scan." header in BodyScanTool intro phase. Cites Menon (2011). Frames Body Scan as an attentional rerouting tool, not a calming technique — pulling attention into the body interrupts the salience network's stuck cognitive priority. Sharper than the previous "calms down" framing.
+"Why Body Scan?" info button added; cites Menon 2011. Frames Body Scan as attentional rerouting, not calming.
 
 ### ✅ Cyclic sighing as third breathing option — RESOLVED Apr 30
-
-**Shipped Apr 30:** Cyclic Sighing added as third breathing pattern alongside Quick Reset and Deep Regulate. Protocol implements published Balban et al. 2023 (Cell Reports Medicine 4:100895, n=111 Stanford RCT under Spiegel/Huberman/Balban) exactly: Inhale 1 (deep, nasal) 4s + Inhale 2 (top-off, nasal) 1s + Exhale (slow, oral) 8s. 1:2 inhale-to-exhale ratio. 5 minutes recommended (~23 cycles).
-
-Settings picker entry cites the published study. Default behavior preserved — Quick Reset stays default for new users; cyclic_sigh is opt-in.
-
-**Outreach implication:** Now that Stillform implements her published protocol, this is the single strongest credibility lever for outreach to Dr. Melis Yilmaz Balban (founder of NeuroSmart, top outreach candidate per memory). Direct research overlap, non-competing market.
+Balban 2023 protocol implemented. Outreach implication: strongest credibility lever for Dr. Melis Yilmaz Balban outreach.
 
 ### ✅ ACT cognitive defusion lineage acknowledgment — RESOLVED May 2 (commit 2218f2b0)
-
-**RESOLVED May 2 (commit 2218f2b0):** Upgraded the Self Mode tab info from static tooltip to full info modal. Names primary lineage as Metacognitive Therapy (Wells 2009) and explicitly acknowledges ACT cognitive defusion (Hayes, Strosahl & Wilson 1999; Han & Kim 2022) as parallel research converging on the same underlying mechanism — creating distance between you and the thought you're having. MCT remains primary framework as required.
+Self Mode tab info upgraded to full modal naming MCT (Wells 2009) primary and acknowledging ACT (Hayes/Strosahl/Wilson 1999; Han & Kim 2022) as parallel research.
 
 ### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections — RESOLVED May 2 (commit 71f64903)
-
-11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Audit completed May 2 against all 18 info modals in App.jsx.
-
-**Two real misalignments fixed:**
-1. "Why name your state?" modal claimed pre-Reframe-entry naming reduces amygdala activation — now contradicted by Nook 2021 crystallization correction. Reframed to position chip selection as context-setting for the AI, not as the amygdala-reduction effect (which is preserved for POST-regulation labeling claims).
-2. "Sessions" modal claimed each session is autonomic flexibility training — overclaim per Science Sheet line 441 which explicitly says Stillform doesn't measure HRV directly. Softened to "regulation practice" with literature framed as "mechanism Stillform draws from."
-
-16 other modals audited and confirmed aligned with current Science Sheet (Yoo 2007 bio-filter, Lieberman + Vine + Nook for What Shifted, Schön for Lock-in, Barrett for Signal Log, Gollwitzer for Next Move + outcome, Meichenbaum for Day Streak, no overclaim for analytical metrics).
+18 modals audited; two misalignments fixed (Why name your state? + Sessions modal).
 
 ---
 
 ## ⚠️ TESTFLIGHT-BLOCKING — Recommended Order
 
-Items tackled in this sequence build on each other and minimize risk. Each item gets reviewed and signed off before the next is touched.
-
-### Sequence 1 — Quick wins (low risk, build momentum)
-1. ~~Stale `OBSERVE AND CHOOSE` comment cleanup~~ — **DONE Apr 27.** Comment renamed to `Self Mode nudge` at line 6217 (current internal name).
-2. ~~Three remaining UTC date sites~~ — **DONE Apr 27.** Resolved by TimeKeeper rollout (Phases 2-4 covered all 17 broken sites including these three plus the streak counter and 13 others).
-
-### Sequence 2 — Real bugs that affect routing
-3. ~~Bio-filter staleness~~ — **DONE Apr 27.** Schema migration (rather than the simpler check-in proxy) — bio-filter now stores its own date stamp `{value, date}`, getActiveBioFilter() returns "" when date doesn't match today's Stillform-day. 5 reads + 4 writes migrated. Handles both morning-check-in path and Reframe-direct path. Legacy plain-string values treated as expired (one-day blip for existing users, then everyone on new schema).
-4. ~~Body-first override narrowing~~ — **DONE Apr 27.** New `shouldBodyRouteToScan(bioFilter)` helper. Three sites narrowed (hero CTA body-first branch + routeObserveEntry priority 1 + routeObserveEntry understand branch). Pain/Off-baseline/Something → Body Scan suggestion; Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005). Removes Body Scan friction for states where breathing IS the science answer.
-5. ~~`routeObserveEntry` bio-filter parity~~ — **DONE Apr 27.** Three understand-branch paths brought into parity with hero CTA: thought-signal, unsure+thought-first regType, and unsure+body-first regType. Each now applies the offBaseline narrowing (Pain → Scan, other off-baseline → Breathe for thought paths; shouldBodyRouteToScan for body paths). User who's activated and goes through Observe Entry no longer gets routed to Reframe before regulating.
-
-### Sequence 3 — Architectural decision + dead code
-6. ~~Body-first metacognition access gap~~ — **VERIFIED ALREADY IMPLEMENTED Apr 27.** Initial review missed that the metacognition route is built into the existing pathway flow. Body-first user goes Pre-rate → Bio-filter → Breathe → Post-rate → Ground, and the grounding-complete screen has "Continue to Reframe →" as the PRIMARY CTA (line 3094, button className btn-primary). Post-rate screen also has "Skip to Reframe instead" escape hatch (line 3471) for users who want metacognition without the full grounding step. Body Scan auto-routes to reframe-calm after completion (line 3834). PresentStateChips component captures feel-state in BreatheGroundTool with the same chips as Reframe entry (line 3229, comment: "same chips as Reframe entry, data parity for body-first users"). Body-first users land on Breathe (science-aligned), are offered Reframe as the next step (metacognition route preserved), and their state is captured identically to thought-first users so the AI has the same context. Nothing to build. Going forward: read the existing flow before claiming a gap.
-7. ~~Stuck dead-branch cleanup at hero CTA~~ — **DONE Apr 27.** `if (feelState === "stuck")` at line 12418 removed. The variable was undefined at App scope (declared only inside ReframeTool/ScanTool/MorningCheckIn), AND the Stuck chip never existed on home (only inside Reframe), so the branch was guaranteed dead. Body-first user still has full Reframe access via the tool grid and post-Breathe flow. Live `feelState === "stuck"` check at line 4910 inside ReframeTool's autoMode preserved untouched — that one is reachable and working correctly when a user inside Reframe selects Stuck.
-
-### Sequence 4 — Resilience (medium-effort, important)
-8. ~~ErrorBoundary error logging via App Diagnostics~~ — **DONE Apr 27 (revised).** Initial implementation overshot: built cloud-restore button and calibration-preserving reset path, both of which duplicated existing infrastructure (Settings has Restore now and Delete all data; Reframe has Start fresh). Reverted UI to original single-button form. Kept ONE addition: componentDidCatch writes the most-recent crash to stillform_last_error (timestamp, message, truncated stack, component stack). buildPerformanceMetricsSnapshot reads it as last_crash and includes in the existing daily diagnostics push. After successful send, the key is cleared. Crashes now ride the opt-in metrics-ingest pipeline the user already controls. Real reuse of existing infrastructure, not new layers. Sequence 4 — Resilience pillar — complete.
-9. ~~AI conversation persistence — IndexedDB encrypted overflow~~ — **DONE Apr 27.** New `SecureStore` IndexedDB module (storage layer only — encryption still happens in secureSet/secureGet via existing CryptoStore). secureSet tries localStorage first, falls through to IndexedDB on quota/error. secureGet checks localStorage first, then IndexedDB. Same AES-GCM encryption either way. localStorage success path also clears any stale IndexedDB copy for the key to keep reads consistent. Diagnostics marker written to sessionStorage if both stores fail (rare). Zero call site changes — three existing call sites in ReframeTool (line 5159 read, 5183 + 5196 write) work transparently. Conversation preserved through localStorage quota overflow.
-10. ~~Cloud sync batching~~ — **DONE Apr 27.** `sbSyncUp` rewritten: encrypts all keys in parallel via Promise.all, then single batched POST to Supabase REST with array body. 34 round trips → 1. Atomic from the user's perspective — no more partial-sync silent inconsistency. No retry baked in (deliberate — keeps helper contract simple, lets call sites decide retry policy with their user-facing context). Return shape preserved; all 4 call sites verified compatible.
+All items in Sequences 1-4 RESOLVED Apr 27. Full record (Quick wins, Real bugs that affect routing, Architectural decision + dead code, Resilience) in Completed — April 27 archive. Sequence 4 (Resilience pillar) was the last to land.
 
 ---
 
 ## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
-These are real bugs/architectural questions still open after the Apr 28 morning research-driven cleanup commits. Items resolved by those commits are listed under "Resolved Apr 28" subsection below.
-
 ### "Calm my body" hero CTA doesn't act on tap
 Body-first user, Composure Check / Settings show normally, but tapping "Calm my body" on home does nothing — no navigation, no state change visible. Static analysis (full trace of click handler → startPathway → startTool → setScreen → BreatheGroundTool mount → hashchange listener) showed no obvious break. **Diagnostic console.log shipped in commit 089acffa98** — next time Arlin taps, browser DevTools console (or Chrome remote debugging via chrome://inspect/#devices) will reveal which branch the click takes. Once that data is available, fix is likely a one-liner. Suspect: stale `stillform_biofilter_choice` localStorage entry routing the click into a silent "skip" path, or React state batching issue specific to mobile WebView.
 
-### Optionality decisions still pending
-The Apr 28 audit identified mechanisms the science sheet names as core training but that are currently optional or skippable. Three commits Apr 28 morning fixed the **placement** issues (chips before regulation removed, post-Reframe screen architectural redundancy resolved). The **gating** decisions remain open:
-
-1. **Lock-in card confirmation** — **RESOLVED May 2 (commit `432e4018`).** Required when Next Move selected. Finish button disabled (40% opacity, not-allowed cursor) when `postNextMoveId && !lockInConfirmed`. Instructional line above: "Tap 'Locked in' above to consolidate before finishing." Schön (1983) reflection-on-action + Lavi-Rotenberg 2020 MERIT — durability mechanism preserved. Gate is on the primary path the science endorses; sessions without a Next Move don't engage the Lock-in card so don't get gated.
-2. **Post-rating chip selection** — **RESOLVED May 2 (commit `9a64577b`).** Required with "Unsure" as the legitimate honest exit. 10th chip "Unsure" added to post-rating row in both Reframe and Body Scan What Shifted (memory #18 symmetry). Finish button disabled when postRating is null. classifyShiftDirection gains explicit unsure handler returning `nullReason: "user-unsure"` — distinct from skipped, distinct from unknown-chip. CHIP_DEFINITIONS has full ⓘ definition for Unsure. SHIFT_CHIP_QUADRANTS deliberately does not include Unsure (no quadrant); classifier short-circuits cleanly. Avg Shift unaffected. Lieberman 2007 + Vine 2019 + Nook 2021 — affect-labeling mechanism preserved without forcing inaccurate labels.
-3. **What Shifted textarea** — Vine 2019 / Nook 2021 say free-text labels are scientifically stronger than predetermined choices. **Decision May 2 (Arlin):** keep What Shifted as the optional precision layer (per Science Sheet directive — it stays). The May 2 stance is not 'do we keep it?' but 'do we capture and surface what users write?' — captured via the unified text aggregator commit `20a0810a` + `3f033319`. AI now receives recent What Shifted text from buildUnifiedTextContext alongside Self Mode responses, grounding writes, and Signal Log. Required-vs-optional toggle decision deferred — the data capture and AI continuity are the priority that was actually blocking, and they shipped.
-4. **Bio-filter for body-first users** — **RESOLVED May 2** via App.jsx commit `fd09bf0b`. Skip → button removed from BreatheGroundTool's bio-filter screen — bio-filter is now a required gate for everyone (calibration type isn't the right variable; pain demands attentional resources regardless of body-first vs thought-first). Pre-selection from getActiveBioFilter() reads today's prior reading and pre-highlights the matching option in amber-glow state with hint "Your last reading is highlighted — confirm or update." When user selects "Pain active" inside Breathe entry flow, routes to new "bio-filter-suggest-scan" sub-phase showing soft suggestion (Eccleston & Crombez 1999 + Kabat-Zinn 1982 + Reiner 2013 + Farb 2013) with two paths: "Body Scan first" (calls onComplete("scan")) or "Continue to Breathe anyway" (preserves autonomy). Bio-filter value saves before suggestion appears so AI context updates either way.
-5. **Calibration "Skip this step"** — **RESOLVED May 2** via App.jsx + reframe.js commits.
-
-**The change:** "Skip this step →" replaced with "Use defaults →" on calibration step 2 (the Signal Profile + Pattern Check step). Tapping it sets `localStorage.stillform_calibration_deferred = "yes"` and proceeds to home. No fake profiles are created — `signalProfile` and `biasProfile` remain null. Instead, AI receives a context note explaining the user has not completed calibration, instructing it to engage as a new user, avoid pattern claims about body signals or thinking patterns, and limit itself to discovery questions when relevant.
-
-When the user later completes calibration (either at first run from this entry point or any time from Settings), SignalMapTool and MicroBiasTool save handlers automatically clear the deferred flag and the AI starts receiving real profile data.
-
-**Citations (verified May 2):**
-- Liu et al. 2025 meta-analysis of 79 RCTs (Deakin University, *via HCPLive Feb 2026 / AJMC Nov 2025*) — mental health app attrition averaged 18.6% at endpoint and 28.4% at follow-up, 49% higher than waitlist controls. Establishes that mental health apps already face elevated attrition before any extra friction is added.
-- UXCam 2026 best-practices analysis on mobile app onboarding — "pre-fill sensible defaults… rather than making every user decide everything. Defaults are a form of onboarding."
-- Zigpoll 2025 onboarding research — "skip and resume options respect user autonomy, reduce frustration, and often increase overall onboarding completion rates."
-- Multiple 2026 sources on deferring optional setup steps until after the user has experienced value.
-
-**A note on a prior fabricated citation (called out for the record):** an earlier version of this entry attributed the recommended fix to a "JAMA Psychiatry 2025 meta-analysis on hard-gating attrition risk." Claude wrote that citation today (May 2) without verification and propagated it through master todo, transfer doc, state-of-may-2 doc, and conversation responses. After Arlin pushed back, web search confirmed the cited study does not exist as described. The architectural argument for the fix stands on the verified sources above; the fabricated citation is replaced.
-
-Decisions 1 and 2 resolved May 2 (commits 432e4018 and 9a64577b). Decision 3 reframed and partially addressed via the unified text aggregator (the question shifted from "should we keep it?" to "should we capture what's written?" — and capture shipped). Decisions 4 and 5 RESOLVED May 2 (commits fd09bf0b for Decision 4 bio-filter required + Pain→Body Scan suggestion, and 954e5d96 + e485c5c7 for Decision 5 calibration Use defaults). Implementing all five today was originally deferred because the placement fixes (commits a121a48a, ae43f4db, c86ec0ba) had to land first to make the gating questions answerable cleanly.
-
-### ✅ Trees in Body Scan / Breathe theme mismatch — RESOLVED May 2 (commit `5ef150d8`)
-FractalBreathCanvas trees now use `var(--text-muted)` per-frame so they follow the active theme. Amber glow under the ring preserved as the warmth anchor.
-
-### Watch deploy → publish flow on Netlify
-Confirmed Apr 27 testing: triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Reminder for future sessions: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
+(Other items from Apr 27-28 testing — optionality decisions, trees theme fix, Resolved Apr 28 morning items — all RESOLVED May 2. Full records in Completed archives.)
 
 ---
 
-### Resolved Apr 28 morning — kept for reference
+## 📒 OPERATING NOTES — for future sessions
 
-These items were genuinely open coming into Apr 28 morning and have been resolved by the three-commit research-driven cleanup. Listed here so the resolution path is documented and findable later.
-
-**🧭 Pre-rate flow needed science-grounded redesign for both processing types** — RESOLVED via commit `ae43f4db`. The chip rows in `BreatheGroundTool` pre-rate (line 3228) and `BodyScanTool` pre-rate (line 3880) have been removed entirely per Nook, Satpute & Ochsner (2021, *Affective Science*) + 2024 BMC Psychology fNIRS replication + 2025 Springer N=226 replication. Pre-regulation affect labeling crystallizes the affective state and impedes subsequent reappraisal/mindful acceptance. The PROCESSING_PRIMER copy ("Downshift physiology first; your cognition clears after the body settles") is no longer contradicted by the screen layout — it now matches what the screen actually does. Chips remain in ReframeTool entry (defensible because Reframe IS the cognitive intervention, not pre-regulation cognitive load).
-
-**Architectural redundancy in post-Reframe screen** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 2). Apr 28 commit removed two unreachable screens (`showStateToStatement` and `showPostInsight`) from the codebase entirely — both had setters that never fired from any live code path, so 108 lines of orphaned UI plus their helper functions (`finishStateToStatement`, `skipStateToStatement`, `continueFromPostInsight`) sat in the file but never executed. The Send a message Next Move chip got a proper draft expansion UI underneath it (textarea + Copy/Share/Mark sent), placed between chip selection and Lock-in card per Gollwitzer 1999 + Hallam 2015 implementation intention specificity research. May 2 commit completed the cleanup the Apr 28 commit message claimed but didn't fully ship: the live What Shifted textarea still had stale "(optional)" qualifier on the toggle and stale "Draft one clear message you can send now" placeholder inherited from the message-drafting era. Both fixed May 2.
-
-**Static tip removal — partial** — RESOLVED via commits `c86ec0ba` (Apr 28) + `20a0810a` (May 2). Apr 28 commit established the architectural intent (textarea serves post-regulation affect labeling only — Lieberman 2007, Vine 2019). May 2 commit finished the actual UI cleanup: "(optional)" qualifier removed from toggle (now reads "▸ What shifted?") and stale "Draft one clear message you can send now" placeholder replaced with "In one line — what shifted?" — consistent with Science Sheet section 563-588. The decision about whether What Shifted should be required or optional remains the user's call (decision 3 of the May 2 gating-decisions sequence).
-
-**Stuck chip status clarification** — RESOLVED earlier (Apr 27 chip-parity work). The chip is live and works in Reframe entry and post-rating. Whether home screen needs a Stuck chip is part of the body-first metacognition access question in the ARCHITECTURAL section.
-
-**Science Sheet line 410 outdated** — RESOLVED via commit `a121a48a`. Updated to cite Nook, Satpute & Ochsner (2021), Affective Science (2025) replication, BMC Psychology (2024) fNIRS replication, and Vine et al. (2019). Mechanism updated from "intensification" (Lieberman tradition, older framing) to "crystallization" (Nook 2021 mechanism — labeling solidifies initial appraisals and limits generation of alternative appraisals). The design rule (regulate first, label after) is unchanged but is now defended by the more current literature.
+### Watch deploy → publish flow on Netlify
+Triggering a deploy in Netlify is NOT the same as publishing it. After triggering, the new build sits ready on the Deploys tab and must be explicitly Published to go live. Reminder: Claude pushes → Arlin triggers deploy → Arlin publishes → fix is live.
 
 ---
 
 ## 🟡 STORE SUBMISSION PATH — Google Play Closed Testing → Public Launch
 
-This section covers the store submission mechanics, not the prelaunch product scope. **The launch standard (locked Apr 29) is: master todo complete, except translations and Apple Store.** Every section above this one — encryption, data feed, Settled chip, chip ⓘ button, Reframe entry redesign, tone system, low-demand mode, Self Mode, My Progress, watch integration, Body Scan What Shifted, all of it — is prelaunch. This is the store-mechanics outline only.
+This section covers the store submission mechanics, not the prelaunch product scope. **The launch standard (locked Apr 29) is: master todo complete, except translations and Apple Store.** Every section above this one is prelaunch work — that scope must be resolved before public launch.
 
 Launch path: Google Play closed testing → public launch. Apple Store is the explicit exception — TestFlight blocked until Arlin has access to an iPhone. Reddit is not a launch step; held as a contingency lever for week-1 traction support.
 
 **ACTIVE — work that can ship now:**
 
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough
-- [x] ~~AI-error → Self Mode auto-flip~~ — **DONE Apr 27.** Full handoff system shipped. New `health.js` Netlify endpoint (lightweight GET, no Anthropic call). `buildOfflineFallback` writeup function deleted (was a worse-version of MetacognitionTool's MCT protocol). Replaced with: counter-based handoff (1st failure = offer card with two buttons, 2nd+ failure = auto-switch to Self Mode tab + plausible event). `selfModeEntryReason` flag distinguishes ai-failure handoff from deliberate Self Mode entry. `/health` polled every 45s (5s initial delay) ONLY when in Self Mode because of AI failure — surfaces an amber pill inside the Self Mode tab when AI recovers: "AI's back. Continue here, or return." with Return → and × buttons. All five state values (counter, offer card, entry reason, ai-back signal, active tab) persist to sessionStorage so a user mid-Self-Mode interrupted by phone call/notification returns to where they were. Self Mode entered deliberately = no polling, no pill ever, even if AI fails on parallel send.
 - [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin. Build the Android App Bundle from existing Capacitor android/ project.
 
 **BLOCKED — pending hardware/access:**
@@ -678,6 +407,10 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 ## 📝 POST-LAUNCH — Noted, Not Blocking
 
+- [ ] **User outcome check after 10 sessions (added May 2 — surfaced from old ideas sweep)** — one open-text question after a user's 10th session: "Has anything changed in how you show up?" Not a rating, not a score, free text. Becomes proof that execution matched intent. Small enough to spec into the existing post-session flow. Defer to post-launch since it requires real users completing 10 sessions.
+- [ ] **7-session review specificity verification (added May 2 — surfaced from old ideas sweep)** — verify what the existing post-7-sessions surface currently does (session notes, longitudinal data are shipped but the 7-session review with specific evidence callouts may not exist as a discrete surface). Spec gap or already-shipped — read code to determine.
+- [ ] **Research partnership outreach email (added May 2 — surfaced from old ideas sweep)** — email drafted for grad student / clinical psych researcher outreach per strategic roadmap. Locate the draft in archives or rewrite. Send when 4-6 weeks of post-launch user data accumulates.
+- [ ] **KetaRevive doctor contact (added May 2 — surfaced from old ideas sweep)** — get name and contact. Ask if they'd try Stillform personally. The signal that started the B2B clinical thread. Captured in KETAREVIVE_ONEPAGER.md but the specific contact details aren't in any active list.
 - [ ] **Internationalization (V1 launch language set chosen Apr 27)** — committed launch set: **English (baseline) + Spanish + Brazilian Portuguese + Armenian**. Reasoning grounded in market analysis:
   - **Spanish** — 500M+ speakers, covers US Hispanic + all Latin America. Strong clinical-translation tradition, abundant translator availability.
   - **Brazilian Portuguese** — Brazil is the fastest-growing wellness app market globally. 220M speakers. Close enough to Spanish that some translation infrastructure can be reused.
@@ -701,8 +434,8 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 - [ ] **Service worker disabled in production** (`index.html`). The current index.html actively unregisters all service workers and clears caches on every page load — `sw.js` exists in `/public` but is never used. Impact: no offline support beyond the in-app self-guided fallback, no asset caching for repeat visits, weak PWA install experience on mobile. Likely intentional during UAT (avoiding stale-cache bugs) but should be re-enabled before public launch so the offline fallback feature has cached assets to work with. Decision needed: keep disabled or re-enable + set up proper cache invalidation.
 - [ ] **ARIA labels minimal across the app** — only 6 `aria-label` / `aria-labelledby` / `role=` attributes across 14,680 lines. Screen reader users would struggle. App Store accessibility audits could flag this. Not blocking launch but needs a sweep on chips, info buttons, and tool entries.
 - [ ] **IndexedDB device key not cleared on delete-all-data** (`App.jsx:14538`). The "Delete all data" flow clears all `stillform_*` localStorage keys and Supabase cloud data, but the AES-GCM device key in IndexedDB (`stillform_keys` DB) persists. Practically harmless (cloud data is gone, so nothing to decrypt) but for forensic deletion completeness, add `CryptoStore.deleteKey()` to the wipe.
-- [ ] **AI prompt framing — "metacognition" never appears.** Stillform is positioned in `reframe.js` as "composure tool / stabilizer / companion" — never as a metacognition tool. The architectural truth is that this IS a metacognition tool that produces composure. Composure is the user-facing outcome word, but the AI prompts never make the metacognition core explicit, which may dilute the AI's behavior in subtle ways. Decide whether to weave "metacognition" into the system prompts so the model treats every interaction as metacognitive scaffolding, not just emotional support.
-- [ ] **AI prompt "not therapy" framing** (`reframe.js:904, 925, 998`). Three places use negation framing ("NOT therapy homework," "not a therapy session"). Per Stillform's product principle: "Never define it by what it isn't." These are AI tone instructions (operational), not user-facing copy, but technically violate the rule. Either accept the operational use or rewrite as positive instructions ("Tight, direct, confident — pre-game language" instead of "not therapy").
+- [ ] **AI prompt framing — "metacognition" (verify against May 2 prompt rewrites).** Stillform was historically positioned in `reframe.js` as "composure tool / stabilizer / companion" — never as a metacognition tool. The architectural truth is that this IS a metacognition tool that produces composure. **Status May 3:** May 2 CBT→MCT prompt rewrites in `netlify/functions/reframe.js` introduced explicit detached-mindfulness language and Wells 2009 references in CALM, CLARITY, and HYPE openings, plus the QUALITY_RETRY_PROMPT and runtime context appendix. Those rewrites are made but not committed yet. After commit, verify whether this item is now resolved or whether further weaving is still needed.
+- [ ] **AI prompt "not therapy" framing** (`reframe.js:904, 925, 998`). Three places use negation framing ("NOT therapy homework," "not a therapy session"). Per Stillform's product principle: "Never define it by what it isn't." These are AI tone instructions (operational), not user-facing copy, but technically violate the rule. **Status May 3:** May 2 prompt rewrites may have changed these line locations. After commit, re-grep for "not therapy" or "NOT therapy" in reframe.js and decide: accept operational use or rewrite as positive instructions.
 - [ ] **"Add state to statement" / "What Shifted" label inconsistency** (`App.jsx:5757, 5768, 5778`). Same screen has both names. Header says "What Shifted", buttons say "Add state to statement" / "Hide state to statement", expanded section header says "State-to-Statement (optional)". They're slightly different concepts (What Shifted = internal observation, State-to-Statement = external message conversion) but the names should make that clearer. Recommend: rename buttons to "Convert to message" / "Hide message draft" and section header to "Make it sendable".
 - [ ] **Subscription URL param trust window** (`App.jsx:8869`). `?subscribed=true` URL param sets local subscribed=yes immediately on page load — server reconciliation happens via `sbCheckSubscriptionStatus` within ~20-min grace period. A bad actor could append the param and have full access until the grace window closes. Acceptable design (handles webhook lag) but worth flagging. Stronger fix: signed query param from Lemon Squeezy redirect.
 - [ ] **AI payload size cap** (`App.jsx:5253–5340`). `signalProfile`, `biasProfile`, `priorToolContext`, `priorModeContext`, `sessionNotes` all bundle into every Reframe request with no size cap. The 2000-char input cap is good but doesn't bound the context payload. For a heavy user 6+ months in this could hit token limits or get expensive. Add per-field truncation with most-recent-first selection.
@@ -720,7 +453,18 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 - [ ] Google Play Console — create account, fill store listing, upload APK, add 12 testers, start 14-day closed testing clock (Arlin has 5 Gmail addresses, needs 7 more)
 - [ ] Xcode — archive, upload to App Store Connect
 - [ ] TestFlight — invite testers
+- [ ] **Native neuro voice (added May 2 — surfaced from old ideas sweep)** — Web Speech API on web shipped. Native voice synthesis on iOS/Android pending — closes the Safari gap and gives platform-quality voice. Not blocking launch but real return-loop value (simulated human contact per retention research).
+- [ ] **Contextual push notification logic (added May 2 — surfaced from old ideas sweep)** — Notification infrastructure shipped via Capacitor. The *logic* for contextual nudges (smart, not spam) was never built. Open question: gated by something else (cognitive function measurement data?), or buildable now? Decision needed before deciding launch vs post-launch placement.
+- [ ] **HRV / Health Connect / HealthKit integration (added May 2 — surfaced from old ideas sweep)** — continuous biometric signal flowing into Stillform's data layer. Heart rate, sleep, HRV. Listed as Layer 2 return-loop infrastructure in roadmap. Post-launch milestone — not blocking initial release but flagged here so it doesn't drop off the radar entirely.
 - [ ] Watch haptic breathing companion — Galaxy Watch Ultra / Wear OS (requires Android Studio)
+  - Code chain wired end-to-end: App.jsx line 4265 → watchBridge → WatchBridgePlugin → WatchBridge.java → MessageClient `/stillform/breathe` → WearListenerService → WearBreatheActivity. Plumbing is structurally complete.
+  - **Known bug (May 2): pattern ID mismatch between phone and watch.** Phone-side `BREATHING_PATTERNS` IDs are `quick`, `deep`, and `cyclic_sigh` (App.jsx line 3629-3650). Watch-side switch in `WearBreatheActivity.java` line 51-63 only handles `box`, `478`, and `quick`. Net effect:
+    - `quick` → matches on both sides ✅
+    - `deep` → no match on watch, falls back to default `{4, 4, 8, 2}` Regulate pattern. Coincidentally identical to deep so it works by luck.
+    - `cyclic_sigh` → no match on watch, falls back to default Regulate pattern. **Watch runs the wrong breathing pattern when user picks Cyclic Sighing on the phone.** This is the broken case.
+    - `box` and `478` referenced in WatchBridge.java javadoc don't exist on the phone side anymore — stale comment.
+  - Fix scope: update `WearBreatheActivity.java` switch cases to match current phone-side IDs (`quick`, `deep`, `cyclic_sigh`) with correct phase durations from `BREATHING_PATTERNS`. Update `WatchBridge.java` javadoc to reflect current pattern IDs.
+  - Cannot verify from code (requires device testing): wear module builds into APK, watch app installs alongside phone app, haptics fire correctly on real hardware, message round-trip works under real conditions.
 
 ---
 
@@ -730,6 +474,195 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 - [ ] Google Play store approved — flip to public
 - [ ] Apple Store: deferred (post-launch)
 - [ ] Reddit post: not a launch step (contingency only — see Store Submission Path section)
+
+---
+
+## Completed — May 2, 2026
+
+### ✅ SECURITY-CRITICAL — Encrypt all sensitive on-device localStorage (commit ef8d8008)
+Extended existing AES-GCM `secureSet`/`secureGet` infrastructure to wrap all sensitive localStorage keys. Same key management pattern (per-device key in IndexedDB), no new primitives. Closes the gap between cloud (already AES-GCM encrypted before upload) and device (previously partially protected — only Reframe AI conversations).
+
+Keys now encrypted: `stillform_sessions`, `stillform_journal`, `stillform_signal_profile`, `stillform_bias_profile`, `stillform_checkin_history`, `stillform_eod_history`, `stillform_communication_events`, `stillform_tool_debriefs`, `stillform_focus_check_history`, `stillform_feelstate`, plus settings/preferences/regulation type/biometric flags.
+
+Why this was launch-critical: a prestige composure architecture cannot ship with users' raw emotional content sitting in plain text on their device.
+
+### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default (commit f36cdb63)
+Three-layer system shipped replacing the Settings-only static tone choice.
+
+**Layer 1 (auto-detect):** detectSuggestedTone helper computes tone from bio-filter / feelState / input per render. Rules: depleted/pain/sleep → gentle, excited → motivational, focused → direct, long+distress → gentle, long+composed → clinical, otherwise null.
+
+**Layer 2 (in-Reframe dropdown):** Static tone label (line ~6578) replaced with tappable dropdown showing Reason header (Auto/Session/Default) + 5 options with descriptions + reset link. Manual selection sets sessionToneOverride which takes top priority. Surfaces the *reason* for auto-selection ("Gentle — because you marked depleted") — metacognitive surface (Pillar 1).
+
+**Layer 3 (Settings personalization):** Default tone selection now includes Balanced (was missing). New 'How your default applies' toggle: 'Use my default' (override) vs 'Auto-suggest, default as fallback' (fallback). Override is recommended default per spec — Stillform doesn't presume to know better than the user.
+
+`stillform_ai_tone_mode` added to SYNC_KEYS / UNENCRYPTED_SYNC_KEYS / keysToRemove. rehydrateAfterSync extended to restore tone + mode after cloud sync. resolveActiveTone surfaces source ('auto' / 'session' / 'default' / 'fallback') so user always sees why a tone is active.
+
+### ✅ Unified text capture for AI context (commits 20a0810a + bbb0f07b + 556a91bc + 3f033319)
+**Spec source:** Arlin direction May 2 — "I want AI to capture all text areas, not just in self mode, in all of them. So specifically in what shifted captured by AI. So we have the data points so we can move forward and guide them the correct way."
+
+**Shipped:** New `buildUnifiedTextContext` aggregator in App.jsx pulls recent text from every persistence store on the device:
+- `stillform_shift_events` → shiftLabel free-text from Body Scan + Reframe What Shifted moments
+- `stillform_sessions` → responses{} from Self Mode 5-step protocol
+- `stillform_grounding_data` → text from grounding 5-senses writes
+- `stillform_journal` → existing Signal Log entries
+
+Defaults: 20 entries, 14-day lookback, sorted newest first. Uses `TimeKeeper.clockDayOf` for proper local-day extraction.
+
+**Wired into reframe.js:** New `textHistoryContext` parameter alongside `journalContext`. Same session-count gating: at sessionCount ≥ 3 AI uses for pattern recognition; at < 3 context only. AI is instructed never to quote text back verbatim, never to flag AI-down gaps in conversation.
+
+**AI-down resilience (Arlin's specific architectural ask):** Aggregator is a synchronous read of localStorage. No network dependency. When the user writes into any textarea during an AI outage:
+1. Text persists locally regardless of network state (storage was always local-first)
+2. The runSelfGuidedFallback path handles the AI-down user experience at the UI layer
+3. When AI returns, buildUnifiedTextContext reads whatever's in localStorage — including everything written during the gap
+4. No special "catch up" code needed because the data layer was never AI-dependent
+
+**Pre-deploy stumbles (operating-rule violations on Claude's part):** Initial commit shipped `s.timestamp.slice(0, 10)` — TimeKeeper guard caught it; should have used `TimeKeeper.clockDayOf` from the start (fixed in 556a91bc). Initial commit used `// ===` decorative dividers; preflight's merge-marker check matched the pattern (replaced with U+2500 box-drawing chars in 3f033319).
+
+### ✅ FAQ enhancements (commit bdf3570a)
+Search bar with no-results state. Chip navigation at top (auto-expand + smooth scroll to target). Collapse-by-question with rotating chevron. Mailto email link with pre-filled subject (ARAembersllc@proton.me). The 'How do the feel chips work?' entry already existed in the FAQ items array (Apr 29 work). Two useState hooks added (faqSearchQuery, faqExpandedSet) alongside existing faqBackScreen. Stable question IDs (slugified) used for both chip nav and expanded-state tracking.
+
+### ✅ Memory reconsolidation grounding for Reframe (commit b3292a97)
+Added "Why Reframe?" info button next to the AI tab in ReframeTool. Cites Ecker, Ticic & Hulley (2012); Schiller et al. (2010, *Nature*); Lane et al. (2015). Frames why repeated Reframe sessions on a recurring trigger update what the trigger means at the memory level. Connects to the Pattern Disruption Layer spec — repeat Reframes are reconsolidation opportunities, not redundant work.
+
+### ✅ Predictive processing grounding for bio-filter (commit b3292a97)
+Extended the existing "Why the bio-filter?" modal (line 3889) with a second paragraph citing Seth (2013); Barrett & Simmons (2015). Frames bio-filter as updating the brain's predictive model of itself — the same situation interpreted through a depleted body produces a different prediction than the same situation interpreted through a rested body.
+
+### ✅ Salience network reset grounding for body-first pathway (commit b3292a97)
+Added "Why Body Scan?" info button next to the "Body scan." header in BodyScanTool intro phase. Cites Menon (2011). Frames Body Scan as an attentional rerouting tool, not a calming technique — pulling attention into the body interrupts the salience network's stuck cognitive priority.
+
+### ✅ ACT cognitive defusion lineage acknowledgment (commit 2218f2b0)
+Upgraded the Self Mode tab info from static tooltip to full info modal. Names primary lineage as Metacognitive Therapy (Wells 2009) and explicitly acknowledges ACT cognitive defusion (Hayes, Strosahl & Wilson 1999; Han & Kim 2022) as parallel research converging on the same underlying mechanism. MCT remains primary framework as required.
+
+### ✅ In-app info button copy alignment with Apr 28 Science Sheet corrections (commit 71f64903)
+11 corrections committed to Science Sheet Apr 28 (commits 175bb6e4 through 9536e676). Audit completed May 2 against all 18 info modals in App.jsx.
+
+**Two real misalignments fixed:**
+1. "Why name your state?" modal claimed pre-Reframe-entry naming reduces amygdala activation — now contradicted by Nook 2021 crystallization correction. Reframed to position chip selection as context-setting for the AI, not as the amygdala-reduction effect (which is preserved for POST-regulation labeling claims).
+2. "Sessions" modal claimed each session is autonomic flexibility training — overclaim per Science Sheet line 441 which explicitly says Stillform doesn't measure HRV directly. Softened to "regulation practice" with literature framed as "mechanism Stillform draws from."
+
+16 other modals audited and confirmed aligned with current Science Sheet (Yoo 2007 bio-filter, Lieberman + Vine + Nook for What Shifted, Schön for Lock-in, Barrett for Signal Log, Gollwitzer for Next Move + outcome, Meichenbaum for Day Streak, no overclaim for analytical metrics).
+
+### ✅ Optionality decisions resolved — 4 of 5 fully resolved; Decision 3 reframed
+The Apr 28 audit identified mechanisms the science sheet names as core training but that were optional or skippable. All five gating decisions resolved May 2:
+
+1. **Lock-in card confirmation** (commit `432e4018`): Required when Next Move selected. Finish button disabled (40% opacity, not-allowed cursor) when `postNextMoveId && !lockInConfirmed`. Schön (1983) reflection-on-action + Lavi-Rotenberg 2020 MERIT — durability mechanism preserved.
+2. **Post-rating chip selection** (commit `9a64577b`): Required with "Unsure" as the legitimate honest exit. 10th chip "Unsure" added to post-rating row in both Reframe and Body Scan What Shifted. Finish button disabled when postRating is null. classifyShiftDirection gains explicit unsure handler returning `nullReason: "user-unsure"`. Lieberman 2007 + Vine 2019 + Nook 2021 — affect-labeling mechanism preserved without forcing inaccurate labels.
+3. **What Shifted textarea** — reframed from "should we keep it?" to "should we capture and surface what users write?" — capture shipped via the unified text aggregator (commits `20a0810a` + `3f033319`). Required-vs-optional toggle decision deferred.
+4. **Bio-filter for body-first users** (commit `fd09bf0b`): Skip → button removed; bio-filter now a required gate for everyone. Pre-selection from getActiveBioFilter() reads today's prior reading and pre-highlights matching option. Pain Active routes to bio-filter-suggest-scan sub-phase showing soft suggestion (Eccleston & Crombez 1999 + Kabat-Zinn 1982 + Reiner 2013 + Farb 2013) with two paths — Body Scan first or Continue to Breathe anyway (preserves autonomy).
+5. **Calibration "Skip this step"** (commits `954e5d96` + `e485c5c7`): Replaced with "Use defaults →" on calibration step 2. Sets `localStorage.stillform_calibration_deferred = "yes"` and proceeds to home. No fake profiles created; signalProfile and biasProfile remain null. AI receives a context note explaining the user has not completed calibration and should engage as a new user, avoid pattern claims about body signals or thinking patterns, and limit to discovery questions when relevant. SignalMapTool and MicroBiasTool save handlers automatically clear the deferred flag.
+
+**Citations (verified May 2):** Liu et al. 2025 meta-analysis of 79 RCTs (Deakin University, *via HCPLive Feb 2026 / AJMC Nov 2025*) — mental health app attrition averaged 18.6% at endpoint and 28.4% at follow-up, 49% higher than waitlist controls. UXCam 2026 best-practices analysis, Zigpoll 2025 onboarding research, multiple 2026 sources on deferring optional setup.
+
+**Note on a prior fabricated citation (called out for the record):** an earlier version of this entry attributed the recommended fix to a "JAMA Psychiatry 2025 meta-analysis on hard-gating attrition risk." Claude wrote that citation today (May 2) without verification and propagated it through master todo, transfer doc, state-of-may-2 doc, and conversation responses. After Arlin pushed back, web search confirmed the cited study does not exist as described. The architectural argument for the fix stands on the verified sources above; the fabricated citation is replaced. Lesson preserved.
+
+### ✅ Trees in Body Scan / Breathe theme mismatch (commit `5ef150d8`)
+FractalBreathCanvas trees now use `var(--text-muted)` per-frame so they follow the active theme. Amber glow under the ring preserved as the warmth anchor.
+
+---
+
+## Completed — April 30 / May 1, 2026
+
+### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
+The 20-second forced wait dropped. Continue enables on selection alone. Copy softened from "20-second capture required before exit" to "Take a moment to name what you used." Skip button added in footer (same skip pattern as What Shifted and Next Move). All three completeDebriefGate functions (Breathe / Body Scan / Reframe) updated to capture `skipped:boolean` on stored debrief record + new Plausible event "Tool Debrief Completed" with tool + skipped props for cohort visibility into engagement-vs-skip rates per tool.
+
+What stayed: header copy, three preset options + "I need another pass to lock this in" fourth option, Continue as primary CTA, tool-specific and regulation-type-specific options (Pillar 1 metacognition load-bearing science).
+
+This was the small focused engagement craft change that addresses Round 2 consultation finding ("close feels heavy") without committing to the full kinesthetic close redesign. The kinesthetic close spec is still next session.
+
+### ✅ Plain-Language Neuroscience Surface — SHIPPED May 1, 2026 (8 commits + 3 follow-up build fixes)
+Second engagement mechanic Arlin flagged interest in alongside Cognitive Function Measurement. Now live as the Plain-Language Neuroscience Surface — post-session card that surfaces one finding from a verified 36-entry corpus tied to what the user just practiced.
+
+**Architecture:**
+- AI-generated at runtime via reframe.js with mode='science_card'
+- 36-entry verified corpus, every entry traceable to a Science Sheet section (Protection C: paraphrased from Science Sheet's own framing, not training-data recall)
+- 20 hand-written static fallback cards activate on any AI failure
+- Variety guard via stillform_card_history localStorage (last 5 topics retained)
+- Three protections: SEVERE-failure system prompt rule (A) + server-side citation validation against SCIENCE_CARD_VALID_CITATIONS Set (B) + Arlin verification pass on corpus before ship (C — pending)
+- ⓘ button on card opens info modal explaining the three card types (AI-generated / static fallback / generic)
+- 4 Plausible events: Science Card Shown / Continued / Skipped / Info Opened
+- Once per session. Skip button. Shows on first session.
+
+**Insertion point:** post-session, after What Shifted (Body Scan) and post-rate (all tools), BEFORE ToolDebriefGate. Each tool's `if (debriefTarget)` block now renders ScienceCard first if scienceCardShown is false.
+
+**Cost:** ~$0.002/card via gpt-4o; ~$1.50/user/year at 2 sessions/day. Negligible against subscription.
+
+**Ship arc — 8 commits + 3 build fixes May 1:**
+- 5a773785 — Spec v2 with verified corpus + 20 static cards + ⓘ modal copy + 3 protections
+- c18d7fc3 — Server side: corpus + routing + system prompt builder + science_card branch in handler + Protection B validation
+- 2d9007ce — Frontend foundation: ScienceCard component + STATIC_SCIENCE_CARDS array + helpers + ⓘ modal + 4 Plausible events
+- 6cf4b8fe — Wiring: ScienceCard inserted into close flow of Breathe, Body Scan, Reframe with scienceCardShown state per tool
+- 821faa09 — FIX: ScienceCard React imports (had used React.useState namespace pattern; codebase uses named hook imports; build was failing on Vite's "React is not defined")
+- 64c2e3b1 — FIX: Literal backslash-n in scienceCardShown state declarations (Python string escaping issue in build script; three places had broken JSX syntax)
+- fc4e8158 — FIX: Decorative comment dividers tripping Security Gate (// =====... matched git conflict marker regex; replaced with dashes)
+- Final state on main: all checks pass, Security Gate green
+
+**Engineering lessons from the three broken commits:**
+- React component patterns must match existing codebase (named hooks, not namespace) — should be checked before writing component
+- Python scripts that build JS files must not embed `\n` in string replacements — triple-quoted strings or direct file write only
+- Decorative comment dividers must avoid `=======` pattern (matches git conflict marker regex in Security Gate)
+- After every code commit, file should be re-read from main and visually inspected for obvious issues — three commits today shipped with bugs that re-reading would have caught
+- "Shipped clean, ready for trigger" is the wrong framing when only Security Gate proves clean — should be "shipped, awaiting Security Gate green"
+
+### ✅ What Shifted three-category data feed — SHIPPED Apr 30 (commit 890469aa, combined with Body Scan What Shifted)
+Russell circumplex three-category classifier implemented (Russell 1980 J.Pers.Soc.Psychol. 39:1161-1178, confirmed Watson 2024). Pure function `classifyShiftDirection(preState, postState, sessionContext)` returns Category A (regulated shift), Category B (persistent state), Category C (concerning shift), or null with reason. Schema versioned at v1 — never recompute existing entries.
+
+**Architecture:** SHIFT_CHIP_QUADRANTS maps all 9 chips to Russell quadrants (HAP/LAP/HAN/LAN/cognitive/undifferentiated). Pattern-context helper (`getRecentSustainedPatterns`) computes sustained Flat ≥5 / sustained HAN ≥5 in 14-day window. Storage key `stillform_shift_events`, capped at 2000 entries. buildShiftEvent helper assembles full event with bioFilter, sessionCount, regulationType frozen at write-time.
+
+**Wired into:** Reframe finishStateToStatement (classifier runs on State-to-Statement complete + skip paths), Body Scan What Shifted (handleWhatShiftedLockIn + handleWhatShiftedSkip), Plausible "Shift Classified" event with 4 props (category, subcategory, tool, mode) — zero user identifiers, zero chip values, zero free text.
+
+**Privacy architecture preserved:** Aggregate-anonymous → Plausible (Stillform sees percentages across users); per-user encrypted on-device → My Progress (Stillform never sees individual data).
+
+Spec at THREE_CATEGORY_DATA_FEED_SPEC.md (committed to repo root). My Progress visual integration ships in My Progress redesign (deferred — needs real categorized data accumulation post-publish).
+
+### ✅ Body Scan post-completion What Shifted moment — SHIPPED Apr 30 (commit 890469aa, combined with three-category data feed)
+What Shifted screen added to BodyScanTool. After 6-point sequence completes, "Signal cleared" → 2s pause → What Shifted screen (post-state chip picker + collapsed-by-default optional free-text label + Lock it in / Skip buttons). Russell-grouped chip ordering. Pre-state shown as "Started: X" for orientation. Lock-In disabled until post-state selected. After lock-in or skip, queueDebriefAndCompleteNow runs the existing ToolDebriefGate. Closes Pillar 1 metacognitive gap.
+
+State additions: showWhatShifted, postStateChip, shiftLabel, shiftLabelExpanded, shiftSkipReason. Handlers: handleWhatShiftedLockIn / handleWhatShiftedSkip. Pre-push audit caught wrong-tool placement bug (handlers initially placed in BreatheGroundTool scope) — fixed before push.
+
+Spec at BODY_SCAN_WHAT_SHIFTED_SPEC.md (committed to repo root).
+
+### ✅ Settled chip — low-arousal positive — SHIPPED Apr 30 (commits 768b56ed in App.jsx + ad4a43f1 in reframe.js)
+Settled added as 9th chip. Russell-circumplex-grouped chip ordering implemented at all chip render sites: Excited · Focused · Settled · Anxious · Angry · Stuck · Mixed · Flat · Distant. AI prompt branch added in reframe.js feelMap for maintain-state framing (no regulate-down posture, surface patterns more freely, no Self Mode nudge, no protective suppression). Chip definition copy committed via CHIP_DEFINITIONS_DRAFT.md (Arlin approved).
+
+**Why this mattered for the data feed:** Without a low-arousal positive chip, Category A (regulated shift) was impossible to detect when users actually arrived at the regulated state. With Settled live, the three-category framework works end-to-end.
+
+Spec at SETTLED_CHIP_SPEC.md (committed to repo root).
+
+### ✅ Chip ⓘ button — define what each chip covers — SHIPPED Apr 30
+CHIP_DEFINITIONS registry added to App.jsx as top-level constant. ⓘ buttons wired at all 3 chip render sites (Body Scan What Shifted, showPostRating, PresentStateChips). Per CHIP_DEFINITIONS_DRAFT.md (Arlin approved Apr 30 after copy review).
+
+Each chip definition is ~40-60 words, anchored to reframe.js feelMap voice but rewritten for user-facing context — no clinical jargon, no pathologizing, body and mind both named, tells user what selecting the chip does in the system. Tapping ⓘ opens existing setInfoModal pattern.
+
+ARIA labels added on every ⓘ button — addresses part of the prelaunch ARIA sweep item.
+
+### ✅ Cyclic sighing as third breathing option — SHIPPED Apr 30
+Cyclic Sighing added as third breathing pattern alongside Quick Reset and Deep Regulate. Protocol implements published Balban et al. 2023 (Cell Reports Medicine 4:100895, n=111 Stanford RCT under Spiegel/Huberman/Balban) exactly: Inhale 1 (deep, nasal) 4s + Inhale 2 (top-off, nasal) 1s + Exhale (slow, oral) 8s. 1:2 inhale-to-exhale ratio. 5 minutes recommended (~23 cycles).
+
+Settings picker entry cites the published study. Default behavior preserved — Quick Reset stays default for new users; cyclic_sigh is opt-in.
+
+**Outreach implication:** Now that Stillform implements her published protocol, this is the single strongest credibility lever for outreach to Dr. Melis Yilmaz Balban (founder of NeuroSmart, top outreach candidate per memory). Direct research overlap, non-competing market.
+
+### ✅ Reframe title doesn't reflect mode — SHIPPED Apr 30
+**Investigation finding:** the bug as described in the original todo entry doesn't exist in the codebase. Audit found that `modeConfig.title` and `modeConfig.subtitle` were defined but NEVER referenced anywhere in the rendering. The only 'Talk it out' the user sees is the home page CTA at App.jsx line 13977, already conditional based on regulation type. Inside Reframe, mode identity is carried by the icon glyph (◎ calm / ✦ clarity / ◌ hype) plus AI prompt behavior — not by any title field.
+
+**Resolution:** removed the dead `title` and `subtitle` fields from modeConfig (6 dead lines across calm/clarity/hype entries). No user-facing change.
+
+### ✅ Low-demand mode Phase 1 (Breathe) — SHIPPED Apr 30 (commit 81e2c0b7)
+Decision-locked architecture: low-demand is a state-of-existing-tool, not a separate tool. Triggered by `bioFilter.includes("medicated")`. No home-screen entry — activates within existing flow when bio-filter signals it.
+
+**Phase 1 changes:**
+- isLowDemand derived state at top of BreatheGroundTool
+- Phase init bypass: phase=='breathe' on entry (skips pre-rate, skips bio-filter screen)
+- Audio force-enabled in low-demand (overrides user's saved setting). Per the science: paced auditory cueing is mechanism for cognitively-compromised users (Balban 2023, Ochsner & Gross 2005), not preference. Audio infrastructure was already built — this commit gates it on for the cohort that needs it.
+- Three-rounds-done screen replaced with low-demand minimal-completion render: pulse circle + "Tap anywhere to close" label. Bypasses three-button decision.
+- Tap-anywhere-to-exit with 1.5s grace period (lowDemandGraceOverRef prevents entry-tap from immediately dismissing).
+- Debrief gate + Next Move screen bypassed entirely. Direct call to onComplete(undefined). No metacognitive demand on a cognitively-impaired user.
+- Session still auto-saves with source='low-demand-complete' for record integrity.
+
+(Broad-design decision rationale captured in Locked Decisions section at top of master todo.)
+
+### ✅ "Composure is a practice. You're building it." copy fix — SHIPPED Apr 30
+Replaced with "Composure is the foundation. You are its architect." Foundation/architect frame is precise to what Stillform actually is — composure is the outcome (the foundation that gets built), user is the architect (active agent), Stillform is the architecture/practice through which it's built. Per Science Sheet line 11: composure is outcome, metacognition is mechanism. Committed to App.jsx line 16032.
 
 ---
 

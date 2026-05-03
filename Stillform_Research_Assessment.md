@@ -4,6 +4,16 @@
 
 ---
 
+> **⚠️ HISTORICAL DOCUMENT — SUPERSEDED FOR FRAMING PURPOSES**
+>
+> This document was compiled April 8, 2026, before Stillform's framing was clarified as **metacognitive therapy (MCT)** rather than cognitive-behavioral therapy (CBT). It refers to Reframe as "cognitive reappraisal" and groups Stillform with CBT-lineage tools — both framings have been superseded.
+>
+> This doc is preserved as a historical record of the pre-pivot research due diligence (real research question, real risks documented, real citations). It should NOT be read as a current statement of what Stillform is. For current framing see `Stillform_Science_Sheet.md` and the locked framing in active session prompts.
+>
+> **Current framing:** Stillform is self-mastery through metacognition that stabilizes composure. The mechanism is metacognitive observation (Wells 2009), not cognitive content-challenging. The neural science of reappraisal (amygdala / PFC) still applies as a substrate; the user-facing engagement is metacognitive.
+
+---
+
 ## THE VERDICT UP FRONT
 
 Stillform is built on individually validated components — breathing, cognitive reappraisal, affect labeling, body awareness — that each have published evidence behind them. The combination is novel and deeper than any competing app. But the honest truth is: **no one has tested whether combining them this way produces better outcomes than any single component alone.** The app hasn't been clinically validated, the AI hasn't been studied, and the biggest risk isn't whether the tools work — it's whether people keep using them.

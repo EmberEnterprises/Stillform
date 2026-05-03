@@ -137,13 +137,15 @@ What this means for future sessions:
 - [ ] **Kinesthetic close interaction spec** — to draft next session, grounded in Engagement Principles 4 and 9
 - [ ] **Plain-language neuroscience surface spec** — second engagement mechanic, never spec'd
 
-### Currently in publish queue (12 user-facing code commits awaiting Netlify trigger)
+### Currently in publish queue
 
-All 12 land at once when Arlin triggers. Closing language candidates draft sits separately as NOT shipping (decided Apr 30).
+All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May 1. Closing language candidates draft sits separately as NOT shipping (decided Apr 30).
 
 ---
 
 ## BACKFILLED ITEMS — IMPLEMENTED BUT PREVIOUSLY MISSING FROM THIS SHIP LIST
+
+> **Verification pass needed (added May 3).** Most items below are likely shipped — they were captured here when discovered missing from the ship list, not as outstanding work. Calendar/health real-device sync items (final entries under Integrations) are confirmed NOT shipped (still scaffold-only) and belong in master todo NATIVE APP section. Other items need Arlin's in-app verification before checking off. Don't bulk-check.
 
 ### UAT + feedback operations
 - [ ] Home UAT banner: flashing **UAT FEEDBACK** behavior + collapsed panel interaction
@@ -211,6 +213,8 @@ All 12 land at once when Arlin triggers. Closing language candidates draft sits 
 ---
 
 ## FEATURES SHIPPED
+
+> **Verification pass needed (added May 3).** Items below are shipped to code but most are not yet checked off because Arlin hasn't run an in-app verification sweep against them. Don't bulk-check. Take a pass at your own pace and tick what you've actually verified. This is also where naming drift can hide — see Composure Telemetry (Heat Map) header below, which uses the original term; the equivalent shipped feature is now Three-Category Data Feed in master todo and Strategic Roadmap. Worth aligning the punch list term during your verification pass, or leaving it as-is for historical continuity.
 
 ### AI Engine
 - [ ] GPT-4o upgrade — responses noticeably sharper than before
@@ -338,7 +342,7 @@ All 12 land at once when Arlin triggers. Closing language candidates draft sits 
 
 ---
 
-*ARA Embers LLC · Punch List · last updated April 30, 2026*
+*ARA Embers LLC · Punch List · last updated May 3, 2026*
 
 
 ---
@@ -355,6 +359,9 @@ All 12 land at once when Arlin triggers. Closing language candidates draft sits 
 - [ ] Performance: no lag on low-end devices
 
 ### AI Framework (19 Scenario Regression Tests)
+
+> **Pre-deploy gate (added May 3).** This 19-scenario list is the existing Stillform AI stress testing protocol. Master todo ARCHITECTURAL section "AI stress testing protocol" entry references the protocol concept; the actual scenarios are below. Run this list before any AI prompt change ships, including today's CBT→MCT prompt rewrites in netlify/functions/reframe.js.
+
 - [ ] Test 1: Attribution error → AI widens frame
 - [ ] Test 2: Bio-filter + interpersonal → AI connects depletion to read
 - [ ] Test 3: Confidence/speak up → AI reflects strength before advice
@@ -407,6 +414,8 @@ All 12 land at once when Arlin triggers. Closing language candidates draft sits 
 ---
 
 ## CLOUD SYNC (April 9, 2026)
+
+> **Verification pass needed (added May 3).** Cloud sync has been live since Apr 15 (Supabase three-table schema, RLS, AES-256). The checkboxes below are presumably tickable. Take an in-app verification pass when convenient; don't bulk-check.
 
 ### Setup
 - [ ] Settings → Cloud Sync section visible

@@ -56,7 +56,7 @@ This section captures the empirical research on human-software interaction that 
 
 **Kahneman (2011)** — *Thinking, Fast and Slow*. System 1 is fast, intuitive, embodied. System 2 is slow, deliberate, cognitive. Asking for System 2 work when the user is in a System 1 state produces friction; matching the system to the state produces flow.
 
-**Stillform application:** When the user has just completed a regulation session, they are in a System 1 state (post-regulation, embodied, integrated). Asking them for System 2 work at that moment (typing a reflection, choosing among detailed options, performing self-rating cognition) creates friction. The kinesthetic close interaction (planned) lands in System 1 — gesture, felt, automatic — which matches the state the user is in. Conversely, Reframe's cognitive reappraisal work happens precisely when the user needs to engage System 2 to update interpretive frames; that is the right moment for cognitive work.
+**Stillform application:** When the user has just completed a regulation session, they are in a System 1 state (post-regulation, embodied, integrated). Asking them for System 2 work at that moment (typing a reflection, choosing among detailed options, performing self-rating cognition) creates friction. The kinesthetic close interaction (planned) lands in System 1 — gesture, felt, automatic — which matches the state the user is in. Conversely, Reframe's metacognitive observation work happens precisely when the user needs to engage System 2 to step back from interpretive frames and see them as frames; that is the right moment for cognitive work.
 
 ### Principle 5: Defaults shape behavior more than instructions do
 
@@ -177,18 +177,18 @@ The classifier is a pure function: same inputs always produce same output. Easy 
 
 ---
 
-## Reframe (AI Cognitive Reappraisal)
+## Reframe (AI Metacognitive Observation)
 
-**What it does:** AI helps users reinterpret situations from multiple perspectives before reacting
+**What it does:** AI helps users observe their own thinking patterns, name what is happening, and choose a response — without challenging the content of their thoughts.
 
-**The science:** Cognitive reappraisal — reinterpreting the meaning of an emotional trigger — is the most well-researched emotion regulation strategy. It reduces amygdala activation and increases prefrontal cortex engagement. Stillform delivers reappraisal conversationally because conversational scaffolding lowers friction at the moment of distress, when self-directed reappraisal is hardest to initiate.
+**The science:** The mechanism is metacognitive observation (Wells 2009): seeing the thought as a thought rather than as the truth. The neural substrate that supports the shift is well-studied under the older "cognitive reappraisal" research tradition — when a user moves from *fused with* a thought to *observing* it, amygdala activation reduces and prefrontal cortex engagement increases. Stillform delivers this conversationally because conversational scaffolding lowers friction at the moment of distress, when self-directed observation is hardest to initiate. Stillform does not ask users to challenge whether their thoughts are rational; it surfaces what their thinking is doing so they can step back from it. That is metacognitive therapy, not cognitive-behavioral therapy.
 
 **Who says so:**
 - Ochsner & Gross (2005) — "The Cognitive Control of Emotion" — *Trends in Cognitive Sciences*
 - Buhle et al. (2014) — reappraisal consistently reduces negative emotion in neuroimaging studies — *Cerebral Cortex*
 - Denny et al. (2015) — reappraisal engages lateral prefrontal and medial prefrontal cortex — *Neuroscience & Biobehavioral Reviews*
 
-**If they push back:** "This isn't a chatbot. It's structured cognitive reappraisal — the same technique used in CBT, delivered through conversation. The AI gives perspectives, not advice."
+**If they push back:** "This isn't a chatbot. It's structured metacognitive observation — the user sees their own thinking pattern, names what is happening, and chooses a response. The AI organizes the user's inputs and reflects them back; the user does the work."
 
 ---
 

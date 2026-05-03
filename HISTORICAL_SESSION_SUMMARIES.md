@@ -1,3 +1,13 @@
+# HISTORICAL — Session Summaries Archive
+
+> **⚠️ ARCHIVAL DOCUMENT — DO NOT USE AS CURRENT STATE REFERENCE**
+>
+> This file holds historical work-day session summaries preserved as a record of what shipped on specific dates. It is NOT a current status document. For current state see `Stillform_Master_Todo.md`. For current ground truth on shipped vs claimed-shipped see `STATE_AS_OF_MAY_2.md`. For session work logs going forward see `Stillform_Punch_List.md`.
+>
+> Future session summaries get appended below the existing entries with a date header. Older entries should not be deleted — they are the archival record.
+
+---
+
 # Stillform — Session Summary April 22, 2026
 ## Where we are when you get back from ketamine
 

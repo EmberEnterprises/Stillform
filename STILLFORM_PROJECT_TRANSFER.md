@@ -118,7 +118,7 @@ Based on proven neuroscience, we built a system that identifies how each person 
 ### Three Core Tools
 1. Breathe — paced breathing activates vagus nerve. Two patterns: Quick Reset and Deep Regulate
 2. Body Scan — six acupressure points, timed holds, auto-advancing
-3. Reframe — AI cognitive reappraisal. Self Mode tab for independent processing (5-step MCT protocol: Notice, Name, Recognize, Perspective, Choose)
+3. Reframe — AI metacognitive observation. Self Mode tab for independent processing (5-step practice grounded in MCT principles: Notice, Name, Recognize, Perspective, Choose)
 
 ### Post-Session Flow
 - Feel chips (pre and post session)
@@ -391,10 +391,10 @@ These gaps are real prelaunch work. None are "must close before publish" — but
 
 *Four-round consultation arc (Apr 30 evening).* Arlin felt 'good bones, not reaching for the stars' and asked for outside AI feedback. Four rounds run; track exhausted by Round 4. In chronological order:
 
-- Round 1 (STILLFORM_CONSULTATION_PROMPT.md): What's missing at brand altitude? Three of four AIs converged on 'rename the umbrella concept' (sovereignty / cognitive access / self-continuity / identity). Arlin correctly identified this as wrong: she'd already collapsed self-mastery and composure into one term deliberately.
-- Round 2 (STILLFORM_COMPREHENSIVE_CONSULTATION.md): Where does experience break the claim? Three convergent gaps: closing language frames as outcome not rehearsal; tool selection at low EF is unowned load; data view reads as state-tracking not practice-tracking. Useful surface punch list. Arlin: 'this is kind of disappointing... not legit major shifts.'
-- Round 3 (STILLFORM_ARCHITECTURAL_CONSULTATION.md): What does the SHAPE look like? Three AIs proposed major architectural shifts (Death of the Tool / Constant Thread / Zero-setup onboarding). All proposed removing things Arlin had already built. GPT pushed back hard. Arlin: the AIs were describing the architecture she already built and calling it new.
-- Round 4 (STILLFORM_ROUND_4_CONSULTATION.md): Drafted but not sent. Arlin's read: consultation track was producing diminishing returns; the spark wouldn't come from another round.
+- Round 1: What's missing at brand altitude? Three of four AIs converged on 'rename the umbrella concept' (sovereignty / cognitive access / self-continuity / identity). Arlin correctly identified this as wrong: she'd already collapsed self-mastery and composure into one term deliberately. Source doc not preserved.
+- Round 2: Where does experience break the claim? Three convergent gaps: closing language frames as outcome not rehearsal; tool selection at low EF is unowned load; data view reads as state-tracking not practice-tracking. Useful surface punch list. Arlin: 'this is kind of disappointing... not legit major shifts.' Source doc not preserved.
+- Round 3: What does the SHAPE look like? Three AIs proposed major architectural shifts (Death of the Tool / Constant Thread / Zero-setup onboarding). All proposed removing things Arlin had already built. GPT pushed back hard. Arlin: the AIs were describing the architecture she already built and calling it new. Source doc not preserved.
+- Round 4: Drafted but not sent. Arlin's read: consultation track was producing diminishing returns; the spark wouldn't come from another round. Source doc not preserved.
 
 *The actual diagnosis (named by Arlin, not AIs).* After Round 3 disappointment: 'I got a bunch of science based prompts that are flat and not interested in engaging for the user. It feels more like a chore than something I actually want to do.' Aria asked her to win an award. The product has truth, rigor, and integrity. What's missing is engagement craft — the layer that makes a serious tool feel alive without becoming gamified.
 
@@ -406,7 +406,7 @@ These gaps are real prelaunch work. None are "must close before publish" — but
 
 *Closing language candidates also drafted (CLOSING_LANGUAGE_CANDIDATES.md).* Round 2 surface fix worth shipping in parallel. All seven closing screens covered with three voice options each (minimal / rehearsal-frame / quieter). Awaiting Arlin's direction before code wiring.
 
-*Body-first pre-rate friction RETRACTED.* Initially drafted as BODY_FIRST_PRE_RATE_FIX_SPEC.md after GPT Round 3 catch. Arlin caught Claude not checking master todo first. Master todo line 321: "Body-first metacognition access gap — VERIFIED ALREADY IMPLEMENTED Apr 27" with explicit note "Going forward: read the existing flow before claiming a gap." Master todo line 361: pre-rate science gap RESOLVED via commit ae43f4db (chip rows removed per Nook 2021 + replications). The 1-5 numeric pre-rate that remains is the minimal residual measurement driving shift delta tracking and three-category data feed. Not a science violation. Spec retracted with full retraction notice; preserved as artifact-of-the-lesson rather than deleted.
+*Body-first pre-rate friction RETRACTED.* Initially drafted after GPT Round 3 catch. Arlin caught Claude not checking master todo first. Master todo line 321: "Body-first metacognition access gap — VERIFIED ALREADY IMPLEMENTED Apr 27" with explicit note "Going forward: read the existing flow before claiming a gap." Master todo line 361: pre-rate science gap RESOLVED via commit ae43f4db (chip rows removed per Nook 2021 + replications). The 1-5 numeric pre-rate that remains is the minimal residual measurement driving shift delta tracking and three-category data feed. Not a science violation. Spec retracted; lesson preserved as locked decision in Section 5 above ("Apr 30 do-not-re-propose").
 
 *Closing language reconsideration RESOLVED Apr 30 evening (NOT shipping).* Round 2 consultation found 4 AIs converged on "current language frames as outcome not rehearsal." CLOSING_LANGUAGE_CANDIDATES.md drafted with 3 voice options across 7 close screens. Arlin's pushback: "the current language has a science behind it too. The language feels more prestige and less putting words into someone's mouth." Closing language stays as-is. The reasoning was captured durably in the Science Sheet as new section "System Observation + User Override (Architectural Conditioning Pattern)" — current language ("Composure restored," "Signal cleared," "STATE SHIFT +2 · FUNCTIONAL") is precise observation paired with explicit override pathways ("I don't feel regulated yet" button). Together they train interoceptive accuracy via supervised-learning-like pattern: system makes prediction, user accepts or corrects, both directions improve over time. Round 2 AIs read words in isolation without seeing override architecture. Future maintenance: do NOT remove override pathways or soften closing language — pattern would break if "cleaned up" later. Grounded in Barrett 2001 granularity, Mehling 2012 + Garfinkel 2015 interoceptive accuracy, Lieberman 2007.
 
@@ -459,6 +459,9 @@ Body-first user, Composure Check / Settings show normally, but tapping "Calm my 
 ### 🟢 Trees graphic theme mismatch — Easy fix, can ship anytime
 Trees at bottom of breathing screen render in fixed orange/amber regardless of theme. On teal theme this creates dissonance. Fix: change trees to `var(--text-muted)` or desaturated neutral. Glow stays warm amber as the one accent note. Inside `BreatheGroundTool`.
 
+### 🟡 Watch integration not finished — see master todo
+Watch haptic breathing companion (Galaxy Watch Ultra / Wear OS) is structurally wired in code but not yet device-tested and has a known pattern-ID bug. Phone-side breathing pattern IDs (`quick`, `deep`, `cyclic_sigh`) don't match the watch-side switch (`box`, `478`, `quick`), so Cyclic Sighing runs the wrong pattern on the watch. Full diagnosis, fix scope, and verification requirements are documented at `Stillform_Master_Todo.md` "NATIVE APP" section under the "Watch haptic breathing companion" entry. Requires Android Studio access for device testing.
+
 ### Resolved April 27, 2026 — kept for reference
 
 The following were CRITICAL/pending in earlier versions of this doc and are now shipped:
@@ -510,6 +513,7 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 - **Apr 28 operating rule:** Before claiming any architectural gap exists, proposing to close one, or suggesting changes to Stillform, Claude (1) reads the existing implementation, (2) checks the doc repo, and (3) checks git commit history. Apparent contradictions are usually intentional design.
 - **Apr 28 operating rule:** Arlin's direction is always for the whole app, not one type. She can only see one screen at a time, so Claude must proactively audit every change for whether the equivalent should apply to the other processing type and flag asymmetries before shipping.
 - **Apr 28 operating rule:** Research-grounded changes are placement-first; gating decisions are separate. When current evidence contradicts implementation (e.g. Nook 2021 vs pre-regulation chips), fix placement first, defer optionality/gating decisions to a separate pass to avoid compounding changes.
+- **Apr 30 do-not-re-propose:** Body-first pre-rate friction is NOT an open architectural gap. The pre-regulation chip rows in BreatheGroundTool and BodyScanTool were removed Apr 28 (commit `ae43f4db`) per Nook 2021 + replications. The residual 1-5 numeric pre-rate is intentional — it captures the user's self-rated state for shift-delta tracking ("Last session: +2") and feeds the three-category data feed (Categories A/B/C). Removing the 1-5 would break the data layer. Body-first metacognition access was verified already implemented Apr 27 (master todo line 321) — body-first users go Pre-rate → Bio-filter → Breathe → Post-rate → Ground, and the grounding-complete screen has "Continue to Reframe →" as primary CTA. A spec proposing to fix this gap was drafted then retracted Apr 30 because the gap doesn't exist. If a new Claude reads the codebase from outside critique and surfaces this as a problem, point it here and to master todo lines 46, 321, and 361.
 
 ---
 
