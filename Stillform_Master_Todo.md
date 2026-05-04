@@ -245,7 +245,16 @@ Pass criterion per scenario: AI names the pattern, reflects the strength, builds
 The AI must build BOTH outward composure (listener stops filtering input by status, background, bias) AND inward composure (speaker stops shrinking, qualifying, performing credibility). Verification needed: does the current prompt set produce both? May connect to the AI-as-actor voice audit (12 surfaces, captured commit `d8a6507e`) — if not already a verification dimension there, add it.
 
 ### Terms of Service + Privacy Policy "not a medical tool" language (added May 2 — liability item)
-Both legal docs need explicit language: "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment." This is liability-critical for the KetaRevive integration and the mental-health-adjacent positioning. Termly privacy policy is set up; verify whether this specific language is present. If not, add to both docs before TestFlight broad release.
+Both legal docs need explicit language: "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment." This is liability-critical for the KetaRevive integration and the mental-health-adjacent positioning.
+
+**Partial verification May 3, 2026:** Top portion of Privacy Policy (intro, summary of key points, opening of security section) verified to NOT contain any of: "medical tool," "medical device," "medical treatment," "not a medical," "not intended for," "substitute for," "diagnose/diagnosis," "professional advice," "healthcare provider." Bottom portion of Privacy Policy (full security section, cookies/tracking, retention, rights, contact) and the full Terms of Service NOT verified — Arlin paused verification to complete from laptop.
+
+**Notes for the laptop session:**
+- Privacy Policy is probably not the correct home for this disclaimer anyway. Privacy docs are about data handling. A "not a medical tool" statement is a scope/liability disclaimer and properly belongs in Terms of Service.
+- Recommended placement: Terms of Service, in a "Nature of the Service" or "Disclaimers" section, near the top so it's visible without scrolling.
+- Suggested wording (from May 2 spec): "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment."
+- Consider adding parallel mental-health framing: "Stillform is not therapy, not a substitute for therapy, and is not intended for crisis support. If you are experiencing a mental health emergency, please contact a licensed clinician or call/text 988 (US Suicide & Crisis Lifeline)."
+- The current Privacy Policy describes Stillform as "a daily composure system that combines guided breathing, body scan with acupressure cues, and AI-assisted reframing to help users regulate stress responses, strengthen self-awareness, and make clearer decisions under pressure." That description sits in wellness-adjacent territory, which makes the explicit medical disclaimer more important, not less.
 
 ---
 
