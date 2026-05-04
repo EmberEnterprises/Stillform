@@ -398,6 +398,19 @@ All items in Sequences 1-4 RESOLVED Apr 27. Full record (Quick wins, Real bugs t
 
 ## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
+### 🔑 Set `LEMON_SQUEEZY_API_KEY` env var on Netlify — REQUIRED before deploy of commit `511c054` (added May 4, 2026)
+The May 4 Manage Subscription feature ships a new Netlify function (`subscription-portal.js`) that calls Lemon Squeezy `/v1/customers/{id}` API to fetch the signed customer portal URL. The function reads `process.env.LEMON_SQUEEZY_API_KEY` and returns 500 "Server not configured" if it's missing. Without this env var set, the in-app "Manage subscription" button in Settings → Account fails for every user.
+
+**Steps:**
+1. Lemon Squeezy dashboard → Settings → API → Create API key. Read-only scope is sufficient (function only does GETs against customer records).
+2. Copy the key.
+3. Netlify dashboard → Site settings → Environment variables → Add a single variable.
+4. Name: `LEMON_SQUEEZY_API_KEY`. Value: paste the key. Scope: All scopes (functions runtime needs it).
+5. Trigger a redeploy so the function picks up the new env var (Netlify functions read env at deploy time, not request time).
+6. Test: sign in to Stillform with a subscribed account → Settings → Account → Subscription → click "Manage subscription". Should open Lemon Squeezy portal in new tab.
+
+**If you forget:** the button will surface "Could not open the subscription portal. Please try again or email araembersllc@proton.me." Users have a fallback (the email path) but the in-app cancellation surface is broken until the env var is set.
+
 ### ✅ "Calm my body" hero CTA doesn't act on tap — RESOLVED May 4, 2026
 Reported behavior was a deploy/publish artifact, not a code bug. Arlin tested the CTA on a build that hadn't been deployed and published yet. After deploy + publish, the CTA acts on tap as intended. Static analysis (full trace of click handler → startPathway → startTool → setScreen → BreatheGroundTool mount → hashchange listener) had already shown no break in code, which is consistent with this resolution. No fix needed. Diagnostic console.log shipped in commit 089acffa98 can be removed in next cleanup pass.
 
