@@ -32,11 +32,11 @@
 
 **Tension dot selection.** Current flow asks the user to tap 1-5 tension level for each area before applying pressure. This is a cognitive task during what should be somatic attention.
 
-**Low-demand:** skip tension selection entirely. Auto-advance from prompt to pressure with no rating. The tension data is interesting analytics but not load-bearing for the practice; for a medicated user, omitting it is the right tradeoff.
+**Low-demand:** skip tension selection entirely. Auto-advance from prompt to pressure with no rating. **Important context confirmed May 4, 2026:** in normal mode the tension data IS captured in React state during the scan but is NOT currently persisted to the session record — it lives only in the rendering layer and is garbage collected at unmount. Phase 2 build wires the tension persistence as part of the same commit (it's not a "data we lose" tradeoff — it's a data gap that's being closed in normal mode at the same time as it's being suppressed in low-demand). My Progress will gain post-practice tension data per session for the first time.
 
-**Implementation:** in low-demand, the tension bar component does not render. The "Apply pressure here →" button appears immediately under the prompt + observation copy. User can tap to advance to pressure phase, or auto-advance after a short timeout (15s? to be discussed).
+**Implementation:** in low-demand, the tension bar component does not render. The "Apply pressure here →" button appears immediately under the prompt + observation copy. User can tap to advance to pressure phase. **Manual tap retained** (not auto-advance — Arlin direction May 4: tapping requires reading the affordance, which is a small cognitive ask worth keeping for some control over pace; auto-advance would remove pace control for medicated users).
 
-**Audio force-enabled.** Same as Phase 1 — paced auditory cueing is mechanism for cognitively-compromised users (Balban 2023, Ochsner & Gross 2005), not preference. Body Scan already has audio infrastructure (the low grounding tone during holds); low-demand turns it on regardless of user setting.
+**Audio force-enabled.** Same as Phase 1 — paced auditory cueing is mechanism for cognitively-compromised users (Balban 2023, Ochsner & Gross 2005), not preference. Body Scan already has audio infrastructure (the low grounding tone during holds); low-demand turns it on regardless of user setting. **No additional audio added** — the literature supports auditory rhythm tied to motor action (paced sound for breath/movement) but does not support adding ambient hum or transition tones during a body scan. Adding more audio in low-demand contradicts the purpose of low-demand (reducing cognitive demand). Force-enable existing only.
 
 ### Changes at completion
 
@@ -101,15 +101,17 @@ Wrap the existing `setShowWhatShifted(true)` trigger logic in `if (!isLowDemand)
 
 ## Open questions for Arlin
 
-1. **Auto-advance during scan?** In low-demand, should the prompt phase auto-advance to pressure after N seconds, or should we keep the manual "Apply pressure here →" tap? Tap requires cognitive engagement (reading button, deciding); auto-advance removes that. But auto-advance also means the user has less control over pace. **My recommendation:** keep manual tap but show a clearer affordance, because some control over pace is worth a small cognitive ask. Different from skipping tension selection (which is a separate cognitive task that adds nothing to the practice).
+**RESOLVED May 4, 2026:**
 
-2. **What about the tension data we lose?** Low-demand users won't generate tension data. Is that okay? **My read:** yes. The tension data is observational analytics, not practice-critical. Losing it for medicated users is a defensible tradeoff. Could flag in the data layer with `tensionDataAvailable: false` field on the session if we want to track it.
+1. ✅ **Auto-advance during scan?** RESOLVED: keep manual tap. Tap requires reading the affordance, which is a small cognitive ask worth keeping for some control over pace. Auto-advance would take pace control away from medicated users.
 
-3. **Audio behavior specifics.** Body Scan currently has a low grounding tone during holds. Should low-demand Body Scan add anything else (paced cueing on transitions? ambient hum throughout?), or just force-enable existing audio? **My recommendation:** force-enable existing only. Adding new audio is scope creep; existing audio is already designed for the tool.
+2. ✅ **What about the tension data we lose?** REFRAMED: this question was based on a wrong premise. Body Scan DOES capture tension data (1-5 dot scale per area) but does NOT currently persist it. So nothing is being "lost" in low-demand because nothing is being saved in normal mode either. Phase 2 build closes the gap: wire tension persistence in normal mode AND skip the input in low-demand. Arlin direction May 4: do not throw away the strongest signal Stillform has for proving practice works; the pre/post delta from morning check-in tension to post-Body-Scan tension is the data My Progress should be using.
 
-4. **LowDemandComplete component refactor — bundle with this commit or separate?** I lean bundle — extracting the shared component while we're already in this code is more efficient than two commits. Phase 3 (Reframe) will benefit too.
+3. ✅ **Audio behavior specifics.** RESOLVED: force-enable existing audio only, no additions. Literature on body scan supports auditory rhythm tied to motor action (Balban 2023, MBSR/MBCT clinical norms) but does not support adding ambient hum or transition tones. Adding audio in low-demand contradicts low-demand's purpose. Existing low grounding tone during holds is already evidence-aligned design.
 
-5. **Mirror to Reframe (Phase 3) — separate spec or reference this one?** Reframe is more complex because AI behavior changes too (shorter sentences, simpler language, no questions demanding reasoning). Probably needs its own spec. This one stays focused on Body Scan.
+4. ✅ **LowDemandComplete component refactor — bundle with this commit or separate?** RESOLVED: bundle. Extracting the shared component while already in this code is more efficient than two commits. Phase 3 (Reframe) will use the same component.
+
+5. ✅ **Mirror to Reframe (Phase 3) — separate spec or reference this one?** ALREADY RESOLVED: separate spec exists at `LOW_DEMAND_PHASE_3_SPEC.md`. Phase 3 is more complex because AI behavior changes too (shorter sentences, simpler language, no questions demanding reasoning).
 
 ---
 

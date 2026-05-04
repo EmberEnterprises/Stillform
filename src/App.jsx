@@ -3659,6 +3659,56 @@ const BREATHING_PATTERNS = [
   ]}
 ];
 
+// Shared completion screen for low-demand sessions across Breathe, Body Scan, and (future) Reframe.
+// Renders a soft pulsing dot + minimal "Tap anywhere to close" copy. The 1.5s grace period prevents
+// stray taps during the practice-to-completion transition from accidentally dismissing the screen.
+// The caller is responsible for having already auto-saved the session — this component does NOT
+// save anything; it only handles the close gesture. See LOW_DEMAND_PHASE_2_SPEC.md.
+function LowDemandComplete({ onClose }) {
+  const graceOverRef = useRef(false);
+  useEffect(() => {
+    graceOverRef.current = false;
+    const timer = setTimeout(() => { graceOverRef.current = true; }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+  return (
+    <div
+      onClick={() => {
+        if (!graceOverRef.current) return;
+        onClose();
+      }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "var(--bg)",
+        cursor: "pointer",
+        padding: 24
+      }}>
+      <div style={{
+        width: 80, height: 80, borderRadius: "50%",
+        background: "var(--amber-glow)",
+        border: "0.5px solid var(--amber-dim)",
+        animation: "pulse 3s ease-in-out infinite",
+        marginBottom: 32
+      }} />
+      <div style={{
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: 9,
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+        color: "var(--text-muted)",
+        opacity: 0.6
+      }}>
+        Tap anywhere to close
+      </div>
+    </div>
+  );
+}
+
 function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoModal }) {
   // LOW-DEMAND MODE — when bioFilter signals cognitive impairment, the tool renders
   // a stripped variant: no chip rows, no pre/post rating, no bio-filter screen,
@@ -3714,9 +3764,6 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   const [debriefTarget, setDebriefTarget] = useState(null);
   const [scienceCardShown, setScienceCardShown] = useState(false);
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
-  // Low-demand: 1.5s grace period before tap-anywhere-to-exit becomes active.
-  // Prevents the entry tap from immediately dismissing the completion screen.
-  const lowDemandGraceOverRef = useRef(false);
   const regulationType = (() => {
     try {
       const value = localStorage.getItem("stillform_regulation_type");
@@ -3812,16 +3859,6 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   const [running, setRunning] = useState(false);
   const [breatheDone, setBreatheDone] = useState(false);
 
-  // Low-demand grace timer — when breath sequence finishes in low-demand mode,
-  // start a 1.5s window before tap-anywhere-to-exit activates. Prevents a stray
-  // tap during the breath-to-completion transition from dismissing the session.
-  useEffect(() => {
-    if (!isLowDemand) return;
-    if (!breatheDone) return;
-    lowDemandGraceOverRef.current = false;
-    const timer = setTimeout(() => { lowDemandGraceOverRef.current = true; }, 1500);
-    return () => clearTimeout(timer);
-  }, [breatheDone]);
   const [keepGoing, setKeepGoing] = useState(false);
 
   // Audio
@@ -4347,56 +4384,18 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         </div>
       ) : isLowDemand ? (
         // LOW-DEMAND completion — minimal demand, no decisions, no chip rows, no Reframe handoff.
-        // Single action: tap anywhere to exit (with grace period to avoid accidental dismiss).
-        // Session still auto-saves so record integrity is preserved.
+        // Single action: tap anywhere to exit (with grace period built into LowDemandComplete).
+        // Session auto-saves on first render so record integrity is preserved.
         (() => {
-          // Side effect: auto-save once, on first render of this branch.
           if (!latestSessionTimestampRef.current) {
             const saved = saveSession(["breathe"], "low-demand-complete");
             if (saved?.timestamp) latestSessionTimestampRef.current = saved.timestamp;
           }
-          return (
-            <div
-              onClick={() => {
-                // 1.5s grace period — set on first render via ref below
-                if (!lowDemandGraceOverRef.current) return;
-                // Bypass debrief + Next Move entirely. A medicated user just navigated
-                // to "tap to close" — asking for reflection text or "what's your next move"
-                // is exactly the cognitive demand low-demand mode is designed to remove.
-                // Session already auto-saved above; no debrief entry is recorded for this
-                // session (intentional — debrief is metacognitive work, not appropriate here).
-                onComplete(undefined);
-              }}
-              style={{
-                position: "fixed",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                background: "var(--bg)",
-                cursor: "pointer",
-                padding: 24
-              }}>
-              <div style={{
-                width: 80, height: 80, borderRadius: "50%",
-                background: "var(--amber-glow)",
-                border: "0.5px solid var(--amber-dim)",
-                animation: "pulse 3s ease-in-out infinite",
-                marginBottom: 32
-              }} />
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace",
-                fontSize: 9,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "var(--text-muted)",
-                opacity: 0.6
-              }}>
-                Tap anywhere to close
-              </div>
-            </div>
-          );
+          // Bypass debrief + Next Move entirely. A medicated user just navigated to "tap to close" —
+          // asking for reflection text or "what's your next move" is exactly the cognitive demand
+          // low-demand mode is designed to remove. No debrief entry recorded for this session
+          // (intentional — debrief is metacognitive work, not appropriate here).
+          return <LowDemandComplete onClose={() => onComplete(undefined)} />;
         })()
       ) : (
         <div className="complete">
@@ -4521,6 +4520,15 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
 }
 
 function BodyScanTool({ onComplete, setInfoModal }) {
+  // LOW-DEMAND MODE — when bioFilter signals cognitive impairment, the tool renders
+  // a stripped variant: no intro screen, no tension dot input, no What Shifted gate,
+  // no ToolDebriefGate, no Next Move. Audio force-enabled. See LOW_DEMAND_PHASE_2_SPEC.md.
+  const isLowDemand = (() => {
+    try {
+      const bf = getActiveBioFilter();
+      return bf.includes("medicated");
+    } catch { return false; }
+  })();
   // TIME-TO-REGULATION
   const startTime = useRef(Date.now());
   const latestSessionTimestampRef = useRef(null);
@@ -4565,17 +4573,36 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     const timestamp = new Date().toISOString();
     try {
       const ctx = contextEntryRef.current || {};
+      // Serialize tension data keyed by area name (not index) so My Progress can
+      // surface it readably without joining against the areas array. Empty when
+      // the user didn't tap any tension dots (low-demand skips the input entirely;
+      // normal-mode users may also leave it untouched). Stored as { areaName: 1-5 }.
+      // First persistence of post-practice tension data — fixes data gap surfaced
+      // May 4, 2026 during low-demand Phase 2 build (tension was being captured
+      // in React state but never written to the session record).
+      const tensionByArea = {};
+      Object.entries(tension || {}).forEach(([idx, level]) => {
+        const area = areas[Number(idx)];
+        if (area && area.name && level > 0) tensionByArea[area.name] = level;
+      });
+      const tensionAreasCount = Object.keys(tensionByArea).length;
       appendSessionToStorage({
         timestamp,
         duration: elapsed,
         durationFormatted: formatTime(elapsed),
         tools: ["body-scan"],
-        exitPoint: "scan-complete",
-        source: "body-scan",
+        exitPoint: isLowDemand ? "low-demand-body-scan-complete" : "scan-complete",
+        source: isLowDemand ? "low-demand-body-scan" : "body-scan",
         entryMode: ctx.entryMode || null,
-        entryProtocolId: ctx.entryProtocolId || null
+        entryProtocolId: ctx.entryProtocolId || null,
+        bodyScanTension: tensionAreasCount > 0 ? tensionByArea : null,
+        tensionDataCaptured: !isLowDemand
       });
-      try { window.plausible("Body Scan Completed"); } catch {}
+      try {
+        window.plausible(isLowDemand ? "Body Scan Completed (low-demand)" : "Body Scan Completed", {
+          props: { tension_areas: tensionAreasCount }
+        });
+      } catch {}
     } catch {}
     return { elapsed, timestamp };
   };
@@ -4764,7 +4791,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
   const [tension, setTension] = useState({});
   const [currentArea, setCurrentArea] = useState(0);
-  const [phase, setPhase] = useState("intro");
+  const [phase, setPhase] = useState(isLowDemand ? "scan" : "intro");
   const [holdCount, setHoldCount] = useState(0);
   const [holding, setHolding] = useState(false);
 
@@ -4779,6 +4806,8 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
   // Audio — low grounding tone during holds
   const [audioOn, setAudioOn] = useState(() => {
+    // Low-demand mode force-enables audio (paced auditory cueing is mechanism, not preference).
+    if (isLowDemand) return true;
     try { return localStorage.getItem("stillform_audio") === "on"; } catch { return false; }
   });
   const audioCtx = useRef(null);
@@ -5087,6 +5116,14 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       scanElapsedRef.current = saved?.elapsed || 0;
       latestSessionTimestampRef.current = saved?.timestamp || null;
     }
+    // Low-demand short-circuit: skip What Shifted gate, ToolDebriefGate, and Next Move.
+    // A medicated user just navigated through the scan; the metacognitive close demands
+    // (post-state chip + optional reflection + lock-in) are exactly the cognitive load
+    // low-demand mode is designed to remove. Direct render of the shared completion screen.
+    // Session already auto-saved above; no debrief entry recorded (intentional).
+    if (isLowDemand) {
+      return <LowDemandComplete onClose={() => onComplete(undefined)} />;
+    }
     // What Shifted gate — replace the old 2s auto-route to Reframe with the metacognitive close
     if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => setShowWhatShifted(true), 2000); }
     const elapsed = scanElapsedRef.current;
@@ -5175,13 +5212,17 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               <div style={{ marginTop: 12, marginBottom: 12, fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.6 }}>
                 Notice what's here. You don't need to change it — just let it be.
               </div>
-              <div style={{ marginTop: 4, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
-              <div className="tension-bar">
-                {[1,2,3,4,5].map(n => (
-                  <div key={n} className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
-                    onClick={(e) => { e.stopPropagation(); setTension(t => ({ ...t, [i]: n })); }} />
-                ))}
-              </div>
+              {!isLowDemand && (
+                <>
+                  <div style={{ marginTop: 4, marginBottom: 8, fontSize: 12, color: "var(--text-dim)", letterSpacing: "0.08em" }}>TENSION LEVEL</div>
+                  <div className="tension-bar">
+                    {[1,2,3,4,5].map(n => (
+                      <div key={n} className={`tension-dot ${(tension[i] || 0) >= n ? "active" : ""}`}
+                        onClick={(e) => { e.stopPropagation(); setTension(t => ({ ...t, [i]: n })); }} />
+                    ))}
+                  </div>
+                </>
+              )}
               <div style={{ marginTop: 20, display: "flex", gap: 8 }}>
                 <button className="btn btn-primary" style={{ flex: 1, fontSize: 13 }}
                   onClick={(e) => { e.stopPropagation(); setPhase("pressure"); }}>
