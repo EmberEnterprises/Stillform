@@ -148,17 +148,17 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 
 1. **reframe.js system prompts** (CALM_SYSTEM, CLARITY_SYSTEM, HYPE_SYSTEM) — tell the AI to think of itself as "companion" or "coach." Shapes every AI response. Highest-leverage single edit because it cascades through all responses.
 
-2. **"What the AI has noticed"** (App.jsx lines 8073, 8152, 11851) — literal screen title + count label visible to user. UI surface, not info modal.
+2. ✅ **"Patterns surfaced"** — RESOLVED May 3, 2026. Was: "What the AI has noticed" (3 occurrences across post-session insight headers and My Progress archive). Now: "Patterns surfaced" — works in monospace caps and as a list header with insight count.
 
-3. **FAQ "What does the AI do in Reframe?"** (line 16580) — "It identifies what is actually happening... introduces a perspective that interrupts that pattern... separates what is factually present from your read." Three sentences put AI in the diagnostician seat.
+3. ✅ **FAQ "What happens in Reframe?"** — RESOLVED May 3, 2026. Question reframed from "What does the AI do in Reframe?" Answer now leads with "Reframe reads..." instead of "It [the AI] reads...", uses "Reframe surfaces what your processing is doing" instead of "The AI introduces a perspective," and frames the screenshot work as Reframe (the tool) reading the message rather than the AI being a diagnostician of the user's read.
 
-4. **FAQ "Does the AI learn about me?"** (line 16584) — "It begins surfacing cross-session observations directly." AI as the one with observations.
+4. ✅ **FAQ "Does Stillform learn about me?"** — RESOLVED May 3, 2026. Question reframed from "Does the AI learn about me?" Answer now: "Yes — the system reads your signal profile..." and "From session five onward, cross-session observations surface directly in your sessions." Removes "the AI" as the entity with observations; the system reads, observations surface.
 
-5. **FAQ "What is Next Move?"** — "The AI reads your session context and surfaces the relevant options."
+5. ✅ **FAQ "What is Next Move?"** — RESOLVED May 3, 2026. Last sentence changed from "The AI reads your session context and surfaces the relevant options" to "Reframe surfaces the relevant options based on your session context." Rest of answer unchanged.
 
-6. **FAQ "What is the Bio-Filter?"** — "AI contextualizes your input accurately rather than coaching past..."
+6. ✅ **FAQ "What is the Bio-Filter?"** — RESOLVED May 3, 2026. Last clause changed from "the AI contextualizes your input accurately" to "the system carries those variables into how your input is read." Matches phrasing used in Item 9 fix for consistency across audit.
 
-7. **FAQ "Can I attach screenshots?"** — "The AI reads visual context to improve coaching."
+7. ✅ **FAQ "Can I attach screenshots?"** — RESOLVED May 3, 2026. Was: "The AI reads visual context — layout, attribution, sequence — to improve coaching for interpersonal situations." Now: "Visual context — layout, attribution, sequence — is folded into the session so Reframe can read interpersonal situations more accurately." Three sentences after this remained the original limits/disclaimers.
 
 8. ✅ **Reframe info modal "Why Reframe?"** — RESOLVED May 3, 2026. Was: "the AI introduces a perspective that interrupts the loop you're already in." Now: "you step back from the loop you're already in by surfacing a different angle on it. The work is yours; the system organizes what you give it and asks the next question." Fixed in both duplicate strings (click handler + keydown handler).
 
@@ -166,9 +166,9 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 
 10. ✅ **"Why name your state?" modal** — RESOLVED May 3, 2026. Was: "tells Stillform what is present so the AI can meet you accurately... how the AI interprets what you type." Now: "tells Stillform what's present so what comes next meets you accurately... how your input is read." Removed "AI" as sentence subject in both phrases without introducing developer jargon (tried "routing" first, dropped because it's not a user word).
 
-11. **Privacy/screenshot disclosure** (line 16539) — "the image is sent to the AI model for interpretation."
+11. 🔒 **Privacy/screenshot disclosure** — KEPT AS-IS May 3, 2026. Original audit flagged "the image is sent to the AI model for interpretation" as AI-as-actor drift. On review during the May 3 voice pass, this was determined to be a different category from items 2-10. Privacy disclosures need to identify the actual data processor — and "AI model" is the technically precise term for what receives the image (third-party LLM). Replacing it would obscure the privacy fact that the image leaves the device and goes to a third party. Termly and legal counsel would want this disclosure exactly this clear. Closed as deliberately preserved.
 
-12. **Hero CTA "Calm my body"** subtitle "Start where the pressure lands" — assumes pressure (separate but related narrowing problem already on audit).
+12. ✅ **Hero CTA "Calm my body" body-first subtitle** — RESOLVED May 3, 2026. Was: "Start where the pressure lands." Now: "Start with what the body is doing." Now parallels the thought-first subtitle ("Start with what the mind is doing.") and removes the assumption that body-first users arrive with pressure. CTA label "Calm my body" itself unchanged — audit only flagged the subtitle.
 
 **Voice that would match Arlin's framing:**
 - User reads their own state. The system organizes the inputs.
@@ -177,11 +177,9 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 - Stillform is the architecture. The user is the operator.
 
 **Notes for whoever does this work:**
-- Items 8, 9, 10 (Claude's own drift from May 2) RESOLVED May 3, 2026. Items 1-7 and 11-12 remain captured for a deliberate voice pass.
-- Item 1 (reframe.js system prompts) is invasive — changes how the AI behaves, not just how the app describes itself. Needs care. Note: the May 3 reframe.js prompt rewrite (commit 43d51a6) addressed the "you are infrastructure / composure companion" opening register but the audit's full sweep across CALM/CLARITY/HYPE wasn't the goal of that commit; items 1's broader scope remains.
-- Item 2 ("What the AI has noticed") is a literal user-facing surface; copy change is also a UX change.
-- Items 3-7 are FAQ canon; whatever voice lands here sets register for the whole app.
-- Hero CTA Group 2 items partially overlap with the existing "narrowing assumptions" surface refinement work — possibly batchable.
+- Items 2-10 and 12 RESOLVED May 3, 2026 across two commits (411f2d5 for 8-10; new commit for 2-7 and 12). Item 11 closed as deliberately preserved for legal precision.
+- Item 1 (reframe.js system prompts) remains the only open AI-as-actor item. The May 3 reframe.js prompt rewrite (commit 43d51a6) addressed the "you are infrastructure / composure companion" opening register and consolidated bloat, but the audit's full sweep across CALM/CLARITY/HYPE for AI-as-actor sentence subjects wasn't the goal of that commit. Item 1 still pending.
+- The 19-scenario AI Framework regression test in punch list (lines 357-376) remains the pre-deploy gate before the new prompts are considered validated. Has not been re-run since the May 3 prompt rewrite.
 
 **Out of scope today.** Captured for a deliberate voice pass when Arlin chooses to do it.
 

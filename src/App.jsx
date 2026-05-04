@@ -8162,7 +8162,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     return (
       <div style={{ textAlign: "left", padding: "36px 0 8px" }}>
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
-          What the AI has noticed
+          Patterns surfaced
         </div>
         <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
           <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
@@ -8241,7 +8241,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {insight && (
           <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-              What the AI has noticed
+              Patterns surfaced
             </div>
             <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
               {insight.note}
@@ -11947,7 +11947,7 @@ function MyProgress({ onBack }) {
         {aiUserFacingInsights.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("ainotes")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>What the AI has noticed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiUserFacingInsights.length} insight{aiUserFacingInsights.length !== 1 ? "s" : ""}</div></div>
+              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Patterns surfaced</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiUserFacingInsights.length} insight{aiUserFacingInsights.length !== 1 ? "s" : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.ainotes ? "▾" : "▸"}</span>
             </button>
             {openSections.ainotes && (
@@ -15698,7 +15698,7 @@ const isSignalProfileConfigured = () => {
                         {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
-                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start where the pressure lands." : "Start with what's loudest."}
+                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start with what the body is doing." : "Start with what's loudest."}
                       </div>
                     </button>
 
@@ -16754,12 +16754,12 @@ const isSignalProfileConfigured = () => {
                 a: "After 6 PM, three inputs: where your energy landed, whether you held composure, one word for the day. The AI carries that into the next morning as context. The morning-to-evening structure creates a feedback loop — patterns that stay invisible inside day-to-day experience become legible over time."
               },
               {
-                q: "What does the AI do in Reframe?",
-                a: "It reads your physical state, feel state, and input — then identifies what is actually happening. Under activation, the mind tends to collect evidence for the interpretation it has already formed and miss what contradicts it. The AI introduces a perspective that interrupts that pattern. For interpersonal situations, it separates what is factually present from what your read of the other person is adding. It does not follow a script — it adapts to your input."
+                q: "What happens in Reframe?",
+                a: "Reframe reads your physical state, feel state, and input together. Under activation, the mind collects evidence for an interpretation it has already formed and misses what contradicts it. Reframe surfaces what your processing is doing so you can step back from the loop. For interpersonal situations, it separates what is factually present in the message from what your read is adding. The flow adapts to your input — there is no script."
               },
               {
-                q: "Does the AI learn about me?",
-                a: "Yes. It reads your signal profile, identified cognitive patterns, check-in history, and session notes. The more you use it, the more precise it becomes. From session five onward, it begins surfacing cross-session observations directly. Seeing your own patterns from the outside creates the distance needed to respond to them rather than operate from inside them."
+                q: "Does Stillform learn about me?",
+                a: "Yes — the system reads your signal profile, identified cognitive patterns, check-in history, and session notes. The more sessions you complete, the more precise the architecture becomes around your patterns. From session five onward, cross-session observations surface directly in your sessions. Seeing your own patterns from the outside creates the distance needed to respond to them rather than operate from inside them."
               },
               {
                 q: "How do the feel chips work?",
@@ -16775,11 +16775,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is Next Move?",
-                a: "One concrete action selected from a regulated state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. The AI reads your session context and surfaces the relevant options."
+                a: "One concrete action selected from a regulated state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. Reframe surfaces the relevant options based on your session context."
               },
               {
                 q: "What is the Bio-Filter?",
-                a: "A physical state check before Reframe. Options include depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. Physical state directly shapes perception — sleep debt amplifies threat detection, pain demands attentional resources, hormonal shifts alter baseline. The bio-filter surfaces these variables so the AI contextualizes your input accurately rather than coaching past something that may need a different response entirely."
+                a: "A physical state check before Reframe. Options include depleted, under-rested, pain present, hormonal shift, gut signal, medicated, activated. Physical state directly shapes perception — sleep debt amplifies threat detection, pain demands attentional resources, hormonal shifts alter baseline. The bio-filter surfaces these variables so the system carries those variables into how your input is read, rather than coaching past something that may need a different response entirely."
               },
               {
                 q: "What is the Body Scan?",
@@ -16811,7 +16811,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "Can I attach screenshots to Reframe?",
-                a: "Yes. Attach up to three screenshots per session. The AI reads visual context — layout, attribution, sequence — to improve coaching for interpersonal situations. Screenshot interpretation has limits. Do not treat it as legal, factual, or medical analysis. Verify anything consequential independently."
+                a: "Yes. Attach up to three screenshots per session. Visual context — layout, attribution, sequence — is folded into the session so Reframe can read interpersonal situations more accurately. Screenshot interpretation has limits. Do not treat it as legal, factual, or medical analysis. Verify anything consequential independently."
               },
               {
                 q: "Why don't I see calendar or health data?",
