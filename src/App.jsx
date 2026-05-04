@@ -6403,6 +6403,36 @@ const sbCheckSubscriptionStatus = async () => {
   if (!res.ok) throw new Error(`Subscription status ${res.status}`);
   return res.json().catch(() => null);
 };
+// Fetches a signed Lemon Squeezy customer portal URL for the authenticated user.
+// The portal lets the user manage their subscription (cancel, update payment method,
+// view receipts) without logging in to Lemon Squeezy separately. Returns the URL
+// string on success, or null on failure (no subscription, server error, etc.).
+const sbFetchPortalUrl = async () => {
+  const installId = getOrCreateInstallId();
+  const token = sbGetSession()?.access_token;
+  if (!token) return { ok: false, error: "not_signed_in" };
+  const url = `${NETLIFY_BASE}/.netlify/functions/subscription-portal`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ install_id: installId })
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      const reason = res.status === 404 ? "no_subscription" : "server_error";
+      return { ok: false, error: reason, status: res.status, detail: text.slice(0, 300) };
+    }
+    const data = await res.json().catch(() => null);
+    if (!data?.portal_url) return { ok: false, error: "missing_portal_url" };
+    return { ok: true, portal_url: data.portal_url, update_payment_url: data.update_payment_url || null };
+  } catch (err) {
+    return { ok: false, error: "network_error", message: err?.message || "unknown" };
+  }
+};
 const SUBSCRIBE_PENDING_KEY = "stillform_subscribe_pending_at";
 const markSubscribePending = () => {
   try { localStorage.setItem(SUBSCRIBE_PENDING_KEY, String(Date.now())); } catch {}
@@ -13332,6 +13362,11 @@ export default function Stillform() {
   const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
   const [subscriptionLastCheckedAt, setSubscriptionLastCheckedAt] = useState(0);
+  // Manage Subscription via Lemon Squeezy customer portal — opens a signed URL
+  // returned by netlify/functions/subscription-portal that lets the user cancel,
+  // update payment method, or view receipts without re-authenticating.
+  const [portalLoading, setPortalLoading] = useState(false);
+  const [portalErrorMessage, setPortalErrorMessage] = useState("");
   const [exportStatus, setExportStatus] = useState("");
   const [settingsShareQrOpen, setSettingsShareQrOpen] = useState(false);
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
@@ -14172,6 +14207,39 @@ export default function Stillform() {
       setSubscriptionStatusWithClear("Couldn't reach subscription server. Keeping current access.");
     } finally {
       setSubscriptionStatusLoading(false);
+    }
+  };
+
+  // Open Lemon Squeezy customer portal in a new tab. The user can cancel the
+  // subscription, update payment method, or view receipts there. The signed URL
+  // is short-lived and customer-scoped — Lemon Squeezy returns it via the
+  // /v1/customers/{id} API endpoint, called server-side in the
+  // subscription-portal Netlify function.
+  const openSubscriptionPortal = async () => {
+    if (portalLoading) return;
+    setPortalLoading(true);
+    setPortalErrorMessage("");
+    try {
+      const result = await sbFetchPortalUrl();
+      if (!result.ok) {
+        const message = result.error === "no_subscription"
+          ? "No active subscription found. Try refreshing first."
+          : result.error === "not_signed_in"
+            ? "Sign in to manage your subscription."
+            : "Could not open the subscription portal. Please try again or email araembersllc@proton.me.";
+        setPortalErrorMessage(message);
+        return;
+      }
+      try {
+        window.open(result.portal_url, "_blank", "noopener,noreferrer");
+      } catch {
+        // Fallback for environments where window.open is blocked
+        setPortalErrorMessage("Couldn't open the portal in a new tab. Check your browser's popup settings.");
+      }
+    } catch (err) {
+      setPortalErrorMessage("Could not open the subscription portal. Please try again or email araembersllc@proton.me.");
+    } finally {
+      setPortalLoading(false);
     }
   };
 
@@ -18064,6 +18132,20 @@ const isSignalProfileConfigured = () => {
                               </div>
                               {syncSignedIn && sbGetUser()?.email && (
                                 <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{sbGetUser().email}</div>
+                              )}
+                              <button
+                                className="btn btn-ghost"
+                                style={{ fontSize: 13, width: "100%", marginTop: 14 }}
+                                onClick={openSubscriptionPortal}
+                                disabled={portalLoading}
+                              >
+                                {portalLoading ? "Opening..." : "Manage subscription"}
+                              </button>
+                              <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 8, lineHeight: 1.5 }}>
+                                Opens the billing portal where you can cancel, update payment, or view receipts.
+                              </div>
+                              {portalErrorMessage && (
+                                <div style={{ marginTop: 8, fontSize: 11, color: "var(--amber)" }}>{portalErrorMessage}</div>
                               )}
                             </div>
                           ) : (
