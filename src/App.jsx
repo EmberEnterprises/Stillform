@@ -1688,6 +1688,18 @@ const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
 const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
 const LOOP_NUDGE_EVENTS_MAX_ITEMS = 180;
+// Category C gentle nudge — surfaces existing Crisis Resources screen when the
+// classifier reports a pattern-based concerning subcategory (sustained-flat
+// or sustained-HAN per Russell circumplex; see classifyShiftDirection). Pattern
+// trigger only — per-session Distant landings are NOT used because Distant after
+// a hard session can be a normal practice arrival (Porges 2011 polyvagal). The
+// pattern threshold (≥5 in 14d) is what "concerning trajectory" means.
+// Two-strikes-and-suppress mirrors LOOP_NUDGE pattern. See Stillform_Master_Todo.md
+// "Category C gentle nudge" entry and Stillform_Science_Sheet.md line 151.
+const CATEGORY_C_NUDGE_DISMISSED_DAY_KEY = "stillform_category_c_nudge_dismissed_day";
+const CATEGORY_C_NUDGE_DISMISS_STREAK_KEY = "stillform_category_c_nudge_dismiss_streak";
+const CATEGORY_C_NUDGE_DISMISS_STREAK_LIMIT = 2;
+const CATEGORY_C_NUDGE_FRESH_WINDOW_HOURS = 24;
 const METRICS_OPT_IN_KEY = "stillform_metrics_opt_in";
 const METRICS_LAST_SENT_DAY_KEY = "stillform_metrics_last_sent_day";
 const METRICS_LAST_SENT_AT_KEY = "stillform_metrics_last_sent_at";
@@ -6137,7 +6149,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const APP_VERSION = "1.0.0";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6205,7 +6217,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -12487,6 +12499,19 @@ export default function Stillform() {
       return 0;
     }
   });
+  // Category C nudge — pattern-based crisis-resources surface. Mirrors the loop
+  // nudge dismiss/streak architecture. Once-per-day cap, two dismisses suppress.
+  const [categoryCNudgeDismissedDay, setCategoryCNudgeDismissedDay] = useState(() => {
+    try { return localStorage.getItem(CATEGORY_C_NUDGE_DISMISSED_DAY_KEY) || ""; } catch { return ""; }
+  });
+  const [categoryCNudgeDismissStreak, setCategoryCNudgeDismissStreak] = useState(() => {
+    try {
+      const raw = Number.parseInt(localStorage.getItem(CATEGORY_C_NUDGE_DISMISS_STREAK_KEY) || "0", 10);
+      return Number.isFinite(raw) ? Math.max(0, raw) : 0;
+    } catch {
+      return 0;
+    }
+  });
   const [regType, setRegType] = useState(() => {
     try {
       // Apr 29: balanced regulation type fully retired. Force-migrate on read.
@@ -12880,6 +12905,79 @@ export default function Stillform() {
       adaptiveMinOpens,
       completionRatio14d,
       sensitivityLabel
+    };
+  };
+
+  // Category C gentle nudge snapshot. Surfaces existing Crisis Resources screen
+  // when the most recent shift event was classified as a pattern-based concerning
+  // subcategory (sustained-flat or sustained-HAN per Russell circumplex
+  // classifyShiftDirection at line 2609). Pattern trigger only — per-session
+  // Distant landings don't fire this because Distant after a hard session can be
+  // a normal practice arrival (Porges 2011 polyvagal). The pattern threshold
+  // (≥5 in 14d) embedded in the classifier is what "concerning trajectory" means.
+  //
+  // Suppression rules:
+  // - Once per Stillform-day max (dismissedDay !== todayIso)
+  // - Two dismisses in a row suppress for 14 days (CATEGORY_C_NUDGE_DISMISS_STREAK_LIMIT)
+  // - Only fires when most recent triggering event is within last 24h (don't surface
+  //   stale trajectories — if the user has had 5 non-concerning sessions since the
+  //   trigger, the trajectory has shifted and the nudge is no longer relevant)
+  //
+  // Voice grounding (Stillform_Master_Todo.md locked decisions):
+  // - The classifier reports the category; the user is never told how they're doing
+  // - No repair/trauma/intensity framing
+  // - Routes to existing infrastructure (988, Crisis Text Line at screen "crisis")
+  //   rather than inventing new escalation
+  const getCategoryCNudgeSnapshot = () => {
+    const todayIso = TimeKeeper.stillformDay();
+
+    // Streak suppression check — two dismisses in a row hides nudge for 14 days
+    // from the last dismissal day. Streak resets on action (tap to view resources).
+    if (categoryCNudgeDismissStreak >= CATEGORY_C_NUDGE_DISMISS_STREAK_LIMIT) {
+      const lastDismiss = categoryCNudgeDismissedDay;
+      if (lastDismiss) {
+        try {
+          const lastDt = new Date(`${lastDismiss}T00:00:00`);
+          const cutoff = Date.now() - (14 * 24 * 60 * 60 * 1000);
+          if (lastDt.getTime() > cutoff) {
+            return { todayIso, showCategoryCNudge: false, reason: "streak-suppressed" };
+          }
+        } catch {}
+      }
+    }
+
+    // Already dismissed today
+    if (categoryCNudgeDismissedDay === todayIso) {
+      return { todayIso, showCategoryCNudge: false, reason: "dismissed-today" };
+    }
+
+    // Read most recent shift event
+    const events = getShiftEventsFromStorage();
+    if (!Array.isArray(events) || events.length === 0) {
+      return { todayIso, showCategoryCNudge: false, reason: "no-events" };
+    }
+
+    // Find most recent pattern-based concerning event within fresh window
+    const freshCutoff = Date.now() - (CATEGORY_C_NUDGE_FRESH_WINDOW_HOURS * 60 * 60 * 1000);
+    const recentConcerning = events.find((e) => {
+      if (!e || !e.timestamp) return false;
+      try {
+        const eventTime = new Date(e.timestamp).getTime();
+        if (eventTime < freshCutoff) return false;
+      } catch { return false; }
+      return e.category === "concerning"
+        && (e.subcategory === "sustained-flat" || e.subcategory === "sustained-HAN");
+    });
+
+    if (!recentConcerning) {
+      return { todayIso, showCategoryCNudge: false, reason: "no-recent-pattern" };
+    }
+
+    return {
+      todayIso,
+      showCategoryCNudge: true,
+      triggeringEvent: recentConcerning,
+      reason: "pattern-active"
     };
   };
 
@@ -15320,6 +15418,54 @@ const isSignalProfileConfigured = () => {
             setEodPromptDismissed(false);
           };
 
+          // Category C nudge — read snapshot, define dismiss + action handlers.
+          // Pattern: mirrors loop nudge architecture but simpler. No adaptive
+          // thresholds, no sensitivity tier — single trigger, single suppression
+          // logic. Voice and routing decisions grounded in master todo locked
+          // decisions and science sheet line 151.
+          const categoryCSnapshot = getCategoryCNudgeSnapshot();
+          const showCategoryCNudge = !!categoryCSnapshot.showCategoryCNudge;
+          const dismissCategoryCNudge = () => {
+            const today = categoryCSnapshot.todayIso;
+            const previousDismissDate = categoryCNudgeDismissedDay
+              ? new Date(`${categoryCNudgeDismissedDay}T00:00:00`)
+              : null;
+            const todayDate = new Date(`${today}T00:00:00`);
+            const dayDiff = previousDismissDate
+              ? Math.round((todayDate.getTime() - previousDismissDate.getTime()) / (1000 * 60 * 60 * 24))
+              : null;
+            // Streak increments on consecutive-day dismiss; resets after a gap.
+            // Same-day re-dismiss preserves streak (already at 1+ for today).
+            const nextStreak = dayDiff === 0
+              ? Math.max(1, categoryCNudgeDismissStreak)
+              : (dayDiff === 1 ? categoryCNudgeDismissStreak + 1 : 1);
+            try { localStorage.setItem(CATEGORY_C_NUDGE_DISMISSED_DAY_KEY, today); } catch {}
+            try { localStorage.setItem(CATEGORY_C_NUDGE_DISMISS_STREAK_KEY, String(nextStreak)); } catch {}
+            setCategoryCNudgeDismissedDay(today);
+            setCategoryCNudgeDismissStreak(nextStreak);
+            try {
+              window.plausible("Category C Nudge Dismissed", {
+                props: {
+                  subcategory: categoryCSnapshot.triggeringEvent?.subcategory || "unknown",
+                  dismiss_streak: nextStreak
+                }
+              });
+            } catch {}
+          };
+          const handleCategoryCNudgeAction = () => {
+            // Streak resets on action (user engaged with infrastructure)
+            try { localStorage.setItem(CATEGORY_C_NUDGE_DISMISS_STREAK_KEY, "0"); } catch {}
+            setCategoryCNudgeDismissStreak(0);
+            try {
+              window.plausible("Category C Nudge Actioned", {
+                props: {
+                  subcategory: categoryCSnapshot.triggeringEvent?.subcategory || "unknown"
+                }
+              });
+            } catch {}
+            setScreen("crisis");
+          };
+
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
@@ -16291,6 +16437,55 @@ const isSignalProfileConfigured = () => {
                       Keeping this simple after recent dismissals.
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* CATEGORY C GENTLE NUDGE — pattern-based crisis-resources surface.
+                  Fires when classifyShiftDirection has reported sustained-flat or
+                  sustained-HAN within the last 24 hours and dismiss-streak guards pass.
+                  Voice grounded in master todo locked decisions:
+                  - Does not tell user how they're doing (no "you've been struggling")
+                  - No repair/trauma framing (no "carrying a lot")
+                  - Routes to existing infrastructure (988, Crisis Text Line at screen "crisis")
+                  - "It's a route, not an intervention" (master todo Apr 29 framing) */}
+              {showCategoryCNudge && (
+                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 12 }}>
+                    Resources are here if you want them.
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={handleCategoryCNudgeAction}
+                      style={{
+                        flex: 1,
+                        background: "var(--surface)",
+                        color: "var(--amber)",
+                        border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                        borderRadius: "var(--r-lg)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Crisis resources →
+                    </button>
+                    <button
+                      onClick={dismissCategoryCNudge}
+                      style={{
+                        background: "none",
+                        color: "var(--text-muted)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        padding: "9px 10px",
+                        fontSize: 11,
+                        fontFamily: "'DM Sans', sans-serif",
+                        cursor: "pointer"
+                      }}
+                    >
+                      Not now
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -18364,7 +18559,7 @@ const isSignalProfileConfigured = () => {
                         try { await sbSignOut().catch(() => {}); } catch {}
                         try { sbClearSession(); } catch {}
                         setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                         keysToRemove.forEach(key => localStorage.removeItem(key));
                         Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                         window.location.reload();

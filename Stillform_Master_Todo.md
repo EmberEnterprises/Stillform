@@ -288,15 +288,29 @@ Settled added as 9th chip; Russell-circumplex-grouped chip ordering implemented 
 ### ✅ Chip ⓘ button — define what each chip covers — RESOLVED Apr 30
 CHIP_DEFINITIONS registry added; ⓘ buttons wired at all 3 chip render sites; ARIA labels added. Full record in Completed archive.
 
-### Category C gentle nudge — referral to existing crisis resources
+### ✅ Category C gentle nudge — referral to existing crisis resources — RESOLVED May 4, 2026
 
-When a user trends toward Category C across multiple sessions (sustained Flat, persistent high-arousal negative without shift, or any session resulting in Distant), Stillform should surface a gentle nudge toward the existing Crisis Resources screen.
+**Shipped:** Pattern-based trigger only (sustained-flat or sustained-HAN per Russell circumplex; per-session Distant deliberately excluded because Distant after a hard session can be a normal practice arrival per Porges 2011). Surfaces on home screen on next session entry within 24h of triggering pattern. Once-per-Stillform-day cap; two-strikes-and-suppress for 14 days, mirroring existing LOOP_NUDGE architecture (App.jsx lines 1685-1690). Routes to existing Crisis Resources screen (988, Crisis Text Line — already at `screen === "crisis"`) rather than inventing new escalation logic.
 
-**Honest acknowledgment of evidence base (locked Apr 29):** The literature on app-based escalation prompts ("you've been struggling — here are resources") is **thin, not contested.** Studies haven't been done at scale for this specific intervention type. So when we build the nudge, we're making a clinical-judgment call without strong empirical guidance. We acknowledge that explicitly rather than hide behind ambiguous "contested research" framing.
+**Voice as shipped:** "Resources are here if you want them." + two buttons: "Crisis resources →" / "Not now". No interpretation. No "you've been struggling." No "we noticed." Quiet gray surface, not alarmist amber. The user encounters infrastructure on a calm later moment, not interrupted mid-session.
 
-**The defensible move:** Refer users to the existing Crisis Resources screen (which is real, vetted, professional infrastructure — 988, Crisis Text Line) rather than invent new escalation logic. Stillform is not a clinical replacement. Users who need medication, therapy, or professional support need those things. Stillform's job is to be honest about its own scope and route appropriately.
+**Doc-grounded design decisions (preserved for future sessions):**
+- Master todo line 295: literature on app-based escalation prompts is "thin, not contested" — clinical-judgment call without strong empirical guidance, so the nudge is conservative.
+- Master todo line 297: "Refer users to the existing Crisis Resources screen rather than invent new escalation logic. Stillform is not a clinical replacement."
+- Science sheet line 155: "Stillform doesn't tell the user how they're doing. The user tells Stillform via the chip they picked." This ruled out "you've been struggling" framing.
+- Locked decision line 33: "Future copy must NOT pull toward repair / trauma / intensity / 'carry a lot' framing." Ruled out emotional commentary copy.
+- Master todo line 299 (Arlin's words): "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." Scope statement: nudge surfaces, doesn't recommend.
+- Comprehensive brief line 358: "Quick Breathe always free — anyone in crisis can use it without paying." Confirms emergency paths already exist; the nudge is for trajectory observation, not crisis interruption.
 
-**Framing principle (Arlin's words, captured for future sessions):** "If they need to be medicated, that's on them. The app isn't a substitute for clinical care." This isn't dismissive — it's the correct scope statement. A user with clinical depression that requires medication is not a Stillform failure. A user who could be helped by Stillform but the tool didn't reach them is a separate signal worth understanding from the data feed.
+**Trigger logic decision (Arlin choice May 4, option 2):** Pattern-based only, NOT per-session Distant. Per-session Distant after one hard session could feel alarmist and contradict the "system observation paired with explicit override pathways" architecture (locked decision line 24). Per-session Distant landings still get classified as Category C in the data feed; they just don't fire this nudge. The 14-day pattern threshold is what "concerning trajectory" means.
+
+**What was NOT built (per voice grounding):**
+- Differentiated copy per subcategory (sustained-flat vs sustained-HAN). Differentiating would put the system in the diagnosing seat.
+- Notification/push escalation. The nudge is in-app passive, never an interrupting notification.
+- "We recommend you talk to someone" language. Recommendation crosses into clinical advice.
+- Frequency tracking exposed to user ("you've seen this X times"). Would invite performative avoidance.
+
+Storage keys: `stillform_category_c_nudge_dismissed_day`, `stillform_category_c_nudge_dismiss_streak`. Added to SYNC_KEYS, UNENCRYPTED_SYNC_KEYS (dismiss tracking is not sensitive — doesn't need encryption like the shift events themselves), and account purge keysToRemove list. Plausible events fire on actioned/dismissed with subcategory + dismiss_streak props.
 
 ### ✅ Reframe tone — auto-detect + in-Reframe dropdown + personalization default — RESOLVED May 2 (commit f36cdb63)
 Three-layer system shipped: auto-detect from state/content, in-Reframe dropdown override, Settings personalization default. Full record (Layer 1 detectSuggestedTone helper, Layer 2 dropdown wiring, Layer 3 'Use my default' vs 'Auto-suggest') in Completed — May 2 archive.
