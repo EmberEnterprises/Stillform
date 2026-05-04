@@ -318,11 +318,22 @@ Three-layer system shipped: auto-detect from state/content, in-Reframe dropdown 
 ### ✅ Unified text capture for AI context — RESOLVED May 2 (commits 20a0810a + bbb0f07b + 556a91bc + 3f033319)
 buildUnifiedTextContext aggregator pulls recent text from every persistence store on the device for AI continuity. AI-down resilient (synchronous local-first read). Full record including AI-down resilience architecture and pre-deploy stumbles in Completed — May 2 archive.
 
-### "Get ready" Reframe mode label needs context
+### ✅ "Get ready" Reframe mode label — RESOLVED May 4, 2026 (no code change needed)
 
-Currently line 14242 in App.jsx, `hype: "◌ Get ready"`. The label appears in the upper-right of Reframe screen when feelState is `excited` or `focused`. Without context, a user who has never used hype mode reads "Get ready" as ambiguous — get ready for what?
+The user-facing concern was solved Apr 30 in the modeConfig refactor. App.jsx line 7771 inline comment confirms: *"title and subtitle fields removed Apr 30 — verified unused (mc.title and mc.subtitle never referenced). Mode identity is carried by the icon (◎/✦/◌) plus AI prompt behavior, not by a title field."* The "Get ready" label that the original entry described as appearing in the upper-right of Reframe screen no longer exists in the user's view.
 
-Options to evaluate (Arlin's call, not Claude's): rename for clarity ("Lock in", "Get focused", "Sharpen"), add a one-line description below the label, add an info button next to the label, or hide the label and let the AI's behavior carry the mode. Captured for Arlin to decide. Not Claude's call.
+Two non-user-facing uses remain and are appropriate by design:
+
+**App.jsx line 7652** — AI prompt context block telling the AI what mode a prior conversation came from ("USER'S PRIOR CONVERSATION from Get ready mode, same session..."). The user never sees this string. Changing it would only complicate the prompt without changing AI behavior.
+
+**App.jsx line 18433** — Saved Reframes archive in Settings/My Progress. When a user views their saved reframes weeks later, the mode tag ("Talk it through", "Break the loop", "Get ready") combined with the saved reframe content provides full context. "Get ready" is a faithful plain-language summary of what hype mode is — per HYPE_SYSTEM in reframe.js line 952, hype is for "right before something that matters: public speaking, stage performance, a difficult conversation, a job interview..."
+
+**Doc grounding for closure:**
+- App.jsx line 7771 comment confirms Apr 30 removal of the user-facing title/subtitle fields
+- HYPE_SYSTEM in reframe.js line 952 makes "Get ready" precise to the moment hype mode targets
+- Locked decision line 24 (closing language stays as-is when it's "precise observation paired with explicit override pathways") — "Get ready" is precise to the moment; the override pathway is mode switching
+
+What was NOT done (deliberate): rename to abstract terms ("Lock in", "Sharpen") would require new first-time-viewer context and offers no improvement over the existing label.
 
 ### ✅ FAQ enhancements — RESOLVED May 2 (commit bdf3570a)
 Search bar, chip navigation (auto-expand + smooth scroll), collapse-by-question with rotating chevron, no-results state, mailto email link with pre-filled subject. Full record in Completed — May 2 archive.
