@@ -398,6 +398,25 @@ All items in Sequences 1-4 RESOLVED Apr 27. Full record (Quick wins, Real bugs t
 
 ## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
+### 📜 Build legal update notification mechanism — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
+Stillform has no infrastructure to notify users when the Terms of Service or Privacy Policy are updated. The Termly ToS questionnaire commits Stillform to "notify users about updates to your legal terms" — without an implementation, that commitment is unfulfilled and creates regulatory exposure (GDPR/CCPA/similar laws require meaningful notice of material changes).
+
+**What needs to be built:**
+1. **Constant in code** — `LEGAL_VERSION` constant with the current date/version of the legal docs (e.g., `LEGAL_VERSION = "2026-05-04"`). Updated whenever the ToS or Privacy Policy materially changes.
+2. **Per-user storage in Supabase** — column `last_legal_version_accepted` on `stillform_user_state` table (or equivalent). Stores the version string of the legal docs the user last accepted.
+3. **App launch comparison** — on each app launch (or sign-in), compare the user's `last_legal_version_accepted` to the current `LEGAL_VERSION` constant. If they don't match, surface the legal-update modal.
+4. **Legal-update modal** — single-screen modal with two-paragraph notice: "Our Terms of Service and/or Privacy Policy have been updated. Please review the changes." Two buttons: "Review changes" (opens stillformapp.com/terms or stillformapp.com/privacy in new tab) and "Accept and continue" (writes the new version string to the user's record, dismisses the modal).
+5. **For brand-new users** — on first sign-up, automatically set `last_legal_version_accepted` to the current `LEGAL_VERSION`. They've effectively accepted by signing up under the current terms.
+6. **For users who don't accept** — for routine updates, they can dismiss and continue using the app (modal re-surfaces on next launch). For material changes (rare), modal could block app access until accepted — but for V1, soft-prompt is sufficient.
+
+**Implementation notes:**
+- Tracks at user level, not install level — if a user has multiple devices, accepting on one device clears the modal on all devices on next launch.
+- Email notification for material changes is also standard practice but is not blocking V1 — Termly ToS commitment is "in-app notification when the user next accesses the Services," which the modal satisfies.
+- The Privacy Policy already has a "Last updated" timestamp at the top — that's the version string source of truth. The ToS will have similar once published. `LEGAL_VERSION` should match these dates.
+- This is a one-time build with low ongoing maintenance — once shipped, the only work is bumping the constant when legal docs change.
+
+**Why TestFlight-blocking:** Termly ToS makes the user commitment to notify of updates. Without the mechanism in place, the ToS is making a promise the app doesn't keep. Real exposure: GDPR has fined companies for failing to notify of material privacy policy changes. CCPA has similar provisions. Apple App Store review will look for this if they scrutinize the privacy/legal posture (less common than other reviews but happens).
+
 ### 🔐 Build password reset flow — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
 Stillform currently has no in-app password reset flow. A user who forgets their password has no recovery path — they'd need to email araembersllc@proton.me and manually have the password reset via the Supabase admin dashboard. This is a real prelaunch gap that will surface within hours of the first user signup.
 
