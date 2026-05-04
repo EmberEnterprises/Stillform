@@ -59,7 +59,7 @@ After three rounds of consultation produced surface fixes and architectural over
 
 Out of nine engagement mechanics from non-wellness products examined, Arlin chose: cognitive function measurement as evidence of neuroplasticity. Small repeatable cognitive exercises grounded in Stillform's existing cited literature, performed periodically by the user, with results tracked over time. Improvements over weeks are measurable evidence the practice is producing the neuroplasticity Stillform claims.
 
-This is the moonshot. Multi-week build (6-8 weeks focused work). Centerpiece feature.
+This is the moonshot. Centerpiece feature. Scope: three measurement modules in Phase 1 (affect labeling speed, interoceptive latency, cognitive defusion), results tracking with longitudinal storage, integration into existing surfaces (My Progress, post-session, Settings). Built across multiple sessions paced by Arlin's review and decision availability — not estimated in calendar time.
 
 **Differentiation:** every wellness app measures sessions/minutes/streaks. Nobody measures the cognitive functions the practice trains. Stillform would be first.
 
@@ -114,7 +114,7 @@ Open questions called out in spec §7 (six items, biggest is the disruptor mecha
 
 Ship-or-hold timing: deferred to Arlin. Spec recommendation defers the call; both prelaunch (as part of Self Mode redesign) and post-launch (as v1.1 announcement) are defensible.
 
-Engineering scope: 3-5 days focused work across detection, dispatch, state machine, disruptor tool, transparency surface, end-to-end testing. Capacitor push-notifications and local-notifications already initialized.
+Engineering scope: detection, dispatch, state machine, disruptor tool, transparency surface, end-to-end testing across multiple sessions. Capacitor push-notifications and local-notifications already initialized.
 
 ### ✅ ToolDebriefGate friction reduction — SHIPPED Apr 30 (commit 51493cce)
 20-second forced wait dropped; Continue enables on selection alone; skip button added. Full record in Completed — April 30 archive.
@@ -429,7 +429,7 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
   
   **Build path (NOT yet implemented):** (1) i18n library install (i18next), (2) string extraction from all UI components into a translation table, (3) language picker in Settings persisted to localStorage + Supabase, (4) AI prompt translation for each language — REQUIRES clinical translator, not generic, because Porges polyvagal / Siegel window of tolerance / Ochsner & Gross suppression-vs-reappraisal must keep precision. (5) Per-language QA review.
   
-  **Cost reality:** ~6,500 lines UI strings + ~1,500 lines AI prompts × 3 target languages × translator rates × QA review. Not free, not bolt-on. Plan as multi-session work with budget allocated. Realistic timeline 4-6 weeks of mixed engineering + translation work.
+  **Cost reality:** ~6,500 lines UI strings + ~1,500 lines AI prompts × 3 target languages × translator rates × QA review. Not free, not bolt-on. Plan as multi-session work with budget allocated.
   
   Crisis region routing (App.jsx line 9538) already handles locale-driven hotline routing.
 
