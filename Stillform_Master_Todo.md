@@ -180,7 +180,7 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 **Notes for whoever does this work:**
 - Items 2-10 and 12 RESOLVED May 3, 2026 across two commits (411f2d5 for 8-10; new commit for 2-7 and 12). Item 11 closed as deliberately preserved for legal precision.
 - Item 1 (reframe.js system prompts) remains the only open AI-as-actor item. The May 3 reframe.js prompt rewrite (commit 43d51a6) addressed the "you are infrastructure / composure companion" opening register and consolidated bloat, but the audit's full sweep across CALM/CLARITY/HYPE for AI-as-actor sentence subjects wasn't the goal of that commit. Item 1 still pending.
-- The 19-scenario AI Framework regression test in punch list (lines 357-376) remains the pre-deploy gate before the new prompts are considered validated. Has not been re-run since the May 3 prompt rewrite.
+- The 19-scenario AI Framework regression test artifact is now ready to run. See `AI_REGRESSION_TEST_19.md` (test spec with pass/fail signals per scenario) and `scripts/run-ai-regression.mjs` (runner that posts each scenario to the deployed Reframe API and writes responses to `ai_regression_results.json`). Cost ~$0.05 per full run, ~2.5 minutes. Has not been run yet against the May 3 prompt rewrite or the May 4 Phase 3 LOW-DEMAND OVERRIDE. Pre-deploy gate before TestFlight broad release.
 
 **Out of scope today.** Captured for a deliberate voice pass when Arlin chooses to do it.
 

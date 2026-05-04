@@ -360,7 +360,7 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 
 ### AI Framework (19 Scenario Regression Tests)
 
-> **Pre-deploy gate (added May 3).** This 19-scenario list is the existing Stillform AI stress testing protocol. Master todo ARCHITECTURAL section "AI stress testing protocol" entry references the protocol concept; the actual scenarios are below. Run this list before any AI prompt change ships, including today's CBT→MCT prompt rewrites in netlify/functions/reframe.js.
+> **Pre-deploy gate (added May 3, artifact built May 4).** This 19-scenario list is the existing Stillform AI stress testing protocol. The full test spec with per-scenario inputs, modes, bioFilters, and pass/fail signals lives in `AI_REGRESSION_TEST_19.md`. The runner script at `scripts/run-ai-regression.mjs` posts each scenario to the deployed Reframe API and captures responses to `ai_regression_results.json` for qualitative review. Run before any AI prompt change ships — including the May 3 CBT→MCT prompt rewrites in `netlify/functions/reframe.js` and the May 4 Phase 3 LOW-DEMAND OVERRIDE addition. Usage: `REFRAME_API_URL=<deploy-preview-url> node scripts/run-ai-regression.mjs`.
 
 - [ ] Test 1: Attribution error → AI widens frame
 - [ ] Test 2: Bio-filter + interpersonal → AI connects depletion to read
