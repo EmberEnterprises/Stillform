@@ -398,6 +398,26 @@ All items in Sequences 1-4 RESOLVED Apr 27. Full record (Quick wins, Real bugs t
 
 ## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
+### 📞 Set up Google Voice business line + update Termly ToS phone number — REQUIRED before TestFlight (added May 4, 2026 during Termly ToS questionnaire)
+The Termly ToS generated today lists Arlin's personal cell (+1 201-388-8437) as the company contact phone in two places (opening paragraph and Section 31 "Contact Us"). Personal cell published in legal docs = spam exposure, subpoena service exposure, and personal/business boundary erosion.
+
+**Steps:**
+1. Set up free Google Voice number at voice.google.com. Pick a number from any area code (NJ 201/973/908 keeps it regional). Forward to Arlin's personal cell so calls/texts route through but the published number is the Google Voice one.
+2. Update Termly ToS questionnaire — replace the personal cell with the new Google Voice number in the company contact section. Re-generate ToS. Re-publish.
+3. Optional: also update Termly Privacy Policy if it references the same phone (need to check — Privacy Policy review yesterday didn't surface a phone field).
+
+**Why TestFlight-blocking:** the ToS published today is technically active even before App Store launch. Anyone who reads it has the personal cell. Better to fix BEFORE the ToS goes wide. Five-minute setup, real privacy protection.
+
+### 🔧 Fix Termly ToS free-trial billing answer — REQUIRED before publishing the ToS (added May 4, 2026 during Termly ToS questionnaire)
+The ToS generated today reads: *"The account will not be charged and the subscription will be suspended until upgraded to a paid version at the end of the free trial."* This **contradicts the actual Lemon Squeezy billing setup** — the trial auto-converts to paid charging on day 15. Real legal exposure: a user charged on day 15 could cite the ToS as evidence the charge was unauthorized.
+
+**Steps:**
+1. Go back to Termly ToS questionnaire. Find the Free Trial question.
+2. Change the answer from "The account will not be charged and the subscription will be suspended until upgraded to a paid version" to **"The account will be charged according to the user's chosen subscription."**
+3. Re-generate ToS. Re-publish at https://stillformapp.com/terms (or wherever the ToS embed lives).
+
+**Why must-fix before publishing:** the current ToS makes a false billing commitment. This is the single biggest exposure in the generated document. Five-minute fix.
+
 ### 📜 Build legal update notification mechanism — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
 Stillform has no infrastructure to notify users when the Terms of Service or Privacy Policy are updated. The Termly ToS questionnaire commits Stillform to "notify users about updates to your legal terms" — without an implementation, that commitment is unfulfilled and creates regulatory exposure (GDPR/CCPA/similar laws require meaningful notice of material changes).
 
