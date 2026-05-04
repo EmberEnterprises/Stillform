@@ -398,6 +398,25 @@ All items in Sequences 1-4 RESOLVED Apr 27. Full record (Quick wins, Real bugs t
 
 ## 🔴 OPEN — Surfaced During Apr 27–28 Testing
 
+### 🔐 Build password reset flow — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
+Stillform currently has no in-app password reset flow. A user who forgets their password has no recovery path — they'd need to email araembersllc@proton.me and manually have the password reset via the Supabase admin dashboard. This is a real prelaunch gap that will surface within hours of the first user signup.
+
+**What needs to be built:**
+1. **"Forgot password?" link** on the sign-in screen.
+2. **Email entry screen** — user types their account email.
+3. **Trigger Supabase recovery email** — call `supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://stillformapp.com/#reset' })` (or equivalent — check Supabase docs for current method). Supabase sends a recovery link via email.
+4. **Recovery callback handler** — handle the `#access_token=...&type=recovery` URL hash that Supabase appends to the redirect URL when the user clicks the email link. Show a "set new password" UI.
+5. **New password form** — user enters new password (with strength validation matching existing signup), confirms, calls `supabase.auth.updateUser({ password: newPassword })`.
+6. **Success state** → automatically sign in or redirect to sign-in screen with success message.
+
+**Implementation notes:**
+- Supabase password reset is built-in — no new infrastructure needed beyond Stillform code.
+- Default Supabase recovery link template can be customized via Supabase Dashboard → Authentication → Email Templates if you want to match Stillform's voice.
+- Email goes from `noreply@mail.app.supabase.io` by default. Custom domain (e.g., `noreply@stillformapp.com`) requires SMTP configuration in Supabase — nice-to-have, not blocking.
+- The recovery URL hash needs to be parsed early in App.jsx initialization (before normal screen routing kicks in) so the recovery flow takes priority over default home screen.
+
+**Why TestFlight-blocking:** real users sign up, real users forget passwords. Without recovery, every forgot-password becomes a manual support ticket to araembersllc@proton.me — unsustainable at any user scale. Apple App Store review will also expect the standard auth flows (sign in, sign up, forgot password, sign out) to be present.
+
 ### 🔑 Set `LEMON_SQUEEZY_API_KEY` env var on Netlify — REQUIRED before deploy of commit `511c054` (added May 4, 2026)
 The May 4 Manage Subscription feature ships a new Netlify function (`subscription-portal.js`) that calls Lemon Squeezy `/v1/customers/{id}` API to fetch the signed customer portal URL. The function reads `process.env.LEMON_SQUEEZY_API_KEY` and returns 500 "Server not configured" if it's missing. Without this env var set, the in-app "Manage subscription" button in Settings → Account fails for every user.
 
