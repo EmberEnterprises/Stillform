@@ -6760,6 +6760,20 @@ function secureDelete(key) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null, setInfoModal }) {
+  // LOW-DEMAND MODE — when bioFilter signals cognitive impairment (medicated), the tool
+  // renders a stripped variant: no chip selection (uses persisted/inferred feelState),
+  // no State-to-Statement option, no ToolDebriefGate, no Next Move, route to shared
+  // LowDemandComplete on done. Mode defaults to calm regardless of caller-passed mode
+  // (calm is safest for cognitively reduced users; the LOW-DEMAND OVERRIDE prompt block
+  // in reframe.js further constrains the response shape — short, statements, simple).
+  // See LOW_DEMAND_PHASE_3_SPEC.md.
+  const isLowDemand = (() => {
+    try {
+      const bf = getActiveBioFilter();
+      return bf.includes("medicated");
+    } catch { return false; }
+  })();
+  const effectiveModeForLowDemand = isLowDemand ? "calm" : mode;
   const POSITIVE_STATE_PATTERNS = [
     "not so bad",
     "figured it out",
@@ -6791,7 +6805,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // activeMode is captured from the mode prop on mount.
   // The setter was historically here for "manual override" paths that never materialized.
   // If you need to override, pass a different mode prop from the parent.
+  // In low-demand mode, mode is forced to calm (safest default for cognitively reduced users).
   const [activeMode] = useState(() => {
+    if (isLowDemand) return null; // calm is the default when activeMode is null
     return mode !== "calm" ? mode : null;
   });
   const [showPostRating, setShowPostRating] = useState(false);
@@ -7258,9 +7274,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     } catch {}
   };
 
+  const [showLowDemandComplete, setShowLowDemandComplete] = useState(false);
   const handleDoneForNow = () => {
     // Preserve thread so accidental "Done for now" never loses context.
     secureSet(STORAGE_KEY, messages).catch(() => {});
+    if (isLowDemand) {
+      // Low-demand short-circuit: skip post-rating, skip post-insight, skip State-to-Statement,
+      // skip ToolDebriefGate, skip Next Move. Save session directly with no postState (the user
+      // didn't pick a chip and asking them to is the wrong demand for this cohort), then render
+      // the shared LowDemandComplete screen.
+      const saved = saveSession(null);
+      latestSessionTimestampRef.current = saved?.timestamp || null;
+      setShowLowDemandComplete(true);
+      return;
+    }
     setPostRating(null);
     setShowStateToStatement(false);
     setShowPostRating(true);
@@ -8199,6 +8226,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     );
   }
 
+  // Low-demand short-circuit completion. When user taps Done in low-demand mode,
+  // handleDoneForNow saves the session and sets this flag — no post-rating, no
+  // post-insight, no State-to-Statement, no debrief, no Next Move. Direct render
+  // of the shared completion screen.
+  if (showLowDemandComplete) {
+    return <LowDemandComplete onClose={() => onComplete(undefined)} />;
+  }
+
   if (showPostInsight && postSessionInsight) {
     return (
       <div style={{ textAlign: "left", padding: "36px 0 8px" }}>
@@ -8545,8 +8580,14 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           </div>
         )}
-        {/* WHAT IS PRESENT — pre-populated from morning check-in (read-only) + in-the-moment feel chips */}
-        <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} />
+        {/* WHAT IS PRESENT — pre-populated from morning check-in (read-only) + in-the-moment feel chips.
+            Hidden in low-demand: chip selection is a cognitive task (picking among 9 options requires
+            executive function this cohort doesn't have available). feelState still flows from persisted
+            value or morning check-in inference, so the AI has context — the user just doesn't have to
+            pick. */}
+        {!isLowDemand && (
+          <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} />
+        )}
       </div>
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
@@ -8973,7 +9014,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <textarea
                 className="ai-input"
                 style={{ borderColor: input.length > 1800 ? "rgba(200,100,50,0.6)" : mc.border, width: "100%", boxSizing: "border-box" }}
-                placeholder={speech.listening ? "Listening..." : "What's on your mind..."}
+                placeholder={speech.listening ? "Listening..." : (isLowDemand ? "Type when you're ready." : "What's on your mind...")}
                 value={input}
                 maxLength={2000}
                 onChange={e => { setInput(e.target.value); checkTypingSpeed(); }}

@@ -173,15 +173,17 @@ This phase needs more rigorous testing than Phase 1 or 2 because the AI behavior
 
 ## Open questions for Arlin
 
-1. **The override prompt language.** Drafted above; Arlin's voice review needed. The instruction to the AI is high-stakes copy because it shapes how the model behaves with the most vulnerable cohort. Want her read on tone.
+**RESOLVED May 4, 2026 — Phase 3 shipped:**
 
-2. **State-to-Statement skip — strictly or with optional override?** I lean strictly skip (the cohort can't do this work; offering it is asking them to do work they shouldn't be doing). But Arlin might prefer "skip default, show small link to enable if user really wants it." Both defensible.
+1. ✅ **The override prompt language.** RESOLVED. Drafted block tightened during review: removed "cognitively compromised" (clinical, ableist) in favor of "user reports being medicated. Their executive function is reduced today." Removed "medicated users are statistically more vulnerable" (probabilistic warning rather than instruction) — kept clean "Safety rules are NOT relaxed." instruction. Final block as shipped lives in `netlify/functions/reframe.js` prepended after context block, before CALENDAR/SAFETY/LIABILITY (so safety still wins position #1 at runtime).
 
-3. **Default mode (calm) when no chip selected.** I assumed this; want to confirm. Alternative: detect from message content (the AI prompt routing already does this in normal mode for some cases). Probably more reliable to just default to calm and let the prompt adapt.
+2. ✅ **State-to-Statement skip — strictly or with optional override?** RESOLVED: skip strictly. Drafting language to another person while medicated is real cognitive work. Preserving choice via "click here if you want to do harder work" toggle is itself a decision a medicated user shouldn't have to evaluate. Low-demand mode is state-of-existing-tool that protects the user from cognitive demands they may not realize are too much in the moment.
 
-4. **Shared LowDemandComplete component — build during Phase 2 or Phase 3?** Phase 2 spec recommends bundling in Phase 2 build. If Phase 2 doesn't extract it, Phase 3 will. Either way the work happens once.
+3. ✅ **Default mode (calm) when no chip selected.** RESOLVED: default to calm with persisted feel state as fallback. Detection from content adds a routing decision step that could route a medicated user into hype mode based on excited language ("I'm pumped about my project!") when the right call is still to be present and brief. Calm is the safest default; the LOW-DEMAND OVERRIDE prompt then constrains the response shape regardless of which mode the AI thinks it's in.
 
-5. **Testing rigor — how much before ship?** I've drafted a 4-test protocol. Adequate? Or want more before shipping to real users?
+4. ✅ **Shared LowDemandComplete component — build during Phase 2 or Phase 3?** ALREADY RESOLVED in Phase 2 commit `3f148b6` (May 4, 2026). Component lives at module scope in `src/App.jsx` above `BreatheGroundTool`. Phase 3 just consumes it.
+
+5. ✅ **Testing rigor — how much before ship?** RESOLVED: ship the drafted 4-test protocol (10 messages medicated, 10 messages clear control, 5 messages crisis+medicated, end-to-end on phone) AND require the on-phone test (Test 4) to pass with a trusted tester before TestFlight broad release. Tests 1-3 are API-level and run against deployed Netlify preview before promotion to production. Test 4 needs full publish.
 
 ---
 

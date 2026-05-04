@@ -605,7 +605,7 @@ function normalizeReframePayload(parsed, route) {
   return { distortion, mechanism, reframe, next_step, question };
 }
 
-function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLanguage = false } = {}) {
+function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLanguage = false, isLowDemand = false } = {}) {
   const reasons = [];
   const reframe = String(payload?.reframe || "").trim();
   const nextStep = String(payload?.next_step || "").trim();
@@ -613,13 +613,19 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
   if (reframe.length < 40 && !isSummaryRequest) reasons.push("reframe too short");
   if (reframe.length > 900) reasons.push("reframe too long");
   const sentenceCount = estimateSentenceCount(reframe);
-  const maxSentences = hasCrisisLanguage ? 6 : 5;
+  // Low-demand hard ceiling: 3 sentences (per LOW_DEMAND_PHASE_3_SPEC.md). Crisis still gets 6.
+  // Normal users get 5. Low-demand wins if both flags are set EXCEPT crisis — safety language
+  // (988, Crisis Text Line, ask-the-question) needs more sentences than 3 to fit, so crisis
+  // overrides low-demand on length only.
+  const maxSentences = hasCrisisLanguage ? 6 : (isLowDemand ? 3 : 5);
   if (!isSummaryRequest && (sentenceCount < 2 || sentenceCount > maxSentences)) reasons.push("invalid sentence count");
   if (!isSummaryRequest && (!payload?.mechanism || typeof payload.mechanism !== "string")) reasons.push("missing mechanism");
   if (!isSummaryRequest && (!nextStep || nextStep.length < 10)) reasons.push("missing actionable next_step");
   if (!isSummaryRequest) {
     const questionCount = `${reframe} ${payload?.question || ""}`.split("?").length - 1;
-    if (questionCount > 1) reasons.push("too many questions");
+    // Low-demand prefers statements over questions; even one question is suspect unless crisis.
+    const maxQuestions = (isLowDemand && !hasCrisisLanguage) ? 0 : 1;
+    if (questionCount > maxQuestions) reasons.push(isLowDemand ? "low-demand prefers statements" : "too many questions");
   }
   if (hasAnySnippet(reframe, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic garbage phrasing");
   if (hasAnySnippet(nextStep, GENERIC_NEXT_STEP_SNIPPETS)) reasons.push("generic next_step");
@@ -1486,6 +1492,17 @@ WHAT STAYING SHARP LOOKS LIKE:
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
+    // LOW-DEMAND OVERRIDE — when bio-filter signals "medicated" (SSRIs, post-anesthesia,
+    // sleep aids, chemo, recreational substance, or similar), the user's executive function
+    // is reduced. The AI must adapt: shorter sentences, simpler vocabulary, fewer questions,
+    // companion presence rather than cognitive coach. Position: prepended here so SAFETY and
+    // LIABILITY blocks (added below) still wrap on top and remain top priority. Final read
+    // order at runtime: LIABILITY → SAFETY → CALENDAR → LOW-DEMAND → mode prompt.
+    // Safety rules are NOT relaxed in low-demand. See LOW_DEMAND_PHASE_3_SPEC.md.
+    if (bioFilter && bioFilter.includes("medicated")) {
+      systemPrompt = `LOW-DEMAND OVERRIDE — ADAPT YOUR VOICE FOR THIS USER:\nThe user reports being medicated. Their executive function is reduced today. Adapt as follows:\n1. Shorter sentences. 1-2 sentences per response typical. Hard ceiling of 3 sentences.\n2. Simpler vocabulary. No abstract concepts. No multi-part reframings ("one read is X, another is Y, a third is Z" — pick one or none).\n3. Fewer questions. Default to statements that hold what they said, not questions that ask them to do more. When you do ask, ask closed (yes/no) and concrete, not open and abstract.\n4. Companion presence, not cognitive coach. Your job is to be there, regulate alongside them, and not increase their load.\n5. Safety rules are NOT relaxed. If you detect crisis language, follow the SAFETY OVERRIDE protocol fully.\n6. Do NOT mention to the user that you've shifted into a different mode. They should just feel met where they are.\n\n` + systemPrompt;
+    }
+
     // CALENDAR HARD OVERRIDE — injected when calendar context present and first message is short/vague
     const isVagueOpener = history.length <= 1 && /^(hi|hey|hello|yo|sup|what's up|whats up|hiya|howdy|greetings|helo|hii|heyyy|hi there|hey there|help|i need help|i'm ready|im ready|ready|let's go|lets go|start|begin|go)[\.!\?]?$/i.test(trimmedInput.trim());
     if (calendarContext && isVagueOpener) {
@@ -1565,7 +1582,8 @@ WHAT STAYING SHARP LOOKS LIKE:
       const raw = await requestCompletion(attemptSystemPrompt, attemptMessages);
       previousRaw = raw;
       const normalized = normalizeReframePayload(parseModelPayload(raw), scienceRoute);
-      lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage });
+      const isLowDemand = bioFilter && bioFilter.includes("medicated");
+      lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage, isLowDemand });
       lastVoiceValidation = validateVoiceContract(normalized, {
         isSummaryRequest: isInternalSummaryRequest,
         isSoftEntry,
