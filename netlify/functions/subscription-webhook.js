@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { upsertSubscriptionStatus } from "./_subscriptionState.js";
+import { upsertSubscriptionStatus, sbAdminFetch } from "./_subscriptionState.js";
 
 const responseHeaders = { "Content-Type": "application/json" };
 const MAX_BODY_CHARS = 200000;
@@ -56,7 +56,7 @@ export const handler = async function(event) {
     const custom = payload?.meta?.custom_data || {};
 
     const installId = custom.install_id || null;
-    const userId = custom.user_id || null;
+    const userIdFromCustom = custom.user_id || null;
     const lemonCustomerId = attrs.customer_id ? String(attrs.customer_id) : null;
     const lemonSubscriptionId = payload?.data?.id ? String(payload.data.id) : null;
     const userEmail = attrs.user_email || null;
@@ -67,6 +67,35 @@ export const handler = async function(event) {
     // We only use live-mode events for truth.
     if (testMode) {
       return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "test_mode" }) };
+    }
+
+    // Fallback: if Lemon Squeezy custom_data didn't carry user_id (which happens
+    // with discount-code flows and some checkout edge cases — observed May 5, 2026
+    // when a $0 founder subscription was created and the user_id was missing from
+    // the webhook payload despite being passed at checkout), look up the auth user
+    // by the customer email. Lemon Squeezy always includes user_email in webhook
+    // attributes, so this gives us a reliable second path to user_id and prevents
+    // the "subscription exists but UI shows no active subscription" bug.
+    let userId = userIdFromCustom;
+    if (!userId && userEmail) {
+      try {
+        const lookup = await sbAdminFetch(
+          `/auth/v1/admin/users?email=${encodeURIComponent(userEmail)}`
+        ).catch(() => null);
+        const matchedUser = Array.isArray(lookup?.users) && lookup.users.length
+          ? lookup.users[0]
+          : null;
+        if (matchedUser?.id) {
+          userId = matchedUser.id;
+        }
+      } catch (lookupError) {
+        // Email-based fallback is best-effort. If it fails, the webhook still
+        // writes the install/customer/subscription rows; user can call
+        // subscription-link-account from the client to fill in the user row later.
+        console.error("subscription-webhook-email-lookup-failed", {
+          message: lookupError?.message || "unknown"
+        });
+      }
     }
 
     const effectiveStatus = normalizeStatus(eventName, attrs.status, attrs.cancelled);
