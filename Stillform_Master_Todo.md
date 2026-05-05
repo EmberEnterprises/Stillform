@@ -418,6 +418,32 @@ The ToS generated today reads: *"The account will not be charged and the subscri
 
 **Why must-fix before publishing:** the current ToS makes a false billing commitment. This is the single biggest exposure in the generated document. Five-minute fix.
 
+### 🏗️ Subscription state table architecture rewrite — REQUIRED before TestFlight broad release (added May 5, 2026)
+
+**Real architectural problem.** The current `stillform_subscription_state` table stores the same subscription multiple times under different identity keys (`customer:`, `install:`, `subscription:`, `user:`). Each new identity creates another row. Result: nine rows in Supabase for one person (founder account, May 5 testing) — some from April marked inactive, some from May marked active, all for the same Lemon Squeezy customer. Client reads the wrong row, displays wrong subscription state. Webhook fires correctly, returns 200, but subscription state is inconsistent across rows.
+
+**Symptom that surfaced this:** May 5, 2026 — founder subscription created via FOUNDER discount code. Lemon Squeezy showed active subscription, fired all expected webhooks (subscription_created, subscription_updated, subscription_payment_success), webhooks returned 200. But Stillform UI showed "No active subscription found." Root cause: stale `user:3ed32eb5-...` row from April 23 cancellation never got updated by today's webhooks because Lemon Squeezy didn't include custom_data.user_id in the discount-code checkout payload. The May 5, 2026 patch (commit `c81dbb3`) added an email-based user_id fallback to the webhook to keep the system from failing for future subscriptions, but that patch is a stabilizer, not a fix. The architecture is the problem.
+
+**What the rewrite looks like:**
+
+1. **New schema** — one row per Lemon Squeezy subscription, keyed by `lemon_subscription_id` (primary key) only. Columns: `lemon_subscription_id`, `lemon_customer_id`, `user_id`, `install_id`, `user_email_hash`, `plan_variant`, `product_name`, `status`, `lemon_status`, `is_subscribed`, `trial_ends_at`, `renews_at`, `ends_at`, `updated_at`. No more `identity_key`. No more multiple rows for the same subscription.
+
+2. **Migration of existing rows** — write a SQL migration that consolidates current rows by `lemon_subscription_id`. For each subscription_id, pick the row with the most recent `updated_at` and most "complete" data (preferring rows with `user_id` populated). Drop duplicate rows. Add a `migrated_at` timestamp for audit.
+
+3. **Updated webhook handler (`subscription-webhook.js`)** — write ONE row per webhook event, not four. `upsertSubscriptionStatus` becomes `upsertSubscriptionByLemonId(lemonSubscriptionId, ...)`. The email-based user_id fallback from commit c81dbb3 becomes part of normal flow, not a patch.
+
+4. **Updated link-account function (`subscription-link-account.js`)** — when a user signs in and their install_id has a subscription record, UPDATE that row's `user_id` column. Don't write a new row. Single source of truth.
+
+5. **Updated read function (`subscription-status.js`)** — lookup by user_id OR install_id finds the SAME row. Returns one consistent state. No more `pickBestState` arbitration.
+
+6. **Updated `_subscriptionState.js` helpers** — remove `identityKeyFrom`, remove `writeIdentityRow` per-identity loop, remove `pickBestState`. Replace with simple lookup-and-update by lemon_subscription_id.
+
+**Estimated scope:** focused work session. Includes schema migration, code changes across four functions, testing across the edge cases the current architecture handles today (subscribe-before-signup, multi-device, account linking, trial-to-paid conversion, cancellation, expiration). Worth doing as its own dedicated session rather than wedged into a multitasking flow.
+
+**TestFlight-blocking because:** the current architecture creates fragmented data on EVERY signup, not just discount-code edge cases. The May 5 patch reduces the failure rate but the underlying brittleness affects every user. At launch scale (real users hitting trial-to-paid conversion, multi-device usage, account recovery), this would surface as recurring "I paid but the app says I didn't" support tickets — bad first-week metric, hard to debug per-user, and embarrassing for a paid SaaS launch.
+
+**Recovery for current founder account in the meantime:** manually patch the `user:3ed32eb5-...` row in Supabase (set is_subscribed=TRUE, status=active, lemon_customer_id=8285339, lemon_subscription_id=2127474, source_event=manual_recovery_pending_rewrite, updated_at=now). Keeps the founder account testable while the rewrite is scheduled.
+
 ### 📜 Build legal update notification mechanism — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
 Stillform has no infrastructure to notify users when the Terms of Service or Privacy Policy are updated. The Termly ToS questionnaire commits Stillform to "notify users about updates to your legal terms" — without an implementation, that commitment is unfulfilled and creates regulatory exposure (GDPR/CCPA/similar laws require meaningful notice of material changes).
 
