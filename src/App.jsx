@@ -12543,7 +12543,7 @@ function MyProgress({ onBack }) {
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   {weeklyReflectionSummary.map((line, idx) => (
-                    <div key={`weekly-reflection-${idx}`} style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55 }}>
+                    <div key={`weekly-reflection-${idx}`} className="t-body-sm quiet">
                       {line}
                     </div>
                   ))}
@@ -15523,7 +15523,7 @@ const isSignalProfileConfigured = () => {
               {Array.isArray(page.paragraphs) && page.paragraphs.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
                   {page.paragraphs.map((line, idx) => (
-                    <p key={`${page.title}-paragraph-${idx}`} style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, margin: 0 }}>
+                    <p key={`${page.title}-paragraph-${idx}`} className="t-body-md quiet" style={{ lineHeight: 1.7, margin: 0 }}>
                       {line}
                     </p>
                   ))}
@@ -17938,7 +17938,7 @@ const isSignalProfileConfigured = () => {
                     ? "Opening checkout..."
                     : (!syncSignedIn ? "Sign in / Sign up to subscribe →" : (trialExpired ? "Subscribe now →" : "Subscribe →"))}
                 </button>
-                <div style={{ textAlign: "center", marginTop: 8, fontSize: 12, color: "var(--text-dim)" }}>
+                <div className="t-body-sm quiet" style={{ textAlign: "center", marginTop: 8 }}>
                   Quick checkout. Plan details are below if you want them.
                 </div>
                 {checkoutMessage && (
@@ -18453,7 +18453,7 @@ const isSignalProfileConfigured = () => {
             </h1>
             {!resetPasswordSuccess && (
               <>
-                <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.5 }}>
+                <p className="t-body-md faint" style={{ marginBottom: 24, lineHeight: 1.5 }}>
                   Enter a new password for your Stillform account. After saving, you'll be signed in automatically.
                 </p>
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -19400,7 +19400,7 @@ const isSignalProfileConfigured = () => {
                     )}
                     {resetEmailOpen && !resetEmailSent && (
                       <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12, paddingTop: 12, borderTop: "0.5px solid var(--border)" }}>
-                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
+                        <div className="t-body-sm">
                           Enter your account email. We'll send you a link to set a new password.
                         </div>
                         <input
@@ -19450,7 +19450,7 @@ const isSignalProfileConfigured = () => {
                     )}
                     {resetEmailSent && (
                       <div style={{ marginTop: 12, paddingTop: 12, borderTop: "0.5px solid var(--border)" }}>
-                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
+                        <div className="t-body-sm">
                           Check your email for a password reset link. The link will sign you in and let you set a new password. The email may take a minute to arrive — check spam if you don't see it.
                         </div>
                         <button
@@ -19695,7 +19695,7 @@ const isSignalProfileConfigured = () => {
 
                 {/* Signal profile */}
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 20 }}>
-                  <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
+                  <div className="t-body-md" style={{ marginBottom: 4 }}>Signal profile</div>
                   <div className="t-body-sm quiet">
                     {(() => { try { const s = secureRead("stillform_signal_profile", {}); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Personalization"; } catch { return "Not set up yet"; } })()}
                   </div>
