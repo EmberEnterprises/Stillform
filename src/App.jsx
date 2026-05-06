@@ -18889,29 +18889,86 @@ const isSignalProfileConfigured = () => {
                     </div>
                   )}
                 </div>
-                {/* Delete */}
+                {/* Delete account — App Store Review Guideline 5.1.1(v) requires
+                    in-app account deletion. Renamed from "Delete all data" so the
+                    feature is findable as account deletion (Apple reviewers look
+                    for the word "account"). */}
                 <button onClick={async () => {
-                  if (window.confirm("Are you sure? This will permanently delete ALL your data — sessions, pulse log, conversations, signal profile, check-ins, and saved reframes. This cannot be undone.")) {
-                    const typed = window.prompt("To confirm deletion, type DELETE below:");
-                    if (typed === "DELETE") {
+                  // Step 1: warn about active subscription, if any
+                  if (isSubscribed) {
+                    const subscriptionWarn = window.confirm(
+                      "You have an active Stillform subscription. Deleting your account does NOT cancel billing — your subscription will continue charging through Lemon Squeezy until you cancel it.\n\nCancel your subscription first, then come back to delete your account.\n\nOK to open the subscription portal, or Cancel to delete the account anyway (subscription will continue billing)."
+                    );
+                    if (subscriptionWarn) {
+                      // Open the customer portal in a new tab. User can cancel
+                      // there, then return to delete their account.
                       try {
-                        try { await sbDeleteCloudData().catch(() => {}); } catch {}
-                        try { await sbSignOut().catch(() => {}); } catch {}
-                        try { sbClearSession(); } catch {}
-                        setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                        const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
-                        keysToRemove.forEach(key => localStorage.removeItem(key));
-                        Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
-                        window.location.reload();
-                      } catch {}
+                        const session = sbGetSession();
+                        const token = session?.access_token || "";
+                        const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/subscription-portal`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                        });
+                        const data = await res.json().catch(() => null);
+                        if (data?.url) {
+                          window.open(data.url, "_blank", "noopener,noreferrer");
+                        } else {
+                          alert("Could not open the subscription portal. Please email araembersllc@proton.me to cancel your subscription before deleting your account.");
+                        }
+                      } catch {
+                        alert("Could not open the subscription portal. Please email araembersllc@proton.me to cancel your subscription before deleting your account.");
+                      }
+                      return;
                     }
                   }
+                  // Step 2: confirm account deletion intent
+                  const confirmed = window.confirm(
+                    "Delete your Stillform account?\n\nThis permanently deletes:\n• Your account (cannot be recovered)\n• All sessions, pulse log, conversations, signal profile, check-ins, and saved reframes\n• Encrypted cloud data\n\nThis cannot be undone. Continue?"
+                  );
+                  if (!confirmed) return;
+                  // Step 3: type-to-confirm
+                  const typed = window.prompt("To confirm permanent account deletion, type DELETE below:");
+                  if (typed !== "DELETE") return;
+                  // Step 4: execute deletion in order
+                  try {
+                    // 4a. Delete encrypted cloud data via user's own RLS rights
+                    try { await sbDeleteCloudData().catch(() => {}); } catch {}
+                    // 4b. Delete auth.users row + subscription_state rows via admin function
+                    let accountDeleteOk = true;
+                    try {
+                      const session = sbGetSession();
+                      const token = session?.access_token || "";
+                      const res = await fetch(`${NETLIFY_BASE}/.netlify/functions/account-delete`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }
+                      });
+                      if (!res.ok) {
+                        accountDeleteOk = false;
+                        const errBody = await res.json().catch(() => ({}));
+                        alert(errBody?.error || "Account deletion partially failed. Some data may remain. Please contact araembersllc@proton.me.");
+                      }
+                    } catch (e) {
+                      accountDeleteOk = false;
+                      alert("Could not contact the deletion service. Your local data will be cleared, but please contact araembersllc@proton.me to confirm full account deletion.");
+                    }
+                    // 4c. Local cleanup regardless of server result — sign out + clear localStorage
+                    try { await sbSignOut().catch(() => {}); } catch {}
+                    try { sbClearSession(); } catch {}
+                    setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    keysToRemove.forEach(key => localStorage.removeItem(key));
+                    Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
+                    if (accountDeleteOk) {
+                      alert("Your account has been deleted.");
+                    }
+                    window.location.reload();
+                  } catch {}
                 }} style={{
                   background: "none", border: "none", padding: "8px 0", fontSize: 11,
                   color: "rgba(200,80,80,0.4)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
                   marginTop: 16, letterSpacing: "0.04em"
                 }}>
-                  Delete all data
+                  Delete account
                 </button>
 
               </>)}

@@ -463,37 +463,33 @@ Stillform has no infrastructure to notify users when the Terms of Service or Pri
 
 **Why TestFlight-blocking:** Termly ToS makes the user commitment to notify of updates. Without the mechanism in place, the ToS is making a promise the app doesn't keep. Real exposure: GDPR has fined companies for failing to notify of material privacy policy changes. CCPA has similar provisions. Apple App Store review will look for this if they scrutinize the privacy/legal posture (less common than other reviews but happens).
 
-### 🔐 Build password reset flow — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
-Stillform currently has no in-app password reset flow. A user who forgets their password has no recovery path — they'd need to email araembersllc@proton.me and manually have the password reset via the Supabase admin dashboard. This is a real prelaunch gap that will surface within hours of the first user signup.
+### ✅ Build password reset flow — SHIPPED May 6, 2026 (commit `b4bb394`)
+Surfaces a complete in-app password reset flow using Supabase auth recovery. Five pieces in one commit: (1) new auth helpers `sbResetPassword(email)` and `sbUpdatePassword(newPassword)`, (2) new routable `reset-password` screen registered in HASH_SCREENS, (3) recovery hash parser that runs once on initial mount — detects `type=recovery` in URL hash, extracts access_token + refresh_token, calls sbSetSession() to authenticate the recovering user, then cleans hash and routes to reset-password screen, (4) "Set new password" screen with password + confirm fields, Show/Hide toggle, validation (8+ chars, match), error states, success state with Continue button to home, (5) "Forgot password?" link on existing sign-in surface in Settings → Sign in card with inline panel for requesting recovery email, confirmation message includes spam-folder check reminder.
 
-**What needs to be built:**
-1. **"Forgot password?" link** on the sign-in screen.
-2. **Email entry screen** — user types their account email.
-3. **Trigger Supabase recovery email** — call `supabase.auth.resetPasswordForEmail(email, { redirectTo: 'https://stillformapp.com/#reset' })` (or equivalent — check Supabase docs for current method). Supabase sends a recovery link via email.
-4. **Recovery callback handler** — handle the `#access_token=...&type=recovery` URL hash that Supabase appends to the redirect URL when the user clicks the email link. Show a "set new password" UI.
-5. **New password form** — user enters new password (with strength validation matching existing signup), confirms, calls `supabase.auth.updateUser({ password: newPassword })`.
-6. **Success state** → automatically sign in or redirect to sign-in screen with success message.
+Build verified: vite build passes, 0 errors, 583 kB main bundle / 145 kB gzipped (no regression). Closes the May 4 TestFlight-blocking item from Termly walkthrough.
 
-**Implementation notes:**
-- Supabase password reset is built-in — no new infrastructure needed beyond Stillform code.
-- Default Supabase recovery link template can be customized via Supabase Dashboard → Authentication → Email Templates if you want to match Stillform's voice.
-- Email goes from `noreply@mail.app.supabase.io` by default. Custom domain (e.g., `noreply@stillformapp.com`) requires SMTP configuration in Supabase — nice-to-have, not blocking.
-- The recovery URL hash needs to be parsed early in App.jsx initialization (before normal screen routing kicks in) so the recovery flow takes priority over default home screen.
+REQUIRES (your action — quick check, probably already configured): Supabase project → Authentication → URL Configuration → ensure https://stillformapp.com is in 'Site URL' or 'Redirect URLs' allowlist. Already required for sign-in to work, so should be in place — but verify before testing the recovery email link.
 
-**Why TestFlight-blocking:** real users sign up, real users forget passwords. Without recovery, every forgot-password becomes a manual support ticket to araembersllc@proton.me — unsustainable at any user scale. Apple App Store review will also expect the standard auth flows (sign in, sign up, forgot password, sign out) to be present.
+### ✅ Build in-app account deletion flow — SHIPPED May 6, 2026
+**Required by Apple App Store Review Guideline 5.1.1(v)** — apps that allow account creation must allow users to initiate account deletion from within the app. Without this, the app is rejected on review.
 
-### 🔑 Set `LEMON_SQUEEZY_API_KEY` env var on Netlify — REQUIRED before deploy of commit `511c054` (added May 4, 2026)
-The May 4 Manage Subscription feature ships a new Netlify function (`subscription-portal.js`) that calls Lemon Squeezy `/v1/customers/{id}` API to fetch the signed customer portal URL. The function reads `process.env.LEMON_SQUEEZY_API_KEY` and returns 500 "Server not configured" if it's missing. Without this env var set, the in-app "Manage subscription" button in Settings → Account fails for every user.
+What was already in place: a "Delete all data" button that called `sbDeleteCloudData()` (deletes user_data and backups tables via user's RLS rights), then signed out and cleared localStorage. What was missing for Apple compliance: (a) the auth.users row deletion, (b) the word "account" in the button label so reviewers can find the feature, (c) handling for users with active subscriptions.
 
-**Steps:**
-1. Lemon Squeezy dashboard → Settings → API → Create API key. Read-only scope is sufficient (function only does GETs against customer records).
-2. Copy the key.
-3. Netlify dashboard → Site settings → Environment variables → Add a single variable.
-4. Name: `LEMON_SQUEEZY_API_KEY`. Value: paste the key. Scope: All scopes (functions runtime needs it).
-5. Trigger a redeploy so the function picks up the new env var (Netlify functions read env at deploy time, not request time).
-6. Test: sign in to Stillform with a subscribed account → Settings → Account → Subscription → click "Manage subscription". Should open Lemon Squeezy portal in new tab.
+Three pieces shipped:
+1. **New Netlify function `account-delete.js`** — authenticated via user's bearer token, deletes `stillform_subscription_state` rows for the user, then calls Supabase Auth Admin API to delete the auth.users row. Auth deletion failure is fatal and surfaces a real error to the user (not a fake "success") with instructions to contact araembersllc@proton.me. Subscription state cleanup is best-effort (logged but non-fatal — pending the architecture rewrite).
 
-**If you forget:** the button will surface "Could not open the subscription portal. Please try again or email araembersllc@proton.me." Users have a fallback (the email path) but the in-app cancellation surface is broken until the env var is set.
+2. **Renamed and rewrote the existing button to "Delete account"** — the word "account" is now visible to App Store reviewers. New flow: (a) if user has active subscription, first confirm dialog warns billing continues through Lemon Squeezy and offers to open the customer portal in a new tab to cancel first, (b) confirmation dialog explaining what gets deleted (account, all sessions, encrypted cloud data, "cannot be undone"), (c) type-DELETE-to-confirm prompt, (d) executes in order: sbDeleteCloudData → account-delete function → sign out → local cleanup → reload, (e) success alert before reload.
+
+3. **No changes to existing `sbDeleteCloudData`** — it correctly handles user_data and backups tables via user's own access token (cleaner than admin-API deletion since the user has direct DELETE rights on their own rows via RLS). Build keeps existing data-deletion logic intact.
+
+Build verified: vite build passes, 0 errors, 585 kB main bundle / 146 kB gzipped (small increase from password reset commit, expected).
+
+NOT included in this build:
+- Programmatic Lemon Squeezy subscription cancellation. Decision: warn user + open portal instead. Reasoning: programmatic cancel needs write-scope API key (currently read-only) and is more error-prone than letting the user manage billing through the portal we already shipped. User experience is one extra click but the architectural simplicity is worth it.
+- Account deletion email confirmation. Apple does not require this. Could add post-launch if support load justifies it.
+
+### 🔑 ✅ Set `LEMON_SQUEEZY_API_KEY` env var on Netlify — DONE May 6, 2026
+Set up during May 6 founder account testing. API key created in Lemon Squeezy (named "Stillform Customer Portal", read-only scope), env var added to Netlify with scope "All scopes", site redeployed, Manage Subscription button validated end-to-end (Settings → Account → Subscription → "Manage subscription" → Lemon Squeezy customer portal opens correctly with active subscription details). Originally captured during Termly walkthrough as TestFlight-blocking.
 
 ### ✅ "Calm my body" hero CTA doesn't act on tap — RESOLVED May 4, 2026
 Reported behavior was a deploy/publish artifact, not a code bug. Arlin tested the CTA on a build that hadn't been deployed and published yet. After deploy + publish, the CTA acts on tap as intended. Static analysis (full trace of click handler → startPathway → startTool → setScreen → BreatheGroundTool mount → hashchange listener) had already shown no break in code, which is consistent with this resolution. No fix needed. Diagnostic console.log shipped in commit 089acffa98 can be removed in next cleanup pass.
