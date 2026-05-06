@@ -572,14 +572,16 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 These five are surfaced from a May 5, 2026 vision/values/science alignment review. **Four are prelaunch — they shape session-1 retention, values posture, or user mental models that must be coherent before real users arrive.** One has a prelaunch verification piece + a structurally post-launch surface (split below). Three other gaps surfaced in the same review were already shipped (share QR code) or deliberately scoped out (language barrier — gated on revenue; under-18 population — separate app due to health law constraints around minors in mental health apps).
 
-### 🎯 PRELAUNCH — First-session metacognition framing lock
-Stillform's onboarding teaches **what the tools are**. It does not necessarily teach **why composure is a skill, and why this app is instrumentation rather than therapy/meditation/coaching**. Most new users arrive having tried Headspace, Calm, BetterHelp, Talkspace — they pattern-match Stillform to a familiar wellness category before the metacognition framing has a chance to land. If they categorize the app wrong in the first 60 seconds, they either bounce or use it wrong (expecting calmness rather than self-mastery, expecting fixing rather than instrumentation).
+### ✅ First-session metacognition framing lock — SHIPPED May 6, 2026
+Closes the May 5 prelaunch gap. The opening tutorial page now carries an explicit category line that draws the line for users arriving with prior wellness-app context. Added between the existing "composure is a skill that builds" framing and the brand sign-off:
 
-**Why prelaunch:** session-1 framing failure is unrecoverable. A user who categorizes Stillform as "another meditation app" in their first 60 seconds churns before TestFlight feedback can catch the problem. Cannot wait for post-launch data to validate the gap.
+*"This is instrumentation for self-mastery. Not therapy. Not meditation. Not coaching. A composure system you operate."*
 
-**Possible solution:** A 30-second "what Stillform actually is" moment — single onboarding card, brief animated explainer, or short narrated intro — that locks the metacognition framing **before** tool introduction. Not therapy. Not meditation. Not coaching. Instrumentation. Anchors the rest of the experience.
+Names what Stillform isn't (gently — single line, not a manifesto), names what it is (instrumentation, system you operate), draws the category boundary before users see any tool. The opening page is the highest-leverage spot since some users won't make it past page 1 of onboarding. No new screen — adding one creates friction. One pointed sentence integrated into existing copy.
 
-**Compliance side benefit:** the medical disclaimers in the ToS (Sections 27-30) and Privacy Policy become more believable when the framing is established up front rather than only living in legal text users don't read.
+Compliance side benefit captured during the May 5 audit: the medical disclaimers in ToS Sections 27-30 and the Privacy Policy now have a felt anchor in the user's first 60 seconds. The disclaimer language stops being "legal stuff" and becomes "yes, this matches what they told me at the start."
+
+Build verified.
 
 ### ✅ Within-session physiology-naming feedback — SHIPPED May 6, 2026 (partial scope: Breathe + Ground, Body Scan)
 Closes the session-1 retention gap from the May 5 vision/values review for two of three tool completion surfaces. Reframe is the remaining surface — deferred because Reframe lacks a discrete "completion screen" (it transitions through queueDebriefAndComplete to debrief or Self Mode, not a dedicated complete screen). Adding physiology naming to Reframe is architectural and warrants a separate session.

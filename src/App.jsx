@@ -14701,6 +14701,7 @@ const isSignalProfileConfigured = () => {
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
                 "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
+                "This is instrumentation for self-mastery. Not therapy. Not meditation. Not coaching. A composure system you operate.",
                 "Stillform. Composure Architecture."
               ]
             },
