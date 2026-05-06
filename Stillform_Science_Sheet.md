@@ -157,6 +157,7 @@ The classifier is a pure function: same inputs always produce same output. Easy 
 **Who says so:**
 - Russell (1980) — circumplex grounding
 - Hayes, Strosahl & Wilson (2011) — ACT, sustained acceptance as practice (Category B legitimacy)
+- Han & Kim (2022) — *Journal of Medical Internet Research* — meta-analysis of internet-based ACT confirming process-measure effects including cognitive defusion (cited in Self Mode info modal alongside Hayes et al. as parallel-research grounding for ACT-MCT convergence)
 - Kabat-Zinn (1990) — mindfulness-based stress reduction; the practice is the holding
 - Porges (2011) — Distant as hypoarousal signal (Category C grounding)
 
