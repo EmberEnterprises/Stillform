@@ -2905,6 +2905,59 @@ const getSessionsPerDay = (days = 30) => {
   } catch { return []; }
 };
 
+// ─── FOCUS CHECK HISTORY HELPERS — Phase 0 for My Progress ────────────
+// Focus check (Composure Check) records: { timestamp, trials, accuracy,
+// inhibition, avgReactionMs, falseAlarms }. 20-record cap (acknowledged
+// in master todo as sufficient for trend analysis but capped depth).
+//
+// Storage: stillform_focus_check_history (encrypted).
+//
+// These helpers expose the trend My Progress will need to surface:
+// recognition speed and inhibition both improving over time is direct
+// evidence of the cognitive function the practice trains.
+
+// Get focus check history sorted oldest-first.
+const getFocusCheckHistory = () => {
+  try {
+    const raw = secureRead("stillform_focus_check_history", []);
+    if (!Array.isArray(raw)) return [];
+    return [...raw].sort((a, b) => {
+      const at = new Date(a.timestamp || 0).getTime();
+      const bt = new Date(b.timestamp || 0).getTime();
+      return at - bt;
+    });
+  } catch { return []; }
+};
+
+// Trend across focus check history. Returns { first, latest, deltaAccuracy,
+// deltaInhibition, deltaReactionMs, recordCount } or null if fewer than 2.
+// Negative deltaReactionMs = faster (improvement). Positive deltaAccuracy/
+// deltaInhibition = improvement. Used for surfacing "your composure check
+// reaction time has dropped from X to Y" (the spec language explicitly
+// called out as a recognition-through-evidence framing).
+const getFocusCheckTrend = (limit = 10) => {
+  try {
+    const records = getFocusCheckHistory().slice(-limit);
+    if (records.length < 2) return null;
+    const first = records[0];
+    const latest = records[records.length - 1];
+    return {
+      first,
+      latest,
+      recordCount: records.length,
+      deltaAccuracy: typeof first.accuracy === "number" && typeof latest.accuracy === "number"
+        ? latest.accuracy - first.accuracy
+        : null,
+      deltaInhibition: typeof first.inhibition === "number" && typeof latest.inhibition === "number"
+        ? latest.inhibition - first.inhibition
+        : null,
+      deltaReactionMs: typeof first.avgReactionMs === "number" && typeof latest.avgReactionMs === "number"
+        ? latest.avgReactionMs - first.avgReactionMs
+        : null
+    };
+  } catch { return null; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
