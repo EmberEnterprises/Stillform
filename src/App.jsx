@@ -2688,6 +2688,94 @@ const getMorningToScanDelta = (limitDays = 30) => {
   } catch { return []; }
 };
 
+// ─── EOD HISTORY HELPERS — Phase 0 for My Progress redesign ────────────
+// EOD records capture: { date, timestamp, energy, composure, word, morningEnergy }
+// where:
+//   energy:        eod-end-of-day energy reading ("low" | "same" | "high" etc)
+//   composure:     self-rated composure that day ("strong" | "mostly" | "rough")
+//   word:          optional one-word reflection from user
+//   morningEnergy: snapshot of that morning's energy for pre/post compare
+//
+// Persistence gap fixed May 6, 2026: trackEodComplete now passes the full
+// record (was only passing { date, timestamp, composure } before, dropping
+// energy, word, and morningEnergy from history). Records before that fix
+// will only have the partial shape; helpers handle missing fields gracefully.
+
+// Get all EOD records sorted oldest-first.
+const getEodHistory = () => {
+  try {
+    const raw = JSON.parse(localStorage.getItem("stillform_eod_history") || "[]");
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .map(c => ({
+        timestamp: c.timestamp || null,
+        date: c.date || null,
+        energy: c.energy || null,
+        composure: c.composure || null,
+        word: c.word || null,
+        morningEnergy: c.morningEnergy || null
+      }))
+      .sort((a, b) => {
+        const at = new Date(a.timestamp || a.date || 0).getTime();
+        const bt = new Date(b.timestamp || b.date || 0).getTime();
+        return at - bt;
+      });
+  } catch { return []; }
+};
+
+// Composure trend across last N EOD records. Returns { strong, mostly, rough,
+// total, ratio: { strong: 0-1, mostly: 0-1, rough: 0-1 } } or null if no records.
+const getComposureTrend = (limit = 14) => {
+  try {
+    const recent = getEodHistory().slice(-limit).filter(r => r.composure);
+    if (recent.length === 0) return null;
+    const counts = { strong: 0, mostly: 0, rough: 0 };
+    recent.forEach(r => {
+      if (counts[r.composure] !== undefined) counts[r.composure]++;
+    });
+    const total = recent.length;
+    return {
+      ...counts,
+      total,
+      ratio: {
+        strong: total > 0 ? counts.strong / total : 0,
+        mostly: total > 0 ? counts.mostly / total : 0,
+        rough: total > 0 ? counts.rough / total : 0
+      }
+    };
+  } catch { return null; }
+};
+
+// Energy delta morning→evening across same-day pairs. Captures whether
+// energy *recovered* (morning low → evening high) or *drained* (morning
+// high → evening low) on each day. Returns array of { date, morning, evening }
+// for each day where both readings exist.
+const getEnergyArc = (limitDays = 30) => {
+  try {
+    const eod = getEodHistory().slice(-limitDays);
+    return eod
+      .filter(r => r.energy && r.morningEnergy)
+      .map(r => ({
+        date: r.date,
+        morning: r.morningEnergy,
+        evening: r.energy
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  } catch { return []; }
+};
+
+// Get all words from EOD reflections (for word-cloud or trend display).
+// Returns array of { date, word } or empty if no word reflections exist.
+const getEodReflections = (limit = 30) => {
+  try {
+    return getEodHistory()
+      .filter(r => r.word && String(r.word).trim().length > 0)
+      .slice(-limit)
+      .map(r => ({ date: r.date, word: String(r.word).trim() }))
+      .reverse(); // newest first for surfacing
+  } catch { return []; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
@@ -16293,6 +16381,8 @@ const isSignalProfileConfigured = () => {
                       date: today,
                       timestamp: new Date().toISOString(),
                       energy: ciEnergy || "steady",
+                      bio: bioArray.length > 0 ? bioArray : ["clear"],
+                      tension: Object.keys(ciTension).length > 0 ? ciTension : null,
                       tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
                     });
                     if (bioArray.length > 0) setActiveBioFilter(bioArray.join(","));
@@ -16769,7 +16859,10 @@ const isSignalProfileConfigured = () => {
                     trackEodComplete({
                       date: today,
                       timestamp: new Date().toISOString(),
-                      composure: eodComposure || "mostly"
+                      energy: eodEnergy || "same",
+                      composure: eodComposure || "mostly",
+                      word: eodWord || null,
+                      morningEnergy: morningData?.energy || null
                     });
                   } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
