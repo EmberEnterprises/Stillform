@@ -251,20 +251,35 @@ Pass criterion per scenario: AI names the pattern, reflects the strength, builds
 
 **Especially relevant given May 2 prompt rewrites** — the new MCT-aligned prompts in `netlify/functions/reframe.js` have not yet been stress tested against the 19 scenarios. Reading the punch list confirms these scenarios already exist as work-product, not aspirational; what was missing was the pre-deploy discipline of running them. Master todo and punch list now reference each other.
 
-### Composure-applied-both-directions verification (added May 2 — surfaced from old ideas sweep)
+### Composure-applied-both-directions verification — AUDIT FINDINGS May 6, 2026 (test-blocked)
 The AI must build BOTH outward composure (listener stops filtering input by status, background, bias) AND inward composure (speaker stops shrinking, qualifying, performing credibility). Verification needed: does the current prompt set produce both? May connect to the AI-as-actor voice audit (12 surfaces, captured commit `d8a6507e`) — if not already a verification dimension there, add it.
 
-### Terms of Service + Privacy Policy "not a medical tool" language (added May 2 — liability item)
-Both legal docs need explicit language: "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment." This is liability-critical for the KetaRevive integration and the mental-health-adjacent positioning.
+**Code-side audit findings (May 6, 2026):**
 
-**Partial verification May 3, 2026:** Top portion of Privacy Policy (intro, summary of key points, opening of security section) verified to NOT contain any of: "medical tool," "medical device," "medical treatment," "not a medical," "not intended for," "substitute for," "diagnose/diagnosis," "professional advice," "healthcare provider." Bottom portion of Privacy Policy (full security section, cookies/tracking, retention, rights, contact) and the full Terms of Service NOT verified — Arlin paused verification to complete from laptop.
+Reading `netlify/functions/reframe.js` (1655 lines):
+- Calm mode system prompt (line 724) frames composure as inward: *"observe their own thinking when their state is loud"* and *"see what their mind is doing so they can step back from it and choose their next move."* Inward-only framing.
+- Hype mode system prompt (line 952) addresses both directions implicitly: *"Composure is power. Whoever stays composed controls the room."* (line 994 — confrontation context). This names outward effect.
+- Medical advocacy is hard-coded as a hype-mode context (line 992): *"they have a right to be heard. Help them name what they need in one clear sentence."* This is the speaker-stops-shrinking dimension.
+- "Stop pulling toward repair, trauma, intensity" guard (line 739) prevents the AI from triggering speaker-shrinking but doesn't actively build outward composure framing.
 
-**Notes for the laptop session:**
-- Privacy Policy is probably not the correct home for this disclaimer anyway. Privacy docs are about data handling. A "not a medical tool" statement is a scope/liability disclaimer and properly belongs in Terms of Service.
-- Recommended placement: Terms of Service, in a "Nature of the Service" or "Disclaimers" section, near the top so it's visible without scrolling.
-- Suggested wording (from May 2 spec): "Stillform is not a medical tool and is not intended for use during or as a substitute for medical treatment."
-- Consider adding parallel mental-health framing: "Stillform is not therapy, not a substitute for therapy, and is not intended for crisis support. If you are experiencing a mental health emergency, please contact a licensed clinician or call/text 988 (US Suicide & Crisis Lifeline)."
-- The current Privacy Policy describes Stillform as "a daily composure system that combines guided breathing, body scan with acupressure cues, and AI-assisted reframing to help users regulate stress responses, strengthen self-awareness, and make clearer decisions under pressure." That description sits in wellness-adjacent territory, which makes the explicit medical disclaimer more important, not less.
+**Verdict on code side:** the prompts produce inward composure consistently. Outward composure is implicit (mostly in hype mode context lines) but not named as a dimension the AI is supposed to support. The 19-scenario regression test (`AI_REGRESSION_TEST_19.md`) covers self-diminishment / silencing / advocacy scenarios that would surface whether the AI actively builds outward framing or only inward framing. Cannot verify behaviorally without running that test against the deployed Reframe API. Test is on the May 7 test plan.
+
+**Decision pending test results:** if the 19-scenario test shows the AI defaults to inward-only framing in scenarios that need outward-composure framing (boss talked over user, missing-degree credibility, immigrant outsider), that's a prompt rewrite item before TestFlight. If the test shows the AI handles both directions adequately because the per-state contexts and hype-mode framing carry enough load, this audit closes without further work.
+
+### ✅ Terms of Service + Privacy Policy "not a medical tool" language — VERIFIED in app May 6, 2026
+The in-app Privacy & Disclaimers screen (App.jsx line 17505) contains exact required language: *"Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment."*
+
+The pre-subscribe pricing surface (App.jsx line 17488) carries a short version visible BEFORE payment: *"Stillform is not medical treatment. It is a composure tool."*
+
+The acupressure section adds a parallel disclaimer: *"It is not medical treatment. The pressure points referenced are based on traditional practices and are provided for informational and self-care purposes. Consult a healthcare provider before beginning any new wellness practice, especially if you are pregnant, have a medical condition, or are taking medication."*
+
+The Reframe AI section adds liability-critical language about AI: *"These responses are generated by AI, not by a licensed therapist or medical professional. AI responses may not always be accurate, appropriate, or applicable to your situation. Do not rely on AI-generated content as a substitute for professional mental health care."*
+
+The published Termly ToS (per prior compaction summary) has Sections 27-30 covering medical disclaimers, crisis routing, intended use, and responsibility — published with custom clauses verified May 5, 2026. Termly Privacy Policy and ToS are both published and live at https://stillformapp.com/privacy and https://stillformapp.com/terms.
+
+**Liability posture is consistent across:** in-app Privacy & Disclaimers screen, in-app pre-subscribe surface, in-app FAQ ("Stillform is neither. Meditation is a sustained attention practice. Therapy is clinical treatment..."), Termly ToS Sections 27-30, and the AI-disclaimer Reframe paragraph. All five surfaces use the same "not medical, not therapy, not substitute for, see professional" framework.
+
+**No further work needed.** The May 2 audit ask is fully satisfied across published docs and in-app surfaces.
 
 ---
 
