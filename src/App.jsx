@@ -6186,6 +6186,25 @@ const sbSignIn = async (email, password) => {
   return d;
 };
 const sbSignOut = async () => { try { await sbFetch("/auth/v1/logout", {method:"POST"}); } catch {} sbClearSession(); };
+const sbResetPassword = async (email) => {
+  // Triggers Supabase recovery email. The redirectTo parameter tells Supabase
+  // where to send the user after they click the email link — it appends the
+  // recovery access_token to the URL hash, which our app detects on load.
+  const redirectTo = `${window.location.origin}/#reset-password`;
+  return sbFetch("/auth/v1/recover", {
+    method: "POST",
+    body: JSON.stringify({ email, redirect_to: redirectTo, gotrue_meta_security: {} })
+  });
+};
+const sbUpdatePassword = async (newPassword) => {
+  // PUT /auth/v1/user updates the authenticated user. Supabase requires the
+  // current access_token (set by sbSetSession when recovery hash is parsed).
+  const d = await sbFetch("/auth/v1/user", {
+    method: "PUT",
+    body: JSON.stringify({ password: newPassword })
+  });
+  return d;
+};
 const sbRefreshSession = async () => {
   const s = sbGetSession(); if (!s?.refresh_token) return null;
   try { const d = await sbFetch("/auth/v1/token?grant_type=refresh_token", {method:"POST",body:JSON.stringify({refresh_token:s.refresh_token})}); const session = sbNormalizeSession(d); if (session) { sbSetSession(session); return session; } } catch {}
@@ -12429,8 +12448,43 @@ export default function Stillform() {
   const [screen, setScreenRaw] = useState(null);
   const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
 
+  // Recovery hash parser — runs once on mount before any other hash-based routing.
+  // Supabase appends recovery tokens to the URL hash when the user clicks the
+  // password reset email link, e.g.:
+  //   https://stillformapp.com/#access_token=...&refresh_token=...&type=recovery
+  // We detect type=recovery, set the session so the user is authenticated, then
+  // route to the reset-password screen and clean the hash.
+  useEffect(() => {
+    try {
+      const rawHash = (window.location.hash || "").replace(/^#/, "");
+      // Supabase recovery URLs use & separators after type=recovery, not query params
+      if (!rawHash.includes("type=recovery") && !rawHash.includes("type%3Drecovery")) return;
+      // Parse key=value pairs from hash
+      const params = {};
+      rawHash.split("&").forEach(pair => {
+        const eq = pair.indexOf("=");
+        if (eq === -1) return;
+        const key = decodeURIComponent(pair.slice(0, eq));
+        const val = decodeURIComponent(pair.slice(eq + 1));
+        params[key] = val;
+      });
+      if (params.type !== "recovery" || !params.access_token) return;
+      // Set the session so subsequent sbFetch calls (including PUT /auth/v1/user
+      // for password update) are authenticated as the recovering user.
+      sbSetSession({
+        access_token: params.access_token,
+        refresh_token: params.refresh_token || null,
+        token_type: params.token_type || "bearer",
+        expires_in: params.expires_in ? parseInt(params.expires_in, 10) : null,
+        user: null
+      });
+      // Clean the hash and route to the reset-password screen.
+      window.location.hash = "#reset-password";
+    } catch {}
+  }, []);
+
   // Hash routing — keeps browser back button working
-  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge"]);
+  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge","reset-password"]);
   const screenToHash = (s) => {
     if (!s) return "#home";
     // Transient screens (tool, panic) keep whatever hash is current — no navigation entry
@@ -13356,6 +13410,18 @@ export default function Stillform() {
   const [pricingAuthError, setPricingAuthError] = useState(null);
   const [pricingAuthCooldownUntil, setPricingAuthCooldownUntil] = useState(0);
   const [, setPricingAuthTick] = useState(0);
+  // Reset password flow state
+  const [resetEmailOpen, setResetEmailOpen] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetEmailLoading, setResetEmailLoading] = useState(false);
+  const [resetEmailError, setResetEmailError] = useState(null);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [resetPasswordLoading, setResetPasswordLoading] = useState(false);
+  const [resetPasswordError, setResetPasswordError] = useState(null);
+  const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
   const [installDismissed, setInstallDismissed] = useState(false);
   const [integrationActionStatus, setIntegrationActionStatus] = useState("");
@@ -17479,6 +17545,97 @@ const isSignalProfileConfigured = () => {
           </section>
         )}
 
+        {/* RESET PASSWORD — Supabase recovery flow lands here after user clicks email link */}
+        {screen === "reset-password" && (
+          <section style={{ maxWidth: 420, margin: "0 auto", padding: "48px 24px" }}>
+            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
+              Set new password
+            </h1>
+            {!resetPasswordSuccess && (
+              <>
+                <p style={{ fontSize: 14, color: "var(--text-muted)", marginBottom: 24, lineHeight: 1.5 }}>
+                  Enter a new password for your Stillform account. After saving, you'll be signed in automatically.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+                    <input
+                      type={showNewPassword ? "text" : "password"}
+                      placeholder="New password"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 50px 10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }}
+                    />
+                    <button
+                      onClick={() => setShowNewPassword(p => !p)}
+                      style={{ position: "absolute", right: 10, background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, fontFamily: "'DM Sans', sans-serif", padding: 0 }}
+                    >
+                      {showNewPassword ? "Hide" : "Show"}
+                    </button>
+                  </div>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    placeholder="Confirm new password"
+                    value={newPasswordConfirm}
+                    onChange={e => setNewPasswordConfirm(e.target.value)}
+                    style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }}
+                  />
+                  {resetPasswordError && <div style={{ fontSize: 12, color: "#e05" }}>{resetPasswordError}</div>}
+                  <button
+                    className="btn btn-primary"
+                    style={{ fontSize: 14, marginTop: 4 }}
+                    onClick={async () => {
+                      setResetPasswordError(null);
+                      if (!newPassword || newPassword.length < 8) {
+                        setResetPasswordError("Password must be at least 8 characters.");
+                        return;
+                      }
+                      if (newPassword !== newPasswordConfirm) {
+                        setResetPasswordError("Passwords don't match.");
+                        return;
+                      }
+                      if (!sbIsSignedIn()) {
+                        setResetPasswordError("This recovery link has expired. Please request a new password reset email.");
+                        return;
+                      }
+                      setResetPasswordLoading(true);
+                      try {
+                        await sbUpdatePassword(newPassword);
+                        setResetPasswordSuccess(true);
+                        setNewPassword("");
+                        setNewPasswordConfirm("");
+                        setSyncSignedIn(true);
+                      } catch (e) {
+                        const msg = e?.message || "Could not update password. The recovery link may have expired.";
+                        setResetPasswordError(msg);
+                      }
+                      setResetPasswordLoading(false);
+                    }}
+                  >
+                    {resetPasswordLoading ? "Saving..." : "Save new password"}
+                  </button>
+                </div>
+              </>
+            )}
+            {resetPasswordSuccess && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.5 }}>
+                  Password updated. You're signed in.
+                </p>
+                <button
+                  className="btn btn-primary"
+                  style={{ fontSize: 14 }}
+                  onClick={() => {
+                    setResetPasswordSuccess(false);
+                    setScreen("home");
+                  }}
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
@@ -18311,6 +18468,107 @@ const isSignalProfileConfigured = () => {
                     <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
                       New to Stillform? Enter your email and a password — your account is created automatically.
                     </div>
+                    {/* Forgot password — opens an inline panel for requesting recovery email */}
+                    {!resetEmailOpen && !resetEmailSent && (
+                      <button
+                        onClick={() => {
+                          setResetEmailOpen(true);
+                          setResetEmail(syncEmail || "");
+                          setResetEmailError(null);
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "var(--text-muted)",
+                          cursor: "pointer",
+                          fontSize: 12,
+                          fontFamily: "'DM Sans', sans-serif",
+                          padding: 0,
+                          marginTop: 8,
+                          textAlign: "left",
+                          textDecoration: "underline"
+                        }}
+                      >
+                        Forgot password?
+                      </button>
+                    )}
+                    {resetEmailOpen && !resetEmailSent && (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12, paddingTop: 12, borderTop: "0.5px solid var(--border)" }}>
+                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
+                          Enter your account email. We'll send you a link to set a new password.
+                        </div>
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={resetEmail}
+                          onChange={e => setResetEmail(e.target.value)}
+                          style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 14px", fontSize: 14, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", width: "100%" }}
+                        />
+                        {resetEmailError && <div style={{ fontSize: 12, color: "#e05" }}>{resetEmailError}</div>}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            className="btn btn-primary"
+                            style={{ fontSize: 13, flex: 1 }}
+                            onClick={async () => {
+                              setResetEmailError(null);
+                              if (!resetEmail || !resetEmail.includes("@")) {
+                                setResetEmailError("Enter a valid email.");
+                                return;
+                              }
+                              setResetEmailLoading(true);
+                              try {
+                                await sbResetPassword(resetEmail);
+                                setResetEmailSent(true);
+                                setResetEmailOpen(false);
+                              } catch (e) {
+                                const msg = e?.message || "Could not send reset email. Please try again.";
+                                setResetEmailError(msg);
+                              }
+                              setResetEmailLoading(false);
+                            }}
+                          >
+                            {resetEmailLoading ? "Sending..." : "Send reset email"}
+                          </button>
+                          <button
+                            className="btn btn-ghost"
+                            style={{ fontSize: 13 }}
+                            onClick={() => {
+                              setResetEmailOpen(false);
+                              setResetEmailError(null);
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {resetEmailSent && (
+                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: "0.5px solid var(--border)" }}>
+                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.5 }}>
+                          Check your email for a password reset link. The link will sign you in and let you set a new password. The email may take a minute to arrive — check spam if you don't see it.
+                        </div>
+                        <button
+                          onClick={() => {
+                            setResetEmailSent(false);
+                            setResetEmail("");
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "var(--text-muted)",
+                            cursor: "pointer",
+                            fontSize: 12,
+                            fontFamily: "'DM Sans', sans-serif",
+                            padding: 0,
+                            marginTop: 8,
+                            textAlign: "left",
+                            textDecoration: "underline"
+                          }}
+                        >
+                          Done
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </>)}
