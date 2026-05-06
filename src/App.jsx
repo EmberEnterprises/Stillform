@@ -3753,7 +3753,7 @@ function PhysiologicalSighTool({ onComplete }) {
         <div className="complete-icon">✓</div>
         <h2>Reset complete.</h2>
         <p style={{ marginBottom: 8 }}>Three deep sighs. Your head is clearer than it was {fmt(elapsed)} ago.</p>
-        {count > 1 && <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 16 }}>Session #{count}.</div>}
+        {count > 1 && <div className="t-body-sm faint" style={{ marginBottom: 16 }}>Session #{count}.</div>}
         <button className="btn btn-primary" style={{ width: "100%" }} onClick={() => onComplete("reframe")}>
           Talk through what's happening →
         </button>
@@ -4243,7 +4243,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Signal Shift</div>
             {signalProfile.firstAreas.slice(0, 3).map(area => (
               <div key={area} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{area}</span>
+                <span className="t-mono-sm">{area}</span>
                 <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)" }}>Protocol complete</span>
               </div>
             ))}
@@ -4258,7 +4258,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         {count === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
         {/* Physiology naming — names what happened in the nervous system.
@@ -4430,7 +4430,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       <div className="t-mono-xs" style={{ marginBottom: 16 }}>
         Pain present
       </div>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 20 }}>
+      <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 20 }}>
         Pain pulls cognitive resources before you can think clearly. A short body scan locates and softens it first — that's the most effective sequence the research supports. You opened Breathe, but Body Scan is the closer fit right now.
       </div>
       <button onClick={() => onComplete("scan")} style={{
@@ -4474,7 +4474,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       <div className="t-mono-xs" style={{ marginBottom: 20 }}>
         <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When you mark depleted, in pain, sleep-deprived, the system carries that hardware state into how your input is read. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
+      <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 20 }}>
         Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.{bioFilter && <span style={{ display: "block", marginTop: 8, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>Your last reading is highlighted — confirm or update.</span>}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 20 }}>
@@ -4571,7 +4571,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             </div>
           </div>
           <div className="breath-instruction" style={{ marginTop: 8 }}>{phases[phaseIdx].instruction}</div>
-          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4, marginBottom: 12 }}>
+          <div className="t-body-sm quiet" style={{ marginTop: 4, marginBottom: 12 }}>
             Round {cycle} of {totalCycles}
           </div>
           <button onClick={toggleAudio} style={{
@@ -4717,8 +4717,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                   </>
                 ) : (
                   <>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Stabilized</div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
+                    <div className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 8 }}>Stabilized</div>
+                    <div className="t-body-sm faint" style={{ textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
                       Moving to grounding…
                     </div>
                     <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("reframe-calm", "post-rate-skip-to-reframe")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
@@ -5222,10 +5222,10 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
     return (
       <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 24, padding: "24px 16px 8px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+        <div className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 12 }}>
           What Shifted
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 12 }}>
+        <div className="t-body-md quiet" style={{ marginBottom: 12 }}>
           Your body moved through six points. Name where it lands now — that's what locks the regulation in.
         </div>
         {/* Physiology naming — names interoception specifically as the practiced skill.
@@ -5243,7 +5243,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
         </div>
 
         {preChipLabel && (
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+          <div className="t-mono-sm" style={{ marginBottom: 8 }}>
             Started: {preChipLabel}
           </div>
         )}
@@ -5370,7 +5370,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Signal Shift</div>
             {signalProfile.firstAreas.slice(0, 3).map(area => (
               <div key={area} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
-                <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{area}</span>
+                <span className="t-mono-sm">{area}</span>
                 <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, color: "var(--amber)" }}>Pressure released</span>
               </div>
             ))}
@@ -5380,7 +5380,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
         {sessionCount === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
@@ -5411,7 +5411,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           </button>
         )}
       </div>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 24, textAlign: "center" }}>
+      <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 24, textAlign: "center" }}>
         Six areas, head to feet. Notice what's there before you change anything.
       </div>
       {/* Pre-regulation chips removed per Nook 2021 + 2024-2025 replications:
@@ -5597,9 +5597,9 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
               <div style={{ background: "var(--amber-glow)", border: "1px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "16px 20px" }}>
                 <div style={{ fontSize: 15, fontWeight: 500, color: "var(--amber)", marginBottom: 10 }}>{a.pointEffect}</div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>Where:</strong> {a.pointLocation}</div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 10 }}><strong>How:</strong> {a.pointInstruction}</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", fontStyle: "italic", marginBottom: 8 }}>{a.benefit}</div>
+                <div className="t-body-md" style={{ marginBottom: 10 }}><strong>Where:</strong> {a.pointLocation}</div>
+                <div className="t-body-md" style={{ marginBottom: 10 }}><strong>How:</strong> {a.pointInstruction}</div>
+                <div className="t-body-sm quiet" style={{ fontStyle: "italic", marginBottom: 8 }}>{a.benefit}</div>
                 <button
                   onClick={(e) => { e.stopPropagation(); setShowPointName(!showPointName); }}
                   style={{ background: "none", border: "none", fontSize: 11, color: "var(--text-muted)", cursor: "pointer", padding: 0, letterSpacing: "0.06em" }}
@@ -5866,7 +5866,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
           </div>
         )}
 
-        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 14, fontFamily: "'DM Sans', sans-serif" }}>
+        <div className="t-body-md quiet" style={{ marginBottom: 14, fontFamily: "'DM Sans', sans-serif" }}>
           {card.body}
         </div>
 
@@ -5947,7 +5947,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
               The science behind this
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
               <p style={{ marginTop: 0 }}>The findings shown here are drawn from the peer-reviewed research underlying Stillform's tools.</p>
               <p>Drawn from a curated library that grounds Stillform's mechanisms. AI-generated when available, static otherwise.</p>
               <p>The "Read the study" link goes to the source research. Some studies are openly published; others remain behind academic paywalls.</p>
@@ -5986,7 +5986,7 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
           Lock in how you processed
         </div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+        <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 10 }}>
           {promptSet?.prompt || "Choose one line that best fits this session."}
         </div>
         <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
@@ -6102,7 +6102,7 @@ function NextMoveStep({
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
           {title}
         </div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+        <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 12 }}>
           {description}
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
@@ -6212,7 +6212,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
       <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
         Next Move follow-up
       </div>
-      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+      <div className="t-body-sm quiet" style={{ lineHeight: 1.55, marginBottom: 10 }}>
         You chose: <span style={{ color: "var(--text)" }}>{nextMoveLabel}</span>
       </div>
       <div style={{ marginBottom: 10 }}>
@@ -8436,7 +8436,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
           What Shifted
         </div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
+        <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 16 }}>
           In one line — what shifted? Naming it locks in the regulated state.
         </div>
 
@@ -8661,7 +8661,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   Lock in
                   <button onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
-                <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.7, marginBottom: 16, fontStyle: "italic" }}>
+                <div className="t-body-md" style={{ marginBottom: 16, fontStyle: "italic" }}>
                   {statement}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -8748,7 +8748,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>
               Want to go deeper?
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 10 }}>
               You came in at a high intensity. Self Mode helps you see the pattern under the moment — not just regulate it.
             </div>
             <button onClick={() => {
@@ -8867,7 +8867,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <div style={{ fontSize: 12, color: "var(--amber)", marginBottom: 8, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em", textTransform: "uppercase" }}>
               AI is having trouble connecting
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 10 }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.5, marginBottom: 10 }}>
               Self Mode walks you through the same work without AI — structured, five steps, your pace. Your message is saved either way.
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -9212,7 +9212,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               )}
               <div style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, padding: "8px 0" }}>
                 {(() => { try { return getSessionsFromStorage().filter(s => s.tools?.includes("reframe")).length === 0; } catch { return true; } })() && (
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+                  <div className="t-body-sm faint" style={{ marginBottom: 12, padding: "10px 14px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)" }}>
                     This is an AI that learns your patterns. Say what's on your mind — it gets sharper the more you use it.
                   </div>
                 )}
@@ -9502,7 +9502,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             }}>
               Start a new conversation?
             </div>
-            <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 16 }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 16 }}>
               This thread will close. The session will be logged to My Progress; the messages won't be saved.
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
@@ -9881,7 +9881,7 @@ function PanicMode({ onComplete }) {
           try {
             const sessions = getSessionsFromStorage();
             if (sessions.length > 1) {
-              return <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 24 }}>
+              return <div className="t-body-sm faint" style={{ marginBottom: 24 }}>
                 Session #{sessions.length}.
               </div>;
             }
@@ -9912,7 +9912,7 @@ function PanicMode({ onComplete }) {
         <div style={{ fontSize: 48, fontWeight: 300, color: "var(--amber)", marginBottom: 16, fontFamily: "'Cormorant Garamond', serif" }}>
           {step.num}
         </div>
-        <div style={{ fontSize: 16, color: "var(--text-dim)", marginBottom: 32, maxWidth: 260, lineHeight: 1.6 }}>
+        <div className="t-body-lg quiet" style={{ marginBottom: 32, maxWidth: 260, lineHeight: 1.6 }}>
           {step.prompt}
         </div>
         <div style={{ display: "flex", gap: 8, marginBottom: 32 }}>
@@ -10179,7 +10179,7 @@ function FocusCheckValidation({
             <div style={{ fontSize: 32, letterSpacing: "0.08em", color: currentFocusTrial.type === "go" ? "var(--amber)" : "var(--text)", fontFamily: "'IBM Plex Mono', monospace", marginBottom: 8 }}>
               {currentFocusTrial.label}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>
+            <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>
               {currentFocusTrial.type === "go" ? "Tap now" : "Do not tap"}
             </div>
             <button
@@ -10203,7 +10203,7 @@ function FocusCheckValidation({
         )}
         {focusCheckMode !== "running" && !autoStart && (
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
               {latestSummary ? "Latest run saved. Run again anytime." : "No run yet. Start when ready."}
             </div>
             <button
@@ -10336,11 +10336,11 @@ function MicroBiasTool({ onComplete }) {
       </h2>
 
       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
-        <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 12 }}>{pattern.what}</div>
-        <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
+        <div className="t-body-md" style={{ marginBottom: 12 }}>{pattern.what}</div>
+        <div className="t-body-sm quiet" style={{ lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
       </div>
 
-      <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 24 }}>
+      <p className="t-body-md" style={{ marginBottom: 24 }}>
         {pattern.question}
       </p>
 
@@ -10452,12 +10452,12 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
           aria-label="Why this suggestion"
         >ⓘ</button>
       </div>
-      <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.55 }}>
+      <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.55 }}>
         {config.bodyText}
       </div>
       <button onClick={onAccept} style={primaryBtn}>
         <div style={{ fontWeight: 500, color: "var(--amber)", fontSize: 14 }}>{config.primaryLabel}</div>
-        <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{config.primarySub}</div>
+        <div className="t-body-sm quiet" style={{ marginTop: 2 }}>{config.primarySub}</div>
       </button>
       <button onClick={onSkip} style={skipBtn}>
         <div>{config.skipLabel}</div>
@@ -10693,12 +10693,12 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>
               Signal Awareness
             </div>
-            <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>
+            <div className="t-body-md">
               {autonomousCount === 1
                 ? "First time choosing without a tool. That's the observer activating."
                 : `${autonomousCount} times now. The observer is getting faster.`}
             </div>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+            <div className="t-body-sm quiet" style={{ marginTop: 6 }}>
               This is the skill compounding. The less you need the app, the more it's working.
             </div>
           </div>
@@ -10736,7 +10736,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
               padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
             }}>
               <div style={{ fontSize: 14, fontWeight: 500, color: "var(--text)" }}>{c.label}</div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{c.desc}</div>
+              <div className="t-body-sm quiet" style={{ marginTop: 2 }}>{c.desc}</div>
             </button>
           ))}
         </div>
@@ -10926,7 +10926,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
         <h2 className="t-display-lg" style={{ marginBottom: 8 }}>Where do you activate first?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Tap the areas that respond first — whether stress, excitement, or anything in between.</p>
         <p style={{ color: "var(--text-dim)", fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>This changes over time. Update it whenever your patterns shift.</p>
-        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
+        <p className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
           {bodyAreas.map(area => {
             const selected = (signals.firstAreas || []).includes(area.id);
@@ -10941,7 +10941,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
                 borderRadius: "var(--r-lg)", padding: "14px 18px", textAlign: "left", cursor: "pointer", transition: "all 0.2s"
               }}>
                 <div style={{ fontSize: 14, fontWeight: 500, color: selected ? "var(--amber)" : "var(--text)" }}>{area.label}</div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{area.desc}</div>
+                <div className="t-body-sm quiet" style={{ marginTop: 2 }}>{area.desc}</div>
               </button>
             );
           })}
@@ -10957,7 +10957,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
         <h2 className="t-display-lg" style={{ marginBottom: 8 }}>What signals a state shift?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 12 }}>The physical sensations that show up when your system is changing gears — up or down.</p>
-        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
+        <p className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {sensations.map(s => {
             const selected = (signals.preSensations || []).includes(s);
@@ -10987,7 +10987,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
         <h2 className="t-display-lg" style={{ marginBottom: 8 }}>What activates you?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Choose what fits now. Categories keep this focused and easier to scan.</p>
         <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 12, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
-        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+        <p className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 14 }}>
           {selectedTriggers.length} selected
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -11057,10 +11057,10 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
             <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Your signals</div>
             <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", color: "var(--text-muted)", textTransform: "uppercase" }}>Telemetry Source: Manual</div>
           </div>
-          <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
+          <div className="t-body-sm quiet" style={{ marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>First to respond:</strong> {(signals.firstAreas || []).map(a => bodyAreas.find(b => b.id === a)?.label).join(", ")}
           </div>
-          <div style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 8 }}>
+          <div className="t-body-sm quiet" style={{ marginBottom: 8 }}>
             <strong style={{ color: "var(--text)" }}>State-shift signals:</strong> {(signals.preSensations || []).join(", ")}
           </div>
         </div>
@@ -11509,7 +11509,7 @@ function MyProgress({ onBack }) {
     <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 24px 80px", position: "relative", zIndex: 1 }}>
       <button className="intervention-back" onClick={onBack}>← Back</button>
       <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 4 }}>My Progress</h1>
-      <p style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 32 }}>One question: is the observer getting faster?</p>
+      <p className="t-body-sm quiet" style={{ marginBottom: 32 }}>One question: is the observer getting faster?</p>
 
       {sessions.length === 0 ? (
         <div style={{ textAlign: "center", padding: "40px 0", color: "var(--text-muted)", fontSize: 13 }}>
@@ -11536,17 +11536,17 @@ function MyProgress({ onBack }) {
                   </div>
                 )}
                 {durationTrend !== null && durationTrend > 0.5 && (
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                     Your sessions are getting {durationTrend.toFixed(1)}m shorter on average. You're catching it earlier.
                   </div>
                 )}
                 {durationTrend !== null && durationTrend <= 0.5 && autonomousExits === 0 && (
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                     This measures how quickly you notice your state before it drives action. Keep going.
                   </div>
                 )}
                 {recentAutoExits > priorAutoExits && priorAutoExits >= 0 && (
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 6 }}>
+                  <div className="t-body-sm quiet" style={{ marginTop: 6 }}>
                     Autonomous exits this month: <span style={{ color: "var(--amber)" }}>{recentAutoExits}</span>
                     {priorAutoExits > 0 ? ` (up from ${priorAutoExits} last month)` : " — first month tracking."}
                   </div>
@@ -11560,7 +11560,7 @@ function MyProgress({ onBack }) {
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {recoverySpeedMinutesForProof === null ? "N/A" : `${recoverySpeedMinutesForProof.toFixed(1)}m avg from high activation`}
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
                 30-day acute shift rate: <span style={{ color: "var(--text)" }}>{acuteShiftRate30dForProof === null ? "N/A" : `${acuteShiftRate30dForProof}%`}</span>
                 {avgDelta ? <> · Avg session delta: <span style={{ color: "var(--text)" }}>{Number(avgDelta) >= 0 ? "+" : ""}{avgDelta}</span></> : null}
               </div>
@@ -11572,7 +11572,7 @@ function MyProgress({ onBack }) {
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {loopCompletion14d}% loop consistency (14d)
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
                 Check-ins completed: <span style={{ color: "var(--text)" }}>{checkinsCompleted14dForProof}</span>
                 {" "}({morning14dCount}/14 morning · {eod14dCount}/14 evening)
               </div>
@@ -11584,7 +11584,7 @@ function MyProgress({ onBack }) {
               <div style={{ fontSize: 15, color: "var(--amber)", marginBottom: 4 }}>
                 {followThrough30dForProof === null ? "N/A" : `${followThrough30dForProof}% follow-through from drafted actions`}
               </div>
-              <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
                 Opportunities: <span style={{ color: "var(--text)" }}>{opportunity30dForProof}</span>
                 {" · "}Drafted: <span style={{ color: "var(--text)" }}>{drafted30dForProof}</span>
                 {" · "}Sent confirmed: <span style={{ color: "var(--text)" }}>{sentConfirmed30dForProof}</span>
@@ -11821,20 +11821,20 @@ function MyProgress({ onBack }) {
               </button>
               {openSections.proof && (
                 <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                     Sessions logged: <span style={{ color: "var(--text)" }}>{sessions.length}</span>
                     {" · "}Active days: <span style={{ color: "var(--text)" }}>{activeDays}</span>
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                     Protocol launches: <span style={{ color: "var(--text)" }}>{protocolRuns}</span>
                     {" · "}Rated sessions: <span style={{ color: "var(--text)" }}>{ratingDeltaSessions.length}</span>
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                     Loop completion (14d): <span style={{ color: "var(--text)" }}>{loopCompletion14d}%</span>
                     {" · "}Morning: <span style={{ color: "var(--text)" }}>{morningCompletion14d}%</span>
                     {" · "}EOD: <span style={{ color: "var(--text)" }}>{eodCompletion14d}%</span>
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                     Drop-off (14d): Morning <span style={{ color: "var(--text)" }}>{morningDropoff14dPct}%</span> ({morningDropoff14dCount}/{morningOpen14dDays.size || 0})
                     {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
                   </div>
@@ -11960,18 +11960,18 @@ function MyProgress({ onBack }) {
                     </div>
                   </div>
                   {nudgeRecovery14dPct !== null && (
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                       Nudge recovery (14d): <span style={{ color: "var(--text)" }}>{nudgeRecovery14dPct}%</span> ({recoveredNudges14d}/{loopNudgeShown14d.length})
                       {" · "}Actioned: <span style={{ color: "var(--text)" }}>{loopNudgeActioned14d.length}</span>
                     </div>
                   )}
                   {nudgeRecovery14dPct === null && (
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                    <div className="t-body-sm faint" style={{ lineHeight: 1.7 }}>
                       Nudge recovery (14d): waiting for intervention data.
                     </div>
                   )}
                   {avgShift !== null && (
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.7 }}>
+                    <div className="t-body-sm quiet" style={{ lineHeight: 1.7 }}>
                       Average composure gain per rated session:{" "}
                       <span style={{ color: avgShift >= 0 ? "var(--amber)" : "#e05" }}>
                         {avgShift >= 0 ? "+" : ""}{avgShift.toFixed(1)}
@@ -11979,7 +11979,7 @@ function MyProgress({ onBack }) {
                     </div>
                   )}
                   {avgShift === null && (
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.7 }}>
+                    <div className="t-body-sm faint" style={{ lineHeight: 1.7 }}>
                       Add pre and post ratings to see measured composure gains here.
                     </div>
                   )}
@@ -12080,7 +12080,7 @@ function MyProgress({ onBack }) {
                 <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
                   Processing Mastery
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                <div className="t-body-sm quiet" style={{ lineHeight: 1.55, marginBottom: 10 }}>
                   {normalizedRegulationType === "thought-first"
                     ? "Default pattern = cognitive first. Accuracy tracks how often your completed sessions align to that under pressure."
                     : normalizedRegulationType === "body-first"
@@ -12275,7 +12275,7 @@ function MyProgress({ onBack }) {
                                 <div style={{ width: `${shiftPct}%`, height: "100%", background: "linear-gradient(90deg, var(--amber-dim), var(--amber))" }} />
                               </div>
                             </div>
-                            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "right" }}>
+                            <div className="t-body-sm faint" style={{ textAlign: "right" }}>
                               {t.avgShift !== null ? `avg ${t.avgShift >= 0 ? "+" : ""}${t.avgShift.toFixed(1)}` : "—"}
                               <span style={{ marginLeft: 8, color: "var(--text-dim)" }}>{t.pct}% of sessions</span>
                             </div>
@@ -12327,7 +12327,7 @@ function MyProgress({ onBack }) {
 
                   {/* No data state */}
                   {sessionsThisWeek.length === 0 && toolList.length < 2 && !topArea && !topBias && (
-                    <div style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "8px 0" }}>
+                    <div className="t-body-sm faint" style={{ textAlign: "center", padding: "8px 0" }}>
                       More data needed. Patterns surface after a few sessions.
                     </div>
                   )}
@@ -12390,7 +12390,7 @@ function MyProgress({ onBack }) {
             </div>
           </div>
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
-            <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
               Pulse is fed by completed tools and check-ins. It lives here as part of My Progress.
             </div>
           </div>
@@ -12416,7 +12416,7 @@ function MyProgress({ onBack }) {
           {/* ENTRY LIST */}
           {!viewEntry && (
             journalEntries.length === 0 ? (
-              <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", padding: "16px 0" }}>No pulse data yet. Complete check-ins and tools to start your progress signal.</div>
+              <div className="t-body-sm faint" style={{ fontStyle: "italic", padding: "16px 0" }}>No pulse data yet. Complete check-ins and tools to start your progress signal.</div>
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
                 {[...journalEntries].reverse().map((e, i) => (
@@ -15130,10 +15130,10 @@ const isSignalProfileConfigured = () => {
                           <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 2 }}>{tutorialFocusBrief.avgReactionMs ? `${tutorialFocusBrief.avgReactionMs}ms` : "N/A"}</div>
                         </div>
                       </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                      <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                         Accuracy reflects attentional consistency. Inhibition reflects response control under conflict. Avg RT reflects processing tempo under speed demand.
                       </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                      <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                         This is your baseline performance signature for today. Stillform uses this with signal mapping and check-ins to adapt routing and track transfer over time.
                       </div>
                     </div>
@@ -15207,14 +15207,14 @@ const isSignalProfileConfigured = () => {
                 <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
                   Personalization
                 </h1>
-                <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+                <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
                   Set up how Stillform looks and feels before you start. You can always change these in Settings.
                 </p>
 
                 {/* Theme */}
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Theme</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
                     Pick your environment. The whole app changes instantly — try them.
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
@@ -15261,7 +15261,7 @@ const isSignalProfileConfigured = () => {
                 {/* Text size */}
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Text size</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
                     Scale all text and UI proportionally. If something looks off at a larger size, switch back to Default.
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
@@ -15302,7 +15302,7 @@ const isSignalProfileConfigured = () => {
                 {/* High contrast */}
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>High contrast</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
                     Strengthens text and borders. Helps with color sensitivity and low vision. Toggle and see the difference on any theme above.
                   </div>
                   <button
@@ -15341,7 +15341,7 @@ const isSignalProfileConfigured = () => {
                 {/* Reduced motion */}
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Reduced motion</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
                     Removes animations throughout the app. Text and timers only.
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
@@ -15387,7 +15387,7 @@ const isSignalProfileConfigured = () => {
                 {/* Visual grounding */}
                 <div style={{ marginBottom: 32 }}>
                   <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500, marginBottom: 4 }}>Visual grounding</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 14, lineHeight: 1.5 }}>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
                     Organic visuals behind breathing exercises. Gives your eyes an anchor while your body settles.
                   </div>
                   <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
@@ -15461,7 +15461,7 @@ const isSignalProfileConfigured = () => {
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
                 Map your signals.
               </h1>
-              <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+              <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
                 Where does intensity hit first in your body? Jaw, shoulders, chest, gut, hands, legs. This is how the app learns you.
               </p>
               <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 24 }}>
@@ -15471,7 +15471,7 @@ const isSignalProfileConfigured = () => {
                 <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6, fontWeight: 500 }}>
                   {signalMappingConfigured ? "✓ Your signals are mapped." : "Takes about 60 seconds."}
                 </div>
-                <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.6 }}>
+                <div className="t-body-sm quiet" style={{ marginBottom: 16, lineHeight: 1.6 }}>
                   {signalMappingConfigured
                     ? "The app knows where to look first. You can update this anytime in Settings."
                     : "Every session uses this to personalise your regulation tools and AI prompts. The more accurate, the faster it works."}
@@ -15607,7 +15607,7 @@ const isSignalProfileConfigured = () => {
               <div style={{ fontSize: 14, color: "var(--text-dim)", fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", marginBottom: 28 }}>
                 {current.subtitle}
               </div>
-              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.8, marginBottom: 36 }}>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.8, marginBottom: 36 }}>
                 {current.body && current.body.split("\n\n").map((para, i) => (
                   <p key={i} style={{ marginBottom: 12 }}>{para}</p>
                 ))}
@@ -15653,7 +15653,7 @@ const isSignalProfileConfigured = () => {
                     <div className="t-display-md" style={{ color: "var(--text)", marginBottom: 8 }}>
                       {typeLabels[scoreAssessment()].name}
                     </div>
-                    <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 16 }}>
+                    <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 16 }}>
                       {typeLabels[scoreAssessment()].desc}
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>
@@ -16201,7 +16201,7 @@ const isSignalProfileConfigured = () => {
                       return (
                         <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", textAlign: "center" }}>
                           <div style={{ fontSize: 12, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6 }}>Before you begin</div>
-                          <div style={{ fontSize: 13, color: "var(--text-dim)", fontStyle: "italic", lineHeight: 1.7 }}>
+                          <div className="t-body-sm quiet" style={{ fontStyle: "italic", lineHeight: 1.7 }}>
                             Take one breath in through your nose.<br />Let it out slowly through your mouth.<br />Notice where you're starting from.
                           </div>
                         </div>
@@ -16213,7 +16213,7 @@ const isSignalProfileConfigured = () => {
                       </div>
                     )}
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How's your energy?</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Low", "Steady", "High", "Ready", "On fire", "Wired"].map(e => (
                         <button key={e} onClick={() => setCiEnergy(e.toLowerCase())} style={{
@@ -16226,7 +16226,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Hardware check</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Hardware check</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {[
                         { id: "clear", label: "All clear" },
@@ -16270,7 +16270,7 @@ const isSignalProfileConfigured = () => {
                     {/* Branch: have time vs pin it */}
                     {ciOffBaselineOpen && (
                       <div style={{ marginBottom: 16, padding: "12px 14px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                        <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                        <div className="t-body-sm quiet" style={{ marginBottom: 10, lineHeight: 1.5 }}>
                           Something's registering. Do you have a minute to check where?
                         </div>
                         <div style={{ display: "flex", gap: 8 }}>
@@ -16311,7 +16311,7 @@ const isSignalProfileConfigured = () => {
                       </div>
                     )}
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where are you holding tension?</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Where are you holding tension?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Jaw","Shoulders","Chest","Gut","Hands","Legs"].map(area => {
                         const level = ciTension[area] || 0;
@@ -16332,7 +16332,7 @@ const isSignalProfileConfigured = () => {
                     </div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 16, fontStyle: "italic" }}>Tap once = mild · twice = high</div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 4 }}>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 4 }}>
                       What do you want today?
                       <button onClick={() => setInfoModal({ title: "Why choose your outcome?", body: "Naming what you want today before the day hits is implementation intention formation (Gollwitzer 1999). Morning intention-setting bypasses decision paralysis when stress arrives later — the if-then plan is already in place. Mental Contrasting (Oettingen) extends this: identifying a desired outcome alongside today's actual state creates cognitive readiness that makes regulation more automatic. Stillform uses your morning outcome to recommend the right starting protocol for your day." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                     </div>
@@ -16523,7 +16523,7 @@ const isSignalProfileConfigured = () => {
                         WebkitTapHighlightColor: "transparent"
                       }}>
                         <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{opt.label}</div>
-                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2 }}>{opt.sub}</div>
+                        <div className="t-body-sm faint" style={{ marginTop: 2 }}>{opt.sub}</div>
                       </button>
                     ))}
                     <button onClick={() => setShowSupportSheet(false)} style={{
@@ -16641,7 +16641,7 @@ const isSignalProfileConfigured = () => {
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
                     <div className="t-mono-xs" style={{ marginBottom: 14 }}>Close the loop</div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy landing?</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Where's your energy landing?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Full", "Steady", "Low", "Empty"].map(e => (
                         <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
@@ -16654,7 +16654,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>How much did you catch before it ran you?</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How much did you catch before it ran you?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Mixed", "Rough"].map(e => (
                         <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
@@ -16667,7 +16667,7 @@ const isSignalProfileConfigured = () => {
                       ))}
                     </div>
 
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>One word that names what today taught you</div>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>One word that names what today taught you</div>
                     <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Solid", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
                         <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
@@ -16732,7 +16732,7 @@ const isSignalProfileConfigured = () => {
                           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
                             Signal shift detected
                           </div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                          <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
                             You've been reporting {signalDivergence} tension consistently. Your signal map doesn't include it yet.
                           </div>
                         </div>
@@ -16891,7 +16891,7 @@ const isSignalProfileConfigured = () => {
               {isAbsent && (
                 <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
                   <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
-                  <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
                 </div>
               )}
 
@@ -16917,7 +16917,7 @@ const isSignalProfileConfigured = () => {
                           ? `I've noticed something. You came in as ${regType === "body-first" ? "body-first" : "thought-first"}, but you keep reaching for ${regType === "body-first" ? "conversation" : "breathing"}. That's not wrong — it might mean your system is telling you something about how you actually process. Want to explore that?`
                           : "7 sessions. You're building something. How's it feeling?"}
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 14 }}>
+                    <div className="t-body-sm quiet" style={{ lineHeight: 1.5, marginBottom: 14 }}>
                       {mismatch
                         ? "The system adapts to how you actually use it, not just how it assessed you. You decide."
                         : "Take it into Reframe when you're ready — or notice it."}
@@ -16954,7 +16954,7 @@ const isSignalProfileConfigured = () => {
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                     Loop reliability nudge
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 12 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.5, marginBottom: 12 }}>
                     {isSoftTone
                       ? "Quick check-in now keeps your daily loop steady."
                       : `${activeLoopNudge?.title}: ${activeLoopNudge?.dropoffPct}% drop-off in the last 14 days (${activeLoopNudge?.dropoffCount}/${activeLoopNudge?.opens}).`}
@@ -17012,7 +17012,7 @@ const isSignalProfileConfigured = () => {
                   - "It's a route, not an intervention" (master todo Apr 29 framing) */}
               {showCategoryCNudge && (
                 <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 12 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.55, marginBottom: 12 }}>
                     Resources are here if you want them.
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
@@ -17150,7 +17150,7 @@ const isSignalProfileConfigured = () => {
 
                   {showUatFeedbackPanel && (
                     <>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
+                      <div className="t-body-sm quiet" style={{ lineHeight: 1.55, marginBottom: 10 }}>
                         Tell us what is unclear. This is reviewed against the SHIP list and actioned in UAT updates.
                       </div>
                       <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 10 }}>
@@ -17320,7 +17320,7 @@ const isSignalProfileConfigured = () => {
                     }}>ⓘ</button>
                   );
                 })()}
-                <div style={{ fontSize: 13, color: "var(--text-dim)" }}>
+                <div className="t-body-sm quiet">
                 {activeTool.id === "reframe" ? null : (
                   <>{activeTool.icon} {activeTool.name}</>
                 )}
@@ -17350,7 +17350,7 @@ const isSignalProfileConfigured = () => {
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
                     Processing primer
                   </div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                     {primer}
                   </div>
                 </div>
@@ -17921,7 +17921,7 @@ const isSignalProfileConfigured = () => {
                 </div>
               );
             })()}
-            <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
+            <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
             {(() => {
@@ -18085,7 +18085,7 @@ const isSignalProfileConfigured = () => {
             )}
             {resetPasswordSuccess && (
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                <p style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.5 }}>
+                <p className="t-body-md">
                   Password updated. You're signed in.
                 </p>
                 <button
@@ -18256,7 +18256,7 @@ const isSignalProfileConfigured = () => {
                             <div style={{ fontSize: 14, color: "var(--text)" }}>English</div>
                             <div style={{ fontSize: 11, color: "var(--amber)" }}>✓ Active</div>
                           </div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                          <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
                             Stillform launches in English. Additional languages coming post-launch — clinically translated so the science holds in every language, not machine-translated.
                           </div>
                         </div>
@@ -18313,7 +18313,7 @@ const isSignalProfileConfigured = () => {
                       }}>
                         <div>
                           <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
-                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>{opt.desc}</div>
+                          <div className="t-body-sm quiet" style={{ marginTop: 2 }}>{opt.desc}</div>
                         </div>
                         <button onClick={() => { try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {} }} style={{
                           background: isOn ? "var(--amber)" : "var(--border)",
@@ -18332,7 +18332,7 @@ const isSignalProfileConfigured = () => {
                   }}>
                     <div>
                       <div style={{ fontSize: 14, color: "var(--text)" }}>◑ High contrast</div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Boosts text and border contrast. Helps with color blindness and visual sensitivity.</div>
+                      <div className="t-body-sm quiet" style={{ marginTop: 2 }}>Boosts text and border contrast. Helps with color blindness and visual sensitivity.</div>
                     </div>
                     <button onClick={() => {
                       const next = !highContrastMode;
@@ -18414,7 +18414,7 @@ const isSignalProfileConfigured = () => {
                           background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                           padding: "12px 16px", marginBottom: 6, opacity: 0.35, display: "flex", justifyContent: "space-between", alignItems: "center"
                         }}>
-                          <div style={{ fontSize: 13, color: "var(--text-muted)" }}>{s.label}</div>
+                          <div className="t-body-sm faint">{s.label}</div>
                           <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Coming soon</div>
                         </div>
                       ))}
@@ -18523,7 +18523,7 @@ const isSignalProfileConfigured = () => {
                       {/* Body Scan Pace */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Body Scan Pace</div>
-                  <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
+                  <div className="t-body-sm faint" style={{ marginBottom: 10 }}>Hold time per acupressure point. Standard is 45–60s.</div>
                   <div style={{ display: "flex", gap: 6 }}>
                     {[
                       { id: "fast", label: "Fast", desc: "~25s / point" },
@@ -18774,7 +18774,7 @@ const isSignalProfileConfigured = () => {
                             </div>
                           ) : (
                             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
-                              <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                              <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 12 }}>
                                 No active subscription found on this device.
                               </div>
                               <button
@@ -18806,7 +18806,7 @@ const isSignalProfileConfigured = () => {
                       {settingsSubOpen.syncControls && (
                         <div style={{ marginTop: 10 }}>
                           {/* Cloud sync controls */}
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+                    <div className="t-body-sm faint" style={{ marginBottom: 12 }}>
                       Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
                     </div>
                     <details style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
@@ -18865,7 +18865,7 @@ const isSignalProfileConfigured = () => {
                         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                           <div>
                             <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
-                            <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress. Syncs across devices — each device uses its own biometric.</div>
+                            <div className="t-body-sm quiet" style={{ marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress. Syncs across devices — each device uses its own biometric.</div>
                           </div>
                           <button onClick={() => { biometric.setEnabled(!bioOn); refreshSettings(); }} style={{
                             background: bioOn ? "var(--amber)" : "var(--border)",
@@ -18881,7 +18881,7 @@ const isSignalProfileConfigured = () => {
                   </div>
                 ) : (
                   <div>
-                    <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
+                    <div className="t-body-sm faint" style={{ marginBottom: 12 }}>
                       Back up encrypted data from this device. Your data is encrypted before it leaves your device — Stillform cannot read it. If you change devices later, see "What survives a device change" after signing in.
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
@@ -19172,7 +19172,7 @@ const isSignalProfileConfigured = () => {
                 {openLog === "sessions" && (() => {
                   try {
                     const sessions = getSessionsFromStorage().slice().reverse();
-                    if (sessions.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No sessions yet.</div>;
+                    if (sessions.length === 0) return <div className="t-body-sm faint" style={{ padding: "8px 18px" }}>No sessions yet.</div>;
                     const toolLabel = { breathe: "Breathe", "body-scan": "Body Scan", reframe: "Reframe" };
                     return (
                       <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
@@ -19210,7 +19210,7 @@ const isSignalProfileConfigured = () => {
                 {openLog === "journal" && (() => {
                   try {
                     const entries = secureRead("stillform_journal", []);
-                    if (entries.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No signal entries yet.</div>;
+                    if (entries.length === 0) return <div className="t-body-sm faint" style={{ padding: "8px 18px" }}>No signal entries yet.</div>;
                     return (
                       <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
                         {entries.map((e, i) => (
@@ -19242,7 +19242,7 @@ const isSignalProfileConfigured = () => {
                 {openLog === "reframes" && (() => {
                   try {
                     const saved = secureRead("stillform_saved_reframes", []);
-                    if (saved.length === 0) return <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 18px" }}>No saved reframes yet.</div>;
+                    if (saved.length === 0) return <div className="t-body-sm faint" style={{ padding: "8px 18px" }}>No saved reframes yet.</div>;
                     const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" };
                     return (
                       <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 8 }}>
@@ -19509,7 +19509,7 @@ const isSignalProfileConfigured = () => {
                       <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Share Stillform</div>
                       <a href={SHARE_QR_TARGET_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>Open link ↗</a>
                     </div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>Use this QR when meeting someone in person.</div>
+                    <div className="t-body-sm quiet" style={{ lineHeight: 1.55, marginBottom: 10 }}>Use this QR when meeting someone in person.</div>
                     <div style={{ display: "flex", justifyContent: "center", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: 12 }}>
                       <img src={SHARE_QR_IMAGE_URL} alt={`QR code for ${SHARE_QR_TARGET_URL}`} style={{ width: 180, height: 180, borderRadius: 6, background: "#fff", padding: 8 }} loading="lazy" />
                     </div>
@@ -19520,7 +19520,7 @@ const isSignalProfileConfigured = () => {
               )}
             </div>
 
-            <div style={{ fontSize: 12, color: "var(--text-muted)", textAlign: "center", marginTop: 28, lineHeight: 1.5 }}>
+            <div className="t-body-sm faint" style={{ textAlign: "center", marginTop: 28, lineHeight: 1.5 }}>
               Stillform · ARA Embers LLC · v{APP_VERSION}<br />
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
