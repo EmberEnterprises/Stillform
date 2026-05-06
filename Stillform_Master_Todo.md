@@ -573,6 +573,56 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 ---
 
+## 🔍 GAPS TO BE CONSIDERED — Surfaced May 5, 2026 (not yet evaluated for prelaunch vs postlaunch)
+
+These four are surfaced from a vision/values/science alignment review during May 5, 2026 session. Each represents a real product gap that is not currently tracked elsewhere in this todo. Captured here as "considerations to evaluate" — not yet committed as blockers, not yet scheduled. Decide priority/timing in a focused review session. Three other gaps surfaced in the same review were already shipped (share QR code) or deliberately scoped out (language barrier — gated on revenue; under-18 population — separate app due to health law constraints around minors in mental health apps).
+
+### 🎯 First-session metacognition framing lock
+Stillform's onboarding teaches **what the tools are**. It does not necessarily teach **why composure is a skill, and why this app is instrumentation rather than therapy/meditation/coaching**. Most new users arrive having tried Headspace, Calm, BetterHelp, Talkspace — they pattern-match Stillform to a familiar wellness category before the metacognition framing has a chance to land. If they categorize the app wrong in the first 60 seconds, they either bounce or use it wrong (expecting calmness rather than self-mastery, expecting fixing rather than instrumentation).
+
+**Possible solution:** A 30-second "what Stillform actually is" moment — single onboarding card, brief animated explainer, or short narrated intro — that locks the metacognition framing **before** tool introduction. Not therapy. Not meditation. Not coaching. Instrumentation. Anchors the rest of the experience.
+
+**Why this also strengthens compliance:** the medical disclaimers in the ToS (Sections 27-30) and Privacy Policy become more believable when the framing is established up front rather than only living in legal text users don't read.
+
+**Open question to evaluate:** is this a prelaunch must-have or a post-launch refinement? Test users would need to flag retention drop-off in session 1 to justify the prelaunch cost. Decide based on TestFlight cohort feedback.
+
+### 🧠 Within-session "what just happened in your nervous system" feedback
+Stillform's science foundation is real and rigorous. The plain-language neuroscience surface (May 1) makes the science visible **on demand**. But on-demand info that users have to tap into doesn't shape the felt sense of using the app. Users in their first 1-3 sessions need a "this is doing something specific" signal to retain — and it has to be specific enough that it differentiates Stillform from generic breathing/meditation apps.
+
+**Possible solution:** A within-session post-tool moment that names what just happened in physiological terms. Not generic encouragement ("Great job!"). Specific physiology: *"You just reduced your sympathetic activation. That's measurable."* Or *"You just spent 60 seconds in the parasympathetic dominant state. With practice this becomes faster to access."* Woven into tool completion screens rather than buried in info buttons.
+
+**Why this is the highest-leverage gap of the four:** session-1 retention hinges on users feeling something specific happened. The science backs it. The current build doesn't necessarily carry it back to the user at the moment it would matter most.
+
+**Verification step:** read existing tool completion screens (Breathe close, Body Scan close, Reframe close) and document what each currently says. Then evaluate whether physiology-naming language could be added without making completion verbose or didactic. Brief, specific, science-grounded.
+
+### 💵 Periodic value articulation moments (post-launch)
+Subscription apps live or die on the moment a user looks at their credit card statement and asks "what do I get for $14.99/month?" If the answer in their head is fuzzy, they cancel. Stillform's pricing reflects real value and the science backs it. But that value needs to be **named to the user with their own data** at meaningful intervals.
+
+**Possible solution:** A periodic "value articulation" moment in-app — month 1, month 3, month 6 — that surfaces user-specific data: *"In the last 30 days you used Stillform 14 times. Your average signal awareness latency dropped from 45 minutes to 12 minutes. That's measurable composure improvement."* Personalized, data-backed, hard to argue with.
+
+**Why this needs prelaunch attention even if it ships post-launch:** the surface is post-launch but the **data capture** must start at day 1. Some metrics that would feed these moments need to be captured starting at launch even if the surface that displays them ships months later. Verify which metrics from the Cognitive Function Measurement spec and the metacognition layer (signal awareness latency, autonomous exit count, 7-session evidence) are persisted with timestamps and aggregatable, vs which are computed live and not stored. If anything needed for month-1 articulation isn't being captured now, that's a prelaunch gap.
+
+### 🆘 Crisis routing depth — warmth gap
+Category C nudge shipped May 4 (commit `5ad8e2a`) — pattern-based crisis-resources surface for sustained-flat or sustained-HAN users. Real, important work. But the crisis screen itself is structured as a static emergency-card UI: phone numbers, SMS shortcut, regional helplines. It treats the moment with appropriate gravity but doesn't carry the rest of Stillform's voice (steady, specific, structural, warm-not-soothing).
+
+**Possible solution:** Examine whether there's an intermediate state between "you flagged Category C" and "988 NOW emergency card." Something like a brief acknowledgment of the user's act of opening the screen, then the gentlest meaningful next step (text Crisis Text Line, breathe with us for 60 seconds while you decide, call someone you trust whose number you'd want surfaced). The Category C population is sustained-flat/sustained-HAN — likely to bounce off a stark crisis card because their state isn't acute panic, it's chronic numbness or hyperarousal that needs different framing.
+
+**Constraint that matters:** any change here must preserve the legal posture established in ToS Section 28 (Crisis and Emergency Situations) — that Stillform is not a crisis intervention service. The screen can be warmer without claiming to be intervention. Words matter. Worth a careful pass with the existing crisis-resources content and the Category C nudge spec before changing anything.
+
+### 🔐 Encryption key loss recovery clarity
+Stillform shipped end-to-end encryption May 2 (commit `ef8d8008`). Correct architecture for the data sensitivity Stillform handles. But the user-facing flow when someone loses their encryption key (switches phones, reinstalls, loses device) is structurally complicated. The Settings screen acknowledges *"Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt."* — which is honest but cryptic for a non-technical user.
+
+**Possible solution:** A clear in-app explanation of:
+- What users lose when they lose their key (which encrypted items can't be decrypted)
+- What they keep (account, subscription, non-encrypted metadata)
+- How to back up the key proactively (export to password manager? print a recovery phrase? something else?)
+
+**Overlap with password reset gap:** the password reset flow (already captured as TestFlight-blocking) is one path that surfaces this concern. But encryption key recovery is broader — a user might successfully reset their password but still lose their encrypted journal entries because the key was tied to the previous device. These two flows need to be designed together so users have a coherent mental model of "what survives a device change."
+
+**Open question:** is the right answer to add a key backup mechanism (recovery phrase, export-to-cloud-encrypted-with-password) or to be radically transparent that some data is device-bound and that's the privacy tradeoff? Both are defensible. Pick one before launch and commit to it in copy.
+
+---
+
 ## NATIVE APP
 
 - [ ] Android Studio setup — build signed APK
