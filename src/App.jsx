@@ -3771,7 +3771,7 @@ function PhysiologicalSighTool({ onComplete }) {
         <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-dim)", marginBottom: 4 }}>
           Physiological sigh
         </div>
-        <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+        <div className="t-body-sm quiet">
           {rep} of {totalReps}
         </div>
       </div>
@@ -4257,7 +4257,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         {count > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
         {count === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
             <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
@@ -4392,7 +4392,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   // Pre-rate: quick 1-5 tap
   if (phase === "pre-rate") return (
     <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
+      <h2 className="t-display-lg" style={{ marginBottom: 8 }}>
         How steady are you?
       </h2>
       {(() => { try { const s = JSON.parse(localStorage.getItem("stillform_last_shift") || "null"); if (s) return <div style={{ fontSize: 13, color: s > 0 ? "var(--amber)" : "var(--text-muted)", marginBottom: 16, fontWeight: s > 0 ? 500 : 400 }}>Last session: {s > 0 ? "+" : ""}{s}</div>; } catch {} return null; })()}
@@ -4643,7 +4643,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       {phase === "post-rate" && (
         <div style={{ maxWidth: 400, margin: "0 auto", textAlign: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, margin: 0 }}>
+            <h2 className="t-display-lg" style={{ margin: 0 }}>
               Where are you now?
             </h2>
             <button onClick={() => setInfoModal({ title: "Why track this?", body: "Tracking your state after a session measures the shift. The difference between how you came in and how you leave is the data point that builds your composure pattern over time." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
@@ -5379,7 +5379,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
         {sessionCount > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {sessionCount}</div>}
         {sessionCount === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
             <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
@@ -5828,7 +5828,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
     return (
       <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
         <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "32px 16px", textAlign: "center" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", opacity: 0.6 }}>
+          <div className="t-mono-xs" style={{ color: "var(--amber)", opacity: 0.6 }}>
             Loading…
           </div>
         </div>
@@ -5842,7 +5842,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
     <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
       <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "20px 18px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+          <div className="t-mono-xs" style={{ color: "var(--amber)" }}>
             The science behind this
           </div>
           <button
@@ -5944,7 +5944,7 @@ function ScienceCard({ toolId, lastBreathPattern = null, lastBodyScanArea = null
               overflowY: "auto"
             }}
           >
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
               The science behind this
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
@@ -5983,7 +5983,7 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
   return (
     <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
       <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "18px 16px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+        <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
           Lock in how you processed
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
@@ -6099,7 +6099,7 @@ function NextMoveStep({
   return (
     <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 10 }}>
       <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "18px 16px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+        <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
           {title}
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
@@ -8616,7 +8616,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {/* POST SESSION INSIGHT — inline, if available */}
         {insight && (
           <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
               Patterns surfaced
             </div>
             <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.7, fontStyle: "italic" }}>
@@ -8627,7 +8627,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
         {/* NEXT MOVE — 4 buttons + lock-in */}
         <div style={{ marginBottom: 24 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+          <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
             Next Move
             <button onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
@@ -8657,7 +8657,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             const statement = (LOCK_IN_STATEMENTS[postNextMoveId] || {})[regType] || (LOCK_IN_STATEMENTS[postNextMoveId] || {})["thought-first"] || "";
             return (
               <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                   Lock in
                   <button onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
@@ -8745,7 +8745,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {/* Self Mode nudge — high-activation only */}
         {(feelState === "angry" || feelState === "anxious" || feelState === "mixed") && (
           <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>
               Want to go deeper?
             </div>
             <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 10 }}>
@@ -9868,7 +9868,7 @@ function PanicMode({ onComplete }) {
     return (
       <div className="panic-screen panic-done">
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
+        <div className="t-display-lg" style={{ color: "var(--text)", marginBottom: 8 }}>
           You're here.
         </div>
         <div className="panic-done-text">
@@ -10164,7 +10164,7 @@ function FocusCheckValidation({
   return (
     <section style={containerStyle}>
       {!hideBack && <button className="intervention-back" onClick={onBack}>← Back</button>}
-      {!compact && <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Composure Check</h1>}
+      {!compact && <h1 className="t-display-lg" style={{ marginBottom: 8 }}>Composure Check</h1>}
       <div style={{ fontSize: compact ? 12 : 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
         30-second Go/No-Go validation. Tap for GO. Hold on NO-GO.
         <br />
@@ -10302,7 +10302,7 @@ function MicroBiasTool({ onComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
+        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
           Pattern baseline captured.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
@@ -10331,7 +10331,7 @@ function MicroBiasTool({ onComplete }) {
         Pattern Check · {current + 1} of {patterns.length}
       </div>
 
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>
+      <h2 className="t-display-lg" style={{ marginBottom: 16 }}>
         {pattern.name}
       </h2>
 
@@ -10682,7 +10682,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
     return (
       <div style={{ textAlign: "center", maxWidth: 320, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
+        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
           You watched it. You named it. You chose.
         </h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 16 }}>
@@ -10690,7 +10690,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
         </p>
         {autonomousCount >= 1 && (
           <div style={{ background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 20, textAlign: "left" }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 6 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>
               Signal Awareness
             </div>
             <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6 }}>
@@ -10721,7 +10721,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
         {prompt.label} — {step + 1} of {prompts.length}
       </div>
 
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>
+      <h2 className="t-display-lg" style={{ marginBottom: 8 }}>
         {prompt.question}
       </h2>
       <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 24, lineHeight: 1.6 }}>
@@ -10912,7 +10912,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     () => (
       <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>◎</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Map Your Signals</h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>Map Your Signals</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 32 }}>
           Your body broadcasts state before your mind catches up. Most people never learn to read the signal. This takes 2 minutes and teaches the app how YOUR system operates.
         </p>
@@ -10923,7 +10923,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 1 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Where do you activate first?</h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 8 }}>Where do you activate first?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Tap the areas that respond first — whether stress, excitement, or anything in between.</p>
         <p style={{ color: "var(--text-dim)", fontSize: 12, marginBottom: 12, lineHeight: 1.6 }}>This changes over time. Update it whenever your patterns shift.</p>
         <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
@@ -10955,7 +10955,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 2 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What signals a state shift?</h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 8 }}>What signals a state shift?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 12 }}>The physical sensations that show up when your system is changing gears — up or down.</p>
         <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24 }}>Select all that apply</p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -10984,7 +10984,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     () => (
       <div style={{ maxWidth: 400, margin: "0 auto" }}>
         <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>Step 3 of 3</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>What activates you?</h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 8 }}>What activates you?</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 13, marginBottom: 8 }}>Choose what fits now. Categories keep this focused and easier to scan.</p>
         <p style={{ color: "var(--text-muted)", fontSize: 11, marginBottom: 12, fontStyle: "italic" }}>This isn't a diagnosis. It's self-knowledge. The more you identify, the earlier you'll catch the wave.</p>
         <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
@@ -11048,7 +11048,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
     () => (
       <div style={{ textAlign: "center", maxWidth: 360, margin: "0 auto" }}>
         <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>Signal profile saved.</h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>Signal profile saved.</h2>
         <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
           Now you know what to watch for. Over time, you'll start catching these signals before they escalate.
         </p>
@@ -11518,7 +11518,7 @@ function MyProgress({ onBack }) {
       ) : (<>
         {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+          <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
             Observer growth
           </div>
           <div style={{ display: "grid", gap: 8 }}>
@@ -12077,7 +12077,7 @@ function MyProgress({ onBack }) {
               </div>
 
               <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
                   Processing Mastery
                 </div>
                 <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>
@@ -12107,7 +12107,7 @@ function MyProgress({ onBack }) {
               </div>
 
               <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
                   Weekly reflection
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -15601,7 +15601,7 @@ const isSignalProfileConfigured = () => {
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
                 {current.label}
               </div>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8, lineHeight: 1.15 }}>
+              <h1 className="t-display-lg" style={{ marginBottom: 8, lineHeight: 1.15 }}>
                 {current.title}
               </h1>
               <div style={{ fontSize: 14, color: "var(--text-dim)", fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", marginBottom: 28 }}>
@@ -15616,7 +15616,7 @@ const isSignalProfileConfigured = () => {
               {/* Assessment scenarios */}
               {current.isAssessment && !assessmentComplete && currentScenario && (
                 <div style={{ marginBottom: 28 }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 12 }}>
+                  <div className="t-mono-xs" style={{ marginBottom: 12 }}>
                     Scenario {assessmentAnswers.length + 1} of {current.scenarios.length}
                   </div>
                   <div style={{ color: "var(--text)", lineHeight: 1.6, marginBottom: 20, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 17 }}>
@@ -15647,7 +15647,7 @@ const isSignalProfileConfigured = () => {
               {current.isAssessment && assessmentComplete && (
                 <div style={{ marginBottom: 28 }}>
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "20px", textAlign: "center" }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
                       Your processing type
                     </div>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
@@ -16045,10 +16045,10 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", cursor: "pointer", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 3 }}>
+                      <div className="t-mono-xs" style={{ marginBottom: 3 }}>
                         Morning Check-in
                       </div>
-                      <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                      <div className="t-body-sm quiet">
                         {_ms_done ? "✓ Done · tap to update" : "What might drive you today if you don't notice it early?"}
                       </div>
                     </div>
@@ -16508,7 +16508,7 @@ const isSignalProfileConfigured = () => {
                     background: "var(--surface)", borderRadius: "var(--r-lg) var(--r-lg) 0 0",
                     padding: "24px 24px 40px", width: "100%", maxWidth: 480
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+                    <div className="t-mono-xs" style={{ marginBottom: 20 }}>
                       Direct access
                     </div>
                     {[
@@ -16570,8 +16570,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div className="t-mono-xs">Close the loop</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Closed · tap to update</div>
                   </button>
                 );
                 if (eodDone && !eodOpen) return (
@@ -16589,8 +16589,8 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Close the loop</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div className="t-mono-xs">Close the loop</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Closed · tap to update</div>
                   </button>
                 );
 
@@ -16632,14 +16632,14 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)" }}>Before you close out</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What did you catch today? What got past you?</div>
+                    <div className="t-mono-xs">Before you close out</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>What did you catch today? What got past you?</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 14 }}>Close the loop</div>
+                    <div className="t-mono-xs" style={{ marginBottom: 14 }}>Close the loop</div>
 
                     <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 10 }}>Where's your energy landing?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
@@ -16890,7 +16890,7 @@ const isSignalProfileConfigured = () => {
               {/* ABSENCE DETECTION — operator tone, no guilt */}
               {isAbsent && (
                 <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
+                  <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
                   <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
                 </div>
               )}
@@ -16907,7 +16907,7 @@ const isSignalProfileConfigured = () => {
                                  (regType === "thought-first" && reframeRatio < 0.3);
                 return (
                   <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
                       {hasStreak ? "7 days straight" : "7 sessions"}
                     </div>
                     <div style={{ fontSize: 17, color: "var(--text)", lineHeight: 1.7, marginBottom: 8, fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic" }}>
@@ -17096,7 +17096,7 @@ const isSignalProfileConfigured = () => {
                 }}
               >
                 <div style={{ position: "absolute", left: 12, display: "flex", alignItems: "center" }}>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>
+                  <div className="t-mono-xs" style={{ color: "var(--amber)" }}>
                     UAT
                   </div>
                 </div>
@@ -17139,7 +17139,7 @@ const isSignalProfileConfigured = () => {
                     }}
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", animation: !reducedMotion ? "pulse 1.2s ease-in-out infinite" : "none" }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)", animation: !reducedMotion ? "pulse 1.2s ease-in-out infinite" : "none" }}>
                         {UAT_FEEDBACK_FLASH_LABEL}
                       </div>
                       <div style={{ color: "var(--text-muted)", fontSize: 12 }}>
@@ -17721,7 +17721,7 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={() => setScreen(faqBackScreen || "home")}>← Back</button>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 16 }}>FAQ</h1>
+              <h1 className="t-display-lg" style={{ marginBottom: 16 }}>FAQ</h1>
               <div style={{ fontSize: 14, fontStyle: "italic", color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 24, fontFamily: "'Cormorant Garamond', serif" }}>
                 Composure is being in control of how you show up — in any moment that matters.
               </div>
@@ -17886,7 +17886,7 @@ const isSignalProfileConfigured = () => {
         {screen === "crisis" && (
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
+            <h1 className="t-display-lg" style={{ marginBottom: 8 }}>Crisis Resources</h1>
             {(() => {
               // Read entry context to decide whether to show pattern-specific
               // acknowledgment. Per May 5 audit: Category C population is
@@ -18015,7 +18015,7 @@ const isSignalProfileConfigured = () => {
         {/* RESET PASSWORD — Supabase recovery flow lands here after user clicks email link */}
         {screen === "reset-password" && (
           <section style={{ maxWidth: 420, margin: "0 auto", padding: "48px 24px" }}>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 12 }}>
+            <h1 className="t-display-lg" style={{ marginBottom: 12 }}>
               Set new password
             </h1>
             {!resetPasswordSuccess && (
@@ -18107,7 +18107,7 @@ const isSignalProfileConfigured = () => {
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 32 }}>Settings</h1>
+            <h1 className="t-display-lg" style={{ marginBottom: 32 }}>Settings</h1>
 
 {/* PERSONALIZATION */}
             <div style={{ marginBottom: 28 }}>
@@ -18641,7 +18641,7 @@ const isSignalProfileConfigured = () => {
                         </div>
                         {reminderOn && (
                           <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", alignItems: "center", gap: 12 }}>
-                            <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Time</div>
+                            <div className="t-body-sm faint">Time</div>
                             <input type="time" defaultValue={reminderTime} onChange={e => { try { localStorage.setItem("stillform_reminder_time", e.target.value); const [h, m] = e.target.value.split(":").map(Number); scheduleReminder("Stillform", "Time to check in. How steady are you?", h, m); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
                           </div>
                         )}
@@ -18676,13 +18676,13 @@ const isSignalProfileConfigured = () => {
                         {enabled && (
                           <div style={{ padding: "12px 18px", borderTop: "0.5px solid var(--border)", display: "flex", flexDirection: "column", gap: 10 }}>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>First reminder</div>
+                              <div className="t-body-sm faint">First reminder</div>
                               <select value={firstMins} onChange={e => { try { localStorage.setItem(PRE_MEETING_NOTIF_FIRST_KEY, e.target.value); scheduleMeetingNotifications(); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
                                 {[10, 15, 20, 30, 45, 60].map(m => <option key={m} value={String(m)}>{m} minutes before</option>)}
                               </select>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <div style={{ fontSize: 12, color: "var(--text-muted)" }}>Second reminder</div>
+                              <div className="t-body-sm faint">Second reminder</div>
                               <select value={secondMins} onChange={e => { try { localStorage.setItem(PRE_MEETING_NOTIF_SECOND_KEY, e.target.value); scheduleMeetingNotifications(); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif" }}>
                                 {[5, 10, 15, 20].map(m => <option key={m} value={String(m)}>{m} minutes before</option>)}
                               </select>
@@ -19074,7 +19074,7 @@ const isSignalProfileConfigured = () => {
                             : "Calendar integration requires the native Android app."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div className="t-body-sm quiet">Consent</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendarConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
                     {integrationContext.calendarConsent || "pending"}
                   </div>
@@ -19098,7 +19098,7 @@ const isSignalProfileConfigured = () => {
                             : "Health integration requires the native Android app."))}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>Consent</div>
+                  <div className="t-body-sm quiet">Consent</div>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.healthConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
                     {integrationContext.healthConsent || "pending"}
                   </div>
@@ -19165,7 +19165,7 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{getSessionCountFromStorage()} sessions</div>
+                    <div className="t-body-sm quiet">{getSessionCountFromStorage()} sessions</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
                 </button>
@@ -19203,7 +19203,7 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return secureRead("stillform_journal", []).length; } catch { return 0; } })()} entries</div>
+                    <div className="t-body-sm quiet">{(() => { try { return secureRead("stillform_journal", []).length; } catch { return 0; } })()} entries</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
                 </button>
@@ -19235,7 +19235,7 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)" }}>{(() => { try { return secureRead("stillform_saved_reframes", []).length; } catch { return 0; } })()} saved</div>
+                    <div className="t-body-sm quiet">{(() => { try { return secureRead("stillform_saved_reframes", []).length; } catch { return 0; } })()} saved</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
                 </button>
@@ -19263,7 +19263,7 @@ const isSignalProfileConfigured = () => {
                 {/* Signal profile */}
                 <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", marginBottom: 20 }}>
                   <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 4 }}>Signal profile</div>
-                  <div style={{ fontSize: 12, color: "var(--text-dim)" }}>
+                  <div className="t-body-sm quiet">
                     {(() => { try { const s = secureRead("stillform_signal_profile", {}); return Object.keys(s).length > 0 ? "Configured" : "Not set up yet — find Signal Mapping in Personalization"; } catch { return "Not set up yet"; } })()}
                   </div>
                 </div>
@@ -19506,7 +19506,7 @@ const isSignalProfileConfigured = () => {
                 {settingsShareQrOpen && (
                   <div style={{ marginTop: 4, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 14px" }}>
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)" }}>Share Stillform</div>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Share Stillform</div>
                       <a href={SHARE_QR_TARGET_URL} target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)", fontSize: 10, textDecoration: "none", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", textTransform: "uppercase" }}>Open link ↗</a>
                     </div>
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55, marginBottom: 10 }}>Use this QR when meeting someone in person.</div>
