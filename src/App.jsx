@@ -12426,6 +12426,11 @@ export default function Stillform() {
   });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
+  // Pull-to-refresh state — drives the visual indicator and refresh trigger
+  // on home screen. Threshold: 80px of pull to trigger refresh.
+  const [pullDistance, setPullDistance] = useState(0);
+  const [isPulling, setIsPulling] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // Legal update notification — surfaces a modal when the user's last-accepted
   // version of ToS/Privacy doesn't match the current LEGAL_VERSION constant.
   // Per Termly ToS commitment to notify users of legal updates.
@@ -12932,6 +12937,86 @@ export default function Stillform() {
       window.removeEventListener("touchend", onTouchEnd);
     };
   }, [screen, tutorialStep, tutorialFocusBrief, tutorialReturnScreen, setupBridgeOrigin, setupBridgeStep, setupStep, faqBackScreen, focusCheckReturnScreen]);
+
+  // Pull-to-refresh — only active on home screen. Triggers a soft refresh:
+  // re-syncs cloud data, increments subscriptionCheckTick to refetch
+  // subscription status, and refreshes settings from localStorage.
+  useEffect(() => {
+    if (screen !== "home") return;
+    let pullStartY = null;
+    let pullStartScrollTop = 0;
+    const PULL_THRESHOLD = 80;
+    const MAX_PULL = 120;
+
+    const onTouchStart = (event) => {
+      if (event.touches.length !== 1) return;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+      // Only initiate pull if we're at the top of the page
+      if (scrollTop > 0) return;
+      pullStartY = event.touches[0].clientY;
+      pullStartScrollTop = scrollTop;
+    };
+
+    const onTouchMove = (event) => {
+      if (pullStartY === null) return;
+      if (isRefreshing) return;
+      const dy = event.touches[0].clientY - pullStartY;
+      if (dy <= 0) {
+        setPullDistance(0);
+        setIsPulling(false);
+        return;
+      }
+      // Apply rubber-band resistance — feels right on iOS
+      const resisted = Math.min(MAX_PULL, dy * 0.5);
+      setPullDistance(resisted);
+      setIsPulling(true);
+    };
+
+    const onTouchEnd = async () => {
+      if (pullStartY === null) {
+        setPullDistance(0);
+        setIsPulling(false);
+        return;
+      }
+      pullStartY = null;
+      const triggered = pullDistance >= PULL_THRESHOLD;
+      setIsPulling(false);
+      if (!triggered) {
+        setPullDistance(0);
+        return;
+      }
+      // Trigger refresh
+      setIsRefreshing(true);
+      setPullDistance(60);
+      try {
+        // Re-sync cloud data if signed in
+        if (sbIsSignedIn()) {
+          try { await sbSyncDown().catch(() => {}); } catch {}
+        }
+        // Force subscription status recheck
+        setSubscriptionCheckTick(n => n + 1);
+        // Refresh settings from localStorage
+        try { refreshSettings(); } catch {}
+        try { window.plausible?.("Pull To Refresh"); } catch {}
+      } finally {
+        // Brief pause so user sees the refresh state register
+        setTimeout(() => {
+          setIsRefreshing(false);
+          setPullDistance(0);
+        }, 600);
+      }
+    };
+
+    window.addEventListener("touchstart", onTouchStart, { passive: true });
+    window.addEventListener("touchmove", onTouchMove, { passive: true });
+    window.addEventListener("touchend", onTouchEnd, { passive: true });
+    return () => {
+      window.removeEventListener("touchstart", onTouchStart);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onTouchEnd);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screen, pullDistance, isRefreshing]);
 
   const getLoopNudgeSnapshot = () => {
     const todayIso = TimeKeeper.stillformDay();
@@ -19188,6 +19273,51 @@ const isSignalProfileConfigured = () => {
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>
+        )}
+
+        {/* PULL-TO-REFRESH INDICATOR — only visible when pulling or refreshing on home */}
+        {screen === "home" && (isPulling || isRefreshing) && (
+          <div style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: pullDistance,
+            background: "transparent",
+            zIndex: 5,
+            pointerEvents: "none",
+            transition: isRefreshing ? "height 0.2s ease-out" : "none"
+          }}>
+            <div style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "var(--amber)",
+              opacity: Math.min(1, pullDistance / 80),
+              display: "flex",
+              alignItems: "center",
+              gap: 8
+            }}>
+              {isRefreshing ? (
+                <>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: "50%",
+                    background: "var(--amber)",
+                    animation: "pulse 1s ease-in-out infinite"
+                  }} />
+                  Refreshing
+                </>
+              ) : pullDistance >= 80 ? (
+                "Release to refresh"
+              ) : (
+                "Pull to refresh"
+              )}
+            </div>
+          </div>
         )}
 
         {/* RECONSTRUCTION BANNER */}
