@@ -81,6 +81,8 @@ This is the moonshot. Centerpiece feature. Scope: three measurement modules in P
 
 **Why this matters for the award case Aria asked for:** Stillform claims neuroplasticity. With this, Stillform proves it for each user individually. Nobody else in wellness has it. It's grounded in real science. It's executed at prestige altitude. It does something the user can't get anywhere else.
 
+**Phase 1 decision audit drafted May 6, 2026.** See `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md` (375 lines). Walks every undecided question in the spec with stakes, options, and a recommendation grounded in the spec + codebase. Four decisions need Arlin's explicit sign-off before Sprint 1 can start: Decision 1 (naming — "Practice evidence" recommended), Decision 3 (Arlin authoring 30 affect-labeling + 15 defusion stimuli), Decision 5 (dedicated screen surface vs Self Mode integration), Decision 7 (AI distinctiveness rubric). Decisions 2, 4, 6 are lockable from the doc directly. Audit also proposes a four-sprint Phase 1 build sequence with Phase 1.5 (interoceptive latency, Self Mode integration, My Progress trend curves) deferred to after Self Mode + My Progress redesigns ship.
+
 Open questions for Arlin's review listed in spec.
 
 ---
