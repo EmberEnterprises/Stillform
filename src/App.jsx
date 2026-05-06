@@ -2527,6 +2527,167 @@ const getFunctionCheckTrend = (candidate, limit = 20) => {
   } catch { return null; }
 };
 
+// ─── BODY SCAN TENSION DATA HELPERS — Phase 0 for My Progress redesign ────
+// Per master todo Surface refinements line 145 ("Body Scan tension data →
+// My Progress surface"). These read-only helpers normalize the two tension
+// data sources (morning check-in + post-Body-Scan session record) into
+// shapes that the My Progress redesign can consume directly.
+//
+// Storage shapes (already shipped, just being surfaced here):
+//   stillform_checkin_history: [{ timestamp, energy, bio, tension: { areaName: 1-5 } }]
+//   stillform_sessions: [{ timestamp, tools: [...], bodyScanTension: { areaName: 1-5 } | null }]
+//
+// Area name canonical values (from Body Scan areas array, line ~4939):
+//   "Jaw & Face", "Shoulders & Neck", "Chest & Breath", "Hands & Arms",
+//   "Gut & Core", "Legs & Feet"
+//
+// Morning check-in uses lowercase area keys in some user paths; helpers
+// normalize to lowercase for matching across sources. Display surface
+// can re-cap.
+const BODY_SCAN_AREAS = Object.freeze([
+  "Jaw & Face", "Shoulders & Neck", "Chest & Breath",
+  "Hands & Arms", "Gut & Core", "Legs & Feet"
+]);
+
+const normalizeAreaKey = (k) => String(k || "").trim().toLowerCase();
+
+// Get all morning check-in records that have tension data, sorted oldest-first.
+// Returns [] if none. Each record: { date, tension: { areaName: 1-5 } }.
+const getMorningTensionHistory = () => {
+  try {
+    const raw = secureRead("stillform_checkin_history", []);
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(c => c?.tension && Object.keys(c.tension).length > 0)
+      .map(c => ({
+        timestamp: c.timestamp || c.date || null,
+        date: c.date || (c.timestamp ? c.timestamp.slice(0, 10) : null),
+        energy: c.energy || null,
+        tension: c.tension
+      }))
+      .sort((a, b) => {
+        const at = new Date(a.timestamp || a.date || 0).getTime();
+        const bt = new Date(b.timestamp || b.date || 0).getTime();
+        return at - bt;
+      });
+  } catch { return []; }
+};
+
+// Get all body scan sessions that captured post-practice tension, oldest-first.
+// Returns [] if none. Each record: { timestamp, bodyScanTension: { areaName: 1-5 } }.
+// Excludes low-demand sessions where tension input was skipped (tensionDataCaptured: false).
+const getBodyScanTensionHistory = () => {
+  try {
+    const raw = secureRead("stillform_sessions", []);
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter(s => Array.isArray(s?.tools) && s.tools.includes("body-scan"))
+      .filter(s => s?.bodyScanTension && Object.keys(s.bodyScanTension).length > 0)
+      .map(s => ({
+        timestamp: s.timestamp || null,
+        bodyScanTension: s.bodyScanTension,
+        durationFormatted: s.durationFormatted || null
+      }))
+      .sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
+  } catch { return []; }
+};
+
+// Get the latest tension level for each area across the most recent N records
+// of a chosen source. Source: "morning" or "scan". Returns { areaName: 1-5 }
+// using the most recent reading per area within the window.
+const getLatestTensionByArea = (source = "morning", limit = 5) => {
+  try {
+    const records = source === "scan"
+      ? getBodyScanTensionHistory()
+      : getMorningTensionHistory();
+    const recent = records.slice(-limit);
+    const latest = {};
+    recent.forEach(r => {
+      const data = source === "scan" ? r.bodyScanTension : r.tension;
+      Object.entries(data || {}).forEach(([area, level]) => {
+        if (level > 0) latest[area] = level; // last write wins (chronological order preserved)
+      });
+    });
+    return latest;
+  } catch { return {}; }
+};
+
+// Get tension trend per area across the last N records of a source.
+// Returns { areaName: { first, latest, delta, recordCount } } or null per area
+// when there's only one or zero readings for that area in the window.
+const getTensionTrend = (source = "morning", limit = 14) => {
+  try {
+    const records = source === "scan"
+      ? getBodyScanTensionHistory()
+      : getMorningTensionHistory();
+    const recent = records.slice(-limit);
+    if (recent.length < 2) return {};
+
+    // Group readings by area
+    const perArea = {};
+    recent.forEach(r => {
+      const data = source === "scan" ? r.bodyScanTension : r.tension;
+      Object.entries(data || {}).forEach(([area, level]) => {
+        if (level > 0) {
+          if (!perArea[area]) perArea[area] = [];
+          perArea[area].push({ ts: r.timestamp || r.date || null, level });
+        }
+      });
+    });
+
+    const trend = {};
+    Object.entries(perArea).forEach(([area, readings]) => {
+      if (readings.length < 2) return;
+      const first = readings[0];
+      const latest = readings[readings.length - 1];
+      trend[area] = {
+        first: first.level,
+        latest: latest.level,
+        delta: latest.level - first.level, // negative = improvement, positive = worsening
+        recordCount: readings.length
+      };
+    });
+    return trend;
+  } catch { return {}; }
+};
+
+// Get morning→scan delta on the same Stillform day. The strongest signal
+// Stillform has for proving practice works: tension before vs after a body
+// scan, on the same day. Returns array of { date, area, before, after, delta }
+// or [] if no same-day pairs exist. delta is post - pre; negative = better.
+const getMorningToScanDelta = (limitDays = 30) => {
+  try {
+    const morning = getMorningTensionHistory();
+    const scans = getBodyScanTensionHistory();
+
+    // Index morning by Stillform-day (uses date if available, else timestamp prefix)
+    const morningByDay = {};
+    morning.forEach(m => {
+      const day = m.date || (m.timestamp ? String(m.timestamp).slice(0, 10) : null);
+      if (day) morningByDay[day] = m.tension;
+    });
+
+    // For each body scan, find same-day morning tension and compute delta per area
+    const pairs = [];
+    scans.forEach(s => {
+      const day = s.timestamp ? String(s.timestamp).slice(0, 10) : null;
+      if (!day) return;
+      const morningTension = morningByDay[day];
+      if (!morningTension) return;
+      Object.entries(s.bodyScanTension || {}).forEach(([area, after]) => {
+        const before = morningTension[area];
+        if (typeof before === "number" && before > 0 && typeof after === "number") {
+          pairs.push({ date: day, area, before, after, delta: after - before });
+        }
+      });
+    });
+
+    // Cap at limitDays of same-day pairs (sorted by date desc)
+    pairs.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return pairs.slice(0, limitDays * BODY_SCAN_AREAS.length); // generous cap per area
+  } catch { return []; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
