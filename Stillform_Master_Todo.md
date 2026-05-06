@@ -141,7 +141,7 @@ Post-session card surfacing one finding from a verified 36-entry corpus tied to 
 - Composure self-mastery legibility doc commit — sitting in /mnt/user-data/outputs, conceptual decision already made
 - **Text size / high contrast accessibility toggle in Settings** — High contrast: ✅ shipped (verified May 3, 2026, App.jsx line ~14592 with HIGH_CONTRAST_OVERLAY values that meaningfully lift dim-text contrast). Text size: ✅ shipped May 3, 2026 (commit lands a Default/Larger/Largest three-button selector in Settings between Theme and High contrast, applies CSS `zoom` on the React root mount point at scale values 1.0/1.15/1.30 matching iOS standard accessibility text scale steps). Sourced from Bobby's first user session feedback ("text still too dim for aging eyes"). Connects to existing accessibility line items (ARIA labels line ~702, chip touch targets line ~710 — verify line numbers).
 - **Fractal aesthetic expansion (May 2 idea, captured not committed)** — Arlin liked the trees. Possible directions if the existing audio/visual roadmap leaves room: branches that visibly extend on inhale and settle on exhale (synchronizing gaze with breath, not bilateral stimulation); additional fractal forms unlocked over session milestones (ferns, water rings, crystalline growth) as engagement-craft palette; pure "watch and breathe" mode that strips all UI and lets the canvas carry the session. NONE of this is EMDR or bilateral stimulation — the explicit rule from May 2 conversation is no EMDR-coded mechanics, with or without the name. Aesthetic and gaze-synchrony only.
-- **Watch haptic-by-index → haptic-by-name** (added May 3, 2026, commit `3b29c31` follow-up). `WearBreatheActivity.hapticPhaseStart()` selects haptic intensity by phase index (0 = Inhale-medium, 1 = Hold-light, 2 = Exhale-long, 3 = Rest-very-light). Works for `quick` and `deep` patterns where index = phase type. Mismatch on `cyclic_sigh` where phase 1 is the secondary inhale (top-off), not a hold — currently fires the Hold light pulse. For a 1-second phase the perceptual difference is small and a lighter pulse arguably matches the smaller top-off breath, so the bug fix commit accepted this as known. Cleaner long-term implementation: switch on `phaseNames[currentPhase]` instead of `currentPhase` index, so haptic intensity follows what the breath actually is. Single-file change in `android/wear/src/main/java/com/araembers/stillform/WearBreatheActivity.java`. Validate on physical watch through all three patterns.
+- **✅ Watch haptic-by-index → haptic-by-name — SHIPPED May 6, 2026.** `WearBreatheActivity.hapticPhaseStart()` now switches on `phaseNames[currentPhase]` instead of `currentPhase` index. cyclic_sigh's phase 1 (secondary top-off inhale) now correctly fires the Inhale haptic instead of the Hold haptic. Validation on physical Wear OS watch through all three breathing patterns deferred until a watch is available — code change is mechanical (string switch over existing array values) and low-risk.
 - **Body Scan tension data → My Progress surface** (added May 4, 2026, follow-up to low-demand Phase 2 commit). Body Scan now persists post-practice tension data per session as `bodyScanTension: { areaName: 1-5 }` on the session record (gap that existed since Body Scan shipped — tension was captured in React state and discarded). My Progress code that consumes session records needs to know this field exists and surface it. Simplest first surface: a sparkline or per-area trend showing tension levels across recent body scans, ideally paired with morning check-in tension data so the pre/post delta becomes visible — that delta is the strongest signal Stillform has for proving practice works. Held until the My Progress redesign lands so the new visual treatment can incorporate this from the start rather than retrofitting it twice.
 
 ---
@@ -448,9 +448,14 @@ The ToS generated today reads: *"The account will not be charged and the subscri
 
 **Why must-fix before publishing:** the current ToS makes a false billing commitment. This is the single biggest exposure in the generated document. Five-minute fix.
 
-### 🏗️ ✅ Subscription state table architecture rewrite — CODE SHIPPED May 6, 2026 (SQL migration pending Arlin's run)
+### 🏗️ ✅ Subscription state table architecture rewrite — CODE + MIGRATION SHIPPED May 6, 2026
 
-**Code complete. SQL migration awaits your action in Supabase SQL editor.** All four Netlify functions are updated and the v2 `_subscriptionState.js` module is deployed. The migration file (`netlify/functions/_subscriptionMigration_v2.sql`) consolidates the existing rows by `lemon_subscription_id`, archives the v1 table, and renames v2 to canonical.
+**Code complete AND SQL migration successfully run by Arlin in Supabase SQL editor on May 6, 2026.** All four Netlify functions are updated and deployed; the migration consolidated 9 fragmented rows into 5 clean rows (one per Lemon Squeezy subscription). Founder account verified — single row, is_subscribed=true, lemon_subscription_id=2127474. Zero orphans.
+
+**Post-migration tables (now in Supabase):**
+- `stillform_subscription_state` — canonical, 5 rows, one per subscription
+- `stillform_subscription_state_v1_archive` — original 9 rows preserved for rollback
+- `stillform_subscription_state_orphans` — empty (every row had a subscription_id)
 
 **What shipped (code):**
 1. **`netlify/functions/_subscriptionMigration_v2.sql`** — full migration with rollback notes, post-migration verification queries, and "drop archive after one billing cycle" guidance
@@ -461,15 +466,11 @@ The ToS generated today reads: *"The account will not be charged and the subscri
 6. **`netlify/functions/subscription-portal.js`** — no code change needed; `getSubscriptionStatusForLookup` interface preserved.
 7. **`netlify/functions/account-delete.js`** — no code change needed; only used `sbAdminFetch`.
 
-**REQUIRED — your action in Supabase before the new functions become safe to deploy:**
-1. Take a Supabase backup (Database → Backups → "Create manual backup")
-2. Open Supabase SQL editor
-3. Paste the entire contents of `netlify/functions/_subscriptionMigration_v2.sql` and run as a single transaction
-4. Run the post-migration verification queries (commented at bottom of the SQL file)
-5. Spot-check the founder row: `select * from stillform_subscription_state where user_id = '3ed32eb5-ab80-4d7b-a4b1-491132100c8a';` — expect ONE row, is_subscribed=true, lemon_subscription_id=2127474
-6. After Netlify deploy + end-to-end validation (subscription portal works, webhook still 200s on next billing event, link-account works for new signups), drop the v1_archive and orphans tables
+**Outstanding (low priority, not blocking):**
+- After ~30 days of clean operation through one billing cycle, drop the v1_archive and orphans tables to keep the schema tidy. No urgency.
+- Tomorrow during phone testing: confirm Manage Subscription button still opens the customer portal correctly (the function reads from the new table seamlessly).
 
-**Rollback path if anything goes wrong:** the `stillform_subscription_state_v1_archive` table preserves the original data. Drop the new table, rename the archive back, redeploy v1 functions.
+**Rollback path preserved:** `stillform_subscription_state_v1_archive` preserves original data. If anything ever needs investigation, drop the new table and rename the archive back.
 
 **Why this architecture is correct:**
 - Single source of truth keyed by `lemon_subscription_id` matches Lemon Squeezy's identity model — they assign exactly one subscription ID per subscription

@@ -140,19 +140,26 @@ public class WearBreatheActivity extends Activity {
     private void hapticPhaseStart() {
         if (vibrator == null) return;
         try {
-            switch (currentPhase) {
-                case 0: // Inhale — medium pulse
+            // Dispatch by phase NAME, not by index. In quick/deep patterns, the index
+            // happens to align with the phase type (0=Inhale, 1=Hold, 2=Exhale, 3=Rest)
+            // but in cyclic_sigh, phase 1 is the secondary inhale (top-off), not a hold.
+            // Index-based dispatch fired the Hold haptic on cyclic_sigh's top-off; fixed
+            // May 6, 2026 by switching on phaseNames[currentPhase].
+            String phase = currentPhase < phaseNames.length ? phaseNames[currentPhase] : "";
+            switch (phase) {
+                case "Inhale": // medium pulse — same for primary or secondary top-off
                     vibrator.vibrate(VibrationEffect.createOneShot(60, 120));
                     break;
-                case 1: // Hold — light pulse
+                case "Hold": // light pulse
                     vibrator.vibrate(VibrationEffect.createOneShot(30, 60));
                     break;
-                case 2: // Exhale — gentle long pulse
+                case "Exhale": // gentle long pulse
                     vibrator.vibrate(VibrationEffect.createOneShot(80, 80));
                     break;
-                case 3: // Rest — very light
+                case "Rest": // very light
                     vibrator.vibrate(VibrationEffect.createOneShot(15, 40));
                     break;
+                // empty-string phase (e.g. quick/cyclic_sigh's silent 4th slot) — no haptic
             }
         } catch (Exception e) { /* fallback: no haptics */ }
     }
