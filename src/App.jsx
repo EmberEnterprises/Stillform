@@ -2370,6 +2370,40 @@ const countTodaysSessions = () => {
   } catch { return 0; }
 };
 
+// Get the most recent session (any tool) within the last 24h. Used for the
+// "pick up where you left off" affordance on home. Returns null if no recent
+// session.
+const getMostRecentSession = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!sessions.length) return null;
+    const last = sessions[sessions.length - 1];
+    if (!last?.timestamp) return null;
+    const ageMs = Date.now() - new Date(last.timestamp).getTime();
+    if (ageMs > 24 * 60 * 60 * 1000) return null; // >24h, not relevant
+    return { ...last, ageMs };
+  } catch { return null; }
+};
+
+// Format an age in ms as a brief human label: "12m ago", "2h ago", "yesterday".
+const formatSessionAge = (ageMs) => {
+  if (ageMs < 60 * 1000) return "just now";
+  if (ageMs < 60 * 60 * 1000) return `${Math.floor(ageMs / (60 * 1000))}m ago`;
+  if (ageMs < 24 * 60 * 60 * 1000) return `${Math.floor(ageMs / (60 * 60 * 1000))}h ago`;
+  return "yesterday";
+};
+
+// Map session.tools array to a readable tool label for the resume affordance.
+const labelForLastSession = (session) => {
+  const tools = Array.isArray(session?.tools) ? session.tools : [];
+  if (tools.includes("reframe")) return "Reframe";
+  if (tools.includes("body-scan")) return "Body Scan";
+  if (tools.includes("breathe") && tools.includes("ground")) return "Breathe + Ground";
+  if (tools.includes("breathe")) return "Breathe";
+  if (tools.includes("metacognition")) return "Self Mode";
+  return "Last session";
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
@@ -15806,6 +15840,39 @@ const isSignalProfileConfigured = () => {
 
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+
+              {/* ── PICK UP WHERE YOU LEFT OFF — recent-session affordance ─ */}
+              {(() => {
+                const last = getMostRecentSession();
+                if (!last) return null;
+                const ageLabel = formatSessionAge(last.ageMs);
+                const toolLabel = labelForLastSession(last);
+                // Don't surface if it just happened (avoids weird "just now" loop right after exit)
+                if (last.ageMs < 2 * 60 * 1000) return null;
+                return (
+                  <div style={{
+                    marginBottom: 20,
+                    padding: "10px 14px",
+                    background: "var(--surface)",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 10
+                  }}>
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--text-muted)"
+                    }}>
+                      Last session · {toolLabel} · {ageLabel}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
               {(() => {
