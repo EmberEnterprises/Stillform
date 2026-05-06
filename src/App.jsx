@@ -8406,6 +8406,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
         </div>
 
+        {/* Physiology naming — names cognitive reappraisal as the practiced skill.
+            Parallel to Breathe's parasympathetic naming and Body Scan's interoception
+            naming. Completes the science-of-the-session arc: affect labeling (chip),
+            cognitive reappraisal (Reframe itself), reflection-on-action (Lock-in). */}
+        <div style={{
+          fontSize: 12,
+          color: "var(--text-muted)",
+          lineHeight: 1.6,
+          marginBottom: 24,
+          paddingLeft: 12,
+          borderLeft: "1px solid var(--amber-dim)"
+        }}>
+          You practiced cognitive reappraisal — the shift from reactive interpretation to deliberate framing. It's a measurable skill that strengthens prefrontal-amygdala regulation.
+        </div>
+
         {/* POST SESSION INSIGHT — inline, if available */}
         {insight && (
           <div style={{ marginBottom: 24, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>

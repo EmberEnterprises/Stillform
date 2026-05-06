@@ -583,20 +583,25 @@ Compliance side benefit captured during the May 5 audit: the medical disclaimers
 
 Build verified.
 
-### ✅ Within-session physiology-naming feedback — SHIPPED May 6, 2026 (partial scope: Breathe + Ground, Body Scan)
-Closes the session-1 retention gap from the May 5 vision/values review for two of three tool completion surfaces. Reframe is the remaining surface — deferred because Reframe lacks a discrete "completion screen" (it transitions through queueDebriefAndComplete to debrief or Self Mode, not a dedicated complete screen). Adding physiology naming to Reframe is architectural and warrants a separate session.
+### ✅ Within-session physiology-naming feedback — SHIPPED May 6, 2026 (full scope: Breathe, Body Scan, Reframe)
+Closes the session-1 retention gap from the May 5 vision/values review across all three tool completion surfaces. Initial scope claimed Reframe lacked a discrete completion screen — that was a half-checked audit. Reframe's `showPostRating` screen is the equivalent surface (post-state circumplex chips, post-session insight, Next Move with Lock-in). Re-audit corrected the scope and shipped Reframe in the same session.
 
-Two surfaces enhanced:
+Three surfaces enhanced — each names the actual neuroscience term that maps to what the tool does:
 
-1. **Breathe + Ground complete screen** — added a centered text block between the session indicator and button row: *"You engaged your parasympathetic nervous system through paced breathing and somatic grounding. Practice strengthens the pathway."* Names the physiology specifically (parasympathetic), names what the user did (paced breathing + somatic grounding), names what gets built (the pathway).
+1. **Breathe + Ground complete screen** — *"You engaged your parasympathetic nervous system through paced breathing and somatic grounding. Practice strengthens the pathway."* Names parasympathetic activation as the physiology.
 
-2. **Body Scan What Shifted screen** — added a left-bordered text block between the existing "Your body moved through six points" intro and the chip selection: *"You practiced interoception — the awareness of internal body state. It's a measurable skill that strengthens with reps."* Names interoception specifically (real neuroscience term), names what got practiced, frames as skill-building.
+2. **Body Scan What Shifted screen** — *"You practiced interoception — the awareness of internal body state. It's a measurable skill that strengthens with reps."* Names interoception as the practiced skill.
 
-Both new copies follow the locked tone discipline — deadpan, specific, structural, no filler words. No instances of "just" in any new user-facing copy.
+3. **Reframe Post-Rating screen** — *"You practiced cognitive reappraisal — the shift from reactive interpretation to deliberate framing. It's a measurable skill that strengthens prefrontal-amygdala regulation."* Names cognitive reappraisal (Ochsner & Gross 2002+), the validated neuroscience technique that Reframe operationalizes.
 
-Build verified: vite build passes. Reframe physiology naming carried forward as a smaller follow-up.
+The three-surface set creates a **complete science-of-the-session arc**:
+- **Affect labeling** — chip selection (already documented in FAQ and CHIP_DEFINITIONS info modal)
+- **Cognitive reappraisal** — Reframe itself (new line)
+- **Reflection-on-action** — Lock-in (already cited in info modal: "Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning")
 
-### 🧠 ~~PRELAUNCH — Within-session physiology-naming feedback~~ — SHIPPED ABOVE for Breathe + Body Scan; Reframe surface deferred
+Each surface gives the user a specific, named, validated mechanism for what's happening in their nervous system. Tone discipline maintained: deadpan, specific, structural, no filler words.
+
+Build verified.
 
 ### 📊 PRELAUNCH — Verify metrics persistence for future value articulation
 Subscription apps live or die on the moment a user looks at their credit card statement and asks "what do I get for $14.99/month?" Stillform's pricing reflects real value and the science backs it. The user-facing "value articulation" surface (month-1, month-3, month-6 personalized data callouts) is structurally post-launch — it requires real longitudinal user data that doesn't exist yet. **But the prelaunch piece is making sure the data is being captured correctly RIGHT NOW so it's available when the surface ships.**
