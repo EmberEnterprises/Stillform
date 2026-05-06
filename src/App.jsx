@@ -2830,6 +2830,81 @@ const getSavedReframeDistortions = (limitDays = 90) => {
   } catch { return []; }
 };
 
+// ─── SESSIONS INVENTORY HELPERS — Phase 0 for My Progress ─────────────
+// computeStreak, countTodaysSessions, getMostRecentSession already exist
+// near line 2350 (added earlier in May 6 home-screen feature commits).
+// These are the rollup helpers My Progress will need: week/month windows,
+// tool distribution, average session duration.
+
+// Count sessions in the last N stillform-days. Includes today.
+// Default 7 = "this week" rolling window.
+const countSessionsInDays = (days = 7) => {
+  try {
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    return getSessionsFromStorage().filter(s => {
+      const ts = new Date(s.timestamp || 0).getTime();
+      return ts >= cutoff;
+    }).length;
+  } catch { return 0; }
+};
+
+// Tool usage distribution across last N days. Returns
+// { breathe, scan, reframe, metacognition, ground, total } where each value
+// is the count of sessions that included that tool. (Sessions can include
+// multiple tools — e.g. breathe + ground.) Default 30 days.
+const getToolDistribution = (days = 30) => {
+  try {
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const sessions = getSessionsFromStorage().filter(s => {
+      const ts = new Date(s.timestamp || 0).getTime();
+      return ts >= cutoff;
+    });
+    const counts = { breathe: 0, "body-scan": 0, reframe: 0, metacognition: 0, ground: 0, total: sessions.length };
+    sessions.forEach(s => {
+      const tools = Array.isArray(s.tools) ? s.tools : [];
+      tools.forEach(t => {
+        if (counts[t] !== undefined) counts[t]++;
+      });
+    });
+    return counts;
+  } catch { return { breathe: 0, "body-scan": 0, reframe: 0, metacognition: 0, ground: 0, total: 0 }; }
+};
+
+// Average session duration (in seconds) across last N sessions. Returns null
+// if no sessions or no duration data. Used for "your average session is N
+// minutes" surface.
+const getAverageSessionDuration = (limit = 30) => {
+  try {
+    const recent = getSessionsFromStorage()
+      .filter(s => typeof s.duration === "number" && s.duration > 0)
+      .slice(-limit);
+    if (!recent.length) return null;
+    const total = recent.reduce((sum, s) => sum + s.duration, 0);
+    return Math.round(total / recent.length);
+  } catch { return null; }
+};
+
+// Sessions per stillform-day across last N days. Returns array of
+// { date, count } sorted oldest-first. Surfaces practice rhythm — does
+// the user practice consistently, in bursts, or sporadically? Default 30.
+const getSessionsPerDay = (days = 30) => {
+  try {
+    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const sessions = getSessionsFromStorage().filter(s => {
+      const ts = new Date(s.timestamp || 0).getTime();
+      return ts >= cutoff;
+    });
+    const byDay = {};
+    sessions.forEach(s => {
+      const day = TimeKeeper.stillformDayOf(s.timestamp);
+      if (day) byDay[day] = (byDay[day] || 0) + 1;
+    });
+    return Object.entries(byDay)
+      .map(([date, count]) => ({ date, count }))
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  } catch { return []; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
