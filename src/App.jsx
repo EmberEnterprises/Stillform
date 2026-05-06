@@ -10999,7 +10999,7 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
                   width: "100%", background: "none", border: "none", padding: "10px 12px",
                   cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
-                  <span style={{ fontSize: 12, color: "var(--text)" }}>{group.label}</span>
+                  <span className="t-body-sm">{group.label}</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
                     {selectedInGroup > 0 ? `${selectedInGroup} selected` : ""} {openTriggerGroups[group.id] ? "▾" : "▸"}
                   </span>
@@ -17055,7 +17055,7 @@ const isSignalProfileConfigured = () => {
               {installPrompt && !installDismissed && (
                 <div style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "10px 16px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 12, color: "var(--text)" }}>Install Stillform for instant access</span>
+                    <span className="t-body-sm">Install Stillform for instant access</span>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
                     <button onClick={() => setInstallDismissed(true)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Later</button>
