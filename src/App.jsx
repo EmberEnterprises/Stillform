@@ -5062,7 +5062,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           {feelChips.map(f => (
             <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
               <button
-                onClick={() => setPostStateChip(f.id)}
+                onClick={() => { haptic.tick(); setPostStateChip(f.id); }}
                 style={{
                   background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
                   border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
@@ -8384,7 +8384,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             {feelChips.map(f => (
               <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-                <button onClick={() => setPostRating(f.id)} style={{
+                <button onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
                   background: postRating === f.id ? "var(--amber-glow)" : "transparent",
                   border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
                   borderRadius: 20, padding: "8px 20px", fontSize: 13,
@@ -8483,7 +8483,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                     })()}
                   </div>
                   {showLockIn && (
-                    <button onClick={() => setLockInConfirmed(true)} style={{
+                    <button onClick={() => { haptic.heavy(); setLockInConfirmed(true); }} style={{
                       background: "var(--surface)", color: "var(--amber)",
                       border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
                       borderRadius: "var(--r-lg)", padding: "8px 20px", fontSize: 12,
@@ -10355,7 +10355,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             { id: "distant", label: "Distant" }
           ].map(f => (
             <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-              <button onClick={() => setFeelState(feelState === f.id ? null : f.id)} style={{
+              <button onClick={() => { haptic.tick(); setFeelState(feelState === f.id ? null : f.id); }} style={{
                 background: feelState === f.id ? "var(--amber-glow)" : "transparent",
                 border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
                 borderRadius: 20, padding: "5px 14px", fontSize: 12,
