@@ -581,14 +581,20 @@ Stillform's onboarding teaches **what the tools are**. It does not necessarily t
 
 **Compliance side benefit:** the medical disclaimers in the ToS (Sections 27-30) and Privacy Policy become more believable when the framing is established up front rather than only living in legal text users don't read.
 
-### 🧠 PRELAUNCH — Within-session "what just happened in your nervous system" feedback
-Stillform's science foundation is real and rigorous. The plain-language neuroscience surface (May 1) makes the science visible **on demand**. But on-demand info that users have to tap into doesn't shape the felt sense of using the app. Users in their first 1-3 sessions need a "this is doing something specific" signal to retain — and it has to be specific enough that it differentiates Stillform from generic breathing/meditation apps.
+### ✅ Within-session physiology-naming feedback — SHIPPED May 6, 2026 (partial scope: Breathe + Ground, Body Scan)
+Closes the session-1 retention gap from the May 5 vision/values review for two of three tool completion surfaces. Reframe is the remaining surface — deferred because Reframe lacks a discrete "completion screen" (it transitions through queueDebriefAndComplete to debrief or Self Mode, not a dedicated complete screen). Adding physiology naming to Reframe is architectural and warrants a separate session.
 
-**Why prelaunch:** session-1 retention is determined by whether users feel something specific happened. Adding the physiology naming to tool completion screens after launch means the launch cohort gets the inferior version and churns at a higher rate. Highest-leverage gap of the five.
+Two surfaces enhanced:
 
-**Possible solution:** A within-session post-tool moment that names what just happened in physiological terms. Not generic encouragement ("Great job!"). Specific physiology: *"You just reduced your sympathetic activation. That's measurable."* Or *"You just spent 60 seconds in the parasympathetic dominant state. With practice this becomes faster to access."* Woven into tool completion screens rather than buried in info buttons.
+1. **Breathe + Ground complete screen** — added a centered text block between the session indicator and button row: *"You engaged your parasympathetic nervous system through paced breathing and somatic grounding. Practice strengthens the pathway."* Names the physiology specifically (parasympathetic), names what the user did (paced breathing + somatic grounding), names what gets built (the pathway).
 
-**Verification step:** read existing tool completion screens (Breathe close, Body Scan close, Reframe close) and document what each currently says. Then evaluate where physiology-naming language can be added without making completion verbose or didactic. Brief, specific, science-grounded.
+2. **Body Scan What Shifted screen** — added a left-bordered text block between the existing "Your body moved through six points" intro and the chip selection: *"You practiced interoception — the awareness of internal body state. It's a measurable skill that strengthens with reps."* Names interoception specifically (real neuroscience term), names what got practiced, frames as skill-building.
+
+Both new copies follow the locked tone discipline — deadpan, specific, structural, no filler words. No instances of "just" in any new user-facing copy.
+
+Build verified: vite build passes. Reframe physiology naming carried forward as a smaller follow-up.
+
+### 🧠 ~~PRELAUNCH — Within-session physiology-naming feedback~~ — SHIPPED ABOVE for Breathe + Body Scan; Reframe surface deferred
 
 ### 📊 PRELAUNCH — Verify metrics persistence for future value articulation
 Subscription apps live or die on the moment a user looks at their credit card statement and asks "what do I get for $14.99/month?" Stillform's pricing reflects real value and the science backs it. The user-facing "value articulation" surface (month-1, month-3, month-6 personalized data callouts) is structurally post-launch — it requires real longitudinal user data that doesn't exist yet. **But the prelaunch piece is making sure the data is being captured correctly RIGHT NOW so it's available when the surface ships.**

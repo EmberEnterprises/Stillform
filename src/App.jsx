@@ -4072,6 +4072,20 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
+        {/* Physiology naming — names what happened in the nervous system.
+            Per May 5 prelaunch gap audit: session-1 retention hinges on users
+            feeling something specific happened. Brief, science-grounded. */}
+        <div style={{
+          fontSize: 12,
+          color: "var(--text-muted)",
+          lineHeight: 1.6,
+          marginBottom: 16,
+          textAlign: "center",
+          maxWidth: 360,
+          margin: "0 auto 16px"
+        }}>
+          You engaged your parasympathetic nervous system through paced breathing and somatic grounding. Practice strengthens the pathway.
+        </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, width: "100%" }}>
           <button className="btn btn-primary" onClick={() => queueDebriefAndComplete("reframe-calm", "grounding-complete-continue")}>
             Continue to Reframe →
@@ -5021,8 +5035,21 @@ function BodyScanTool({ onComplete, setInfoModal }) {
         <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
           What Shifted
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 24 }}>
+        <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 12 }}>
           Your body just moved through six points. Name where it lands now — that's what locks the regulation in.
+        </div>
+        {/* Physiology naming — names interoception specifically as the practiced skill.
+            Per May 5 prelaunch gap audit: session-1 retention hinges on users feeling
+            something specific happened. */}
+        <div style={{
+          fontSize: 12,
+          color: "var(--text-muted)",
+          lineHeight: 1.6,
+          marginBottom: 24,
+          paddingLeft: 12,
+          borderLeft: "1px solid var(--amber-dim)"
+        }}>
+          You practiced interoception — the awareness of internal body state. It's a measurable skill that strengthens with reps.
         </div>
 
         {preChipLabel && (
