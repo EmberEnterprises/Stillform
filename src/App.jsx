@@ -15841,6 +15841,29 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
+              {/* ── TIME-OF-DAY GREETING — terse, declarative ─────────────── */}
+              {(() => {
+                const hr = new Date().getHours();
+                let greeting;
+                if (hr < 5) greeting = "Late night.";
+                else if (hr < 12) greeting = "Morning.";
+                else if (hr < 17) greeting = "Afternoon.";
+                else if (hr < 21) greeting = "Evening.";
+                else greeting = "Night.";
+                return (
+                  <div style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 22,
+                    fontWeight: 300,
+                    color: "var(--text-dim)",
+                    letterSpacing: "0.01em",
+                    marginBottom: 16
+                  }}>
+                    {greeting}
+                  </div>
+                );
+              })()}
+
               {/* ── PICK UP WHERE YOU LEFT OFF — recent-session affordance ─ */}
               {(() => {
                 const last = getMostRecentSession();
