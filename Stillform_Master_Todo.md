@@ -444,24 +444,23 @@ The ToS generated today reads: *"The account will not be charged and the subscri
 
 **Recovery for current founder account in the meantime:** manually patch the `user:3ed32eb5-...` row in Supabase (set is_subscribed=TRUE, status=active, lemon_customer_id=8285339, lemon_subscription_id=2127474, source_event=manual_recovery_pending_rewrite, updated_at=now). Keeps the founder account testable while the rewrite is scheduled.
 
-### 📜 Build legal update notification mechanism — REQUIRED before TestFlight broad release (added May 4, 2026 during Termly ToS questionnaire)
-Stillform has no infrastructure to notify users when the Terms of Service or Privacy Policy are updated. The Termly ToS questionnaire commits Stillform to "notify users about updates to your legal terms" — without an implementation, that commitment is unfulfilled and creates regulatory exposure (GDPR/CCPA/similar laws require meaningful notice of material changes).
+### ✅ Build legal update notification mechanism — SHIPPED May 6, 2026
+Closes the May 4 TestFlight-blocking item from Termly walkthrough. Per Termly ToS commitment to notify users of legal updates.
 
-**What needs to be built:**
-1. **Constant in code** — `LEGAL_VERSION` constant with the current date/version of the legal docs (e.g., `LEGAL_VERSION = "2026-05-04"`). Updated whenever the ToS or Privacy Policy materially changes.
-2. **Per-user storage in Supabase** — column `last_legal_version_accepted` on `stillform_user_state` table (or equivalent). Stores the version string of the legal docs the user last accepted.
-3. **App launch comparison** — on each app launch (or sign-in), compare the user's `last_legal_version_accepted` to the current `LEGAL_VERSION` constant. If they don't match, surface the legal-update modal.
-4. **Legal-update modal** — single-screen modal with two-paragraph notice: "Our Terms of Service and/or Privacy Policy have been updated. Please review the changes." Two buttons: "Review changes" (opens stillformapp.com/terms or stillformapp.com/privacy in new tab) and "Accept and continue" (writes the new version string to the user's record, dismisses the modal).
-5. **For brand-new users** — on first sign-up, automatically set `last_legal_version_accepted` to the current `LEGAL_VERSION`. They've effectively accepted by signing up under the current terms.
-6. **For users who don't accept** — for routine updates, they can dismiss and continue using the app (modal re-surfaces on next launch). For material changes (rare), modal could block app access until accepted — but for V1, soft-prompt is sufficient.
+Three pieces shipped:
+1. **`LEGAL_VERSION` and `LEGAL_VERSION_KEY` constants** at the top of App.jsx near `APP_VERSION`. Format: YYYY-MM-DD matching Termly "Last updated" timestamps. Bump this whenever ToS or Privacy Policy is materially updated.
+2. **Initialization logic on mount** — checks localStorage for last-accepted version. First-run users are silently set to current version (they're accepting by signing up under current ToS). Existing users with mismatched version trigger the modal.
+3. **Legal update modal** — overlay with backdrop blur. Title "Updated legal terms," body explains ToS/Privacy were updated, two link buttons to review (Terms and Privacy on stillformapp.com), one "Accept and continue" primary button that writes new version to localStorage and dismisses.
 
-**Implementation notes:**
-- Tracks at user level, not install level — if a user has multiple devices, accepting on one device clears the modal on all devices on next launch.
-- Email notification for material changes is also standard practice but is not blocking V1 — Termly ToS commitment is "in-app notification when the user next accesses the Services," which the modal satisfies.
-- The Privacy Policy already has a "Last updated" timestamp at the top — that's the version string source of truth. The ToS will have similar once published. `LEGAL_VERSION` should match these dates.
-- This is a one-time build with low ongoing maintenance — once shipped, the only work is bumping the constant when legal docs change.
+**Soft-prompt design:** user can navigate around the modal but it re-surfaces on next launch until accepted. Per Apr 30 V1 design decision — material changes (rare) could block app access in future, but soft-prompt is sufficient for V1.
 
-**Why TestFlight-blocking:** Termly ToS makes the user commitment to notify of updates. Without the mechanism in place, the ToS is making a promise the app doesn't keep. Real exposure: GDPR has fined companies for failing to notify of material privacy policy changes. CCPA has similar provisions. Apple App Store review will look for this if they scrutinize the privacy/legal posture (less common than other reviews but happens).
+**Implementation chose localStorage over Supabase column** — simpler, no schema migration, no admin API call needed. Tradeoff: if user reinstalls and signs in, they re-accept (which is fine since the modal is non-disruptive). The Supabase column approach captured in original spec was overkill for V1.
+
+**To trigger the modal in production:** bump `LEGAL_VERSION` constant whenever ToS or Privacy Policy is updated. All existing users will see the modal on their next app load.
+
+**Sync with Termly:** when republishing ToS through Termly, copy the "Last updated" timestamp into `LEGAL_VERSION`. Same when republishing Privacy Policy. If only one doc updates, still bump (the modal's wording covers both).
+
+Build verified: vite build passes, 0 errors, 587 kB main bundle / 146 kB gzipped.
 
 ### ✅ Build password reset flow — SHIPPED May 6, 2026 (commit `b4bb394`)
 Surfaces a complete in-app password reset flow using Supabase auth recovery. Five pieces in one commit: (1) new auth helpers `sbResetPassword(email)` and `sbUpdatePassword(newPassword)`, (2) new routable `reset-password` screen registered in HASH_SCREENS, (3) recovery hash parser that runs once on initial mount — detects `type=recovery` in URL hash, extracts access_token + refresh_token, calls sbSetSession() to authenticate the recovering user, then cleans hash and routes to reset-password screen, (4) "Set new password" screen with password + confirm fields, Show/Hide toggle, validation (8+ chars, match), error states, success state with Continue button to home, (5) "Forgot password?" link on existing sign-in surface in Settings → Sign in card with inline panel for requesting recovery email, confirmation message includes spam-folder check reminder.

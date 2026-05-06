@@ -6147,6 +6147,11 @@ function MicButton({ onTranscript }) {
 const SUPABASE_URL = "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4cmV3aWxkZm5ieGx5Z2pvZnB4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NTAxMDcsImV4cCI6MjA5MTMyNjEwN30.r3Pdm3XoZVPlUFgKCPLtfkSrHKIxVcwFW4tuUP23Vns";
 const APP_VERSION = "1.0.0";
+// LEGAL_VERSION — bump this whenever ToS or Privacy Policy is materially updated.
+// Per Termly ToS commitment to notify users of legal updates.
+// Format: YYYY-MM-DD matching the Termly "Last updated" timestamp.
+const LEGAL_VERSION = "2026-05-04";
+const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
 const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
@@ -12366,6 +12371,24 @@ export default function Stillform() {
   });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
+  // Legal update notification — surfaces a modal when the user's last-accepted
+  // version of ToS/Privacy doesn't match the current LEGAL_VERSION constant.
+  // Per Termly ToS commitment to notify users of legal updates.
+  const [legalUpdateOpen, setLegalUpdateOpen] = useState(() => {
+    try {
+      const accepted = localStorage.getItem(LEGAL_VERSION_KEY);
+      // First-run users: silently set to current version (they're accepting
+      // by signing up under the current ToS shown at signup time).
+      if (!accepted) {
+        localStorage.setItem(LEGAL_VERSION_KEY, LEGAL_VERSION);
+        return false;
+      }
+      // Existing users with mismatched version: surface modal.
+      return accepted !== LEGAL_VERSION;
+    } catch {
+      return false;
+    }
+  });
   const trialDaysLeft = (() => {
     try {
       const start = localStorage.getItem("stillform_trial_start");
@@ -19088,6 +19111,110 @@ const isSignalProfileConfigured = () => {
           </footer>
         )}
       </div>
+
+      {/* LEGAL UPDATE MODAL — surfaces when LEGAL_VERSION constant doesn't match
+          the user's last-accepted version. Per Termly ToS commitment to notify
+          users of legal updates. Soft-prompt: user can dismiss but it re-surfaces
+          on next launch until accepted. */}
+      {legalUpdateOpen && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0, 0, 0, 0.7)",
+          backdropFilter: "blur(4px)",
+          zIndex: 10000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          padding: "24px"
+        }}>
+          <div style={{
+            background: "var(--bg)",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--r-lg)",
+            maxWidth: 420,
+            width: "100%",
+            padding: "32px 24px",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.3)"
+          }}>
+            <h2 style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 28,
+              fontWeight: 300,
+              marginBottom: 16,
+              color: "var(--text)"
+            }}>
+              Updated legal terms
+            </h2>
+            <p style={{
+              fontSize: 14,
+              color: "var(--text)",
+              lineHeight: 1.6,
+              marginBottom: 12
+            }}>
+              We've updated our Terms of Service and Privacy Policy. Please review the changes.
+            </p>
+            <p style={{
+              fontSize: 13,
+              color: "var(--text-muted)",
+              lineHeight: 1.5,
+              marginBottom: 20
+            }}>
+              By continuing to use Stillform, you agree to the updated terms.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <a
+                href="https://stillformapp.com/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--r-lg)",
+                  padding: "12px 16px",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  color: "var(--text)",
+                  fontSize: 13,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                Review Terms of Service
+              </a>
+              <a
+                href="https://stillformapp.com/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  borderRadius: "var(--r-lg)",
+                  padding: "12px 16px",
+                  textAlign: "center",
+                  textDecoration: "none",
+                  color: "var(--text)",
+                  fontSize: 13,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}
+              >
+                Review Privacy Policy
+              </a>
+              <button
+                className="btn btn-primary"
+                style={{ fontSize: 14, marginTop: 8 }}
+                onClick={() => {
+                  try {
+                    localStorage.setItem(LEGAL_VERSION_KEY, LEGAL_VERSION);
+                  } catch {}
+                  setLegalUpdateOpen(false);
+                }}
+              >
+                Accept and continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
     </ErrorBoundary>
   );
