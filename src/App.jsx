@@ -2361,6 +2361,15 @@ const computeStreak = () => {
   } catch { return 0; }
 };
 
+// Count today's sessions for the home-screen daily-rep counter. Uses
+// stillformDay so the count rolls over at the user's morning_start, not midnight.
+const countTodaysSessions = () => {
+  try {
+    const today = TimeKeeper.stillformDay();
+    return getSessionsFromStorage().filter(s => TimeKeeper.stillformDayOf(s.timestamp) === today).length;
+  } catch { return 0; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
@@ -19342,9 +19351,12 @@ const isSignalProfileConfigured = () => {
         {/* RECONSTRUCTION BANNER */}
         {screen === "home" && (() => {
           const streak = computeStreak();
+          const todaysSessions = countTodaysSessions();
+          const showStreak = streak >= 2;
+          const showToday = todaysSessions >= 1;
           return (
             <>
-              {streak >= 2 && (
+              {(showStreak || showToday) && (
                 <div style={{
                   background: "var(--bg)",
                   borderBottom: "0.5px solid var(--amber-dim)",
@@ -19352,24 +19364,51 @@ const isSignalProfileConfigured = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
-                  gap: 10
+                  gap: 24
                 }}>
-                  <span style={{
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontSize: 22,
-                    color: "var(--amber)",
-                    fontWeight: 300,
-                    lineHeight: 1
-                  }}>{streak}</span>
-                  <span style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.18em",
-                    textTransform: "uppercase",
-                    color: "var(--text-muted)"
-                  }}>
-                    {streak === 1 ? "day" : "days"} consecutive
-                  </span>
+                  {showStreak && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 22,
+                        color: "var(--amber)",
+                        fontWeight: 300,
+                        lineHeight: 1
+                      }}>{streak}</span>
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 9,
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        color: "var(--text-muted)"
+                      }}>
+                        {streak === 1 ? "day" : "days"} consecutive
+                      </span>
+                    </div>
+                  )}
+                  {showStreak && showToday && (
+                    <span style={{ color: "var(--border)", fontSize: 12 }}>·</span>
+                  )}
+                  {showToday && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 22,
+                        color: "var(--amber)",
+                        fontWeight: 300,
+                        lineHeight: 1
+                      }}>{todaysSessions}</span>
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 9,
+                        letterSpacing: "0.18em",
+                        textTransform: "uppercase",
+                        color: "var(--text-muted)"
+                      }}>
+                        {todaysSessions === 1 ? "session" : "sessions"} today
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
               <div style={{
