@@ -4679,13 +4679,13 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
               </div>
             ))}
             {lastShift !== null && lastShift > 0 && (
-              <div style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid var(--border)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--amber)", letterSpacing: "0.1em" }}>
+              <div className="t-mono-xs" style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid var(--border)", color: "var(--amber)", letterSpacing: "0.1em" }}>
                 STATE SHIFT +{lastShift} · FUNCTIONAL
               </div>
             )}
           </div>
         )}
-        {count > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
+        {count > 1 && <div className="t-mono-xs" style={{ letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {count}</div>}
         {count === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
@@ -5807,14 +5807,14 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             ))}
           </div>
         )}
-        {sessionCount > 1 && <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {sessionCount}</div>}
+        {sessionCount > 1 && <div className="t-mono-xs" style={{ letterSpacing: "0.1em", marginBottom: 16 }}>SESSION {sessionCount}</div>}
         {sessionCount === 1 && (
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 16, textAlign: "center" }}>
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>First calibration</div>
             <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", color: "var(--text-muted)", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
+        <div className="t-mono-xs" style={{ letterSpacing: "0.1em", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
           NAMING THE SHIFT…
         </div>
         <button className="btn btn-ghost" style={{ fontSize: 12 }} onClick={() => queueDebriefAndComplete(undefined, "scan-complete-exit")}>Exit session</button>
@@ -9001,7 +9001,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       <div style={{ padding: "40px 0 8px" }}>
         {/* FEEL CHIPS */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+          <div className="t-mono-xs" style={{ marginBottom: 20 }}>
             Where are you now?
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
@@ -9753,7 +9753,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 rows={3}
               />
               {input.length > 1600 && (
-                <div style={{ position: "absolute", bottom: 6, right: 8, fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.06em", color: input.length > 1900 ? "rgba(200,100,50,0.9)" : "var(--text-muted)", pointerEvents: "none" }}>
+                <div className="t-mono-xs" style={{ position: "absolute", bottom: 6, right: 8, letterSpacing: "0.06em", color: input.length > 1900 ? "rgba(200,100,50,0.9)" : "var(--text-muted)", pointerEvents: "none" }}>
                   {2000 - input.length}
                 </div>
               )}
@@ -12816,7 +12816,7 @@ function MyProgress({ onBack }) {
         <div style={{ marginTop: 24, paddingTop: 24, borderTop: "0.5px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}><span>Pulse</span> <button onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+              <div className="t-mono-xs" style={{ color: "var(--amber)" }}><span>Pulse</span> <button onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
               {journalEntries.length > 0 && <div className="t-caption" style={{ marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
           </div>
@@ -12829,17 +12829,16 @@ function MyProgress({ onBack }) {
           {/* VIEW SINGLE ENTRY */}
           {viewEntry && (() => {
             const e = viewEntry;
-            const labelStyle = { fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.16em", textTransform: "uppercase" };
             const valueStyle = { fontSize: 13, color: "var(--text)", lineHeight: 1.6 };
             return (
               <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px" }}>
                 <button onClick={() => setViewEntry(null)} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginBottom: 16, padding: 0 }}>← Back</button>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 300, marginBottom: 16, lineHeight: 1.3 }}>{e.triggerType || e.trigger || "Signal event"}</div>
                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", marginBottom: 16 }}>{e.date} · {e.time}</div>
-                {e.signal?.length > 0 && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Signal</div><div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{e.signal.map(s => <span key={s} style={{ padding: "3px 8px", borderRadius: "var(--r-sm)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9 }}>{s}</span>)}</div></div>}
-                {(e.triggerType || e.trigger) && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Trigger</div><div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div></div>}
-                {e.outcome && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Outcome</div><div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div></div>}
-                {e.notes && <div style={{ marginBottom: 12 }}><div style={labelStyle}>Notes</div><div style={valueStyle}>{e.notes}</div></div>}
+                {e.signal?.length > 0 && <div style={{ marginBottom: 12 }}><div className="t-mono-xs" style={{ marginBottom: 6 }}>Signal</div><div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>{e.signal.map(s => <span key={s} style={{ padding: "3px 8px", borderRadius: "var(--r-sm)", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9 }}>{s}</span>)}</div></div>}
+                {(e.triggerType || e.trigger) && <div style={{ marginBottom: 12 }}><div className="t-mono-xs" style={{ marginBottom: 6 }}>Trigger</div><div style={valueStyle}>{[e.triggerType, e.trigger].filter(Boolean).join(" — ")}</div></div>}
+                {e.outcome && <div style={{ marginBottom: 12 }}><div className="t-mono-xs" style={{ marginBottom: 6 }}>Outcome</div><div style={{ ...valueStyle, color: "var(--amber)" }}>{e.outcome}</div></div>}
+                {e.notes && <div style={{ marginBottom: 12 }}><div className="t-mono-xs" style={{ marginBottom: 6 }}>Notes</div><div style={valueStyle}>{e.notes}</div></div>}
               </div>
             );
           })()}
@@ -15354,7 +15353,7 @@ const isSignalProfileConfigured = () => {
             background: "var(--bg2, #111)", border: "0.5px solid var(--border)",
             borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%"
           }}>
-            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 14 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
               {infoModal.title}
             </div>
             <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif" }}>
@@ -15544,7 +15543,7 @@ const isSignalProfileConfigured = () => {
                     />
                   ) : (
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.1em" }}>
                         Post-Check Briefing
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
@@ -16014,7 +16013,7 @@ const isSignalProfileConfigured = () => {
               <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
 
               {/* System calibration header */}
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+              <div className="t-mono-xs" style={{ marginBottom: 16 }}>
                 ◎ SYSTEM CALIBRATION
               </div>
 
@@ -16029,7 +16028,7 @@ const isSignalProfileConfigured = () => {
                 ))}
               </div>
 
-              <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
                 {current.label}
               </div>
               <h1 className="t-display-lg" style={{ marginBottom: 8, lineHeight: 1.15 }}>
@@ -17719,7 +17718,7 @@ const isSignalProfileConfigured = () => {
               {/* Roadmap link intentionally hidden from home surface */}
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
-                <button onClick={() => openFocusCheck("home")} style={{ background: "none", border: "none", fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.14em", textTransform: "uppercase", cursor: "pointer" }}>Composure Check</button>
+                <button onClick={() => openFocusCheck("home")} className="t-mono-xs" style={{ background: "none", border: "none", letterSpacing: "0.14em", cursor: "pointer" }}>Composure Check</button>
                 <button onClick={() => setInfoModal({ title: "Composure Check", body: "A 30-trial cognitive test measuring reaction time, impulse control, and response inhibition. Tap it from the home screen before a high-stakes interaction or decision to get an accurate read of your current regulatory capacity." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
               </div>
 
@@ -19496,7 +19495,7 @@ const isSignalProfileConfigured = () => {
               <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Calendar context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("calendar", !!integrationContext.calendar) }}>
+                  <div className="t-mono-xs" style={{ letterSpacing: "0.1em", color: integrationSignalColor("calendar", !!integrationContext.calendar) }}>
                     {integrationSignalLabel("calendar", !!integrationContext.calendar, `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`)}
                   </div>
                 </div>
@@ -19511,7 +19510,7 @@ const isSignalProfileConfigured = () => {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                   <div className="t-body-sm quiet">Consent</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.calendarConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                  <div className="t-mono-xs" style={{ letterSpacing: "0.1em", color: integrationContext.calendarConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
                     {integrationContext.calendarConsent || "pending"}
                   </div>
                 </div>
@@ -19520,7 +19519,7 @@ const isSignalProfileConfigured = () => {
                 {integrationContext.calendarLastRetryAt && <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}</div>}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationSignalColor("health", !!integrationContext.health) }}>
+                  <div className="t-mono-xs" style={{ letterSpacing: "0.1em", color: integrationSignalColor("health", !!integrationContext.health) }}>
                     {integrationSignalLabel("health", !!integrationContext.health, `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`)}
                   </div>
                 </div>
@@ -19535,7 +19534,7 @@ const isSignalProfileConfigured = () => {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10, marginBottom: 10 }}>
                   <div className="t-body-sm quiet">Consent</div>
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: integrationContext.healthConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
+                  <div className="t-mono-xs" style={{ letterSpacing: "0.1em", color: integrationContext.healthConsent === "granted" ? "var(--amber)" : "var(--text-muted)" }}>
                     {integrationContext.healthConsent || "pending"}
                   </div>
                 </div>
