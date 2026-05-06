@@ -16122,10 +16122,9 @@ const isSignalProfileConfigured = () => {
                     setRegType("thought-first");
                     setAssessmentAnswers([]);
                     setSetupStep(s => s + 1);
-                  }} style={{
+                  }} className="t-mono-sm" style={{
                     background: "none", border: "none", cursor: "pointer",
-                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
-                    textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
+                    letterSpacing: "0.14em", color: "var(--text-muted)", padding: "8px 0"
                   }}>
                     Help me figure it out →
                   </button>
@@ -16146,10 +16145,9 @@ const isSignalProfileConfigured = () => {
                       try { localStorage.setItem("stillform_calibration_deferred", "yes"); } catch {}
                       setSetupStep(s => s + 1);
                     }
-                  }} style={{
+                  }} className="t-mono-sm" style={{
                     background: "none", border: "none", cursor: "pointer",
-                    fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em",
-                    textTransform: "uppercase", color: "var(--text-muted)", padding: "8px 0"
+                    letterSpacing: "0.14em", color: "var(--text-muted)", padding: "8px 0"
                   }}>
                     {isLast ? "Calibration complete → Enter system" : "Use defaults →"}
                   </button>
@@ -19187,7 +19185,7 @@ const isSignalProfileConfigured = () => {
                             <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px" }}>
                               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                                 <div style={{ fontSize: 13, color: "var(--text)" }}>Status</div>
-                                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Active</div>
+                                <div className="t-mono-sm" style={{ letterSpacing: "0.1em", color: "var(--amber)" }}>Active</div>
                               </div>
                               {syncSignedIn && sbGetUser()?.email && (
                                 <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6 }}>{sbGetUser().email}</div>
