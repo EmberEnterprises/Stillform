@@ -18253,7 +18253,7 @@ const isSignalProfileConfigured = () => {
                           padding: "14px 18px", marginBottom: 12
                         }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                            <div style={{ fontSize: 14, color: "var(--text)" }}>English</div>
+                            <div className="t-body-md">English</div>
                             <div style={{ fontSize: 11, color: "var(--amber)" }}>✓ Active</div>
                           </div>
                           <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
@@ -18312,7 +18312,7 @@ const isSignalProfileConfigured = () => {
                         padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8
                       }}>
                         <div>
-                          <div style={{ fontSize: 14, color: "var(--text)" }}>{opt.icon} {opt.label}</div>
+                          <div className="t-body-md">{opt.icon} {opt.label}</div>
                           <div className="t-body-sm quiet" style={{ marginTop: 2 }}>{opt.desc}</div>
                         </div>
                         <button onClick={() => { try { localStorage.setItem(opt.key, isOn ? "off" : "on"); refreshSettings(); } catch {} }} style={{
@@ -18331,7 +18331,7 @@ const isSignalProfileConfigured = () => {
                     padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8
                   }}>
                     <div>
-                      <div style={{ fontSize: 14, color: "var(--text)" }}>◑ High contrast</div>
+                      <div className="t-body-md">◑ High contrast</div>
                       <div className="t-body-sm quiet" style={{ marginTop: 2 }}>Boosts text and border contrast. Helps with color blindness and visual sensitivity.</div>
                     </div>
                     <button onClick={() => {
@@ -18624,7 +18624,7 @@ const isSignalProfileConfigured = () => {
                       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                         <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
-                            <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in reminder</div>
+                            <div className="t-body-md">Daily check-in reminder</div>
                             <div className="t-caption" style={{ marginTop: 2 }}>
                               {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
                             </div>
@@ -18661,7 +18661,7 @@ const isSignalProfileConfigured = () => {
                       <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden", marginTop: 8 }}>
                         <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
-                            <div style={{ fontSize: 14, color: "var(--text)" }}>Pre-meeting preparation</div>
+                            <div className="t-body-md">Pre-meeting preparation</div>
                             <div className="t-caption" style={{ marginTop: 2 }}>
                               {enabled ? `${firstMins} min + ${secondMins} min before` : "Off"}
                             </div>
@@ -18864,7 +18864,7 @@ const isSignalProfileConfigured = () => {
                       return (
                         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                           <div>
-                            <div style={{ fontSize: 14, color: "var(--text)" }}>🔒 Biometric lock</div>
+                            <div className="t-body-md">🔒 Biometric lock</div>
                             <div className="t-body-sm quiet" style={{ marginTop: 2 }}>Require Face ID or fingerprint for Reframe and My Progress. Syncs across devices — each device uses its own biometric.</div>
                           </div>
                           <button onClick={() => { biometric.setEnabled(!bioOn); refreshSettings(); }} style={{
@@ -19164,7 +19164,7 @@ const isSignalProfileConfigured = () => {
                   fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Session history</div>
+                    <div className="t-body-md">Session history</div>
                     <div className="t-body-sm quiet">{getSessionCountFromStorage()} sessions</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "sessions" ? "▾" : "▸"}</span>
@@ -19202,7 +19202,7 @@ const isSignalProfileConfigured = () => {
                   fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Pulse</div>
+                    <div className="t-body-md">Pulse</div>
                     <div className="t-body-sm quiet">{(() => { try { return secureRead("stillform_journal", []).length; } catch { return 0; } })()} entries</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "journal" ? "▾" : "▸"}</span>
@@ -19234,7 +19234,7 @@ const isSignalProfileConfigured = () => {
                   fontFamily: "'DM Sans', sans-serif", display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Saved reframes</div>
+                    <div className="t-body-md">Saved reframes</div>
                     <div className="t-body-sm quiet">{(() => { try { return secureRead("stillform_saved_reframes", []).length; } catch { return 0; } })()} saved</div>
                   </div>
                   <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openLog === "reframes" ? "▾" : "▸"}</span>
@@ -19490,7 +19490,7 @@ const isSignalProfileConfigured = () => {
                   display: "flex", justifyContent: "space-between", alignItems: "center"
                 }}>
                   <div>
-                    <div style={{ fontSize: 14, color: "var(--text)" }}>Run Focus Check (30s)</div>
+                    <div className="t-body-md">Run Focus Check (30s)</div>
                     <div className="t-caption" style={{ marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
                   </div>
                   <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
