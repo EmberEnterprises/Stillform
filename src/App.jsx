@@ -2776,6 +2776,60 @@ const getEodReflections = (limit = 30) => {
   } catch { return []; }
 };
 
+// ─── SAVED REFRAMES INVENTORY HELPERS — Phase 0 for My Progress redesign ───
+// Saved reframes record: { text, distortion, timestamp, mode } where mode is
+// "calm" | "clarity" | "hype". Stored in stillform_saved_reframes (encrypted).
+//
+// These helpers normalize the inventory for surfacing in My Progress without
+// requiring the screen to know the storage key or shape.
+
+// Get all saved reframes, newest-first (typical surfacing order).
+const getSavedReframes = (limit = 50) => {
+  try {
+    const raw = secureRead("stillform_saved_reframes", []);
+    if (!Array.isArray(raw)) return [];
+    return [...raw]
+      .sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime())
+      .slice(0, limit);
+  } catch { return []; }
+};
+
+// Count saved reframes by mode. Returns { calm, clarity, hype, total }.
+// Useful for surfacing "you've saved 7 calm reframes, 2 hype" patterns.
+const getSavedReframeCounts = () => {
+  try {
+    const raw = secureRead("stillform_saved_reframes", []);
+    if (!Array.isArray(raw)) return { calm: 0, clarity: 0, hype: 0, total: 0 };
+    const counts = { calm: 0, clarity: 0, hype: 0, total: raw.length };
+    raw.forEach(r => {
+      const mode = String(r.mode || "").toLowerCase();
+      if (counts[mode] !== undefined) counts[mode]++;
+    });
+    return counts;
+  } catch { return { calm: 0, clarity: 0, hype: 0, total: 0 }; }
+};
+
+// Distortion frequency across saved reframes. Returns { distortion: count }
+// sorted by count descending. Useful for surfacing user's most-recurring
+// thinking patterns ("you've named catastrophizing 12 times this month").
+const getSavedReframeDistortions = (limitDays = 90) => {
+  try {
+    const raw = secureRead("stillform_saved_reframes", []);
+    if (!Array.isArray(raw)) return [];
+    const cutoff = Date.now() - (limitDays * 24 * 60 * 60 * 1000);
+    const counts = {};
+    raw
+      .filter(r => r.distortion && new Date(r.timestamp || 0).getTime() >= cutoff)
+      .forEach(r => {
+        const d = String(r.distortion).trim();
+        if (d) counts[d] = (counts[d] || 0) + 1;
+      });
+    return Object.entries(counts)
+      .map(([distortion, count]) => ({ distortion, count }))
+      .sort((a, b) => b.count - a.count);
+  } catch { return []; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
