@@ -427,31 +427,35 @@ The ToS generated today reads: *"The account will not be charged and the subscri
 
 **Why must-fix before publishing:** the current ToS makes a false billing commitment. This is the single biggest exposure in the generated document. Five-minute fix.
 
-### 🏗️ Subscription state table architecture rewrite — REQUIRED before TestFlight broad release (added May 5, 2026)
+### 🏗️ ✅ Subscription state table architecture rewrite — CODE SHIPPED May 6, 2026 (SQL migration pending Arlin's run)
 
-**Real architectural problem.** The current `stillform_subscription_state` table stores the same subscription multiple times under different identity keys (`customer:`, `install:`, `subscription:`, `user:`). Each new identity creates another row. Result: nine rows in Supabase for one person (founder account, May 5 testing) — some from April marked inactive, some from May marked active, all for the same Lemon Squeezy customer. Client reads the wrong row, displays wrong subscription state. Webhook fires correctly, returns 200, but subscription state is inconsistent across rows.
+**Code complete. SQL migration awaits your action in Supabase SQL editor.** All four Netlify functions are updated and the v2 `_subscriptionState.js` module is deployed. The migration file (`netlify/functions/_subscriptionMigration_v2.sql`) consolidates the existing rows by `lemon_subscription_id`, archives the v1 table, and renames v2 to canonical.
 
-**Symptom that surfaced this:** May 5, 2026 — founder subscription created via FOUNDER discount code. Lemon Squeezy showed active subscription, fired all expected webhooks (subscription_created, subscription_updated, subscription_payment_success), webhooks returned 200. But Stillform UI showed "No active subscription found." Root cause: stale `user:3ed32eb5-...` row from April 23 cancellation never got updated by today's webhooks because Lemon Squeezy didn't include custom_data.user_id in the discount-code checkout payload. The May 5, 2026 patch (commit `c81dbb3`) added an email-based user_id fallback to the webhook to keep the system from failing for future subscriptions, but that patch is a stabilizer, not a fix. The architecture is the problem.
+**What shipped (code):**
+1. **`netlify/functions/_subscriptionMigration_v2.sql`** — full migration with rollback notes, post-migration verification queries, and "drop archive after one billing cycle" guidance
+2. **`netlify/functions/_subscriptionState.js`** — rewritten. New `upsertSubscriptionByLemonId()` writes ONE row per webhook event. Email-based user_id fallback (the v1 patch from commit c81dbb3) is now part of normal flow inside the upsert, not a special case. `getSubscriptionStatusForLookup()` returns one row, no `pickBestState` arbitration. `linkInstallToUser()` UPDATES the existing row's user_id, doesn't write a new row. Old `upsertSubscriptionStatus()` kept as deprecated alias so any unmigrated callers still work.
+3. **`netlify/functions/subscription-webhook.js`** — uses `upsertSubscriptionByLemonId` directly. Removed the inline c81dbb3 email-fallback (now in module). Now bails early if no `lemon_subscription_id` in payload (rare edge case).
+4. **`netlify/functions/subscription-link-account.js`** — uses `linkInstallToUser` semantics. Single-row UPDATE on user_id column. No more multi-row write per link.
+5. **`netlify/functions/subscription-status.js`** — no code change needed; `getSubscriptionStatusForLookup` interface preserved.
+6. **`netlify/functions/subscription-portal.js`** — no code change needed; `getSubscriptionStatusForLookup` interface preserved.
+7. **`netlify/functions/account-delete.js`** — no code change needed; only used `sbAdminFetch`.
 
-**What the rewrite looks like:**
+**REQUIRED — your action in Supabase before the new functions become safe to deploy:**
+1. Take a Supabase backup (Database → Backups → "Create manual backup")
+2. Open Supabase SQL editor
+3. Paste the entire contents of `netlify/functions/_subscriptionMigration_v2.sql` and run as a single transaction
+4. Run the post-migration verification queries (commented at bottom of the SQL file)
+5. Spot-check the founder row: `select * from stillform_subscription_state where user_id = '3ed32eb5-ab80-4d7b-a4b1-491132100c8a';` — expect ONE row, is_subscribed=true, lemon_subscription_id=2127474
+6. After Netlify deploy + end-to-end validation (subscription portal works, webhook still 200s on next billing event, link-account works for new signups), drop the v1_archive and orphans tables
 
-1. **New schema** — one row per Lemon Squeezy subscription, keyed by `lemon_subscription_id` (primary key) only. Columns: `lemon_subscription_id`, `lemon_customer_id`, `user_id`, `install_id`, `user_email_hash`, `plan_variant`, `product_name`, `status`, `lemon_status`, `is_subscribed`, `trial_ends_at`, `renews_at`, `ends_at`, `updated_at`. No more `identity_key`. No more multiple rows for the same subscription.
+**Rollback path if anything goes wrong:** the `stillform_subscription_state_v1_archive` table preserves the original data. Drop the new table, rename the archive back, redeploy v1 functions.
 
-2. **Migration of existing rows** — write a SQL migration that consolidates current rows by `lemon_subscription_id`. For each subscription_id, pick the row with the most recent `updated_at` and most "complete" data (preferring rows with `user_id` populated). Drop duplicate rows. Add a `migrated_at` timestamp for audit.
-
-3. **Updated webhook handler (`subscription-webhook.js`)** — write ONE row per webhook event, not four. `upsertSubscriptionStatus` becomes `upsertSubscriptionByLemonId(lemonSubscriptionId, ...)`. The email-based user_id fallback from commit c81dbb3 becomes part of normal flow, not a patch.
-
-4. **Updated link-account function (`subscription-link-account.js`)** — when a user signs in and their install_id has a subscription record, UPDATE that row's `user_id` column. Don't write a new row. Single source of truth.
-
-5. **Updated read function (`subscription-status.js`)** — lookup by user_id OR install_id finds the SAME row. Returns one consistent state. No more `pickBestState` arbitration.
-
-6. **Updated `_subscriptionState.js` helpers** — remove `identityKeyFrom`, remove `writeIdentityRow` per-identity loop, remove `pickBestState`. Replace with simple lookup-and-update by lemon_subscription_id.
-
-**Estimated scope:** focused work session. Includes schema migration, code changes across four functions, testing across the edge cases the current architecture handles today (subscribe-before-signup, multi-device, account linking, trial-to-paid conversion, cancellation, expiration). Worth doing as its own dedicated session rather than wedged into a multitasking flow.
-
-**TestFlight-blocking because:** the current architecture creates fragmented data on EVERY signup, not just discount-code edge cases. The May 5 patch reduces the failure rate but the underlying brittleness affects every user. At launch scale (real users hitting trial-to-paid conversion, multi-device usage, account recovery), this would surface as recurring "I paid but the app says I didn't" support tickets — bad first-week metric, hard to debug per-user, and embarrassing for a paid SaaS launch.
-
-**Recovery for current founder account in the meantime:** manually patch the `user:3ed32eb5-...` row in Supabase (set is_subscribed=TRUE, status=active, lemon_customer_id=8285339, lemon_subscription_id=2127474, source_event=manual_recovery_pending_rewrite, updated_at=now). Keeps the founder account testable while the rewrite is scheduled.
+**Why this architecture is correct:**
+- Single source of truth keyed by `lemon_subscription_id` matches Lemon Squeezy's identity model — they assign exactly one subscription ID per subscription
+- `user_id` and `install_id` become indexed lookup columns, not part of row identity. A user changing devices, signing in/out, or reinstalling doesn't create new rows
+- Email-based user_id resolution (the patch from c81dbb3 that saved the founder account on May 5) is now permanent normal flow
+- No more `pickBestState` arbitration → no more "load-bearing fragility"
+- Webhook writes ONE row per event instead of four → simpler, faster, fewer failure modes
 
 ### ✅ Build legal update notification mechanism — SHIPPED May 6, 2026
 Closes the May 4 TestFlight-blocking item from Termly walkthrough. Per Termly ToS commitment to notify users of legal updates.

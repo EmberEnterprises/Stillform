@@ -1,4 +1,4 @@
-import { upsertSubscriptionStatus, getSubscriptionStatusForLookup } from "./_subscriptionState.js";
+import { linkInstallToUser, getSubscriptionStatusForLookup } from "./_subscriptionState.js";
 import {
   jsonResponse,
   parseBearer,
@@ -35,26 +35,17 @@ export async function handler(event) {
     const installId = body?.install_id ? String(body.install_id).trim().slice(0, 120) : null;
     if (!installId) return jsonResponse(event, 400, { error: "install_id is required" }, CORS_OPTIONS);
 
+    // v2: check if there's any subscription row for this install
     const existing = await getSubscriptionStatusForLookup({ installId });
     if (!existing) {
       return jsonResponse(event, 200, { ok: true, linked: false, reason: "no_install_record" }, CORS_OPTIONS);
     }
 
-    await upsertSubscriptionStatus({
-      userId,
-      installId,
-      lemonCustomerId: existing.lemon_customer_id || null,
-      lemonSubscriptionId: existing.lemon_subscription_id || null,
-      lemonStatus: existing.lemon_status || null,
-      status: existing.status || null,
-      userEmail: user.email || existing.user_email || null,
-      variantName: existing.plan_variant || null,
-      productName: existing.product_name || null,
-      eventName: "account_linked",
-      trialEndsAt: existing.trial_ends_at || null,
-      renewsAt: existing.renews_at || null,
-      endsAt: existing.ends_at || null
-    });
+    // v2: backfill user_id on the existing row, do NOT write a new row
+    const linked = await linkInstallToUser({ userId, installId });
+    if (!linked) {
+      return jsonResponse(event, 200, { ok: true, linked: false, reason: "no_subscription_id" }, CORS_OPTIONS);
+    }
 
     return jsonResponse(event, 200, { ok: true, linked: true }, CORS_OPTIONS);
   } catch (error) {

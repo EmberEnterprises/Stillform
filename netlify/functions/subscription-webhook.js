@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { upsertSubscriptionStatus, sbAdminFetch } from "./_subscriptionState.js";
+import { upsertSubscriptionByLemonId } from "./_subscriptionState.js";
 
 const responseHeaders = { "Content-Type": "application/json" };
 const MAX_BODY_CHARS = 200000;
@@ -69,46 +69,24 @@ export const handler = async function(event) {
       return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "test_mode" }) };
     }
 
-    // Fallback: if Lemon Squeezy custom_data didn't carry user_id (which happens
-    // with discount-code flows and some checkout edge cases — observed May 5, 2026
-    // when a $0 founder subscription was created and the user_id was missing from
-    // the webhook payload despite being passed at checkout), look up the auth user
-    // by the customer email. Lemon Squeezy always includes user_email in webhook
-    // attributes, so this gives us a reliable second path to user_id and prevents
-    // the "subscription exists but UI shows no active subscription" bug.
-    let userId = userIdFromCustom;
-    if (!userId && userEmail) {
-      try {
-        const lookup = await sbAdminFetch(
-          `/auth/v1/admin/users?email=${encodeURIComponent(userEmail)}`
-        ).catch(() => null);
-        const matchedUser = Array.isArray(lookup?.users) && lookup.users.length
-          ? lookup.users[0]
-          : null;
-        if (matchedUser?.id) {
-          userId = matchedUser.id;
-        }
-      } catch (lookupError) {
-        // Email-based fallback is best-effort. If it fails, the webhook still
-        // writes the install/customer/subscription rows; user can call
-        // subscription-link-account from the client to fill in the user row later.
-        console.error("subscription-webhook-email-lookup-failed", {
-          message: lookupError?.message || "unknown"
-        });
-      }
+    // v2 schema: ONE row per Lemon Squeezy subscription, keyed by
+    // lemon_subscription_id. If the webhook arrives without a subscription_id
+    // (rare — should only happen on order_created events that aren't
+    // subscriptions), we cannot write a row.
+    if (!lemonSubscriptionId) {
+      return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "no_subscription_id" }) };
     }
 
     const effectiveStatus = normalizeStatus(eventName, attrs.status, attrs.cancelled);
 
-    if (!installId && !userId && !lemonCustomerId && !lemonSubscriptionId) {
-      return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "no_match_keys" }) };
-    }
-
-    await upsertSubscriptionStatus({
-      userId,
+    // Email-based user_id resolution lives inside upsertSubscriptionByLemonId
+    // (was an inline patch in v1, now part of normal flow). The webhook just
+    // passes the raw user_id and email — the upsert handles fallback.
+    await upsertSubscriptionByLemonId({
+      lemonSubscriptionId,
+      userId: userIdFromCustom,
       installId,
       lemonCustomerId,
-      lemonSubscriptionId,
       lemonStatus: attrs.status || null,
       status: effectiveStatus,
       userEmail,
