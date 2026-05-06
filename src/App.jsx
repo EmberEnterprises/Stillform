@@ -4235,7 +4235,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>Composure restored.</h2>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+        <div className="t-mono-xs" style={{ marginBottom: 16 }}>
           System calibrated · {formatTime(elapsed)}
         </div>
         {signalProfile?.firstAreas?.length > 0 && (
@@ -4424,10 +4424,10 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   // (Eccleston & Crombez 1999 — pain demands attentional resources before cognition lands).
   if (phase === "bio-filter-suggest-scan") return (
     <div style={{ maxWidth: 400, margin: "0 auto" }}>
-      <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, marginBottom: 6 }}>
+      <h2 className="t-display-md" style={{ marginBottom: 6 }}>
         Quick check before Breathe.
       </h2>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+      <div className="t-mono-xs" style={{ marginBottom: 16 }}>
         Pain present
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 20 }}>
@@ -4471,7 +4471,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, marginBottom: 6 }}>
         State read.
       </h2>
-      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.16em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 20 }}>
+      <div className="t-mono-xs" style={{ marginBottom: 20 }}>
         <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When you mark depleted, in pain, sleep-deprived, the system carries that hardware state into how your input is read. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
       <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 20 }}>
@@ -5362,7 +5362,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       <div className="complete">
         <div className="complete-icon" style={{ animation: "pulse 1.2s ease-in-out 3" }}>✓</div>
         <h2>Signal cleared.</h2>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 16 }}>
+        <div className="t-mono-xs" style={{ marginBottom: 16 }}>
           System calibrated · {formatTime(elapsed)}
         </div>
         {signalProfile?.firstAreas?.length > 0 && (
@@ -8433,7 +8433,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   if (showStateToStatement) {
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+        <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
           What Shifted
         </div>
         <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 16 }}>
@@ -8522,7 +8522,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   if (showPostInsight && postSessionInsight) {
     return (
       <div style={{ textAlign: "left", padding: "36px 0 8px" }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>
+        <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
           Patterns surfaced
         </div>
         <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "14px 16px", marginBottom: 12 }}>
@@ -10443,7 +10443,7 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
   return (
     <div style={{ padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", marginBottom: 8 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6 }}>
-        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+        <div className="t-mono-xs">
           {config.headline}
         </div>
         <button
@@ -11839,7 +11839,7 @@ function MyProgress({ onBack }) {
                     {" · "}EOD <span style={{ color: "var(--text)" }}>{eodDropoff14dPct}%</span> ({eodDropoff14dCount}/{eodOpen14dDays.size || 0})
                   </div>
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                    <div className="t-mono-xs">
                       Science Evidence
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 8 }}>
@@ -11867,7 +11867,7 @@ function MyProgress({ onBack }) {
                   </div>
                   {focusCheckSummary && (
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                      <div className="t-mono-xs">
                         Composure Check
                       </div>
                       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
@@ -11892,7 +11892,7 @@ function MyProgress({ onBack }) {
                     </div>
                   )}
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)" }}>
+                    <div className="t-mono-xs">
                       Composure → Communication
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 8 }}>
@@ -11939,13 +11939,13 @@ function MyProgress({ onBack }) {
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 132px", gap: 10 }}>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px" }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 6 }}>
+                      <div className="t-mono-xs" style={{ marginBottom: 6 }}>
                         Shift trend (last 10 rated)
                       </div>
                       {renderTrendSparkline(ratedTrendValues)}
                     </div>
                     <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 10px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                      <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 8 }}>
+                      <div className="t-mono-xs" style={{ marginBottom: 8 }}>
                         Loop reliability
                       </div>
                       <div style={{ width: 64, height: 64, borderRadius: "50%", border: "5px solid var(--amber-dim)", position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -15650,7 +15650,7 @@ const isSignalProfileConfigured = () => {
                     <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
                       Your processing type
                     </div>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300, color: "var(--text)", marginBottom: 8 }}>
+                    <div className="t-display-md" style={{ color: "var(--text)", marginBottom: 8 }}>
                       {typeLabels[scoreAssessment()].name}
                     </div>
                     <div style={{ fontSize: 13, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 16 }}>
@@ -16484,7 +16484,7 @@ const isSignalProfileConfigured = () => {
                       WebkitTapHighlightColor: "transparent", marginBottom: 8,
                       transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
-                      <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 400, lineHeight: 1.2 }}>
+                      <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
                         {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
