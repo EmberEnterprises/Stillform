@@ -2404,6 +2404,110 @@ const labelForLastSession = (session) => {
   return "Last session";
 };
 
+// ─── COGNITIVE FUNCTION MEASUREMENT — Phase 0 storage infrastructure ────
+// Per COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md (Apr 30, 2026). This is the
+// data layer only — no UI, no stimulus libraries, no surfacing logic.
+// Stimulus libraries, exercise UI, and surfacing logic ship in subsequent
+// phases per the spec.
+//
+// Storage shape: an array of function-check records. Each record:
+//   {
+//     v: 1,                          // schema version
+//     id: "fc_<timestamp>",          // unique
+//     candidate: "affect-labeling" | "interoceptive-latency" | "cognitive-defusion",
+//     timestamp: ISO8601,
+//     primaryMs: number,             // latency in ms (Candidate 1, 2)
+//     primaryCount: number,          // count of frames (Candidate 3)
+//     specificity: 0 | 0.5 | 1,      // for Candidate 2
+//     bioFilter: string[]|null,      // user state at measurement time
+//     toolsBeforeMs: { breathe, body-scan, reframe } | null,
+//                                    // recent practice context
+//   }
+//
+// Honest framing rules from spec §"What it can't do" enforced at surfacing
+// time, not at storage time. Storage is dumb; comparison logic is where
+// the integrity claim lives.
+const FUNCTION_CHECKS_KEY = "stillform_function_checks";
+const FUNCTION_CHECK_SCHEMA_VERSION = 1;
+const FUNCTION_CHECK_CANDIDATES = Object.freeze({
+  AFFECT_LABELING: "affect-labeling",
+  INTEROCEPTIVE_LATENCY: "interoceptive-latency",
+  COGNITIVE_DEFUSION: "cognitive-defusion"
+});
+
+const getFunctionChecksFromStorage = () => {
+  try {
+    const raw = secureRead(FUNCTION_CHECKS_KEY, []);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+const appendFunctionCheck = (entry) => {
+  if (!entry || !entry.candidate) return null;
+  const record = {
+    v: FUNCTION_CHECK_SCHEMA_VERSION,
+    id: entry.id || `fc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    candidate: entry.candidate,
+    timestamp: entry.timestamp || new Date().toISOString(),
+    primaryMs: typeof entry.primaryMs === "number" ? entry.primaryMs : null,
+    primaryCount: typeof entry.primaryCount === "number" ? entry.primaryCount : null,
+    specificity: typeof entry.specificity === "number" ? entry.specificity : null,
+    bioFilter: Array.isArray(entry.bioFilter) ? entry.bioFilter : null,
+    toolsBeforeMs: entry.toolsBeforeMs || null
+  };
+  try {
+    const existing = getFunctionChecksFromStorage();
+    const next = [...existing, record].slice(-200);
+    secureWrite(FUNCTION_CHECKS_KEY, next);
+    return record;
+  } catch { return null; }
+};
+
+// Get the most recent function check for a specific candidate. Used by
+// surfacing logic to decide cadence ("user hasn't run affect-labeling
+// in 8 days; suggest one"). Returns null if never run.
+const getLatestFunctionCheck = (candidate) => {
+  if (!candidate) return null;
+  try {
+    const all = getFunctionChecksFromStorage();
+    for (let i = all.length - 1; i >= 0; i--) {
+      if (all[i]?.candidate === candidate) return all[i];
+    }
+    return null;
+  } catch { return null; }
+};
+
+// Get the trend for a candidate over the last N records. Returns null if
+// fewer than 2 records exist. Returns { first, latest, deltaMs, deltaCount,
+// recordCount } so surfacing logic can render the honest framing the spec
+// mandates ("eight weeks ago: 4.2s, today: 1.8s — the function the
+// practice trains has gotten faster").
+const getFunctionCheckTrend = (candidate, limit = 20) => {
+  if (!candidate) return null;
+  try {
+    const records = getFunctionChecksFromStorage()
+      .filter(r => r?.candidate === candidate)
+      .slice(-limit);
+    if (records.length < 2) return null;
+    const first = records[0];
+    const latest = records[records.length - 1];
+    const trend = {
+      first,
+      latest,
+      recordCount: records.length,
+      deltaMs: null,
+      deltaCount: null
+    };
+    if (typeof first.primaryMs === "number" && typeof latest.primaryMs === "number") {
+      trend.deltaMs = latest.primaryMs - first.primaryMs;
+    }
+    if (typeof first.primaryCount === "number" && typeof latest.primaryCount === "number") {
+      trend.deltaCount = latest.primaryCount - first.primaryCount;
+    }
+    return trend;
+  } catch { return null; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
@@ -6243,7 +6347,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_function_checks","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6824,6 +6928,7 @@ const SECURE_KEYS = [
   "stillform_communication_events",
   "stillform_tool_debriefs",
   "stillform_focus_check_history",
+  "stillform_function_checks",
   "stillform_feelstate",
   "stillform_sessions",
   "stillform_saved_reframes",

@@ -55,6 +55,15 @@ Low-demand mode serves anyone whose cognition is partly offline — Medicated bi
 
 **Spec drafted Apr 30 — see COGNITIVE_FUNCTION_MEASUREMENT_SPEC.md in repo root.**
 
+**Phase 0 storage infrastructure SHIPPED May 6, 2026.** The data layer the rest of the feature plugs into. No UI, no stimulus libraries, no surfacing logic — those ship in subsequent phases per the spec. Phase 0 includes:
+- `stillform_function_checks` registered as a secure-storage key (encrypted at rest like sessions and journal)
+- Registered in SYNC_KEYS so records persist to cloud sync if the user is signed in
+- `FUNCTION_CHECK_CANDIDATES` constant for the three Phase 1 candidates: AFFECT_LABELING, INTEROCEPTIVE_LATENCY, COGNITIVE_DEFUSION
+- `getFunctionChecksFromStorage()`, `appendFunctionCheck()`, `getLatestFunctionCheck(candidate)`, `getFunctionCheckTrend(candidate, limit)` helpers
+- Schema versioned (`v: 1`) so future schema changes don't break historical reads
+- 200-record cap on storage (4+ years of weekly checks at the spec's recommended cadence)
+- Honest-framing rules from spec §"What it can't do" enforced at surfacing time, not storage — storage stays dumb so future surfacing work can iterate freely
+
 After three rounds of consultation produced surface fixes and architectural overcorrections, Arlin diagnosed the actual gap: 'I got a bunch of science based prompts that are flat and not interested in engaging for the user. It feels more like a chore than something I actually want to do.' This is engagement craft, not architecture.
 
 Out of nine engagement mechanics from non-wellness products examined, Arlin chose: cognitive function measurement as evidence of neuroplasticity. Small repeatable cognitive exercises grounded in Stillform's existing cited literature, performed periodically by the user, with results tracked over time. Improvements over weeks are measurable evidence the practice is producing the neuroplasticity Stillform claims.
