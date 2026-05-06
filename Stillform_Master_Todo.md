@@ -612,14 +612,25 @@ Subscription apps live or die on the moment a user looks at their credit card st
 
 **Output of verification:** a list of metrics that are correctly persisted (no work needed), metrics that need persistence added before launch, and metrics that are currently computed-only and need to start storing. Single read-and-document task. The post-launch surface ("In 30 days...") is then unblocked when the data is available.
 
-### 🆘 PRELAUNCH — Crisis routing depth / warmth gap
-Category C nudge shipped May 4 (commit `5ad8e2a`) — pattern-based crisis-resources surface for sustained-flat or sustained-HAN users. Real, important work. But the crisis screen itself is structured as a static emergency-card UI: phone numbers, SMS shortcut, regional helplines. It treats the moment with appropriate gravity but doesn't carry the rest of Stillform's voice (steady, specific, structural, warm-not-soothing).
+### ✅ Crisis routing depth / warmth gap — SHIPPED May 6, 2026 (entry-context-aware acknowledgment)
+Closes the May 5 prelaunch gap with a surgical addition that honors all three constraints (ToS Section 28 cannot be softened, Apple/health-app guidance requires prominent emergency direction, the user might be in acute crisis even with chronic-pattern trigger).
 
-**Why prelaunch:** the Category C population is exactly the population most at risk if the crisis screen feels stark. These users are sustained-flat or sustained-HAN — chronic states, not acute panic. Shipping the warmth gap means launch-cohort vulnerable users get the worst version. Values problem, not refinement problem.
+**Audit reasoning:** the crisis screen had three legitimate entry contexts but treated all identically — (1) acute distress (footer/panic-button entry), (2) pattern-triggered chronic state (Category C nudge entry), (3) browsing (exploring Settings → Crisis Resources). The acute framing was appropriate for #1 but mismatched for #2 and #3. Solution: detect entry context and surface a brief pattern-specific acknowledgment ABOVE the existing protective copy when entry source is Category C nudge. The protective copy and resources list remain unchanged.
 
-**Possible solution:** Examine whether there's an intermediate state between "you flagged Category C" and "988 NOW emergency card." Something like a brief acknowledgment of the user's act of opening the screen, then the gentlest meaningful next step (text Crisis Text Line, breathe with us for 60 seconds while you decide, call someone you trust whose number you'd want surfaced). The Category C population needs different framing because their state isn't acute panic — it's chronic numbness or hyperarousal.
+**Two pieces shipped:**
+1. **Entry context tracking** — `handleCategoryCNudgeAction` now writes a sessionStorage entry with source ("category-c-nudge"), subcategory (sustained-flat or sustained-HAN), and timestamp before navigating to crisis screen.
+2. **Conditional acknowledgment block on crisis screen** — reads entry context, honors only if recent (60-second window to prevent stale state from earlier navigation), surfaces a brief block above the existing copy when source matches:
 
-**Constraint that matters:** any change here must preserve the legal posture established in ToS Section 28 (Crisis and Emergency Situations) — that Stillform is not a crisis intervention service. The screen can be warmer without claiming to be intervention. Words matter. Worth a careful pass with the existing crisis-resources content and the Category C nudge spec before changing anything.
+   *"Patterns suggest you've been at sustained high activation [or sustained flatness] for two-plus weeks. That's a real signal worth meeting. These resources are here without pressure."*
+
+**Tone discipline:** specific (names the pattern), structural (calls it a signal), respectful (no pressure, no rescue framing). Aligns with locked positioning (instrumentation, not babying). No "just," no soothing-language drift.
+
+**Constraint preservation:**
+- ToS Section 28 protective paragraph unchanged below the new block
+- Acute entries (footer link, panic button) bypass the acknowledgment entirely — they get the existing acute framing only
+- Resources list unchanged — 988/Crisis Text Line still prominent
+
+Build verified.
 
 ### ✅ Encryption key recovery clarity — SHIPPED May 6, 2026 (Path C: radical transparency, no key export)
 Closes the May 5 prelaunch gap. The open question — should we add key export/backup or commit to device-bound transparency — was decided in favor of transparency after audit weighed user risk.

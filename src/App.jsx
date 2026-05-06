@@ -15648,6 +15648,18 @@ const isSignalProfileConfigured = () => {
                 }
               });
             } catch {}
+            // Pass entry context so the crisis screen can show pattern-specific
+            // acknowledgment instead of acute-only framing. The Category C
+            // population is sustained-flat or sustained-HAN — chronic states,
+            // not acute panic. Per May 5 vision/values audit (warmth gap).
+            const subcat = categoryCSnapshot.triggeringEvent?.subcategory || null;
+            try {
+              sessionStorage.setItem("stillform_crisis_entry_context", JSON.stringify({
+                source: "category-c-nudge",
+                subcategory: subcat,
+                at: Date.now()
+              }));
+            } catch {}
             setScreen("crisis");
           };
 
@@ -17510,6 +17522,40 @@ const isSignalProfileConfigured = () => {
           <section style={{ maxWidth: 560, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
             <button className="intervention-back" onClick={() => goHomeSafely()}>← Back</button>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300, marginBottom: 8 }}>Crisis Resources</h1>
+            {(() => {
+              // Read entry context to decide whether to show pattern-specific
+              // acknowledgment. Per May 5 audit: Category C population is
+              // sustained-flat or sustained-HAN (chronic, not acute) — they
+              // benefit from a brief acknowledgment that names the pattern
+              // rather than only seeing acute-emergency framing. Constraint:
+              // ToS Section 28 protective copy stays unchanged below.
+              let entryContext = null;
+              try {
+                const raw = sessionStorage.getItem("stillform_crisis_entry_context");
+                if (raw) {
+                  const parsed = JSON.parse(raw);
+                  // Only honor recent context (within 60 seconds)
+                  if (parsed?.at && (Date.now() - parsed.at) < 60000) {
+                    entryContext = parsed;
+                  }
+                }
+              } catch {}
+              if (entryContext?.source !== "category-c-nudge") return null;
+              return (
+                <div style={{
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)",
+                  padding: "14px 18px",
+                  marginBottom: 20,
+                  fontSize: 13,
+                  color: "var(--text-dim)",
+                  lineHeight: 1.6
+                }}>
+                  Patterns suggest you've been at {entryContext.subcategory === "sustained-HAN" ? "sustained high activation" : "sustained flatness"} for two-plus weeks. That's a real signal worth meeting. These resources are here without pressure.
+                </div>
+              );
+            })()}
             <p style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 28 }}>
               Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
