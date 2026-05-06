@@ -17168,7 +17168,8 @@ const isSignalProfileConfigured = () => {
             <p>Stillform tracks session data and may surface patterns or insights based on your usage history. These insights are observational and educational. They are not clinical assessments, diagnoses, or medical advice. Patterns identified by the app reflect your self-reported data and should not be used as the basis for medical or psychological decisions.</p>
 
             <h2>Your Data</h2>
-            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups from this device are stored in our Supabase cloud infrastructure. Data is encrypted on-device before upload. Restore requires access to the original device encryption key, so restore on a different device may be limited.</p>
+            <p>Stillform stores session data, signal profiles, check-ins, and saved reframes locally on your device using AES-256 encryption. If you enable Cloud Sync, encrypted backups from this device are stored in our Supabase cloud infrastructure. Data is encrypted on-device before upload using a key that never leaves the device.</p>
+            <p>This is a deliberate privacy guarantee — Stillform cannot decrypt your data, even if compelled by law enforcement. The tradeoff: if you change devices, your account, subscription, app settings, and AI access come back when you sign in, but encrypted historical data (sessions, signal profile, journal entries, saved reframes, check-ins) may not be readable on the new device because it generates its own encryption key. To keep historical data accessible across devices, export it before switching using Settings → Account → Download My Data.</p>
             <p>If you subscribe, we collect your email address and payment information through our payment processor (Lemon Squeezy). We do not store credit card numbers.</p>
             <h2>App Diagnostics (counts + rates only)</h2>
             <p>App Diagnostics are enabled by default so Stillform can verify app performance and reliability. Stillform sends only anonymous aggregate counts (for example session counts, completion rates, and trend deltas).</p>
@@ -17293,7 +17294,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What happens to my data if I cancel?",
-                a: "Local data stays on your device. If Cloud Sync was active, encrypted backups are retained and restorable if you return. Restoration on a different device depends on the original encryption key."
+                a: "Local data stays on your device. If Cloud Sync was active, encrypted backups are retained. Your account and settings come back if you return. Encrypted historical data may not decrypt on a different device — see the next FAQ for what survives a device change."
+              },
+              {
+                q: "What survives if I change phones or reinstall?",
+                a: "Stillform encrypts your session data on your device using a key that never leaves the device. This is a deliberate privacy guarantee — Stillform cannot decrypt your data, even if compelled by law enforcement. What survives a device change: your account, subscription, app settings (theme, language, reminders), and AI access — sign in on the new device and these come back. What may not survive: encrypted historical data (sessions, signal profile, journal entries, saved reframes, check-ins). The new device generates its own encryption key and cannot decrypt data encrypted by the old device's key. The tradeoff is the cost of the privacy guarantee. To keep historical data accessible across devices, export it before switching using Settings → Account → Download My Data."
               },
               {
                 q: "Is my data backed up?",
@@ -18393,9 +18398,15 @@ const isSignalProfileConfigured = () => {
                     <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
                       Your data is encrypted before upload and backed up to cloud. Automatic sync runs in supported flows, and you can always tap Sync now.
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
-                      Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt.
-                    </div>
+                    <details style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
+                      <summary style={{ cursor: "pointer", color: "var(--amber)", marginBottom: 6 }}>What survives a device change</summary>
+                      <div style={{ marginTop: 8, paddingLeft: 8, borderLeft: "1px solid var(--amber-dim)" }}>
+                        <p style={{ marginBottom: 8 }}>Stillform encrypts your session data on this device using a key that never leaves the device. This is a deliberate privacy guarantee — Stillform cannot decrypt your data, even if compelled by law enforcement.</p>
+                        <p style={{ marginBottom: 8 }}><strong style={{ color: "var(--text-dim)" }}>What survives if you change devices:</strong> your account, subscription, app settings (theme, language, reminders), and AI access. Sign in on the new device and these come back.</p>
+                        <p style={{ marginBottom: 8 }}><strong style={{ color: "var(--text-dim)" }}>What may not survive:</strong> encrypted historical data (sessions, signal profile, journal entries, saved reframes, check-ins). The new device generates its own encryption key and cannot decrypt data encrypted by the old device's key.</p>
+                        <p style={{ marginBottom: 0 }}>This tradeoff is the cost of the privacy guarantee. If you want to keep historical data accessible across devices, export it before switching — Settings → Account → Download My Data.</p>
+                      </div>
+                    </details>
                     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
                       <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={async () => {
                         setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
@@ -18460,7 +18471,7 @@ const isSignalProfileConfigured = () => {
                 ) : (
                   <div>
                     <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 12 }}>
-                      Back up encrypted data from this device. Your data is encrypted before it leaves your device — we can't read it. Restore on a different device may be limited if the original encryption key is unavailable.
+                      Back up encrypted data from this device. Your data is encrypted before it leaves your device — Stillform cannot read it. If you change devices later, see "What survives a device change" after signing in.
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
                       <input type="email" placeholder="Email" value={syncEmail} onChange={e => setSyncEmail(e.target.value)}

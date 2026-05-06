@@ -621,17 +621,23 @@ Category C nudge shipped May 4 (commit `5ad8e2a`) — pattern-based crisis-resou
 
 **Constraint that matters:** any change here must preserve the legal posture established in ToS Section 28 (Crisis and Emergency Situations) — that Stillform is not a crisis intervention service. The screen can be warmer without claiming to be intervention. Words matter. Worth a careful pass with the existing crisis-resources content and the Category C nudge spec before changing anything.
 
-### 🔐 PRELAUNCH — Encryption key loss recovery clarity
-Stillform shipped end-to-end encryption May 2 (commit `ef8d8008`). Correct architecture for the data sensitivity Stillform handles. But the user-facing flow when someone loses their encryption key (switches phones, reinstalls, loses device) is structurally complicated. The Settings screen acknowledges *"Restore works when this device has the original encryption key. On a different device, some encrypted items may not decrypt."* — which is honest but cryptic for a non-technical user.
+### ✅ Encryption key recovery clarity — SHIPPED May 6, 2026 (Path C: radical transparency, no key export)
+Closes the May 5 prelaunch gap. The open question — should we add key export/backup or commit to device-bound transparency — was decided in favor of transparency after audit weighed user risk.
 
-**Why prelaunch:** tied to password reset (already prelaunch-blocking). User mental model of "what survives a device change" must be coherent before users actually change devices. The first user who gets a new phone and discovers their journal entries can't be decrypted is the first negative app-store review.
+**Audit reasoning:** the user population (cognitively dysregulated, often dealing with mast cell, neurological, hormonal disruption) is exactly the population most at risk of saving an exported encryption key in places they don't fully think through (screenshots in iCloud Photos, notes in shared family devices, etc.). Making key export easy makes accidental key leakage easy. The privacy guarantee Stillform makes — "your data is encrypted with a key Stillform cannot access" — is worth more to this user base than convenience of cross-device historical data.
 
-**Possible solution:** A clear in-app explanation of:
-- What users lose when they lose their key (which encrypted items can't be decrypted)
-- What they keep (account, subscription, non-encrypted metadata)
-- How to back up the key proactively (export to password manager? print a recovery phrase? something else?)
+**Path A (build key export) deferred** to post-launch unless TestFlight feedback shows users actively want it. Building it without that signal risks creating accidental privacy leaks for the very users Stillform is designed to protect.
 
-**Open question to commit on before launch:** is the right answer to add a key backup mechanism (recovery phrase, export-to-cloud-encrypted-with-password) or to be radically transparent that some data is device-bound and that's the privacy tradeoff? Both are defensible. Pick one before launch and commit to it in copy. **This decision needs to happen alongside the password reset flow design** so the two flows form a coherent mental model.
+**Three pieces shipped:**
+1. **Settings → Cloud Sync** — replaced cryptic "Restore works when this device has the original encryption key" line with a collapsible explainer titled "What survives a device change" that names the privacy guarantee, what survives (account, subscription, settings, AI access), what may not (encrypted historical data), and the export path (Download My Data) for users who want to keep historical data across devices.
+2. **Privacy & Disclaimers screen → Your Data** — replaced the same cryptic copy with the structured explanation and the export-before-switch path.
+3. **FAQ → "What survives if I change phones or reinstall?"** — new dedicated entry with the full structured explanation. Existing "What happens to my data if I cancel?" entry updated to point at the new entry instead of leaving users with the cryptic line.
+
+All three surfaces use the same structured language: privacy guarantee → what survives → what may not → tradeoff named explicitly → user has agency (Download My Data path).
+
+**Tone discipline maintained:** deadpan, specific, structural, no filler words. No instances of "just" in any new copy.
+
+Build verified.
 
 ---
 
