@@ -605,6 +605,19 @@ function normalizeReframePayload(parsed, route) {
   return { distortion, mechanism, reframe, next_step, question };
 }
 
+// Low-demand mode trigger — kept in sync with src/App.jsx isLowDemandBioFilter
+// (lines ~2174-2192). Cannot share code: this is a Netlify function (server-side
+// Node), App.jsx is the client bundle. If LOW_DEMAND_FLAGS changes in App.jsx,
+// it MUST also be updated here. Apr 28 locked decision: low-demand is for the
+// broad cognitive-bandwidth-limited population. Activated and clear excluded.
+const LOW_DEMAND_FLAGS = ["medicated", "depleted", "sleep", "pain", "hormonal", "gut"];
+
+function isLowDemandBioFilter(bf) {
+  if (!bf) return false;
+  const tokens = String(bf).toLowerCase().split(",").map(t => t.trim());
+  return tokens.some(t => LOW_DEMAND_FLAGS.includes(t));
+}
+
 function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLanguage = false, isLowDemand = false } = {}) {
   const reasons = [];
   const reframe = String(payload?.reframe || "").trim();
@@ -1492,15 +1505,28 @@ WHAT STAYING SHARP LOOKS LIKE:
 
     if (contextParts.length > 0) systemPrompt += "\n\n" + contextParts.join("\n\n");
 
-    // LOW-DEMAND OVERRIDE — when bio-filter signals "medicated" (SSRIs, post-anesthesia,
-    // sleep aids, chemo, recreational substance, or similar), the user's executive function
-    // is reduced. The AI must adapt: shorter sentences, simpler vocabulary, fewer questions,
-    // companion presence rather than cognitive coach. Position: prepended here so SAFETY and
-    // LIABILITY blocks (added below) still wrap on top and remain top priority. Final read
-    // order at runtime: LIABILITY → SAFETY → CALENDAR → LOW-DEMAND → mode prompt.
+    // LOW-DEMAND OVERRIDE — when bio-filter signals reduced executive function
+    // (medicated, depleted, sleep-deprived, in pain, hormonal disruption, GI distress),
+    // the user's cognitive bandwidth is reduced today. The AI must adapt: shorter
+    // sentences, simpler vocabulary, fewer questions, companion presence rather than
+    // cognitive coach. Position: prepended here so SAFETY and LIABILITY blocks
+    // (added below) still wrap on top and remain top priority. Final read order at
+    // runtime: LIABILITY → SAFETY → CALENDAR → LOW-DEMAND → mode prompt.
     // Safety rules are NOT relaxed in low-demand. See LOW_DEMAND_PHASE_3_SPEC.md.
-    if (bioFilter && bioFilter.includes("medicated")) {
-      systemPrompt = `LOW-DEMAND OVERRIDE — ADAPT YOUR VOICE FOR THIS USER:\nThe user reports being medicated. Their executive function is reduced today. Adapt as follows:\n1. Shorter sentences. 1-2 sentences per response typical. Hard ceiling of 3 sentences.\n2. Simpler vocabulary. No abstract concepts. No multi-part reframings ("one read is X, another is Y, a third is Z" — pick one or none).\n3. Fewer questions. Default to statements that hold what they said, not questions that ask them to do more. When you do ask, ask closed (yes/no) and concrete, not open and abstract.\n4. Companion presence, not cognitive coach. Your job is to be there, regulate alongside them, and not increase their load.\n5. Safety rules are NOT relaxed. If you detect crisis language, follow the SAFETY OVERRIDE protocol fully.\n6. Do NOT mention to the user that you've shifted into a different mode. They should just feel met where they are.\n\n` + systemPrompt;
+    // Trigger broadened May 6, 2026 — see isLowDemandBioFilter helper above.
+    if (isLowDemandBioFilter(bioFilter)) {
+      // Build a flag-specific opening clause so the prompt matches what the user
+      // actually marked. This is internal-only (the user never sees the prompt),
+      // but accuracy matters for the AI's framing of why bandwidth is reduced.
+      const tokens = String(bioFilter || "").toLowerCase().split(",").map(t => t.trim());
+      let stateClause = "The user's cognitive bandwidth is reduced today.";
+      if (tokens.includes("medicated")) stateClause = "The user reports being medicated. Their executive function is reduced today.";
+      else if (tokens.includes("pain")) stateClause = "The user reports being in pain. Pain is consuming attentional resources.";
+      else if (tokens.includes("sleep")) stateClause = "The user reports sleep deprivation. Their executive function is reduced today.";
+      else if (tokens.includes("depleted")) stateClause = "The user reports being depleted. Their cognitive bandwidth is low today.";
+      else if (tokens.includes("hormonal")) stateClause = "The user reports hormonal disruption affecting their baseline today.";
+      else if (tokens.includes("gut")) stateClause = "The user reports GI distress. Their bandwidth for abstract processing is reduced.";
+      systemPrompt = `LOW-DEMAND OVERRIDE — ADAPT YOUR VOICE FOR THIS USER:\n${stateClause} Adapt as follows:\n1. Shorter sentences. 1-2 sentences per response typical. Hard ceiling of 3 sentences.\n2. Simpler vocabulary. No abstract concepts. No multi-part reframings ("one read is X, another is Y, a third is Z" — pick one or none).\n3. Fewer questions. Default to statements that hold what they said, not questions that ask them to do more. When you do ask, ask closed (yes/no) and concrete, not open and abstract.\n4. Companion presence, not cognitive coach. Your job is to be there, regulate alongside them, and not increase their load.\n5. Safety rules are NOT relaxed. If you detect crisis language, follow the SAFETY OVERRIDE protocol fully.\n6. Do NOT mention to the user that you've shifted into a different mode. They should just feel met where they are.\n\n` + systemPrompt;
     }
 
     // CALENDAR HARD OVERRIDE — injected when calendar context present and first message is short/vague
@@ -1582,7 +1608,7 @@ WHAT STAYING SHARP LOOKS LIKE:
       const raw = await requestCompletion(attemptSystemPrompt, attemptMessages);
       previousRaw = raw;
       const normalized = normalizeReframePayload(parseModelPayload(raw), scienceRoute);
-      const isLowDemand = bioFilter && bioFilter.includes("medicated");
+      const isLowDemand = isLowDemandBioFilter(bioFilter);
       lastValidation = validateReframePayload(normalized, { isSummaryRequest: isInternalSummaryRequest, hasCrisisLanguage, isLowDemand });
       lastVoiceValidation = validateVoiceContract(normalized, {
         isSummaryRequest: isInternalSummaryRequest,

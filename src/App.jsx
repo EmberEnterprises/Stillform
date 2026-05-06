@@ -2171,6 +2171,25 @@ function setActiveBioFilter(value) {
   } catch {}
 }
 
+// Low-demand mode trigger — aligned with Apr 28 locked decision
+// ("broad cognitive-bandwidth-limited population: SSRI users, post-anesthesia,
+// sleep aids, chemo, recreational, sleep-deprived parents, migraine,
+// dissociative episodes, etc"). Originally only triggered on "medicated".
+// May 6, 2026 audit found this was narrower than the locked decision intended —
+// users marking depleted/sleep/pain/hormonal/gut have the same reduced
+// executive function low-demand was designed to meet.
+//
+// EXPLICITLY EXCLUDED: "activated" (high arousal is a different physiological
+// state, needs activation-specific framing — not cognitive simplification).
+// EXPLICITLY EXCLUDED: "clear" (no flag, normal voice).
+const LOW_DEMAND_FLAGS = ["medicated", "depleted", "sleep", "pain", "hormonal", "gut"];
+
+function isLowDemandBioFilter(bf) {
+  if (!bf) return false;
+  const tokens = String(bf).toLowerCase().split(",").map(t => t.trim());
+  return tokens.some(t => LOW_DEMAND_FLAGS.includes(t));
+}
+
 // Body-routing rule per the science:
 // - Pain → Body Scan (Kabat-Zinn 1982 MBSR, Reiner et al. 2013, Farb et al. 2013 — mindful pain pathway)
 // - Off-baseline / Something → Body Scan (locate the unnamed signal first)
@@ -3893,11 +3912,12 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   // no Reframe handoff. Audio force-enabled. Per master todo "Low-demand mode"
   // (cognitive-bandwidth-limited population: SSRI users, post-anesthesia, sleep aids,
   // chemo, recreational, sleep-deprived parents, migraine, dissociative episodes, etc).
-  // Trigger: bioFilter.includes("medicated"). Architecture: state-of-existing-tool, not separate tool.
+  // Trigger: isLowDemandBioFilter() — see helper near line 2174 for the full flag set.
+  // Architecture: state-of-existing-tool, not separate tool.
   const isLowDemand = (() => {
     try {
       const bf = getActiveBioFilter();
-      return bf.includes("medicated");
+      return isLowDemandBioFilter(bf);
     } catch { return false; }
   })();
 
@@ -3908,23 +3928,26 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   );
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
-  const [bioFilter, setBioFilter] = useState(isLowDemand ? "medicated" : (() => {
+  const [bioFilter, setBioFilter] = useState((() => {
     // Pre-select last bio-filter answer if from today's Stillform-day.
+    // In low-demand mode we still want the *actual* flag the user marked
+    // (pain, sleep, depleted, etc) — not hardcoded "medicated" — so analytics
+    // and downstream displays stay accurate.
     // getActiveBioFilter returns "" if stale or missing, otherwise the stored value
     // (which may be a single id like "pain" or a comma-joined string like "depleted,sleep"
     // from morning check-in). The screen below uses single-id state, so pick the first
     // token that matches one of the screen's options.
     try {
       const stored = getActiveBioFilter();
-      if (!stored) return null;
+      if (!stored) return isLowDemand ? "medicated" : null; // safety fallback
       const SCREEN_OPTIONS = ["clear", "activated", "depleted", "gut", "sleep", "hormonal", "pain", "medicated"];
       const tokens = String(stored).split(",").map(t => t.trim());
       // Prefer non-clear flags first (they're the clinically meaningful signals).
       const nonClear = tokens.find(t => SCREEN_OPTIONS.includes(t) && t !== "clear");
       if (nonClear) return nonClear;
       const anyMatch = tokens.find(t => SCREEN_OPTIONS.includes(t));
-      return anyMatch || null;
-    } catch { return null; }
+      return anyMatch || (isLowDemand ? "medicated" : null);
+    } catch { return isLowDemand ? "medicated" : null; }
   })());
   const [feelState, setFeelState] = useState(() => {
     // Infer from today's check-in if available — user can always override via chips
@@ -4715,10 +4738,11 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   // LOW-DEMAND MODE — when bioFilter signals cognitive impairment, the tool renders
   // a stripped variant: no intro screen, no tension dot input, no What Shifted gate,
   // no ToolDebriefGate, no Next Move. Audio force-enabled. See LOW_DEMAND_PHASE_2_SPEC.md.
+  // Trigger broadened May 6, 2026 — see isLowDemandBioFilter helper near line 2174.
   const isLowDemand = (() => {
     try {
       const bf = getActiveBioFilter();
-      return bf.includes("medicated");
+      return isLowDemandBioFilter(bf);
     } catch { return false; }
   })();
   // TIME-TO-REGULATION
@@ -7026,11 +7050,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // LowDemandComplete on done. Mode defaults to calm regardless of caller-passed mode
   // (calm is safest for cognitively reduced users; the LOW-DEMAND OVERRIDE prompt block
   // in reframe.js further constrains the response shape — short, statements, simple).
+  // Trigger broadened May 6, 2026 — see isLowDemandBioFilter helper near line 2174.
   // See LOW_DEMAND_PHASE_3_SPEC.md.
   const isLowDemand = (() => {
     try {
       const bf = getActiveBioFilter();
-      return bf.includes("medicated");
+      return isLowDemandBioFilter(bf);
     } catch { return false; }
   })();
   const effectiveModeForLowDemand = isLowDemand ? "calm" : mode;
