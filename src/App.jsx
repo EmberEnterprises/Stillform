@@ -2342,6 +2342,25 @@ const appendSessionToStorage = (entry) => {
   return sessions.length;
 };
 
+// Compute the current consecutive-day session streak. Looks back from today
+// using stillformDay (morning_start-aware) so a 5am session counts toward the
+// previous day for late-night practitioners. Returns 0 if today and yesterday
+// have no sessions.
+const computeStreak = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
+    let streak = 0;
+    for (let i = 0; i < 365; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      if (daySet.has(TimeKeeper.stillformDayOf(d))) streak++;
+      else break;
+    }
+    return streak;
+  } catch { return 0; }
+};
+
 const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITEMS) => {
   if (!entry) return 0;
   const events = readArrayFromStorage(COMMUNICATION_EVENTS_KEY);
@@ -19321,16 +19340,49 @@ const isSignalProfileConfigured = () => {
         )}
 
         {/* RECONSTRUCTION BANNER */}
-        {screen === "home" && (
-          <div style={{
-            background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)",
-            padding: "8px 20px", textAlign: "center", fontSize: 11,
-            color: "var(--text-dim)", letterSpacing: "0.04em"
-          }}>
-            <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
-            Composure is the foundation. You are its architect.
-          </div>
-        )}
+        {screen === "home" && (() => {
+          const streak = computeStreak();
+          return (
+            <>
+              {streak >= 2 && (
+                <div style={{
+                  background: "var(--bg)",
+                  borderBottom: "0.5px solid var(--amber-dim)",
+                  padding: "10px 20px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 10
+                }}>
+                  <span style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 22,
+                    color: "var(--amber)",
+                    fontWeight: 300,
+                    lineHeight: 1
+                  }}>{streak}</span>
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: "var(--text-muted)"
+                  }}>
+                    {streak === 1 ? "day" : "days"} consecutive
+                  </span>
+                </div>
+              )}
+              <div style={{
+                background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)",
+                padding: "8px 20px", textAlign: "center", fontSize: 11,
+                color: "var(--text-dim)", letterSpacing: "0.04em"
+              }}>
+                <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
+                Composure is the foundation. You are its architect.
+              </div>
+            </>
+          );
+        })()}
 
         {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
         {!["tool","panic","setup-bridge"].includes(screen) && (
