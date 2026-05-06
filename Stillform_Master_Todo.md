@@ -603,19 +603,31 @@ Each surface gives the user a specific, named, validated mechanism for what's ha
 
 Build verified.
 
-### 📊 PRELAUNCH — Verify metrics persistence for future value articulation
-Subscription apps live or die on the moment a user looks at their credit card statement and asks "what do I get for $14.99/month?" Stillform's pricing reflects real value and the science backs it. The user-facing "value articulation" surface (month-1, month-3, month-6 personalized data callouts) is structurally post-launch — it requires real longitudinal user data that doesn't exist yet. **But the prelaunch piece is making sure the data is being captured correctly RIGHT NOW so it's available when the surface ships.**
+### ✅ Metrics persistence audit + signal awareness latency capture — SHIPPED May 6, 2026
+Closes the May 5 read-only audit task plus the one real gap surfaced. Audited five metrics named in the original todo:
 
-**Why this verification is prelaunch:** if metrics needed for month-1 articulation aren't being captured with timestamps and aggregatable structure starting at launch day, the launch cohort permanently has worse data than every subsequent cohort. Can't retroactively persist data that wasn't stored.
+| Metric | Status | Notes |
+|---|---|---|
+| Signal awareness latency (time-to-recognition) | **REAL GAP — fixed today** | Was never captured; now recorded per session |
+| Autonomous exit count | ✅ Already works | Persisted with timestamp, queryable, attributable |
+| 7-session evidence callouts | ✅ Already works | Computed live from session history with milestone-seen flag |
+| Cognitive function measurement scores | ✅ Already works | Persisted with timestamp + accuracy + inhibition + avgReactionMs + falseAlarms (last 20 retained — sufficient for trend analysis, capped depth noted) |
+| Body Scan tension data | ✅ Already works | Persisted keyed by area name, aggregatable (commit 3f148b6, May 4) |
 
-**What to verify:**
-- Signal awareness latency (April 21 metacognition layer) — persisted with timestamps and aggregatable per-user across 30/60/90 day windows?
-- Autonomous exit count — persisted, queryable, attributable to specific users?
-- 7-session evidence callouts — stored or computed live?
-- Cognitive function measurement scores (per the spec) — persisted across sessions with timestamps?
-- Body Scan tension data (commit `3f148b6`, May 4 — known to be persisted now) — confirmed aggregatable?
+**Real gap surfaced and fixed:**
+The metacognition flow recorded the *outcome* (autonomous, self-regulated, breathe-redirect, reframe-redirect) but not the *latency* — how long the user sat with the prompt before deciding. For month-3+ value articulation like *"your time-to-recognition has dropped from 45s to 12s,"* that data needed to start being captured at launch. Otherwise the launch cohort permanently has worse data than every subsequent cohort.
 
-**Output of verification:** a list of metrics that are correctly persisted (no work needed), metrics that need persistence added before launch, and metrics that are currently computed-only and need to start storing. Single read-and-document task. The post-launch surface ("In 30 days...") is then unblocked when the data is available.
+**What shipped:**
+- `startedAtRef` captured in `MetacognitionTool` on first prompt surface
+- `recognitionLatencyMs` field added to both session-storage writes (self-regulated exit + autonomous exit)
+- Zero user-facing change — pure data capture
+- 3-line addition; no risk to existing flows
+
+**Caveat noted but not fixed:** focus check history caps at 20 entries (`.slice(-20)`). Sufficient for trend analysis (4-6 month windows of weekly checks) but caps historical depth. Not a true gap for V1.
+
+**Tradeoff considered:** could have deferred latency capture to post-launch with the value-articulation surface itself. Decided against — the data has to start being captured *now* or the launch cohort gets shorted. The capture is invisible to users and adds zero risk.
+
+Build verified.
 
 ### ✅ Crisis routing depth / warmth gap — SHIPPED May 6, 2026 (entry-context-aware acknowledgment)
 Closes the May 5 prelaunch gap with a surgical addition that honors all three constraints (ToS Section 28 cannot be softened, Apple/health-app guidance requires prominent emergency direction, the user might be in acute crisis even with chronic-pattern trigger).

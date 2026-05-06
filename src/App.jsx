@@ -10385,6 +10385,13 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
   const [step, setStep] = useState(0);
   const [responses, setResponses] = useState({});
   const startTrackedRef = useRef(false);
+  // Capture the moment the metacognition prompt first surfaces so we can record
+  // the user's time-to-recognition latency on session save. Per May 5 metrics
+  // persistence audit (May 6, 2026): autonomous-exit count alone doesn't tell
+  // us whether the user is getting faster at noticing — latency does. Captured
+  // now so the launch cohort has the data when the post-launch month-3+
+  // value-articulation surface ships.
+  const startedAtRef = useRef(Date.now());
   if (step === 0 && !startTrackedRef.current) {
     startTrackedRef.current = true;
     try { window.plausible?.("Reframe Watch Sequence Started"); } catch {}
@@ -10443,6 +10450,9 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
           tools: ["metacognition"],
           exitPoint: "self-regulated",
           source: "metacognition",
+          // Time from first prompt surface to decision (ms). For value
+          // articulation: tracks whether user is getting faster at noticing.
+          recognitionLatencyMs: Date.now() - startedAtRef.current,
           responses
         });
       } catch {}
@@ -10457,6 +10467,9 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
           tools: ["metacognition"],
           exitPoint: "autonomous",
           source: "metacognition",
+          // Time from first prompt surface to decision (ms). For value
+          // articulation: tracks whether user is getting faster at noticing.
+          recognitionLatencyMs: Date.now() - startedAtRef.current,
           responses
         });
         try { window.plausible?.("Reframe Watch Sequence Autonomous"); } catch {}
