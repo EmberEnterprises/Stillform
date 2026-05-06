@@ -5036,7 +5036,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           What Shifted
         </div>
         <div style={{ fontSize: 14, color: "var(--text-dim)", lineHeight: 1.7, marginBottom: 12 }}>
-          Your body just moved through six points. Name where it lands now — that's what locks the regulation in.
+          Your body moved through six points. Name where it lands now — that's what locks the regulation in.
         </div>
         {/* Physiology naming — names interoception specifically as the practiced skill.
             Per May 5 prelaunch gap audit: session-1 retention hinges on users feeling
@@ -10193,7 +10193,7 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
   // Each state gets the line that matches the science for that specific signal.
   const stateBody = (() => {
     if (hasPain) return "Pain pulls cognitive resources before you can think clearly. A short body scan locates and softens it first — that's the most effective sequence the research supports.";
-    if (activeStates.includes("activated")) return "The nervous system is firing. Settling arousal first is what lets cognitive work actually land — the body has to come down before the mind can sort.";
+    if (activeStates.includes("activated")) return "The nervous system is firing. Settling arousal first is what lets cognitive work land — the body has to come down before the mind can sort.";
     if (activeStates.includes("sleep")) return "Sleep loss amplifies threat detection and degrades the prefrontal regulation that cognitive reappraisal depends on. Body work first.";
     if (activeStates.includes("depleted")) return "Cognitive reappraisal is high-effort. When capacity is low, the body-first path lands cleaner.";
     if (activeStates.includes("medicated")) return "Substance is shifting the baseline. Body work is the safer entry point until you can read your system clearly.";
@@ -10409,7 +10409,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
     },
     {
       label: "Name",
-      question: "What thought just fired?",
+      question: "What thought fired?",
       sub: "The first one. Before the story built around it.",
       placeholder: "The raw thought. Not the story."
     },
@@ -16583,7 +16583,7 @@ const isSignalProfileConfigured = () => {
                     <div style={{ fontSize: 12, color: "var(--text-dim)", lineHeight: 1.5, marginBottom: 14 }}>
                       {mismatch
                         ? "The system adapts to how you actually use it, not just how it assessed you. You decide."
-                        : "Take it into Reframe when you're ready — or just notice it."}
+                        : "Take it into Reframe when you're ready — or notice it."}
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <button onClick={() => {
@@ -17234,7 +17234,7 @@ const isSignalProfileConfigured = () => {
           const FAQ_ITEMS = [
 {
                 q: "What is Stillform?",
-                a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation actually takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
+                a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
               },
               {
                 q: "What does composure mean here?",
