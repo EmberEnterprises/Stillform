@@ -4335,7 +4335,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         <div style={{ fontSize: 20, color: "var(--text)", fontWeight: 500, marginBottom: 8 }}>
           {steps[current].label}
         </div>
-        <div style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 20 }}>
+        <div className="t-body-md quiet" style={{ marginBottom: 20 }}>
           {steps[current].prompt}
         </div>
 
@@ -5316,7 +5316,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
                 marginBottom: 8
               }}
             />
-            <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>
+            <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.5 }}>
               Naming the somatic shift — even in one line — strengthens the pattern. Optional.
             </div>
           </div>
@@ -5591,7 +5591,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
                   </>}
                 </svg>
               </div>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+              <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10 }}>
                 Visual legend: amber circle = where to apply pressure.
               </div>
 
@@ -5989,7 +5989,7 @@ function ToolDebriefGate({ toolId, regulationType, onContinue }) {
         <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 10 }}>
           {promptSet?.prompt || "Choose one line that best fits this session."}
         </div>
-        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 12 }}>
+        <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 12 }}>
           Take a moment to name what you used.
         </div>
 
@@ -6216,7 +6216,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
         You chose: <span style={{ color: "var(--text)" }}>{nextMoveLabel}</span>
       </div>
       <div style={{ marginBottom: 10 }}>
-        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did you do it?</div>
+        <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Did you do it?</div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
           {[
             { id: "yes", label: "Yes" },
@@ -6245,7 +6245,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
         </div>
       </div>
       <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>Did it help?</div>
+        <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Did it help?</div>
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", opacity: helpedRequired ? 1 : 0.5 }}>
           {[
             { id: "yes", label: "Yes" },
@@ -8468,7 +8468,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               rows={3}
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
-            <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
+            <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
               Purpose: convert your regulated state into one clear message you can send outside Stillform (Slack, email, text, or talking point).
             </div>
 
@@ -8533,7 +8533,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             {new Date(postSessionInsight.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           </div>
         </div>
-        <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 16 }}>
+        <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 16 }}>
           Guardrails active: insight-only, no labels, no diagnosis.
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -8717,7 +8717,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
+              <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
                 In one line — what shifted? Naming it locks in the regulated state. This is for you, not for sending.
               </div>
               <textarea
@@ -11597,8 +11597,8 @@ function MyProgress({ onBack }) {
         <div style={{ marginBottom: 12 }}>
           <button onClick={() => toggle("telemetry")} style={rowStyle}>
             <div>
-              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Composure telemetry</div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+              <div className="t-body-md strong">Composure telemetry</div>
+              <div className="t-caption" style={{ marginTop: 2 }}>
                 12-week activity heat map
               </div>
             </div>
@@ -11778,7 +11778,7 @@ function MyProgress({ onBack }) {
           const renderTrendSparkline = (values) => {
             if (!Array.isArray(values) || values.length < 2) {
               return (
-                <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                <div className="t-caption" style={{ color: "var(--text-muted)" }}>
                   Add at least 2 rated sessions to unlock trend line.
                 </div>
               );
@@ -11812,8 +11812,8 @@ function MyProgress({ onBack }) {
             <div style={{ marginBottom: 12 }}>
               <button onClick={() => toggle("proof")} style={rowStyle}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Proof snapshot</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                  <div className="t-body-md strong">Proof snapshot</div>
+                  <div className="t-caption" style={{ marginTop: 2 }}>
                     {activeDays} active day{activeDays !== 1 ? "s" : ""} · {protocolRuns} protocol run{protocolRuns !== 1 ? "s" : ""}
                   </div>
                 </div>
@@ -11860,7 +11860,7 @@ function MyProgress({ onBack }) {
                         <div style={{ fontSize: 14, color: "var(--amber)", marginTop: 3 }}>{transferScore14d === null ? "N/A" : `${transferScore14d}%`}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>
+                    <div className="t-caption" style={{ lineHeight: 1.5 }}>
                       Readout: <span style={{ color: "var(--text)" }}>{scienceEvidenceRead}</span>.
                       {" "}Built from existing sessions, deltas, and loop completion — no extra workflow required.
                     </div>
@@ -11921,18 +11921,18 @@ function MyProgress({ onBack }) {
                         <div style={{ fontSize: 13, color: "var(--amber)", marginTop: 2 }}>{followThrough30d === null ? "N/A" : `${followThrough30d}%`}</div>
                       </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                    <div className="t-caption">
                       Copy/share actions (30d): <span style={{ color: "var(--text)" }}>{copied30d + shared30d}</span>
                       {" · "}Skipped: <span style={{ color: "var(--text)" }}>{skipped30d}</span>
                       {" · "}Completed without draft: <span style={{ color: "var(--text)" }}>{completedWithoutDraft30d}</span>
                     </div>
                     {topSkipReason && (
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                      <div className="t-caption">
                         Most common skip reason: <span style={{ color: "var(--text)" }}>{skipReasonLabelMap[topSkipReason[0]] || topSkipReason[0]}</span>
                       </div>
                     )}
                     {lastSentConfirmedEvent && (
-                      <div style={{ fontSize: 11, color: "var(--text-dim)" }}>
+                      <div className="t-caption">
                         Last sent confirmation: <span style={{ color: "var(--text)" }}>{new Date(lastSentConfirmedEvent.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
                       </div>
                     )}
@@ -11993,8 +11993,8 @@ function MyProgress({ onBack }) {
         <div style={{ marginBottom: 12 }}>
           <button onClick={() => toggle("sharecard")} style={rowStyle}>
             <div>
-              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Shareable composure card</div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+              <div className="t-body-md strong">Shareable composure card</div>
+              <div className="t-caption" style={{ marginTop: 2 }}>
                 Share progress snapshot or export as PDF
               </div>
             </div>
@@ -12009,7 +12009,7 @@ function MyProgress({ onBack }) {
                 <button onClick={exportShareCardPdf} style={{ background: "none", border: "0.5px solid var(--amber-dim)", color: "var(--amber)", borderRadius: "var(--r)", padding: "8px 12px", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}>Export PDF</button>
               </div>
               {shareCardStatus && (
-                <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{shareCardStatus}</div>
+                <div className="t-caption">{shareCardStatus}</div>
               )}
             </div>
           )}
@@ -12019,8 +12019,8 @@ function MyProgress({ onBack }) {
         <div style={{ marginBottom: 12 }}>
           <button onClick={() => toggle("supportingStats")} style={rowStyle}>
             <div>
-              <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Additional stats</div>
-              <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+              <div className="t-body-md strong">Additional stats</div>
+              <div className="t-caption" style={{ marginTop: 2 }}>
                 Supporting metrics and weekly readout
               </div>
             </div>
@@ -12101,7 +12101,7 @@ function MyProgress({ onBack }) {
                     <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 8 }}>
                   Built from completed tool sessions and lock-in captures.
                 </div>
               </div>
@@ -12232,8 +12232,8 @@ function MyProgress({ onBack }) {
             <div style={{ marginBottom: 8 }}>
               <button onClick={() => toggle("patterns")} style={rowStyle}>
                 <div>
-                  <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>My Patterns</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{summaryLine}</div>
+                  <div className="t-body-md strong">My Patterns</div>
+                  <div className="t-caption" style={{ marginTop: 2 }}>{summaryLine}</div>
                 </div>
                 <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.patterns ? "▾" : "▸"}</span>
               </button>
@@ -12342,7 +12342,7 @@ function MyProgress({ onBack }) {
         {aiUserFacingInsights.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("ainotes")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Patterns surfaced</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{aiUserFacingInsights.length} insight{aiUserFacingInsights.length !== 1 ? "s" : ""}</div></div>
+              <div><div className="t-body-md strong">Patterns surfaced</div><div className="t-caption" style={{ marginTop: 2 }}>{aiUserFacingInsights.length} insight{aiUserFacingInsights.length !== 1 ? "s" : ""}</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.ainotes ? "▾" : "▸"}</span>
             </button>
             {openSections.ainotes && (
@@ -12353,7 +12353,7 @@ function MyProgress({ onBack }) {
                     <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>{n.note}</div>
                   </div>
                 ))}
-                <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6, marginTop: 4 }}>
+                <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginTop: 4 }}>
                   Insight guardrails are active: no labels, no diagnoses, no judgment.
                 </div>
               </div>
@@ -12365,7 +12365,7 @@ function MyProgress({ onBack }) {
         {savedReframes.length > 0 && (
           <div style={{ marginBottom: 8 }}>
             <button onClick={() => toggle("reframes")} style={rowStyle}>
-              <div><div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>Reframes that landed</div><div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{savedReframes.length} saved</div></div>
+              <div><div className="t-body-md strong">Reframes that landed</div><div className="t-caption" style={{ marginTop: 2 }}>{savedReframes.length} saved</div></div>
               <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.reframes ? "▾" : "▸"}</span>
             </button>
             {openSections.reframes && (
@@ -12373,7 +12373,7 @@ function MyProgress({ onBack }) {
                 {[...savedReframes].reverse().map((r, i) => (
                   <div key={i} style={subRowStyle}>
                     <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.6, fontStyle: "italic" }}>"{r.text}"</div>
-                    {r.timestamp && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
+                    {r.timestamp && <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4 }}>{new Date(r.timestamp).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</div>}
                   </div>
                 ))}
               </div>
@@ -12386,7 +12386,7 @@ function MyProgress({ onBack }) {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
               <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.2em", textTransform: "uppercase", color: "var(--amber)" }}><span>Pulse</span> <button onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
-              {journalEntries.length > 0 && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
+              {journalEntries.length > 0 && <div className="t-caption" style={{ marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
           </div>
           <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", marginBottom: 14 }}>
@@ -15086,7 +15086,7 @@ const isSignalProfileConfigured = () => {
                 </div>
               )}
               {page.subtitle && (
-                <p style={{ fontSize: 14, color: "var(--text-dim)", marginBottom: 16, lineHeight: 1.7 }}>
+                <p className="t-body-md quiet" style={{ marginBottom: 16, lineHeight: 1.7 }}>
                   {page.subtitle}
                 </p>
               )}
@@ -15141,7 +15141,7 @@ const isSignalProfileConfigured = () => {
                 </div>
               )}
               {page.footer && (
-                <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
+                <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 18, lineHeight: 1.6 }}>
                   {page.footer}
                 </div>
               )}
@@ -15656,7 +15656,7 @@ const isSignalProfileConfigured = () => {
                     <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 16 }}>
                       {typeLabels[scoreAssessment()].desc}
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>
+                    <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.5, fontStyle: "italic" }}>
                       This isn't permanent. The system learns from how you actually use it and will check in after 7 sessions.
                     </div>
                   </div>
@@ -16522,7 +16522,7 @@ const isSignalProfileConfigured = () => {
                         cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif",
                         WebkitTapHighlightColor: "transparent"
                       }}>
-                        <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{opt.label}</div>
+                        <div className="t-body-md strong">{opt.label}</div>
                         <div className="t-body-sm faint" style={{ marginTop: 2 }}>{opt.sub}</div>
                       </button>
                     ))}
@@ -16775,7 +16775,7 @@ const isSignalProfileConfigured = () => {
                             // 1. Signal Awareness — autonomous exits
                             const autoExits = sessions.filter(s => s.autonomousExit).length;
                             if (autoExits > 0) return (
-                              <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                              <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
                                 {autoExits === 1 ? "1 time you caught it before it ran." : `${autoExits} times you caught it before it ran.`}
                               </div>
                             );
@@ -16786,7 +16786,7 @@ const isSignalProfileConfigured = () => {
                               const recentAvg = recent.reduce((a, s) => a + s.duration, 0) / recent.length;
                               const earlyAvg = early.reduce((a, s) => a + s.duration, 0) / early.length;
                               if (recentAvg < earlyAvg - 0.5) return (
-                                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
                                   Sessions are getting shorter. The observer is faster.
                                 </div>
                               );
@@ -17101,8 +17101,8 @@ const isSignalProfileConfigured = () => {
                   </div>
                 </div>
                 <div style={{ textAlign: "center", lineHeight: 1.4 }}>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>{UAT_BOARD_UPDATED_LABEL}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
+                  <div className="t-caption">{UAT_BOARD_UPDATED_LABEL}</div>
+                  <div className="t-caption">Launch ETA {UAT_BOARD_LAUNCH_ETA_LABEL}</div>
                 </div>
                 <button
                   onClick={openUatBoardHomeOnly}
@@ -17252,7 +17252,7 @@ const isSignalProfileConfigured = () => {
                           </div>
                         )}
                         {uatFeedbackHistory.length === 0 ? (
-                          <div style={{ fontSize: 11, color: "var(--text-muted)" }}>No shared UAT feedback yet.</div>
+                          <div className="t-caption" style={{ color: "var(--text-muted)" }}>No shared UAT feedback yet.</div>
                         ) : (
                           uatFeedbackHistory.map((entry) => {
                             const questionLabel = shortLabelMap[entry.questionId] || entry.questionId || "Feedback";
@@ -17262,7 +17262,7 @@ const isSignalProfileConfigured = () => {
                                   <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>{questionLabel}</span>
                                   <span style={{ fontSize: 10, color: "var(--text-muted)" }}>{new Date(entry.submittedAt).toLocaleString()}</span>
                                 </div>
-                                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{entry.text}</div>
+                                <div className="t-caption" style={{ lineHeight: 1.5 }}>{entry.text}</div>
                               </div>
                             );
                           })
@@ -17328,7 +17328,7 @@ const isSignalProfileConfigured = () => {
 
             </div>
             </div>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
+            <div className="t-caption" style={{ color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
               Your data is encrypted.
             </div>
             {(() => {
@@ -17960,8 +17960,8 @@ const isSignalProfileConfigured = () => {
                   <div key={j} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "12px 16px", marginBottom: 6 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                       <div>
-                        <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500 }}>{line.name}</div>
-                        {line.note && <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>{line.note}</div>}
+                        <div className="t-body-md strong">{line.name}</div>
+                        {line.note && <div className="t-caption" style={{ marginTop: 2 }}>{line.note}</div>}
                       </div>
                       {isPhone ? (
                         <a href={`tel:${phoneDigits}`} style={{ fontSize: 15, color: "var(--amber)", fontWeight: 500, whiteSpace: "nowrap", textDecoration: "none" }}>{line.number} →</a>
@@ -18176,7 +18176,7 @@ const isSignalProfileConfigured = () => {
                       {/* Default tone selection */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>Default tone</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                  <div className="t-caption" style={{ marginBottom: 10, lineHeight: 1.5 }}>
                     The tone Reframe uses unless something else takes over. You can change it for a single session from inside Reframe.
                   </div>
                   {[
@@ -18197,7 +18197,7 @@ const isSignalProfileConfigured = () => {
                       }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{t.label}</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2, lineHeight: 1.45 }}>{t.desc}</div>
+                          <div className="t-caption" style={{ marginTop: 2, lineHeight: 1.45 }}>{t.desc}</div>
                         </div>
                         {selected && <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 2 }}>✓</div>}
                       </button>
@@ -18207,7 +18207,7 @@ const isSignalProfileConfigured = () => {
                 {/* Tone mode — override vs fallback */}
                 <div style={{ marginBottom: 16 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>How your default applies</div>
-                  <div style={{ fontSize: 11, color: "var(--text-dim)", marginBottom: 10, lineHeight: 1.5 }}>
+                  <div className="t-caption" style={{ marginBottom: 10, lineHeight: 1.5 }}>
                     Stillform can also auto-suggest a tone based on your bio-filter, feel state, and what you write. This setting controls whether your default takes precedence.
                   </div>
                   {[
@@ -18225,7 +18225,7 @@ const isSignalProfileConfigured = () => {
                       }}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: 14, color: selected ? "var(--amber)" : "var(--text)" }}>{m.label}</div>
-                          <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2, lineHeight: 1.45 }}>{m.desc}</div>
+                          <div className="t-caption" style={{ marginTop: 2, lineHeight: 1.45 }}>{m.desc}</div>
                         </div>
                         {selected && <div style={{ fontSize: 11, color: "var(--amber)", marginTop: 2 }}>✓</div>}
                       </button>
@@ -18276,7 +18276,7 @@ const isSignalProfileConfigured = () => {
                         >
                           <div>
                             <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 2 }}>Request a language</div>
-                            <div style={{ fontSize: 11, color: "var(--text-muted)" }}>We prioritize languages with the most requests.</div>
+                            <div className="t-caption" style={{ color: "var(--text-muted)" }}>We prioritize languages with the most requests.</div>
                           </div>
                           <span style={{ color: "var(--amber)", fontSize: 14 }}>→</span>
                         </button>
@@ -18404,7 +18404,7 @@ const isSignalProfileConfigured = () => {
                         }}>
                           <div>
                             <div style={{ fontSize: 13, color: current === s.id ? "var(--amber)" : "var(--text)" }}>{s.label}</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 1 }}>{s.desc}</div>
+                            <div className="t-caption" style={{ marginTop: 1 }}>{s.desc}</div>
                           </div>
                           {current === s.id && <div style={{ fontSize: 11, color: "var(--amber)" }}>✓</div>}
                         </button>
@@ -18442,7 +18442,7 @@ const isSignalProfileConfigured = () => {
                       {/* Processing Type */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Processing Type</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                     How you naturally process intensity — through thoughts or through your body. This determines which tool appears first. The system checks in after 7 sessions to see if it still fits.
                   </div>
                   {[
@@ -18459,7 +18459,7 @@ const isSignalProfileConfigured = () => {
                         borderRadius: "var(--r-lg)", marginBottom: 6, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
                       }}>
                         <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{t.name}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{t.desc}</div>
+                        <div className="t-caption" style={{ lineHeight: 1.5 }}>{t.desc}</div>
                       </button>
                     );
                   })}
@@ -18482,7 +18482,7 @@ const isSignalProfileConfigured = () => {
                       {/* Breathing Pattern */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Breathing Pattern</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                     Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
                   </div>
                   {[
@@ -18500,7 +18500,7 @@ const isSignalProfileConfigured = () => {
                       }}>
                         <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4, color: isSelected ? "var(--amber)" : "var(--text)" }}>{p.name}</div>
                         <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 4, fontStyle: "italic" }}>{p.use}</div>
-                        <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.5 }}>{p.why}</div>
+                        <div className="t-caption" style={{ lineHeight: 1.5 }}>{p.why}</div>
                       </button>
                     );
                   })}
@@ -18564,7 +18564,7 @@ const isSignalProfileConfigured = () => {
                       {/* Signal Mapping */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Signal Mapping</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
                     Map where your body responds first — jaw, shoulders, chest, gut, hands, legs. One-time setup. The app uses this to personalize your sessions.
                   </div>
                   <button onClick={() => startTool(TOOLS.find(t => t.id === "signals"))} style={{
@@ -18572,7 +18572,7 @@ const isSignalProfileConfigured = () => {
                     padding: "14px 18px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif"
                   }}>
                     <div style={{ fontWeight: 500, marginBottom: 2 }}>Map your signals →</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)" }}>Where does it hit first? Takes 60 seconds.</div>
+                    <div className="t-caption">Where does it hit first? Takes 60 seconds.</div>
                   </button>
                 </div>
                     </div>
@@ -18593,7 +18593,7 @@ const isSignalProfileConfigured = () => {
                       {/* Schedule & Notifications — combined */}
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Schedule & Notifications</div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.5 }}>
                     When check-ins appear and whether you get a daily reminder.
                   </div>
                   {/* Time pickers */}
@@ -18625,7 +18625,7 @@ const isSignalProfileConfigured = () => {
                         <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
                             <div style={{ fontSize: 14, color: "var(--text)" }}>Daily check-in reminder</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                            <div className="t-caption" style={{ marginTop: 2 }}>
                               {reminderOn ? `Scheduled · ${reminderTime}` : "Off"}
                             </div>
                           </div>
@@ -18662,7 +18662,7 @@ const isSignalProfileConfigured = () => {
                         <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                           <div>
                             <div style={{ fontSize: 14, color: "var(--text)" }}>Pre-meeting preparation</div>
-                            <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                            <div className="t-caption" style={{ marginTop: 2 }}>
                               {enabled ? `${firstMins} min + ${secondMins} min before` : "Off"}
                             </div>
                           </div>
@@ -18755,7 +18755,7 @@ const isSignalProfileConfigured = () => {
                                 <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Active</div>
                               </div>
                               {syncSignedIn && sbGetUser()?.email && (
-                                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{sbGetUser().email}</div>
+                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6 }}>{sbGetUser().email}</div>
                               )}
                               <button
                                 className="btn btn-ghost"
@@ -18896,7 +18896,7 @@ const isSignalProfileConfigured = () => {
                       </div>
                       {syncError && <div style={{ fontSize: 12, color: "#e05" }}>{syncError}</div>}
                       {syncAuthCooldownSeconds > 0 && (
-                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                        <div className="t-caption" style={{ color: "var(--text-muted)" }}>
                           Too many attempts. Please wait {syncAuthCooldownSeconds}s before trying again.
                         </div>
                       )}
@@ -18938,7 +18938,7 @@ const isSignalProfileConfigured = () => {
                         {syncLoading ? "Please wait..." : (syncAuthCooldownSeconds > 0 ? `Wait ${syncAuthCooldownSeconds}s` : "Sign in / Create account")}
                       </button>
                     </div>
-                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                    <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 8 }}>
                       New to Stillform? Enter your email and a password — your account is created automatically.
                     </div>
                     {/* Forgot password — opens an inline panel for requesting recovery email */}
@@ -19064,7 +19064,7 @@ const isSignalProfileConfigured = () => {
                     {integrationSignalLabel("calendar", !!integrationContext.calendar, `${integrationContext.calendar?.source || "none"} · ${integrationContext.calendar?.freshness || "Unknown"}`)}
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6, marginBottom: 12 }}>
+                <div className="t-caption" style={{ lineHeight: 1.6, marginBottom: 12 }}>
                   {integrationContext.calendar
                     ? integrationContext.calendar.summary
                     : (integrationsSupportedOnPlatform
@@ -19088,7 +19088,7 @@ const isSignalProfileConfigured = () => {
                     {integrationSignalLabel("health", !!integrationContext.health, `${integrationContext.health?.source || "none"} · ${integrationContext.health?.freshness || "Unknown"}`)}
                   </div>
                 </div>
-                <div style={{ fontSize: 11, color: "var(--text-dim)", lineHeight: 1.6 }}>
+                <div className="t-caption" style={{ lineHeight: 1.6 }}>
                   {integrationContext.health
                     ? integrationContext.health.summary
                     : (integrationsSupportedOnPlatform
@@ -19288,7 +19288,7 @@ const isSignalProfileConfigured = () => {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}>
                     <div>
                       <div style={{ fontSize: 13, color: "var(--text)" }}>App diagnostics (counts + rates only)</div>
-                      <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>
+                      <div className="t-caption" style={{ marginTop: 2 }}>
                         Enabled by default. Sends aggregate usage metrics only. Never sends journal text, AI conversation content, or free-form notes.
                       </div>
                     </div>
@@ -19302,10 +19302,10 @@ const isSignalProfileConfigured = () => {
                       {metricsOptIn ? "On" : "Off"}
                     </button>
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 8 }}>
                     {metricsLastSentAt ? `Last sent: ${new Date(metricsLastSentAt).toLocaleString()}` : "Last sent: not yet"}
                   </div>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6 }}>
                     Disclosure is documented in Privacy &amp; Disclaimers and must stay aligned with the full Privacy Policy.
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 10 }}>
@@ -19323,7 +19323,7 @@ const isSignalProfileConfigured = () => {
                       Copy diagnostic snapshot (JSON)
                     </button>
                   </div>
-                  {!metricsAuthToken && <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>Sign in to Cloud Sync to send metrics.</div>}
+                  {!metricsAuthToken && <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 8 }}>Sign in to Cloud Sync to send metrics.</div>}
                 </div>
                     </div>
                   )}
@@ -19347,14 +19347,14 @@ const isSignalProfileConfigured = () => {
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Download pulse log (PDF)</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Opens a printable document for Save as PDF.</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>Opens a printable document for Save as PDF.</div>
                   </button>
                   <button onClick={exportSessionHistoryCsv} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Download session history (CSV)</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Structured session data for personal review or provider share.</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>Structured session data for personal review or provider share.</div>
                   </button>
                 </div>
                 {exportStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{exportStatus}</div>}
@@ -19491,7 +19491,7 @@ const isSignalProfileConfigured = () => {
                 }}>
                   <div>
                     <div style={{ fontSize: 14, color: "var(--text)" }}>Run Focus Check (30s)</div>
-                    <div style={{ fontSize: 11, color: "var(--text-dim)", marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
                   </div>
                   <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
                 </button>
