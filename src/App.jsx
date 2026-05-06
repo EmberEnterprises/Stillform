@@ -16163,8 +16163,12 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Morning Check-in</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>✓ Done · tap to update</div>
+                    {/* Prestige refresh May 6 — converted from inline mono/body styles to
+                        utility classes per STILLFORM_DESIGN_SYSTEM.md. .t-mono-xs ships
+                        9px/0.16em uppercase; color override stays amber for the accent
+                        moment. .t-body-sm.quiet ships 13px/1.50 at --text-dim. */}
+                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Morning Check-in</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Done · tap to update</div>
                   </button>
                 );
 
@@ -16183,14 +16187,14 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)" }}>Before the day begins</div>
-                    <div style={{ fontSize: 12, color: "var(--text-dim)", marginTop: 4 }}>What might run you today if you don't see it first?</div>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Before the day begins</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>What might run you today if you don't see it first?</div>
                   </button>
                 );
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 9, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Morning Check-in</div>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>Morning Check-in</div>
                     {(() => {
                       const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
                       if (!breathCueOn) return null;
