@@ -1,11 +1,7 @@
 import { useState, useEffect, useRef, Component } from "react";
 import { WidgetBridge } from "./plugins/widgetBridge";
 import { integrationBridge } from "./plugins/integrationBridge";
-import { AFFECT_LABELING_STIMULI, getValidatedAffectStimuli } from "./practice-signals/affect-labeling-stimuli";
-import { COGNITIVE_DEFUSION_STIMULI, getValidatedDefusionStimuli } from "./practice-signals/cognitive-defusion-stimuli";
-import { AffectLabelingExercise } from "./practice-signals/AffectLabelingExercise";
-import { CognitiveDefusionExercise } from "./practice-signals/CognitiveDefusionExercise";
-import { DisruptorTool } from "./practice-signals/DisruptorTool";
+import { DisruptorTool } from "./disruptor/DisruptorTool";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -3010,155 +3006,6 @@ const updatePatternReasoning = (id, enrichment) => {
     writePatternDetections(next);
     return updated;
   } catch { return null; }
-};
-
-const FUNCTION_CHECKS_KEY = "stillform_function_checks";
-const FUNCTION_CHECK_SCHEMA_VERSION = 1;
-const FUNCTION_CHECK_CANDIDATES = Object.freeze({
-  AFFECT_LABELING: "affect-labeling",
-  INTEROCEPTIVE_LATENCY: "interoceptive-latency",
-  COGNITIVE_DEFUSION: "cognitive-defusion"
-});
-
-const getFunctionChecksFromStorage = () => {
-  try {
-    const raw = secureRead(FUNCTION_CHECKS_KEY, []);
-    return Array.isArray(raw) ? raw : [];
-  } catch { return []; }
-};
-
-const appendFunctionCheck = (entry) => {
-  if (!entry || !entry.candidate) return null;
-  const record = {
-    v: FUNCTION_CHECK_SCHEMA_VERSION,
-    id: entry.id || `fc_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-    candidate: entry.candidate,
-    timestamp: entry.timestamp || new Date().toISOString(),
-    primaryMs: typeof entry.primaryMs === "number" ? entry.primaryMs : null,
-    primaryCount: typeof entry.primaryCount === "number" ? entry.primaryCount : null,
-    specificity: typeof entry.specificity === "number" ? entry.specificity : null,
-    bioFilter: Array.isArray(entry.bioFilter) ? entry.bioFilter : null,
-    toolsBeforeMs: entry.toolsBeforeMs || null
-  };
-  try {
-    const existing = getFunctionChecksFromStorage();
-    const next = [...existing, record].slice(-200);
-    secureWrite(FUNCTION_CHECKS_KEY, next);
-    return record;
-  } catch { return null; }
-};
-
-// Get the most recent function check for a specific candidate. Used by
-// surfacing logic to decide cadence ("user hasn't run affect-labeling
-// in 8 days; suggest one"). Returns null if never run.
-const getLatestFunctionCheck = (candidate) => {
-  if (!candidate) return null;
-  try {
-    const all = getFunctionChecksFromStorage();
-    for (let i = all.length - 1; i >= 0; i--) {
-      if (all[i]?.candidate === candidate) return all[i];
-    }
-    return null;
-  } catch { return null; }
-};
-
-// Get the trend for a candidate over the last N records. Returns null if
-// fewer than 2 records exist. Returns { first, latest, deltaMs, deltaCount,
-// recordCount } so surfacing logic can render the honest framing the spec
-// mandates ("eight weeks ago: 4.2s, today: 1.8s — the function the
-// practice trains has gotten faster").
-const getFunctionCheckTrend = (candidate, limit = 20) => {
-  if (!candidate) return null;
-  try {
-    const records = getFunctionChecksFromStorage()
-      .filter(r => r?.candidate === candidate)
-      .slice(-limit);
-    if (records.length < 2) return null;
-    const first = records[0];
-    const latest = records[records.length - 1];
-    const trend = {
-      first,
-      latest,
-      recordCount: records.length,
-      deltaMs: null,
-      deltaCount: null
-    };
-    if (typeof first.primaryMs === "number" && typeof latest.primaryMs === "number") {
-      trend.deltaMs = latest.primaryMs - first.primaryMs;
-    }
-    if (typeof first.primaryCount === "number" && typeof latest.primaryCount === "number") {
-      trend.deltaCount = latest.primaryCount - first.primaryCount;
-    }
-    return trend;
-  } catch { return null; }
-};
-
-// ─── PRACTICE SIGNALS — CFM Phase 1 cadence helper (May 7, 2026) ──────────
-// Decision 4 from COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md:
-// practice-gated, weekly cap. Trigger: 5+ sessions since last function check
-// OR 7 days since last check, whichever comes first. Capped at one offer
-// per week regardless of practice volume. The 5-session floor means heavy
-// users get measured during high-engagement periods (strongest comparison
-// signal); the weekly minimum means low-engagement users still see the
-// offer (don't fall off the radar).
-//
-// Returns true if the user should see the practice-signal offer for the
-// given candidate. False if a check ran recently within the cadence window.
-const PRACTICE_SIGNALS_SESSION_FLOOR = 5;
-const PRACTICE_SIGNALS_DAY_CEILING_MS = 7 * 24 * 60 * 60 * 1000;
-const PRACTICE_SIGNALS_WEEKLY_CAP_MS = 7 * 24 * 60 * 60 * 1000;
-
-const shouldOfferFunctionCheck = (candidate, sessionCount = null) => {
-  if (!candidate) return false;
-  try {
-    const latest = getLatestFunctionCheck(candidate);
-    // Never run before — always offer.
-    if (!latest) return true;
-
-    const lastCheckTime = new Date(latest.timestamp).getTime();
-    const now = Date.now();
-    if (Number.isNaN(lastCheckTime)) return true;
-
-    const msSinceLast = now - lastCheckTime;
-
-    // Weekly cap — never offer the same candidate more than once per week,
-    // regardless of practice volume. Prevents over-measurement fatigue.
-    if (msSinceLast < PRACTICE_SIGNALS_WEEKLY_CAP_MS) return false;
-
-    // Time-gated path — 7 days since last check. Always offer.
-    if (msSinceLast >= PRACTICE_SIGNALS_DAY_CEILING_MS) return true;
-
-    // Practice-gated path — 5+ sessions since last check. Couples
-    // measurement to active practice for strongest comparison data.
-    // Caller passes sessionCount; if not passed, fall back to time-gated only.
-    if (typeof sessionCount === "number") {
-      // Count sessions completed since the last check timestamp.
-      // We need session count *since* the last check, not absolute.
-      // Caller is responsible for computing this from getSessionsFromStorage()
-      // filtered by timestamp > latest.timestamp.
-      if (sessionCount >= PRACTICE_SIGNALS_SESSION_FLOOR) return true;
-    }
-    return false;
-  } catch { return false; }
-};
-
-// Helper for callers: count sessions completed since the last check of a
-// given candidate. Pass this as sessionCount to shouldOfferFunctionCheck().
-const getSessionsSinceLastFunctionCheck = (candidate) => {
-  try {
-    const latest = getLatestFunctionCheck(candidate);
-    if (!latest) {
-      // No prior check — count all sessions.
-      return getSessionCountFromStorage();
-    }
-    const since = new Date(latest.timestamp).getTime();
-    if (Number.isNaN(since)) return getSessionCountFromStorage();
-    const sessions = getSessionsFromStorage();
-    return sessions.filter(s => {
-      const t = new Date(s.timestamp || 0).getTime();
-      return !Number.isNaN(t) && t > since;
-    }).length;
-  } catch { return 0; }
 };
 
 // ─── BODY SCAN TENSION DATA HELPERS — Phase 0 for My Progress redesign ────
@@ -7451,7 +7298,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_function_checks","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 round 5 — added stillform_pattern_push_enabled. Independent toggle from stillform_reminder; user can want daily check-in without pattern interrupts (or vice-versa).
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -8062,7 +7909,6 @@ const SECURE_KEYS = [
   "stillform_communication_events",
   "stillform_tool_debriefs",
   "stillform_focus_check_history",
-  "stillform_function_checks",
   "stillform_feelstate",
   "stillform_sessions",
   "stillform_saved_reframes",
@@ -14336,11 +14182,6 @@ export default function Stillform() {
   const [milestone7Seen, setMilestone7Seen] = useState(() => {
     try { return localStorage.getItem("stillform_milestone_7_seen") === "yes"; } catch { return false; }
   });
-  // Practice Signals — CFM Phase 1, May 7, 2026. When non-null, renders the
-  // exercise overlay for the chosen candidate. Cleared on completion or
-  // explicit close. Lifted to App scope so the launcher buttons in the
-  // Practice Signals screen can set it without prop-drilling.
-  const [activePracticeSignal, setActivePracticeSignal] = useState(null);
   // Pattern Disruption — May 7, 2026. surfacedPattern is set when detection
   // surfaces a loop; the in-app prompt renders. disruptorActive flips when
   // user accepts → DisruptorTool overlay renders. Both clear on completion
@@ -14602,7 +14443,7 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing" || screen === "practice-signals" || screen === "pattern-transparency") {
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing" || screen === "pattern-transparency") {
       goHomeSafely();
       return;
     }
@@ -19907,159 +19748,6 @@ const isSignalProfileConfigured = () => {
           </section>
         )}
 
-
-          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 0" }}>
-            <AffectLabelingExercise
-              bioFilter={(() => { try { const v = getActiveBioFilter(); return v ? v.split(",").map(t => t.trim()).filter(Boolean) : null; } catch { return null; } })()}
-              onClose={() => setActivePracticeSignal(null)}
-              onComplete={(summary) => {
-                try {
-                  appendFunctionCheck(summary);
-                  window.plausible?.("Practice Signals Check Completed", { props: { candidate: summary.candidate, accurate: summary.primaryCount, total: summary.trialCount } });
-                } catch {}
-                setActivePracticeSignal(null);
-              }}
-            />
-          </section>
-        )}
-
-        {screen === "practice-signals" && activePracticeSignal === FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION && (
-          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 0" }}>
-            <CognitiveDefusionExercise
-              bioFilter={(() => { try { const v = getActiveBioFilter(); return v ? v.split(",").map(t => t.trim()).filter(Boolean) : null; } catch { return null; } })()}
-              onClose={() => setActivePracticeSignal(null)}
-              onComplete={(summary) => {
-                try {
-                  appendFunctionCheck(summary);
-                  window.plausible?.("Practice Signals Check Completed", { props: { candidate: summary.candidate, distinct: summary.primaryCount, total: summary.framesSubmitted } });
-                } catch {}
-                setActivePracticeSignal(null);
-              }}
-            />
-          </section>
-        )}
-
-        {screen === "practice-signals" && !activePracticeSignal && (
-          <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
-            <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
-            <h1 className="t-display-lg" style={{ marginBottom: 12 }}>Practice Signals</h1>
-
-            {/* Explainer — CFM Decision 1 description copy.
-                Honest framing per spec line 88: never "your brain is X% better." */}
-            <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 32 }}>
-              Brief exercises that measure the cognitive functions your practice trains.
-              Repeated over time, your own data shows whether the work is producing change.
-              Specific function. Specific change. Specific timeframe.
-            </div>
-
-            {/* Take a check CTA — opens picker for which signal to measure */}
-            {(() => {
-              const affectTrend = getFunctionCheckTrend(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING, 20);
-              const defusionTrend = getFunctionCheckTrend(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION, 20);
-              const sessionsSinceAffect = getSessionsSinceLastFunctionCheck(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING);
-              const sessionsSinceDefusion = getSessionsSinceLastFunctionCheck(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION);
-              const offerAffect = shouldOfferFunctionCheck(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING, sessionsSinceAffect);
-              const offerDefusion = shouldOfferFunctionCheck(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION, sessionsSinceDefusion);
-
-              return (
-                <>
-                  <div style={{ marginBottom: 32 }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
-                      Take a signal check
-                    </div>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setActivePracticeSignal(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING)}
-                      style={{ width: "100%", marginBottom: 8, textAlign: "left" }}
-                      aria-label="Start affect labeling signal check"
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>Affect labeling</span>
-                        {offerAffect && <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ready</span>}
-                      </div>
-                      <div className="t-caption quiet" style={{ marginTop: 4 }}>
-                        How fast you label what's present. ~30 seconds.
-                      </div>
-                    </button>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setActivePracticeSignal(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION)}
-                      style={{ width: "100%", textAlign: "left" }}
-                      aria-label="Start cognitive defusion signal check"
-                    >
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                        <span>Cognitive defusion</span>
-                        {offerDefusion && <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ready</span>}
-                      </div>
-                      <div className="t-caption quiet" style={{ marginTop: 4 }}>
-                        How many distinct frames you can generate. ~60 seconds.
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Trends section — only shows for candidates with data.
-                      Per spec anti-Lumosity rule: specific function, specific
-                      change, specific timeframe. NEVER "your brain is X%" or
-                      single composite scores. */}
-                  {(affectTrend || defusionTrend) && (
-                    <div style={{ marginBottom: 32 }}>
-                      <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
-                        Your trends
-                      </div>
-
-                      {affectTrend && (
-                        <div style={{ marginBottom: 16, padding: "16px 18px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-                          <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6 }}>Affect labeling</div>
-                          <div className="t-caption quiet" style={{ lineHeight: 1.6 }}>
-                            {(() => {
-                              if (typeof affectTrend.deltaMs !== "number") {
-                                return `${affectTrend.recordCount} check${affectTrend.recordCount > 1 ? "s" : ""} on record. Take another to see the trend.`;
-                              }
-                              const firstSec = (affectTrend.first.primaryMs / 1000).toFixed(1);
-                              const latestSec = (affectTrend.latest.primaryMs / 1000).toFixed(1);
-                              const direction = affectTrend.deltaMs < 0 ? "faster" : (affectTrend.deltaMs > 0 ? "slower" : "unchanged");
-                              return `${affectTrend.recordCount} checks. First: ${firstSec}s · Latest: ${latestSec}s. ${direction === "unchanged" ? "Holding steady." : `The literature predicts this function gets ${direction === "faster" ? "faster" : "more variable"} with practice.`}`;
-                            })()}
-                          </div>
-                        </div>
-                      )}
-
-                      {defusionTrend && (
-                        <div style={{ marginBottom: 16, padding: "16px 18px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
-                          <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6 }}>Cognitive defusion</div>
-                          <div className="t-caption quiet" style={{ lineHeight: 1.6 }}>
-                            {(() => {
-                              if (typeof defusionTrend.deltaCount !== "number") {
-                                return `${defusionTrend.recordCount} check${defusionTrend.recordCount > 1 ? "s" : ""} on record. Take another to see the trend.`;
-                              }
-                              const firstCount = defusionTrend.first.primaryCount;
-                              const latestCount = defusionTrend.latest.primaryCount;
-                              return `${defusionTrend.recordCount} checks. First: ${firstCount} distinct frames · Latest: ${latestCount}.`;
-                            })()}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {!affectTrend && !defusionTrend && (
-                    <div className="t-caption quiet" style={{ lineHeight: 1.6, padding: "20px 0" }}>
-                      No checks on record yet. Take one above. Trends appear after your second check.
-                    </div>
-                  )}
-
-                  {/* Disclaimer — required per Sprint 4 polish. */}
-                  <div className="t-caption quiet" style={{ lineHeight: 1.5, marginTop: 32, paddingTop: 16, borderTop: "0.5px solid var(--border)", fontSize: 11 }}>
-                    These checks are not clinical assessments. They measure specific cognitive functions
-                    your practice trains, so you can see whether the practice is producing change for you.
-                    No comparisons to other users. No composite scores. Your data, your timeframe.
-                  </div>
-                </>
-              );
-            })()}
-          </section>
-        )}
-
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
@@ -21476,14 +21164,6 @@ const isSignalProfileConfigured = () => {
               </button>
               {settingsSectionOpen.more && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <button onClick={() => setScreen("practice-signals")} style={{
-                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
-                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
-                }}>
-                  <span style={{ fontSize: 13, color: "var(--text)" }}>Practice Signals</span>
-                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
-                </button>
                 <button onClick={() => setScreen("pattern-transparency")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",

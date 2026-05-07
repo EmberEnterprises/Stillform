@@ -54,30 +54,40 @@ Stage definitions → Trigger Profile → Today's Brief → Mirror surface → A
 
 ---
 
-## ✅ May 7 Build Batch — DEPLOYED + AI REGRESSION VERIFIED (phone test pending)
+## ⚠️ May 7 Build Batch — PRACTICE SIGNALS REVERTED (rest verified)
 
-47 items below built locally across `src/App.jsx`, `netlify/functions/reframe.js`, `netlify/functions/cognitive-defusion-score.js` (new), `netlify/functions/pattern-enrichment.js` (new), `scripts/run-ai-regression.mjs`, `scripts/ship-preflight.mjs`, `scripts/check-undefined-components.mjs`, `scripts/check-sync-keys.mjs` (new), `index.html`, `public/sw.js`, plus 5 new files in `src/practice-signals/`.
+**Practice Signals revert (May 7, late session):** Builds #31, #32, #33, #34, #35, #36, #37, #46 (cognitive-defusion-score Netlify function only — pattern-enrichment.js stays for Pattern Disruption) **REVERTED.** Reason: AffectLabelingExercise rendered unconditionally on every screen (orphaned `)}` JSX text node visible on screen, "Done" button non-functional because state changes had no effect on a non-conditionally-rendered component, 9-chip vocabulary identical to existing app feel-state chips, stimuli asked user to label hypothetical scenarios which is not what affect labeling research measures, "0/12 — counted as not matched" hostile UX on skip-all path). All 35 pre-commit audits passed; none of them were behavior-level. The revert is documented in detail in this section.
 
-**Status (May 7, post-deploy):** All 6 commits pushed to origin/main (3c56952 → 9c6abed). Netlify deployed and published (Arlin manual trigger). AI regression re-run against production: **19/19 scenarios passed, all 3 liability scenarios redirected correctly with liabilityGuard=true.** Build #9 (liability redirect Options A+B) VERIFIED. See AI_REGRESSION_RESULTS_MAY_7.md for full post-deploy verification.
+**What stayed (everything else from the batch):** Practice Signals revert is a clean removal — nothing else from the May 7 batch is affected. Pattern Disruption Layer + DisruptorTool work correctly (DisruptorTool moved from `src/practice-signals/` to `src/disruptor/`). Sync infrastructure, hardening, server-side AI, service worker, regression runner improvements — all intact and verified.
 
-**Punch-list addition from post-deploy run:** scenarios 15 + 18 produced a grammatical stitch in liability-redirect copy ("That tracks" being appended awkwardly to a redirect template that already validates). Behavior is correct; prose is rough. Template-prose polish task, not a regression.
+**Status (May 7, post-deploy):** Original 6 commits pushed to origin/main (3c56952 → 9c6abed). Netlify deployed. AI regression re-run against production: **19/19 scenarios passed, all 3 liability scenarios redirected correctly.** Build #9 verified. Then post-deploy phone test surfaced Practice Signals render bleed → revert commit pending.
 
-Local commit chain on origin/main (newest first):
+Original commit chain on origin/main (newest first):
 1. `9c6abed` — docs: engagement architecture + Self Mode research + Path A consolidation + AI regression artifacts
 2. `eb5b9e7` — chore: re-enable service worker — cache-versioned, network-first HTML (build #29)
 3. `fa23cc5` — feat+fix: App.jsx — sync infra, self-fixes, hardening, Practice Signals + Pattern Disruption integration (~30 builds)
 4. `774152e` — feat: practice-signals — stimulus libraries + exercise components + Disruptor (builds #32, #33, #36, #38)
 5. `4f22ce8` — fix: server-side AI — liability redirects, payload caps, voice corrections + new functions (builds #9, #21, #22, #37, #46)
 6. `1f7fc65` — chore: scripts — preflight tightening + sync key validator + regression runner (builds #11, #12, #19, #44)
++ `6deb48f` — docs: post-deploy AI regression verification
 
-**Verification still pending:**
-- Phone test critical paths on Arlin's device (morning chip → bio-filter status → low-demand close → QBPill → Practice Signals → Pattern Disruption surfacing → Self Mode AI-down handoff → Pattern push toggle → State-to-Statement renamed labels → ErrorBoundary recovery)
-- Practice Signals end-to-end (Settings → Practice Signals → Affect Labeling check → Cognitive Defusion check → results screen)
-- Pattern Disruption surfacing (won't fire on first run — needs 3+ data points; verify Settings → Patterns I'm watching for renders cleanly empty-state)
+**Pending revert commit:** `revert: Practice Signals — entire feature removed`
 
-Bundle size delta: 588kB → 647kB (+59kB, +10%). Real new feature work. Acceptable for launch.
+**Audit gap that allowed this:** my 35-item pre-commit checklist was 100% code-hygiene level (banned phrases, sync key parity, build green, encryption boundaries, useEffect cleanup, etc.). NONE of them were behavior-level. Specifically missing:
+- Render gating audit — verify each new component renders ONLY when intended
+- End-to-end user flow walkthrough — actually traverse entry → exercise → exit
+- Empty/skip-all visual check — what does the worst-case user path look like?
+- Brand voice audit on results screens — "0/12 counted as not matched" violates Stillform brand
+- UI coherence audit — does new UI fit existing visual system or layer parallel to it?
+- Phone screenshot before commit — visual review on actual target environment
 
-Review path: `git log -6 --stat` or open in editor. Each item carries a "May 7, 2026" comment block in code at the line ranges listed.
+`npm run build` accepts syntactically balanced JSX even when the rendering logic is broken. ship-preflight, check-sync-keys, check-undefined-components are all syntactic, not behavioral. False confidence to push.
+
+**Practice Signals as a feature:** removed from launch entirely pending fundamental rework. The redundancy with existing feel-state chips and the science mismatch (Lieberman 2007 affect labeling measures FIRST-PERSON CURRENT STATE, not labeling of hypothetical scenarios) need real design work before any re-attempt. Self Mode redesign research doc captures the framing principles that should govern any Practice Signals rebuild.
+
+**Bundle size after revert:** 619kB (down from broken-state 647kB). The pre-batch baseline was 588kB; net delta from the May 7 batch is now +31kB (+5%) for Pattern Disruption + sync infra + hardening + service worker — proportional to actual shipped feature value.
+
+Review path: `git log` or open in editor. Each item carries a "May 7, 2026" comment block in code at the line ranges listed.
 
 | # | Item | App.jsx line | Source todo entry |
 |---|------|------|-------------------|
