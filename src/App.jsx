@@ -3975,8 +3975,73 @@ const computeAchievement = (sessionEntry) => {
   if (tools.includes("body-scan")) return computeAchievementForBodyScan(sessionEntry);
   if (tools.includes("reframe")) return computeAchievementForReframe(sessionEntry);
   if (tools.includes("breathe")) return computeAchievementForBreathe(sessionEntry);
-  // EOD handler: subsequent build (Phase 4 — composure trend)
+  if (tools.includes("eod")) return computeAchievementForEod(sessionEntry);
   return null;
+};
+
+// Phase 4 — EOD close composure-frequency claim.
+//
+// EOD entries have a different shape than tool sessions (no `tools` field
+// in storage). Callers construct a synthetic { tools: ["eod"], composure,
+// date, timestamp } shape from live state at credit-display time. Same
+// pattern as Phase 2 + 3 live-state computation.
+//
+// Hard guards:
+//   - composure must be "solid" or "mixed". Skips "rough" (no failure
+//     framing per spec §2 — closing a hard day rough is real work but
+//     the credit moment isn't the time to compare; the existing close
+//     UI accepts the rating without judgment, this stays silent).
+//   - composure === "mostly" returns null. "mostly" is the saveEod
+//     fallback when user submits without selecting a chip, AND is a
+//     legacy value from the old "Strong/Mostly/Rough" chip schema.
+//     Crediting it would fabricate (fallback case) or conflate
+//     schemas (legacy case). Cleanest path: silent.
+//   - frequency must be >= 2 distinct prior days in last 7 days.
+//     First-of-kind is silent (no fabricated "1st time" claim,
+//     same precedent as Reframe + Breathe handlers).
+//
+// Frequency computation dedupes by date — same EOD record can appear
+// multiple times in history if user updated their close, but that's
+// still ONE day toward the count.
+const computeAchievementForEod = (sessionEntry) => {
+  if (!sessionEntry) return null;
+  const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
+  if (!tools.includes("eod")) return null;
+
+  const { composure, date, timestamp } = sessionEntry;
+  if (composure !== "solid" && composure !== "mixed") return null;
+
+  // Distinct prior days in last 7 days where composure matched, excluding today.
+  let priorMatchingDays = 0;
+  try {
+    const history = getEodHistory();
+    const weekAgoMs = TimeKeeper.daysAgoMs(7);
+    const currentDate = date || null;
+    const matchingDates = new Set();
+    history.forEach(e => {
+      if (!e || e.composure !== composure) return;
+      if (currentDate && e.date === currentDate) return; // same-day = same EOD
+      const t = new Date(e.timestamp || e.date || 0).getTime();
+      if (Number.isNaN(t) || t < weekAgoMs) return;
+      if (e.date) matchingDates.add(e.date);
+    });
+    priorMatchingDays = matchingDates.size;
+  } catch {}
+
+  const total = priorMatchingDays + 1; // +1 for today (just-saved EOD)
+  if (total < 2) return null;
+
+  const ordinal = total === 2 ? "2nd"
+    : total === 3 ? "3rd"
+    : total === 21 ? "21st"
+    : total === 22 ? "22nd"
+    : total === 23 ? "23rd"
+    : `${total}th`;
+
+  return {
+    headline: `${ordinal} ${composure} close this week.`,
+    context: null
+  };
 };
 
 // Phase 3 — Breathe close longitudinal context.
@@ -19147,6 +19212,36 @@ const isSignalProfileConfigured = () => {
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div className="t-mono-xs">Close the loop</div>
+                    {/* Build #5 Phase 4 — EOD close composure-frequency claim.
+                        Renders only on the just-saved state (eodSaved branch) and only
+                        when the saved composure is solid/mixed AND has occurred 2+ days
+                        in the last 7. Returns null on rough closes (no failure framing),
+                        mostly fallback (no fabrication), and first-of-kind (no '1st time'
+                        framing). The credit IS the close moment — once user navigates
+                        away or returns later, the eodDone branch (without credit) takes
+                        over. Same single-line discipline as Phase 3. */}
+                    {(() => {
+                      try {
+                        const liveEod = {
+                          tools: ["eod"],
+                          composure: eodComposure || "mostly",
+                          date: today,
+                          timestamp: new Date().toISOString()
+                        };
+                        const credit = computeAchievement(liveEod);
+                        if (!credit?.headline) return null;
+                        return (
+                          <div className="t-mono-xs" style={{
+                            color: "var(--amber)",
+                            letterSpacing: "0.08em",
+                            marginTop: 6,
+                            fontSize: 10
+                          }}>
+                            {credit.headline}
+                          </div>
+                        );
+                      } catch { return null; }
+                    })()}
                     <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Closed · tap to update</div>
                   </button>
                 );
