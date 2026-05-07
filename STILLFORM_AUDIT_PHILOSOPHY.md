@@ -1,5 +1,9 @@
 # STILLFORM AUDIT PHILOSOPHY
-**ARA Embers LLC · May 7, 2026 · Established after Practice Signals revert**
+**ARA Embers LLC · May 7, 2026 · v1.2**
+
+*v1.0 (May 7 morning) established after Practice Signals revert.*
+*v1.1 (May 7 afternoon) added the Science + UI Flow standing requirement.*
+*v1.2 (May 7 evening) added Layer 1.0 (session-start ground truth), refined Layer 1.1 (adjacent-name grep), added Layer 6.4 (diff anomaly investigation) — all from the Mirror-duplicate near-miss.*
 
 ---
 
@@ -195,10 +199,29 @@ This layer was the original Layer 1. It still applies — but Layer 0 (read the 
 
 This is the layer I skipped for Practice Signals. The cost: built parallel UI on top of existing UI, with the same vocabulary, on the same screen.
 
+It's also the layer I skipped for the Mirror duplicate incident (May 7 evening). The cost: nearly shipped a duplicate inline card on top of an already-shipped Mirror anchor + sheet, because my pre-existence grep was too narrow and I had no session-start ground truth.
+
+### Question 1.0: "What's the actual current state of HEAD?"
+**Added v1.2 — the failure mode that nearly shipped a duplicate Mirror surface.**
+- **Evidence:** Output of `git log --oneline -10` AND `wc -l` on every file I'll touch AND `git diff HEAD --stat` for any uncommitted state. All copied into the audit log for this session before any code is written.
+- **Pass:** I have written, ground-truth references for what's been committed recently and the line counts of files I'll modify. I do not assume "the last commit I remember" or "the last thing I worked on" matches HEAD.
+- **Fail:** I started writing code based on a mental model of HEAD that turned out to be wrong. Symptom: diff math doesn't add up later (see Question 6.4 — diff anomaly).
+
+This question matters most after a context-window compaction, after a session break, or after parallel work by Arlin or another collaborator. The post-compaction summary is partial by design — confidently summarizing scope from a partial summary causes real harm.
+
 ### Question 1.1: "Does this already exist in some form?"
 - **Evidence:** Grep results showing every related surface, vocabulary, mechanism in the existing codebase. List of "here's what's already there that touches this concept."
 - **Pass:** I can show that I searched for and inventoried existing related surfaces, with file/line references.
 - **Fail:** I built something without first inventorying what's already there.
+
+**v1.2 refinement — what to grep for:**
+- The FEATURE name itself (e.g., grep "Mirror", "Achievement", "Roadmap") — not just the specific constant or function I'm about to write
+- Adjacent React state names: `showXSheet`, `XCard`, `XPanel`, `XOverlay` — modals and surfaces commonly use these patterns
+- All comment markers: `── X ──`, `// X —`, `// XX-Y ─` — feature regions are usually labeled
+- Storage keys: `stillform_x_*` — features that persist data leave a key trail
+- For UI work: also grep tokens that appear in comments naming the surface (e.g., `STAGE LABEL`, `CAPACITY LINE`)
+
+The Mirror duplicate would have been caught by any of: `grep "Mirror" src/App.jsx` (would have shown the existing anchor + sheet), `grep "showMirrorSheet"` (would have shown the existing useState), `grep "MIRROR ANCHOR"` (would have shown the existing comment block). I grepped for "STAGE_DEFINITIONS" and "computeStageMarkers" — the names of NEW code — but not for the feature name itself.
 
 ### Question 1.2: "Does the science actually match the implementation?"
 - **Evidence:** Side-by-side written comparison. "The research [Author Year] measures X by doing Y. The implementation does Z. They match because [reason]" — OR — "They don't match because [gap]; here's how to close it."
@@ -366,6 +389,14 @@ These are checks against my own cognitive failures. The most dangerous bug is th
 - **Pass:** I treat each feature on its own terms, not as a pattern-match.
 - **Fail:** I assumed something works because similar things worked before.
 
+### Question 6.7: "Diff anomaly — does the math add up?"
+**Added v1.2 — the failure mode that nearly shipped a duplicate Mirror surface.**
+- **Evidence:** Before any commit, sanity-check the diff against the work I think I did. If `git diff --stat` shows +303 lines but I think I typed ~75 lines, INVESTIGATE. If it shows -78 deletions only when I expected ~150 net additions, INVESTIGATE. The investigation tools are: `git show HEAD:file | wc -l` vs `wc -l file` for raw line-count truth, raw `diff` (not `git diff`) for full unfiltered output, and `git log --oneline -5` to verify HEAD is what I think it is.
+- **Pass:** When diff math is surprising, I stop and verify before committing. I treat surprise as a signal that my mental model is wrong, not as a curiosity to ignore.
+- **Fail:** I notice the diff math is off, shrug, and commit anyway. Symptom in production: duplicate code, missing code, or commits whose titles describe work that wasn't actually done in that commit.
+
+This question caught the Mirror duplicate before it shipped. Diff stat said "+303 lines" when I'd only typed a small inline card. Investigation revealed the anchor + sheet were already in HEAD (committed earlier in the day, lost from context after compaction), and my new card was a duplicate on top. The diff anomaly was the audit gate.
+
 ---
 
 ## LAYER 7 — Recovery (when something slips through)
@@ -494,6 +525,8 @@ Documented from real failures so far:
 6. **False confidence from passing hygiene audits** (Practice Signals, May 7) — Layer 6.2
 7. **Skipping phone test before push** (Practice Signals, May 7) — Layer 5
 8. **Building a feature that has a spec without reading the spec** (Practice Signals, May 7) — Layer 0
+9. **Duplicate work from missed pre-existence audit** (Mirror surface, May 7 evening) — Layer 1.0 + Layer 1.1 (v1.2 refinements). Failed because pre-existence grep was too narrow (only checked names of NEW code, not feature name) and there was no session-start commit-log review.
+10. **Ignoring diff anomaly signals** (Mirror surface, May 7 evening) — Layer 6.7. Failed because surprising diff stat ("+303 lines when I typed ~75") was almost ignored. Investigation revealed the truth, but only because the discipline of audit philosophy v1.1 forced "verify before claiming."
 
 When new failure classes appear, document them here and add the audit that catches them.
 
@@ -501,6 +534,10 @@ When new failure classes appear, document them here and add the audit that catch
 
 ## Versioning
 
-**v1.0 — May 7, 2026.** Established after Practice Signals revert.
+**v1.0 — May 7, 2026 morning.** Established after Practice Signals revert. The original 8 layers + failure classes 1-8.
+
+**v1.1 — May 7, 2026 afternoon.** Added the Standing Requirement: science + UI flow articulation before every recommendation. Promoted to irreducible non-negotiable #2.
+
+**v1.2 — May 7, 2026 evening.** Added Question 1.0 (session-start ground truth — `git log --oneline -10` + `wc -l` checks) and refined Question 1.1 (explicit grep guidance: feature name, adjacent state names, comment markers, storage keys — not just the names of new code being written). Added Question 6.7 (diff anomaly investigation — when the math is surprising, stop and verify, don't commit). Documented failure classes 9 and 10 from the Mirror surface duplicate near-miss.
 
 Future versions update this doc when a new failure class is identified. The audit philosophy itself is reviewable, fallible, and evolves.
