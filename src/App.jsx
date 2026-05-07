@@ -20181,10 +20181,10 @@ const isSignalProfileConfigured = () => {
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Breathing Pattern</div>
                   <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 10, lineHeight: 1.6 }}>
-                    Your default starts automatically each session. Quick for regulation on the go, Deep for a fuller reset.
+                    Your default starts automatically each session. Quick for in-the-moment work, Deep for a fuller reset.
                   </div>
                   {[
-                    { id: "quick", name: "Quick Reset", use: "60 seconds. Regulate and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
+                    { id: "quick", name: "Quick Reset", use: "60 seconds. Reset and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
                     { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." },
                     { id: "cyclic_sigh", name: "Cyclic Sighing", use: "5 minutes. Two short inhales, one long exhale.", why: "Outperformed mindfulness, box breathing, and other patterns for mood and arousal reduction in a 2023 Stanford RCT (Balban et al., n=111). The most-studied breath for downregulation." }
                   ].map(p => {
