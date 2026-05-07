@@ -3974,9 +3974,73 @@ const computeAchievement = (sessionEntry) => {
   const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
   if (tools.includes("body-scan")) return computeAchievementForBodyScan(sessionEntry);
   if (tools.includes("reframe")) return computeAchievementForReframe(sessionEntry);
-  // Breathe handler: subsequent build (Phase 3 — physiological-spike delta)
+  if (tools.includes("breathe")) return computeAchievementForBreathe(sessionEntry);
   // EOD handler: subsequent build (Phase 4 — composure trend)
   return null;
+};
+
+// Phase 3 — Breathe close longitudinal context.
+// Different scope from Body Scan / Reframe handlers because Breathe close
+// ALREADY has a per-session credit display (48px Cormorant "+N" + tag +
+// drift %) at lines ~6148-6171. That display IS the headline. This handler
+// only contributes a single context line (frequency of similar +N shifts
+// this week), rendered below the existing surface.
+//
+// Hard guards:
+//   - delta must be > 0 (negative-shift sessions show "Holding"/"Run again"
+//     in the existing surface; adding longitudinal stat would read as
+//     "today didn't work but yesterday did" — spec §2 failure-framing
+//     anti-pattern)
+//   - frequency must be >= 2 in last 7 days (no fabricated "1st time"
+//     framing — would read as "you've never done this before")
+//   - Otherwise returns null (silent path)
+//
+// Returned shape: { headline: null, context: string }
+//   - headline is intentionally null because the existing 48px +N is
+//     already the headline. JSX renders only the context line.
+const computeAchievementForBreathe = (sessionEntry) => {
+  if (!sessionEntry) return null;
+  const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
+  if (!tools.includes("breathe")) return null;
+
+  const { delta, timestamp } = sessionEntry;
+  // Strict positive-delta gate. Existing surface handles non-positive
+  // cases with appropriate tonal calibration; we don't compete with it.
+  if (typeof delta !== "number" || delta <= 0) return null;
+
+  // Count similar +N breathe shifts in last 7 days (excludes self by ts).
+  let total = 1; // include current
+  try {
+    const sessions = getSessionsFromStorage();
+    const weekAgo = TimeKeeper.daysAgoMs(7);
+    const similar = sessions.filter(s => {
+      if (!s) return false;
+      const t = new Date(s.timestamp || 0).getTime();
+      if (Number.isNaN(t) || t < weekAgo) return false;
+      if (timestamp && s.timestamp === timestamp) return false;
+      const stools = Array.isArray(s.tools) ? s.tools : [];
+      // Match any session that included breathe and had the same delta.
+      // breathe+ground combined sessions count too — same physiological
+      // shift mechanism per Brown 2005, Balban 2023.
+      return stools.includes("breathe") && s.delta === delta;
+    });
+    total = similar.length + 1;
+  } catch {}
+
+  // First instance — silent (no fabricated "1st time" claim).
+  if (total < 2) return null;
+
+  const ordinal = total === 2 ? "2nd"
+    : total === 3 ? "3rd"
+    : total === 21 ? "21st"
+    : total === 22 ? "22nd"
+    : total === 23 ? "23rd"
+    : `${total}th`;
+
+  return {
+    headline: null,
+    context: `${ordinal} +${delta} shift this week.`
+  };
 };
 
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
@@ -6168,6 +6232,39 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                 )}
               </div>
             );
+          })()}
+          {/* Build #5 Phase 3 — Breathe close longitudinal context. ONE line,
+              not a full PRACTICE TREND block, because the existing 48px +N
+              display above already serves as the per-session credit headline.
+              This adds the weekly-frequency claim that the existing surface
+              doesn't have. Renders only on positive shifts with frequency >= 2.
+              Returns null in all other paths (sparse data, negative delta,
+              first-of-kind shift) — silent rather than fabricated. */}
+          {postRating && preRating && (() => {
+            try {
+              const delta = postRating - preRating;
+              if (delta <= 0) return null;
+              const liveSession = {
+                tools: ["breathe"],
+                preRating,
+                postRating,
+                delta,
+                timestamp: null
+              };
+              const credit = computeAchievement(liveSession);
+              if (!credit?.context) return null;
+              return (
+                <div className="t-mono-xs" style={{
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.08em",
+                  textAlign: "center",
+                  marginBottom: 16,
+                  fontSize: 10
+                }}>
+                  {credit.context}
+                </div>
+              );
+            } catch { return null; }
           })()}
           {postRating && (() => {
             const delta = postRating - preRating;
