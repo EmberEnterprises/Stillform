@@ -47,7 +47,58 @@ Audits run at eight layers, in order. Skipping a layer is the bug class that shi
 6. **Self-skepticism** — continuous, meta-layer
 7. **Recovery** — what happens when something does slip through
 
+Plus one **standing requirement** that runs in parallel with the layered audit:
+
+**↗ Science + UI Flow justification** — before every recommendation, articulate two things explicitly: how the change serves the science (specific citations, mechanism), and how it improves UI flow (symmetry, continuity, decisions, data integrity, brand). No recommendation without both. See section below.
+
 Each layer below has the questions you ask, the evidence I have to show, and the pass/fail.
+
+---
+
+## STANDING REQUIREMENT — Science + UI Flow justification before any recommendation
+**Added May 7, 2026 (Arlin's call).**
+
+This requirement runs in parallel with all other layers. Every proposed change — code edit, surface adjustment, copy change, removal — must come with explicit articulation in BOTH dimensions before the proposal is offered. Not after the fact. Not when asked. Up front.
+
+### Why this exists
+
+When I propose a change without articulating WHY in the dimensions that matter most to Stillform, two things happen:
+
+1. **I might be making the change for the wrong reason.** A change that fixes a UI symptom but breaks the science isn't a fix — it's a regression. A change that aligns with the science but breaks the flow is the same. Forcing both articulations up front prevents me from optimizing for one and unintentionally hurting the other.
+
+2. **Arlin has to do the verification work I should be doing.** Without the justification baked in, she has to ask "how does this serve the science?" / "how does this improve flow?" each time. That's verification work that should live with the proposal, not the reviewer.
+
+### The two articulations required
+
+#### Science alignment
+- **Which specific citations does this serve or violate?** Not "the science generally." Named: Lieberman 2007 / Barrett 2017 / Mehling 2012 / Wells 2009 / Russell circumplex / Lehrer 2020 / etc.
+- **What mechanism is being preserved or restored?** Affect labeling reduces amygdala reactivity. Interoceptive granularity is trainable. Pre/post measurement is the practice's claim. Pattern detection requires session data. Etc.
+- **What would this change do to the science if it went wrong?** If I'm wrong, what gets broken? The honesty of the measurement claim? The mechanism the practice depends on? Name it.
+
+#### UI flow improvement
+- **Symmetry** — does the same user get the same architectural treatment across tools, or does this fix one place at the cost of asymmetry?
+- **Continuity** — does the change preserve the data continuity My Progress, Pattern Disruption, and Roadmap markers depend on?
+- **Decisions** — does this add or remove cognitive choices for the user? Sometimes a "fix" that adds a feature also adds a decision.
+- **Data integrity** — does the change preserve, augment, or compromise the data the system collects?
+- **Brand consistency** — does the change land within the editorial-luxury frame, or does it drift toward wellness-app default?
+
+### The standard
+
+Every proposal must include both articulations. If I cannot articulate the science alignment, I have not done Layer 0 / Layer 1.2 properly and shouldn't propose yet. If I cannot articulate the flow improvement, I'm proposing a code change that hasn't earned its place in the architecture yet.
+
+### What this looks like in practice
+
+**Bad (pre-May-7 standard):** *"Proposed change: keep the post-state chip for low-demand users. Diff size: ~30 lines. Want me to proceed?"*
+
+**Good (post-May-7 standard):** *"Proposed change: keep the post-state chip for low-demand users.*
+
+*Science: preserves Lieberman 2007 affect labeling mechanism for the cohort that benefits most from accessible labeling moments. Restores Stillform's pre/post measurement claim for depleted users who currently contribute zero data. Preserves Russell circumplex granularity work that Barrett 2017 names as the trainable capacity.*
+
+*UI flow: restores symmetry across the three tools (Body Scan + Reframe already kept the chip May 7; Breathe is the lonely asymmetry). Preserves continuity for Pattern Disruption Layer detection, which reads session pre/post deltas. Restores Roadmap Stage 5 markers that explicitly depend on this data on depleted/activated/pain sessions. Counter-intuitively REMOVES a decision (skips the 3-option choice screen entirely).*
+
+*Diff size: ~30 lines. Want me to proceed?"*
+
+The second version is the same change, but the reviewer can see WHY in the dimensions that matter without having to ask.
 
 ---
 
@@ -343,21 +394,23 @@ These are not audits. These are absolute rules. Violation = the prestige standar
 
 1. **Read the canonical docs before any feature work.** No exceptions. The repo has 43+ docs that already answer most design questions. Building a feature without reading its spec is the failure class that shipped Practice Signals.
 
-2. **Phone screenshot before push.** No exceptions. Even for "small" changes. The Practice Signals failure took 5 seconds to surface in a phone screenshot.
+2. **Articulate science alignment + UI flow improvement before any recommendation.** Both, named, up front. No proposal without both. (Standing requirement, added May 7.)
 
-3. **Existing surfaces inventoried before new ones built.** No new UI without first showing what's already there.
+3. **Phone screenshot before push.** No exceptions. Even for "small" changes. The Practice Signals failure took 5 seconds to surface in a phone screenshot.
 
-4. **Worst-case path checked before happy path approved.** Empty / skip / error / hostile context all walked before sign-off.
+4. **Existing surfaces inventoried before new ones built.** No new UI without first showing what's already there.
 
-5. **Every component has explicit conditional wrapper.** No exceptions. Unconditional render is the bug class that hides until production.
+5. **Worst-case path checked before happy path approved.** Empty / skip / error / hostile context all walked before sign-off.
 
-6. **Revert > patch when something ships broken.** Patches don't force reckoning; reverts do.
+6. **Every component has explicit conditional wrapper.** No exceptions. Unconditional render is the bug class that hides until production.
 
-7. **Voice held at the worst-case copy.** If the worst path produces copy that would feel bad to read aloud to a friend, the feature isn't ready.
+7. **Revert > patch when something ships broken.** Patches don't force reckoning; reverts do.
 
-8. **Science citations verified, not just cited.** Implementation must produce the effect the research measures.
+8. **Voice held at the worst-case copy.** If the worst path produces copy that would feel bad to read aloud to a friend, the feature isn't ready.
 
-9. **Self-skepticism is the hardest audit.** Confidence is the most dangerous bug.
+9. **Science citations verified, not just cited.** Implementation must produce the effect the research measures.
+
+10. **Self-skepticism is the hardest audit.** Confidence is the most dangerous bug.
 
 ---
 
@@ -369,29 +422,31 @@ Step-by-step, in order. Skipping any step = audit philosophy violated.
 
 2. **Pre-existence audit (Layer 1).** Inventory existing surfaces in code. Verify science. Walk worst-case paths. Make explicit choice: build / integrate / skip.
 
-3. **Design pass.** Address Layer 0 + 1 findings. Decide what to actually build.
+3. **Science + UI flow articulation (standing requirement).** Before proposing any change to Arlin: name the citations being served or violated, name the mechanism being preserved or restored, name the flow improvement (symmetry / continuity / decisions / data integrity / brand). If I can't articulate either dimension, I haven't earned the right to propose yet.
 
-4. **Write code.**
+4. **Design pass.** Address Layer 0 + 1 findings. Decide what to actually build.
 
-5. **Code-hygiene audit (Layer 2).** All 35 hygiene audits pass.
+5. **Write code.**
 
-6. **Behavior audit (Layer 3).** Render gating verified. JSX text-leakage scan clean. Full user flow walked end-to-end. Empty / skip / error paths verified. Existing-surface delta confirmed.
+6. **Code-hygiene audit (Layer 2).** All 35 hygiene audits pass.
 
-7. **Voice + brand audit (Layer 4).** No grading/shaming. No "not X" framings. Self-mastery served. Worst-case copy respected.
+7. **Behavior audit (Layer 3).** Render gating verified. JSX text-leakage scan clean. Full user flow walked end-to-end. Empty / skip / error paths verified. Existing-surface delta confirmed.
 
-8. **Visual coherence audit (Layer 5).** Phone screenshots taken. All states + adjacent screens. No bleed. No code-shaped text.
+8. **Voice + brand audit (Layer 4).** No grading/shaming. No "not X" framings. Self-mastery served. Worst-case copy respected.
 
-9. **Self-skepticism pass (Layer 6).** Assumptions named and tested. False-confidence check. Stranger walkthrough.
+9. **Visual coherence audit (Layer 5).** Phone screenshots taken. All states + adjacent screens. No bleed. No code-shaped text.
 
-10. **Stage commit.**
+10. **Self-skepticism pass (Layer 6).** Assumptions named and tested. False-confidence check. Stranger walkthrough.
 
-11. **Pre-push audit.** State integrity. Build green. All audits re-run if any code changed.
+11. **Stage commit.**
 
-12. **Push.**
+12. **Pre-push audit.** State integrity. Build green. All audits re-run if any code changed.
 
-13. **Deploy.**
+13. **Push.**
 
-14. **Post-deploy verification.** AI regression if applicable. Phone test of newly-deployed surface. Update relevant docs.
+14. **Deploy.**
+
+15. **Post-deploy verification.** AI regression if applicable. Phone test of newly-deployed surface. Update relevant docs.
 
 If any step fails, return to the earliest failed layer. Don't push partial-pass states.
 
