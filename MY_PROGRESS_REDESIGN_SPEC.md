@@ -3,6 +3,27 @@
 
 ---
 
+## ⚠️ STATUS UPDATE — May 7, 2026
+
+**This spec is functionally absorbed into STILLFORM_ENGAGEMENT_ARCHITECTURE.md per Path A consolidation decision (May 7).**
+
+The redundancy this spec called out — "Observer growth and Proof both surface session-rating delta data," "Additional stats and Composure telemetry both surface activity counts," "Three places reference follow-through from drafted actions" — is resolved by the engagement architecture's three-engine refactor:
+
+- "Processing Mastery" card → folded into Roadmap stage markers (Mastery becomes the 5-stage progression)
+- "Observer Growth" section → moved out of My Progress entirely, becomes Achievement micro-credits at session close
+- Milestone-7 surface → generalized into Stage-1-crossing moment
+- 30+ computed metrics → categorized by stage as markers (computation layer unchanged, presentation rebuilt)
+
+After Path A, My Progress contains 4 sections instead of 8:
+1. **Roadmap surface** — stage display + markers + what's next per stage (NEW framing, existing data)
+2. **Composure telemetry** — 12-week heat map (kept as-is)
+3. **Weekly reflection** — narrative summary (kept as-is)
+4. **Saved Reframes / AI session notes / Shareable card** — kept as-is, lower priority
+
+The detailed analysis of the current screen below remains valid and informs the engagement architecture build. Read STILLFORM_ENGAGEMENT_ARCHITECTURE.md for the consolidated direction.
+
+---
+
 ## What this spec is
 
 A redesign of the My Progress screen grounded in Pillar 4 (neuroplasticity) science from your Science Sheet, addressing your specific feedback that the current screen is "data heavy" with "redundancy" and that data needs to "show trends, patterns" rather than raw counts. The new architecture moves heavy computation backend / PDF and surfaces only patterns the user actually needs to see in the live screen.

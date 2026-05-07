@@ -1,5 +1,134 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 3, 2026**
+**ARA Embers LLC · last updated May 7, 2026**
+
+---
+
+## 🌟 ENGAGEMENT ARCHITECTURE — Active design (May 7 brainstorm, awaiting build)
+
+Single largest architectural commitment of the launch sprint. Captured in full in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**. Read that doc for complete context — this is just the index entry.
+
+**The thesis:** Stillform's actual retention killer is product self-obsolescence — composure work becomes baseline by month 2-3 and the user thinks they're done. The fix is three engines running in parallel:
+
+1. **Retention engine** — Mirror (named loops at home) + Achievement (in-flow micro-credits at every close) + Roadmap (5 stages of mastery visible from day 1)
+2. **Application layer** — Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact (real-world artifacts the user takes from app to life)
+3. **External risk mitigation** — Trigger Profile as third diagnostic layer alongside Signal Profile and Bias Profile
+
+**Path A consolidation (decided May 7) — this is a REFACTOR of existing surfaces, not an addition on top.** The architecture replaces existing capacity-feedback surfaces:
+- "Processing Mastery" card in My Progress → folded into Stage markers across the Roadmap
+- "Observer Growth" section in My Progress → moved to Achievement micro-credits at session close
+- Milestone-7 surface → generalized into Stage-1-crossing moment
+- 30+ existing computed metrics → categorized by stage as markers (no new computation)
+
+After Path A, MY_PROGRESS_REDESIGN_SPEC.md is functionally absorbed: the redesign IS the engagement architecture. My Progress consolidates from 8 overlapping sections to 4: Roadmap surface (new), Composure telemetry heat map (kept), Weekly reflection (kept), Saved Reframes / AI session notes / Shareable card (kept).
+
+**Stage definitions (proposed, naming locked May 7):**
+NOTICING → NAMING → ANTICIPATING → RECOGNIZING → HOLDING. Single-verb capacity names that build sequentially. ~80% of stage markers attach to existing data; only Stage 3's Trigger Profile is new data collection.
+
+**What this absorbs/replaces:**
+- "3 to-dos for the day" idea → absorbed into Trigger Profile premeditation + Today's Brief
+- 90-day attribution report → replaced by daily-flow micro-credits
+- Decision item 7 (7-session evidence callouts, research-first) → becomes Roadmap markers per stage
+- Cross-cultural composure question → Trigger Profile category, NOT bias-reduction
+- Existing My Progress redesign work → consolidated into this architecture
+
+**What this does NOT absorb:**
+- Decision item 5 (Self Mode redesign) → stays distinct. Framing locked May 7 ("Past Self / Present Self"). See SELF_MODE_REDESIGN_RESEARCH.md.
+
+**Status:** Architecture documented in STILLFORM_ENGAGEMENT_ARCHITECTURE.md. **Not yet building.** Awaiting Arlin sign-off on:
+1. The 5 stage definitions (load-bearing — everything attaches)
+2. Trigger Profile onboarding flow
+3. Mirror surface placement
+4. Achievement threshold (one number per close, ranking logic)
+5. Other open questions in §8 of the spec
+
+**Related research item — Self Mode redesign (decision item 5):** NOT absorbed into this architecture. Stays distinct. Full research + design proposal in **SELF_MODE_REDESIGN_RESEARCH.md** (May 7). Concept proposal: "Past Self / Present Self" — Self Mode as the surface where the user's own cached data (Bias Profile, Signal Profile, saved Reframes, journal entries) becomes the in-the-moment intervention when AI is unavailable. ~4-6 builds, smaller than CFM Phase 1. Sequences AFTER engagement architecture stages + Trigger Profile, BEFORE Today's Brief / application layer. Single biggest design decision pending: does the "past self talks to present self" frame land for Arlin as the right concept.
+
+**Shipping order (load-bearing first), full table in spec §9:**
+Stage definitions → Trigger Profile → Today's Brief → Mirror surface → Achievement micro-credits → Roadmap screen → Pre-event Brief → Move card → Scripts → EOD artifact
+
+**Estimated scope:** 12-18 builds. Multi-session, each independently shippable.
+
+**Award-winning angle:** Stillform has better attribution data than Calm or Headspace — pre/post rates per session, function-level Practice Signals trends, Pattern Disruption catch timing, Body Scan tension trends per area, composure across bio-filter states. Whoop did this for physical recovery. Strava did it for running. Nobody has done it for nervous system regulation at this granularity. That's the differentiator, presented as proof of work, not gamification.
+
+**Anti-patterns explicitly out of scope:** streaks, badges, dopamine, productivity-task framing, bias-reduction claims, 90-day retrospective surfaces, therapy-coded language, "you missed X today" failure framing. See spec §2 for full list.
+
+---
+
+## ✅ May 7 Build Batch — COMMITTED LOCALLY (awaiting push + Netlify deploy + phone test)
+
+47 items below built locally across `src/App.jsx`, `netlify/functions/reframe.js`, `netlify/functions/cognitive-defusion-score.js` (new), `netlify/functions/pattern-enrichment.js` (new), `scripts/run-ai-regression.mjs`, `scripts/ship-preflight.mjs`, `scripts/check-undefined-components.mjs`, `scripts/check-sync-keys.mjs` (new), `index.html`, `public/sw.js`, plus 5 new files in `src/practice-signals/`.
+
+**Commit status (May 7, late session):** All committed locally across 6 commits in dependency order. Awaiting single push + Netlify manual deploy + phone test. Original 8-commit plan consolidated to 6: App.jsx had 83 hunks heavily interleaved, hunk-level splitting was too error-prone for prestige discipline. App.jsx ships as one commit with full build inventory in commit body.
+
+Local commit chain (newest first, all on local main only):
+1. `chore: scripts — preflight tightening + sync key validator + regression runner` (builds #11, #12, #19, #44)
+2. `fix: server-side AI — liability redirects, payload caps, voice corrections + new functions` (builds #9, #21, #22, #37, #46)
+3. `feat: practice-signals — stimulus libraries + exercise components + Disruptor` (builds #32, #33, #36, #38 component file)
+4. `feat+fix: App.jsx — sync infra, self-fixes, hardening, Practice Signals + Pattern Disruption integration` (~30 builds — see commit body)
+5. `chore: re-enable service worker — cache-versioned, network-first HTML` (build #29)
+6. `docs: engagement architecture + Self Mode research + Path A consolidation` (in progress)
+
+Verification still pending: AI regression re-run post-deploy (verifies build #9 fixed scenario #19), phone test on critical paths.
+
+Bundle size delta: 588kB → 647kB (+59kB, +10%). Real new feature work (Practice Signals + Pattern Disruption + Disruptor + Pattern Transparency screen). Acceptable for launch.
+
+Review path: `git log -6 --stat` or open in editor. Each item carries a "May 7, 2026" comment block in code at the line ranges listed.
+
+| # | Item | App.jsx line | Source todo entry |
+|---|------|------|-------------------|
+| 1 | 🪧 QBPill clamp on mount + resize listener | ~12872 | line 328 |
+| 2 | 🎚️ Tone dropdown affordance bump | ~9326 | line 383 |
+| 3 | 🪞 Bio-filter status line + inline edit at Reframe entry | ~10905 | line 362 |
+| 4 | 🌅 Morning mood chip row + writer fix + feelState seeding | ~13418, 16703, 16797 | line 337 |
+| 5 | 🌗 Splash wordmark split treatment | ~15384 | line 388 |
+| 6 | 🔄 Auto-launch sync — cloud data + subscription recheck | ~13298 | line 301 |
+| 7 | 🎯 Low-demand close redesign — Reframe + Body Scan parallel | ~5187, 5283, 5320, 5640, 5715, 7994, 8982 | line 393 |
+| 8 | 🏠 Footer-logo home link (small additive, not in original todo) | ~20410 | additive |
+| 9 | 🛡️ Liability-redirect fix in reframe.js — Options A + B (skip intent validator on liabilityGuard, add proper fallback templates) | netlify/functions/reframe.js ~650, 689, 1618, 1639 | surfaced by May 7 regression run |
+| 10 | 📊 Plausible event for `Reframe Deterministic Fallback Triggered` — production observability | src/App.jsx ~8451 | observability gap surfaced by May 7 regression |
+| 11 | 🧪 Regression runner improvements — surface `FALLBACK_FIRED` + `INTENT_FAIL_RECOVERED` tags, exit non-zero on silent fallback fires, exclude crisis from `TOO_LONG` noise | scripts/run-ai-regression.mjs | tooling improvement from May 7 finding |
+| 12 | 🚧 Ship-preflight protection for items 9 — must-match checks on `liability_redirect_*` templates and `hasLiabilityGuard` parameter | scripts/ship-preflight.mjs | regression protection |
+| 13 | 🔁 Cross-device sync gap — added `stillform_checkin_today` + `stillform_bio_filter` to `SYNC_KEYS` so morning state and active hardware state carry across phone/tablet/desktop same-day. Bio-filter specifically drives LOW-DEMAND OVERRIDE; without sync, multi-device users got wrong-cohort AI responses | src/App.jsx ~6820 | gap surfaced while auditing build #4 |
+| 14 | 🐛 Self-fix on build #4 — morning mood seeded `stillform_feelstate` as a plain string but the reader expects the day-keyed `{value, day}` schema. Silently failed for 7 of 10 chips (the regex fallback only recovered anxious/angry/excited). Schema corrected | src/App.jsx ~16880 | caught while auditing today's diff |
+| 15 | 🧹 Self-cleanup on build #3 — bio-filter inline-edit clear path inlined `secureWrite` directly to `stillform_bio_filter`, bypassing the canonical `setActiveBioFilter()` setter (file comment at line 2150 explicitly bans direct access). Replaced with the canonical setter | src/App.jsx ~11178 | caught while auditing today's diff |
+| 16 | 🏷️ Bio-filter `off-baseline` label added to `BIO_FILTER_LABELS` — was rendering raw token in status line at Reframe entry for users who took the morning "Something's off" path | src/App.jsx ~11034 | caught while auditing build #3 |
+| 17 | 🔁 Cross-device sync round 2 — added 4 more user-facing keys to SYNC_KEYS: `_eod_today` (parallel to morning), `_outcome_focus` (drives recommended protocol), `_grounding_data` (user-generated content), `_calibration_deferred` (onboarding state) | src/App.jsx ~6820 | second sync-key audit pass |
+| 18 | 🔁 Cross-device sync round 3 — added `_feelstate` to SYNC_KEYS. Earlier held; on reflection sync only runs at launch/refresh, not constantly, so intra-day conflict risk is narrow vs the cross-device AI-context benefit | src/App.jsx ~6820 | reconsidered after round 2 audit |
+| 19 | 🛡️ SYNC_KEYS typo guard — new `scripts/check-sync-keys.mjs` validator that flags any SYNC_KEYS entry with no quoted reference elsewhere. Wired into `ship-preflight`. Catches the bug class where a typo'd key silently breaks sync for users — invisible to build, lint, runtime | scripts/check-sync-keys.mjs (new), scripts/ship-preflight.mjs | preventive, surfaced after rounds 2-3 of additions |
+| 20 | 🗝️ IndexedDB device key + overflow blob wipe on delete-account — added `CryptoStore.deleteKey()` and `SecureStore.clear()`, both wired into the delete-account flow. Forensic deletion completeness on shared devices | src/App.jsx ~7196, ~7271, ~20251 | punch list line 547 |
+| 21 | ✍️ Four "not therapy / not a patient / therapy padding / pre-game not therapy" framings in reframe.js rewritten as positive — per Stillform rule "never define it by what it isn't" | netlify/functions/reframe.js ~798, ~805, ~1024, ~1031 | punch list line 549 |
+| 22 | ✂️ AI payload size cap — `priorModeContext` (250 char per message) and `sessionNotes` (200 char per note) now truncate. Prevents heavy users 6+ months in from blowing token limits | src/App.jsx ~8403, ~8420 | punch list line 552 |
+| 23 | 🏷️ State-to-Statement labels renamed — buttons now "Convert to message" / "Hide message draft", section header "Make it sendable". Distinguishes observation (What Shifted) from sendable conversion | src/App.jsx ~8970, ~8980 | punch list line 550 |
+| 24 | ♿ Info-icon ARIA labels — 18 of the ⓘ buttons now have `aria-label` from their modal title. Screen readers no longer announce them as "ⓘ" | src/App.jsx (multiple) | punch list line 546 partial |
+| 25 | ♿ Chip aria-pressed — 10 toggle chip patterns (bio-filter drawer + 9 others) gained `aria-pressed={isActive}` so screen readers announce selection state | src/App.jsx (multiple) | punch list line 546 partial |
+| 26 | 🛡️ ErrorBoundary "Clear local data & restart" recovery path — covers crash loops caused by corrupted localStorage. Wipes stillform_* keys but preserves auth so cloud sync restores on next launch | src/App.jsx ~24 | punch list line 556 |
+| 27 | 🧹 Scroll-into-view useEffect cleanup — `messages`-deps useEffect was firing setTimeout without storing or clearing. Rapid message changes stacked timers; unmount during pending fired on stale refs | src/App.jsx ~8111 | punch list line 553 |
+| 28 | 🔧 Processing primer threshold extracted to `PROCESSING_PRIMER_DECAY_THRESHOLD` constant. Was inline magic number `5` at render site; now alongside other tunable thresholds (LOOP_NUDGE_*) so future adjustment is one-number change instead of grep | src/App.jsx ~1719, ~18222 | master todo line 410 |
+| 29 | 🔌 Service worker re-enabled — replaced kill-switch sw.js with cache-versioned worker. Network-first for HTML, cache-first for `/assets/*` (Vite-hashed bundles), network-only for `/.netlify/*`, stale-while-revalidate for fonts/icons. CACHE_VERSION = `stillform-v1-2026-05-07` (manual bump for future cache breaks). Old caches cleared on activate. Restores PWA install + offline access without the stale-asset failure mode that triggered the kill-switch | public/sw.js (new), index.html ~120-145 | decision item 6 (risk accepted) |
+| 30 | 👆 Chip touch target bumps — surgical regex sweep raised 16 chip paddings (4-5px vertical → 10px vertical) across affect/feel/bio-filter chip rows. Touch height ~26px → ~36-40px, closer to iOS HIG 44pt. Visual impact minimal (chips slightly taller); accessibility improves meaningfully on small screens | src/App.jsx (16 sites) | decision item 8 |
+| 31 | 🧠 Practice Signals cadence helpers — `shouldOfferFunctionCheck(candidate, sessionCount)` (5+ sessions OR 7 days, weekly cap) + `getSessionsSinceLastFunctionCheck(candidate)` per CFM Phase 1 audit Decision 4. Honest cadence: heavy users measured during high-engagement windows, low-engagement users still see the offer | src/App.jsx ~2569 | decision item 1 + 2 |
+| 32 | 📚 Practice Signals stimulus libraries (drafts) — 30 affect-labeling scenarios across 8 categories (work, social, parenting, health, financial, identity, positive, ambiguity) each mapped to primary + optional secondary chip; 15 cognitive-defusion thoughts across 11 categories. Includes `RATER_AGREEMENT` arrays for May 9 review pass. `getValidated*Stimuli()` filters to "yes" entries only when agreement data exists | src/practice-signals/affect-labeling-stimuli.js, src/practice-signals/cognitive-defusion-stimuli.js (both new) | decision item 2 |
+| 33 | 🎯 AffectLabelingExercise component — 12-trial flow: scenario flashes 1.5s, 9-chip row appears, latency captured (chipsShownAt → tap), accuracy = matches primary OR secondary, summary shows median latency + accuracy count. 8s response timeout per trial auto-skips. Saves via `appendFunctionCheck` with `candidate: "affect-labeling"`, `primaryMs: median latency`, `primaryCount: accurate count` | src/practice-signals/AffectLabelingExercise.jsx (new) | decision item 1 |
+| 34 | 🪞 Practice Signals dedicated screen — explainer + Take-a-check launcher (two cards: Affect labeling + Cognitive defusion, "Ready" badge from `shouldOfferFunctionCheck`) + Trends section (per-candidate first/latest with anti-Lumosity framing per CFM spec line 88) + disclaimer. Honest empty state. Routing array updated, `screen === "practice-signals"` allowed | src/App.jsx ~19075 + ~13975 | decision item 1 + 5 (CFM gets dedicated screen, not Self Mode) |
+| 35 | 🔗 Settings → Practice Signals link — entry point in More section, mirrors Privacy & Disclaimers pattern | src/App.jsx ~20558 | decision item 1 |
+| 36 | 🧠 CognitiveDefusionExercise component — single-thought 60s window, user types frames (Enter to commit), POSTs to `/.netlify/functions/cognitive-defusion-score`, displays scored summary. Saves with `primaryCount: distinctCount`. Error-recovery path on scoring failure | src/practice-signals/CognitiveDefusionExercise.jsx (new) | decision item 1 |
+| 37 | ☁️ Netlify scoring function `cognitive-defusion-score.js` — POST endpoint, 3-tier rubric (distinct/reworded/same) per CFM Decision 7, GPT-4o low-temp (0.2) with few-shot prompt, heuristic fallback for AI-down (conservative — defaults uncertain to "reworded" not "distinct" so trend doesn't inflate). Returns `{scores, distinctCount, rewordedCount, sameCount}`. CORS via `_httpSecurity.js` | netlify/functions/cognitive-defusion-score.js (new) | decision item 1 |
+| 38 | 🔍 Pattern Disruption Layer foundation — storage (`stillform_pattern_detections` + `stillform_disruptor_sessions`), 8 dimension constants (SAME_CHIP, SAME_BIO_FILTER, SAME_FEELSTATE, SAME_TENSION_AREA, SAME_DISTORTION, SAME_TOOL_PATH, SHIFT_NOT_LANDING, SAME_REFRAME_CONTEXT) + plain-language labels, deterministic detector counting repeats across 6 active dimensions in 14d/10sess window, two-strikes-and-drop state machine (active → dismissed_once → closed), `getActivePatternForSurfacing` honors 48h re-fire window per spec §3.2 Q2 | src/App.jsx ~2491 | decision item 4 |
+| 39 | 🔁 SYNC_KEYS round 4 — added `stillform_pattern_detections` + `stillform_disruptor_sessions`. Cross-device benefit: pattern caught on phone at 9am isn't re-fired on tablet at 11am as new instance | src/App.jsx ~6858 | decision item 4 |
+| 40 | 🧘 DisruptorTool component — 90-second somatic redirection sequence per spec §4 (locked science: attentional capture, somatic anchoring, brief duration). 8 prompts auto-advance (8-14s each, total ~82s): pressure (feet, hands), breath (nasal-mouth cycle, long exhale), temperature attention, posture (shoulders, jaw), open gaze. Pulsing focus ring CSS animation. Body-first compliant — no verbal input required (satisfies spec §2.3 Q6). Reflection screen: "That's what stepping out feels like." | src/practice-signals/DisruptorTool.jsx (new) | decision item 4 |
+| 41 | ⏰ Pattern Disruption detection useEffect — runs on mount with 24h surface throttle (`stillform_pattern_last_surfaced` localStorage key). Calls `runPatternDetection()` then `getActivePatternForSurfacing()`. If candidate found: marks surfaced, sets `surfacedPattern` state, fires Plausible "Pattern Disruption Surfaced" | src/App.jsx ~13967 | decision item 4 |
+| 42 | 🪧 Pattern prompt + disruptor overlay rendering — fixed-position modal with "I noticed something" + dimension label + count + "Step out" / "Not now" buttons. Accept → `markPatternAccepted` + `setDisruptorActive(true)`. Dismiss → `markPatternDismissed`. Disruptor active → full-screen overlay rendering DisruptorTool. onComplete → `appendDisruptorSession` + Plausible "Pattern Disruption Session" with dimension/duration/completed/pathway | src/App.jsx ~16205 | decision item 4 |
+| 43 | 🔬 Pattern Transparency screen + Settings link — `pattern-transparency` screen lists all 8 dimensions in plain language, "In flight" section showing ACTIVE + DISMISSED_ONCE detections with count, "History" section showing last 10 ACCEPTED/CLOSED detections, "Clear pattern history" button with confirmation. Spec §5 agency principle: user signed up for AI-assisted composure architecture; transparency is the deal | src/App.jsx ~19075 (new screen above practice-signals) + ~20558 (Settings link) | decision item 4 spec §5 |
+| 44 | 🛡️ check-undefined-components.mjs upgraded — script now recognizes ESM-imported PascalCase components (default + named imports). Was emitting false positives for AffectLabelingExercise / CognitiveDefusionExercise / DisruptorTool because it only scanned for local `function`/`const`/`class` declarations. Real-bug detection still works (it's the imports that were the gap, not the JSX scan) | scripts/check-undefined-components.mjs | preventive upgrade |
+| 45 | 🔔 Pattern Disruption push notification wiring — Capacitor LocalNotifications path. New `schedulePatternDisruptionNotification(pattern)` + `cancelPatternDisruptionNotifications()` helpers. Reserved ID range 9100-9109. Native-only; web users get nothing additional. Schedule-on-surface (covers no-response close), cancel-on-accept (handled), leave-on-dismiss (the canonical 24h nudge case). On every app open, cancel any pending pattern pushes since in-app surface takes precedence. Tap listener tracks Plausible "Pattern Push Tapped" with patternId for conversion analytics. Notification copy: "A pattern is in flight" / "There's something I noticed across your recent sessions. Open when you have 90 seconds." Observation framing, no dimension telegraphed (could be stale by tap), 90-second expectation set | src/App.jsx ~1683 (helpers), ~13862 (tap listener), ~13989 (cancel on app open), ~16234 (schedule on surface), ~16249 (cancel on accept) | follow-up to decision item 4 |
+| 46 | 🧠 AI-aware pattern enrichment — new `netlify/functions/pattern-enrichment.js` (GPT-4o, max 220 tokens, temp 0.4, observation-mode persona matching Reframe voice). Layered ABOVE deterministic detection per spec §4 Q4: AI runs only after pre-filter trips. Server-side pipeline: validation → API call → JSON parse → length cap 280 chars → brand-voice post-filter (banned phrases: "you should/need/must", "always/never", "it's okay", "I care", "therapy/treatment") → confidence clamp. Heuristic fallback at every failure point (no API key, API error, parse error, shape error, brand-voice violation, exception) — AI-down backup case stays working per spec. Client-side helpers: `buildPatternEnrichmentContext(pattern)` (trims to 6 most recent sessions + signal/bias profiles), `enrichPatternWithAI(pattern)` (fire-and-forget), `updatePatternReasoning(id, enrichment)` (persists `aiReasoning` + `aiConfidence` + `aiFallback` + `aiEnrichedAt` on the detection record so re-fires use cached version without second AI call). Wired into detection useEffect with id-equality guard against race where user dismissed before AI returned. Modal copy upgrades in place when reasoning lands; falls back to count-based observation when not. Pattern Transparency screen surfaces enriched reasoning on both in-flight and history entries. Plausible event "Pattern Enrichment Returned" with dimension/fallback/confidence | src/App.jsx ~2780-2880 (helpers), ~13990 (wiring), ~16276 (modal copy), ~19170 + ~19200 (transparency surface), netlify/functions/pattern-enrichment.js (new) | follow-up to decision item 4 spec §4 Q4 |
+| 47 | 🎚️ Pattern interrupts opt-out toggle in Settings — Schedule & Notifications section, sits below daily reminder. Default ON (`localStorage.getItem("stillform_pattern_push_enabled") !== "off"` — null/undefined/anything-but-"off" enables). Independent from daily-reminder toggle per agency principle (user can want one without the other). `schedulePatternDisruptionNotification` reads the gate before scheduling; localStorage-throw safe (private-browser mode falls through to default ON). Turning OFF cancels any pending pattern push immediately so a user who just dismissed in-app + flipped the toggle doesn't get pinged 24h later. Toggle adds `stillform_pattern_push_enabled` to SYNC_KEYS round 5 + UNENCRYPTED_SYNC_KEYS (it's a preference flag, not user data). aria-pressed + aria-label for screen readers. Plausible event "Pattern Push Toggle" with state. Subtitle copy clarifies: "The in-app prompt always surfaces regardless of this setting — this only controls the 24-hour follow-up notification." | src/App.jsx ~1690 (gate in scheduler), ~7448 (SYNC_KEYS round 5), ~7536 (UNENCRYPTED_SYNC_KEYS), ~20602 (toggle UI in Settings) | follow-up to decision item 4 (push wiring) |
+
+**Open question still pending:** "Additional morning chips" (line 406) — Arlin clarified May 7 the ask was check-in chips at Reframe entry; mood capture (build #4) carries through to "From this morning" row at Reframe entry, closing the gap without a separate Reframe surface. Mark ✅ resolved if Arlin agrees on review.
+
+**Verification gap on item #9:** the regression test runs against the *deployed* reframe.js, but the fix is local-only. Cannot verify from build container without Netlify deploy. Re-run regression after Arlin triggers deploy preview to confirm scenario #19 (legal redirect) now passes. See `AI_REGRESSION_RESULTS_MAY_7.md` "Verification path" section.
+
+After review: each item gets ✅ SHIPPED status update and full record moves to `Stillform_Completed_Archive.md`. Reverts (if any) handled commit-by-commit.
 
 ---
 
@@ -170,7 +299,12 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 
 **Items found (high-leverage first):**
 
-1. **reframe.js system prompts** (CALM_SYSTEM, CLARITY_SYSTEM, HYPE_SYSTEM) — tell the AI to think of itself as "companion" or "coach." Shapes every AI response. Highest-leverage single edit because it cascades through all responses.
+1. ✅ **reframe.js system prompts** (CALM_SYSTEM, CLARITY_SYSTEM, HYPE_SYSTEM) — RESOLVED May 3, 2026 (commit `43d51a6`). The audit's concrete grounds were the "companion" / "coach" role framings in the opening registers. All three were rewritten:
+   - CALM was `"You are a composure **companion** in Stillform"` → became `"You are the AI inside Stillform's Reframe — a self-mastery tool"`
+   - CLARITY was `"You are a focused reframing **companion** in Stillform"` → became `"You are the AI inside Stillform's Reframe — clarity mode"`
+   - HYPE was `"You are a pre-performance composure **coach** in Stillform"` → became `"You are the AI inside Stillform's Reframe — hype mode"`
+
+   Position the AI as infrastructure inside the tool, not as a relational entity. Voice metaphors elsewhere in the prompts ("Like a sharp friend," "Like a coach who's walked into the same room before") are register descriptors, not identity claims — they shape tone without making the AI a companion. Closed as resolved.
 
 2. ✅ **"Patterns surfaced"** — RESOLVED May 3, 2026. Was: "What the AI has noticed" (3 occurrences across post-session insight headers and My Progress archive). Now: "Patterns surfaced" — works in monospace caps and as a list header with insight count.
 
@@ -201,11 +335,11 @@ The mechanism is correct — AI does read inputs, process them, and surface user
 - Stillform is the architecture. The user is the operator.
 
 **Notes for whoever does this work:**
-- Items 2-10 and 12 RESOLVED May 3, 2026 across two commits (411f2d5 for 8-10; new commit for 2-7 and 12). Item 11 closed as deliberately preserved for legal precision.
-- Item 1 (reframe.js system prompts) remains the only open AI-as-actor item. The May 3 reframe.js prompt rewrite (commit 43d51a6) addressed the "you are infrastructure / composure companion" opening register and consolidated bloat, but the audit's full sweep across CALM/CLARITY/HYPE for AI-as-actor sentence subjects wasn't the goal of that commit. Item 1 still pending.
-- The 19-scenario AI Framework regression test artifact is now ready to run. See `AI_REGRESSION_TEST_19.md` (test spec with pass/fail signals per scenario) and `scripts/run-ai-regression.mjs` (runner that posts each scenario to the deployed Reframe API and writes responses to `ai_regression_results.json`). Cost ~$0.05 per full run, ~2.5 minutes. Has not been run yet against the May 3 prompt rewrite or the May 4 Phase 3 LOW-DEMAND OVERRIDE. Pre-deploy gate before TestFlight broad release.
+- All 12 items resolved across three May 3, 2026 commits: `2b3da8f` (items 2-7 and 12), `411f2d5` (items 8/9/10), `43d51a6` (item 1 — Reframe AI prompt opening-register rewrite). Item 11 closed as deliberately preserved for legal precision.
+- The 19-scenario AI Framework regression test artifact is ready to run. See `AI_REGRESSION_TEST_19.md` (test spec with pass/fail signals per scenario) and `scripts/run-ai-regression.mjs` (runner that posts each scenario to the deployed Reframe API and writes responses to `ai_regression_results.json`). Cost ~$0.05 per full run, ~2.5 minutes. Has not been run yet against the May 3 prompt rewrite or the May 4 Phase 3 LOW-DEMAND OVERRIDE. Pre-deploy gate before TestFlight broad release.
+- **May 7, 2026 correction:** previous note here read "Item 1 still pending" — that was written before commit `43d51a6` and never updated. The companion/coach framings (the audit's concrete grounds for item 1) were already removed in that commit. Note corrected; audit is fully closed.
 
-**Out of scope today.** Captured for a deliberate voice pass when Arlin chooses to do it.
+**Audit complete.** No open items remaining.
 
 ---
 
@@ -325,6 +459,24 @@ Requires Android Studio for fix.
 - Fix scope: update `WearBreatheActivity.java` switch cases to match current phone-side IDs (`quick`, `deep`, `cyclic_sigh`) with correct phase durations from `BREATHING_PATTERNS`. Update `WatchBridge.java` javadoc to reflect current pattern IDs.
 - Cannot verify from code (requires device testing): wear module builds into APK, watch app installs alongside phone app, haptics fire correctly on real hardware, message round-trip works under real conditions.
 
+### 🪧 QBPill saved position not clamped on mount — off-screen on phone — added May 7, 2026
+Surfaced in May 7 phone testing. Quick Breathe pill missing from Reframe (and other screens) because saved position from a wider device persists in localStorage, lands off the visible viewport on phone.
+
+**Root cause:** `QBPill` (App.jsx ~line 12872) reads `stillform_qb_position` via `getSavedPos()` and uses it as initial state. `clamp()` only fires during pointer drag, not on mount. If the user previously positioned the pill on desktop (or a wider phone) and that x/y persisted to cloud sync, on a smaller viewport the pill renders off-screen. Pill works fine — just invisible.
+
+**Fix scope:** ~3 lines. Wrap the `getSavedPos()` return through `clamp()` on initial render, or run a clamp pass inside the existing `useEffect` that handles window-resize. Verify on desktop AND phone after fix.
+
+**Affects all users**, not specific to a processing type — QBPill is global.
+
+### 🌅 Morning check-in stopped writing `mood`; PresentStateChips reader still expects it — added May 7, 2026
+Surfaced in May 7 phone testing. The "From this morning" row in `PresentStateChips` (Reframe entry) only ever shows tension chips, never a mood chip — broken contract between writer and reader.
+
+**Root cause:** Morning check-in `saveCheckin()` (App.jsx ~line 16555) writes `{ date, energy, bio, tension }` — **no `mood` field**. `PresentStateChips` (App.jsx line 10908) reads `checkin?.mood` to render the morning mood chip. Field was dropped from the writer at some point in a refactor; consumer was never updated.
+
+**Fix decision needed:** either (a) restore mood capture in morning check-in (adds back a chip selector to morning UI — small surface change), or (b) drop the dead `checkinMood` read in `PresentStateChips` (simpler, but loses the original feature intent of carrying morning emotional state into Reframe context).
+
+Recommendation: (a) if morning emotional state matters as AI context, otherwise (b). Worth a short call before fix.
+
 ---
 
 ## 🎨 UX / Surface refinements
@@ -340,6 +492,53 @@ Visual treatment held until whole-app design system locks (whole-app prestige re
 ### Processing primer threshold tunable (currently 5 sessions)
 
 Decay logic ships at session > 5 (App.jsx ~line 14257). If 5 is too long after live testing, threshold is one number to change. Captured Apr 29 for revisit after real user data.
+
+### 🪞 Surface bio-filter at Reframe entry (transparency + mid-day update path) — added May 7, 2026
+Surfaced in May 7 phone testing. `PresentStateChips` at Reframe entry currently shows tension chips from morning check-in + 9 in-the-moment feel chips, but **does not surface the active bio-filter**. So the user can't see what hardware state the AI is reading them in — which now drives major behavior changes (low-demand mode strips the close flow on six bio-filter values per the May 6 broadening).
+
+**History check:** no commit explicitly removed bio-filter from this surface. It was just never built in. Archive line 457 confirms `PresentStateChips` was kept at Reframe entry per Lieberman 2007 (labeling IS the regulation mechanism for cognitive intervention), but the chip set never included bio-filter.
+
+**Approach (revised May 7 after phone-screenshot review):** NOT a new chip row. The Reframe entry surface is already dense (mode label, encryption notice, processing primer, "WHAT IS PRESENT" + 2 ⓘ, morning tension chips, 9 feel chips, encryption duplicate, tone dropdown, AI/Self Mode tabs). Adding another interactive chip array contradicts the processing primer's *"start with one concrete signal"* framing — it asks the user to triage their state across another axis before they type.
+
+**Status line instead.** Slotted between "FROM THIS MORNING" chips and "ANYTHING TO ADD?" label. Mono caps, small, --text-muted. Reads something like:
+
+```
+ACTIVE: depleted · set this morning  ⓘ ✎
+```
+
+Tap ✎ to edit inline (small picker drawer, not a full chip row taking permanent screen space). Tap ⓘ for "what does this mean for how the AI reads you" modal.
+
+**Fix scope:** ~30 min. New `BioFilterStatusLine` mini-component, slot inside `PresentStateChips`, pull active value via `getActiveBioFilter()`, edit drawer reuses existing bio-filter chip array from Breathe/Body Scan but renders inline.
+
+**Bonus this fix unlocks:** mid-day state agency. Currently the only path to update bio-filter mid-day without a session is to start Breathe/Body Scan and bail. With the inline edit affordance, opening Reframe and tapping the ✎ is a 2-tap update path. Sufficient for V1 — no separate home status card needed.
+
+**Non-goal:** does NOT extend to surfacing bio-filter on home screen, in nav, or in Settings. That's a separate question if user testing surfaces a deeper need.
+
+### 🎚️ Tone dropdown affordance — reads as label, not control — added May 7, 2026
+Surfaced in May 7 phone testing. The Reframe AI tone dropdown (App.jsx ~line 9329) is implemented (commit `f36cdb63`, May 2 — three-layer system) but visually reads as a static label, not an interactive control. fontSize 10, monospace caps, `--text-muted` color, transparent background, thin border — easy to skip on a phone, especially after the May 6 prestige refresh.
+
+**Fix scope:** bump visual weight of the button — slightly larger font, less muted color (`--text-dim` or `--text`), more obvious border or subtle accent fill, possibly relabel "Reframe tone:" → something more action-oriented or add a settings-gear icon. ~10 min, verify on phone.
+
+### 🌗 Splash wordmark visual treatment — split or all-accent (design call) — added May 7, 2026
+Surfaced in May 7 phone testing. Splash screen renders "Stillform" as a single block in `var(--amber)` (line 15384). Nav renders `Still<span>form</span>` with split treatment — "Still" in body color, "form" in `--amber` (line 15400, .nav-logo span CSS). On the teal theme (`--amber: #3dbdb5`), splash reads all-teal, nav reads white-Still + teal-form. Neither is broken; both behave correctly per their code paths.
+
+**Design call needed:** split the splash to match nav (`Still<span style={{color: 'var(--amber)'}}>form</span>`) for visual consistency, or accept the ceremonial all-accent treatment as deliberate. ~2 min code change either way; the question is design intent.
+
+### 🎯 Low-demand close flow strips post-state chip — overcorrection — added May 7, 2026
+Surfaced in May 7 phone testing. Phase 3 low-demand commit (`49fdb54`, May 4) strips six surfaces from Reframe close: post-rating chip, post-insight, State-to-Statement, science card, debrief gate, Next Move + Lock-in. Phase 2 low-demand commit (May 4) strips equivalents from Body Scan close.
+
+**Problem:** the post-state chip is **one tap** — the lowest-demand metacognitive act in the app. It's the data point that classifies the shift (Russell category, Plausible event, Settled→regulated path). Stripping it means a depleted user who *did* shift has no way to mark it. Their session evaporates. That's the opposite of what low-demand should do.
+
+**Proposed fix:**
+- Keep post-state chip screen for low-demand users — single tap, no required follow-up
+- Add "tap anywhere to close" affordance for users who don't feel shifted
+- Drop everything *after* chip selection (State-to-Statement, science card, debrief, Next Move/Lock-in) — those are the real demand
+- **Same parallel change for Body Scan** — Phase 2 also strips What Shifted; symmetry needed per operating rule (changes apply to both processing types)
+
+**Locked decision check:** Apr 28 locked decision describes low-demand as "broad cognitive-bandwidth-limited population." That decision sets the population, not the strip-list. The strip-list was an implementation choice that went too far. This proposal narrows the strip without reopening the locked decision.
+
+### ❓ "Additional morning chips" — needs Arlin's direction — added May 7, 2026
+Surfaced in May 7 phone testing as a thing that "didn't get implemented." No spec or commit found in repo. Open questions: what set of chips were meant to be added (the 9 feel-chips? a different set?), and what surface (morning check-in screen? carrying through to Reframe context?). Captured here so it doesn't drop off; awaiting direction before scoping.
 
 ---
 
@@ -379,7 +578,7 @@ Backend, schema, cloud sync, deploy, env-var, Supabase migrations.
 
 User-facing copy, AI prompt voice, FAQ, science cards, info modals.
 
-*Currently empty. AI-as-actor Item 1 (reframe.js system prompts) lives in Engagement Craft where the audit lives.*
+*Currently empty. AI-as-actor voice audit (12 items) closed May 3, 2026 — full record lives in Engagement Craft section.*
 
 ---
 

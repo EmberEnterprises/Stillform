@@ -336,6 +336,37 @@ Question raised after v5 verification surfaced the cyclic sighing implementation
 
 **The clear-eyed read:** No copyright or patent issue I can see for the launch as currently specified. "No issue I can see" is not the same as "legal clearance." Real legal review for the surfaces above before scaling significantly.
 
+## 2.6 May 7, 2026 — Engagement Architecture decision
+
+Working session with Arlin produced the largest architectural decision of the launch sprint. Self-obsoleting product is the actual retention killer in this category — composure work, when it works, becomes baseline by month 2-3 and the user walks. This is the documented graduation problem in regulation/wellness products, and Stillform without intervention is fully exposed to it.
+
+The fix is three engines running in parallel, fully specced in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**:
+
+1. **Retention engine** — Mirror (named loops at home) + Achievement (in-flow micro-credits at every close) + Roadmap (5 stages of mastery visible from day 1). Backed by self-determination theory: competence is the missing motivator. Stillform serves autonomy, correctly skips relatedness, and now fills competence with stages and markers from data we already collect.
+
+2. **Application layer** — Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact. Real-world artifacts the user takes from app to life. Currently only State to Statement bridges app to real world; the rest of Stillform produces internal observation. Application layer is the missing bridge.
+
+3. **External risk mitigation** — **Trigger Profile** as third diagnostic layer alongside Signal Profile and Bias Profile. User names external situations, contexts, and relationships where composure is hardest. Cross-cultural moments are one category among many, NOT a bias-reduction product (Forscher 2019: brief bias interventions don't durably work; Dobbin & Kalev 2018: some bias training increases backlash).
+
+**Award-winning differentiator:** Stillform has better attribution data than Calm or Headspace — pre/post rates per session, function-level Practice Signals trends, Pattern Disruption catch timing, Body Scan tension trends per area, composure across bio-filter states. Whoop did this for physical recovery. Strava did it for running. Nobody has done it for nervous system regulation at this granularity. That is the differentiator: hard data on internal state change presented as proof of work, NOT gamification.
+
+**What this absorbs:**
+- "3 to-dos for the day" idea (May 7) → Trigger Profile premeditation + Today's Brief
+- 90-day attribution report (May 7) → daily-flow micro-credits
+- Decision item 7 (7-session evidence callouts, research-first) → becomes Roadmap markers
+- Cross-cultural composure question → Trigger Profile category, not bias-reduction
+
+**What this does NOT absorb:**
+- Decision item 5 (Self Mode redesign, research-first) → stays distinct. The engagement architecture's deterministic surfaces (Mirror, Achievement, Roadmap) remain visible when AI is down — but those solve "what does the user see about progress" not "what does the user actually DO when activated and AI is unavailable." Self Mode's processing flow is its own design challenge with its own research path. Framing locked May 7 ("Past Self / Present Self"). See SELF_MODE_REDESIGN_RESEARCH.md.
+
+**Path A consolidation (decided May 7):** The architecture is a REFACTOR of existing surfaces, not an addition layered on top. Stillform already has substantial mastery-tracking shipped (Processing Mastery card, Observer Growth section, milestone-7 surface, 30+ computed metrics in My Progress). Path A folds existing surfaces into the new architecture: Processing Mastery → Roadmap stage markers; Observer Growth → Achievement micro-credits at session close; milestone-7 → generalized into Stage-1-crossing moment. MY_PROGRESS_REDESIGN_SPEC.md is functionally absorbed — the redesign IS the engagement architecture. My Progress consolidates from 8 overlapping sections to 4. No redundancy.
+
+**What this is NOT:** No streaks, no badges, no dopamine, no productivity-task framing, no bias-reduction claims, no 90-day retrospective surfaces, no therapy-coded language, no "you missed X today" failure framing. See spec §2 for full anti-pattern list.
+
+**Status:** Architecture documented. Not yet building. Awaiting Arlin sign-off on stage definitions (load-bearing — everything attaches), Trigger Profile onboarding flow, Mirror surface placement, Achievement threshold logic, and other open questions in spec §8. Estimated scope 12-18 builds across multi-session work, each independently shippable. Shipping order in spec §9 — stage definitions first.
+
+This is a launch-defining commitment. The Layer 3 placeholder in the Return-Loop Architecture (Strategic Roadmap section above) is now operationally defined as this architecture.
+
 ## 3. Open Issues — Tracked Status
 
 This section is a status snapshot, not an exhaustive list of prelaunch work. The full prelaunch scope lives in `Stillform_Master_Todo.md`. Items here are issues that have been triaged with diagnostic notes attached.

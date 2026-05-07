@@ -28,6 +28,31 @@ This is why "EVERYTHING needs to be done before launch" is not perfectionism —
 
 ---
 
+## ENGAGEMENT ARCHITECTURE — The Operational Form of Layer 3 (decided May 7, 2026)
+
+The Layer 3 work above ("recognition between sessions still pending," "kinesthetic close not yet drafted," "Cognitive Function Measurement still 6-8 weeks") got architectural specificity on May 7 in a working session with Arlin. The full spec lives in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**. The strategic commitments captured here:
+
+**Strategic decision 1: Self-obsoleting product is the actual retention killer.** Composure work, when it works, becomes baseline by month 2-3, and the user walks. This is the documented graduation problem in the regulation/wellness category. Layer 3 must directly counter it via attribution — Stillform must take honest credit for measurable change, in-flow, with the data we already collect.
+
+**Strategic decision 2: Engagement comes from competence, not dopamine.** Self-determination theory (Deci & Ryan) names autonomy, competence, relatedness as core motivators. Stillform serves autonomy correctly and skips relatedness correctly. The miss is competence — there is no visible "I am getting better at this" arc. The fix is a Mastery Map of 5 stages visible from day 1, backed by data markers we already collect, NOT streaks, badges, or goal-pursuit.
+
+**Strategic decision 3: External risk mitigation requires a third diagnostic layer.** Internal regulation does not happen in a vacuum — external triggers (work meetings, family, cross-cultural moments, financial pressure, news cycles) ARE the source of disruption. A third diagnostic layer — **Trigger Profile**, alongside Signal Profile and Bias Profile — is added to the architecture. User names what reliably destabilizes them. Trigger Profile feeds anticipation (Today's Brief, Pre-event Brief), in-the-moment context (Reframe, Pattern Disruption), and recovery surfaces.
+
+**Strategic decision 4: Application layer is distinct from observation layer.** Almost everything Stillform currently produces is internal observation (chips, bio-filter, signal/bias profiles, trends). Only State to Statement bridges app to real world. Layer 3 adds a real application layer: Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact — concrete artifacts the user takes from the app into their day.
+
+**Strategic decision 5: Cross-cultural composure is a Trigger Profile category, not a bias-reduction product.** Forscher et al. 2019 (492-study meta-analysis) shows brief implicit-bias interventions don't durably work. Dobbin & Kalev 2018 shows some bias training increases backlash. Stillform never claims to fix external bias. It does help users hold composure through cross-cultural moments — composure under stress, scoped to that specific external risk. Same architecture as any other Trigger Profile category.
+
+**What this means operationally:**
+- The "engagement craft" placeholder in Layer 3 of return-loop architecture is now defined. It is the three-engine architecture documented in STILLFORM_ENGAGEMENT_ARCHITECTURE.md.
+- 12-18 builds across multi-session work. Each independently shippable.
+- Stage definitions (5 stages of mastery) are load-bearing — everything else attaches. They need Arlin sign-off before build sequencing begins.
+- This architecture absorbs the "3 to-dos for the day" idea (becomes Trigger Profile premeditation), the 90-day attribution report idea (replaced by daily-flow micro-credits), and resolves research-prep item 7 (7-session evidence callouts becomes Roadmap markers). It does NOT absorb decision item 5 (Self Mode redesign), which stays distinct — Mirror/Achievement/Roadmap surfaces remain visible when AI is down, but Self Mode's processing flow (what the user actually does when activated and AI is unavailable) is a separate design challenge. See SELF_MODE_REDESIGN_RESEARCH.md.
+- **Path A consolidation (decided May 7):** This is a REFACTOR of existing surfaces, not an addition. "Processing Mastery" card → folded into Roadmap stage markers. "Observer Growth" section in My Progress → moved to Achievement micro-credits at session close. Milestone-7 surface → generalized into Stage-1-crossing moment. 30+ existing computed metrics → categorized by stage. MY_PROGRESS_REDESIGN_SPEC.md is functionally absorbed: My Progress consolidates from 8 sections to 4 (Roadmap + telemetry heat map + weekly reflection + saved-content). The redundancy the redesign spec called out is resolved by the consolidation.
+
+**The award-winning angle:** Stillform has better attribution data than Calm or Headspace — pre/post rates per session, function-level Practice Signals trends, Pattern Disruption catch timing, Body Scan tension trends per area, composure across bio-filter states. Whoop did this for physical recovery. Strava did it for running. Nobody has done this for nervous system regulation at this granularity. That is the differentiator: hard data on internal state change, presented as proof of work.
+
+---
+
 ## DECISION FRAME — What Earns a Place Before Launch
 
 Each pending item evaluated against: does this contribute to the return loop?
