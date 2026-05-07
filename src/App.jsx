@@ -3448,6 +3448,361 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
   return bounded.length;
 };
 
+// ═══════════════════════════════════════════════════════════════════════
+// ENGAGEMENT ARCHITECTURE — STAGE DEFINITIONS (Phase 0 — May 7, 2026)
+// ═══════════════════════════════════════════════════════════════════════
+//
+// Five-stage developmental architecture for self-mastery through
+// metacognition that stabilizes composure. Stages build sequentially —
+// each capacity prerequisites the next.
+//
+// Spec source of truth: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.1
+// Stage NAMES locked May 7, 2026.
+// THRESHOLD VALUES first-pass — tunable post-launch against cohort data.
+// Markers attach to existing data sources where shipped; deferred markers
+// flagged with status:"deferred" until their data source ships.
+//
+// What ships in this Phase 0: data layer ONLY. No UI. The Mirror surface
+// (home), Achievement micro-credits (close moments), and Roadmap screen
+// (My Progress) all consume getCurrentStage() — they ship in subsequent
+// phases per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §10 shipping order.
+//
+// Honest adaptations from spec where data isn't available today:
+//   - Stage 1 "autonomous exits" marker requires new instrumentation
+//     (no current data trail for "user named state but didn't run a
+//     tool"). Marked status:"deferred". Other Stage 1 markers ship.
+//   - Stage 1 "active state entry" marker needs bio-filter persisted
+//     ON each session entry. Today only the latest bio-filter is in
+//     localStorage. Marked status:"deferred" pending instrumentation.
+//   - Stage 2 affect-labeling latency + accuracy markers depended on
+//     Practice Signals data. Practice Signals reverted entirely on
+//     May 7. Marked status:"deferred" until Practice Signals rebuilds.
+//   - Stage 3 markers gated on Trigger Profile (Build #2) and
+//     Pre-event Brief (Build #7). Until those ship, all Stage 3
+//     markers return met:false. By design — sequential build order.
+//   - Stage 4 "user-flagged pattern preceding AI detection" requires
+//     a new flag in journal/EOD entries. Marked status:"deferred".
+//   - Stage 5 "high-load sessions" + "delta on high-load" markers
+//     need bio-filter on session entries. Same instrumentation gap
+//     as Stage 1 active-state. Marked status:"deferred".
+//
+// Drift behavior: getCurrentStage() reflects CURRENT capacity. If a
+// user's data regresses (stops body-area chips, falls below check-in
+// frequency, etc.), highestStageMet drops. Honest reflection of present
+// state. Stage permanence is not granted; it is maintained.
+//
+// Stage gating: a stage is fully achieved when ALL its shipped markers
+// are met AND no deferred markers gate the stage. If any markers are
+// status:"deferred", the stage cannot be fully crossed yet — by design.
+// Display surfaces should show deferred markers as "system still
+// building" rather than as failures by the user.
+
+// — TUNABLE THRESHOLDS — sign-off pending; first-pass values from spec —
+const STAGE_THRESHOLDS = Object.freeze({
+  // Stage 1 — NOTICING
+  S1_BODY_AREA_SESSIONS_MIN: 5,
+  S1_BODY_AREA_WINDOW_DAYS: 90,
+
+  // Stage 2 — NAMING
+  S2_DISTINCT_CHIPS_MIN: 5,
+  S2_DISTINCT_CHIPS_WINDOW_DAYS: 30,
+  S2_CHECKINS_PER_WEEK_MIN: 2,
+  S2_CHECKINS_SUSTAINED_WEEKS: 2,
+
+  // Stage 3 — ANTICIPATING (gated on Trigger Profile + Pre-event Brief)
+  S3_TRIGGERS_NAMED_MIN: 3,
+  S3_PRE_EVENT_BRIEFS_MIN: 1,
+  S3_PRE_EVENT_WINDOW_DAYS: 14,
+  S3_DELTA_ON_TRIGGER_SESSIONS_MIN: 1.5,
+
+  // Stage 4 — RECOGNIZING
+  S4_PATTERN_ACCEPTANCE_RATE_MIN: 0.5,
+  S4_PATTERN_ACCEPTANCE_LOOKBACK: 5,
+  S4_SELF_INITIATED_DISRUPTOR_MIN: 1,
+  S4_SELF_INITIATED_WINDOW_DAYS: 30,
+
+  // Stage 5 — HOLDING
+  S5_HIGH_LOAD_SESSIONS_MIN: 5,
+  S5_HIGH_LOAD_WINDOW_DAYS: 60,
+  S5_HIGH_LOAD_DELTA_MIN: 2.0,
+  S5_RECOVERY_TREND_LOOKBACK_DAYS: 30,
+});
+
+// — Marker computation helpers — pure functions, all read-only —
+
+// Helper: count sessions in last N days where bodyScanTension is non-null
+// AND specific (between 1 and BODY_SCAN_AREAS.length - 1 areas tagged).
+// "Specific" excludes both the no-tap path (null) and the all-areas case
+// (which functions as "everywhere" — the opposite of specificity).
+const _s1CountSpecificBodyAreaSessions = (windowDays = STAGE_THRESHOLDS.S1_BODY_AREA_WINDOW_DAYS) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    return sessions.filter(s => {
+      const t = new Date(s.timestamp || 0).getTime();
+      if (Number.isNaN(t) || t < cutoff) return false;
+      const tension = s.bodyScanTension;
+      if (!tension || typeof tension !== "object") return false;
+      const areaCount = Object.keys(tension).length;
+      // Specific = at least 1 area, fewer than all 6. "All 6" reads as
+      // "everywhere" which is the opposite of the noticing-specificity
+      // signal Stage 1 is measuring.
+      return areaCount >= 1 && areaCount < BODY_SCAN_AREAS.length;
+    }).length;
+  } catch { return 0; }
+};
+
+// Helper: count distinct preState chip values across sessions in last N days.
+// Reframe + Body Scan + Breathe sessions all persist preState when the user
+// selected a chip at session start.
+const _s2CountDistinctChips = (windowDays = STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_WINDOW_DAYS) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    const chips = new Set();
+    sessions.forEach(s => {
+      const t = new Date(s.timestamp || 0).getTime();
+      if (Number.isNaN(t) || t < cutoff) return;
+      if (s.preState && typeof s.preState === "string") chips.add(s.preState.trim().toLowerCase());
+    });
+    return chips.size;
+  } catch { return 0; }
+};
+
+// Helper: compute the longest run of consecutive weeks where the user did
+// at least N check-ins per week. Used for Stage 2 sustained-consistency.
+// Returns the length of that run in weeks (e.g., 2 means "2+ check-ins per
+// week for the last 2 consecutive weeks").
+const _s2LongestSustainedCheckinRun = (perWeekMin = STAGE_THRESHOLDS.S2_CHECKINS_PER_WEEK_MIN) => {
+  try {
+    const raw = JSON.parse(localStorage.getItem("stillform_checkin_history") || "[]");
+    if (!Array.isArray(raw) || raw.length === 0) return 0;
+    // Group by ISO week (sunday-anchored). Use ISO date string normalized to
+    // a week-start key: monday of the week containing the timestamp.
+    const weekKey = (ts) => {
+      const d = new Date(ts);
+      if (Number.isNaN(d.getTime())) return null;
+      const day = d.getDay(); // 0=Sun..6=Sat
+      const mondayOffset = day === 0 ? -6 : 1 - day;
+      const monday = new Date(d);
+      monday.setDate(d.getDate() + mondayOffset);
+      monday.setHours(0, 0, 0, 0);
+      // Use TimeKeeper.clockDayOf to extract local date — never .toISOString().slice
+      // (which would silently extract UTC and bleed across timezone boundaries).
+      return TimeKeeper.clockDayOf(monday);
+    };
+    const weekCounts = new Map();
+    raw.forEach(r => {
+      const k = weekKey(r.timestamp || r.date);
+      if (k) weekCounts.set(k, (weekCounts.get(k) || 0) + 1);
+    });
+    // Sort weeks chronologically and walk for longest consecutive run.
+    const weeks = [...weekCounts.keys()].sort();
+    let longest = 0, current = 0;
+    let prevWeek = null;
+    for (const w of weeks) {
+      const meets = weekCounts.get(w) >= perWeekMin;
+      if (!meets) { current = 0; prevWeek = w; continue; }
+      if (prevWeek) {
+        const prevDate = new Date(prevWeek);
+        const thisDate = new Date(w);
+        const diffWeeks = Math.round((thisDate.getTime() - prevDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+        current = diffWeeks === 1 ? current + 1 : 1;
+      } else {
+        current = 1;
+      }
+      if (current > longest) longest = current;
+      prevWeek = w;
+    }
+    return longest;
+  } catch { return 0; }
+};
+
+// Helper: pattern acceptance rate over the last N surfaced patterns.
+// "Surfaced" = state ever transitioned out of new (was prompted to user).
+// Acceptance = state === ACCEPTED. Dismiss = DISMISSED_ONCE or CLOSED.
+const _s4PatternAcceptanceRate = (lookback = STAGE_THRESHOLDS.S4_PATTERN_ACCEPTANCE_LOOKBACK) => {
+  try {
+    const detections = getPatternDetectionsFromStorage();
+    if (!Array.isArray(detections) || detections.length === 0) return { rate: 0, count: 0 };
+    // Most recent surfaced detections — those with state past initial.
+    const surfaced = detections
+      .filter(d => d && d.state && d.state !== "active" || (d && d.surfacedAt))
+      .slice(-lookback);
+    if (surfaced.length === 0) return { rate: 0, count: 0 };
+    const accepted = surfaced.filter(d => d.state === PATTERN_STATES.ACCEPTED).length;
+    return { rate: accepted / surfaced.length, count: surfaced.length };
+  } catch { return { rate: 0, count: 0 }; }
+};
+
+// Helper: count Disruptor sessions launched WITHOUT a prompted pattern
+// (patternId === null means user hit Disruptor self-initiated).
+const _s4SelfInitiatedDisruptorCount = (windowDays = STAGE_THRESHOLDS.S4_SELF_INITIATED_WINDOW_DAYS) => {
+  try {
+    const sessions = getDisruptorSessionsFromStorage();
+    if (!Array.isArray(sessions)) return 0;
+    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    return sessions.filter(s => {
+      if (!s || s.patternId) return false;
+      const t = new Date(s.timestamp || 0).getTime();
+      return !Number.isNaN(t) && t >= cutoff;
+    }).length;
+  } catch { return 0; }
+};
+
+// Helper: recovery trend — does pre→post delta improve over time on
+// sessions where the user has rated both pre and post? Stage 5 marker
+// for "recovery time trending downward." Operationalized as "average
+// delta in last half of window > average delta in first half" — improving.
+const _s5RecoveryTrendImproving = (lookbackDays = STAGE_THRESHOLDS.S5_RECOVERY_TREND_LOOKBACK_DAYS) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    const cutoff = Date.now() - (lookbackDays * 24 * 60 * 60 * 1000);
+    const rated = sessions
+      .filter(s => {
+        const t = new Date(s.timestamp || 0).getTime();
+        if (Number.isNaN(t) || t < cutoff) return false;
+        return typeof s.preRate === "number" && typeof s.postRate === "number";
+      })
+      .sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
+    if (rated.length < 4) return null; // not enough data
+    const half = Math.floor(rated.length / 2);
+    const firstHalf = rated.slice(0, half);
+    const secondHalf = rated.slice(half);
+    const avgDelta = arr => arr.reduce((sum, s) => sum + (s.postRate - s.preRate), 0) / arr.length;
+    const firstAvg = avgDelta(firstHalf);
+    const secondAvg = avgDelta(secondHalf);
+    return { improving: secondAvg > firstAvg, firstAvg, secondAvg };
+  } catch { return null; }
+};
+
+// — Stage definitions — names locked May 7, 2026 —
+const STAGE_DEFINITIONS = Object.freeze({
+  1: Object.freeze({
+    id: 1,
+    name: "NOTICING",
+    capacity: "catching what's happening in your body before thought",
+    science: ["Farb 2015 (interoceptive awareness)", "van der Kolk 2014", "Porges polyvagal theory"],
+  }),
+  2: Object.freeze({
+    id: 2,
+    name: "NAMING",
+    capacity: "language for what's present, fast and accurate",
+    science: ["Lieberman 2007 (affect labeling reduces amygdala activity)", "Barrett 2017 (emotional granularity)"],
+  }),
+  3: Object.freeze({
+    id: 3,
+    name: "ANTICIPATING",
+    capacity: "pre-loading composure for known triggers",
+    science: ["Gollwitzer 1999 (implementation intentions)", "Meichenbaum stress inoculation", "Gross 1998 (antecedent-focused regulation)"],
+  }),
+  4: Object.freeze({
+    id: 4,
+    name: "RECOGNIZING",
+    capacity: "seeing your own loops as they form",
+    science: ["Wells 2009 (Metacognitive Therapy)", "Kross 2014 (self-distancing)", "Kabat-Zinn (decentering)"],
+  }),
+  5: Object.freeze({
+    id: 5,
+    name: "HOLDING",
+    capacity: "composure under maximum load",
+    science: ["Meichenbaum stress inoculation outcomes", "McEwen allostatic load", "Porges vagal tone"],
+  }),
+});
+
+// computeStageMarkers(stageId) → array of marker results.
+// Each marker: { id, label, value, threshold, met, status, deferReason? }
+// status: "shipped" (data source live, met reflects reality) or
+//         "deferred" (data source not yet live; met:false by definition).
+const computeStageMarkers = (stageId) => {
+  if (stageId === 1) {
+    const bioFilterSet = (() => { try { return !!localStorage.getItem("stillform_bio_filter"); } catch { return false; } })();
+    const specificSessionsCount = _s1CountSpecificBodyAreaSessions();
+    return [
+      { id: "bio-filter-setup", label: "Bio-filter setup completed", value: bioFilterSet, threshold: true, met: bioFilterSet, status: "shipped" },
+      { id: "body-area-specificity", label: "Sessions with specific body-area tags", value: specificSessionsCount, threshold: STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, met: specificSessionsCount >= STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, status: "shipped" },
+      { id: "active-state-entry", label: "Sessions entered during an active state", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries; instrumentation pending" },
+      { id: "autonomous-exits", label: "Times you saw it and chose without a tool", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "no data trail for chip-without-tool today; instrumentation pending" },
+    ];
+  }
+  if (stageId === 2) {
+    const distinctChips = _s2CountDistinctChips();
+    const sustainedWeeks = _s2LongestSustainedCheckinRun();
+    return [
+      { id: "distinct-chips", label: "Different feel-state chips used in last 30 days", value: distinctChips, threshold: STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_MIN, met: distinctChips >= STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_MIN, status: "shipped" },
+      { id: "checkin-consistency", label: "Consecutive weeks with 2+ check-ins", value: sustainedWeeks, threshold: STAGE_THRESHOLDS.S2_CHECKINS_SUSTAINED_WEEKS, met: sustainedWeeks >= STAGE_THRESHOLDS.S2_CHECKINS_SUSTAINED_WEEKS, status: "shipped" },
+      { id: "affect-label-latency", label: "Median affect-labeling latency", value: null, threshold: 4000, met: false, status: "deferred", deferReason: "Practice Signals reverted May 7; rebuild pending" },
+      { id: "affect-label-accuracy", label: "Affect-labeling accuracy", value: null, threshold: 0.6, met: false, status: "deferred", deferReason: "Practice Signals reverted May 7; rebuild pending" },
+    ];
+  }
+  if (stageId === 3) {
+    return [
+      { id: "triggers-named", label: "Triggers named in your profile", value: 0, threshold: STAGE_THRESHOLDS.S3_TRIGGERS_NAMED_MIN, met: false, status: "deferred", deferReason: "Trigger Profile not yet shipped (Build #2 in spec shipping order)" },
+      { id: "pre-event-briefs", label: "Pre-event Briefs used in last 14 days", value: 0, threshold: STAGE_THRESHOLDS.S3_PRE_EVENT_BRIEFS_MIN, met: false, status: "deferred", deferReason: "Pre-event Brief not yet shipped (Build #7 in spec shipping order)" },
+      { id: "trigger-session-delta", label: "Pre-to-post rate delta on named-trigger sessions", value: 0, threshold: STAGE_THRESHOLDS.S3_DELTA_ON_TRIGGER_SESSIONS_MIN, met: false, status: "deferred", deferReason: "Trigger tagging on sessions requires Trigger Profile" },
+    ];
+  }
+  if (stageId === 4) {
+    const acceptance = _s4PatternAcceptanceRate();
+    const selfInitiated = _s4SelfInitiatedDisruptorCount();
+    return [
+      { id: "pattern-acceptance-rate", label: "Pattern Disruption acceptance rate over last 5 surfaced", value: acceptance.count >= 3 ? acceptance.rate : null, threshold: STAGE_THRESHOLDS.S4_PATTERN_ACCEPTANCE_RATE_MIN, met: acceptance.count >= 3 && acceptance.rate >= STAGE_THRESHOLDS.S4_PATTERN_ACCEPTANCE_RATE_MIN, status: "shipped" },
+      { id: "self-initiated-disruptor", label: "Self-initiated Disruptor sessions in last 30 days", value: selfInitiated, threshold: STAGE_THRESHOLDS.S4_SELF_INITIATED_DISRUPTOR_MIN, met: selfInitiated >= STAGE_THRESHOLDS.S4_SELF_INITIATED_DISRUPTOR_MIN, status: "shipped" },
+      { id: "user-flagged-pattern", label: "Self-flagged patterns preceding system detection", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "user-flag instrumentation in journal/EOD pending" },
+    ];
+  }
+  if (stageId === 5) {
+    const recovery = _s5RecoveryTrendImproving();
+    return [
+      { id: "high-load-sessions", label: "Sessions completed under high-load hardware", value: 0, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_SESSIONS_MIN, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries; same instrumentation gap as Stage 1 active-state" },
+      { id: "high-load-delta", label: "Pre-to-post delta on high-load sessions", value: 0, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_DELTA_MIN, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries" },
+      { id: "recovery-trend", label: "Recovery trending in the right direction", value: recovery ? recovery.improving : null, threshold: true, met: !!(recovery && recovery.improving), status: "shipped" },
+    ];
+  }
+  return [];
+};
+
+// getCurrentStage() → snapshot of where the user is in the architecture.
+// Returns:
+//   { currentStageId, highestStageMet, stage, markers, progress, nextStage }
+//   - currentStageId: stage user is currently working toward (1-5).
+//   - highestStageMet: highest stage where ALL shipped markers met AND
+//     no deferred markers gate it. 0 means no stage fully crossed yet.
+//   - stage: full STAGE_DEFINITIONS entry for currentStageId.
+//   - markers: computeStageMarkers(currentStageId) — what's in flight.
+//   - progress: { metCount, totalCount, percent } for current stage's
+//     SHIPPED markers only (deferred ones don't count against progress).
+//   - nextStage: STAGE_DEFINITIONS[currentStageId + 1] or null at top.
+const getCurrentStage = () => {
+  let highestStageMet = 0;
+  for (let id = 1; id <= 5; id++) {
+    const markers = computeStageMarkers(id);
+    const hasDeferred = markers.some(m => m.status === "deferred");
+    const allShippedMet = markers.filter(m => m.status === "shipped").every(m => m.met);
+    if (!hasDeferred && allShippedMet && markers.length > 0) {
+      highestStageMet = id;
+    } else {
+      break; // sequential — must cross each stage before the next
+    }
+  }
+  const currentStageId = highestStageMet === 5 ? 5 : Math.min(5, highestStageMet + 1);
+  const stage = STAGE_DEFINITIONS[currentStageId];
+  const markers = computeStageMarkers(currentStageId);
+  const shippedMarkers = markers.filter(m => m.status === "shipped");
+  const metCount = shippedMarkers.filter(m => m.met).length;
+  const totalCount = shippedMarkers.length;
+  const percent = totalCount > 0 ? Math.round((metCount / totalCount) * 100) : 0;
+  const nextStage = currentStageId < 5 ? STAGE_DEFINITIONS[currentStageId + 1] : null;
+  return {
+    currentStageId,
+    highestStageMet,
+    stage,
+    markers,
+    progress: { metCount, totalCount, percent },
+    nextStage,
+  };
+};
+
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
 // Phase 2 of encryption extension. These read/write from the encrypted store
 // (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
