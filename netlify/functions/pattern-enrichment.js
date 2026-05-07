@@ -39,7 +39,7 @@ const CORS_OPTIONS = { methods: "POST, OPTIONS" };
 
 const SYSTEM_PROMPT = `You are a pattern observation engine for Stillform, a composure architecture app.
 
-The deterministic detector found a loop in the user's recent sessions. Your job is to articulate what the loop actually is — in 1-2 short sentences — using the data they've generated. The user reads this in a modal that asks them if they want to step out of the loop for 90 seconds.
+The deterministic detector found a loop in the user's recent sessions. Your job is to articulate what the loop actually is — in ONE short sentence, max 15 words — using the data they've generated. The user reads this in a modal that asks them if they want to step out of the loop for 90 seconds. Brevity is the brand. Long text is the bug.
 
 VOICE — match the Stillform AI persona exactly:
 - Observation, not diagnosis. "What I'm seeing" not "what's wrong."
@@ -48,22 +48,25 @@ VOICE — match the Stillform AI persona exactly:
 - No love language. Don't say "I care," don't lean warm. The text should land neutral and useful.
 - Specific, not generic. Reference what they've actually done. Avoid platitudes.
 - No "always" or "never." A pattern is a frequency, not a verdict.
+- Hard ceiling: 15 words. If you can't name the loop in 15 words, name less of it. Cut adjectives, cut prepositional phrases, cut "this pattern suggests" and similar throat-clearing.
 
 OUTPUT — strict JSON only, no markdown, no prose preamble:
 {
-  "reasoning": "1-2 short sentences naming what the loop actually is.",
+  "reasoning": "ONE sentence, max 15 words, naming the loop directly.",
   "confidence": 0.0-1.0
 }
 
-Examples of GOOD reasoning text:
-- "Three of your last five sessions ended in 'stuck' regardless of which tool you ran. That's the loop — the closing state isn't moving with the practice."
-- "The same hardware state — depleted — has been present for the last four sessions. The loop is downstream of the depletion, not separate from it."
-- "Your tension landed in shoulders four times this week, even after Body Scan. The release isn't holding through the day."
+Examples of GOOD reasoning text (all 15 words or fewer):
+- "Three of your last five sessions ended in 'stuck' — the closing state isn't moving."
+- "Same hardware state — depleted — for four sessions running."
+- "Tension landed in shoulders four times this week, even after Body Scan."
+- "Reframe ran three sessions in a row. Same lane, different content."
 
 Examples of BAD reasoning (do not produce):
 - "You always end up stuck — you should try a longer practice." (advice + always)
 - "I notice you might be feeling overwhelmed and that's okay." (love language + therapy framing)
 - "It seems like there's a pattern of repetition." (generic, doesn't name the loop)
+- "The loop is the exclusive use of the reframe tool across three consecutive sessions. This pattern suggests a focus on a single approach without variation." (32 words; throat-clearing; "suggests" hedging)
 
 Return JSON only.`;
 
@@ -127,8 +130,10 @@ const validateInput = (body) => {
 // useful text, just less personalized.
 const heuristicFallback = (input) => {
   const { dimensionLabel = "A pattern", value = "", count = 0 } = input;
-  const valueText = value ? ` — ${value}` : "";
-  return `${dimensionLabel}${valueText} has shown up ${count} times across your recent sessions. The loop is the repetition itself.`;
+  // May 7, 2026 — tightened from 22 words to ~9. Per spec §3.1: 7-12 words.
+  // No "the loop is the repetition itself" editorializing — that was meta-explanation.
+  const valueText = value ? ` (${value})` : "";
+  return `${dimensionLabel}${valueText} — ${count} times across recent sessions.`;
 };
 
 export async function handler(event) {
@@ -211,13 +216,14 @@ export async function handler(event) {
       }, CORS_OPTIONS);
     }
 
-    // Length cap — model occasionally exceeds 1-2 sentences. Truncate at
-    // 280 chars and trim to last sentence boundary if possible.
+    // Length cap — model occasionally exceeds the 15-word ceiling. Truncate
+    // at 100 chars (≈15 words at typical word length) and trim to last
+    // sentence boundary if possible. Tightened May 7, 2026 (was 280).
     let reasoning = parsed.reasoning.trim();
-    if (reasoning.length > 280) {
-      const truncated = reasoning.slice(0, 280);
+    if (reasoning.length > 100) {
+      const truncated = reasoning.slice(0, 100);
       const lastSentence = truncated.lastIndexOf(".");
-      reasoning = lastSentence > 80
+      reasoning = lastSentence > 40
         ? truncated.slice(0, lastSentence + 1)
         : truncated + "…";
     }

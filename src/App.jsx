@@ -16318,7 +16318,7 @@ const isSignalProfileConfigured = () => {
               <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
                 I noticed something
               </div>
-              <div style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", marginBottom: 16 }}>
+              <div style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", marginBottom: 24 }}>
                 {(() => {
                   // Prefer AI reasoning when available — it's specific to the
                   // user's actual session data. Fall back to count-based
@@ -16328,13 +16328,13 @@ const isSignalProfileConfigured = () => {
                     return surfacedPattern.aiReasoning;
                   }
                   const dim = PATTERN_DIMENSION_LABELS[surfacedPattern.dimension] || "A pattern";
-                  return `${dim} — ${surfacedPattern.count} times across your recent sessions.`;
+                  return `${dim} — ${surfacedPattern.count} times across recent sessions.`;
                 })()}
               </div>
-              <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 24 }}>
-                When the same loop runs three or more times, the loop itself is the thing
-                to break — not the content. Want to step out of it for 90 seconds?
-              </div>
+              {/* May 7, 2026 — Arlin's call: removed static editorializing paragraph
+                  that explained WHY pattern disruption fires. The user doesn't need
+                  meta-explanation mid-loop. Per spec §3.1 example phrasings:
+                  7-12 words total. AI reasoning + buttons only. 90s hint moved to button. */}
               <div style={{ display: "flex", gap: 8 }}>
                 <button className="btn btn-primary" onClick={() => {
                   try { markPatternAccepted(surfacedPattern.id); } catch {}
@@ -16343,7 +16343,7 @@ const isSignalProfileConfigured = () => {
                   try { cancelPatternDisruptionNotifications(); } catch {}
                   setDisruptorActive(true);
                 }} style={{ flex: 1 }}>
-                  Step out
+                  Step out · 90s
                 </button>
                 <button className="btn btn-ghost" onClick={() => {
                   try { markPatternDismissed(surfacedPattern.id); } catch {}
@@ -17470,38 +17470,10 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* ── PICK UP WHERE YOU LEFT OFF — recent-session affordance ─ */}
-              {(() => {
-                const last = getMostRecentSession();
-                if (!last) return null;
-                const ageLabel = formatSessionAge(last.ageMs);
-                const toolLabel = labelForLastSession(last);
-                // Don't surface if it just happened (avoids weird "just now" loop right after exit)
-                if (last.ageMs < 2 * 60 * 1000) return null;
-                return (
-                  <div style={{
-                    marginBottom: 20,
-                    padding: "10px 14px",
-                    background: "var(--surface)",
-                    border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: 10
-                  }}>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.12em",
-                      textTransform: "uppercase",
-                      color: "var(--text-muted)"
-                    }}>
-                      Last session · {toolLabel} · {ageLabel}
-                    </div>
-                  </div>
-                );
-              })()}
+              {/* ── PICK UP WHERE YOU LEFT OFF — folded into Talk it out tile below
+                   (May 7, 2026: Arlin's call — pill at top of greeting felt too prominent
+                   for a non-tappable status line. The info is now a subtle subtitle on the
+                   Talk it out CTA where it's contextually useful, not standalone noise.) ─ */}
 
               {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
               {(() => {
@@ -18006,6 +17978,29 @@ const isSignalProfileConfigured = () => {
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
                         {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start with what the body is doing." : "Start with what's loudest."}
                       </div>
+                      {/* May 7, 2026 — last-session info folded in here from the standalone pill above.
+                          Only renders when there's a recent session >2min old (avoids "just now"
+                          loop right after exit). Subtle, contextual, anchored to the action it relates to. */}
+                      {(() => {
+                        const last = getMostRecentSession();
+                        if (!last) return null;
+                        if (last.ageMs < 2 * 60 * 1000) return null;
+                        const ageLabel = formatSessionAge(last.ageMs);
+                        const toolLabel = labelForLastSession(last);
+                        return (
+                          <div style={{
+                            fontSize: 10,
+                            fontFamily: "'IBM Plex Mono', monospace",
+                            letterSpacing: "0.1em",
+                            textTransform: "uppercase",
+                            color: "var(--text-muted)",
+                            marginTop: 8,
+                            opacity: 0.85
+                          }}>
+                            Last · {toolLabel} · {ageLabel}
+                          </div>
+                        );
+                      })()}
                     </button>
 
 
