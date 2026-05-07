@@ -647,8 +647,16 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
   return { ok: reasons.length === 0, reasons };
 }
 
-function validateIntentionFit(payload, { input = "", isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false } = {}) {
-  if (isSummaryRequest || hasCrisisLanguage || isSoftEntry) return { ok: true, reasons: [], anchors: [] };
+function validateIntentionFit(payload, { input = "", isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false, hasLiabilityGuard = false } = {}) {
+  // May 7, 2026: liabilityGuard scenarios (financial / medical / legal) are EXPECTED to
+  // redirect out of the user's framing — the correct AI behavior is to NOT echo charged
+  // language like "unfit mother" or "custody" or "investments." Anchor matching is
+  // structurally incompatible with that redirect behavior. Surfaced by the May 7 regression
+  // run: scenario #19 (legal) failed validation despite producing a correct redirect, then
+  // fell through to buildDeterministicFallback which parroted the user's input back. #18
+  // medical passed by luck, not structure. Voice + payload validators still run; only the
+  // anchor requirement is bypassed for liability scenarios.
+  if (isSummaryRequest || hasCrisisLanguage || isSoftEntry || hasLiabilityGuard) return { ok: true, reasons: [], anchors: [] };
 
   const reasons = [];
   const anchors = extractSignalAnchors(input);
@@ -686,7 +694,7 @@ function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry 
   return { ok: reasons.length === 0, reasons };
 }
 
-function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false }) {
+function buildDeterministicFallback({ mode, route, input, isSummaryRequest = false, hasCrisisLanguage = false, isSoftEntry = false, liabilityDomain = null }) {
   if (isSummaryRequest) {
     return {
       distortion: null,
@@ -714,6 +722,44 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
       reframe: SOFT_ENTRY_LOCKED_REFRAME,
       next_step: "Name one small moment from today that you want to make sense of.",
       question: "What stood out most from your day?"
+    };
+  }
+
+  // May 7, 2026: liability-aware fallback paths. Surfaced by regression #19 (legal) — the
+  // generic fallback below parrots the user's input via signalLead, which is exactly the
+  // wrong behavior for liability scenarios where the response is supposed to redirect out
+  // of the user's framing. Each domain gets a dedicated redirect template that mirrors
+  // the language pattern of #18 medical's passing AI response: acknowledge, redirect to
+  // domain professional, offer the regulation work that IS in scope. No parroting, no
+  // domain-specific advice. Validator skip (Option A) is the primary fix; this is
+  // defense in depth for any future case that fails validation for a different reason.
+  if (liabilityDomain === "financial") {
+    return {
+      distortion: null,
+      mechanism: "liability_redirect_financial",
+      reframe: "The financial details are outside what I can help with directly. What I can help with is getting you clear enough to plan your next steps without panic driving them. The stress is real; the gap doesn't have to be solved in this session.",
+      next_step: "Name one financial professional or resource you could reach this week — a credit counselor, a financial advisor, or a trusted person who's navigated this.",
+      question: "What feels most urgent right now — the numbers themselves or the feeling around them?"
+    };
+  }
+
+  if (liabilityDomain === "medical") {
+    return {
+      distortion: null,
+      mechanism: "liability_redirect_medical",
+      reframe: "The medical side of this choice is outside what I can help with directly. What I can help with is getting you clear enough to make that call yourself or to talk to someone who specializes in it. The decision doesn't have to be made in this session.",
+      next_step: "List one or two questions you'd want answered before deciding — those are what you bring to your doctor or a second opinion.",
+      question: "What feels most important to understand before you decide?"
+    };
+  }
+
+  if (liabilityDomain === "legal") {
+    return {
+      distortion: null,
+      mechanism: "liability_redirect_legal",
+      reframe: "The legal side of this needs someone who specializes in it — that's outside what I can help with directly. What I can help with is getting you clear enough to walk into that conversation steady, with the questions you actually need answered.",
+      next_step: "Name one family-law attorney, legal aid organization, or trusted person who has navigated this — that's the next call.",
+      question: "What's the loudest piece for you right now — the legal question itself or the feeling underneath it?"
     };
   }
 
@@ -749,14 +795,14 @@ You do NOT challenge whether the thought is true (that is CBT, not what we do). 
 WHO YOU'RE TALKING TO:
 Someone using a self-mastery tool. They might arrive activated — anger, anxiety, grief, overwhelm, something they can't name yet. They might arrive calm and want to think something through. Some sessions are heavy. Stay with them when the session is heavy.
 
-This is not therapy and they are not a patient. They are an operator practicing composure as a discipline. The market is anyone enhancing themselves. Do not pull toward repair, trauma, intensity, or "you're carrying a lot" framing — that is the wrong register and breaks the locked positioning.
+The frame is performance and self-mastery. They are an operator practicing composure as a discipline. The market is anyone enhancing themselves. Do not pull toward repair, trauma, intensity, or "you're carrying a lot" framing — that is the wrong register and breaks the locked positioning.
 
 YOUR JOB IN A RESPONSE:
 1. Acknowledge what they're hearing themselves say. Land on it before anything else.
 2. Surface what their thinking is doing — name the pattern, not the content. ("You are running the conversation again." "Your system is rehearsing for something that hasn't happened." "You are sorting yourself out of the room before the room does.")
 3. Optional: one short question that opens space for them to observe — never homework, never bouncing their question back, never more than one.
 
-3-5 sentences. One idea. No lists. No therapy padding. No "Additionally" or "However."
+3-5 sentences. One idea. Tight prose. No lists. Skip "Additionally" or "However."
 
 WHEN THE EXPERIENCE IS REAL:
 If someone was actually betrayed, discriminated against, dismissed, talked over, harmed — the read is data, not a pattern. Reflect the reality first. Do not call lived experience a distortion. The pattern, if any, is what their system is doing on top of the real data, not the data itself.
@@ -975,14 +1021,14 @@ The mechanism is metacognitive observation (Wells 2009 detached mindfulness): se
 You do NOT challenge whether the thought is true (CBT). You DO surface what their system is doing right before the moment, and you reflect their readiness so they can carry it in.
 
 WHO YOU'RE TALKING TO:
-Someone using a self-mastery tool. They're about to walk into something that matters. They might have stage fright, social anxiety, impostor syndrome, fear of being judged, fear of forgetting what to say, fear of confrontation, or just the weight of a moment they can't afford to lose composure in. They don't need to calm down — they need to be ready. Composure is a discipline; they are practicing it. They are an operator, not a patient.
+Someone using a self-mastery tool. They're about to walk into something that matters. They might have stage fright, social anxiety, impostor syndrome, fear of being judged, fear of forgetting what to say, fear of confrontation, or just the weight of a moment they can't afford to lose composure in. They don't need to calm down — they need to be ready. Composure is a discipline; they are practicing it. They are an operator preparing for performance.
 
 YOUR JOB IN A RESPONSE:
 1. Name the moment. Don't minimize it.
 2. Surface what their system is doing — the nerves, the over-rehearsing, the readiness checks. Name it clearly. The mechanism is observation, not pep talk.
 3. Give them ONE thing to hold. A reframe, a sentence, a physical anchor (shoulders back, plant your feet, walk in like you belong).
 
-3-5 sentences. Tight, direct, confident. Pre-game, not therapy.
+3-5 sentences. Tight, direct, confident. Pre-game prep — sharp and ready.
 
 WHAT MAKES OBSERVATION WORK (the moves that actually do MCT, with warmth):
 - Doubting their preparation → "Your system is running readiness checks. The checks are the nerves. You are already prepared."
@@ -1619,7 +1665,8 @@ WHAT STAYING SHARP LOOKS LIKE:
         input: trimmedInput,
         isSummaryRequest: isInternalSummaryRequest,
         hasCrisisLanguage,
-        isSoftEntry
+        isSoftEntry,
+        hasLiabilityGuard: hasFinancial || hasMedical || hasLegal
       });
       lastFailureReasons = [
         ...(lastValidation.reasons || []),
@@ -1639,13 +1686,19 @@ WHAT STAYING SHARP LOOKS LIKE:
     if (!parsed) {
       fallbackUsed = true;
       voiceFallbackUsed = true;
+      // May 7, 2026: derive liabilityDomain so the fallback can produce a proper redirect
+      // template instead of the parroted generic. Order matches detection precedence — if
+      // multiple domains hit, financial wins by listing order; rare and acceptable since
+      // the redirect language is similar in spirit across domains.
+      const liabilityDomain = hasFinancial ? "financial" : hasMedical ? "medical" : hasLegal ? "legal" : null;
       parsed = buildDeterministicFallback({
         mode,
         route: scienceRoute,
         input: trimmedInput,
         isSummaryRequest: isInternalSummaryRequest,
         hasCrisisLanguage,
-        isSoftEntry
+        isSoftEntry,
+        liabilityDomain
       });
     }
 
