@@ -2045,11 +2045,11 @@ const CHIP_DEFINITIONS = {
   },
   focused: {
     title: "Focused",
-    body: "Locked in. Mind sharp, body settled around the work. Different from Excited — Focused is steady, not pushed. Selecting Focused tells Stillform you're already in the state, not trying to enter it. Responses stay tight and operational. The system won't try to regulate you because there's nothing that needs regulating."
+    body: "Locked in. Mind sharp, body settled around the work. Different from Excited — Focused is steady, not pushed. Selecting Focused tells Stillform you're already in the state, not trying to enter it. Responses stay tight and operational. The system reads you as in the state and stays out of your way."
   },
   settled: {
     title: "Settled",
-    body: "Low arousal, positive valence. Body soft, breath even, nervous system at rest. Mind clear without effort. Not high energy, not low energy — at-ease. The state regulation tools are designed to produce. Selecting Settled tells Stillform you're already in the regulated state and you want to use it, not change it."
+    body: "Low arousal, positive valence. Body soft, breath even, nervous system at rest. Mind clear without effort. Not high energy, not low energy — at-ease. The state the tools point you toward. Selecting Settled tells Stillform you're already there and you want to use it, not change it."
   },
   anxious: {
     title: "Anxious",
@@ -9487,7 +9487,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           What Shifted
         </div>
         <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 16 }}>
-          In one line — what shifted? Naming it locks in the regulated state.
+          In one line — what shifted? Naming it locks in the shift.
         </div>
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -9519,7 +9519,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
             />
             <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
-              Purpose: convert your regulated state into one clear message you can send outside Stillform (Slack, email, text, or talking point).
+              Purpose: convert what shifted into one clear message you can send outside Stillform (Slack, email, text, or talking point).
             </div>
 
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -9752,7 +9752,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div style={{ marginBottom: 24 }}>
           <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
             Next Move
-            <button aria-label="Why Next Move?" onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+            <button aria-label="Why Next Move?" onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from this state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: postNextMoveId && !lockInConfirmed ? 16 : 0 }}>
             {NEXT_MOVE_ACTION_OPTIONS.map(opt => {
@@ -9782,7 +9782,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
                 <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                   Lock in
-                  <button aria-label="Lock in" onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                  <button aria-label="Lock in" onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of practice-based learning. The 20-second pause is intentional: it prevents rushed exit from this state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
                 <div className="t-body-md" style={{ marginBottom: 16, fontStyle: "italic" }}>
                   {statement}
@@ -9831,7 +9831,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             <button aria-label="Why one line?"
               onClick={(e) => {
                 e.stopPropagation();
-                setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." });
+                setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the shift. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in this state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." });
               }}
               style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
             >
@@ -9841,7 +9841,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           {stateToStatementExpanded && (
             <div style={{ marginTop: 12 }}>
               <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 8, lineHeight: 1.6 }}>
-                In one line — what shifted? Naming it locks in the regulated state. This is for you, not for sending.
+                In one line — what shifted? Naming it locks in the shift. This is for you, not for sending.
               </div>
               <textarea
                 value={externalAnchorDraft}
@@ -11654,7 +11654,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, justifyContent: compact ? "center" : "flex-start" }}>
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
           What is present
-          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after regulation, where naming what shifted consolidates the regulated state. Naming first establishes context; naming after consolidates change." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after the session, where naming what shifted consolidates the shift. Naming first establishes context; naming after consolidates change." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
         </div>
         {hasMorningData && (
           <button aria-label="Morning check-in"
@@ -16525,7 +16525,7 @@ const isSignalProfileConfigured = () => {
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
                 "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
-                "This is instrumentation for self-mastery. Not therapy. Not meditation. Not coaching. A composure system you operate.",
+                "This is instrumentation for self-mastery. A composure system you operate.",
                 "Stillform. Composure Architecture."
               ]
             },
@@ -16993,7 +16993,7 @@ const isSignalProfileConfigured = () => {
                 <div className="t-body-sm quiet" style={{ marginBottom: 16, lineHeight: 1.6 }}>
                   {signalMappingConfigured
                     ? "The app knows where to look first. You can update this anytime in Settings."
-                    : "Every session uses this to personalise your regulation tools and AI prompts. The more accurate, the faster it works."}
+                    : "Every session uses this to personalise your tools and AI prompts. The more accurate, the faster it works."}
                 </div>
                 <button
                   className="btn btn-primary"
@@ -17034,7 +17034,7 @@ const isSignalProfileConfigured = () => {
               label: "Calibration · 1 of 2",
               title: "How You Process",
               subtitle: "When a moment hits, what fires first — your thoughts or your body?",
-              body: "Research in neuroscience shows two distinct regulation pathways. Some people process through thoughts first — analyzing, replaying, building a response. Others feel it in the body first — tension, heat, restlessness.\n\nNeither is better. Knowing yours means the system starts with the right tool.\n\nAnswer instinctively. There are no wrong answers.",
+              body: "Research shows people register state in two distinct ways. Some process through thoughts first — analyzing, replaying, building a response. Others feel it in the body first — tension, heat, restlessness.\n\nNeither is better. Knowing yours means the system starts with the right tool.\n\nAnswer instinctively. There are no wrong answers.",
               isAssessment: true,
               scenarios: [
                 {
@@ -19166,11 +19166,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is What Shifted?",
-                a: "A single line written after Reframe, naming what changed in your internal state. Translating an emotional experience into precise language measurably reduces activation and reinforces the regulated state. The one-line constraint is deliberate — precision requires more effort than open-ended writing and produces more durable results. It is a processing tool, not a communication tool."
+                a: "A single line written after Reframe, naming what changed in your internal state. Translating an emotional experience into precise language measurably reduces activation and reinforces the shift. The one-line constraint is deliberate — precision requires more effort than open-ended writing and produces more durable results. It is a processing tool, not a communication tool."
               },
               {
                 q: "What is Next Move?",
-                a: "One concrete action selected from a regulated state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. Reframe surfaces the relevant options based on your session context."
+                a: "One concrete action selected from this state immediately after Reframe. Four options: Send a message, Hold a boundary, Delay your response, Let it go. Each has a real execution path — not a label. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. Reframe surfaces the relevant options based on your session context."
               },
               {
                 q: "What is the Bio-Filter?",
