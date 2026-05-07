@@ -14175,6 +14175,9 @@ function QBPill({ onPress }) {
 export default function Stillform() {
   const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
   const [infoModal, setInfoModal] = useState(null);
+  // Engagement architecture Phase 0 (May 7) — Mirror sheet visibility.
+  // Sheet renders the full stage breakdown; anchor on home opens it.
+  const [showMirrorSheet, setShowMirrorSheet] = useState(false);
   const readFirstRunStage = () => {
     try {
       const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
@@ -16814,6 +16817,181 @@ const isSignalProfileConfigured = () => {
         </div>
       )}
 
+      {/* ── MIRROR SHEET — engagement architecture full stage breakdown ──────
+          Opens from the home anchor. Editorial-luxury treatment per design
+          system spec: dark ground, hairline borders, mono caps for stage
+          label, Cormorant for capacity (one editorial moment), DM Sans for
+          body, accent only as a 0.5px line under the headline (5% rule).
+          Renders complete marker breakdown including deferred markers
+          flagged as "system still building" per spec §3.1 — honest
+          transparency about what's measured vs what's coming. */}
+      {showMirrorSheet && (() => {
+        let snap = null;
+        try { snap = getCurrentStage(); } catch { return null; }
+        if (!snap || !snap.stage) return null;
+        const shippedMarkers = snap.markers.filter(m => m.status === "shipped");
+        const deferredMarkers = snap.markers.filter(m => m.status === "deferred");
+        return (
+          <div onClick={() => setShowMirrorSheet(false)} style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.78)", zIndex: 9998,
+            display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 32px",
+            overflowY: "auto"
+          }}>
+            <div onClick={e => e.stopPropagation()} style={{
+              background: "var(--ground-elev)", border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)", padding: "32px 24px", maxWidth: 480, width: "100%",
+              maxHeight: "86vh", overflowY: "auto"
+            }}>
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em" }}>
+                Stage {snap.currentStageId} of 5
+              </div>
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
+                letterSpacing: "0.06em", color: "var(--text)", marginBottom: 12
+              }}>
+                {snap.stage.name}
+              </div>
+              <div style={{
+                height: "0.5px", background: "var(--amber-dim)", width: 32,
+                marginBottom: 18, opacity: 0.8
+              }} />
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.5, marginBottom: 28,
+                letterSpacing: "0.01em"
+              }}>
+                {snap.stage.capacity}
+              </div>
+
+              <div className="t-mono-xs" style={{
+                color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
+              }}>
+                What you're working on
+              </div>
+              <div style={{ marginBottom: 24 }}>
+                {shippedMarkers.map((m, idx) => (
+                  <div key={m.id} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                    padding: "10px 0",
+                    borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none",
+                    gap: 16
+                  }}>
+                    <div style={{
+                      fontSize: 13, color: "var(--text)", lineHeight: 1.45,
+                      fontFamily: "'DM Sans', sans-serif", flex: 1
+                    }}>
+                      {m.label}
+                    </div>
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+                      letterSpacing: "0.1em", textTransform: "uppercase",
+                      color: m.met ? "var(--amber)" : "var(--text-muted)",
+                      whiteSpace: "nowrap"
+                    }}>
+                      {m.met
+                        ? "Met"
+                        : (typeof m.value === "number" && typeof m.threshold === "number"
+                            ? `${m.value} / ${m.threshold}`
+                            : (m.value === false || m.value === null ? "—" : String(m.value)))}
+                    </div>
+                  </div>
+                ))}
+                {shippedMarkers.length === 0 && (
+                  <div style={{
+                    fontSize: 12, color: "var(--text-muted)", fontStyle: "italic",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    Markers for this stage are still being instrumented.
+                  </div>
+                )}
+              </div>
+
+              {deferredMarkers.length > 0 && (
+                <>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
+                  }}>
+                    System still building
+                  </div>
+                  <div style={{ marginBottom: 28 }}>
+                    {deferredMarkers.map((m, idx) => (
+                      <div key={m.id} style={{
+                        padding: "10px 0",
+                        borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+                      }}>
+                        <div style={{
+                          fontSize: 13, color: "var(--text-dim)", lineHeight: 1.45,
+                          fontFamily: "'DM Sans', sans-serif", marginBottom: 4
+                        }}>
+                          {m.label}
+                        </div>
+                        {m.deferReason && (
+                          <div style={{
+                            fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>
+                            {m.deferReason}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {snap.nextStage && (
+                <>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
+                  }}>
+                    Next
+                  </div>
+                  <div style={{
+                    padding: "16px 18px", marginBottom: 28,
+                    border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                    background: "transparent"
+                  }}>
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500,
+                      letterSpacing: "0.06em", color: "var(--text)", marginBottom: 6
+                    }}>
+                      {snap.nextStage.name}
+                    </div>
+                    <div style={{
+                      fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55,
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}>
+                      {snap.nextStage.capacity}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="t-mono-xs" style={{
+                color: "var(--text-muted)", marginBottom: 12, letterSpacing: "0.14em"
+              }}>
+                The science
+              </div>
+              <div style={{
+                fontSize: 11, color: "var(--text-muted)", lineHeight: 1.7,
+                fontFamily: "'DM Sans', sans-serif", marginBottom: 28
+              }}>
+                {snap.stage.science.join(" · ")}
+              </div>
+
+              <button onClick={() => setShowMirrorSheet(false)} style={{
+                background: "none", border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
+                color: "var(--text-muted)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
+              }}>
+                Close
+              </button>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* SPLASH OVERLAY — fades out, never blocks hooks */}
         {(!splashDone || !screenReady || (biometric.isEnabled() && !biometricCleared)) && (
           <div style={{
@@ -18255,6 +18433,53 @@ const isSignalProfileConfigured = () => {
               })()}
 
 
+              {/* ── MIRROR ANCHOR — engagement architecture surface, May 7, 2026 ──
+                  Quiet single-line stage status between morning strip and hero.
+                  Outside the entrain60glow wrapper — does NOT pulse, sits as
+                  steady status. Tappable to open full Mirror sheet. Renders for
+                  every calibrated user (regType guard above already gates this
+                  whole home block). New users see "STAGE 1 · NOTICING · 0%" —
+                  the journey is visible from day 1, before earned, per spec §3.1
+                  ("Roadmap visible from day 1, before earned"). */}
+              {(() => {
+                let snap = null;
+                try { snap = getCurrentStage(); } catch { return null; }
+                if (!snap || !snap.stage) return null;
+                const atTop = snap.currentStageId === 5 && snap.highestStageMet === 5;
+                const trailing = atTop
+                  ? "MAINTAINED"
+                  : `${snap.progress.percent}% TO ${snap.nextStage ? snap.nextStage.name : ""}`;
+                return (
+                  <button
+                    onClick={() => setShowMirrorSheet(true)}
+                    aria-label={`Stage ${snap.currentStageId} of 5: ${snap.stage.name}. ${snap.stage.capacity}. Tap for details.`}
+                    style={{
+                      width: "100%", marginBottom: 24,
+                      padding: "10px 14px",
+                      background: "transparent",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      cursor: "pointer",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 11,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--text-muted)",
+                      textAlign: "left",
+                      transition: "border-color var(--motion-default) var(--ease-prestige)",
+                      WebkitTapHighlightColor: "transparent"
+                    }}
+                  >
+                    <span style={{ color: "var(--text-dim)" }}>Stage {snap.currentStageId}</span>
+                    <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
+                    <span style={{ color: "var(--text)" }}>{snap.stage.name}</span>
+                    <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
+                    <span style={{ color: "var(--text-muted)" }}>{trailing}</span>
+                  </button>
+                );
+              })()}
+
+
               {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
@@ -18403,6 +18628,84 @@ const isSignalProfileConfigured = () => {
                   </>
                 )}
               </div>
+
+              {/* ── 2.5. MIRROR — engagement architecture surface ─────────────
+                  Reflects current stage + diagnostic insights from existing
+                  Signal Profile + Bias Profile. Read-only in this phase.
+                  Tap-to-Roadmap will land when Roadmap screen ships (Build #6
+                  in STILLFORM_ENGAGEMENT_ARCHITECTURE.md §10). */}
+              {(() => {
+                const stageSnapshot = (() => { try { return getCurrentStage(); } catch { return null; } })();
+                if (!stageSnapshot) return null;
+                const signalProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch { return null; } })();
+                const biasProfile = (() => { try { return JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch { return null; } })();
+                const topAreas = Array.isArray(signalProfile?.firstAreas) ? signalProfile.firstAreas.slice(0, 3) : [];
+                const topPatterns = Array.isArray(biasProfile) ? biasProfile.slice(0, 3) : [];
+                const hasInsights = topAreas.length > 0 || topPatterns.length > 0;
+                const isStageFive = stageSnapshot.currentStageId === 5 && stageSnapshot.highestStageMet === 5;
+                const progressLabel = isStageFive
+                  ? "maintained"
+                  : (stageSnapshot.progress.totalCount > 0
+                      ? `${stageSnapshot.progress.percent}% toward ${stageSnapshot.nextStage ? stageSnapshot.nextStage.name : "next"}`
+                      : "system still building this layer");
+                return (
+                  <div style={{
+                    background: "var(--ground-elev)",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r-lg)",
+                    padding: "18px 20px",
+                    marginBottom: 24
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em" }}>
+                        Stage {stageSnapshot.currentStageId} · {stageSnapshot.stage.name}
+                      </div>
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                        {progressLabel}
+                      </div>
+                    </div>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 17,
+                      fontStyle: "italic",
+                      lineHeight: 1.4,
+                      color: "var(--text-dim)",
+                      marginBottom: hasInsights ? 14 : 0
+                    }}>
+                      {stageSnapshot.stage.capacity}
+                    </div>
+                    {hasInsights && (
+                      <div style={{ borderTop: "0.5px solid var(--border)", paddingTop: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+                        {topPatterns.length > 0 && (
+                          <div>
+                            <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.1em" }}>
+                              Working on
+                            </div>
+                            <div className="t-body-sm" style={{ color: "var(--text-dim)", lineHeight: 1.5 }}>
+                              {topPatterns.join(" · ")}
+                            </div>
+                          </div>
+                        )}
+                        {topAreas.length > 0 && (
+                          <div>
+                            <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 4, letterSpacing: "0.1em" }}>
+                              Tension lives in
+                            </div>
+                            <div className="t-body-sm" style={{ color: "var(--text-dim)", lineHeight: 1.5 }}>
+                              {topAreas.join(" · ")}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {!hasInsights && stageSnapshot.currentStageId === 1 && (
+                      <div className="t-body-sm quiet" style={{ marginTop: 10, lineHeight: 1.5, fontStyle: "italic", color: "var(--text-muted)" }}>
+                        As you complete sessions and identify patterns, this surface fills in.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* SUPPORT SHEET — secondary fast-lane, discreet */}
               {showSupportSheet && (
