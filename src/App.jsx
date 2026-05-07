@@ -4840,6 +4840,11 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   );
   const [preRating, setPreRating] = useState(null);
   const [postRating, setPostRating] = useState(null);
+  // May 7, 2026 — closes the asymmetry where Body Scan + Reframe kept the post-state
+  // chip for low-demand users (May 7 fixes) but Breathe still short-circuited past it.
+  // Set true after the chip is captured (or skip-without-rating) to render
+  // <LowDemandComplete>. Mirrors Reframe's pattern at line 8518.
+  const [showLowDemandComplete, setShowLowDemandComplete] = useState(false);
   const [bioFilter, setBioFilter] = useState((() => {
     // Pre-select last bio-filter answer if from today's Stillform-day.
     // In low-demand mode we still want the *actual* flag the user marked
@@ -5058,12 +5063,29 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
           setBreatheDone(true);
           setRunning(false);
           haptic.complete();
+          // May 7, 2026 — Low-demand: route directly to post-rate in the same React
+          // batch as setBreatheDone(true) so the chip-capture screen renders without
+          // a flash of empty UI between breath-complete and post-rate. Skips the
+          // 3-option "Three rounds done — Ground / Keep going / Stop here" screen
+          // (cognitive demand the cohort doesn't have). Mirrors Body Scan + Reframe
+          // May 7 close-flow fixes. Session saved here so post-rate has the timestamp.
+          if (isLowDemand) {
+            const saved = saveSession(["breathe"], "low-demand-complete");
+            if (saved?.timestamp) latestSessionTimestampRef.current = saved.timestamp;
+            setPhase("post-rate");
+          }
           return;
         }
         if (keepGoing && newCycle > totalCycles + 3) {
           setBreatheDone(true);
           setRunning(false);
           haptic.complete();
+          // Same low-demand auto-route in the keepGoing path.
+          if (isLowDemand) {
+            const saved = saveSession(["breathe"], "low-demand-complete");
+            if (saved?.timestamp) latestSessionTimestampRef.current = saved.timestamp;
+            setPhase("post-rate");
+          }
           return;
         }
         setCycle(newCycle);
@@ -5075,7 +5097,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
       const t = setTimeout(() => setCount(c => c - 1), 1000);
       return () => clearTimeout(t);
     }
-  }, [count, running, phaseIdx, cycle, keepGoing]);
+  }, [count, running, phaseIdx, cycle, keepGoing, isLowDemand]);
 
   // --- GROUND ---
   const steps = [
@@ -5440,6 +5462,15 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
     return null;
   }
 
+  // May 7, 2026 — Low-demand close: after the user taps a post-rate chip (or
+  // skips rating), this branch fires and renders the shared tap-to-close screen.
+  // No debrief, no Next Move, no Lock-in. The chip is captured (affect labeling
+  // mechanism preserved per Lieberman 2007); everything downstream is dropped.
+  // Mirrors Reframe's early-return at line 9557.
+  if (showLowDemandComplete) {
+    return <LowDemandComplete onClose={() => onComplete(undefined)} />;
+  }
+
   return (
     <div>
       {!breatheDone ? (
@@ -5509,22 +5540,14 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             </button>
           )}
         </div>
-      ) : isLowDemand ? (
-        // LOW-DEMAND completion — minimal demand, no decisions, no chip rows, no Reframe handoff.
-        // Single action: tap anywhere to exit (with grace period built into LowDemandComplete).
-        // Session auto-saves on first render so record integrity is preserved.
-        (() => {
-          if (!latestSessionTimestampRef.current) {
-            const saved = saveSession(["breathe"], "low-demand-complete");
-            if (saved?.timestamp) latestSessionTimestampRef.current = saved.timestamp;
-          }
-          // Bypass debrief + Next Move entirely. A medicated user just navigated to "tap to close" —
-          // asking for reflection text or "what's your next move" is exactly the cognitive demand
-          // low-demand mode is designed to remove. No debrief entry recorded for this session
-          // (intentional — debrief is metacognitive work, not appropriate here).
-          return <LowDemandComplete onClose={() => onComplete(undefined)} />;
-        })()
       ) : (
+        // Normal-mode "Three rounds done" choice screen.
+        // Low-demand users never see this — the auto-route useEffect transitions
+        // them straight from breatheDone → post-rate, skipping the choice screen
+        // (which is itself cognitive demand the cohort doesn't have).
+        // The useEffect fires before this JSX has a chance to render for low-demand
+        // users; this branch is gated on !isLowDemand as belt-and-suspenders.
+        !isLowDemand && (
         <div className="complete">
           <div className="complete-icon">✓</div>
           <h2>Three rounds done.</h2>
@@ -5549,6 +5572,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             </button>
           </div>
         </div>
+        )
       )}
 
       {/* POST-RATE */}
@@ -5616,9 +5640,26 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
           })()}
           {postRating && (() => {
             const delta = postRating - preRating;
-            // Auto-advance to ground after 1.5s if positive shift
-            if (delta > 0) {
+            // May 7, 2026 — auto-advance to ground only for normal-mode positive shifts.
+            // Low-demand users skip the grounding flow entirely (it's another tool;
+            // the cohort came in to do ONE thing and is done). They go to LowDemandComplete
+            // via the Done button below.
+            if (delta > 0 && !isLowDemand) {
               setTimeout(() => setPhase("ground"), 1500);
+            }
+            // Low-demand close — single "Done" tap → LowDemandComplete. No Try again
+            // (cognitive demand: would the user evaluate whether to repeat?), no Skip
+            // to Reframe (separate tool routing decision), no Exit session (different
+            // copy for the same outcome). One button, one outcome. Mirrors the spec
+            // intent: lowest-demand metacognitive act preserved as one tap.
+            if (isLowDemand) {
+              return (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  <button className="btn btn-primary" onClick={() => setShowLowDemandComplete(true)}>
+                    Done
+                  </button>
+                </div>
+              );
             }
             return (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
