@@ -59,6 +59,11 @@ const checks = [
   { label: "AI insight guardrails", cmd: "rg", args: ["-n", "noteType: \"user-facing\"|Insight guardrails are active", "src/App.jsx"], type: "must-match" },
   { label: "Soft-entry greeting lock", cmd: "rg", args: ["-n", "Hey good to see you\\. How are you doing\\?", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Voice contract runtime guards", cmd: "rg", args: ["-n", "validateVoiceContract|VOICE_CONTRACT_BANNED_PATTERNS|voiceValidationFailed|voiceRepairUsed|voiceFallbackUsed", "netlify/functions/reframe.js"], type: "must-match" },
+  // May 7, 2026 — protect the liability-redirect fix (Options A + B). Without these, the
+  // intent validator rejects correct AI redirects on financial/medical/legal scenarios
+  // and the fallback parrots the user's input. Surfaced by May 7 regression run #19.
+  { label: "Liability-aware fallback templates (May 7 fix)", cmd: "rg", args: ["-n", "liability_redirect_financial|liability_redirect_medical|liability_redirect_legal", "netlify/functions/reframe.js"], type: "must-match" },
+  { label: "Intent validator skips on liabilityGuard (May 7 fix)", cmd: "rg", args: ["-n", "hasLiabilityGuard", "netlify/functions/reframe.js"], type: "must-match" },
   { label: "Post-rating insight loop", cmd: "rg", args: ["-n", "showPostInsight|getLatestUserFacingInsight|Post Session Insight Shown", "src/App.jsx"], type: "must-match" },
   { label: "Share card and PDF export present", cmd: "rg", args: ["-n", "Shareable composure card|Export PDF|Composure Card PDF Export", "src/App.jsx"], type: "must-match" },
   // TimeKeeper guards — block reintroduction of the broken date conventions migrated in Phases 2-4.
@@ -76,7 +81,12 @@ const checks = [
   // Undefined-component guard. Catches JSX <Foo /> against a Foo not declared anywhere.
   // Bug class that shipped FocusCheckValidation, PanicMode, and FractalBreathCanvas as silent
   // crashes — esbuild parses these as valid; they only fail when the path is hit at runtime.
-  { label: "Undefined React components (JSX <Foo /> with no declaration)", cmd: "node", args: ["scripts/check-undefined-components.mjs"], type: "must-match" }
+  { label: "Undefined React components (JSX <Foo /> with no declaration)", cmd: "node", args: ["scripts/check-undefined-components.mjs"], type: "must-match" },
+  // SYNC_KEYS typo guard (May 7, 2026). Catches the case where a future edit to SYNC_KEYS
+  // adds a typo'd key — the build, lint, and runtime all silently pass; only sync silently
+  // fails for that key (data missing on tablet for the user). Verifies every SYNC_KEYS
+  // entry has at least one quoted reference elsewhere in src/App.jsx or netlify/functions/reframe.js.
+  { label: "SYNC_KEYS entries reference real storage keys", cmd: "node", args: ["scripts/check-sync-keys.mjs"], type: "must-match" }
 ];
 
 let failed = false;

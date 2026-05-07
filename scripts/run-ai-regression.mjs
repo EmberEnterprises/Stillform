@@ -252,14 +252,27 @@ async function main() {
     if (result.ok) {
       const sentCount = result.sentenceCount;
       const qCount = result.questionCount;
+      // May 7, 2026: surface FALLBACK_FIRED and INTENT_FAIL in the console summary so
+      // future regression runs catch silent fallback firing at a glance instead of
+      // hiding it in the JSON. Surfaced by the May 7 run where #16 and #19 looked
+      // OK in console output but had actually fallen back to the parroted generic
+      // template — that was the whole bug. Also exclude crisis scenarios from
+      // TOO_LONG noise: the 988 + Crisis Text Line + trusted-person guidance is
+      // intentionally longer than the 5-sentence ceiling.
+      const fellBack = !!result.raw?.deterministicFallbackUsed;
+      const intentFailed = !!result.raw?.intentionValidationFailed;
+      const isCrisis = !!result.crisisDetected;
       const tags = [
-        sentCount > (scenario.bioFilter === "medicated" ? 3 : 5) ? "TOO_LONG" : null,
+        fellBack ? "FALLBACK_FIRED" : null,
+        intentFailed && !fellBack ? "INTENT_FAIL_RECOVERED" : null,
+        sentCount > (scenario.bioFilter === "medicated" ? 3 : 5) && !isCrisis ? "TOO_LONG" : null,
         qCount > 1 ? "TOO_MANY_Q" : null,
         result.crisisDetected ? "CRISIS_FLAG" : null,
         result.liabilityGuard ? "LIABILITY_FLAG" : null
       ].filter(Boolean);
       const tagStr = tags.length ? ` [${tags.join(", ")}]` : "";
-      console.log(`OK (${sentCount}s/${qCount}q, ${result.elapsedMs}ms)${tagStr}`);
+      const status = fellBack ? "OK*" : "OK"; // asterisk on console-line for fallback-fired even though HTTP OK
+      console.log(`${status} (${sentCount}s/${qCount}q, ${result.elapsedMs}ms)${tagStr}`);
     } else {
       console.log(`FAIL (${result.error || result.status || "unknown"})`);
     }
@@ -276,12 +289,31 @@ async function main() {
   console.log("");
   console.log(`Results written to ${outFile}`);
   console.log("Review responses qualitatively against pass/fail signals in AI_REGRESSION_TEST_19.md");
-  const failed = results.filter(r => !r.result.ok);
-  if (failed.length > 0) {
+
+  const httpFailed = results.filter(r => !r.result.ok);
+  // May 7, 2026: also count silent fallback fires as failures. Before this change the
+  // runner exited 0 even when scenarios fell back to the parroted generic template
+  // (e.g. #16 and #19 in the May 7 run) — a real regression that looked like success
+  // because HTTP was fine. Now FALLBACK_FIRED counts the same as HTTP failure for
+  // exit purposes; CI / preflight integration can rely on the exit code.
+  const fellBack = results.filter(r => r.result.ok && r.result.raw?.deterministicFallbackUsed);
+
+  if (httpFailed.length > 0) {
     console.log("");
-    console.log(`WARNING: ${failed.length} scenario(s) failed at HTTP level — see results JSON for details`);
+    console.log(`HTTP FAILURES: ${httpFailed.length} scenario(s) failed at HTTP level — see results JSON for details`);
+  }
+  if (fellBack.length > 0) {
+    console.log("");
+    console.log(`FALLBACK FIRES: ${fellBack.length} scenario(s) silently fell back to deterministic template:`);
+    for (const r of fellBack) {
+      console.log(`  • #${r.scenario_id} ${r.scenario_name}`);
+    }
+  }
+  if (httpFailed.length > 0 || fellBack.length > 0) {
     process.exit(1);
   }
+  console.log("");
+  console.log("All 19 scenarios returned a real AI response (no fallback fires, no HTTP failures).");
 }
 
 main().catch(err => {

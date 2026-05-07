@@ -38,6 +38,24 @@ for (const path of PATHS) {
     declared.add(match[1]);
   }
 
+  // Also recognize ESM-imported PascalCase components.
+  //   import { Foo } from "./bar"
+  //   import { Foo, Bar } from "./baz"
+  //   import Foo from "./qux"
+  for (const match of content.matchAll(/import\s+(?:([A-Z][a-zA-Z0-9]*)|\{([^}]+)\})\s+from/g)) {
+    if (match[1]) {
+      // default import: `import Foo from "..."`
+      declared.add(match[1]);
+    }
+    if (match[2]) {
+      // named imports: `import { Foo, Bar } from "..."`
+      const names = match[2].split(",").map(n => n.trim().split(/\s+as\s+/).pop().trim());
+      for (const n of names) {
+        if (/^[A-Z][a-zA-Z0-9]*$/.test(n)) declared.add(n);
+      }
+    }
+  }
+
   const missing = [...usages].filter(name =>
     !declared.has(name) && !KNOWN_EXTERNAL.has(name)
   );
