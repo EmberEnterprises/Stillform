@@ -1,6 +1,11 @@
 import { useState, useEffect, useRef, Component } from "react";
 import { WidgetBridge } from "./plugins/widgetBridge";
 import { integrationBridge } from "./plugins/integrationBridge";
+import { AFFECT_LABELING_STIMULI, getValidatedAffectStimuli } from "./practice-signals/affect-labeling-stimuli";
+import { COGNITIVE_DEFUSION_STIMULI, getValidatedDefusionStimuli } from "./practice-signals/cognitive-defusion-stimuli";
+import { AffectLabelingExercise } from "./practice-signals/AffectLabelingExercise";
+import { CognitiveDefusionExercise } from "./practice-signals/CognitiveDefusionExercise";
+import { DisruptorTool } from "./practice-signals/DisruptorTool";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -25,6 +30,33 @@ class ErrorBoundary extends Component {
       // Use CSS variables so the boundary respects whichever theme the user has set
       // (dark, midnight, suede, teal, rose, light). Themes set --amber etc. on
       // document.documentElement so they're available even when React's tree errors out.
+      //
+      // May 7, 2026: added "Clear local data & restart" recovery path. The original boundary
+      // had only a plain reload — fine for transient crashes, but if the crash is caused by
+      // corrupted localStorage (broken JSON, schema mismatch, partial writes from an interrupted
+      // sync) the user loops back into the same crash on every reload. The clear-local path
+      // wipes all stillform_* keys but keeps the Supabase auth session intact, so the user
+      // stays signed in and cloud sync restores the data layer on the next launch. Doesn't
+      // touch the cloud — only local. Confirms before running because this path drops any
+      // local writes that haven't synced up yet (rare but possible).
+      const handleClearAndRestart = () => {
+        const confirmed = window.confirm(
+          "Clear local data and restart?\n\n" +
+          "This wipes saved data on this device only. If you're signed in to Cloud Sync, " +
+          "your data will be restored from the cloud automatically when the app reloads.\n\n" +
+          "Use this if restarting alone keeps crashing."
+        );
+        if (!confirmed) return;
+        try {
+          Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith("stillform_") && key !== "stillform_sb_session") {
+              localStorage.removeItem(key);
+            }
+          });
+        } catch {}
+        this.setState({ error: null });
+        window.location.href = "/";
+      };
       return (
         <div style={{ background: "var(--bg, #08080A)", color: "var(--text, #E8EAF0)", padding: 40, minHeight: "100vh", fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, color: "var(--amber, #B8862B)", marginBottom: 12 }}>Something went wrong.</div>
@@ -32,6 +64,10 @@ class ErrorBoundary extends Component {
           <button onClick={() => { this.setState({ error: null }); window.location.href = "/"; }}
             style={{ background: "var(--surface, #111114)", color: "var(--amber, #B8862B)", border: "0.5px solid color-mix(in srgb, var(--amber, #B8862B) 50%, transparent)", padding: "14px 28px", cursor: "pointer", borderRadius: 4, fontSize: 14, fontWeight: 400 }}>
             Restart Stillform
+          </button>
+          <button onClick={handleClearAndRestart}
+            style={{ background: "transparent", color: "var(--text-muted, #9496A1)", border: "none", padding: "12px 16px", marginTop: 12, cursor: "pointer", fontSize: 12, fontWeight: 400, textDecoration: "underline" }}>
+            Still crashing? Clear local data &amp; restart
           </button>
         </div>
       );
@@ -1643,6 +1679,95 @@ const scheduleReminder = async (title, body, hour, minute) => {
   } catch {}
 };
 
+// ─── PATTERN DISRUPTION PUSH NOTIFICATIONS — May 7, 2026 ──────────────
+// Per Arlin's May 7 directive (push trigger for pattern surfacing).
+// Native-only — web users only get the in-app prompt.
+//
+// Wiring philosophy: in-app surface always takes precedence. Push is the
+// fallback nudge for the case where the user dismissed the in-app prompt
+// ("Not now") and then doesn't come back for a while. The push fires once,
+// ~24h after dismiss, with gentle copy. If the user opens the app first,
+// any pending push is cancelled — they don't get pushed about a pattern
+// they're already seeing.
+//
+// Notification ID range 9100-9109 (10 slots). Different range from:
+//   - daily reminder (Date.now() based, scheduleReminder)
+//   - pre-meeting (8800-8803)
+//   - other future scheduled notifications
+//
+// Tap routing: extra.screen = "home" so the user lands at their home and
+// the on-mount detection useEffect re-surfaces the pattern modal naturally.
+// We don't deep-link to a "pattern surface" screen because the pattern
+// might have aged out or been cleared by the time the user taps; the
+// in-app detection logic handles current-state surfacing correctly.
+
+const PATTERN_NOTIFICATION_ID_BASE = 9100;
+const PATTERN_NOTIFICATION_ID_MAX = 9109;
+const PATTERN_NOTIFICATION_DELAY_MS = 24 * 60 * 60 * 1000; // 24h
+
+const schedulePatternDisruptionNotification = async (pattern) => {
+  // Web users get nothing — they have the in-app prompt only.
+  if (!isNative()) return;
+  if (!pattern || !pattern.id || !pattern.dimension) return;
+  // User opt-out — Settings → Schedule & Notifications → Pattern interrupts.
+  // Default is "on" (undefined or "on" both enable). Only "off" disables.
+  // Independent from the daily-reminder toggle — user can want one without
+  // the other.
+  try {
+    if (localStorage.getItem("stillform_pattern_push_enabled") === "off") return;
+  } catch {}
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    const perm = await LocalNotifications.checkPermissions();
+    // Don't prompt for permission here — that prompt belongs to setupPushNotifications
+    // on first launch. If the user has denied, respect that and skip silently.
+    if (perm.display !== 'granted') return;
+
+    // Pick a deterministic-but-rotating id from the reserved range so back-to-back
+    // patterns don't collide. Mod into range.
+    const ringIndex = Math.floor(Math.random() * (PATTERN_NOTIFICATION_ID_MAX - PATTERN_NOTIFICATION_ID_BASE + 1));
+    const notifId = PATTERN_NOTIFICATION_ID_BASE + ringIndex;
+
+    // Cancel any existing pattern notifications first — single push at a time.
+    // User shouldn't get stacked pings about overlapping patterns.
+    const ids = [];
+    for (let i = PATTERN_NOTIFICATION_ID_BASE; i <= PATTERN_NOTIFICATION_ID_MAX; i++) ids.push({ id: i });
+    await LocalNotifications.cancel({ notifications: ids }).catch(() => {});
+
+    // Gentle, non-alarming copy. The pattern itself isn't alarming; the
+    // notification language shouldn't be either. No "you" framing of the
+    // user's pattern — observation framing instead. Body never names the
+    // specific dimension because by the time the user taps, the pattern
+    // state may have changed and we don't want to telegraph stale data.
+    const fireAt = new Date(Date.now() + PATTERN_NOTIFICATION_DELAY_MS);
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: notifId,
+        title: "A pattern is in flight",
+        body: "There's something I noticed across your recent sessions. Open when you have 90 seconds.",
+        schedule: { at: fireAt },
+        extra: { screen: "home", source: "pattern-disruption", patternId: pattern.id }
+      }]
+    });
+
+    // Track the scheduled notification so cancel can run cleanly. Stored as
+    // a single-id pointer; only one pattern notification at a time per the
+    // ring-cancel-then-schedule logic above.
+    try { localStorage.setItem("stillform_pattern_notif_pending", String(notifId)); } catch {}
+  } catch {}
+};
+
+const cancelPatternDisruptionNotifications = async () => {
+  if (!isNative()) return;
+  try {
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    const ids = [];
+    for (let i = PATTERN_NOTIFICATION_ID_BASE; i <= PATTERN_NOTIFICATION_ID_MAX; i++) ids.push({ id: i });
+    await LocalNotifications.cancel({ notifications: ids }).catch(() => {});
+    try { localStorage.removeItem("stillform_pattern_notif_pending"); } catch {}
+  } catch {}
+};
+
 const PRE_MEETING_NOTIF_KEY = "stillform_pre_meeting_notif";
 const PRE_MEETING_NOTIF_FIRST_KEY = "stillform_pre_meeting_first_mins";
 const PRE_MEETING_NOTIF_SECOND_KEY = "stillform_pre_meeting_second_mins";
@@ -1684,6 +1809,13 @@ const LOOP_NUDGE_MIN_OPENS_LOWER_BOUND = 2;
 const LOOP_NUDGE_MIN_OPENS_UPPER_BOUND = 5;
 const LOOP_NUDGE_DROPOFF_THRESHOLD_LOWER_BOUND = 25;
 const LOOP_NUDGE_DROPOFF_THRESHOLD_UPPER_BOUND = 60;
+// May 7, 2026: extracted from inline literal at the processing primer render. Tool
+// entry primer suppresses after this many sessions on the assumption that the user
+// has internalized the framing — Pillar 1 metacognitive scaffolding for new users
+// only. If real-user testing shows 5 is too short (users still benefit) or too
+// long (becomes noise), this is the one number to change. Prior inline lived at
+// the render site, requiring grep to tune.
+const PROCESSING_PRIMER_DECAY_THRESHOLD = 5;
 const LOOP_NUDGE_DISMISSED_DAY_KEY = "stillform_loop_nudge_dismissed_day";
 const LOOP_NUDGE_DISMISS_STREAK_KEY = "stillform_loop_nudge_dismiss_streak";
 const LOOP_NUDGE_EVENTS_KEY = "stillform_loop_nudge_events";
@@ -2446,6 +2578,440 @@ const labelForLastSession = (session) => {
 // Honest framing rules from spec §"What it can't do" enforced at surfacing
 // time, not at storage time. Storage is dumb; comparison logic is where
 // the integrity claim lives.
+// ─── PATTERN DISRUPTION LAYER — May 7, 2026 ───────────────────────────
+// Per PATTERN_DISRUPTION_SPEC.md. Detects repeated loops across the user's
+// recent sessions (≥3 instances of the same signal across 8 dimensions),
+// surfaces the pattern with an offered disruptor, tracks dismissals
+// (two-strikes-and-drop), and records disruptor sessions.
+//
+// Storage:
+//   stillform_pattern_detections: array of detected pattern instances
+//   stillform_disruptor_sessions: array of disruptor tool runs
+//
+// Detection runs deterministically (no AI cost) on a recent-session window.
+// AI-aware enrichment (reasoning + dimension classification) layered on top
+// when a pre-filter threshold trips. Per spec §4 open question Q4: AI runs
+// only after deterministic pre-filter, not on every data point.
+
+const PATTERN_DETECTIONS_KEY = "stillform_pattern_detections";
+const DISRUPTOR_SESSIONS_KEY = "stillform_disruptor_sessions";
+
+// Detection threshold: 3 data points of the same signal in the recent window.
+// Window: last 14 days OR last 10 sessions, whichever is shorter.
+const PATTERN_THRESHOLD = 3;
+const PATTERN_WINDOW_DAYS = 14;
+const PATTERN_WINDOW_SESSIONS = 10;
+
+// Maximum stored detections — older ones are pruned to keep storage bounded.
+const PATTERN_DETECTIONS_MAX = 50;
+const DISRUPTOR_SESSIONS_MAX = 100;
+
+// Eight loop-signal dimensions per spec §2.2. Each is one axis the
+// detector can register repetition on. Body-first detection (chips +
+// bio-filter) is explicit per spec §2.3.
+const PATTERN_DIMENSIONS = Object.freeze({
+  SAME_CHIP: "same_chip",            // post-state chip repeats
+  SAME_BIO_FILTER: "same_bio_filter", // hardware state repeats
+  SAME_FEELSTATE: "same_feelstate",  // entry feel state repeats
+  SAME_TENSION_AREA: "same_tension_area", // body scan area repeats
+  SAME_DISTORTION: "same_distortion", // bias profile distortion repeats
+  SAME_TOOL_PATH: "same_tool_path",  // tool sequence repeats
+  SHIFT_NOT_LANDING: "shift_not_landing", // post-rate stays equal/lower
+  SAME_REFRAME_CONTEXT: "same_reframe_context" // entryMode + feelState combo
+});
+
+const getPatternDetectionsFromStorage = () => {
+  try {
+    const raw = secureRead(PATTERN_DETECTIONS_KEY, []);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+const writePatternDetections = (detections) => {
+  try {
+    const trimmed = (Array.isArray(detections) ? detections : []).slice(-PATTERN_DETECTIONS_MAX);
+    secureWrite(PATTERN_DETECTIONS_KEY, trimmed);
+    return true;
+  } catch { return false; }
+};
+
+const getDisruptorSessionsFromStorage = () => {
+  try {
+    const raw = secureRead(DISRUPTOR_SESSIONS_KEY, []);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+const appendDisruptorSession = (entry) => {
+  if (!entry) return null;
+  const record = {
+    id: entry.id || `ds_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    timestamp: entry.timestamp || new Date().toISOString(),
+    patternId: entry.patternId || null,
+    dimension: entry.dimension || null,
+    durationMs: typeof entry.durationMs === "number" ? entry.durationMs : null,
+    completed: entry.completed === true,
+    pathway: entry.pathway || "somatic-redirection"
+  };
+  try {
+    const existing = getDisruptorSessionsFromStorage();
+    const next = [...existing, record].slice(-DISRUPTOR_SESSIONS_MAX);
+    secureWrite(DISRUPTOR_SESSIONS_KEY, next);
+    return record;
+  } catch { return null; }
+};
+
+// Deterministic pre-filter — counts repeats across the 8 dimensions in the
+// recent window. Returns array of detected patterns, each with:
+//   { dimension, value, count, dataPoints: [session refs] }
+// Cheap to run (pure JS over already-loaded session history). AI enrichment
+// happens only after this pre-filter trips.
+const detectPatternsDeterministic = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (sessions.length < PATTERN_THRESHOLD) return [];
+
+    // Window: most recent N sessions OR last D days, whichever is shorter.
+    const windowStart = Date.now() - (PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const recent = sessions
+      .filter(s => {
+        const t = new Date(s.timestamp || 0).getTime();
+        return !Number.isNaN(t) && t >= windowStart;
+      })
+      .slice(-PATTERN_WINDOW_SESSIONS);
+
+    if (recent.length < PATTERN_THRESHOLD) return [];
+
+    // Count repeats per dimension.
+    const buckets = {
+      [PATTERN_DIMENSIONS.SAME_CHIP]: new Map(),
+      [PATTERN_DIMENSIONS.SAME_BIO_FILTER]: new Map(),
+      [PATTERN_DIMENSIONS.SAME_FEELSTATE]: new Map(),
+      [PATTERN_DIMENSIONS.SAME_TENSION_AREA]: new Map(),
+      [PATTERN_DIMENSIONS.SAME_TOOL_PATH]: new Map(),
+      [PATTERN_DIMENSIONS.SHIFT_NOT_LANDING]: new Map()
+    };
+
+    const recordHit = (dimension, value, sessionRef) => {
+      if (!value) return;
+      const bucket = buckets[dimension];
+      if (!bucket) return;
+      const existing = bucket.get(value) || { value, count: 0, dataPoints: [] };
+      existing.count += 1;
+      existing.dataPoints.push(sessionRef);
+      bucket.set(value, existing);
+    };
+
+    for (const s of recent) {
+      const ref = { timestamp: s.timestamp, sessionId: s.id || null };
+      // Same post-state chip
+      if (s.postState) recordHit(PATTERN_DIMENSIONS.SAME_CHIP, s.postState, ref);
+      // Same bio-filter
+      if (s.bioFilter) {
+        const tokens = String(s.bioFilter).split(",").map(t => t.trim()).filter(Boolean);
+        for (const t of tokens) recordHit(PATTERN_DIMENSIONS.SAME_BIO_FILTER, t, ref);
+      }
+      // Same entry feel state
+      if (s.preState) recordHit(PATTERN_DIMENSIONS.SAME_FEELSTATE, s.preState, ref);
+      // Same tool sequence
+      if (Array.isArray(s.tools) && s.tools.length > 0) {
+        recordHit(PATTERN_DIMENSIONS.SAME_TOOL_PATH, s.tools.join("→"), ref);
+      }
+      // Body scan tension areas
+      if (s.bodyScanTension && typeof s.bodyScanTension === "object") {
+        for (const [area, level] of Object.entries(s.bodyScanTension)) {
+          if (typeof level === "number" && level >= 3) {
+            recordHit(PATTERN_DIMENSIONS.SAME_TENSION_AREA, area, { ...ref, level });
+          }
+        }
+      }
+      // Shift not landing — post rate <= pre rate
+      if (typeof s.preRate === "number" && typeof s.postRate === "number" && s.postRate <= s.preRate) {
+        recordHit(PATTERN_DIMENSIONS.SHIFT_NOT_LANDING, "post_le_pre", ref);
+      }
+    }
+
+    // Collect any bucket entries that hit threshold.
+    const detected = [];
+    for (const [dimension, bucket] of Object.entries(buckets)) {
+      for (const entry of bucket.values()) {
+        if (entry.count >= PATTERN_THRESHOLD) {
+          detected.push({
+            dimension,
+            value: entry.value,
+            count: entry.count,
+            dataPoints: entry.dataPoints
+          });
+        }
+      }
+    }
+    // Strongest patterns first.
+    detected.sort((a, b) => b.count - a.count);
+    return detected;
+  } catch { return []; }
+};
+
+// Surface state for a pattern detection record. State machine per spec §3.2:
+//   "active" → user has not yet responded
+//   "dismissed_once" → user dismissed once; will re-fire on next session/day
+//   "accepted" → user accepted, routed into disruptor
+//   "closed" → two strikes (dismissed twice), pattern instance closed
+const PATTERN_STATES = Object.freeze({
+  ACTIVE: "active",
+  DISMISSED_ONCE: "dismissed_once",
+  ACCEPTED: "accepted",
+  CLOSED: "closed"
+});
+
+// Plain-language label for a pattern dimension — used in the prompt + the
+// transparency surface.
+const PATTERN_DIMENSION_LABELS = {
+  [PATTERN_DIMENSIONS.SAME_CHIP]: "Same closing state",
+  [PATTERN_DIMENSIONS.SAME_BIO_FILTER]: "Same hardware state",
+  [PATTERN_DIMENSIONS.SAME_FEELSTATE]: "Same entry state",
+  [PATTERN_DIMENSIONS.SAME_TENSION_AREA]: "Tension in the same place",
+  [PATTERN_DIMENSIONS.SAME_TOOL_PATH]: "Same tool sequence",
+  [PATTERN_DIMENSIONS.SHIFT_NOT_LANDING]: "Sessions not landing a shift",
+  [PATTERN_DIMENSIONS.SAME_DISTORTION]: "Same thinking distortion",
+  [PATTERN_DIMENSIONS.SAME_REFRAME_CONTEXT]: "Same Reframe context"
+};
+
+// Find or create an active pattern detection record for a given dimension/value
+// pair. If a record exists in CLOSED state, do NOT re-open — fresh accrual of
+// 3 new data points opens a new instance per spec §3.2 ("two-strikes-and-drop").
+// Returns the upserted record.
+const upsertPatternDetection = (detection) => {
+  if (!detection || !detection.dimension || !detection.value) return null;
+  try {
+    const existing = getPatternDetectionsFromStorage();
+    // Look for an open instance (not CLOSED) matching dimension + value.
+    const openIdx = existing.findIndex(d =>
+      d.dimension === detection.dimension &&
+      d.value === detection.value &&
+      d.state !== PATTERN_STATES.CLOSED
+    );
+    if (openIdx >= 0) {
+      // Update count + dataPoints; preserve state machine + history.
+      const updated = {
+        ...existing[openIdx],
+        count: detection.count,
+        dataPoints: detection.dataPoints,
+        lastSeenAt: new Date().toISOString()
+      };
+      const next = [...existing];
+      next[openIdx] = updated;
+      writePatternDetections(next);
+      return updated;
+    }
+    // New instance.
+    const record = {
+      id: `pd_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      dimension: detection.dimension,
+      value: detection.value,
+      count: detection.count,
+      dataPoints: detection.dataPoints,
+      state: PATTERN_STATES.ACTIVE,
+      surfacedAt: null,
+      dismissedAt: [],
+      acceptedAt: null,
+      createdAt: new Date().toISOString(),
+      lastSeenAt: new Date().toISOString()
+    };
+    writePatternDetections([...existing, record]);
+    return record;
+  } catch { return null; }
+};
+
+const markPatternSurfaced = (id) => {
+  try {
+    const existing = getPatternDetectionsFromStorage();
+    const idx = existing.findIndex(d => d.id === id);
+    if (idx < 0) return null;
+    const updated = { ...existing[idx], surfacedAt: existing[idx].surfacedAt || new Date().toISOString() };
+    const next = [...existing];
+    next[idx] = updated;
+    writePatternDetections(next);
+    return updated;
+  } catch { return null; }
+};
+
+const markPatternDismissed = (id) => {
+  try {
+    const existing = getPatternDetectionsFromStorage();
+    const idx = existing.findIndex(d => d.id === id);
+    if (idx < 0) return null;
+    const record = existing[idx];
+    const dismissedAt = [...(record.dismissedAt || []), new Date().toISOString()];
+    // Two strikes → close the pattern instance per spec §3.2.
+    const newState = dismissedAt.length >= 2
+      ? PATTERN_STATES.CLOSED
+      : PATTERN_STATES.DISMISSED_ONCE;
+    const updated = { ...record, dismissedAt, state: newState };
+    const next = [...existing];
+    next[idx] = updated;
+    writePatternDetections(next);
+    return updated;
+  } catch { return null; }
+};
+
+const markPatternAccepted = (id) => {
+  try {
+    const existing = getPatternDetectionsFromStorage();
+    const idx = existing.findIndex(d => d.id === id);
+    if (idx < 0) return null;
+    const updated = { ...existing[idx], acceptedAt: new Date().toISOString(), state: PATTERN_STATES.ACCEPTED };
+    const next = [...existing];
+    next[idx] = updated;
+    writePatternDetections(next);
+    return updated;
+  } catch { return null; }
+};
+
+// Returns an active or dismissed-once pattern detection ready to surface.
+// Used by the in-app prompt to decide whether to render. Honors the
+// re-fire window per spec §3.2 (Q2): if dismissed_once, re-fire on next
+// app open same/next day. Beyond that, drop until next surface attempt.
+const getActivePatternForSurfacing = () => {
+  try {
+    const detections = getPatternDetectionsFromStorage();
+    // Active first (never surfaced or recently surfaced), then dismissed_once
+    // that's eligible for re-fire.
+    const active = detections.filter(d => d.state === PATTERN_STATES.ACTIVE);
+    if (active.length > 0) {
+      // Strongest count first.
+      return [...active].sort((a, b) => (b.count || 0) - (a.count || 0))[0];
+    }
+    const eligibleRefire = detections.filter(d => {
+      if (d.state !== PATTERN_STATES.DISMISSED_ONCE) return false;
+      const lastDismiss = d.dismissedAt && d.dismissedAt.length > 0
+        ? d.dismissedAt[d.dismissedAt.length - 1]
+        : null;
+      if (!lastDismiss) return false;
+      const lastDismissTime = new Date(lastDismiss).getTime();
+      if (Number.isNaN(lastDismissTime)) return false;
+      // Re-fire allowed if dismissed within the last 48 hours and at least
+      // one app open since (caller is the open path itself, so by virtue
+      // of being called we're "since dismissal").
+      return (Date.now() - lastDismissTime) < (48 * 60 * 60 * 1000);
+    });
+    if (eligibleRefire.length > 0) {
+      return [...eligibleRefire].sort((a, b) => (b.count || 0) - (a.count || 0))[0];
+    }
+    return null;
+  } catch { return null; }
+};
+
+// Convenience: run detection + persist any new patterns. Returns the array
+// of upserted records so callers can immediately decide whether to surface.
+const runPatternDetection = () => {
+  try {
+    const detected = detectPatternsDeterministic();
+    return detected.map(d => upsertPatternDetection(d)).filter(Boolean);
+  } catch { return []; }
+};
+
+// ─── PATTERN ENRICHMENT (AI-AWARE LAYER) ──────────────────────────────
+// Per PATTERN_DISRUPTION_SPEC.md §4 Q4 — AI runs after deterministic
+// pre-filter, not on every data point. Enrichment turns the count-based
+// signal into observation-mode reasoning ("the closing state isn't moving
+// with the practice" instead of "stuck × 3"). Cached on the pattern record
+// so re-fires get the cached version without a second AI call.
+//
+// Always tolerant of failure: server returns heuristic fallback on any AI
+// error, and even if the whole call fails, the modal still surfaces with
+// count-based copy. AI-down backup case stays working.
+
+const PATTERN_ENRICHMENT_URL = "/.netlify/functions/pattern-enrichment";
+
+// Build the session excerpt context the AI gets. Keeps payload small —
+// 6 most recent sessions, only the fields that matter for loop reasoning.
+const buildPatternEnrichmentContext = (pattern) => {
+  try {
+    const sessions = getSessionsFromStorage().slice(-6);
+    const sessionExcerpts = sessions.map(s => ({
+      timestamp: s.timestamp,
+      preState: s.preState || null,
+      postState: s.postState || null,
+      preRate: typeof s.preRate === "number" ? s.preRate : null,
+      postRate: typeof s.postRate === "number" ? s.postRate : null,
+      tools: Array.isArray(s.tools) ? s.tools.slice(0, 5) : [],
+      bioFilter: s.bioFilter || null
+    }));
+    let signalProfile = null;
+    let biasProfile = null;
+    let bioFilter = null;
+    try { signalProfile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch {}
+    try { biasProfile = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch {}
+    try { bioFilter = getActiveBioFilter ? getActiveBioFilter() : null; } catch {}
+    return {
+      dimension: pattern.dimension,
+      dimensionLabel: PATTERN_DIMENSION_LABELS[pattern.dimension] || pattern.dimension,
+      value: pattern.value,
+      count: pattern.count,
+      dataPoints: pattern.dataPoints || [],
+      sessionExcerpts,
+      bioFilter,
+      signalProfile,
+      biasProfile
+    };
+  } catch {
+    // On any error building context, return a minimal payload — the
+    // server-side heuristic fallback handles missing fields gracefully.
+    return {
+      dimension: pattern.dimension,
+      dimensionLabel: PATTERN_DIMENSION_LABELS[pattern.dimension] || pattern.dimension,
+      value: pattern.value,
+      count: pattern.count
+    };
+  }
+};
+
+// Fire-and-forget enrichment call. Returns a promise that resolves to the
+// reasoning string (or null on failure). Caller uses this to update the
+// pattern record + surfaced state.
+const enrichPatternWithAI = async (pattern) => {
+  if (!pattern || !pattern.id) return null;
+  try {
+    const payload = buildPatternEnrichmentContext(pattern);
+    const response = await fetch(PATTERN_ENRICHMENT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (typeof data?.reasoning !== "string" || data.reasoning.length === 0) return null;
+    return {
+      reasoning: data.reasoning,
+      confidence: typeof data.confidence === "number" ? data.confidence : null,
+      fallback: data.fallback || null,
+      enrichedAt: new Date().toISOString()
+    };
+  } catch { return null; }
+};
+
+// Persist enrichment result on the pattern detection record. Idempotent —
+// re-running enrichment for the same pattern overwrites prior reasoning.
+const updatePatternReasoning = (id, enrichment) => {
+  if (!id || !enrichment) return null;
+  try {
+    const existing = getPatternDetectionsFromStorage();
+    const idx = existing.findIndex(d => d.id === id);
+    if (idx < 0) return null;
+    const updated = {
+      ...existing[idx],
+      aiReasoning: enrichment.reasoning,
+      aiConfidence: enrichment.confidence,
+      aiFallback: enrichment.fallback,
+      aiEnrichedAt: enrichment.enrichedAt
+    };
+    const next = [...existing];
+    next[idx] = updated;
+    writePatternDetections(next);
+    return updated;
+  } catch { return null; }
+};
+
 const FUNCTION_CHECKS_KEY = "stillform_function_checks";
 const FUNCTION_CHECK_SCHEMA_VERSION = 1;
 const FUNCTION_CHECK_CANDIDATES = Object.freeze({
@@ -2525,6 +3091,74 @@ const getFunctionCheckTrend = (candidate, limit = 20) => {
     }
     return trend;
   } catch { return null; }
+};
+
+// ─── PRACTICE SIGNALS — CFM Phase 1 cadence helper (May 7, 2026) ──────────
+// Decision 4 from COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md:
+// practice-gated, weekly cap. Trigger: 5+ sessions since last function check
+// OR 7 days since last check, whichever comes first. Capped at one offer
+// per week regardless of practice volume. The 5-session floor means heavy
+// users get measured during high-engagement periods (strongest comparison
+// signal); the weekly minimum means low-engagement users still see the
+// offer (don't fall off the radar).
+//
+// Returns true if the user should see the practice-signal offer for the
+// given candidate. False if a check ran recently within the cadence window.
+const PRACTICE_SIGNALS_SESSION_FLOOR = 5;
+const PRACTICE_SIGNALS_DAY_CEILING_MS = 7 * 24 * 60 * 60 * 1000;
+const PRACTICE_SIGNALS_WEEKLY_CAP_MS = 7 * 24 * 60 * 60 * 1000;
+
+const shouldOfferFunctionCheck = (candidate, sessionCount = null) => {
+  if (!candidate) return false;
+  try {
+    const latest = getLatestFunctionCheck(candidate);
+    // Never run before — always offer.
+    if (!latest) return true;
+
+    const lastCheckTime = new Date(latest.timestamp).getTime();
+    const now = Date.now();
+    if (Number.isNaN(lastCheckTime)) return true;
+
+    const msSinceLast = now - lastCheckTime;
+
+    // Weekly cap — never offer the same candidate more than once per week,
+    // regardless of practice volume. Prevents over-measurement fatigue.
+    if (msSinceLast < PRACTICE_SIGNALS_WEEKLY_CAP_MS) return false;
+
+    // Time-gated path — 7 days since last check. Always offer.
+    if (msSinceLast >= PRACTICE_SIGNALS_DAY_CEILING_MS) return true;
+
+    // Practice-gated path — 5+ sessions since last check. Couples
+    // measurement to active practice for strongest comparison data.
+    // Caller passes sessionCount; if not passed, fall back to time-gated only.
+    if (typeof sessionCount === "number") {
+      // Count sessions completed since the last check timestamp.
+      // We need session count *since* the last check, not absolute.
+      // Caller is responsible for computing this from getSessionsFromStorage()
+      // filtered by timestamp > latest.timestamp.
+      if (sessionCount >= PRACTICE_SIGNALS_SESSION_FLOOR) return true;
+    }
+    return false;
+  } catch { return false; }
+};
+
+// Helper for callers: count sessions completed since the last check of a
+// given candidate. Pass this as sessionCount to shouldOfferFunctionCheck().
+const getSessionsSinceLastFunctionCheck = (candidate) => {
+  try {
+    const latest = getLatestFunctionCheck(candidate);
+    if (!latest) {
+      // No prior check — count all sessions.
+      return getSessionCountFromStorage();
+    }
+    const since = new Date(latest.timestamp).getTime();
+    if (Number.isNaN(since)) return getSessionCountFromStorage();
+    const sessions = getSessionsFromStorage();
+    return sessions.filter(s => {
+      const t = new Date(s.timestamp || 0).getTime();
+      return !Number.isNaN(t) && t > since;
+    }).length;
+  } catch { return 0; }
 };
 
 // ─── BODY SCAN TENSION DATA HELPERS — Phase 0 for My Progress redesign ────
@@ -4903,7 +5537,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
         State read.
       </h2>
       <div className="t-mono-xs" style={{ marginBottom: 20 }}>
-        <span>Bio-filter · What is your hardware running right now?</span> <button onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When you mark depleted, in pain, sleep-deprived, the system carries that hardware state into how your input is read. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+        <span>Bio-filter · What is your hardware running right now?</span> <button aria-label="Why the bio-filter?" onClick={() => setInfoModal({ title: "Why the bio-filter?", body: "Physical state directly alters emotional perception. Sleep debt amplifies threat detection. Pain demands attentional resources. Hormonal shifts change affective baseline. This check prevents the system from misreading a biological signal as an emotional one.\n\nThe deeper mechanism: the brain runs on prediction. It takes interoceptive signals from the body and uses them to predict what's happening — emotion is partly the brain's interpretation of those signals (Seth 2013; Barrett & Simmons 2015). When you mark depleted, in pain, sleep-deprived, the system carries that hardware state into how your input is read. The same situation interpreted through a depleted body is a different prediction than the same situation interpreted through a rested body. Bio-filter doesn't just filter responses — it updates the brain's working model of itself." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
       </div>
       <div className="t-body-sm quiet" style={{ lineHeight: 1.6, marginBottom: 20 }}>
         Physical state colors perception. The AI filters your input through this — so the read is accurate, not assumed.{bioFilter && <span style={{ display: "block", marginTop: 8, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.04em" }}>Your last reading is highlighted — confirm or update.</span>}
@@ -5077,7 +5711,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
             <h2 className="t-display-lg" style={{ margin: 0 }}>
               Where are you now?
             </h2>
-            <button onClick={() => setInfoModal({ title: "Why track this?", body: "Tracking your state after a session measures the shift. The difference between how you came in and how you leave is the data point that builds your composure pattern over time." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+            <button aria-label="Why track this?" onClick={() => setInfoModal({ title: "Why track this?", body: "Tracking your state after a session measures the shift. The difference between how you came in and how you leave is the data point that builds your composure pattern over time." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, padding: "0 6px" }}>
             <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}>Reactive</span>
@@ -5185,6 +5819,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
   const [nextMoveTarget, setNextMoveTarget] = useState(null);
   // What Shifted post-completion moment (BODY_SCAN_WHAT_SHIFTED_SPEC.md)
   const [showWhatShifted, setShowWhatShifted] = useState(false);
+  const [showBodyScanLowDemandComplete, setShowBodyScanLowDemandComplete] = useState(false); // May 7, 2026 — flag flipped by What Shifted handlers in low-demand to render LowDemandComplete after save (replaces the old straight-return short-circuit that stripped the chip picker entirely).
   const [postStateChip, setPostStateChip] = useState(null);
   const [shiftLabel, setShiftLabel] = useState("");
   const [shiftLabelExpanded, setShiftLabelExpanded] = useState(false);
@@ -5312,6 +5947,11 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     try { secureWrite("stillform_feelstate", { value: postStateChip, day: TimeKeeper.stillformDay() }); } catch {}
     setShowWhatShifted(false);
     setShiftLabelExpanded(false);
+    if (isLowDemand) {
+      // Low-demand close: skip debrief gate + Next Move flow, render LowDemandComplete directly.
+      setShowBodyScanLowDemandComplete(true);
+      return;
+    }
     queueDebriefAndCompleteNow(null, "body-scan-what-shifted-complete");
   };
 
@@ -5343,6 +5983,10 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     } catch {}
     setShowWhatShifted(false);
     setShiftLabelExpanded(false);
+    if (isLowDemand) {
+      setShowBodyScanLowDemandComplete(true);
+      return;
+    }
     queueDebriefAndCompleteNow(null, "body-scan-what-shifted-skip");
   };
 
@@ -5632,6 +6276,12 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       />
     );
   }
+  if (showBodyScanLowDemandComplete) {
+    // Low-demand finish — chip already saved (or skipped) via handleWhatShifted handlers above.
+    // Renders the shared LowDemandComplete tap-to-close screen, then onComplete fires onClose.
+    return <LowDemandComplete onClose={() => onComplete(undefined)} />;
+  }
+
   if (showWhatShifted) {
     // BODY SCAN WHAT SHIFTED — Russell circumplex post-state moment + optional free-text label
     // Per BODY_SCAN_WHAT_SHIFTED_SPEC.md and THREE_CATEGORY_DATA_FEED_SPEC.md
@@ -5709,7 +6359,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           ))}
         </div>
 
-        {!shiftLabelExpanded && (
+        {!isLowDemand && !shiftLabelExpanded && (
           <button
             onClick={() => setShiftLabelExpanded(true)}
             style={{
@@ -5726,7 +6376,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           </button>
         )}
 
-        {shiftLabelExpanded && (
+        {!isLowDemand && shiftLabelExpanded && (
           <div style={{ marginBottom: 16 }}>
             <textarea
               value={shiftLabel}
@@ -5776,14 +6426,13 @@ function BodyScanTool({ onComplete, setInfoModal }) {
       scanElapsedRef.current = saved?.elapsed || 0;
       latestSessionTimestampRef.current = saved?.timestamp || null;
     }
-    // Low-demand short-circuit: skip What Shifted gate, ToolDebriefGate, and Next Move.
-    // A medicated user just navigated through the scan; the metacognitive close demands
-    // (post-state chip + optional reflection + lock-in) are exactly the cognitive load
-    // low-demand mode is designed to remove. Direct render of the shared completion screen.
-    // Session already auto-saved above; no debrief entry recorded (intentional).
-    if (isLowDemand) {
-      return <LowDemandComplete onClose={() => onComplete(undefined)} />;
-    }
+    // May 7, 2026 redesign — was short-circuiting straight to LowDemandComplete in low-demand,
+    // which stripped the post-state chip picker (the lowest-demand metacognitive act and the
+    // data point that classifies the shift). A depleted user who DID shift had no way to mark
+    // it; their session evaporated. Now low-demand users still flow into showWhatShifted —
+    // the render branches on isLowDemand to hide the heavy bits (free-text shift label) while
+    // keeping the chip picker. Handlers also branch: save the shift event, then render the
+    // shared LowDemandComplete (skipping debrief gate / Next Move).
     // What Shifted gate — replace the old 2s auto-route to Reframe with the metacognitive close
     if (!scanAutoRef.current) { scanAutoRef.current = true; setTimeout(() => setShowWhatShifted(true), 2000); }
     const elapsed = scanElapsedRef.current;
@@ -6540,7 +7189,7 @@ function NextMoveStep({
           {NEXT_MOVE_ACTION_OPTIONS.map((item) => {
             const active = selectedActionId === item.id;
             return (
-              <button
+              <button aria-pressed={active}
                 key={item.id}
                 onClick={() => setSelectedActionId(item.id)}
                 style={{
@@ -6655,7 +7304,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
           ].map((item) => {
             const active = didIt === item.id;
             return (
-              <button
+              <button aria-pressed={active}
                 key={item.id}
                 onClick={() => setDidIt(item.id)}
                 style={{
@@ -6685,7 +7334,7 @@ function NextMoveFollowUpCard({ session, onSubmit }) {
           ].map((item) => {
             const active = helped === item.id;
             return (
-              <button
+              <button aria-pressed={active}
                 key={item.id}
                 onClick={() => {
                   if (!helpedRequired) return;
@@ -6802,7 +7451,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_function_checks","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"];
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_function_checks","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 round 5 — added stillform_pattern_push_enabled. Independent toggle from stillform_reminder; user can want daily check-in without pattern interrupts (or vice-versa).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -6889,7 +7538,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_pattern_push_enabled"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -7179,7 +7828,22 @@ const CryptoStore = (() => {
     } catch { return null; }
   };
 
-  return { encrypt, decrypt };
+  // May 7, 2026: forensic deletion completeness. The "Delete account" flow at the
+  // bottom of Settings was clearing localStorage + Supabase cloud data but leaving
+  // the AES-GCM device key in IndexedDB. Practically harmless (cloud data is gone,
+  // there's nothing left to decrypt), but on a shared device the key persisted.
+  // Drops the entire stillform_keys database in one call rather than iterating.
+  // Resolves on success or absence — never rejects so it can't block the wipe path.
+  const deleteKey = () => new Promise((resolve) => {
+    try {
+      const req = indexedDB.deleteDatabase(DB_NAME);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => resolve(false);
+      req.onblocked = () => resolve(false);
+    } catch { resolve(false); }
+  });
+
+  return { encrypt, decrypt, deleteKey };
 })();
 
 // ─── SecureStore — IndexedDB fallback for secureSet/secureGet ────────────────
@@ -7241,7 +7905,22 @@ const SecureStore = (() => {
     } catch { return false; }
   };
 
-  return { set, get, remove };
+  // May 7, 2026: forensic deletion completeness — the "Delete account" flow needs
+  // to wipe overflow blobs in IndexedDB along with localStorage. Long Reframe
+  // conversations that overflowed localStorage's 5–10MB cap end up here; without
+  // this they survive the delete-all-data flow on a shared device. Drops the
+  // entire stillform_secure database in one call. Resolves on success or absence
+  // so it never blocks the wipe path.
+  const clear = () => new Promise((resolve) => {
+    try {
+      const req = indexedDB.deleteDatabase(DB_NAME);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => resolve(false);
+      req.onblocked = () => resolve(false);
+    } catch { resolve(false); }
+  });
+
+  return { set, get, remove, clear };
 })();
 
 // Encrypted get/set for sensitive keys.
@@ -7991,22 +8670,31 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   };
 
   const [showLowDemandComplete, setShowLowDemandComplete] = useState(false);
+  // May 7, 2026 redesign — was short-circuiting straight to LowDemandComplete in low-demand,
+  // which stripped the post-state chip picker (the lowest-demand metacognitive act in the app
+  // and the data point that classifies the shift). A depleted user who DID shift had no way
+  // to mark it; their session evaporated. Now both paths route to showPostRating; the render
+  // itself branches on isLowDemand to show the simplified close (chip picker + Done/Skip,
+  // no Insight/Next Move/Lock-in/State-to-Statement/Self Mode nudge).
   const handleDoneForNow = () => {
     // Preserve thread so accidental "Done for now" never loses context.
     secureSet(STORAGE_KEY, messages).catch(() => {});
-    if (isLowDemand) {
-      // Low-demand short-circuit: skip post-rating, skip post-insight, skip State-to-Statement,
-      // skip ToolDebriefGate, skip Next Move. Save session directly with no postState (the user
-      // didn't pick a chip and asking them to is the wrong demand for this cohort), then render
-      // the shared LowDemandComplete screen.
-      const saved = saveSession(null);
-      latestSessionTimestampRef.current = saved?.timestamp || null;
-      setShowLowDemandComplete(true);
-      return;
-    }
     setPostRating(null);
     setShowStateToStatement(false);
     setShowPostRating(true);
+  };
+
+  // Low-demand finish — saves with optional chip, skips debrief gate / Next Move /
+  // State-to-Statement, renders LowDemandComplete. Called from the simplified
+  // post-rating render when isLowDemand is true. May 7, 2026 addition.
+  const finishLowDemandSession = (postState) => {
+    try {
+      const saved = saveSession(postState || null);
+      latestSessionTimestampRef.current = saved?.timestamp || null;
+    } catch {}
+    setPostRating(null);
+    setShowPostRating(false);
+    setShowLowDemandComplete(true);
   };
 
   const getSavedReframes = () => {
@@ -8024,7 +8712,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const lastAiRef = useRef(null);
 
   useEffect(() => {
-    setTimeout(() => {
+    // May 7, 2026: timer cleanup. Originally fired-and-forgot — rapid message
+    // changes (streaming responses, retries) stacked multiple pending scrolls,
+    // and an unmount between scheduling and firing would invoke scrollIntoView
+    // on a possibly-stale ref. Store the timer and clear on the next run + on
+    // unmount.
+    const t = setTimeout(() => {
       // Scroll so the latest AI message is visible at the top
       if (lastAiRef.current) {
         lastAiRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -8032,6 +8725,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
       }
     }, 100);
+    return () => clearTimeout(t);
   }, [messages]);
 
   const [lastInput, setLastInput] = useState("");
@@ -8352,7 +9046,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               for (const m of otherModes) {
                 const data = JSON.parse(localStorage.getItem(`stillform_reframe_session_${m}`) || "[]");
                 if (data.length >= 2) {
-                  const recent = data.slice(-4).map(msg => `${msg.role === "ai" ? "Stillform" : "User"}: ${msg.text}`).join("\n");
+                  // May 7, 2026: per-message truncation cap (250 chars). The original code
+                  // sliced the last 4 messages but didn't bound msg.text length — for a
+                  // heavy user a single message could be 1,000+ chars and four messages
+                  // could blow the AI payload past sensible token limits. 250 chars is
+                  // enough to preserve the gist while keeping the cross-mode context
+                  // payload bounded. Truncated messages get an ellipsis tail.
+                  const truncate = (txt) => {
+                    const s = String(txt || "");
+                    return s.length > 250 ? s.slice(0, 247) + "..." : s;
+                  };
+                  const recent = data.slice(-4).map(msg => `${msg.role === "ai" ? "Stillform" : "User"}: ${truncate(msg.text)}`).join("\n");
                   const modeLabel = { calm: "Talk it through", clarity: "Break the loop", hype: "Get ready" }[m];
                   return `USER'S PRIOR CONVERSATION (from ${modeLabel} mode, same session):\n${recent}\nThey switched modes. Use this context — don't make them repeat themselves.`;
                 }
@@ -8368,7 +9072,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const notes = secureRead("stillform_ai_session_notes", []);
               const internalNotes = (Array.isArray(notes) ? notes : []).filter((n) => n?.noteType !== "user-facing");
               if (internalNotes.length === 0) return null;
-              return internalNotes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${n.note}`).join("\n");
+              // May 7, 2026: per-note truncation cap (200 chars). Same rationale as
+              // priorModeContext — a heavy user 6+ months in could have notes
+              // accumulating verbose detail; without a cap the bundled payload grows
+              // unbounded. Most-recent-first via slice(-5) is preserved; per-note
+              // text gets bounded so 5 long notes can't dominate the prompt.
+              const truncate = (txt) => {
+                const s = String(txt || "");
+                return s.length > 200 ? s.slice(0, 197) + "..." : s;
+              };
+              return internalNotes.slice(-5).map(n => `[${n.timestamp.split("T")[0]}] ${truncate(n.note)}`).join("\n");
             } catch { return null; }
           })(),
           install_id: installId,
@@ -8420,6 +9133,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             props: {
               repaired: parsed.voiceRepairUsed ? "yes" : "no",
               fallback: parsed.voiceFallbackUsed ? "yes" : "no"
+            }
+          });
+        } catch {}
+      }
+      // May 7, 2026: deterministic fallback observability. Surfaced by regression run when
+      // scenarios #16 (flirting) and #19 (legal) silently fell back to the parroted generic
+      // template — there was no production signal that this was happening to real users.
+      // Now any fallback fires this event with the validator that triggered it, the mode,
+      // and whether liability/crisis flags were active. Lets us catch new regression
+      // patterns without waiting for the next manual regression run.
+      if (parsed.deterministicFallbackUsed) {
+        try {
+          window.plausible("Reframe Deterministic Fallback Triggered", {
+            props: {
+              intent_failed: parsed.intentionValidationFailed ? "yes" : "no",
+              voice_failed: parsed.voiceValidationFailed ? "yes" : "no",
+              liability: parsed.liabilityGuard ? "yes" : "no",
+              crisis: parsed.crisisDetected ? "yes" : "no",
+              mode: effectiveMode || "calm"
             }
           });
         } catch {}
@@ -8876,7 +9608,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             Finish session
           </button>
           <button className="btn btn-ghost" onClick={toggleStateToStatementExpanded}>
-            {stateToStatementExpanded ? "Hide state to statement" : "Add state to statement"}
+            {stateToStatementExpanded ? "Hide message draft" : "Convert to message"}
           </button>
           <button className="btn btn-ghost" onClick={() => skipStateToStatement(communicationSkipReason || "not-needed")}>
             Skip for now
@@ -8886,7 +9618,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         {stateToStatementExpanded && (
           <div style={{ marginTop: 16 }}>
             <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-              State-to-Statement (optional)
+              Make it sendable (optional)
             </div>
             <textarea
               value={externalAnchorDraft}
@@ -8995,6 +9727,79 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       { id: "distant", label: "Distant" },
       { id: "unsure", label: "Unsure" }
     ];
+
+    // Low-demand close — chip picker + Lock it in / Skip only. May 7, 2026 redesign.
+    // Preserves the post-state chip (one tap, lowest-demand metacognitive act, classifies
+    // the shift via Russell category). Drops everything else (insight surfacing, Next Move
+    // + Lock-in confirmation, State-to-Statement free-text, Self Mode nudge) which would
+    // be cognitive load this cohort doesn't have available.
+    if (isLowDemand) {
+      return (
+        <div style={{ padding: "40px 0 8px" }}>
+          <div style={{ textAlign: "center", marginBottom: 32 }}>
+            <div className="t-mono-xs" style={{ marginBottom: 20 }}>
+              Where are you now?
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
+              {feelChips.map(f => (
+                <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
+                  <button onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
+                    background: postRating === f.id ? "var(--amber-glow)" : "transparent",
+                    border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 20, padding: "8px 20px", fontSize: 13,
+                    color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                  }}>
+                    {f.label}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div style={{
+              fontSize: 11,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              textAlign: "center",
+              maxWidth: 280,
+              lineHeight: 1.6
+            }}>
+              {postRating ? "Tap done when ready." : "Pick a chip if anything shifted, or close without one."}
+            </div>
+            <button
+              className="btn btn-primary"
+              onClick={() => finishLowDemandSession(postRating)}
+            >
+              {postRating ? "Done" : "Close"}
+            </button>
+            {postRating && (
+              <button
+                onClick={() => finishLowDemandSession(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  textDecoration: "underline",
+                  textUnderlineOffset: 2,
+                  padding: "4px 8px"
+                }}
+              >
+                Skip without saving the chip
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Normal close (existing flow): full chip picker + physiology naming + insight + Next Move + Lock-in + State-to-Statement + Self Mode nudge + finish
     // Load insight once when screen appears
     const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
     return (
@@ -9060,13 +9865,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div style={{ marginBottom: 24 }}>
           <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
             Next Move
-            <button onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+            <button aria-label="Why Next Move?" onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from a regulated state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: postNextMoveId && !lockInConfirmed ? 16 : 0 }}>
             {NEXT_MOVE_ACTION_OPTIONS.map(opt => {
               const active = postNextMoveId === opt.id;
               return (
-                <button key={opt.id} onClick={() => {
+                <button aria-pressed={active} key={opt.id} onClick={() => {
                   setPostNextMoveId(active ? null : opt.id);
                   setShowLockIn(false);
                   setLockInConfirmed(false);
@@ -9090,7 +9895,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
                 <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
                   Lock in
-                  <button onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                  <button aria-label="Lock in" onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the regulated insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of self-regulation learning. The 20-second pause is intentional: it prevents rushed exit from the regulated state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                 </div>
                 <div className="t-body-md" style={{ marginBottom: 16, fontStyle: "italic" }}>
                   {statement}
@@ -9136,7 +9941,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             >
               {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
             </button>
-            <button
+            <button aria-label="Why one line?"
               onClick={(e) => {
                 e.stopPropagation();
                 setInfoModal({ title: "Why one line?", body: "Takes one line. Naming what changed in your internal state after a session consolidates the regulation. Translating an emotional experience into precise language measurably reduces amygdala activation and locks in the regulated state. The one-line constraint is intentional — precision produces more durable results than open-ended writing." });
@@ -9330,24 +10135,29 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           aria-expanded={toneDropdownOpen}
           aria-label={`Reframe tone: ${aiToneLabel}. Tap to change.`}
           style={{
-            fontSize: 10,
-            color: "var(--text-muted)",
+            // May 7, 2026 affordance bump — surfaced in phone testing as reading
+            // like a static label, not a control. fontSize 10→11, muted color→
+            // dim, plain border→amber-dim accent, subtle resting bg, brighter
+            // chevron. Still small and quiet (this is not a primary action),
+            // but legibly tappable.
+            fontSize: 11,
+            color: "var(--text-dim)",
             letterSpacing: "0.08em",
             textTransform: "uppercase",
-            border: "1px solid var(--border)",
+            border: "1px solid var(--amber-dim)",
             borderRadius: "var(--r)",
-            padding: "4px 10px",
+            padding: "10px 12px",
             fontFamily: "'IBM Plex Mono', monospace",
-            background: toneDropdownOpen ? "var(--surface2)" : "transparent",
+            background: toneDropdownOpen ? "var(--surface2)" : "var(--surface)",
             cursor: "pointer",
             display: "flex",
             alignItems: "center",
-            gap: 6,
+            gap: 8,
             transition: "background var(--motion-quick) var(--ease-prestige), border-color var(--motion-quick) var(--ease-prestige)"
           }}
         >
           <span>Reframe tone: {aiToneLabel}</span>
-          <span style={{ fontSize: 9, opacity: 0.6, transform: toneDropdownOpen ? "rotate(180deg)" : "none", transition: "transform var(--motion-quick) var(--ease-prestige)" }}>▾</span>
+          <span style={{ fontSize: 10, opacity: 0.85, color: "var(--amber)", transform: toneDropdownOpen ? "rotate(180deg)" : "none", transition: "transform var(--motion-quick) var(--ease-prestige)" }}>▾</span>
         </button>
         {toneDropdownOpen && (
           <>
@@ -9398,7 +10208,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               {["balanced", "gentle", "direct", "clinical", "motivational"].map(toneId => {
                 const isActive = aiToneChoice === toneId;
                 return (
-                  <button
+                  <button aria-pressed={isActive}
                     key={toneId}
                     type="button"
                     role="option"
@@ -9863,7 +10673,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
             {pendingImages.length > 0 && (
               <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
-                letterSpacing: "0.06em", padding: "4px 10px", background: "var(--amber-glow)",
+                letterSpacing: "0.06em", padding: "10px 12px", background: "var(--amber-glow)",
                 borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
                 {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
               </div>
@@ -10902,6 +11712,40 @@ function BioFilterSuggestion({ kind, bioFilter, onAccept, onSkip, openInfo }) {
 // Shows morning check-in pre-fill (no overwrite) + feel chips for in-the-moment additions.
 // Available to body-first tools (Breathe, Scan) and thought-first tool (Reframe) for data parity.
 // Bio-filter and check-in are historical records — never modified here. feelState is session-local.
+//
+// May 7, 2026 addition: bio-filter STATUS LINE + inline edit drawer surfaced between
+// morning chips and feel chips. Solves transparency gap (user couldn't see what hardware
+// state the AI was reading them in — now drives major behavior changes via low-demand
+// trigger broadening). Inline edit unlocks mid-day update path without entering Breathe
+// or Body Scan to bail out. Status-line approach (not chip row) chosen after May 7
+// phone-screenshot review showed the surface was already dense; chip row contradicted
+// the processing primer's "start with one concrete signal" frame.
+const BIO_FILTER_LABELS = {
+  clear: "Baseline",
+  activated: "Activated",
+  depleted: "Low capacity",
+  gut: "Gut signal",
+  sleep: "Under-rested",
+  hormonal: "Hormonal shift",
+  pain: "Pain active",
+  medicated: "Substance active",
+  // May 7, 2026: off-baseline is written by morning check-in's "Something's off" button
+  // for users who can't articulate a concrete state at the time. Display label so the
+  // status line at Reframe entry doesn't render the raw token. The edit drawer
+  // (BIO_FILTER_OPTIONS) intentionally omits this — by Reframe time, users should have
+  // settled on a concrete state and pick from the labeled options.
+  "off-baseline": "Something's off",
+};
+const BIO_FILTER_OPTIONS = [
+  { id: "clear", label: "Baseline" },
+  { id: "activated", label: "Activated" },
+  { id: "depleted", label: "Low capacity" },
+  { id: "gut", label: "Gut signal" },
+  { id: "sleep", label: "Under-rested" },
+  { id: "hormonal", label: "Hormonal shift" },
+  { id: "pain", label: "Pain active" },
+  { id: "medicated", label: "Substance active" },
+];
 function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = false }) {
   const checkin = (() => { try { return JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); } catch { return null; } })();
   const checkinIsToday = checkin?.date === TimeKeeper.stillformDay();
@@ -10909,15 +11753,24 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
   const checkinTension = checkinIsToday ? Object.entries(checkin?.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
   const hasMorningData = checkinMood || checkinTension.length > 0;
 
+  // Bio-filter status — read fresh on every render so an edit elsewhere reflects here.
+  const [bioEditOpen, setBioEditOpen] = useState(false);
+  const [bioFilterValue, setBioFilterValue] = useState(() => {
+    try { return getActiveBioFilter() || ""; } catch { return ""; }
+  });
+  // First token wins for label display when multiple flags are stored comma-separated.
+  const bioPrimary = bioFilterValue.split(",").map(t => t.trim()).filter(Boolean)[0] || "";
+  const bioLabel = bioPrimary ? (BIO_FILTER_LABELS[bioPrimary] || bioPrimary) : "not set";
+
   return (
     <div style={{ marginBottom: compact ? 8 : 12 }}>
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, justifyContent: compact ? "center" : "flex-start" }}>
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
           What is present
-          <button onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after regulation, where naming what shifted consolidates the regulated state. Naming first establishes context; naming after consolidates change." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after regulation, where naming what shifted consolidates the regulated state. Naming first establishes context; naming after consolidates change." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
         </div>
         {hasMorningData && (
-          <button
+          <button aria-label="Morning check-in"
             title="Pre-filled from your morning check-in. This is read-only here — your check-in record is never overwritten by a session."
             onClick={() => setInfoModal && setInfoModal({ title: "Morning check-in", body: "Your physiological baseline changes every day. Sleep debt, physical tension, and energy level directly alter how you perceive situations before any external stressor arrives. This check sets the context the AI uses in every session that follows. Shown here read-only — only updated from your morning check-in itself." })}
             style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
@@ -10937,7 +11790,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             {checkinTension.map(area => (
               <div key={area} style={{
                 background: "var(--surface)", border: "1px solid var(--amber-dim)",
-                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                borderRadius: 20, padding: "10px 14px", fontSize: 12,
                 color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
               }}>
                 {area}
@@ -10946,7 +11799,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             {checkinMood && (
               <div style={{
                 background: "var(--surface)", border: "1px solid var(--amber-dim)",
-                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                borderRadius: 20, padding: "10px 14px", fontSize: 12,
                 color: "var(--amber)", fontFamily: "'DM Sans', sans-serif"
               }}>
                 {checkinMood}
@@ -10955,6 +11808,97 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
           </div>
         </div>
       )}
+
+      {/* BIO-FILTER STATUS LINE — transparency on what hardware state the AI is reading.
+          Tap to open inline edit drawer. May 7, 2026 addition. */}
+      <div style={{ marginBottom: 8, textAlign: compact ? "center" : "left" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "'IBM Plex Mono', monospace" }}>
+          <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+            Bio-filter ·
+          </span>
+          <span style={{ fontSize: 11, color: bioPrimary ? "var(--amber)" : "var(--text-muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
+            {bioLabel}
+          </span>
+          <button
+            onClick={() => setInfoModal && setInfoModal({ title: "Why the bio-filter?", body: "The bio-filter tells Stillform what hardware state you're in — depleted, under-rested, in pain, on substances, hormonal shift, or none of the above. The same situation interpreted through a depleted body produces a different prediction than the same situation through a rested body (Seth 2013, Barrett & Simmons 2015). It changes how the AI reads your input and how the close flow runs — six bio-filter values currently route you into low-demand mode, which simplifies the close to reduce cognitive load when bandwidth is limited." })}
+            aria-label="Why the bio-filter?"
+            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}
+          >
+            ⓘ
+          </button>
+          <button
+            onClick={() => setBioEditOpen(o => !o)}
+            aria-label={bioEditOpen ? "Close bio-filter edit" : "Edit bio-filter"}
+            aria-expanded={bioEditOpen}
+            style={{
+              background: bioEditOpen ? "var(--surface2)" : "transparent",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: 12,
+              color: "var(--amber)",
+              cursor: "pointer",
+              fontSize: 11,
+              padding: "1px 8px",
+              lineHeight: 1.4,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.06em"
+            }}
+          >
+            {bioEditOpen ? "✕" : "edit"}
+          </button>
+        </div>
+        {bioEditOpen && (
+          <div style={{
+            marginTop: 8,
+            padding: 10,
+            background: "var(--surface)",
+            border: "0.5px solid var(--amber-dim)",
+            borderRadius: 10,
+            display: "flex",
+            gap: 5,
+            flexWrap: "wrap",
+            justifyContent: compact ? "center" : "flex-start"
+          }}>
+            {BIO_FILTER_OPTIONS.map(opt => {
+              const isActive = bioPrimary === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  aria-pressed={isActive}
+                  aria-label={opt.label}
+                  onClick={() => {
+                    haptic.tick();
+                    // Toggle off if tapping the active filter; otherwise set new.
+                    const next = isActive ? "" : opt.id;
+                    setBioFilterValue(next);
+                    if (next) {
+                      setActiveBioFilter(next);
+                    } else {
+                      // Clear active bio-filter for today via canonical setter (file comment
+                      // at line 2150 explicitly bans direct secureWrite to this key — staleness
+                      // check lives inside getActiveBioFilter and bypassing the setter risks
+                      // future schema drift).
+                      setActiveBioFilter("");
+                    }
+                    setBioEditOpen(false);
+                  }}
+                  style={{
+                    background: isActive ? "var(--amber-glow)" : "transparent",
+                    border: `1px solid ${isActive ? "var(--amber-dim)" : "var(--border)"}`,
+                    borderRadius: 16,
+                    padding: "10px 12px",
+                    fontSize: 11,
+                    color: isActive ? "var(--amber)" : "var(--text-dim)",
+                    cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}
+                >
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* LINE 2 — Anything to add (in-the-moment feel chips, session-local) */}
       <div>
@@ -10981,7 +11925,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
               <button onClick={() => { haptic.tick(); setFeelState(feelState === f.id ? null : f.id); }} style={{
                 background: feelState === f.id ? "var(--amber-glow)" : "transparent",
                 border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "5px 14px", fontSize: 12,
+                borderRadius: 20, padding: "10px 14px", fontSize: 12,
                 color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
                 cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
               }}>
@@ -12462,7 +13406,7 @@ function MyProgress({ onBack }) {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {avgDelta && Number(avgDelta) > 0 && <div style={cardStyle}>
                   <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>+{avgDelta}</div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Avg state shift</span> <button onClick={() => setInfoModal({ title: "Avg Shift", body: "The average difference between your pre-session and post-session feel state. A positive number means regulation is working. The trend over time matters more than any single session." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Avg state shift</span> <button aria-label="Avg Shift" onClick={() => setInfoModal({ title: "Avg Shift", body: "The average difference between your pre-session and post-session feel state. A positive number means regulation is working. The trend over time matters more than any single session." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                 </div>}
                 {streak > 0 && <div style={cardStyle}>
                   <div style={{ fontSize: 36, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1 }}>{streak}</div>
@@ -12486,7 +13430,7 @@ function MyProgress({ onBack }) {
                   <div style={{ fontSize: 16, color: "var(--amber)", fontFamily: "'Cormorant Garamond', serif", lineHeight: 1.2, marginTop: 4 }}>
                     {regulationType === "thought-first" ? "Thought-first" : regulationType === "body-first" ? "Body-first" : "Balanced"}
                   </div>
-                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Processing type</span> <button onClick={() => setInfoModal({ title: "Processing Type", body: "Your calibration tendency — body-first or thought-first. This is your default entry point, not a fixed identity. Your current state modulates routing each session through the bio-filter and feel state you log." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase", marginTop: 6 }}><span>Processing type</span> <button aria-label="Processing Type" onClick={() => setInfoModal({ title: "Processing Type", body: "Your calibration tendency — body-first or thought-first. This is your default entry point, not a fixed identity. Your current state modulates routing each session through the bio-filter and feel state you log." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                 </div>}
                 {groundingHistory.length >= 3 && (() => {
                   const skipped = groundingHistory.filter(g => g.skipped).length;
@@ -12528,7 +13472,7 @@ function MyProgress({ onBack }) {
                     <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{switchAgility30d === null ? "N/A" : `${switchAgility30d}%`}</div>
                   </div>
                   <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "8px 9px" }}>
-                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}><span>Debrief capture (30d)</span> <button onClick={() => setInfoModal({ title: "Lock-in Rate", body: "How consistently you complete the post-session lock-in. Reflection-on-action — naming the processing move that produced your decision — consolidates the regulated insight and makes it repeatable. Schön (1983)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                    <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.06em", textTransform: "uppercase" }}><span>Debrief capture (30d)</span> <button aria-label="Lock-in Rate" onClick={() => setInfoModal({ title: "Lock-in Rate", body: "How consistently you complete the post-session lock-in. Reflection-on-action — naming the processing move that produced your decision — consolidates the regulated insight and makes it repeatable. Schön (1983)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                     <div style={{ fontSize: 15, color: "var(--amber)", marginTop: 3 }}>{debriefCoverage30d === null ? "N/A" : `${debriefCoverage30d}%`}</div>
                   </div>
                 </div>
@@ -12816,7 +13760,7 @@ function MyProgress({ onBack }) {
         <div style={{ marginTop: 24, paddingTop: 24, borderTop: "0.5px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
-              <div className="t-mono-xs" style={{ color: "var(--amber)" }}><span>Pulse</span> <button onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+              <div className="t-mono-xs" style={{ color: "var(--amber)" }}><span>Pulse</span> <button aria-label="Signal Log" onClick={() => setInfoModal({ title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes and more adaptive coping. Barrett et al. (2001)." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
               {journalEntries.length > 0 && <div className="t-caption" style={{ marginTop: 2 }}>{journalEntries.length} entries{topEmotionEntry ? ` · most logged: ${topEmotionEntry[0]}` : ""}</div>}
             </div>
           </div>
@@ -12872,16 +13816,29 @@ function MyProgress({ onBack }) {
 function QBPill({ onPress }) {
   const storageKey = "stillform_qb_position";
 
+  // Clamp helper — also used inside getSavedPos so a saved x/y from a wider
+  // device can't render the pill off-screen on a phone (May 7, 2026 fix —
+  // bug surfaced in phone testing where the pill was invisible because the
+  // saved position from a desktop session was outside the phone viewport).
+  const clamp = (p) => {
+    const W = typeof window !== "undefined" ? window.innerWidth : 400;
+    const H = typeof window !== "undefined" ? window.innerHeight : 800;
+    return {
+      x: Math.max(8, Math.min(W - 152, p.x)),
+      y: Math.max(60, Math.min(H - 120, p.y))
+    };
+  };
+
   const getSavedPos = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
-      if (saved && typeof saved.x === "number" && typeof saved.y === "number") return saved;
+      if (saved && typeof saved.x === "number" && typeof saved.y === "number") {
+        return clamp(saved);
+      }
     } catch {}
-    // Safe default — bottom right, evaluated lazily
-    return {
-      x: (typeof window !== "undefined" ? window.innerWidth : 400) - 160,
-      y: 80
-    };
+    // Safe default — bottom right, evaluated lazily and clamped for narrow viewports
+    const W = typeof window !== "undefined" ? window.innerWidth : 400;
+    return clamp({ x: W - 160, y: 80 });
   };
 
   const [pos, setPos] = useState(getSavedPos);
@@ -12892,10 +13849,16 @@ function QBPill({ onPress }) {
   const draggedRef = useRef(false);
   posRef.current = pos;
 
-  const clamp = (p) => ({
-    x: Math.max(8, Math.min(window.innerWidth - 152, p.x)),
-    y: Math.max(60, Math.min(window.innerHeight - 120, p.y))
-  });
+  // Re-clamp on viewport resize / orientation change so the pill stays on-screen.
+  useEffect(() => {
+    const onResize = () => setPos(p => clamp(p));
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+    };
+  }, []);
 
   const onPointerDown = (e) => {
     if (e.button !== undefined && e.button !== 0) return;
@@ -12994,6 +13957,29 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+
+    // Local notification tap listener — fires when user taps a scheduled
+    // local notification (pattern push, daily reminder, pre-meeting alert).
+    // We only need to track pattern-disruption taps for analytics; the
+    // on-mount detection useEffect handles the actual surfacing naturally
+    // because tapping always opens/resumes the app and runs the effect.
+    // Native-only.
+    let localNotifSub = null;
+    (async () => {
+      try {
+        if (!isNative()) return;
+        const { LocalNotifications } = await import("@capacitor/local-notifications");
+        localNotifSub = await LocalNotifications.addListener('localNotificationActionPerformed', (action) => {
+          try {
+            const extra = action?.notification?.extra || {};
+            if (extra.source === "pattern-disruption") {
+              window.plausible?.("Pattern Push Tapped", { props: { patternId: extra.patternId || "unknown" } });
+            }
+          } catch {}
+        });
+      } catch {}
+    })();
+
     // Capture device locale once per install — demand data only, never affects app behavior.
     // Used to inform translation prioritization based on real user devices.
     captureDeviceLocale();
@@ -13029,7 +14015,10 @@ export default function Stillform() {
         } catch {}
       }).catch(() => {})).catch(() => {});
     }
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(t);
+      try { localNotifSub?.remove?.(); } catch {}
+    };
   }, []);
 
   // `stillform_onboarded` marks completion of first-run flow (tutorial -> setup bridge -> calibration).
@@ -13150,6 +14139,120 @@ export default function Stillform() {
     return () => { cancelled = true; };
   }, [syncSignedIn, subscriptionCheckTick]);
 
+  // Launch sync — auto-pulls cloud user data when the user opens the app while
+  // signed in. Added May 7, 2026 to close the bug Arlin surfaced in phone testing:
+  // "every time I actually go to the site I have to sync again and restore purchases."
+  // Subscription truth already re-syncs via the useEffect above on syncSignedIn change;
+  // this effect handles user data (sessions, journal, profiles, settings) which previously
+  // only synced on pull-to-refresh or manual Settings tap.
+  //
+  // Debounced via timestamp in localStorage so React strict-mode double-mounts and rapid
+  // tab reloads don't spam the sync API. 2-minute window is short enough that "every time
+  // I open the app" feels covered without hitting Supabase on every render.
+  // Silent on success; failures land in Plausible only (user keeps local data, can manual
+  // pull-to-refresh if they suspect drift).
+  useEffect(() => {
+    if (!sbIsSignedIn()) return;
+    if (typeof window === "undefined") return;
+    const SYNC_DEBOUNCE_MS = 2 * 60 * 1000;
+    const lastLaunchSync = (() => {
+      try { return parseInt(localStorage.getItem("stillform_last_launch_sync") || "0", 10) || 0; } catch { return 0; }
+    })();
+    const now = Date.now();
+    if (now - lastLaunchSync < SYNC_DEBOUNCE_MS) return;
+    // Mark immediately so re-renders / strict-mode double-mounts don't re-fire.
+    try { localStorage.setItem("stillform_last_launch_sync", String(now)); } catch {}
+
+    let cancelled = false;
+    const run = async () => {
+      try {
+        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), 10000));
+        const result = await Promise.race([sbSyncDown(), timeout]);
+        if (cancelled) return;
+        // Force subscription truth recheck after data sync — same pattern pull-to-refresh uses.
+        setSubscriptionCheckTick(n => n + 1);
+        try { window.plausible?.("Launch Sync", { props: { restored: result?.restored ?? 0 } }); } catch {}
+      } catch (err) {
+        if (cancelled) return;
+        try { window.plausible?.("Launch Sync Failed", { props: { reason: String(err?.message || err).slice(0, 60) } }); } catch {}
+      }
+    };
+    run();
+    return () => { cancelled = true; };
+  }, [syncSignedIn]);
+
+  // Pattern Disruption — run detection on app open + cap surfacing to once
+  // per 24-hour window so we don't spam. May 7, 2026.
+  // Per PATTERN_DISRUPTION_SPEC.md §6.4 — ship-or-hold: shipping prelaunch
+  // per Arlin May 7 directive.
+  // Mechanic per spec §3.1: surface in-app on open; user accepts → disruptor;
+  // user dismisses → re-fires once (within 48h window via getActivePatternForSurfacing).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    // Cancel any pending pattern push notifications — the user is here now,
+    // so the in-app prompt (if any) takes precedence. Prevents the case
+    // where a user dismisses in-app, returns within 24h, sees the prompt
+    // again (re-fire window), and ALSO gets pinged by the scheduled push.
+    try { cancelPatternDisruptionNotifications(); } catch {}
+
+    // Throttle: don't surface again within 24h of last surface (regardless of
+    // which pattern). Prevents two patterns hitting the user back-to-back.
+    const PATTERN_SURFACE_THROTTLE_MS = 24 * 60 * 60 * 1000;
+    let lastSurface = 0;
+    try { lastSurface = parseInt(localStorage.getItem("stillform_pattern_last_surfaced") || "0", 10) || 0; } catch {}
+    if (Date.now() - lastSurface < PATTERN_SURFACE_THROTTLE_MS) return;
+
+    // Run detection (deterministic, cheap).
+    try {
+      runPatternDetection();
+    } catch {}
+
+    // Pull strongest surface candidate.
+    let candidate = null;
+    try { candidate = getActivePatternForSurfacing(); } catch {}
+    if (!candidate) return;
+
+    // Mark surfaced + render prompt.
+    try { markPatternSurfaced(candidate.id); } catch {}
+    try { localStorage.setItem("stillform_pattern_last_surfaced", String(Date.now())); } catch {}
+    try { window.plausible?.("Pattern Disruption Surfaced", { props: { dimension: candidate.dimension, count: candidate.count } }); } catch {}
+    // Schedule the 24h push fallback at surface time so a no-response close
+    // (user opens app, sees prompt, closes without tapping) is also covered.
+    // Accept handler cancels it; dismiss handler leaves it. Native-only.
+    try { schedulePatternDisruptionNotification(candidate); } catch {}
+    setSurfacedPattern(candidate);
+
+    // AI enrichment — fire-and-forget. Modal already showing with count-based
+    // copy; when reasoning lands, update both the persistent record (so future
+    // re-fires get the cached version without re-calling AI) and the live
+    // surfaced state (so the prompt copy upgrades in place if the user is
+    // still looking at it). If the user dismissed before enrichment returns,
+    // the persistent record still gets updated for the re-fire path.
+    // Skip if reasoning already cached on this record.
+    if (!candidate.aiReasoning) {
+      enrichPatternWithAI(candidate).then((enrichment) => {
+        if (!enrichment) return;
+        try { updatePatternReasoning(candidate.id, enrichment); } catch {}
+        setSurfacedPattern(prev => {
+          // Only update live state if it's still the same pattern instance
+          // — guards against the race where user dismissed and a new
+          // pattern was surfaced before enrichment returned.
+          if (!prev || prev.id !== candidate.id) return prev;
+          return { ...prev, aiReasoning: enrichment.reasoning };
+        });
+        try {
+          window.plausible?.("Pattern Enrichment Returned", {
+            props: {
+              dimension: candidate.dimension,
+              fallback: enrichment.fallback || "ai",
+              confidence: typeof enrichment.confidence === "number" ? enrichment.confidence.toFixed(1) : "n/a"
+            }
+          });
+        } catch {}
+      }).catch(() => {});
+    }
+  }, []);
+
   const [screen, setScreenRaw] = useState(null);
   const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
 
@@ -13233,6 +14336,17 @@ export default function Stillform() {
   const [milestone7Seen, setMilestone7Seen] = useState(() => {
     try { return localStorage.getItem("stillform_milestone_7_seen") === "yes"; } catch { return false; }
   });
+  // Practice Signals — CFM Phase 1, May 7, 2026. When non-null, renders the
+  // exercise overlay for the chosen candidate. Cleared on completion or
+  // explicit close. Lifted to App scope so the launcher buttons in the
+  // Practice Signals screen can set it without prop-drilling.
+  const [activePracticeSignal, setActivePracticeSignal] = useState(null);
+  // Pattern Disruption — May 7, 2026. surfacedPattern is set when detection
+  // surfaces a loop; the in-app prompt renders. disruptorActive flips when
+  // user accepts → DisruptorTool overlay renders. Both clear on completion
+  // or explicit dismiss.
+  const [surfacedPattern, setSurfacedPattern] = useState(null);
+  const [disruptorActive, setDisruptorActive] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
   const [tutorialReturnScreen, setTutorialReturnScreen] = useState("home");
   const [setupBridgeOrigin, setSetupBridgeOrigin] = useState("home");
@@ -13267,6 +14381,7 @@ export default function Stillform() {
   const [assessmentAnswers, setAssessmentAnswers] = useState([]);
   const [ciOpen, setCiOpen] = useState(false);
   const [ciEnergy, setCiEnergy] = useState(null);
+  const [ciMood, setCiMood] = useState(null); // May 7, 2026 — morning emotional state, carries into Reframe context via PresentStateChips checkinMood reader
   const [ciBio, setCiBio] = useState(new Set());
   const [ciTension, setCiTension] = useState({});
   const [ciOffBaselineOpen, setCiOffBaselineOpen] = useState(false); // "something's off" branch
@@ -13487,7 +14602,7 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing") {
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing" || screen === "practice-signals" || screen === "pattern-transparency") {
       goHomeSafely();
       return;
     }
@@ -15343,6 +16458,98 @@ const isSignalProfileConfigured = () => {
     <>
       <style>{styles}</style>
       <div className={appClasses}>
+        {/* PATTERN DISRUPTION OVERLAYS — May 7, 2026
+            Prompt modal: shown when detection surfaces a pattern. User accepts
+            → opens DisruptorTool. Dismisses → markPatternDismissed (two-strikes
+            state machine handles re-fire).
+            Disruptor overlay: shown when user accepts. Renders the somatic
+            redirection sequence; on completion logs the disruptor session.
+        */}
+        {surfacedPattern && !disruptorActive && (
+          <div role="dialog" aria-label="Pattern noticed" style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 10000,
+            display: "flex", alignItems: "center", justifyContent: "center", padding: "0 16px"
+          }}>
+            <div style={{
+              background: "var(--bg)", border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)", padding: "28px 24px", maxWidth: 440, width: "100%"
+            }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
+                I noticed something
+              </div>
+              <div style={{ fontSize: 18, lineHeight: 1.6, color: "var(--text)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", marginBottom: 16 }}>
+                {(() => {
+                  // Prefer AI reasoning when available — it's specific to the
+                  // user's actual session data. Fall back to count-based
+                  // observation when not (AI still loading, AI failed,
+                  // user cached on a record without reasoning).
+                  if (surfacedPattern.aiReasoning) {
+                    return surfacedPattern.aiReasoning;
+                  }
+                  const dim = PATTERN_DIMENSION_LABELS[surfacedPattern.dimension] || "A pattern";
+                  return `${dim} — ${surfacedPattern.count} times across your recent sessions.`;
+                })()}
+              </div>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 24 }}>
+                When the same loop runs three or more times, the loop itself is the thing
+                to break — not the content. Want to step out of it for 90 seconds?
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn btn-primary" onClick={() => {
+                  try { markPatternAccepted(surfacedPattern.id); } catch {}
+                  try { window.plausible?.("Pattern Disruption Accepted", { props: { dimension: surfacedPattern.dimension } }); } catch {}
+                  // Cancel the pending push fallback — user is handling it now.
+                  try { cancelPatternDisruptionNotifications(); } catch {}
+                  setDisruptorActive(true);
+                }} style={{ flex: 1 }}>
+                  Step out
+                </button>
+                <button className="btn btn-ghost" onClick={() => {
+                  try { markPatternDismissed(surfacedPattern.id); } catch {}
+                  try { window.plausible?.("Pattern Disruption Dismissed", { props: { dimension: surfacedPattern.dimension } }); } catch {}
+                  // The 24h push fallback was already scheduled at surface
+                  // time. Dismiss leaves it pending — that's exactly what
+                  // makes the nudge land if the user doesn't return.
+                  setSurfacedPattern(null);
+                }} style={{ flex: 1 }}>
+                  Not now
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {disruptorActive && (
+          <div role="dialog" aria-label="Pattern interrupt" style={{
+            position: "fixed", inset: 0, background: "var(--bg)", zIndex: 10001,
+            overflowY: "auto"
+          }}>
+            <DisruptorTool
+              patternId={surfacedPattern?.id || null}
+              dimension={surfacedPattern?.dimension || null}
+              onClose={() => {
+                setDisruptorActive(false);
+                setSurfacedPattern(null);
+              }}
+              onComplete={(session) => {
+                try { appendDisruptorSession(session); } catch {}
+                try {
+                  window.plausible?.("Pattern Disruption Session", {
+                    props: {
+                      dimension: session.dimension || "unknown",
+                      duration_ms: session.durationMs || 0,
+                      completed: session.completed ? "yes" : "no",
+                      pathway: session.pathway || "somatic-redirection"
+                    }
+                  });
+                } catch {}
+                setDisruptorActive(false);
+                setSurfacedPattern(null);
+              }}
+            />
+          </div>
+        )}
+
         {/* INFO MODAL */}
       {infoModal && (
         <div onClick={() => setInfoModal(null)} style={{
@@ -15379,9 +16586,9 @@ const isSignalProfileConfigured = () => {
           }}>
             <div style={{
               fontFamily: "'Cormorant Garamond', serif", fontSize: 36, fontWeight: 300,
-              color: "var(--amber)", letterSpacing: "0.04em", marginBottom: 8,
+              color: "var(--text)", letterSpacing: "0.04em", marginBottom: 8,
               opacity: 0, animation: "splashIn 1.2s ease-out 0.3s forwards"
-            }}>Stillform</div>
+            }}>Still<span style={{ color: "var(--amber)" }}>form</span></div>
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
@@ -15651,7 +16858,7 @@ const isSignalProfileConfigured = () => {
                     {themeOptions.map((opt) => {
                       const active = themeChoice === opt.id;
                       return (
-                        <button
+                        <button aria-pressed={active}
                           key={opt.id}
                           onClick={() => setThemeSelection(opt.id)}
                           style={{
@@ -15702,7 +16909,7 @@ const isSignalProfileConfigured = () => {
                     ].map(opt => {
                       const isActive = textScale === opt.value;
                       return (
-                        <button
+                        <button aria-pressed={isActive}
                           key={opt.value}
                           onClick={() => {
                             setTextScale(opt.value);
@@ -16553,24 +17760,33 @@ const isSignalProfileConfigured = () => {
                     // New morning check-in — clear yesterday's persisted feelState (new day, fresh state)
                     try { secureDelete("stillform_feelstate"); } catch {}
                     localStorage.setItem("stillform_checkin_today", JSON.stringify({
-                      date: today, energy: ciEnergy || "steady", bio: bioArray.length > 0 ? bioArray : ["clear"],
+                      date: today, energy: ciEnergy || "steady",
+                      mood: ciMood || null, // May 7, 2026 — morning emotional state, restored after broken-contract fix
+                      bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null
                     }));
                     trackMorningComplete({
                       date: today,
                       timestamp: new Date().toISOString(),
                       energy: ciEnergy || "steady",
+                      mood: ciMood || null,
                       bio: bioArray.length > 0 ? bioArray : ["clear"],
                       tension: Object.keys(ciTension).length > 0 ? ciTension : null,
                       tensionAreas: Object.keys(ciTension || {}).filter((k) => ciTension[k] > 0).length
                     });
                     if (bioArray.length > 0) setActiveBioFilter(bioArray.join(","));
                     else setActiveBioFilter("clear");
+                    // Seed feelState from morning mood so it's already in play when user opens any tool today.
+                    // Cleared by What Shifted at session close, by next morning check-in, or by explicit chip change.
+                    // May 7, 2026 fix: must use the day-keyed object schema { value, day } that the reader at
+                    // line ~7618 expects. Earlier write here was a plain string and silently failed for most
+                    // moods — only "anxious"/"angry"/"excited" got recovered via the regex fallback path.
+                    if (ciMood) { try { secureWrite("stillform_feelstate", { value: ciMood, day: TimeKeeper.stillformDay() }); } catch {} }
                     if (isOffBaseline) localStorage.setItem("stillform_off_baseline_flagged", new Date().toISOString());
                   } catch {}
                   try {
                     const tensionAreas = Object.keys(ciTension).filter(k => ciTension[k] > 0);
-                    window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", tension_areas: tensionAreas.length, upcoming_context: upcomingPressure ? "yes" : "no" } });
+                    window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", mood: ciMood || "none", tension_areas: tensionAreas.length, upcoming_context: upcomingPressure ? "yes" : "no" } });
                   } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
@@ -16587,7 +17803,7 @@ const isSignalProfileConfigured = () => {
                         source: "update"
                       });
                     } catch {}
-                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
+                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
                   }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
                     borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
@@ -16649,10 +17865,39 @@ const isSignalProfileConfigured = () => {
                         <button key={e} onClick={() => setCiEnergy(e.toLowerCase())} style={{
                           background: ciEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${ciEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
                           color: ciEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{e}</button>
+                      ))}
+                    </div>
+
+                    {/* Emotional state chip row — May 7, 2026 addition. Captures morning emotional
+                        anchor so PresentStateChips' checkinMood reader at Reframe entry surfaces
+                        it in "From this morning". Also seeds stillform_feelstate so the AI has
+                        emotional context for the first session of the day without the user having
+                        to re-pick at Reframe entry. Reuses the 9 feel-chips from PresentStateChips
+                        for consistency (Russell circumplex grouping). Single-select, optional. */}
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How are you arriving? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span></div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[
+                        { id: "excited", label: "Excited" },
+                        { id: "focused", label: "Focused" },
+                        { id: "settled", label: "Settled" },
+                        { id: "anxious", label: "Anxious" },
+                        { id: "angry", label: "Angry" },
+                        { id: "stuck", label: "Stuck" },
+                        { id: "mixed", label: "Mixed" },
+                        { id: "flat", label: "Flat" },
+                        { id: "distant", label: "Distant" }
+                      ].map(m => (
+                        <button key={m.id} onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
+                          background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciMood === m.id ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                          color: ciMood === m.id ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{m.label}</button>
                       ))}
                     </div>
 
@@ -16680,7 +17925,7 @@ const isSignalProfileConfigured = () => {
                         }} style={{
                           background: ciBio.has(b.id) ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${ciBio.has(b.id) ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "5px 14px", fontSize: 11, cursor: "pointer",
+                          borderRadius: 20, padding: "10px 14px", fontSize: 11, cursor: "pointer",
                           color: ciBio.has(b.id) ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{b.label}</button>
@@ -16692,7 +17937,7 @@ const isSignalProfileConfigured = () => {
                       }} style={{
                         background: ciBio.has("off-baseline") ? "var(--amber-glow)" : "transparent",
                         border: `1px solid ${ciBio.has("off-baseline") ? "var(--amber-dim)" : "var(--border)"}`,
-                        borderRadius: 20, padding: "5px 14px", fontSize: 11, cursor: "pointer",
+                        borderRadius: 20, padding: "10px 14px", fontSize: 11, cursor: "pointer",
                         color: ciBio.has("off-baseline") ? "var(--amber)" : "var(--text-muted)",
                         fontFamily: "'DM Sans', sans-serif"
                       }}>Something's off</button>
@@ -16749,7 +17994,7 @@ const isSignalProfileConfigured = () => {
                           <button key={area} onClick={() => setCiTension(prev => ({
                             ...prev, [area]: prev[area] === 2 ? 0 : (prev[area] || 0) + 1
                           }))} style={{
-                            padding: "5px 12px", borderRadius: 20, fontSize: 11, cursor: "pointer",
+                            padding: "10px 12px", borderRadius: 20, fontSize: 11, cursor: "pointer",
                             fontFamily: "'DM Sans', sans-serif",
                             background: level === 0 ? "transparent" : level === 1 ? "rgba(201,147,42,0.15)" : "var(--amber-glow)",
                             border: `1px solid ${level === 0 ? "var(--border)" : "var(--amber-dim)"}`,
@@ -16764,7 +18009,7 @@ const isSignalProfileConfigured = () => {
 
                     <div className="t-body-sm quiet" style={{ marginBottom: 4 }}>
                       What do you want today?
-                      <button onClick={() => setInfoModal({ title: "Why choose your outcome?", body: "Naming what you want today before the day hits is implementation intention formation (Gollwitzer 1999). Morning intention-setting bypasses decision paralysis when stress arrives later — the if-then plan is already in place. Mental Contrasting (Oettingen) extends this: identifying a desired outcome alongside today's actual state creates cognitive readiness that makes regulation more automatic. Stillform uses your morning outcome to recommend the right starting protocol for your day." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                      <button aria-label="Why choose your outcome?" onClick={() => setInfoModal({ title: "Why choose your outcome?", body: "Naming what you want today before the day hits is implementation intention formation (Gollwitzer 1999). Morning intention-setting bypasses decision paralysis when stress arrives later — the if-then plan is already in place. Mental Contrasting (Oettingen) extends this: identifying a desired outcome alongside today's actual state creates cognitive readiness that makes regulation more automatic. Stillform uses your morning outcome to recommend the right starting protocol for your day." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
                     </div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 10, fontStyle: "italic" }}>One word. The rest of the day organizes around it.</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
@@ -16778,7 +18023,7 @@ const isSignalProfileConfigured = () => {
                           <button key={o.id} onClick={() => setOutcomeFocus({ id: o.id, label: o.label, date: today })} style={{
                             background: selected ? "var(--amber-glow)" : "transparent",
                             border: `1px solid ${selected ? "var(--amber-dim)" : "var(--border)"}`,
-                            borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
                             color: selected ? "var(--amber)" : "var(--text-muted)",
                             fontFamily: "'DM Sans', sans-serif"
                           }}>{o.label}</button>
@@ -16806,8 +18051,8 @@ const isSignalProfileConfigured = () => {
 
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
                   <span>{isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}</span>
-                  {isBodyFirst && <button onClick={() => setInfoModal({ title: "Why body first?", body: "Your calibration identified a body-first tendency. When activation hits, physical signals arrive before cognition can intervene. Settling the nervous system first creates the conditions for clear thinking — not the other way around." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
-                  {isThoughtFirst && <button onClick={() => setInfoModal({ title: "Why thought first?", body: "Your calibration identified a thought-first tendency. When activation hits, the cognitive loop fires first. Processing the thinking directly is what releases the physical tension — your body follows your mind." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
+                  {isBodyFirst && <button aria-label="Why body first?" onClick={() => setInfoModal({ title: "Why body first?", body: "Your calibration identified a body-first tendency. When activation hits, physical signals arrive before cognition can intervene. Settling the nervous system first creates the conditions for clear thinking — not the other way around." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
+                  {isThoughtFirst && <button aria-label="Why thought first?" onClick={() => setInfoModal({ title: "Why thought first?", body: "Your calibration identified a thought-first tendency. When activation hits, the cognitive loop fires first. Processing the thinking directly is what releases the physical tension — your body follows your mind." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
                 </div>
 
                 {showBioFilterSuggestion ? (
@@ -17080,7 +18325,7 @@ const isSignalProfileConfigured = () => {
                         <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
                           background: eodEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
                           color: eodEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{e}</button>
@@ -17093,7 +18338,7 @@ const isSignalProfileConfigured = () => {
                         <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
                           background: eodComposure === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodComposure === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "5px 14px", fontSize: 12, cursor: "pointer",
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
                           color: eodComposure === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{e}</button>
@@ -17106,7 +18351,7 @@ const isSignalProfileConfigured = () => {
                         <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
                           background: eodWord === w.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodWord === w.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "4px 12px", fontSize: 11, cursor: "pointer",
+                          borderRadius: 20, padding: "10px 14px", fontSize: 11, cursor: "pointer",
                           color: eodWord === w.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
                           fontFamily: "'DM Sans', sans-serif"
                         }}>{w}</button>
@@ -17284,15 +18529,15 @@ const isSignalProfileConfigured = () => {
                         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{sessionCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Sessions</span> <button onClick={() => setInfoModal({ title: "Sessions", body: "Total completed sessions. Each session is one rep of regulation practice. The literature on repeated practice and autonomic flexibility (Lehrer 2020, Thayer & Lane 2000) is the mechanism Stillform draws from — frequency is what the research links to durable change. Stillform tracks self-reported state shift per session today; direct biometric measurement arrives with watch integration." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Sessions</span> <button aria-label="Sessions" onClick={() => setInfoModal({ title: "Sessions", body: "Total completed sessions. Each session is one rep of regulation practice. The literature on repeated practice and autonomic flexibility (Lehrer 2020, Thayer & Lane 2000) is the mechanism Stillform draws from — frequency is what the research links to durable change. Stillform tracks self-reported state shift per session today; direct biometric measurement arrives with watch integration." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
                           <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{streakCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Day streak</span> <button onClick={() => setInfoModal({ title: "Day Streak", body: "Consecutive days with at least one session. Stress inoculation research shows that practicing regulation when calm builds the capacity that deploys automatically under pressure. Consistency compounds." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Day streak</span> <button aria-label="Day Streak" onClick={() => setInfoModal({ title: "Day Streak", body: "Consecutive days with at least one session. Stress inoculation research shows that practicing regulation when calm builds the capacity that deploys automatically under pressure. Consistency compounds." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
                           <div style={{ gridColumn: "1 / -1", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
                             <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "var(--amber)", lineHeight: 1.2 }}>{mostUsedLabel}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Most used</span> <button onClick={() => setInfoModal({ title: "Most Used", body: "The tool your system defaults to most. Over time this should align with your calibration tendency. A persistent mismatch may indicate your default routing has shifted and recalibration is worth considering." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
+                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Most used</span> <button aria-label="Most Used" onClick={() => setInfoModal({ title: "Most Used", body: "The tool your system defaults to most. Over time this should align with your calibration tendency. A persistent mismatch may indicate your default routing has shifted and recalibration is worth considering." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
                           </div>
 
                         </div>
@@ -17499,7 +18744,7 @@ const isSignalProfileConfigured = () => {
                         if (result.outcome === "accepted") setInstallPrompt(null);
                         setInstallDismissed(true);
                       }
-                    }} style={{ background: "var(--surface)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "4px 12px", borderRadius: "var(--r-sm)", fontWeight: 400, transition: "border-color var(--motion-default) var(--ease-prestige)" }}>Install</button>
+                    }} style={{ background: "var(--surface)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)", color: "var(--amber)", fontSize: 11, cursor: "pointer", fontFamily: "'IBM Plex Mono', monospace", padding: "10px 14px", borderRadius: "var(--r-sm)", fontWeight: 400, transition: "border-color var(--motion-default) var(--ease-prestige)" }}>Install</button>
                   </div>
                 </div>
               )}
@@ -17590,7 +18835,7 @@ const isSignalProfileConfigured = () => {
                         {UAT_QUESTION_OPTIONS.map((item) => {
                           const active = item.id === selectedQuestion?.id;
                           return (
-                            <button
+                            <button aria-pressed={active}
                               key={item.id}
                               onClick={() => setUatQuestionId(item.id)}
                               style={{
@@ -17717,7 +18962,7 @@ const isSignalProfileConfigured = () => {
               {/* BOTTOM LINKS — minimal */}
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button onClick={() => openFocusCheck("home")} className="t-mono-xs" style={{ background: "none", border: "none", letterSpacing: "0.14em", cursor: "pointer" }}>Composure Check</button>
-                <button onClick={() => setInfoModal({ title: "Composure Check", body: "A 30-trial cognitive test measuring reaction time, impulse control, and response inhibition. Tap it from the home screen before a high-stakes interaction or decision to get an accurate read of your current regulatory capacity." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                <button aria-label="Composure Check" onClick={() => setInfoModal({ title: "Composure Check", body: "A 30-trial cognitive test measuring reaction time, impulse control, and response inhibition. Tap it from the home screen before a high-stakes interaction or decision to get an accurate read of your current regulatory capacity." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
               </div>
 
             </section>
@@ -17767,9 +19012,9 @@ const isSignalProfileConfigured = () => {
             {(() => {
               const primer = getToolEntryPrimer(activeTool?.id, regType);
               if (!primer) return null;
-              // Decay: show primer for first 5 sessions only (Pillar 1 metacognitive scaffolding for new users; suppressed once internalized — aligns with invisible-leveling principle)
+              // Decay: show primer for first PROCESSING_PRIMER_DECAY_THRESHOLD sessions only (Pillar 1 metacognitive scaffolding for new users; suppressed once internalized — aligns with invisible-leveling principle)
               const sessionCount = getSessionCountFromStorage();
-              if (sessionCount > 5) return null;
+              if (sessionCount > PROCESSING_PRIMER_DECAY_THRESHOLD) return null;
               return (
                 <div
                   style={{
@@ -18536,6 +19781,285 @@ const isSignalProfileConfigured = () => {
           </section>
         )}
 
+        {/* PRACTICE SIGNALS — CFM Phase 1 dedicated screen (May 7, 2026)
+            Per COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md Decision 5:
+            Phase 1 ships against a single dedicated screen accessible from
+            Settings, not against Self Mode or My Progress (both have pending
+            redesigns). When those redesigns land, they add entry points that
+            link into this screen — this screen is the source of truth.
+
+            Phase 1 scope: explainer + Take a check launcher + history of
+            past checks with trends. Sprint 1 ships the shell; Sprints 2-3
+            add the actual exercise UIs. The "Take a check" button is
+            wired to the launcher modal; until exercise components ship,
+            it shows a "Coming this week" state.
+        */}
+        {/* PATTERN TRANSPARENCY — Pattern Disruption Layer surface (May 7, 2026)
+            Per PATTERN_DISRUPTION_SPEC.md §5: user can view what AI is watching
+            for, history of patterns surfaced/accepted/dismissed, and clear
+            history. The agency principle in concrete form — user signed up
+            for AI-assisted composure architecture; transparency is the deal.
+        */}
+        {screen === "pattern-transparency" && (
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
+            <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+            <h1 className="t-display-lg" style={{ marginBottom: 12 }}>Patterns I'm watching for</h1>
+
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 32 }}>
+              When the same loop runs three or more times across your recent sessions,
+              I surface it as a pattern. The mechanic is novelty in the body — stepping
+              out for 90 seconds, not solving it.
+            </div>
+
+            {/* Eight detection dimensions in plain language */}
+            <div style={{ marginBottom: 32 }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+                What I watch
+              </div>
+              {Object.entries(PATTERN_DIMENSION_LABELS).map(([dim, label]) => (
+                <div key={dim} style={{ padding: "10px 14px", marginBottom: 4, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", fontSize: 13, color: "var(--text-dim)" }}>
+                  {label}
+                </div>
+              ))}
+            </div>
+
+            {/* Detection history */}
+            {(() => {
+              const all = getPatternDetectionsFromStorage();
+              if (all.length === 0) {
+                return (
+                  <div className="t-caption quiet" style={{ lineHeight: 1.6, padding: "20px 0" }}>
+                    No patterns detected yet. The detector needs a few sessions to see anything.
+                  </div>
+                );
+              }
+              const active = all.filter(p => p.state === PATTERN_STATES.ACTIVE || p.state === PATTERN_STATES.DISMISSED_ONCE);
+              const history = all.filter(p => p.state === PATTERN_STATES.ACCEPTED || p.state === PATTERN_STATES.CLOSED);
+              return (
+                <>
+                  {active.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+                        In flight
+                      </div>
+                      {active.map(p => (
+                        <div key={p.id} style={{ padding: "12px 14px", marginBottom: 6, background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>
+                            {PATTERN_DIMENSION_LABELS[p.dimension] || p.dimension}: {p.value}
+                          </div>
+                          {p.aiReasoning && (
+                            <div className="t-caption quiet" style={{ fontSize: 12, lineHeight: 1.5, fontStyle: "italic", marginTop: 6, marginBottom: 4, color: "var(--text-dim)" }}>
+                              {p.aiReasoning}
+                            </div>
+                          )}
+                          <div className="t-caption quiet" style={{ fontSize: 11 }}>
+                            {p.count} instances · {p.state === PATTERN_STATES.DISMISSED_ONCE ? "dismissed once" : "active"}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {history.length > 0 && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 12 }}>
+                        History
+                      </div>
+                      {history.slice(-10).reverse().map(p => (
+                        <div key={p.id} style={{ padding: "10px 14px", marginBottom: 4, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                          <div style={{ fontSize: 12, color: "var(--text-dim)", marginBottom: 2 }}>
+                            {PATTERN_DIMENSION_LABELS[p.dimension] || p.dimension}: {p.value}
+                          </div>
+                          {p.aiReasoning && (
+                            <div className="t-caption quiet" style={{ fontSize: 11, lineHeight: 1.5, fontStyle: "italic", marginTop: 4, marginBottom: 4, color: "var(--text-muted)" }}>
+                              {p.aiReasoning}
+                            </div>
+                          )}
+                          <div className="t-caption quiet" style={{ fontSize: 10 }}>
+                            {p.state === PATTERN_STATES.ACCEPTED ? "Stepped out" : "Closed without action"}
+                            {p.acceptedAt && ` · ${new Date(p.acceptedAt).toLocaleDateString()}`}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Clear history affordance — agency principle */}
+                  <button
+                    onClick={() => {
+                      if (window.confirm("Clear all pattern history? This won't reset the detection — new patterns will surface as they accrue.")) {
+                        try { secureWrite(PATTERN_DETECTIONS_KEY, []); } catch {}
+                        try { window.plausible?.("Pattern History Cleared"); } catch {}
+                        setScreen("pattern-transparency"); // forces re-read
+                      }
+                    }}
+                    style={{
+                      background: "none", border: "none", padding: "8px 0", fontSize: 11,
+                      color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      marginTop: 16, letterSpacing: "0.04em", textDecoration: "underline"
+                    }}
+                  >
+                    Clear pattern history
+                  </button>
+                </>
+              );
+            })()}
+          </section>
+        )}
+
+
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 0" }}>
+            <AffectLabelingExercise
+              bioFilter={(() => { try { const v = getActiveBioFilter(); return v ? v.split(",").map(t => t.trim()).filter(Boolean) : null; } catch { return null; } })()}
+              onClose={() => setActivePracticeSignal(null)}
+              onComplete={(summary) => {
+                try {
+                  appendFunctionCheck(summary);
+                  window.plausible?.("Practice Signals Check Completed", { props: { candidate: summary.candidate, accurate: summary.primaryCount, total: summary.trialCount } });
+                } catch {}
+                setActivePracticeSignal(null);
+              }}
+            />
+          </section>
+        )}
+
+        {screen === "practice-signals" && activePracticeSignal === FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION && (
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "24px 0" }}>
+            <CognitiveDefusionExercise
+              bioFilter={(() => { try { const v = getActiveBioFilter(); return v ? v.split(",").map(t => t.trim()).filter(Boolean) : null; } catch { return null; } })()}
+              onClose={() => setActivePracticeSignal(null)}
+              onComplete={(summary) => {
+                try {
+                  appendFunctionCheck(summary);
+                  window.plausible?.("Practice Signals Check Completed", { props: { candidate: summary.candidate, distinct: summary.primaryCount, total: summary.framesSubmitted } });
+                } catch {}
+                setActivePracticeSignal(null);
+              }}
+            />
+          </section>
+        )}
+
+        {screen === "practice-signals" && !activePracticeSignal && (
+          <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
+            <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+            <h1 className="t-display-lg" style={{ marginBottom: 12 }}>Practice Signals</h1>
+
+            {/* Explainer — CFM Decision 1 description copy.
+                Honest framing per spec line 88: never "your brain is X% better." */}
+            <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 32 }}>
+              Brief exercises that measure the cognitive functions your practice trains.
+              Repeated over time, your own data shows whether the work is producing change.
+              Specific function. Specific change. Specific timeframe.
+            </div>
+
+            {/* Take a check CTA — opens picker for which signal to measure */}
+            {(() => {
+              const affectTrend = getFunctionCheckTrend(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING, 20);
+              const defusionTrend = getFunctionCheckTrend(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION, 20);
+              const sessionsSinceAffect = getSessionsSinceLastFunctionCheck(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING);
+              const sessionsSinceDefusion = getSessionsSinceLastFunctionCheck(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION);
+              const offerAffect = shouldOfferFunctionCheck(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING, sessionsSinceAffect);
+              const offerDefusion = shouldOfferFunctionCheck(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION, sessionsSinceDefusion);
+
+              return (
+                <>
+                  <div style={{ marginBottom: 32 }}>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+                      Take a signal check
+                    </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setActivePracticeSignal(FUNCTION_CHECK_CANDIDATES.AFFECT_LABELING)}
+                      style={{ width: "100%", marginBottom: 8, textAlign: "left" }}
+                      aria-label="Start affect labeling signal check"
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span>Affect labeling</span>
+                        {offerAffect && <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ready</span>}
+                      </div>
+                      <div className="t-caption quiet" style={{ marginTop: 4 }}>
+                        How fast you label what's present. ~30 seconds.
+                      </div>
+                    </button>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setActivePracticeSignal(FUNCTION_CHECK_CANDIDATES.COGNITIVE_DEFUSION)}
+                      style={{ width: "100%", textAlign: "left" }}
+                      aria-label="Start cognitive defusion signal check"
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                        <span>Cognitive defusion</span>
+                        {offerDefusion && <span style={{ fontSize: 10, color: "var(--amber)", letterSpacing: "0.08em", textTransform: "uppercase" }}>Ready</span>}
+                      </div>
+                      <div className="t-caption quiet" style={{ marginTop: 4 }}>
+                        How many distinct frames you can generate. ~60 seconds.
+                      </div>
+                    </button>
+                  </div>
+
+                  {/* Trends section — only shows for candidates with data.
+                      Per spec anti-Lumosity rule: specific function, specific
+                      change, specific timeframe. NEVER "your brain is X%" or
+                      single composite scores. */}
+                  {(affectTrend || defusionTrend) && (
+                    <div style={{ marginBottom: 32 }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+                        Your trends
+                      </div>
+
+                      {affectTrend && (
+                        <div style={{ marginBottom: 16, padding: "16px 18px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6 }}>Affect labeling</div>
+                          <div className="t-caption quiet" style={{ lineHeight: 1.6 }}>
+                            {(() => {
+                              if (typeof affectTrend.deltaMs !== "number") {
+                                return `${affectTrend.recordCount} check${affectTrend.recordCount > 1 ? "s" : ""} on record. Take another to see the trend.`;
+                              }
+                              const firstSec = (affectTrend.first.primaryMs / 1000).toFixed(1);
+                              const latestSec = (affectTrend.latest.primaryMs / 1000).toFixed(1);
+                              const direction = affectTrend.deltaMs < 0 ? "faster" : (affectTrend.deltaMs > 0 ? "slower" : "unchanged");
+                              return `${affectTrend.recordCount} checks. First: ${firstSec}s · Latest: ${latestSec}s. ${direction === "unchanged" ? "Holding steady." : `The literature predicts this function gets ${direction === "faster" ? "faster" : "more variable"} with practice.`}`;
+                            })()}
+                          </div>
+                        </div>
+                      )}
+
+                      {defusionTrend && (
+                        <div style={{ marginBottom: 16, padding: "16px 18px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)" }}>
+                          <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6 }}>Cognitive defusion</div>
+                          <div className="t-caption quiet" style={{ lineHeight: 1.6 }}>
+                            {(() => {
+                              if (typeof defusionTrend.deltaCount !== "number") {
+                                return `${defusionTrend.recordCount} check${defusionTrend.recordCount > 1 ? "s" : ""} on record. Take another to see the trend.`;
+                              }
+                              const firstCount = defusionTrend.first.primaryCount;
+                              const latestCount = defusionTrend.latest.primaryCount;
+                              return `${defusionTrend.recordCount} checks. First: ${firstCount} distinct frames · Latest: ${latestCount}.`;
+                            })()}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!affectTrend && !defusionTrend && (
+                    <div className="t-caption quiet" style={{ lineHeight: 1.6, padding: "20px 0" }}>
+                      No checks on record yet. Take one above. Trends appear after your second check.
+                    </div>
+                  )}
+
+                  {/* Disclaimer — required per Sprint 4 polish. */}
+                  <div className="t-caption quiet" style={{ lineHeight: 1.5, marginTop: 32, paddingTop: 16, borderTop: "0.5px solid var(--border)", fontSize: 11 }}>
+                    These checks are not clinical assessments. They measure specific cognitive functions
+                    your practice trains, so you can see whether the practice is producing change for you.
+                    No comparisons to other users. No composite scores. Your data, your timeframe.
+                  </div>
+                </>
+              );
+            })()}
+          </section>
+        )}
+
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
@@ -18966,7 +20490,7 @@ const isSignalProfileConfigured = () => {
                       const current = (() => { try { return localStorage.getItem("stillform_scan_pace") || "standard"; } catch { return "standard"; } })();
                       const active = current === opt.id;
                       return (
-                        <button key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
+                        <button aria-pressed={active} key={opt.id} onClick={() => { try { localStorage.setItem("stillform_scan_pace", opt.id); refreshSettings(); } catch {} }} style={{
                           flex: 1, background: active ? "var(--amber-glow)" : "var(--surface)",
                           border: `0.5px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
                           borderRadius: "var(--r)", padding: "10px 8px", cursor: "pointer", textAlign: "center", transition: "all 0.15s",
@@ -19078,6 +20602,54 @@ const isSignalProfileConfigured = () => {
                             <input type="time" defaultValue={reminderTime} onChange={e => { try { localStorage.setItem("stillform_reminder_time", e.target.value); const [h, m] = e.target.value.split(":").map(Number); scheduleReminder("Stillform", "Time to check in. How steady are you?", h, m); refreshSettings(); } catch {} }} style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "6px 10px", color: "var(--text)", fontSize: 14, fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
                           </div>
                         )}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Pattern interrupts toggle — May 7, 2026.
+                      Independent from daily reminder per spec §6 user agency
+                      principle. Default "on" — user has already granted OS
+                      notification permission upstream; this toggle is just
+                      finer-grained control over which Stillform pushes they
+                      receive. Turning off cancels any pending pattern push
+                      (so a user who dismissed an in-app prompt and then
+                      changes their mind isn't pinged 24h later). */}
+                  {(() => {
+                    const patternPushOn = (() => {
+                      try { return localStorage.getItem("stillform_pattern_push_enabled") !== "off"; } catch { return true; }
+                    })();
+                    return (
+                      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden", marginTop: 8 }}>
+                        <div style={{ padding: "14px 18px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                          <div style={{ flex: 1, paddingRight: 12 }}>
+                            <div className="t-body-md">Pattern interrupts</div>
+                            <div className="t-caption" style={{ marginTop: 2 }}>
+                              {patternPushOn ? "On — gentle nudge if a loop goes unaddressed for 24h" : "Off — in-app surface only"}
+                            </div>
+                          </div>
+                          <button onClick={() => {
+                            try {
+                              const wasOn = localStorage.getItem("stillform_pattern_push_enabled") !== "off";
+                              localStorage.setItem("stillform_pattern_push_enabled", wasOn ? "off" : "on");
+                              // If turning off, cancel any pending pattern pushes
+                              // so a user who just dismissed in-app + flipped the
+                              // toggle isn't pinged 24h later.
+                              if (wasOn) {
+                                cancelPatternDisruptionNotifications();
+                              }
+                              try { window.plausible?.("Pattern Push Toggle", { props: { state: wasOn ? "off" : "on" } }); } catch {}
+                              refreshSettings();
+                            } catch {}
+                          }} aria-label={patternPushOn ? "Disable pattern interrupt notifications" : "Enable pattern interrupt notifications"} aria-pressed={patternPushOn} style={{
+                            background: patternPushOn ? "var(--amber)" : "var(--border)",
+                            border: "none", borderRadius: "var(--r-lg)", width: 44, height: 24, cursor: "pointer", position: "relative", transition: "background 0.2s", flexShrink: 0
+                          }}>
+                            <div style={{ width: 18, height: 18, borderRadius: "50%", background: "white", position: "absolute", top: 3, left: patternPushOn ? 23 : 3, transition: "left 0.2s" }} />
+                          </button>
+                        </div>
+                        <div style={{ padding: "10px 18px", borderTop: "0.5px solid var(--border)", fontSize: 11, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                          The in-app prompt always surfaces regardless of this setting — this only controls the 24-hour follow-up notification.
+                        </div>
                       </div>
                     );
                   })()}
@@ -19864,6 +21436,19 @@ const isSignalProfileConfigured = () => {
                     const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
+                    // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
+                    // device key (CryptoStore) and the overflow blob store (SecureStore).
+                    // Without this the AES-GCM device key persisted on shared devices and
+                    // long Reframe conversations that overflowed localStorage's 5–10MB cap
+                    // remained in IndexedDB. Both calls resolve on failure so they can't
+                    // block the reload below. Awaited together so the reload sees a fully
+                    // wiped storage tier.
+                    try {
+                      await Promise.all([
+                        CryptoStore.deleteKey().catch(() => {}),
+                        SecureStore.clear().catch(() => {})
+                      ]);
+                    } catch {}
                     if (accountDeleteOk) {
                       alert("Your account has been deleted.");
                     }
@@ -19891,6 +21476,22 @@ const isSignalProfileConfigured = () => {
               </button>
               {settingsSectionOpen.more && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <button onClick={() => setScreen("practice-signals")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--text)" }}>Practice Signals</span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </button>
+                <button onClick={() => setScreen("pattern-transparency")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span style={{ fontSize: 13, color: "var(--text)" }}>Patterns I'm watching for</span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </button>
                 <button onClick={() => setScreen("privacy")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
@@ -20083,7 +21684,18 @@ const isSignalProfileConfigured = () => {
         {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
         {!["tool","panic","setup-bridge"].includes(screen) && (
           <footer className="footer">
-            <div className="footer-logo">Stillform</div>
+            {/* May 7, 2026 — footer-logo now a home link on non-home screens, mirroring
+                the nav-logo pattern. Single dim color (not split treatment) is intentional —
+                footer is a secondary surface; reserving the amber split for the nav keeps the
+                wordmark hierarchy legible. */}
+            <div
+              className="footer-logo"
+              style={{ cursor: screen === "home" ? "default" : "pointer", opacity: screen === "home" ? 0.7 : 1 }}
+              onClick={() => { if (screen !== "home") goHomeSafely(); }}
+              role={screen === "home" ? undefined : "button"}
+              tabIndex={screen === "home" ? -1 : 0}
+              onKeyDown={(e) => { if (screen !== "home" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); goHomeSafely(); } }}
+            >Stillform</div>
             <div className="footer-links">
               {screen !== "pricing" && screen !== "home" && !isSubscribed && (
                 <button onClick={() => setScreen("pricing")}>{syncSignedIn ? "Subscribe" : "Sign In"}</button>
