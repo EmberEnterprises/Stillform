@@ -19086,7 +19086,7 @@ const isSignalProfileConfigured = () => {
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
-              Stillform is not medical treatment. It is a composure tool. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
+              Stillform is composure architecture, not medical treatment. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
             </p>
           </section>
         )}
@@ -19151,11 +19151,11 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is neither. Meditation is a sustained attention practice. Therapy is clinical treatment for psychological conditions. Stillform is a precision regulation system — structured interventions that interrupt activation and restore a functional baseline in real time. It is a performance and composure tool. It is not a substitute for clinical care."
+                a: "Stillform is composure architecture — structured interventions that interrupt activation and restore a functional baseline in real time. It's a daily practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. It is not a substitute for clinical care."
               },
               {
                 q: "What is calibration?",
-                a: "A five-scenario assessment that identifies your default regulation tendency — body-first or thought-first. Research shows people have genuine biases toward certain strategies, but these are probabilistic and state-dependent, not fixed. On a given day, physical activation may require a body-first entry even for someone who typically processes cognitively first. Calibration pre-loads your most likely starting point. The bio-filter and feel state you log each session adjust routing when your current state calls for something different. Recalibrate anytime in Settings."
+                a: "A five-scenario assessment that identifies how you process state first — body-first or thought-first. Research shows people have genuine biases toward certain strategies, but these are probabilistic and state-dependent, not fixed. On a given day, physical activation may require a body-first entry even for someone who typically processes cognitively first. Calibration pre-loads your most likely starting point. The bio-filter and feel state you log each session adjust routing when your current state calls for something different. Recalibrate anytime in Settings."
               },
               {
                 q: "What is the morning check-in?",
@@ -19211,15 +19211,15 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is Composure Check?",
-                a: "A voluntary assessment of your regulatory state. Thirty rapid-response trials that measure reaction time, impulse control, and response inhibition — whether you are operating from a regulated baseline or whether something is narrowing your window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where an accurate read of your current capacity matters."
+                a: "A voluntary assessment of your current capacity. Thirty rapid-response trials that measure reaction time, impulse control, and response inhibition — whether you're operating from a clear baseline or whether something is narrowing your window. Not a diagnostic. Use it before high-stakes conversations, decisions, or any moment where an accurate read of your current capacity matters."
               },
               {
                 q: "What is the 60 BPM pulse on the home screen?",
-                a: "A 1Hz ambient glow matching a calm resting heart rate. The nervous system entrains to rhythmic environmental stimuli without conscious effort. The home screen is designed to begin regulation before any tool is opened."
+                a: "A 1Hz ambient glow matching a calm resting heart rate. The nervous system entrains to rhythmic environmental stimuli without conscious effort. The home screen is part of the practice — settling begins before any tool is opened."
               },
               {
                 q: "What if the AI connection drops?",
-                a: "Reframe retries automatically. If the connection fails, a built-in self-guided protocol takes over so the session continues without interruption. Fallback sessions are recorded in your history the same as any other."
+                a: "Reframe retries automatically. If the connection fails, you're routed to Self Mode — the structured five-step practice you can do at your own pace — so the session continues without interruption. Self Mode sessions are recorded in your history the same as any other."
               },
               {
                 q: "Can I attach screenshots to Reframe?",
@@ -19230,7 +19230,7 @@ const isSignalProfileConfigured = () => {
                 a: "Calendar and Health Connect integrations require device-level permissions only available in the native Android app. Browser access does not support them. Install the Android app and grant permissions in Settings under Integrations."
               },
               {
-                q: "What if regulation remains difficult?",
+                q: "What if my state stays activated?",
                 a: "Physical variables can impose a ceiling on regulation outcomes independent of practice quality. Sleep debt, chronic pain, inflammation, hormonal changes, and medication effects alter perception at a biological level. Stillform can help you read the signal more clearly — but if your state appears physically driven or consistently resistant, that warrants medical attention, not more practice."
               },
               {
@@ -19494,7 +19494,7 @@ const isSignalProfileConfigured = () => {
               );
             })()}
             <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-              Stillform is a composure tool, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
+              Stillform is composure architecture, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
             {(() => {
               const crisisResources = [
