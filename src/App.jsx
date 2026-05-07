@@ -3909,11 +3909,71 @@ const computeAchievementForBodyScan = (sessionEntry) => {
 // Dispatches to the right per-tool computer based on session entry shape.
 // Phase 1: Body Scan only. Other tools return null until their handlers
 // ship in subsequent builds.
+const computeAchievementForReframe = (sessionEntry) => {
+  if (!sessionEntry) return null;
+  const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
+  if (!tools.includes("reframe")) return null;
+
+  const { preState, postState, delta } = sessionEntry;
+
+  // No post-state means user skipped the rating — no honest credit to claim.
+  // Don't fabricate a headline; this is the "better silence" path.
+  if (!preState || !postState) return null;
+
+  // Build headline. Same chip = "held the state" (still real work, often
+  // harder than transitioning). Different chips = the transition itself.
+  // Append delta when meaningful (positive shift in numeric score).
+  let headline;
+  if (preState === postState) {
+    headline = `Held ${preState}`;
+  } else {
+    headline = `${preState} → ${postState}`;
+  }
+  if (typeof delta === "number" && delta > 0) {
+    headline = `${headline} · +${delta}`;
+  }
+
+  // Context — frequency of this exact pre→post pattern in the last 7 days.
+  // Counts the user's own repeated patterns of regulation. Heider 1958
+  // attribution: when users repeat the same shift, Stillform names it as
+  // a pattern they own. Only surfaces when there's at least one prior
+  // similar shift this week (otherwise no context line — fabricated
+  // "1st time" framing rings as "you've never done this before" which
+  // is a hostile read).
+  let context = null;
+  try {
+    const sessions = getSessionsFromStorage();
+    const weekAgo = TimeKeeper.daysAgoMs(7);
+    const currentTs = sessionEntry.timestamp || null;
+    const similar = sessions.filter(s => {
+      if (!s) return false;
+      const t = new Date(s.timestamp || 0).getTime();
+      if (Number.isNaN(t) || t < weekAgo) return false;
+      // Exclude the current session if it's already persisted (post-save call).
+      // Live (pre-save) calls have currentTs === null, so no exclusion needed.
+      if (currentTs && s.timestamp === currentTs) return false;
+      return s.preState === preState && s.postState === postState;
+    });
+    if (similar.length >= 1) {
+      const total = similar.length + 1; // include current
+      const ordinal = total === 2 ? "2nd"
+        : total === 3 ? "3rd"
+        : total === 21 ? "21st"
+        : total === 22 ? "22nd"
+        : total === 23 ? "23rd"
+        : `${total}th`;
+      context = `${ordinal} time this week.`;
+    }
+  } catch {}
+
+  return { headline, context };
+};
+
 const computeAchievement = (sessionEntry) => {
   if (!sessionEntry) return null;
   const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
   if (tools.includes("body-scan")) return computeAchievementForBodyScan(sessionEntry);
-  // Reframe handler: subsequent build (Phase 2 — pre→post rate delta + frequency)
+  if (tools.includes("reframe")) return computeAchievementForReframe(sessionEntry);
   // Breathe handler: subsequent build (Phase 3 — physiological-spike delta)
   // EOD handler: subsequent build (Phase 4 — composure trend)
   return null;
@@ -10159,6 +10219,62 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           </div>
 
+          {/* PRACTICE TREND — Reframe achievement micro-credit (Build #5 Phase 2).
+              Renders only when post-state chip is selected. Computes from live
+              feelState + postRating; the session is not persisted yet, so we
+              build a synthetic session shape and pass it through computeAchievement. */}
+          {postRating && (() => {
+            try {
+              const liveSession = {
+                tools: ["reframe"],
+                preState: feelState || null,
+                postState: postRating,
+                preRating: scoreState(feelState),
+                postRating: scoreState(postRating),
+                delta: (Number.isFinite(scoreState(feelState)) && Number.isFinite(scoreState(postRating)))
+                  ? scoreState(postRating) - scoreState(feelState)
+                  : null
+              };
+              const credit = computeAchievement(liveSession);
+              if (!credit) return null;
+              return (
+                <div style={{
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  padding: "12px 16px",
+                  marginBottom: 16,
+                  textAlign: "left",
+                  maxWidth: 360,
+                  margin: "0 auto 16px"
+                }}>
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                    Practice trend
+                  </div>
+                  <div style={{
+                    fontSize: 14,
+                    fontFamily: "'DM Sans', sans-serif",
+                    color: "var(--text)",
+                    lineHeight: 1.4,
+                    marginBottom: credit.context ? 4 : 0
+                  }}>
+                    {credit.headline}
+                  </div>
+                  {credit.context && (
+                    <div style={{
+                      fontSize: 12,
+                      fontFamily: "'DM Sans', sans-serif",
+                      color: "var(--text-dim)",
+                      lineHeight: 1.5
+                    }}>
+                      {credit.context}
+                    </div>
+                  )}
+                </div>
+              );
+            } catch { return null; }
+          })()}
+
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
             <div style={{
               fontSize: 11,
@@ -10402,6 +10518,61 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           </div>
         )}
+
+        {/* PRACTICE TREND — Reframe achievement micro-credit (Build #5 Phase 2).
+            Renders only when post-state chip is selected. Constructs synthetic
+            session shape from live state since the session isn't persisted yet.
+            Placed below the Self Mode nudge and above FINISH so the credit is
+            the last thing the user reads before tapping the close button. */}
+        {postRating && (() => {
+          try {
+            const liveSession = {
+              tools: ["reframe"],
+              preState: feelState || null,
+              postState: postRating,
+              preRating: scoreState(feelState),
+              postRating: scoreState(postRating),
+              delta: (Number.isFinite(scoreState(feelState)) && Number.isFinite(scoreState(postRating)))
+                ? scoreState(postRating) - scoreState(feelState)
+                : null
+            };
+            const credit = computeAchievement(liveSession);
+            if (!credit) return null;
+            return (
+              <div style={{
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "12px 16px",
+                marginBottom: 16,
+                textAlign: "left"
+              }}>
+                <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                  Practice trend
+                </div>
+                <div style={{
+                  fontSize: 14,
+                  fontFamily: "'DM Sans', sans-serif",
+                  color: "var(--text)",
+                  lineHeight: 1.4,
+                  marginBottom: credit.context ? 4 : 0
+                }}>
+                  {credit.headline}
+                </div>
+                {credit.context && (
+                  <div style={{
+                    fontSize: 12,
+                    fontFamily: "'DM Sans', sans-serif",
+                    color: "var(--text-dim)",
+                    lineHeight: 1.5
+                  }}>
+                    {credit.context}
+                  </div>
+                )}
+              </div>
+            );
+          } catch { return null; }
+        })()}
 
         {/* FINISH */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10 }}>
