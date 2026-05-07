@@ -88,38 +88,32 @@ Tiers:
 
 ### 🟠 PRESTIGE GAPS (calibration, not reconstruction)
 
-#### 6. Bio-filter invisible at Reframe entry
-- **Where:** Reframe entry surface. The user can see chips, tone dropdown, processing primer — but cannot see what bio-filter the AI is currently reading them in. Bio-filter now drives major behavior changes (low-demand mode triggers on six bio-filter values).
-- **What's wrong:** transparency gap. The user signed up for AI-assisted composure architecture; the AI's read of their hardware state should be visible and editable.
-- **Spec ref:** Master Todo line 511. Approach is locked: status line (NOT a chip row) between "FROM THIS MORNING" and "ANYTHING TO ADD?" — `ACTIVE: depleted · set this morning ⓘ ✎`. Edit drawer reuses existing chip array, renders inline.
-- **Fix scope:** ~30 min. New `BioFilterStatusLine` mini-component, slot into `PresentStateChips`.
-- **Why prestige tier:** invisible-but-load-bearing state is the opposite of the operator-tier transparency the brand promises.
+> **Verification update May 7, 2026:** Same pattern as Block 1 — most items already shipped May 7 but Master Todo entries weren't crossed off. Re-verified all five against current code state.
 
-#### 7. Tone dropdown reads as label, not control
-- **Where:** Reframe AI tone dropdown (App.jsx ~9329). Implemented in the May 2 three-layer system but visually reads as static caption — fontSize 10, monospace caps, `--text-muted`, transparent bg, thin border. After the May 6 prestige refresh it's even easier to skip on a phone.
-- **What's wrong:** users don't know it's interactive. A control they paid for is visually inert.
-- **Spec ref:** Master Todo line 532.
-- **Fix scope:** ~10 min. Bump font slightly, less-muted color (`--text-dim` or `--text`), more obvious border or subtle accent fill, possibly relabel.
-- **Why prestige tier:** prestige standard requires that interactive elements *look* interactive without flashing for attention.
+#### 6. Bio-filter invisible at Reframe entry — ✅ ALREADY RESOLVED MAY 7
+- **Where:** `PresentStateChips` at `src/App.jsx:11636-11788`.
+- **What was wrong:** No transparency on what bio-filter the AI was reading the user in.
+- **Resolution:** Status line slot built into `PresentStateChips` exactly per spec — monospace caps `Bio-filter · {label}`, ⓘ for explanation modal (Seth 2013, Barrett & Simmons 2015), inline edit drawer with all `BIO_FILTER_OPTIONS`. 2-tap mid-day update path delivered.
 
-#### 8. Splash wordmark inconsistent with nav wordmark
-- **Where:** Splash renders `Stillform` as single block in `var(--amber)` (line 15384). Nav renders `Still<span>form</span>` with split treatment — body color + amber on `form` (line 15400).
-- **What's wrong:** first impression doesn't match the rest of the app's wordmark treatment. On the teal theme the splash reads all-teal while nav reads split.
-- **Spec ref:** Master Todo line 537.
-- **Fix scope:** ~2 min. Either split the splash to match nav, OR accept ceremonial all-accent as deliberate. Design call needed.
-- **Why prestige tier:** the wordmark is the brand. Two treatments in two surfaces is the kind of thing prestige users notice.
+#### 7. Tone dropdown reads as label, not control — ✅ ALREADY RESOLVED MAY 7
+- **Where:** Reframe AI tone dropdown at `src/App.jsx:10019-10048`.
+- **What was wrong:** Visually read as static caption.
+- **Resolution:** Comment at line 10025 explicitly cites the May 7 affordance bump — fontSize 10→11, muted color → dim, plain border → amber-dim accent, subtle resting bg, brighter chevron. All five items from the original proposal applied.
 
-#### 9. "How much do you owe this guy?" ad-tracking link visible at home footer
-- **Where:** Home screen, very bottom (visible in your May 7 screenshot).
-- **What's wrong:** appears to be a Plausible or browser-injected tracker rendering visible text in the chrome. This shouldn't be visible in production.
-- **Source unknown:** not located in App.jsx grep. Likely Chrome's "ad/tracker blocked" debug overlay or a similar browser-extension artifact, NOT app code. Verify on your phone with extensions disabled before flagging as a bug.
-- **Why prestige tier:** if it's app-side, it breaks the editorial-luxury frame. If it's browser-side, it's not the app — but you should know which.
+#### 8. Splash wordmark inconsistent with nav wordmark — ✅ ALREADY RESOLVED MAY 7
+- **Where:** Splash render at `src/App.jsx:16473`.
+- **What was wrong:** Splash rendered "Stillform" all-amber; nav rendered split (text-color "Still" + amber "form").
+- **Resolution:** Splash now renders `Still<span style={{ color: var(--amber) }}>form</span>` matching the nav. Visual consistency restored across surfaces.
 
-#### 10. "Pull to refresh" affordance on home — reconsider
-- **Where:** Home screen top — "PULL TO REFRESH" hint visible above the greeting (your May 7 screenshot).
-- **What's wrong:** instructional text on the home screen breaks the editorial restraint. Aesop / Cartier / MUBI never instruct the user. The gesture should work without on-screen narration.
-- **Fix scope:** make the instruction appear ONLY on the actual pull (during interaction), not as static caption.
-- **Why prestige tier:** silent affordances are a brand signal. Captioned ones are wellness-app default.
+#### 9. "How much do you owe this guy?" footer text — ⚠️ LIKELY BROWSER OVERLAY, NOT APP
+- **Where:** Visible in May 7 home screenshot.
+- **Verification:** Searched the entire `src/App.jsx` codebase — no such text exists in app source. Likely a Chrome extension overlay, browser tracker-block message, or similar non-app artifact.
+- **Action:** Verify on phone with extensions disabled. If still present in clean browser context, dig deeper. If gone, this is a non-issue — close out.
+
+#### 10. "Pull to refresh" affordance on home — ✅ ALREADY CORRECT
+- **Where:** Pull-to-refresh indicator at `src/App.jsx:21281-21323`.
+- **What I claimed was wrong:** Static instructional text breaking editorial restraint.
+- **Resolution:** Re-read code. Indicator is gated on `(isPulling || isRefreshing)` — only renders during the actual gesture, not as static caption. The text in Arlin's original screenshot was likely captured mid-pull. Audit finding was incorrect; existing implementation already follows the editorial-luxury pattern (silent affordance, surfaces only on interaction).
 
 ---
 
@@ -162,30 +156,30 @@ Tiers:
 
 ## Recommended ship order
 
-> **Verification update May 7:** Block 1 is mostly already shipped. Sequence below reflects current actionable state.
+> **Verification update May 7 (final pass):** Both Block 1 and Block 2 are now essentially complete. Most items were already shipped May 7 but Master Todo entries weren't crossed off. The actionable launch path is much shorter than my initial audit suggested.
 
 **Block 1 — must ship before TestFlight:**
 1. ~~Auto-sync + restore-purchases on app open (#1)~~ — ✅ already resolved May 7
 2. ~~Morning check-in `mood` contract restore (#2)~~ — ✅ already resolved May 7
 3. ~~QBPill clamp on mount (#3)~~ — ✅ already resolved May 7
-4. **Low-demand close — keep post-state chip (#5)** — ⛔ ACTIONABLE TODAY
+4. ~~Low-demand close — keep post-state chip (#5)~~ — ✅ resolved May 7 (Reframe + Body Scan early; Breathe late same day)
 
 **Block 2 — prestige polish for launch:**
-5. Bio-filter status line at Reframe entry (#6)
-6. Tone dropdown affordance (#7)
-7. Splash wordmark consistency (#8)
-8. Pull-to-refresh instructional text (#10)
-9. Verify "How much do you owe this guy?" footer text source (#9)
+5. ~~Bio-filter status line at Reframe entry (#6)~~ — ✅ already resolved May 7
+6. ~~Tone dropdown affordance (#7)~~ — ✅ already resolved May 7
+7. ~~Splash wordmark consistency (#8)~~ — ✅ already resolved May 7
+8. ~~Pull-to-refresh instructional text (#10)~~ — ✅ already correct (was audit error)
+9. **Verify "How much do you owe this guy?" footer text source (#9)** — ⚠️ Phone test with browser extensions disabled. Likely browser overlay, not app.
 
 **Block 3 — flow walks (no edits, just observation):**
-10. First-run cold-open walk (#12)
-11. EOD surface walk (#13)
-12. AI failure → Self Mode handoff voice walk (#14)
+10. First-run cold-open walk (#12) — entrance, calibration, first home
+11. EOD surface walk (#13) — post-6pm experience
+12. AI failure → Self Mode handoff voice walk (#14) — handoff card copy review
 
 **Block 4 — environment-blocked:**
 13. Watch pattern ID mismatch (#4) — source already fixed; APK build pending Android Studio
 
-Block 1 is mostly done — only #5 remains as a code task. Block 2 is what makes the app *land* the way the brand demands. Block 3 surfaces things I haven't verified yet — the audit is honest about its gaps. Block 4 is real but separate from the path to web/iOS launch.
+The actual remaining launch path is: **#9 verification + Block 3 walks + Block 4 build environment**. Plus any new findings the walks surface.
 
 ---
 

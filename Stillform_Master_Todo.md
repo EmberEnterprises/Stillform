@@ -544,7 +544,12 @@ Visual treatment held until whole-app design system locks (whole-app prestige re
 
 Decay logic ships at session > 5 (App.jsx ~line 14257). If 5 is too long after live testing, threshold is one number to change. Captured Apr 29 for revisit after real user data.
 
-### 🪞 Surface bio-filter at Reframe entry (transparency + mid-day update path) — added May 7, 2026
+### ✅ RESOLVED May 7, 2026 — Surface bio-filter at Reframe entry (transparency + mid-day update path)
+
+**Resolved at `src/App.jsx:11699-11788`.** `PresentStateChips` now includes a bio-filter status line between morning chips and feel chips, exactly matching the spec: monospace caps "Bio-filter · {label}", ⓘ for explanation modal (Seth 2013, Barrett & Simmons 2015), inline edit drawer with all `BIO_FILTER_OPTIONS`. Edit closes on selection, fires `setActiveBioFilter()` for canonical persistence.
+
+<details><summary>Original entry (now resolved)</summary>
+
 Surfaced in May 7 phone testing. `PresentStateChips` at Reframe entry currently shows tension chips from morning check-in + 9 in-the-moment feel chips, but **does not surface the active bio-filter**. So the user can't see what hardware state the AI is reading them in — which now drives major behavior changes (low-demand mode strips the close flow on six bio-filter values per the May 6 broadening).
 
 **History check:** no commit explicitly removed bio-filter from this surface. It was just never built in. Archive line 457 confirms `PresentStateChips` was kept at Reframe entry per Lieberman 2007 (labeling IS the regulation mechanism for cognitive intervention), but the chip set never included bio-filter.
@@ -565,17 +570,38 @@ Tap ✎ to edit inline (small picker drawer, not a full chip row taking permanen
 
 **Non-goal:** does NOT extend to surfacing bio-filter on home screen, in nav, or in Settings. That's a separate question if user testing surfaces a deeper need.
 
-### 🎚️ Tone dropdown affordance — reads as label, not control — added May 7, 2026
-Surfaced in May 7 phone testing. The Reframe AI tone dropdown (App.jsx ~line 9329) is implemented (commit `f36cdb63`, May 2 — three-layer system) but visually reads as a static label, not an interactive control. fontSize 10, monospace caps, `--text-muted` color, transparent background, thin border — easy to skip on a phone, especially after the May 6 prestige refresh.
+</details>
 
-**Fix scope:** bump visual weight of the button — slightly larger font, less muted color (`--text-dim` or `--text`), more obvious border or subtle accent fill, possibly relabel "Reframe tone:" → something more action-oriented or add a settings-gear icon. ~10 min, verify on phone.
+### ✅ RESOLVED May 7, 2026 — Tone dropdown affordance — reads as label, not control
 
-### 🌗 Splash wordmark visual treatment — split or all-accent (design call) — added May 7, 2026
-Surfaced in May 7 phone testing. Splash screen renders "Stillform" as a single block in `var(--amber)` (line 15384). Nav renders `Still<span>form</span>` with split treatment — "Still" in body color, "form" in `--amber` (line 15400, .nav-logo span CSS). On the teal theme (`--amber: #3dbdb5`), splash reads all-teal, nav reads white-Still + teal-form. Neither is broken; both behave correctly per their code paths.
+**Resolved at `src/App.jsx:10019-10048`.** Comment at line 10025 explicitly says: *"May 7, 2026 affordance bump — surfaced in phone testing as reading like a static label, not a control. fontSize 10→11, muted color→dim, plain border→amber-dim accent, subtle resting bg, brighter chevron. Still small and quiet (this is not a primary action), but legibly tappable."* All five fix items from the original recommendation applied.
 
-**Design call needed:** split the splash to match nav (`Still<span style={{color: 'var(--amber)'}}>form</span>`) for visual consistency, or accept the ceremonial all-accent treatment as deliberate. ~2 min code change either way; the question is design intent.
+<details><summary>Original entry (now resolved)</summary>
 
-### 🎯 Low-demand close flow strips post-state chip — overcorrection — added May 7, 2026
+Surfaced in May 7 phone testing. The Reframe AI tone dropdown (App.jsx ~line 9329) is implemented (commit `f36cdb63`, May 2 — three-layer system) but visually reads as a static label, not an interactive control.
+
+**Fix scope:** bump visual weight of the button — slightly larger font, less muted color (`--text-dim` or `--text`), more obvious border or subtle accent fill.
+
+</details>
+
+### ✅ RESOLVED May 7, 2026 — Splash wordmark visual treatment — split or all-accent
+
+**Resolved at `src/App.jsx:16473`.** Splash now renders `Still<span style={{ color: var(--amber) }}>form</span>` matching the nav. Visual consistency restored across surfaces.
+
+<details><summary>Original entry (now resolved)</summary>
+
+Surfaced in May 7 phone testing. Splash screen rendered "Stillform" as a single block in `var(--amber)`. Nav rendered with split treatment — "Still" in body color, "form" in `--amber`.
+
+**Design call needed:** split the splash to match nav, or accept the ceremonial all-accent treatment as deliberate. ~2 min code change either way.
+
+</details>
+
+### ✅ RESOLVED May 7, 2026 — Low-demand close flow strips post-state chip — overcorrection
+
+**Resolved across all three tools.** Reframe + Body Scan fixed early May 7 (`src/App.jsx:8518` + `src/App.jsx:5685`); Breathe fixed late May 7 (`src/App.jsx:5468` + cycle-counter useEffect at 5067 — same architectural pattern as Reframe + Body Scan). All three tools now preserve the 1-5 / chip selection for low-demand users (Lieberman 2007 affect labeling preserved as the lowest-demand metacognitive act in the app), drop everything downstream (debrief, Next Move, Lock-in, State-to-Statement, science card).
+
+<details><summary>Original entry (now resolved)</summary>
+
 Surfaced in May 7 phone testing. Phase 3 low-demand commit (`49fdb54`, May 4) strips six surfaces from Reframe close: post-rating chip, post-insight, State-to-Statement, science card, debrief gate, Next Move + Lock-in. Phase 2 low-demand commit (May 4) strips equivalents from Body Scan close.
 
 **Problem:** the post-state chip is **one tap** — the lowest-demand metacognitive act in the app. It's the data point that classifies the shift (Russell category, Plausible event, Settled→regulated path). Stripping it means a depleted user who *did* shift has no way to mark it. Their session evaporates. That's the opposite of what low-demand should do.
@@ -587,6 +613,8 @@ Surfaced in May 7 phone testing. Phase 3 low-demand commit (`49fdb54`, May 4) st
 - **Same parallel change for Body Scan** — Phase 2 also strips What Shifted; symmetry needed per operating rule (changes apply to both processing types)
 
 **Locked decision check:** Apr 28 locked decision describes low-demand as "broad cognitive-bandwidth-limited population." That decision sets the population, not the strip-list. The strip-list was an implementation choice that went too far. This proposal narrows the strip without reopening the locked decision.
+
+</details>
 
 ### ❓ "Additional morning chips" — needs Arlin's direction — added May 7, 2026
 Surfaced in May 7 phone testing as a thing that "didn't get implemented." No spec or commit found in repo. Open questions: what set of chips were meant to be added (the 9 feel-chips? a different set?), and what surface (morning check-in screen? carrying through to Reframe context?). Captured here so it doesn't drop off; awaiting direction before scoping.
