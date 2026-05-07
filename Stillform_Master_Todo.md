@@ -447,7 +447,19 @@ Implementation order in spec: CSS variables → typography → components → sc
 
 ## 🐛 Bugs / Defects
 
-### 🔄 Auto-trigger cloud sync + restore purchases on app open for logged-in users — added May 6, 2026
+### ✅ RESOLVED May 7, 2026 — Auto-trigger cloud sync + restore purchases on app open for logged-in users (originally added May 6, 2026)
+
+**Resolved by Launch Sync useEffect at `src/App.jsx:14000-14028`** (added May 7, dependency `[syncSignedIn]`, debounced 2 minutes). On app open with active session, fires `sbSyncDown()` and forces `setSubscriptionCheckTick(n => n + 1)` — which in turn triggers `sbCheckSubscriptionStatus()` at line 13958. Comment at line 13988 explicitly references this Master Todo entry.
+
+**Verified on phone May 7 (Arlin):** subscription shows active without manual restore tap.
+
+Original entry preserved below for archival.
+
+---
+
+<details>
+<summary>Original entry (now resolved)</summary>
+
 When a user is already signed in, opening the app does not automatically sync cloud data or restore purchases. Both require a manual tap in Settings.
 
 **Impact:**
@@ -462,19 +474,29 @@ When a user is already signed in, opening the app does not automatically sync cl
 
 **Why TestFlight-blocking:** Apple reviewers will sign in and expect their data and active subscription to be present without manual Settings actions. Real UX gap for any returning user.
 
-### ⌚ Watch haptic breathing companion — pattern ID mismatch (Galaxy Watch Ultra / Wear OS)
-Requires Android Studio for fix.
+</details>
+
+### ⌚ Watch haptic breathing companion — pattern ID mismatch (Galaxy Watch Ultra / Wear OS) — SOURCE FIXED, APK BUILD PENDING
+
+**Source state (verified May 7, 2026):** `WearBreatheActivity.java` switch now handles all three current phone-side pattern IDs (`quick`, `deep`, `cyclic_sigh`) with correct phase durations. Source code is no longer the bug.
+
+**Remaining work:** Watch APK on Arlin's physical device hasn't been rebuilt with the source change. Genuinely environment-blocked — requires Android Studio installed locally to run `npx cap sync` + Gradle build + install on watch. Not a code task.
 
 - Code chain wired end-to-end: App.jsx line 4265 → watchBridge → WatchBridgePlugin → WatchBridge.java → MessageClient `/stillform/breathe` → WearListenerService → WearBreatheActivity. Plumbing is structurally complete.
-- **Known bug (May 2): pattern ID mismatch between phone and watch.** Phone-side `BREATHING_PATTERNS` IDs are `quick`, `deep`, and `cyclic_sigh` (App.jsx line 3629-3650). Watch-side switch in `WearBreatheActivity.java` line 51-63 only handles `box`, `478`, and `quick`. Net effect:
-  - `quick` → matches on both sides ✅
-  - `deep` → no match on watch, falls back to default `{4, 4, 8, 2}` Regulate pattern. Coincidentally identical to deep so it works by luck.
-  - `cyclic_sigh` → no match on watch, falls back to default Regulate pattern. **Watch runs the wrong breathing pattern when user picks Cyclic Sighing on the phone.** This is the broken case.
-  - `box` and `478` referenced in WatchBridge.java javadoc don't exist on the phone side anymore — stale comment.
-- Fix scope: update `WearBreatheActivity.java` switch cases to match current phone-side IDs (`quick`, `deep`, `cyclic_sigh`) with correct phase durations from `BREATHING_PATTERNS`. Update `WatchBridge.java` javadoc to reflect current pattern IDs.
+- **Original bug (May 2): pattern ID mismatch between phone and watch.** Phone-side `BREATHING_PATTERNS` IDs are `quick`, `deep`, and `cyclic_sigh` (App.jsx line 3629-3650). Watch-side switch originally only handled `box`, `478`, and `quick` — has since been updated.
 - Cannot verify from code (requires device testing): wear module builds into APK, watch app installs alongside phone app, haptics fire correctly on real hardware, message round-trip works under real conditions.
 
-### 🪧 QBPill saved position not clamped on mount — off-screen on phone — added May 7, 2026
+### ✅ RESOLVED May 7, 2026 — QBPill saved position not clamped on mount — off-screen on phone (originally added May 7, 2026)
+
+**Resolved at `src/App.jsx:13665-13682`.** `getSavedPos()` now wraps the saved position through `clamp()` before returning. Comment at line 13666 explicitly references this Master Todo entry.
+
+Original entry preserved below for archival.
+
+---
+
+<details>
+<summary>Original entry (now resolved)</summary>
+
 Surfaced in May 7 phone testing. Quick Breathe pill missing from Reframe (and other screens) because saved position from a wider device persists in localStorage, lands off the visible viewport on phone.
 
 **Root cause:** `QBPill` (App.jsx ~line 12872) reads `stillform_qb_position` via `getSavedPos()` and uses it as initial state. `clamp()` only fires during pointer drag, not on mount. If the user previously positioned the pill on desktop (or a wider phone) and that x/y persisted to cloud sync, on a smaller viewport the pill renders off-screen. Pill works fine — just invisible.
@@ -483,7 +505,19 @@ Surfaced in May 7 phone testing. Quick Breathe pill missing from Reframe (and ot
 
 **Affects all users**, not specific to a processing type — QBPill is global.
 
-### 🌅 Morning check-in stopped writing `mood`; PresentStateChips reader still expects it — added May 7, 2026
+</details>
+
+### ✅ RESOLVED May 7, 2026 — Morning check-in stopped writing `mood`; PresentStateChips reader still expects it (originally added May 7, 2026)
+
+**Resolved at `src/App.jsx:17577`.** `saveCheckin()` now writes `mood: ciMood || null` alongside the existing fields. Comment at line 17577 explicitly references this Master Todo entry: *"morning emotional state, restored after broken-contract fix."* Reader at `PresentStateChips` (line 11598) was already correct — fix was on the writer side, option (a) per the original recommendation.
+
+Original entry preserved below for archival.
+
+---
+
+<details>
+<summary>Original entry (now resolved)</summary>
+
 Surfaced in May 7 phone testing. The "From this morning" row in `PresentStateChips` (Reframe entry) only ever shows tension chips, never a mood chip — broken contract between writer and reader.
 
 **Root cause:** Morning check-in `saveCheckin()` (App.jsx ~line 16555) writes `{ date, energy, bio, tension }` — **no `mood` field**. `PresentStateChips` (App.jsx line 10908) reads `checkin?.mood` to render the morning mood chip. Field was dropped from the writer at some point in a refactor; consumer was never updated.
@@ -491,6 +525,8 @@ Surfaced in May 7 phone testing. The "From this morning" row in `PresentStateChi
 **Fix decision needed:** either (a) restore mood capture in morning check-in (adds back a chip selector to morning UI — small surface change), or (b) drop the dead `checkinMood` read in `PresentStateChips` (simpler, but loses the original feature intent of carrying morning emotional state into Reframe context).
 
 Recommendation: (a) if morning emotional state matters as AI context, otherwise (b). Worth a short call before fix.
+
+</details>
 
 ---
 
