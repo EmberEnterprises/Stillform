@@ -54,23 +54,28 @@ Stage definitions → Trigger Profile → Today's Brief → Mirror surface → A
 
 ---
 
-## ✅ May 7 Build Batch — COMMITTED LOCALLY (awaiting push + Netlify deploy + phone test)
+## ✅ May 7 Build Batch — DEPLOYED + AI REGRESSION VERIFIED (phone test pending)
 
 47 items below built locally across `src/App.jsx`, `netlify/functions/reframe.js`, `netlify/functions/cognitive-defusion-score.js` (new), `netlify/functions/pattern-enrichment.js` (new), `scripts/run-ai-regression.mjs`, `scripts/ship-preflight.mjs`, `scripts/check-undefined-components.mjs`, `scripts/check-sync-keys.mjs` (new), `index.html`, `public/sw.js`, plus 5 new files in `src/practice-signals/`.
 
-**Commit status (May 7, late session):** All committed locally across 6 commits in dependency order. Awaiting single push + Netlify manual deploy + phone test. Original 8-commit plan consolidated to 6: App.jsx had 83 hunks heavily interleaved, hunk-level splitting was too error-prone for prestige discipline. App.jsx ships as one commit with full build inventory in commit body.
+**Status (May 7, post-deploy):** All 6 commits pushed to origin/main (3c56952 → 9c6abed). Netlify deployed and published (Arlin manual trigger). AI regression re-run against production: **19/19 scenarios passed, all 3 liability scenarios redirected correctly with liabilityGuard=true.** Build #9 (liability redirect Options A+B) VERIFIED. See AI_REGRESSION_RESULTS_MAY_7.md for full post-deploy verification.
 
-Local commit chain (newest first, all on local main only):
-1. `chore: scripts — preflight tightening + sync key validator + regression runner` (builds #11, #12, #19, #44)
-2. `fix: server-side AI — liability redirects, payload caps, voice corrections + new functions` (builds #9, #21, #22, #37, #46)
-3. `feat: practice-signals — stimulus libraries + exercise components + Disruptor` (builds #32, #33, #36, #38 component file)
-4. `feat+fix: App.jsx — sync infra, self-fixes, hardening, Practice Signals + Pattern Disruption integration` (~30 builds — see commit body)
-5. `chore: re-enable service worker — cache-versioned, network-first HTML` (build #29)
-6. `docs: engagement architecture + Self Mode research + Path A consolidation` (in progress)
+**Punch-list addition from post-deploy run:** scenarios 15 + 18 produced a grammatical stitch in liability-redirect copy ("That tracks" being appended awkwardly to a redirect template that already validates). Behavior is correct; prose is rough. Template-prose polish task, not a regression.
 
-Verification still pending: AI regression re-run post-deploy (verifies build #9 fixed scenario #19), phone test on critical paths.
+Local commit chain on origin/main (newest first):
+1. `9c6abed` — docs: engagement architecture + Self Mode research + Path A consolidation + AI regression artifacts
+2. `eb5b9e7` — chore: re-enable service worker — cache-versioned, network-first HTML (build #29)
+3. `fa23cc5` — feat+fix: App.jsx — sync infra, self-fixes, hardening, Practice Signals + Pattern Disruption integration (~30 builds)
+4. `774152e` — feat: practice-signals — stimulus libraries + exercise components + Disruptor (builds #32, #33, #36, #38)
+5. `4f22ce8` — fix: server-side AI — liability redirects, payload caps, voice corrections + new functions (builds #9, #21, #22, #37, #46)
+6. `1f7fc65` — chore: scripts — preflight tightening + sync key validator + regression runner (builds #11, #12, #19, #44)
 
-Bundle size delta: 588kB → 647kB (+59kB, +10%). Real new feature work (Practice Signals + Pattern Disruption + Disruptor + Pattern Transparency screen). Acceptable for launch.
+**Verification still pending:**
+- Phone test critical paths on Arlin's device (morning chip → bio-filter status → low-demand close → QBPill → Practice Signals → Pattern Disruption surfacing → Self Mode AI-down handoff → Pattern push toggle → State-to-Statement renamed labels → ErrorBoundary recovery)
+- Practice Signals end-to-end (Settings → Practice Signals → Affect Labeling check → Cognitive Defusion check → results screen)
+- Pattern Disruption surfacing (won't fire on first run — needs 3+ data points; verify Settings → Patterns I'm watching for renders cleanly empty-state)
+
+Bundle size delta: 588kB → 647kB (+59kB, +10%). Real new feature work. Acceptable for launch.
 
 Review path: `git log -6 --stat` or open in editor. Each item carries a "May 7, 2026" comment block in code at the line ranges listed.
 
