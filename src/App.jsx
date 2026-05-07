@@ -18107,6 +18107,21 @@ const isSignalProfileConfigured = () => {
                 if (!inEodWindow) return null;
                 const today = TimeKeeper.stillformDayOf(now);
                 const eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
+                // May 7, 2026 — when user taps "tap to update," pre-load saved values
+                // so they can adjust ONE chip rather than re-enter everything.
+                // Previously the form opened with empty state which made "update" a
+                // misleading affordance — user had to re-pick all three fields just to
+                // change one. Mirrors the chip-state pattern used in morning check-in.
+                const loadEodForUpdate = () => {
+                  try {
+                    const saved = JSON.parse(localStorage.getItem("stillform_eod_today") || "null");
+                    if (saved?.date === today) {
+                      if (saved.energy) setEodEnergy(saved.energy);
+                      if (saved.composure) setEodComposure(saved.composure);
+                      if (saved.word) setEodWord(saved.word);
+                    }
+                  } catch {}
+                };
                 if (eodSaved && !eodOpen) return (
                   <button onClick={() => {
                     try {
@@ -18116,6 +18131,7 @@ const isSignalProfileConfigured = () => {
                         source: "update"
                       });
                     } catch {}
+                    loadEodForUpdate();
                     setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
                   }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -18135,6 +18151,7 @@ const isSignalProfileConfigured = () => {
                         source: "update"
                       });
                     } catch {}
+                    loadEodForUpdate();
                     setEodOpen(true);
                   }} style={{
                     width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
@@ -18224,7 +18241,7 @@ const isSignalProfileConfigured = () => {
 
                     <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>One word that names what today taught you</div>
                     <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Solid", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
+                      {["Anchored", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
                         <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
                           background: eodWord === w.toLowerCase() ? "var(--amber-glow)" : "transparent",
                           border: `1px solid ${eodWord === w.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,

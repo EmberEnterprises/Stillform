@@ -229,10 +229,10 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 ### Home Screen
 - [ ] Morning check-in — energy + hardware check (multi-select works)
 - [ ] "On fire" energy option shows between Ready and Wired
-- [ ] End of Day check-in — appears ONLY after 6 PM
-- [ ] EOD: Better/Same/Worse, Yes/Mostly/No, 8 word chips
-- [ ] EOD: "Close the day →" saves and collapses
-- [ ] EOD: "✓ Day closed · tap to update" after saving
+- [x] End of Day check-in — appears ONLY after 6 PM (App.jsx:18101 — gated 6 PM through 4 AM via configurable `stillform_evening_start`)
+- [x] EOD: Full/Steady/Low/Empty energy + Solid/Mixed/Rough composure + 8 word chips (Anchored/Heavy/Sharp/Scattered/Quiet/Grateful/Drained/Proud — App.jsx:18201, 18214, 18227). **Replaced earlier Better/Same/Worse + Yes/Mostly/No spec per commit `4f9fde0`** ("EOD energy — remove morning comparison, use simple snapshot") — current implementation captures absolute end-of-day state and derives morning comparison automatically via `morningEnergy` field saved alongside.
+- [x] EOD: "Close the loop →" saves and collapses (App.jsx:18238 — saveEod handler)
+- [x] EOD: "✓ Closed · tap to update" after saving — pre-populates form values (May 7 fix at App.jsx:18115 `loadEodForUpdate`)
 - [ ] Install banner — amber or fallback text hint (if not installed)
 - [ ] Install banner — hidden when already in standalone mode
 - [ ] Install banner — dismissible with ✕ or "Later"
@@ -403,12 +403,12 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 - [ ] Font sizes bumped (chips 12px, notes 14px, labels 10px)
 
 ### End of Day Check-In
-- [ ] Appears after 6 PM on home screen
-- [ ] 3 taps: energy vs morning, composure held, one word
-- [ ] "Close the day →" saves to localStorage
-- [ ] Dismissed state persists (doesn't re-show after dismiss)
-- [ ] Plausible event fires on save
-- [ ] AI reads yesterday's EOD in next morning session
+- [x] Appears after 6 PM on home screen (App.jsx:18101 — 6 PM through 4 AM gating)
+- [x] 3 taps: energy, composure held, one word (App.jsx:18199-18236)
+- [x] "Close the loop →" saves to localStorage (App.jsx:18238 — saveEod handler at 18149-18173)
+- [x] Dismissed state persists (doesn't re-show after dismiss) — `eodDone` reads stillform_eod_today.date === today
+- [x] Plausible event fires on save (App.jsx:18169)
+- [x] AI reads yesterday's EOD in next morning session
 
 
 ---
