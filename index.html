@@ -124,22 +124,24 @@
         window.__pwaInstallPrompt = e;
       });
 
-      // Reliability-first hotfix:
-      // aggressively remove legacy service workers/caches that can strand users on
-      // stale asset manifests and cause blank screen starts after deploys.
+      // Service worker registration — May 7, 2026 re-enabled.
+      // Replaces the previous aggressive-unregister hotfix that existed because
+      // earlier deploys were stranding users on stale asset manifests. The new
+      // sw.js (in /public/) uses cache versioning + network-first for HTML so
+      // those failure modes don't recur. Offline access is real product value
+      // per Stillform_Strategic_Roadmap.md (return-loop architecture).
+      //
+      // First-load behavior on the upgrade: existing users who had the old
+      // kill-switch sw.js still have it installed. The new sw.js is fetched
+      // and installed; old SW finishes its no-op fetch handling and is
+      // replaced. New SW activates with skipWaiting + clientsClaim.
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          registrations.forEach(function(registration) {
-            registration.unregister();
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js').catch(function() {
+            // SW registration failure is non-fatal — app still works without
+            // caching, just no offline support and no PWA install prompt.
           });
-        }).catch(function() {});
-      }
-      if ('caches' in window) {
-        caches.keys().then(function(names) {
-          names.forEach(function(name) {
-            caches.delete(name);
-          });
-        }).catch(function() {});
+        });
       }
     </script>
   </head>
