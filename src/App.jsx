@@ -9991,7 +9991,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               AI is having trouble connecting
             </div>
             <div className="t-body-sm quiet" style={{ lineHeight: 1.5, marginBottom: 10 }}>
-              Self Mode walks you through the same work without AI — structured, five steps, your pace. Your message is saved either way.
+              Self Mode is the structured five-step practice you can do at your own pace. Your message is saved either way.
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button className="btn btn-ghost" style={{ fontSize: 13 }} onClick={switchToSelfModeFromFailure}>
@@ -10247,7 +10247,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 e.stopPropagation();
                 setInfoModal({
                   title: "What is Self Mode?",
-                  body: "Self Mode is the structured solo practice for working through a moment without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 2011; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
+                  body: "Self Mode is the structured solo practice for working through a moment. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 2011; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
                 });
               }}
               onKeyDown={(e) => {
@@ -10256,7 +10256,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   e.stopPropagation();
                   setInfoModal({
                     title: "What is Self Mode?",
-                    body: "Self Mode is the structured solo practice for working through a moment without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 2011; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
+                    body: "Self Mode is the structured solo practice for working through a moment. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The goal is to train the move you make alone — Reframe handles partner work in real time; Self Mode builds the muscle.\n\nThe primary lineage: Metacognitive Therapy (Wells 2009) — observing a state rather than fusing with it. The 5 steps are an MCT-grounded protocol for that observation.\n\nThe protocol also overlaps with cognitive defusion in Acceptance and Commitment Therapy (Hayes, Strosahl & Wilson 2011; Han & Kim 2022). Both traditions teach the same underlying move: creating distance between you and the thought you're having, rather than treating the thought as truth that needs to be argued with. MCT is the primary framework Stillform draws from; ACT defusion is acknowledged as parallel research that converges on the same mechanism."
                   });
                 }
               }}
@@ -10266,7 +10266,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </span>
           ) : (
             <span
-              title="Work through this on your own without AI. Structured self-observation — for users who prefer to process independently."
+              title="Work through this on your own. Structured self-observation — for users who prefer to process independently."
               style={{ fontSize: 11, color: "var(--text-muted)", cursor: "help", fontFamily: "sans-serif" }}
             >
               ⓘ
@@ -18878,9 +18878,9 @@ const isSignalProfileConfigured = () => {
                   const INFO = {
                     breathe: { title: "Breathe", body: "Paced breathing activates the vagus nerve, directly down-regulating the autonomic nervous system. The exhale length determines recovery speed. Body-first users start here. Thought-first users use this when cognition alone isn't clearing the state." },
                     scan: { title: "Body Scan", body: "Six acupressure points with timed holds. Focused somatic attention redirects cognitive resources to physical sensation — ruminative thought cannot run at full capacity simultaneously. Each point corresponds to a tension-release pathway." },
-                    reframe: { title: "Reframe", body: "AI-assisted cognitive processing. The system reads your physical state, feel state, and input — then identifies what is operationally relevant. It separates what is factually present from what your interpretation is adding. Self Mode runs the same process without AI." },
+                    reframe: { title: "Reframe", body: "AI-assisted cognitive processing. The system reads your physical state, feel state, and input — then identifies what is operationally relevant. It separates what is factually present from what your interpretation is adding. Self Mode is the same protocol, structured for solo work." },
                     pulse: { title: "Signal Log", body: "Emotion tracking through specific labeling. The ability to distinguish between granular emotional states — not broad categories — is consistently associated with better regulation outcomes. Each entry is a data point. Patterns surface in My Progress over time." },
-                    metacognition: { title: "Self Mode", body: "Structured self-observation without AI. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. Grounded in Metacognitive Therapy." },
+                    metacognition: { title: "Self Mode", body: "Structured self-observation — the move you make alone. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. Grounded in Metacognitive Therapy." },
                     progress: { title: "My Progress", body: "A 12-week practice record. Session frequency, streak, tool usage, and Signal Log entries. Patterns that stay invisible inside day-to-day experience become legible over time. A flight recorder, not a mood log." },
                   };
                   const info = INFO[activeTool.id];
@@ -19179,7 +19179,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "What is Self Mode in Reframe?",
-                a: "A structured self-observation protocol for users who prefer to process independently. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The structure is grounded in Metacognitive Therapy — observing a state rather than fusing with it, without AI involvement. Available via the Self Mode tab inside Reframe."
+                a: "A structured self-observation protocol for users who prefer to process independently. Five steps: Notice the physical location, Name the first thought without elaboration, Recognize whether the pattern is familiar, identify your Perspective on what you actually need, then Choose what comes next. The structure is grounded in Metacognitive Therapy — observing a state rather than fusing with it. Available via the Self Mode tab inside Reframe."
               },
               {
                 q: "What is What Shifted?",
