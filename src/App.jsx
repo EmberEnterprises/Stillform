@@ -4108,6 +4108,183 @@ const computeAchievementForBreathe = (sessionEntry) => {
   };
 };
 
+// ─── TRIGGER PROFILE — engagement architecture Build #2 Phase 1 ────────
+//
+// Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.3, Trigger Profile is the
+// third diagnostic layer alongside Signal Profile (where intensity
+// activates in body) and Bias Profile (cognitive distortions).
+//
+// CRITICAL DISTINCTION FROM SIGNAL PROFILE TRIGGERS:
+// Signal Profile already has a `triggers` field — a chip-picker selecting
+// from a predefined 30+ option taxonomy (work pressure, family dynamics,
+// sensory overload, etc). That's TYPE-level data: which categories of
+// trigger affect this user.
+//
+// Trigger Profile is INSTANCE-level data: specific named people, contexts,
+// kinds of moments. "My boss Mike" not "work pressure." "Mom's Sunday
+// dinners" not "family dynamics." "Quarterly OKR reviews" not "deadlines."
+//
+// Per Heider 1958 attribution theory and Lazarus 1991 cognitive appraisal:
+// naming specific external causes binds internal experience to external
+// triggers, enabling appraisal-focused regulation. Without instance-level
+// attribution, users self-attribute ("I'm just anxious") and miss the
+// causal pattern.
+//
+// PHASE 1 SCOPE: data layer only.
+//   - Schema, helpers, AI formatter, SYNC_KEYS membership
+//   - NO UI yet (Phase 2)
+//   - NO encounter tracking from session content (Phase 3)
+//
+// Schema:
+//   stillform_trigger_profile = {
+//     triggers: [
+//       { id, label, category, createdAt, lastSeen, encounterCount }
+//     ],
+//     updatedAt
+//   }
+
+const TRIGGER_PROFILE_CATEGORIES = Object.freeze([
+  "work",            // power dynamics, deadlines, performance
+  "relational",      // specific people, family dynamics
+  "financial",       // money pressure, scarcity
+  "health",          // medical stress, chronic conditions
+  "cross-cultural",  // code-switching, identity navigation
+  "current-events",  // news cycles, collective stress
+  "other"            // user-defined catch-all
+]);
+
+const _generateTriggerId = () => {
+  // Best-effort unique id; collision astronomically unlikely
+  // for a profile that stays under ~50 triggers (spec's practical ceiling).
+  return `trig_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+};
+
+const _emptyTriggerProfile = () => ({ triggers: [], updatedAt: null });
+
+const getTriggerProfile = () => {
+  try {
+    const raw = secureRead("stillform_trigger_profile", null);
+    if (!raw || typeof raw !== "object") return _emptyTriggerProfile();
+    const triggers = Array.isArray(raw.triggers) ? raw.triggers : [];
+    return {
+      triggers: triggers.filter(t => t && typeof t === "object" && t.id && t.label),
+      updatedAt: raw.updatedAt || null
+    };
+  } catch {
+    return _emptyTriggerProfile();
+  }
+};
+
+const saveTriggerProfile = (profile) => {
+  try {
+    const safe = {
+      triggers: Array.isArray(profile?.triggers) ? profile.triggers : [],
+      updatedAt: new Date().toISOString()
+    };
+    secureWrite("stillform_trigger_profile", safe);
+    return safe;
+  } catch { return null; }
+};
+
+const addTrigger = ({ label, category }) => {
+  const trimmed = typeof label === "string" ? label.trim() : "";
+  if (!trimmed) return null;
+  const validCategory = TRIGGER_PROFILE_CATEGORIES.includes(category) ? category : "other";
+  const profile = getTriggerProfile();
+  const now = new Date().toISOString();
+  // Deduplicate by case-insensitive label match (don't add the same name twice)
+  const exists = profile.triggers.find(
+    t => t.label.toLowerCase().trim() === trimmed.toLowerCase()
+  );
+  if (exists) return exists;
+  const newTrigger = {
+    id: _generateTriggerId(),
+    label: trimmed,
+    category: validCategory,
+    createdAt: now,
+    lastSeen: now,
+    encounterCount: 0
+  };
+  profile.triggers.push(newTrigger);
+  saveTriggerProfile(profile);
+  return newTrigger;
+};
+
+const updateTrigger = (id, updates) => {
+  if (!id || !updates || typeof updates !== "object") return null;
+  const profile = getTriggerProfile();
+  const idx = profile.triggers.findIndex(t => t.id === id);
+  if (idx === -1) return null;
+  const existing = profile.triggers[idx];
+  // Whitelist updatable fields. id, createdAt, encounterCount are immutable
+  // through this path (encounterCount has its own incrementer).
+  const allowed = {};
+  if (typeof updates.label === "string" && updates.label.trim()) {
+    allowed.label = updates.label.trim();
+  }
+  if (TRIGGER_PROFILE_CATEGORIES.includes(updates.category)) {
+    allowed.category = updates.category;
+  }
+  const updated = { ...existing, ...allowed };
+  profile.triggers[idx] = updated;
+  saveTriggerProfile(profile);
+  return updated;
+};
+
+const deleteTrigger = (id) => {
+  if (!id) return false;
+  const profile = getTriggerProfile();
+  const next = profile.triggers.filter(t => t.id !== id);
+  if (next.length === profile.triggers.length) return false;
+  profile.triggers = next;
+  saveTriggerProfile(profile);
+  return true;
+};
+
+const incrementTriggerEncounter = (id) => {
+  if (!id) return null;
+  const profile = getTriggerProfile();
+  const idx = profile.triggers.findIndex(t => t.id === id);
+  if (idx === -1) return null;
+  const existing = profile.triggers[idx];
+  const updated = {
+    ...existing,
+    lastSeen: new Date().toISOString(),
+    encounterCount: (existing.encounterCount || 0) + 1
+  };
+  profile.triggers[idx] = updated;
+  saveTriggerProfile(profile);
+  return updated;
+};
+
+// AI context formatter for Reframe API integration.
+// Returns null when no triggers (so Reframe context block can omit cleanly).
+// Otherwise returns a string formatted for AI consumption — top N triggers
+// by encounter count, labeled with category and frequency.
+const formatTriggerProfileForAI = (limit = 8) => {
+  try {
+    const profile = getTriggerProfile();
+    if (!profile.triggers.length) return null;
+    // Sort by encounter count desc, then by lastSeen recency.
+    // The triggers the user has named AND has surfaced most often
+    // are the most cognitively load-bearing.
+    const sorted = [...profile.triggers].sort((a, b) => {
+      const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
+      if (ec !== 0) return ec;
+      const at = new Date(a.lastSeen || a.createdAt || 0).getTime();
+      const bt = new Date(b.lastSeen || b.createdAt || 0).getTime();
+      return bt - at;
+    });
+    const top = sorted.slice(0, limit);
+    const formatted = top.map(t => {
+      const count = t.encounterCount || 0;
+      const countLabel = count === 0 ? "" : ` (${count} encounter${count === 1 ? "" : "s"})`;
+      return `"${t.label}" [${t.category}]${countLabel}`;
+    }).join(", ");
+    return `User's named external triggers: ${formatted}`;
+  } catch { return null; }
+};
+
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
 // Phase 2 of encryption extension. These read/write from the encrypted store
 // (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
@@ -8076,7 +8253,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -8682,6 +8859,7 @@ const SECURE_KEYS = [
   "stillform_journal",
   "stillform_signal_profile",
   "stillform_bias_profile",
+  "stillform_trigger_profile",
   "stillform_checkin_history",
   "stillform_eod_history",
   "stillform_communication_events",
@@ -9621,6 +9799,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const biases = secureRead("stillform_bias_profile", null);
               if (!biases?.length) return null;
               return `User's identified decision patterns: ${biases.join(", ")}`;
+            } catch { return null; }
+          })(),
+          // Build #2 Phase 1 — Trigger Profile (instance-level external triggers).
+          // Distinct from Signal Profile's predefined `triggers` chip-picker
+          // (type-level: "work pressure," "family dynamics") — Trigger Profile
+          // names specific people, contexts, kinds of moments. Top N by
+          // encounter count. Returns null when no triggers named yet.
+          triggerProfile: (() => {
+            try {
+              return formatTriggerProfileForAI(8);
             } catch { return null; }
           })(),
           // Decision 5 (May 2): when calibration was deferred via "Use defaults" and
