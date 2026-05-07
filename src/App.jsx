@@ -21281,80 +21281,22 @@ const isSignalProfileConfigured = () => {
           </div>
         )}
 
-        {/* RECONSTRUCTION BANNER */}
-        {screen === "home" && (() => {
-          const streak = computeStreak();
-          const todaysSessions = countTodaysSessions();
-          const showStreak = streak >= 2;
-          const showToday = todaysSessions >= 1;
-          return (
-            <>
-              {(showStreak || showToday) && (
-                <div style={{
-                  background: "var(--bg)",
-                  borderBottom: "0.5px solid var(--amber-dim)",
-                  padding: "10px 20px",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 24
-                }}>
-                  {showStreak && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: 22,
-                        color: "var(--amber)",
-                        fontWeight: 300,
-                        lineHeight: 1
-                      }}>{streak}</span>
-                      <span style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 9,
-                        letterSpacing: "0.18em",
-                        textTransform: "uppercase",
-                        color: "var(--text-muted)"
-                      }}>
-                        {streak === 1 ? "day" : "days"} consecutive
-                      </span>
-                    </div>
-                  )}
-                  {showStreak && showToday && (
-                    <span style={{ color: "var(--border)", fontSize: 12 }}>·</span>
-                  )}
-                  {showToday && (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <span style={{
-                        fontFamily: "'Cormorant Garamond', serif",
-                        fontSize: 22,
-                        color: "var(--amber)",
-                        fontWeight: 300,
-                        lineHeight: 1
-                      }}>{todaysSessions}</span>
-                      <span style={{
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        fontSize: 9,
-                        letterSpacing: "0.18em",
-                        textTransform: "uppercase",
-                        color: "var(--text-muted)"
-                      }}>
-                        {todaysSessions === 1 ? "session" : "sessions"} today
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-              <div style={{
-                background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)",
-                padding: "8px 20px", textAlign: "center", fontSize: 11,
-                color: "var(--text-dim)", letterSpacing: "0.04em"
-              }}>
-                <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
-                Composure is the foundation. You are its architect.
-              </div>
-            </>
-          );
-        })()}
+        {/* HOME-SCREEN TAGLINE — stats banner removed May 7, 2026 (Arlin's call):
+            "{streak} days consecutive · {N} sessions today" was redundant with
+            My Progress tile, which surfaces the same data more prominently.
+            Per audit philosophy Layer 3.5 (no vocabulary/data redundancy on
+            same screen), the duplicate is the bug. Tagline kept — it's brand,
+            not data. */}
+        {screen === "home" && (
+          <div style={{
+            background: "var(--surface)", borderBottom: "0.5px solid var(--amber-dim)",
+            padding: "8px 20px", textAlign: "center", fontSize: 11,
+            color: "var(--text-dim)", letterSpacing: "0.04em"
+          }}>
+            <span style={{ color: "var(--amber)", marginRight: 6 }}>◉</span>
+            Composure is the foundation. You are its architect.
+          </div>
+        )}
 
         {/* FOOTER — always visible except tool/panic/setup bridge. Active screen link hidden. */}
         {!["tool","panic","setup-bridge"].includes(screen) && (
