@@ -3803,6 +3803,122 @@ const getCurrentStage = () => {
   };
 };
 
+// ─── ACHIEVEMENT MICRO-CREDITS — engagement architecture Build #5 ──────
+//
+// Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.1: ONE specific number per
+// meaningful close, picked by relevance. Embedded in the moment. The
+// credit IS the close. NOT a dashboard.
+//
+// Phase 1 of this build ships Body Scan only. Reframe + Breathe + EOD
+// integrations follow in subsequent builds (each independently shippable).
+//
+// Anti-pattern guards from spec §2:
+//   - No "ACHIEVEMENT" label (sounds gamified). Use "PRACTICE TREND."
+//   - No streaks, badges, or count-up dopamine.
+//   - No "you missed X" failure framing — return null on sparse data
+//     instead of saying "no data."
+//   - Operator-tier voice. No therapy-coded language.
+//
+// Returns: { headline, context } | null
+//   - headline: glanceable specific number (e.g., "Jaw 4 → 2")
+//   - context: optional trend statement (e.g., "Down from 4.1 average")
+//   - null when data is too sparse for an honest credit. Better silence
+//     than fabricated proof.
+
+const computeAchievementForBodyScan = (sessionEntry) => {
+  if (!sessionEntry?.bodyScanTension) return null;
+  const tensionEntries = Object.entries(sessionEntry.bodyScanTension);
+  if (tensionEntries.length === 0) return null;
+
+  // Primary area = highest tension reported in this session — the area
+  // the user MOST noticed. That's the area whose change is most relevant.
+  const sorted = [...tensionEntries].sort((a, b) => b[1] - a[1]);
+  const [primaryArea, primaryLevel] = sorted[0];
+  if (typeof primaryLevel !== "number") return null;
+
+  // Look for same-day morning tension reading in this area for headline delta.
+  // Morning history uses lowercase area keys in some user paths; match
+  // case-insensitively per the existing helper convention.
+  let morningLevel = null;
+  try {
+    const morningHistory = getMorningTensionHistory();
+    const today = TimeKeeper.stillformDay();
+    const sameDay = morningHistory.find(h => h.date === today);
+    if (sameDay?.tensionByArea) {
+      const matchKey = Object.keys(sameDay.tensionByArea).find(
+        k => k.toLowerCase() === primaryArea.toLowerCase()
+      );
+      if (matchKey && typeof sameDay.tensionByArea[matchKey] === "number") {
+        morningLevel = sameDay.tensionByArea[matchKey];
+      }
+    }
+  } catch {}
+
+  // Average tension in this area across last 14 days of body-scan sessions.
+  // Used for the trend context line. Excludes the current session if it's
+  // already saved (the sort below leaves most-recent at the end; we slice
+  // off the latest entry to avoid self-referential trend).
+  let avgPriorTension = null;
+  let priorCount = 0;
+  try {
+    const scanHistory = getBodyScanTensionHistory();
+    const recent = scanHistory.slice(-15, -1); // last 14 PRIOR sessions, excluding current
+    const readings = recent
+      .map(h => {
+        if (!h.tensionByArea) return null;
+        const matchKey = Object.keys(h.tensionByArea).find(
+          k => k.toLowerCase() === primaryArea.toLowerCase()
+        );
+        return matchKey && typeof h.tensionByArea[matchKey] === "number"
+          ? h.tensionByArea[matchKey]
+          : null;
+      })
+      .filter(v => v !== null);
+    priorCount = readings.length;
+    if (readings.length >= 3) {
+      avgPriorTension = readings.reduce((a, b) => a + b, 0) / readings.length;
+    }
+  } catch {}
+
+  // Build headline — use morning→post delta when available (most informative),
+  // otherwise just current level.
+  const headline = morningLevel !== null && morningLevel > primaryLevel
+    ? `${primaryArea}: ${morningLevel} → ${primaryLevel}`
+    : `${primaryArea}: ${primaryLevel}`;
+
+  // Build context — only when there's enough history to be meaningful.
+  // Better to omit than fabricate.
+  let context = null;
+  if (avgPriorTension !== null) {
+    const delta = primaryLevel - avgPriorTension;
+    if (delta < -0.3) {
+      context = `Down from ${avgPriorTension.toFixed(1)} average across last ${priorCount} sessions.`;
+    } else if (delta > 0.3) {
+      context = `Above your ${avgPriorTension.toFixed(1)} average — system noticing.`;
+    } else {
+      context = `Holding near your ${avgPriorTension.toFixed(1)} average.`;
+    }
+  }
+  // Sparse-data path: no context line (returns null instead of fabricated text).
+  // Headline alone is still a real reading.
+
+  return { headline, context };
+};
+
+// computeAchievement(sessionEntry) → { headline, context } | null
+// Dispatches to the right per-tool computer based on session entry shape.
+// Phase 1: Body Scan only. Other tools return null until their handlers
+// ship in subsequent builds.
+const computeAchievement = (sessionEntry) => {
+  if (!sessionEntry) return null;
+  const tools = Array.isArray(sessionEntry.tools) ? sessionEntry.tools : [];
+  if (tools.includes("body-scan")) return computeAchievementForBodyScan(sessionEntry);
+  // Reframe handler: subsequent build (Phase 2 — pre→post rate delta + frequency)
+  // Breathe handler: subsequent build (Phase 3 — physiological-spike delta)
+  // EOD handler: subsequent build (Phase 4 — composure trend)
+  return null;
+};
+
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
 // Phase 2 of encryption extension. These read/write from the encrypted store
 // (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
@@ -6706,6 +6822,50 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>System is learning you. Each session sharpens the read.</div>
           </div>
         )}
+        {/* PRACTICE TREND — engagement architecture Build #5 micro-credit.
+            ONE specific number per close, picked by relevance. Returns null
+            when data is too sparse for an honest credit (better silence
+            than fabricated proof). Compact, glanceable in the ~2s window
+            before auto-advance to What Shifted. Operator-tier label —
+            not "Achievement" (gamified). */}
+        {(() => {
+          const latestSession = (() => { try { return getSessionsFromStorage().slice(-1)[0]; } catch { return null; } })();
+          const credit = (() => { try { return computeAchievement(latestSession); } catch { return null; } })();
+          if (!credit) return null;
+          return (
+            <div style={{
+              background: "var(--surface)",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r)",
+              padding: "12px 16px",
+              marginBottom: 16,
+              textAlign: "left"
+            }}>
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                Practice trend
+              </div>
+              <div style={{
+                fontSize: 14,
+                fontFamily: "'DM Sans', sans-serif",
+                color: "var(--text)",
+                lineHeight: 1.4,
+                marginBottom: credit.context ? 4 : 0
+              }}>
+                {credit.headline}
+              </div>
+              {credit.context && (
+                <div style={{
+                  fontSize: 12,
+                  fontFamily: "'DM Sans', sans-serif",
+                  color: "var(--text-dim)",
+                  lineHeight: 1.5
+                }}>
+                  {credit.context}
+                </div>
+              )}
+            </div>
+          );
+        })()}
         <div className="t-mono-xs" style={{ letterSpacing: "0.1em", marginBottom: 16, animation: "pulse 1s ease-in-out infinite" }}>
           NAMING THE SHIFT…
         </div>
