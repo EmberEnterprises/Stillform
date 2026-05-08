@@ -728,6 +728,39 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
   
   Each surface has the science available — modal text mostly drafts from existing code comments + spec docs (engagement architecture, Russell circumplex, Heider attribution). **This is the third deferred experience tied to the felt-engagement gap.**
 
+- [ ] **🔥 NARRATIVE SPINE / CONNECTIVITY LAYER — the absent integrative experience (added May 8, 2026 from Arlin direction).** This is the largest UX gap the product has and is structurally distinct from the info-button pass above (which fixes WHY for individual surfaces). The connectivity layer fixes the absent CHAIN that ties everything together as one journey.
+
+  **Arlin's exact framing (May 8):** *"Where is the connectivity of the flow for everything? It doesn't feel connected. It doesn't show hey we are using metacognition to help you be your best self by stabilizing composure so you can be successful in your day to achieve your goals and these are the steps you need to take/practice to get these. It feels like a bunch of boxes with no true data system or connectivity."*
+
+  **The gap:** Stillform has features (Bio-filter, Tools, Practice Trend, Mirror anchor, Mirror sheet, My Progress, Stages, Russell classifier, Plain-Language Neuroscience cards) that the user encounters as discrete surfaces. The data layer behind them IS connected (`getCurrentStage`, `classifyShiftDirection`, `computeAchievementForX`, marker progress, three-category data feed all live in one architecture) but the connection is invisible to the user.
+
+  **The missing causal chain — what the user should feel:**
+  1. **Mechanism:** *We use metacognition.* (Wells 2009 — observing the state, not solving it.)
+  2. **Outcome:** *Metacognition stabilizes composure as a learnable capacity.* (Stages of capacity, not points.)
+  3. **Life impact:** *Composure lets you operate well in your day, achieve your goals.* (The user's WHY.)
+  4. **Practice:** *These are the specific moves that build it.* (Body Scan, Reframe, Self Mode mapped to capacities.)
+  5. **Today's contribution:** *This session is rep #N of capacity X — building toward Stage Y.* (Each session ties to the larger journey.)
+  6. **What's next:** *To progress from Stage 1 to Stage 2, here's what to practice.* (Action affordance, not just status.)
+
+  **Concrete examples of where the chain breaks today:**
+  - Mirror anchor displays "STAGE 1 · NOTICING · 50% TO NAMING" — names the position but never names *why naming matters, what naming gives you that noticing doesn't, what to do to get there, or how this connects to your goals.*
+  - Practice Trend shows `focused → mixed` — names the transition but never names *what capacity it builds, what stage it contributes to, or why the user should care.*
+  - My Progress shows aggregates — Avg Shift, Processing Type, Lock-in Rate, Day Streak — but doesn't show *the journey those numbers describe.*
+  - Tools (Body Scan, Reframe, Self Mode) entered from home with no context for *what each one builds, when to use which, or how today's choice contributes to capacity.*
+  - Roadmap markers exist in `getCurrentStage` data but have no surface that shows *the path forward.*
+
+  **What this is NOT:** This is not the info-button pass. Info buttons surface science PER surface. The connectivity layer is the connecting tissue ACROSS surfaces — the thing that makes the whole feel like one practice, not seven tools.
+
+  **Possible solution shapes** (Arlin's call which path; surfacing options, not deciding):
+  - **A) Mirror sheet enhancement** — add "What this stage gives you / What to practice next / How today's session contributes" sections. Single-surface change, big experiential payoff. Lowest risk.
+  - **B) Cross-surface narrative threading** — every Practice Trend, every tool entry, every My Progress metric carries a sentence connecting it to the larger journey ("This session built your NAMING capacity — 3 reps closer to Stage 2"). Bigger surface area, more code touches, higher payoff.
+  - **C) Dedicated "How Stillform Works" surface** — interactive walkthrough that shows the chain explicitly (mechanism → outcome → life impact → practice → today). Standalone, can be entered from Settings or first-run. Lower risk because additive.
+  - **D) Combination** — Mirror sheet enhancement (A) + light narrative threading on highest-visibility surfaces (Mirror anchor, Practice Trend, Reframe close) + retain the option for a later "How Stillform Works" surface. Probably the right path because A is the smallest viable fix to the connectivity gap and B+C extend it without rebuilding it.
+
+  **Relationship to other May 8 items:** This is the parent of the engagement gap. Info-button pass (line 716) addresses WHY. My Progress redesign (line 714) addresses one specific surface. Self Mode redesign (line 715) addresses one specific tool flow. The narrative spine is the FRAME that makes those individual fixes feel like parts of one product instead of disconnected polish. **If launch happens without this, every individual fix above will land but the product will still feel disconnected because the connecting tissue is the actual gap.**
+
+  **Read before scoping:** `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` (the architecture spec) + `MY_PROGRESS_REDESIGN_SPEC.md` (one slice of the connectivity surface). Both already in repo. The framework exists; the surfacing of it doesn't.
+
 - [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin. Build the Android App Bundle from existing Capacitor android/ project.
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough. **Sequenced last on purpose (Arlin direction May 4):** onboarding teaches users what the app does, so the calibration questions and tutorial flow can't be designed until the rest of the prelaunch product scope is locked. Building it earlier means rebuilding it as features land.
 
