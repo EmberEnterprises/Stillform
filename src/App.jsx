@@ -13686,16 +13686,136 @@ const _formatTriggerLastSeen = (iso) => {
   } catch { return null; }
 };
 
+// Shared category chip row — used by TriggerForm (which is used by Settings
+// CRUD, EOD prompt, and any future capture surface). Module-level so all
+// instances render identically.
+const TriggerCategoryChipRow = ({ value, onChange }) => (
+  <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+    {TRIGGER_PROFILE_CATEGORIES.map(cat => {
+      const isActive = value === cat;
+      return (
+        <button
+          key={cat}
+          onClick={() => onChange(cat)}
+          aria-pressed={isActive}
+          aria-label={`Category: ${TRIGGER_CATEGORY_LABELS[cat]}`}
+          style={{
+            background: isActive ? "var(--amber-glow)" : "var(--surface)",
+            border: `0.5px solid ${isActive ? "var(--amber-dim)" : "var(--border)"}`,
+            borderRadius: "var(--r-lg)",
+            padding: "8px 12px",
+            fontSize: 11,
+            color: isActive ? "var(--amber)" : "var(--text-muted)",
+            cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif",
+            letterSpacing: "0.02em",
+            WebkitTapHighlightColor: "transparent"
+          }}
+        >
+          {TRIGGER_CATEGORY_LABELS[cat]}
+        </button>
+      );
+    })}
+  </div>
+);
+
+// Shared trigger form — label input + category chip row + submit/cancel.
+// Used by Phase 2a (Settings CRUD add + edit), Phase 2b (EOD post-save
+// prompt), and Phase 2c (Reframe close prompt) when those ship. Caller
+// owns persistence; this component owns input validation only.
+function TriggerForm({
+  initialLabel = "",
+  initialCategory = "work",
+  submitLabel = "Add",
+  cancelLabel = "Cancel",
+  placeholder = "e.g., Mike's 1:1, Sunday family dinners",
+  autoFocus = false,
+  onSubmit,
+  onCancel
+}) {
+  const [label, setLabel] = useState(initialLabel);
+  const [category, setCategory] = useState(initialCategory);
+  const [error, setError] = useState("");
+
+  const submit = () => {
+    const trimmed = label.trim();
+    if (!trimmed) { setError("Add a label."); return; }
+    if (trimmed.length > 64) { setError("Keep it under 64 characters."); return; }
+    setError("");
+    if (typeof onSubmit === "function") onSubmit({ label: trimmed, category });
+  };
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={label}
+        onChange={(e) => setLabel(e.target.value)}
+        maxLength={64}
+        placeholder={placeholder}
+        aria-label="Trigger label"
+        autoFocus={autoFocus}
+        style={{
+          width: "100%",
+          background: "var(--surface)",
+          border: "0.5px solid var(--border)",
+          borderRadius: "var(--r-sm)",
+          padding: "10px 12px",
+          fontSize: 13,
+          color: "var(--text)",
+          fontFamily: "'DM Sans', sans-serif",
+          marginBottom: 12,
+          WebkitAppearance: "none"
+        }}
+      />
+      <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Category</div>
+      <TriggerCategoryChipRow value={category} onChange={setCategory} />
+      {error && (
+        <div className="t-caption" style={{ color: "var(--state-negative, var(--text-muted))", marginBottom: 10 }}>
+          {error}
+        </div>
+      )}
+      <div style={{ display: "flex", gap: 8 }}>
+        <button
+          onClick={submit}
+          style={{
+            background: "var(--amber-glow)",
+            border: "0.5px solid var(--amber-dim)",
+            borderRadius: "var(--r-sm)",
+            padding: "9px 16px",
+            fontSize: 12,
+            color: "var(--amber)",
+            cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif"
+          }}
+        >
+          {submitLabel}
+        </button>
+        <button
+          onClick={onCancel}
+          style={{
+            background: "var(--surface)",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--r-sm)",
+            padding: "9px 16px",
+            fontSize: 12,
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            fontFamily: "'DM Sans', sans-serif"
+          }}
+        >
+          {cancelLabel}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function TriggerProfileSection({ onChange }) {
   const [profile, setProfile] = useState(() => getTriggerProfile());
   const [adding, setAdding] = useState(false);
-  const [newLabel, setNewLabel] = useState("");
-  const [newCategory, setNewCategory] = useState("work");
   const [editingId, setEditingId] = useState(null);
-  const [editLabel, setEditLabel] = useState("");
-  const [editCategory, setEditCategory] = useState("work");
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [error, setError] = useState("");
 
   const refresh = () => {
     const next = getTriggerProfile();
@@ -13709,43 +13829,16 @@ function TriggerProfileSection({ onChange }) {
     return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
   });
 
-  const handleAdd = () => {
-    const trimmed = newLabel.trim();
-    if (!trimmed) { setError("Add a label."); return; }
-    if (trimmed.length > 64) { setError("Keep it under 64 characters."); return; }
-    const result = addTrigger({ label: trimmed, category: newCategory });
-    if (!result) { setError("Couldn't save. Try again."); return; }
-    setNewLabel("");
-    setNewCategory("work");
+  const handleAdd = ({ label, category }) => {
+    if (!addTrigger({ label, category })) return;
     setAdding(false);
-    setError("");
     refresh();
   };
 
-  const handleEditStart = (t) => {
-    setEditingId(t.id);
-    setEditLabel(t.label);
-    setEditCategory(t.category || "other");
-    setConfirmDeleteId(null);
-    setAdding(false);
-  };
-
-  const handleEditSave = (id) => {
-    const trimmed = editLabel.trim();
-    if (!trimmed) { setError("Label can't be empty."); return; }
-    if (trimmed.length > 64) { setError("Keep it under 64 characters."); return; }
-    const result = updateTrigger(id, { label: trimmed, category: editCategory });
-    if (!result) { setError("Couldn't save. Try again."); return; }
+  const handleEditSave = (id) => ({ label, category }) => {
+    if (!updateTrigger(id, { label, category })) return;
     setEditingId(null);
-    setEditLabel("");
-    setError("");
     refresh();
-  };
-
-  const handleEditCancel = () => {
-    setEditingId(null);
-    setEditLabel("");
-    setError("");
   };
 
   const handleDelete = (id) => {
@@ -13754,36 +13847,6 @@ function TriggerProfileSection({ onChange }) {
     refresh();
   };
 
-  const CategoryChipRow = ({ value, onChange: setVal }) => (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-      {TRIGGER_PROFILE_CATEGORIES.map(cat => {
-        const isActive = value === cat;
-        return (
-          <button
-            key={cat}
-            onClick={() => setVal(cat)}
-            aria-pressed={isActive}
-            aria-label={`Category: ${TRIGGER_CATEGORY_LABELS[cat]}`}
-            style={{
-              background: isActive ? "var(--amber-glow)" : "var(--surface)",
-              border: `0.5px solid ${isActive ? "var(--amber-dim)" : "var(--border)"}`,
-              borderRadius: "var(--r-lg)",
-              padding: "8px 12px",
-              fontSize: 11,
-              color: isActive ? "var(--amber)" : "var(--text-muted)",
-              cursor: "pointer",
-              fontFamily: "'DM Sans', sans-serif",
-              letterSpacing: "0.02em",
-              WebkitTapHighlightColor: "transparent"
-            }}
-          >
-            {TRIGGER_CATEGORY_LABELS[cat]}
-          </button>
-        );
-      })}
-    </div>
-  );
-
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Triggers</div>
@@ -13791,7 +13854,7 @@ function TriggerProfileSection({ onChange }) {
         Specific people, contexts, or moments where composure is hardest. Name them as they show up — instances, not categories. Editable anytime.
       </div>
 
-      {/* List */}
+      {/* Empty state */}
       {sorted.length === 0 && !adding && (
         <div style={{
           background: "var(--surface)",
@@ -13806,6 +13869,7 @@ function TriggerProfileSection({ onChange }) {
         </div>
       )}
 
+      {/* List */}
       {sorted.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
           {sorted.map(t => {
@@ -13823,65 +13887,15 @@ function TriggerProfileSection({ onChange }) {
                   borderRadius: "var(--r)",
                   padding: "12px 14px"
                 }}>
-                  <input
-                    type="text"
-                    value={editLabel}
-                    onChange={(e) => setEditLabel(e.target.value)}
-                    maxLength={64}
+                  <TriggerForm
+                    initialLabel={t.label}
+                    initialCategory={t.category || "other"}
+                    submitLabel="Save"
+                    cancelLabel="Cancel"
                     placeholder="Trigger label"
-                    aria-label="Edit trigger label"
-                    style={{
-                      width: "100%",
-                      background: "var(--surface)",
-                      border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r-sm)",
-                      padding: "8px 10px",
-                      fontSize: 13,
-                      color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif",
-                      marginBottom: 10,
-                      WebkitAppearance: "none"
-                    }}
+                    onSubmit={handleEditSave(t.id)}
+                    onCancel={() => setEditingId(null)}
                   />
-                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Category</div>
-                  <CategoryChipRow value={editCategory} onChange={setEditCategory} />
-                  {error && (
-                    <div className="t-caption" style={{ color: "var(--state-negative, var(--text-muted))", marginBottom: 8 }}>
-                      {error}
-                    </div>
-                  )}
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button
-                      onClick={() => handleEditSave(t.id)}
-                      style={{
-                        background: "var(--amber-glow)",
-                        border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 14px",
-                        fontSize: 12,
-                        color: "var(--amber)",
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif"
-                      }}
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={handleEditCancel}
-                      style={{
-                        background: "var(--surface)",
-                        border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r-sm)",
-                        padding: "8px 14px",
-                        fontSize: 12,
-                        color: "var(--text-muted)",
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif"
-                      }}
-                    >
-                      Cancel
-                    </button>
-                  </div>
                 </div>
               );
             }
@@ -13957,7 +13971,7 @@ function TriggerProfileSection({ onChange }) {
                 </div>
                 <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
                   <button
-                    onClick={() => handleEditStart(t)}
+                    onClick={() => { setEditingId(t.id); setConfirmDeleteId(null); setAdding(false); }}
                     aria-label={`Edit ${t.label}`}
                     style={{
                       background: "transparent",
@@ -13996,7 +14010,7 @@ function TriggerProfileSection({ onChange }) {
       {/* Add affordance */}
       {!adding && (
         <button
-          onClick={() => { setAdding(true); setEditingId(null); setConfirmDeleteId(null); setError(""); }}
+          onClick={() => { setAdding(true); setEditingId(null); setConfirmDeleteId(null); }}
           style={{
             width: "100%",
             background: "var(--surface)",
@@ -14022,66 +14036,11 @@ function TriggerProfileSection({ onChange }) {
           borderRadius: "var(--r)",
           padding: "14px 16px"
         }}>
-          <input
-            type="text"
-            value={newLabel}
-            onChange={(e) => setNewLabel(e.target.value)}
-            maxLength={64}
-            placeholder="e.g., Mike's 1:1, Sunday family dinners"
-            aria-label="New trigger label"
+          <TriggerForm
             autoFocus
-            style={{
-              width: "100%",
-              background: "var(--surface)",
-              border: "0.5px solid var(--border)",
-              borderRadius: "var(--r-sm)",
-              padding: "10px 12px",
-              fontSize: 13,
-              color: "var(--text)",
-              fontFamily: "'DM Sans', sans-serif",
-              marginBottom: 12,
-              WebkitAppearance: "none"
-            }}
+            onSubmit={handleAdd}
+            onCancel={() => setAdding(false)}
           />
-          <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Category</div>
-          <CategoryChipRow value={newCategory} onChange={setNewCategory} />
-          {error && (
-            <div className="t-caption" style={{ color: "var(--state-negative, var(--text-muted))", marginBottom: 10 }}>
-              {error}
-            </div>
-          )}
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={handleAdd}
-              style={{
-                background: "var(--amber-glow)",
-                border: "0.5px solid var(--amber-dim)",
-                borderRadius: "var(--r-sm)",
-                padding: "9px 16px",
-                fontSize: 12,
-                color: "var(--amber)",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}
-            >
-              Add
-            </button>
-            <button
-              onClick={() => { setAdding(false); setNewLabel(""); setNewCategory("work"); setError(""); }}
-              style={{
-                background: "var(--surface)",
-                border: "0.5px solid var(--border)",
-                borderRadius: "var(--r-sm)",
-                padding: "9px 16px",
-                fontSize: 12,
-                color: "var(--text-muted)",
-                cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif"
-              }}
-            >
-              Cancel
-            </button>
-          </div>
         </div>
       )}
     </div>
@@ -16487,6 +16446,11 @@ export default function Stillform() {
   const [eodComposure, setEodComposure] = useState(null);
   const [eodWord, setEodWord] = useState(null);
   const [eodSaved, setEodSaved] = useState(false);
+  // Phase 2b — Trigger Profile EOD post-save prompt. Transient state: set
+  // true by saveEod immediately after persistence; flipped false by the
+  // prompt's submit or skip handlers. Component-local only (no persistence)
+  // so a reopened app after dismissal doesn't re-prompt for the same EOD.
+  const [eodTriggerPromptOpen, setEodTriggerPromptOpen] = useState(false);
   const [eodPromptDismissed, setEodPromptDismissed] = useState(false);
   const [loopNudgeDismissedDay, setLoopNudgeDismissedDay] = useState(() => {
     try { return localStorage.getItem(LOOP_NUDGE_DISMISSED_DAY_KEY) || ""; } catch { return ""; }
@@ -20739,6 +20703,46 @@ const isSignalProfileConfigured = () => {
                     }
                   } catch {}
                 };
+                // Phase 2b — Trigger Profile EOD prompt. Renders between
+                // EOD save and the saved-state button. Does NOT block the
+                // save (already persisted by saveEod). Submit writes a
+                // trigger via Phase 1 helpers + increments encounterCount;
+                // skip just closes the prompt. State is component-local
+                // so a dismissed prompt does not re-fire on app reopen.
+                if (eodTriggerPromptOpen) return (
+                  <div style={{
+                    background: "var(--surface)",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)",
+                    padding: "16px 18px",
+                    marginBottom: 20
+                  }}>
+                    <div className="t-mono-xs" style={{ marginBottom: 8 }}>One more</div>
+                    <div className="t-body-sm" style={{ color: "var(--text)", marginBottom: 14, lineHeight: 1.6 }}>
+                      Did one specific thing show up today? Name it — a person, context, or moment. Optional.
+                    </div>
+                    <TriggerForm
+                      autoFocus
+                      submitLabel="Save"
+                      cancelLabel="Not today"
+                      placeholder="e.g., Mike's 1:1, today's news cycle"
+                      onSubmit={({ label, category }) => {
+                        try {
+                          const result = addTrigger({ label, category });
+                          if (result?.id) {
+                            incrementTriggerEncounter(result.id);
+                          }
+                          try { window.plausible("Trigger Added From EOD", { props: { category } }); } catch {}
+                        } catch {}
+                        setEodTriggerPromptOpen(false);
+                      }}
+                      onCancel={() => {
+                        try { window.plausible("Trigger Prompt Skipped", { props: { surface: "eod" } }); } catch {}
+                        setEodTriggerPromptOpen(false);
+                      }}
+                    />
+                  </div>
+                );
                 if (eodSaved && !eodOpen) return (
                   <button onClick={() => {
                     try {
@@ -20839,6 +20843,11 @@ const isSignalProfileConfigured = () => {
                   setEodSaved(true);
                   setEodPromptDismissed(false);
                   setEodOpen(false);
+                  // Phase 2b — Trigger Profile prompt. Open immediately after
+                  // persistence so the user can name what showed up today
+                  // while the day is still in their head. Optional, dismissible.
+                  setEodTriggerPromptOpen(true);
+                  try { window.plausible("Trigger Prompt Shown", { props: { surface: "eod" } }); } catch {}
                 };
 
                 if (!eodOpen && !eodDone) return (
