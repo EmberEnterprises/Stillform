@@ -377,6 +377,22 @@ function hasAnyPattern(text, patterns) {
   });
 }
 
+// findMatchingPattern — returns the source string of the first matching regex,
+// or null if none match. Parallel to hasAnyPattern, used by the validators to
+// surface WHICH specific pattern fired for telemetry. The source string is
+// safe for telemetry (no user content) — it's the regex pattern itself.
+// Added v1.3 (May 8 2026, GPT-4o Guardrails Audit Action 1 — observability into
+// which specific bans are doing the work, which are dead weight).
+function findMatchingPattern(text, patterns) {
+  const value = String(text || "");
+  for (const pattern of patterns) {
+    if (!(pattern instanceof RegExp)) continue;
+    pattern.lastIndex = 0;
+    if (pattern.test(value)) return pattern.source;
+  }
+  return null;
+}
+
 function normalizeForSnippetMatch(text) {
   return String(text || "")
     .toLowerCase()
@@ -388,6 +404,17 @@ function normalizeForSnippetMatch(text) {
 function hasAnySnippet(text, snippets) {
   const normalized = normalizeForSnippetMatch(text);
   return snippets.some((snippet) => normalized.includes(snippet));
+}
+
+// findMatchingSnippet — returns the matching substring or null. Same purpose
+// as findMatchingPattern but for substring-based bans. The snippet itself
+// is safe for telemetry (it's the ban-list literal, not user content).
+function findMatchingSnippet(text, snippets) {
+  const normalized = normalizeForSnippetMatch(text);
+  for (const snippet of snippets) {
+    if (normalized.includes(snippet)) return snippet;
+  }
+  return null;
 }
 
 function extractQuotedAnchors(input) {
@@ -640,10 +667,22 @@ function validateReframePayload(payload, { isSummaryRequest = false, hasCrisisLa
     const maxQuestions = (isLowDemand && !hasCrisisLanguage) ? 0 : 1;
     if (questionCount > maxQuestions) reasons.push(isLowDemand ? "low-demand prefers statements" : "too many questions");
   }
-  if (hasAnySnippet(reframe, GENERIC_GARBAGE_SNIPPETS)) reasons.push("generic garbage phrasing");
-  if (hasAnySnippet(nextStep, GENERIC_NEXT_STEP_SNIPPETS)) reasons.push("generic next_step");
-  if (hasAnyPattern(reframe, GENERIC_GARBAGE_PATTERNS)) reasons.push("generic garbage phrasing");
-  if (hasAnyPattern(reframe, BANNED_REFRAME_PATTERNS)) reasons.push("contains banned phrase");
+  if (hasAnySnippet(reframe, GENERIC_GARBAGE_SNIPPETS)) {
+    const snippet = findMatchingSnippet(reframe, GENERIC_GARBAGE_SNIPPETS);
+    reasons.push(snippet ? `generic garbage phrasing: ${snippet}` : "generic garbage phrasing");
+  }
+  if (hasAnySnippet(nextStep, GENERIC_NEXT_STEP_SNIPPETS)) {
+    const snippet = findMatchingSnippet(nextStep, GENERIC_NEXT_STEP_SNIPPETS);
+    reasons.push(snippet ? `generic next_step: ${snippet}` : "generic next_step");
+  }
+  if (hasAnyPattern(reframe, GENERIC_GARBAGE_PATTERNS)) {
+    const source = findMatchingPattern(reframe, GENERIC_GARBAGE_PATTERNS);
+    reasons.push(source ? `generic garbage phrasing: ${source}` : "generic garbage phrasing");
+  }
+  if (hasAnyPattern(reframe, BANNED_REFRAME_PATTERNS)) {
+    const source = findMatchingPattern(reframe, BANNED_REFRAME_PATTERNS);
+    reasons.push(source ? `contains banned phrase: ${source}` : "contains banned phrase");
+  }
   return { ok: reasons.length === 0, reasons };
 }
 
@@ -685,7 +724,10 @@ function validateVoiceContract(payload, { isSummaryRequest = false, isSoftEntry 
   const reframe = String(payload?.reframe || "").trim();
   if (!reframe) return { ok: false, reasons: ["empty voice payload"] };
 
-  if (hasAnyPattern(reframe, VOICE_CONTRACT_BANNED_PATTERNS)) reasons.push("voice contract banned phrase");
+  if (hasAnyPattern(reframe, VOICE_CONTRACT_BANNED_PATTERNS)) {
+    const source = findMatchingPattern(reframe, VOICE_CONTRACT_BANNED_PATTERNS);
+    reasons.push(source ? `voice contract banned phrase: ${source}` : "voice contract banned phrase");
+  }
 
   if (!hasCrisisLanguage && reframe.length > 560) {
     reasons.push("voice payload too long");
@@ -1714,6 +1756,12 @@ WHAT STAYING SHARP LOOKS LIKE:
         scienceRoute: scienceRoute?.id || null,
         qualityRetryUsed: retryUsed,
         deterministicFallbackUsed: fallbackUsed,
+        // GPT-4o Guardrails Audit Action 1 (May 8 2026): surface payload-level
+        // validation reasons (BANNED_REFRAME_PATTERNS + GENERIC_GARBAGE_PATTERNS)
+        // for client-side Plausible telemetry. Reasons carry pattern source only,
+        // never user content (per master todo line 427 constraint).
+        payloadValidationFailed: !lastValidation.ok,
+        payloadFailureReasons: lastValidation.reasons || [],
         voiceValidationFailed: !lastVoiceValidation.ok,
         voiceFailureReasons: lastVoiceValidation.reasons || [],
         intentionValidationFailed: !lastIntentionValidation.ok,

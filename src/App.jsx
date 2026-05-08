@@ -10022,6 +10022,41 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       if (parsed.crisisDetected) { try { window.plausible("Crisis Detection Triggered"); } catch {} }
       if (parsed.liabilityGuard) { try { window.plausible("Liability Guard Triggered"); } catch {} }
+      // GPT-4o Guardrails Audit Action 1 (May 8 2026): surface WHICH specific banned
+      // pattern fired across all three validation layers. Reasons carry pattern source
+      // only (regex source string or substring snippet), never user content. Layer
+      // attribution lets us see whether bans concentrate in payload (BANNED_REFRAME_PATTERNS,
+      // GENERIC_GARBAGE_PATTERNS) or in voice contract (VOICE_CONTRACT_BANNED_PATTERNS).
+      // Some bans may have never fired in production (dead weight); some may fire constantly
+      // (need prompt-level reinforcement, not just post-process catch). This is the data
+      // that lets us tell the difference.
+      const bannedPatternFires = [];
+      const collectBans = (reasons, layer) => {
+        if (!Array.isArray(reasons)) return;
+        for (const reason of reasons) {
+          if (typeof reason !== "string") continue;
+          // Match prefixes set by validateReframePayload + validateVoiceContract.
+          // Pattern source is everything after the colon-space; null if generic.
+          const m = reason.match(/^(contains banned phrase|generic garbage phrasing|generic next_step|voice contract banned phrase): (.+)$/);
+          if (m) {
+            bannedPatternFires.push({ category: m[1], pattern: m[2], layer });
+          }
+        }
+      };
+      collectBans(parsed.payloadFailureReasons, "payload");
+      collectBans(parsed.voiceFailureReasons, "voice_contract");
+      for (const fire of bannedPatternFires) {
+        try {
+          window.plausible("Reframe Banned Pattern Fired", {
+            props: {
+              category: fire.category,
+              pattern: fire.pattern,
+              layer: fire.layer,
+              mode: effectiveMode || "calm"
+            }
+          });
+        } catch {}
+      }
       if (parsed.voiceValidationFailed) {
         try {
           window.plausible("Reframe Voice Guard Triggered", {
