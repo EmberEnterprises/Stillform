@@ -339,6 +339,19 @@ This question was added after discovering 5 call sites in the codebase use `Date
 
 **A regex guard with a known bypass is worse than no guard, because it produces false confidence.**
 
+### Question 2.39: "For any read of persisted data, does the read path actually match the write path?" (added v1.3, May 8 night)
+**Required for any read of localStorage / SecureCache / IndexedDB data.**
+
+A read can be field-name-correct, schema-correct, regex-guard-clean, and still return stale or empty data if the read path doesn't match the write path. The bug is invisible at every other audit layer — only Question 2.39 catches it.
+
+- **Evidence:** For every helper that reads persisted data, I locate the write path (where the data is actually persisted) and confirm: (a) the read API and write API access the same underlying store, (b) writes are visible to subsequent reads in the same session.
+- **Pass:** Read path and write path use the same storage mechanism (both raw localStorage, OR both secureRead/secureWrite, OR both IndexedDB).
+- **Fail:** Read uses secureRead but write uses raw localStorage.setItem (or vice versa). Symptom: helper returns boot-time snapshot, missing all writes that happened in the current session. Tests pass against pre-seeded data; production fails silently for data created in-session.
+
+This question was added because two of my v1.3 fixes (commit 1f49ddb) introduced exactly this bug: I changed `getEodHistory` and `_s2LongestSustainedCheckinRun` from raw localStorage reads to `secureRead` to "fix" the encryption inconsistency — without checking that the WRITES for those keys still go through raw `localStorage.setItem` (in `appendDailyLoopHistory` line 5139). My "fix" produced stale reads. Reverted in the next commit after audit caught it.
+
+The Stillform codebase has a pre-existing architectural inconsistency: some SECURE_KEYS use secureWrite (encryption-at-rest works), others use raw localStorage (encryption-at-rest is broken for those keys). Tonight's audit aligned reads to writes for the broken-encryption keys via explicit `// SECURE-KEYS-ALLOW: ...` markers. The broader architectural consistency is flagged as failure class 15 for future broader audit.
+
 ---
 
 ## LAYER 3 — Behavior audit
@@ -611,6 +624,7 @@ Documented from real failures so far:
 12. **Synthetic tests verifying fiction** (Phase 1 Body Scan credit, May 7 night) — Layer 2.36. Mocked helpers in tests with field names matching MY ASSUMPTION (`tensionByArea`) instead of actual implementation (`tension`, `bodyScanTension`). All 9 tests passed against fictional data shapes. Production code: morning-delta and trend-context lines never fire because field reads always evaluate undefined.
 13. **Field-name read without source verification** (Phase 1 Body Scan credit, May 7 night) — Layer 2.37. Read `sameDay.tensionByArea` and `h.tensionByArea` without grepping where those fields are written. Five-second check would have caught it.
 14. **Regex-guard bypass via following existing pattern** (Phase 0 Stage Definitions data layer, May 7 evening, surfaced May 7 night) — Layer 2.38. Used `Date.now() - (variable * 24 * 60 * 60 * 1000)` — preflight regex requires literal-number multiplier and missed the variable form. Followed an existing pattern (4 pre-existing call sites bypass identically). Guard "passed" while violation was visible.
+15. **Read-write path mismatch on persisted data** (commit 1f49ddb, May 8 night, surfaced same session) — Layer 2.39. Changed `getEodHistory` and `_s2LongestSustainedCheckinRun` from raw localStorage reads to `secureRead` to address the encryption-at-rest inconsistency, without checking that the corresponding WRITES still went through raw `localStorage.setItem` in `appendDailyLoopHistory` (line 5139). Result: those helpers returned stale boot-time SecureCache snapshots, missing all writes from the current session. Tests passed against pre-seeded data; production was broken for any in-session data. Reverted in the same session. Two more sites (line 17223 getSignalDivergence, line 19704 My Progress sessions reader) had the same pre-existing bug; both fixed via raw read alignment with explicit `// SECURE-KEYS-ALLOW:` markers. The broader encryption-at-rest architectural inconsistency (some SECURE_KEYS use secureWrite, others use raw localStorage) is pre-existing tech debt flagged for future audit, not fixed in scope.
 
 When new failure classes appear, document them here and add the audit that catches them.
 
@@ -624,6 +638,6 @@ When new failure classes appear, document them here and add the audit that catch
 
 **v1.2 — May 7, 2026 evening.** Added Question 1.0 (session-start ground truth — `git log --oneline -10` + `wc -l` checks) and refined Question 1.1 (explicit grep guidance: feature name, adjacent state names, comment markers, storage keys — not just the names of new code being written). Added Question 6.7 (diff anomaly investigation — when the math is surprising, stop and verify, don't commit). Documented failure classes 9 and 10 from the Mirror surface duplicate near-miss.
 
-**v1.3 — May 7, 2026 night.** Added the **Prime Directive of Integrity** (all-caps standing rule from Arlin's directive after a night of assumption-based work). Added Layer 0.6 (flow ground truth — read canonical flow docs before designing user-facing surfaces). Added Question 2.36 (synthetic tests must mock against actual helper return shapes, not assumed shapes). Added Question 2.37 (field-name reads must be verified against source-of-truth definition). Added Question 2.38 (regex guards must catch every documented violation shape — known bypasses are worse than no guard). Documented failure classes 11-14 from Build #2 Trigger Profile flow assumption + Phase 1 Body Scan field-name bugs + Phase 0 TimeKeeper guard bypass.
+**v1.3 — May 7-8, 2026 night.** Added the **Prime Directive of Integrity** (all-caps standing rule from Arlin's directive after a night of assumption-based work). Added Layer 0.6 (flow ground truth — read canonical flow docs before designing user-facing surfaces). Added Question 2.36 (synthetic tests must mock against actual helper return shapes, not assumed shapes). Added Question 2.37 (field-name reads must be verified against source-of-truth definition). Added Question 2.38 (regex guards must catch every documented violation shape — known bypasses are worse than no guard). Added Question 2.39 (for any persisted-data read, the read path must match the write path — secureRead/secureWrite mismatch produces stale-read bugs invisible to other audit layers). Documented failure classes 11-15 from Build #2 Trigger Profile flow assumption + Phase 1 Body Scan field-name bugs + Phase 0 TimeKeeper guard bypass + secureRead/secureWrite read-write path mismatch.
 
 Future versions update this doc when a new failure class is identified. The audit philosophy itself is reviewable, fallible, and evolves.

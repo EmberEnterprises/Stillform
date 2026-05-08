@@ -3214,13 +3214,19 @@ const getMorningToScanDelta = (limitDays = 30) => {
 // will only have the partial shape; helpers handle missing fields gracefully.
 
 // Get all EOD records sorted oldest-first.
-// Layer 2.37 source-of-truth: stillform_eod_history is in SECURE_KEYS (line ~8855).
-// Encrypted users have an envelope { __enc: true, ... } at this localStorage key,
-// not the array. Reading raw produced an empty result (Array.isArray on envelope
-// is false → fall through to []). Fixed v1.3 to use secureRead.
+// READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
+// Reads via raw localStorage to match the write path. trackEodComplete
+// → appendDailyLoopHistory (line 5139) writes via localStorage.setItem.
+// SecureCache is primed once at boot; subsequent raw writes don't update
+// it. Reading via secureRead would return stale boot-time data, missing
+// today's EOD record. Raw read here matches what the write path persisted.
+// Architectural note: stillform_eod_history is in SECURE_KEYS but the
+// write path doesn't use secureWrite — pre-existing inconsistency flagged
+// for future audit (failure class 15). Tonight's work aligns reads to
+// writes; the broader encryption-at-rest consistency is out of scope.
 const getEodHistory = () => {
   try {
-    const raw = secureRead("stillform_eod_history", []);
+    const raw = readArrayFromStorage("stillform_eod_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
     if (!Array.isArray(raw)) return [];
     return raw
       .map(c => ({
@@ -3618,12 +3624,16 @@ const _s2CountDistinctChips = (windowDays = STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_W
 // week for the last 2 consecutive weeks").
 const _s2LongestSustainedCheckinRun = (perWeekMin = STAGE_THRESHOLDS.S2_CHECKINS_PER_WEEK_MIN) => {
   try {
-    // Layer 2.37 source-of-truth: stillform_checkin_history is in SECURE_KEYS
-    // (line ~8855). Encrypted users have an envelope { __enc: true, ... } at
-    // this localStorage key, not the array. Reading raw produced an empty
-    // result for encrypted users → S2 sustained-run always evaluated 0,
-    // blocking Stage 2 progression. Fixed v1.3 to use secureRead.
-    const raw = secureRead("stillform_checkin_history", []);
+    // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
+    // Reads via raw localStorage to match the write path. trackMorningComplete
+    // → appendDailyLoopHistory (line 5139) writes via localStorage.setItem.
+    // SecureCache is primed once at boot; subsequent raw writes don't update
+    // it. Reading via secureRead would return stale boot-time data, missing
+    // today's check-in. Raw read here matches what the write path persisted.
+    // Architectural note: stillform_checkin_history is in SECURE_KEYS but
+    // the write path doesn't use secureWrite — pre-existing inconsistency
+    // flagged for future audit (failure class 15).
+    const raw = readArrayFromStorage("stillform_checkin_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
     if (!Array.isArray(raw) || raw.length === 0) return 0;
     // Group by ISO week (sunday-anchored). Use ISO date string normalized to
     // a week-start key: monday of the week containing the timestamp.
@@ -17210,7 +17220,12 @@ const getSignalDivergence = () => {
     const mappedAreas = (profile?.firstAreas || []).map(a => a.toLowerCase());
     if (!mappedAreas.length) return null;
 
-    const history = secureRead("stillform_checkin_history", []);
+    // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
+    // stillform_checkin_history is written via raw localStorage in
+    // appendDailyLoopHistory (line 5139). secureRead returns boot-time
+    // SecureCache snapshot, missing today's check-ins → divergence
+    // detection silently failed for current-session data. Aligned to raw read.
+    const history = readArrayFromStorage("stillform_checkin_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
     const sevenDaysAgo = TimeKeeper.daysAgoMs(7);
     const recent = history.filter(c => new Date(c.timestamp || c.date).getTime() > sevenDaysAgo);
     if (recent.length < 3) return null;
@@ -19690,8 +19705,13 @@ const isSignalProfileConfigured = () => {
                         <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 400, color: "var(--text)" }}>My Progress</div>
                         {(() => {
                           // Show one data-backed cue at rest — priority order per spec
+                          // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
+                          // stillform_sessions is written via raw localStorage in
+                          // setSessionsInStorage (line 2478). secureRead returns
+                          // boot-time SecureCache snapshot, missing current-session
+                          // sessions. Use getSessionsFromStorage which reads raw.
                           try {
-                            const sessions = secureRead("stillform_sessions", []);
+                            const sessions = getSessionsFromStorage(); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
                             if (!Array.isArray(sessions) || sessions.length < 3) return null;
                             // 1. Signal Awareness — autonomous exits
                             const autoExits = sessions.filter(s => s.autonomousExit).length;
