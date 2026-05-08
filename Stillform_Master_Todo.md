@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 7, 2026**
+**ARA Embers LLC · last updated May 8, 2026 (post-audit night session)**
 
 ---
 
@@ -34,12 +34,41 @@ NOTICING → NAMING → ANTICIPATING → RECOGNIZING → HOLDING. Single-verb ca
 **What this does NOT absorb:**
 - Decision item 5 (Self Mode redesign) → stays distinct. Framing locked May 7 ("Past Self / Present Self"). See SELF_MODE_REDESIGN_RESEARCH.md.
 
-**Status:** Architecture documented in STILLFORM_ENGAGEMENT_ARCHITECTURE.md. **Not yet building.** Awaiting Arlin sign-off on:
-1. The 5 stage definitions (load-bearing — everything attaches)
-2. Trigger Profile onboarding flow
-3. Mirror surface placement
-4. Achievement threshold (one number per close, ranking logic)
+**Status (May 7-8, 2026):** Architecture documented in STILLFORM_ENGAGEMENT_ARCHITECTURE.md. **Foundation phases SHIPPED to repo (deploy queue manual).**
+
+**SHIPPED (HEAD = `1f49ddb`, awaiting Arlin's manual Netlify deploy):**
+
+- ✅ **Phase 0 — Stage Definitions data layer** (`0a5b796`). Frozen STAGE_DEFINITIONS constant (NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING). Stage marker computation helpers (`_s1CountSpecificBodyAreaSessions`, `_s2CountDistinctChips`, `_s2LongestSustainedCheckinRun`, `_s4PatternAcceptanceRate`, `_s4SelfInitiatedDisruptorCount`, `_s5RecoveryTrendImproving`). `getCurrentStage()` dispatcher returning `{ stage, currentStageId, nextStage, highestStageMet, progress, markers }`. ~80% of markers attach to existing data per spec; only Stage 3 needs Trigger Profile (Build #2).
+- ✅ **Phase 1 — Mirror surface (anchor + sheet)** (`c673dac`, `25a9bfe`). Quiet single-line stage status between morning strip and main hero on home (`STAGE 1 · NOTICING · 0% TO NAMING`). Tappable to open MIRROR SHEET modal — full stage breakdown with shipped + deferred markers, science citations, capacity description. Outside the entrain60glow wrapper (steady status, doesn't pulse). Renders for every calibrated user; new users see Stage 1 at 0% per spec §3.1 ("Roadmap visible from day 1, before earned"). Layer 0.6 audit verified placement: doesn't compete with hero CTA, both processing types see consistent treatment.
+- ✅ **Build #5 Phase 1 — Body Scan close micro-credit** (`39d11e1` + audit fixes). PRACTICE TREND block in BodyScanTool close screen between SESSION counter and "NAMING THE SHIFT…" pulse. Headline: `Jaw & Face: 5 → 2` when same-day morning tension reading exists, falls back to `Jaw & Face: 2` when no morning data. Trend context: `Down from 4.1 average across last 9 sessions.` when ≥3 prior readings. Returns null on sparse data — silent rather than fabricated. Operator-tier voice, no "ACHIEVEMENT" gamified label.
+- ✅ **Build #5 Phase 2 — Reframe close micro-credit** (`5d6eab2`). Headline `stuck → focused · +2` (state delta, frequency suffix). Context: `3rd time this week.` when frequency ≥ 3 distinct days. Both normal post-rate path and low-demand close path. Note: `scoreState()` only handles 6 of 10 chips (angry/anxious/flat/mixed/excited/focused) — settled/stuck/distant/unsure silently drop the `· +N` decoration. Pre-existing constraint, also affects saveSession's delta computation. Headline string match still works without the delta.
+- ✅ **Build #5 Phase 3 — Breathe close longitudinal context** (`34cdffa`). Single mono-caps line between existing post-rate display and action buttons: `2nd +2 shift this week.` when frequency ≥ 2 same-magnitude positive shifts. Returns null on first-of-kind, on negative deltas (no shame on regression), and when delta is null.
+- ✅ **Build #5 Phase 4 — EOD close composure-frequency claim** (`e422132`). Trend line in eodSaved branch: `2nd solid close this week.` when frequency ≥ 2 same-composure picks across distinct days. eodDone branch unchanged. Reads via `getEodHistory()` which uses raw localStorage matching the write path.
+- ✅ **Build #2 Phase 1 — Trigger Profile data layer** (`f9aa354`). Pure storage layer, no UI yet. Frozen 7-category enum (work / relational / financial / health / cross-cultural / current-events / other). 6 helpers: `getTriggerProfile`, `saveTriggerProfile`, `addTrigger`, `updateTrigger`, `deleteTrigger`, `incrementTriggerEncounter`. `formatTriggerProfileForAI()` sorts by encounterCount desc + lastSeen desc, plural-aware. SECURE_KEYS membership for encryption-at-rest. SYNC_KEYS membership for cloud sync. Reframe API integration: `triggerProfile` field at line 9797, parallel to existing `signalProfile` and `biasProfile`. Trigger Profile UI (Build #2 Phase 2 — capture points) **not yet designed** — pending Layer 0.6 flow audit before any UI proposal.
+
+**SHIPPED — Audit philosophy v1.3 + audit-driven fixes (May 7-8 night session):**
+
+- ✅ **Audit philosophy v1.3** (`f32ac5a`). Added Prime Directive in all caps at top: "EVERYTHING NEEDS TO HAVE INTEGRITY IN EVERY ASPECT OF WHAT WE DO. NO FLUFF. NO FABRICATION. NO PATCHES. NO ASSUMPTIONS. NO DRIFT." Added Layer 0.6 (flow ground truth before designing user-facing surfaces), Layer 2.36 (synthetic tests must verify against actual helper implementations), Layer 2.37 (field-name verification before persisting code), Layer 2.38 (regex-guard completeness). Documented failure classes 11-15.
+- ✅ **TimeKeeper bypass migration** (`02ffb61`). Five existing call sites + Phase 0 helper at line 3540 used `Date.now() - (X * 24 * 60 * 60 * 1000)` form which the preflight regex's literal-multiplier requirement missed. All 13 instances migrated to `TimeKeeper.daysAgoMs(...)`. Two new preflight regex variants added (paren-wrapped + bare variable). Layer 2.38 enforces.
+- ✅ **Phase 1 Body Scan field-name bugs** (`4daec9f`). My handler read `sameDay.tensionByArea` but actual helper field is `tension`; read `h.tensionByArea` but actual is `bodyScanTension`. Both reads always evaluated undefined → morning→post delta NEVER fired, trend context NEVER fired in production. Tests passed because I mocked helpers to match my buggy assumption — Layer 2.36 violation. 8 references corrected with source-of-truth comments.
+- ✅ **Stale-read bug in tension helpers** (`fc39da7`). `getMorningTensionHistory` and `getBodyScanTensionHistory` read via `secureRead` but write paths (`appendDailyLoopHistory`, `setSessionsInStorage`) use raw `localStorage.setItem`. SecureCache primes once at boot from localStorage; subsequent raw writes don't update SecureCache. So `secureRead` returned boot-time snapshot, missing all current-session writes. Both helpers aligned to read via `readArrayFromStorage` matching the write path. Same fix applied to `getEodHistory`, `_s2LongestSustainedCheckinRun`, `getSignalDivergence`, and one inline render site. Pattern enforced via `// SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match` markers.
+- ✅ **SECURE_KEYS preflight guard** (`1f49ddb`). New `scripts/check-secure-keys-raw-read.mjs` scans for `localStorage.getItem` on any SECURE_KEYS-listed key. Allow-list mechanism via inline `SECURE-KEYS-ALLOW` marker. Wired into `npm run ship:preflight`. 17 encrypted keys scanned; no unsafe raw reads. Layer 2.38 enforces.
+- ✅ **`buildPatternEnrichmentContext` profile reads** (also in `fc39da7`). Was reading `signalProfile`/`biasProfile` via raw `localStorage.getItem`. These keys ARE written via `secureWrite`, so raw reads returned the encrypted envelope `{ __enc: true, ... }` — AI pattern-enrichment call received garbage instead of profile context. Fixed to `secureRead`.
+- ✅ **`getComposureTrend` schema mismatch** (also in `fc39da7`). Counted `strong/mostly/rough` but real chip-picker schema (line 19532) is `solid/mixed/rough` with legacy `mostly` fallback. The `strong` bucket never incremented anywhere in the codebase. Solid + Mixed (the two most-common picks) silently dropped. Schema rewritten to match reality. (Note: helper has zero callers currently — fix is correctness for future use.)
+
+**ARCHITECTURAL DEBT FLAGGED (failure class 15):**
+
+`stillform_eod_history`, `stillform_checkin_history`, `stillform_sessions` are in SECURE_KEYS but their write paths (`appendDailyLoopHistory` line 5149, `setSessionsInStorage` line 2480) use raw `localStorage.setItem` instead of `secureWrite`. This means the encryption-at-rest claim of SECURE_KEYS is not actually realized for these keys — they're stored as plain text. Tonight's work aligned READS to the raw write path so behavior is internally consistent, but the broader encryption-at-rest fix (converting all writers to `secureWrite`) is **out of scope for tonight** — flagged for post-launch architectural audit.
+
+**Still pending Arlin sign-off on:**
+1. ~~The 5 stage definitions~~ — naming locked May 7, definitions shipped Phase 0
+2. Trigger Profile onboarding flow — Build #2 Phase 2 UI design (Layer 0.6 audit required first)
+3. ~~Mirror surface placement~~ — shipped
+4. Achievement threshold (one number per close, ranking logic) — Build #5 ships one credit per close, ranking is implicit by category match in dispatcher
 5. Other open questions in §8 of the spec
+
+**Pre-existing limitation flagged:**
+- `scoreState()` only handles 6 of 10 post-rate chips. Settled/stuck/distant/unsure silently drop the "+N" delta in Reframe credit headlines. Same constraint applies in `saveSession`'s delta computation. Fix requires product judgment on where each chip falls on the 1-5 Reactive→Composed scale — pending Arlin direction.
 
 **Related research item — Self Mode redesign (decision item 5):** NOT absorbed into this architecture. Stays distinct. Full research + design proposal in **SELF_MODE_REDESIGN_RESEARCH.md** (May 7). Concept proposal: "Past Self / Present Self" — Self Mode as the surface where the user's own cached data (Bias Profile, Signal Profile, saved Reframes, journal entries) becomes the in-the-moment intervention when AI is unavailable. ~4-6 builds, smaller than CFM Phase 1. Sequences AFTER engagement architecture stages + Trigger Profile, BEFORE Today's Brief / application layer. Single biggest design decision pending: does the "past self talks to present self" frame land for Arlin as the right concept.
 

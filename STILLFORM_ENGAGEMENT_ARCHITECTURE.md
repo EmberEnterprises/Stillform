@@ -1,6 +1,14 @@
 # Stillform Engagement Architecture
 
-**Status:** Architectural design, May 7, 2026. Awaiting Arlin's sign-off before build begins.
+**Status (May 8, 2026):** Foundation phases SHIPPED to repo. Build queue paused pending Arlin's manual Netlify deploy + direction on Build #2 Phase 2 (Trigger Profile UI design).
+
+**SHIPPED (HEAD = `1f49ddb`, awaiting deploy):** Phase 0 Stage Definitions data layer · Phase 1 Mirror surface (anchor + sheet) · Build #2 Phase 1 Trigger Profile data layer · Build #5 Phases 1-4 (Body Scan + Reframe + Breathe + EOD micro-credits at every close).
+
+**NOT YET BUILT:** Build #2 Phase 2 (Trigger Profile capture UI — pending Layer 0.6 flow audit before any UI proposal) · Today's Brief · Roadmap full screen · Pre-event Brief · Move card · Scripts · EOD artifact.
+
+**Audit philosophy v1.3** governs all build work. See `STILLFORM_AUDIT_PHILOSOPHY.md`.
+
+**Original status:** Architectural design, May 7, 2026.
 **Author of this draft:** Claude, synthesizing the May 7 brainstorm with Arlin.
 **Supersedes:** the "3 to-dos for the day" thread, the 90-day attribution report idea, and absorbs research-prep items 5 (Self Mode) and 7 (evidence callouts) into a unified architecture.
 
