@@ -1,9 +1,22 @@
 # STILLFORM AUDIT PHILOSOPHY
-**ARA Embers LLC · May 7, 2026 · v1.2**
+**ARA Embers LLC · May 7, 2026 · v1.3**
 
 *v1.0 (May 7 morning) established after Practice Signals revert.*
 *v1.1 (May 7 afternoon) added the Science + UI Flow standing requirement.*
 *v1.2 (May 7 evening) added Layer 1.0 (session-start ground truth), refined Layer 1.1 (adjacent-name grep), added Layer 6.4 (diff anomaly investigation) — all from the Mirror-duplicate near-miss.*
+*v1.3 (May 7 night) added the Prime Directive of Integrity, Layer 0.6 (flow ground truth), Layer 2.36 (test-against-real-helpers), Layer 2.37 (field-name verification), Layer 2.38 (regex-guard completeness) — all from the Build #2 Trigger Profile flow-assumption failure and Phase 1 Body Scan field-name bugs where synthetic tests verified fiction instead of reality.*
+
+---
+
+## PRIME DIRECTIVE — added v1.3
+
+**EVERYTHING NEEDS TO HAVE INTEGRITY IN EVERY ASPECT OF WHAT WE DO. NO FLUFF. NO FABRICATION. NO PATCHES. NO ASSUMPTIONS. NO DRIFT.**
+
+This is the operating instruction Arlin gave on May 7, 2026 after a night of work I shipped on assumptions that didn't hold. It is the lens every other layer of this philosophy runs through. If a check is technically passing but built on assumed knowledge of the codebase, the user, the flow, or the helper return shape, **it is failing this directive regardless of what the layered audits say.**
+
+The eight layers below are the mechanism. The Prime Directive is the standard.
+
+A passing audit is not the goal. A correct, grounded, verified system is the goal. When the two diverge, the audit is wrong.
 
 ---
 
@@ -192,8 +205,44 @@ Three of those four things I would have built differently. The fourth ("0/12 cou
 
 ---
 
+## LAYER 0.6 — Flow ground truth (added v1.3)
+**Required before designing any user-facing surface, capture point, or feature placement.**
+
+Layer 0 covers reading the spec for the feature being built. Layer 0.6 covers reading the canonical app flow — what users *actually do* day-to-day, which tools each processing type defaults to, where canonical entry points are.
+
+I added this layer because I designed Trigger Profile capture points for Build #2 Phase 1 without first reading the canonical flow doc. I proposed Self Mode as primary capture; Self Mode is actually the AI-fallback / deliberate-practice tool, not the canonical primary entry for either processing type. The proposal was confidently wrong because I hadn't grounded it in the actual flow.
+
+### Question 0.6.1: "Have I read the canonical flow documentation before proposing this surface or capture point?"
+- **Required reading:**
+  - `STILLFORM_PROJECT_TRANSFER.md` — Daily Loop section (canonical user day)
+  - `STILLFORM_PROJECT_TRANSFER.md` — Current Routing Logic section (which tools each processing type defaults to)
+  - `STILLFORM_PROJECT_TRANSFER.md` — Key Features Built (existing affordances I might be duplicating)
+  - The actual `TOOLS` array in `src/App.jsx`
+  - The hero CTA routing logic in code
+- **Evidence:** Quotes from the doc with line references for the flow facts I'm building on. Not summaries — exact text.
+- **Pass:** Every flow claim in my proposal traces to a quoted line in the canonical docs or code.
+- **Fail:** I proposed where a feature lives, when it surfaces, or what cohort sees it without grounded references. Symptoms: "primary tool" / "users typically" / "main entry point" without citation.
+
+### Question 0.6.2: "For each user-facing surface, which processing type sees it?"
+- **Evidence:** Explicit mapping. "Thought-first users see this at [step] because [routing logic at line N]. Body-first users see this at [step] because [routing logic at line M]."
+- **Pass:** Both processing types accounted for. Asymmetries flagged.
+- **Fail:** Designed for one type, didn't verify the other type's path.
+
+### Question 0.6.3: "Where does the user encounter this for the first time?"
+- **Evidence:** Walked through onboarding + first-session paths in code. Confirmed where this surface appears in those paths.
+- **Pass:** First-encounter moment is clear and grounded.
+- **Fail:** Surface only fires when user has 5+ sessions; new users never see it; I didn't notice.
+
+### Why this matters more than a code-level audit
+
+A code-level audit can confirm "the function does X." Layer 0.6 confirms "X is the right thing to do for this user, in this flow, at this moment." Practice Signals shipped with passing code-level audits and was wrong because the flow didn't support what the code did. Trigger Profile Phase 2 was about to ship the same way.
+
+**The Prime Directive lives or dies here. Most assumption failures in this codebase have been flow assumptions, not syntax assumptions.**
+
+---
+
 ## LAYER 1 — Pre-existence audit
-**After Layer 0, before writing code.**
+**After Layer 0 and 0.6, before writing code.**
 
 This layer was the original Layer 1. It still applies — but Layer 0 (read the docs) comes first.
 
@@ -258,6 +307,37 @@ The 35 audits stay (state integrity, build green, preflight green, sync key pari
 - **Fail:** Any audit fails OR I skipped any audit.
 
 **Critical:** passing this layer does NOT mean the feature works. It means the code is structurally sound. Don't let "all 35 passed" produce false confidence.
+
+### Question 2.36: "Are my synthetic tests verifying behavior against ACTUAL helper implementations?" (added v1.3)
+**Required for any code that calls existing helpers, reads existing storage, or constructs synthetic shapes that are passed to other functions.**
+
+- **Evidence:** For every helper my code calls, I read the helper's actual implementation FIRST, document its real return shape in a comment at the top of the test file, and mock the helper to return THAT shape. Reference: file path + line number where I read the implementation.
+- **Pass:** Mocks match actual helper return shapes verbatim. The test verifies what production code will actually receive.
+- **Fail:** Mocks return whatever shape my code expects, regardless of what the real helper returns. The test verifies fiction.
+
+This question was added because Phase 1 Body Scan credit shipped with two field-name bugs (`tensionByArea` instead of actual `tension` and `bodyScanTension`) and "all 9 synthetic tests passed" because I mocked the helpers to match my buggy assumption. Tests verifying fiction is the same false-confidence class as Practice Signals' passing audits.
+
+The discipline: **a test is only as valid as its mocks. A mock based on assumption is a fiction. A fiction-based test produces zero confidence even when it passes.**
+
+### Question 2.37: "Did I verify every field-name read against the source's actual schema?" (added v1.3)
+**Five-second check; skipping it produces silent feature-degradation bugs.**
+
+- **Evidence:** For every line of code that reads a field from a helper return, storage payload, or session entry (`obj.fieldName`), I grepped for the field's source-of-truth definition before persisting code. Reference: line number where the field is actually written.
+- **Pass:** Every field-read has a verified source.
+- **Fail:** I assumed a field name based on what made sense or what other handlers used. Symptom: code never throws but always evaluates `undefined`, feature silently degrades.
+
+If I cannot point to the line where a field is *written* with that exact name, I have not done Layer 2.37 for that field.
+
+### Question 2.38: "Are the regex guards in ship-preflight watertight, or do they have known bypasses?" (added v1.3)
+**Whenever I add a check via regex, or follow an existing regex-guarded pattern, verify the regex catches every shape of the violation.**
+
+- **Evidence:** For each regex-based preflight guard I'm relying on (TimeKeeper inline ms math, banned phrases, etc), I write out the variants the regex SHOULD catch and confirm each one against the regex. Reference: list of variants tested.
+- **Pass:** Regex catches every documented violation shape.
+- **Fail:** I followed an existing pattern that bypasses the regex. My code is "guarded" by a check that doesn't see it.
+
+This question was added after discovering 5 call sites in the codebase use `Date.now() - (variableName * 24 * 60 * 60 * 1000)` — a form the TimeKeeper guard regex doesn't catch because it requires a literal-number multiplier. My Phase 0 stage marker code followed that bypass pattern. The guard "passed" while the violation was right there.
+
+**A regex guard with a known bypass is worse than no guard, because it produces false confidence.**
 
 ---
 
@@ -527,6 +607,10 @@ Documented from real failures so far:
 8. **Building a feature that has a spec without reading the spec** (Practice Signals, May 7) — Layer 0
 9. **Duplicate work from missed pre-existence audit** (Mirror surface, May 7 evening) — Layer 1.0 + Layer 1.1 (v1.2 refinements). Failed because pre-existence grep was too narrow (only checked names of NEW code, not feature name) and there was no session-start commit-log review.
 10. **Ignoring diff anomaly signals** (Mirror surface, May 7 evening) — Layer 6.7. Failed because surprising diff stat ("+303 lines when I typed ~75") was almost ignored. Investigation revealed the truth, but only because the discipline of audit philosophy v1.1 forced "verify before claiming."
+11. **Flow-assumption design** (Build #2 Trigger Profile capture points, May 7 night) — Layer 0.6. Designed where capture points lived without reading the canonical user-flow doc. Proposed Self Mode as primary capture; Self Mode is actually AI-fallback / deliberate-practice, not canonical primary entry for either processing type. The proposal was confidently wrong because no flow grounding.
+12. **Synthetic tests verifying fiction** (Phase 1 Body Scan credit, May 7 night) — Layer 2.36. Mocked helpers in tests with field names matching MY ASSUMPTION (`tensionByArea`) instead of actual implementation (`tension`, `bodyScanTension`). All 9 tests passed against fictional data shapes. Production code: morning-delta and trend-context lines never fire because field reads always evaluate undefined.
+13. **Field-name read without source verification** (Phase 1 Body Scan credit, May 7 night) — Layer 2.37. Read `sameDay.tensionByArea` and `h.tensionByArea` without grepping where those fields are written. Five-second check would have caught it.
+14. **Regex-guard bypass via following existing pattern** (Phase 0 Stage Definitions data layer, May 7 evening, surfaced May 7 night) — Layer 2.38. Used `Date.now() - (variable * 24 * 60 * 60 * 1000)` — preflight regex requires literal-number multiplier and missed the variable form. Followed an existing pattern (4 pre-existing call sites bypass identically). Guard "passed" while violation was visible.
 
 When new failure classes appear, document them here and add the audit that catches them.
 
@@ -539,5 +623,7 @@ When new failure classes appear, document them here and add the audit that catch
 **v1.1 — May 7, 2026 afternoon.** Added the Standing Requirement: science + UI flow articulation before every recommendation. Promoted to irreducible non-negotiable #2.
 
 **v1.2 — May 7, 2026 evening.** Added Question 1.0 (session-start ground truth — `git log --oneline -10` + `wc -l` checks) and refined Question 1.1 (explicit grep guidance: feature name, adjacent state names, comment markers, storage keys — not just the names of new code being written). Added Question 6.7 (diff anomaly investigation — when the math is surprising, stop and verify, don't commit). Documented failure classes 9 and 10 from the Mirror surface duplicate near-miss.
+
+**v1.3 — May 7, 2026 night.** Added the **Prime Directive of Integrity** (all-caps standing rule from Arlin's directive after a night of assumption-based work). Added Layer 0.6 (flow ground truth — read canonical flow docs before designing user-facing surfaces). Added Question 2.36 (synthetic tests must mock against actual helper return shapes, not assumed shapes). Added Question 2.37 (field-name reads must be verified against source-of-truth definition). Added Question 2.38 (regex guards must catch every documented violation shape — known bypasses are worse than no guard). Documented failure classes 11-14 from Build #2 Trigger Profile flow assumption + Phase 1 Body Scan field-name bugs + Phase 0 TimeKeeper guard bypass.
 
 Future versions update this doc when a new failure class is identified. The audit philosophy itself is reviewable, fallible, and evolves.
