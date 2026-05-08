@@ -83,6 +83,15 @@ const checks = [
   // The underscore prefix marks them as internal; \\b boundary in JS regex means matches do not include _-prefixed names.
   { label: "TimeKeeper guard: no direct toLocalDateKey() — use TimeKeeper.clockDay/clockDayOf", cmd: "rg", args: ["-n", "\\btoLocalDateKey\\(", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no direct getStillformToday() — use TimeKeeper.stillformDay/stillformDayOf", cmd: "rg", args: ["-n", "\\bgetStillformToday\\(", "src/App.jsx"], type: "must-not-match" },
+  // SECURE_KEYS guard (v1.3 Layer 2.38). Failure class 12: raw localStorage.getItem
+  // on a SECURE_KEYS-listed key returns the encrypted envelope { __enc: true, ... }
+  // for encrypted users, NOT the actual data. JSON.parse + Array.isArray then
+  // silently returns []. 4 helpers + 2 inline reads were broken this way before
+  // v1.3. The guard runs check-secure-keys-raw-read.mjs which scans for
+  // localStorage.getItem on any SECURE_KEYS key, with a single allow-listed
+  // exception (bio_filter EXISTS check at line ~3767, which uses !! and works
+  // correctly on either envelope or plaintext).
+  { label: "SECURE_KEYS guard: no raw localStorage reads on encrypted keys", cmd: "node", args: ["scripts/check-secure-keys-raw-read.mjs"], type: "must-match" },
   // Undefined-component guard. Catches JSX <Foo /> against a Foo not declared anywhere.
   // Bug class that shipped FocusCheckValidation, PanicMode, and FractalBreathCanvas as silent
   // crashes — esbuild parses these as valid; they only fail when the path is hit at runtime.
