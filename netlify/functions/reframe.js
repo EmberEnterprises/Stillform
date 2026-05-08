@@ -1201,6 +1201,7 @@ exports.handler = async function(event) {
       feelState = null,
       signalProfile = null,
       biasProfile = null,
+      triggerProfile = null,
       deferredCalibration = null,
       priorToolContext = null,
       bioFilter = null,
