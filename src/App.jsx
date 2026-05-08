@@ -9254,6 +9254,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const communicationExpandedRef = useRef(false);
   const stateToStatementSessionIdRef = useRef(null);
   const latestSessionTimestampRef = useRef(null);
+  // Phase 2c — Trigger Profile prompt at Reframe close. Gates the next-step
+  // call (queueDebriefAndComplete*) until user submits or skips. Only fires
+  // when ≥1 user message exists in the conversation (no prompt for 0-message
+  // exits). State is component-local (no persistence) so a dismissed prompt
+  // does not re-fire on app reopen. Resume closure stored in ref so the
+  // post-prompt call resolves to the exact next-step decision finishReframeSession
+  // computed at gate time.
+  const [reframeTriggerPromptOpen, setReframeTriggerPromptOpen] = useState(false);
+  const reframeTriggerPromptResumeRef = useRef(null);
   // AI-failure → Self Mode handoff state (Apr 27).
   // - consecutiveAiFailures: counter of full handleSend cycles that ended in failure (each cycle internally retries 3x)
   // - showSelfModeOffer: when true, render the "Switch to Self Mode" card (single-failure case)
@@ -10465,13 +10474,46 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorSent(false);
     setStateToStatementExpanded(false);
     setPostSessionInsight(null);
-    // If the user already selected a Next Move inline, skip the duplicate Next Move screen
-    // and go straight to the debrief gate. Otherwise show the Next Move step.
-    if (hadInlineNextMove) {
-      queueDebriefAndCompleteNow(resolvePostReframeRoute(), "reframe-merged-finish");
+    // Phase 2c — Trigger Profile prompt gate. If the user actually engaged
+    // with Reframe (≥1 user message), surface the prompt before advancing
+    // to debrief / Next Move. Submit or skip resumes the original next-step
+    // decision via reframeTriggerPromptResumeRef. If 0 user messages (rare
+    // — quick close without engagement), advance directly with no prompt.
+    const userMessageCount = messages.filter(m => m && m.role === "user").length;
+    const advance = () => {
+      if (hadInlineNextMove) {
+        queueDebriefAndCompleteNow(resolvePostReframeRoute(), "reframe-merged-finish");
+      } else {
+        queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
+      }
+    };
+    if (userMessageCount >= 1) {
+      reframeTriggerPromptResumeRef.current = advance;
+      setReframeTriggerPromptOpen(true);
+      try { window.plausible("Trigger Prompt Shown", { props: { surface: "reframe-close" } }); } catch {}
     } else {
-      queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
+      advance();
     }
+  };
+
+  const handleReframeTriggerSubmit = ({ label, category }) => {
+    try {
+      const result = addTrigger({ label, category });
+      if (result?.id) incrementTriggerEncounter(result.id);
+      try { window.plausible("Trigger Added From Reframe", { props: { category } }); } catch {}
+    } catch {}
+    setReframeTriggerPromptOpen(false);
+    const resume = reframeTriggerPromptResumeRef.current;
+    reframeTriggerPromptResumeRef.current = null;
+    if (typeof resume === "function") resume();
+  };
+
+  const handleReframeTriggerSkip = () => {
+    try { window.plausible("Trigger Prompt Skipped", { props: { surface: "reframe-close" } }); } catch {}
+    setReframeTriggerPromptOpen(false);
+    const resume = reframeTriggerPromptResumeRef.current;
+    reframeTriggerPromptResumeRef.current = null;
+    if (typeof resume === "function") resume();
   };
 
   const finishStateToStatement = () => {
@@ -11256,6 +11298,34 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     try { window.plausible("Reframe Different Response Requested", { props: { mode: effectiveMode } }); } catch {}
     handleSend("Give me a different response to what I just shared. Keep it specific and practical.");
   };
+
+  // Phase 2c — Trigger Profile prompt render. Early-returns the entire
+  // tool surface to a single-purpose prompt screen when reframeTriggerPromptOpen
+  // is true. All hooks above have already run; safe to short-circuit here.
+  // Submit or Skip resumes finishReframeSession's gated next-step via
+  // reframeTriggerPromptResumeRef.current.
+  if (reframeTriggerPromptOpen) {
+    return (
+      <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px", minHeight: "60vh" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "32px 0" }}>
+          <div className="t-mono-xs" style={{ marginBottom: 8, letterSpacing: "0.14em" }}>
+            One more
+          </div>
+          <div className="t-body-sm" style={{ color: "var(--text)", marginBottom: 20, lineHeight: 1.6 }}>
+            Was this session about something specific? Name it — a person, context, or moment. Optional.
+          </div>
+          <TriggerForm
+            autoFocus
+            submitLabel="Save"
+            cancelLabel="Skip"
+            placeholder="e.g., Mike's 1:1, today's news cycle"
+            onSubmit={handleReframeTriggerSubmit}
+            onCancel={handleReframeTriggerSkip}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ background: mc.bg, margin: "-40px -40px 0", padding: "40px 40px 0", borderRadius: "0 0 16px 16px" }}>
