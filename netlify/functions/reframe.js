@@ -751,7 +751,7 @@ function buildDeterministicFallback({ mode, route, input, isSummaryRequest = fal
     return {
       distortion: null,
       mechanism: "crisis_safety_override",
-      reframe: "You're not overreacting — this needs immediate support. Are you thinking about hurting yourself right now? If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7. I'm still here — keep talking to me.",
+      reframe: "You're not overreacting — this needs immediate support. Are you thinking about hurting yourself right now? If you're in crisis right now: 988 Suicide & Crisis Lifeline (call or text 988) or Crisis Text Line (text HOME to 741741). They're free, confidential, and available 24/7. You're not alone — please reach 988 or the Crisis Text Line. They're equipped for exactly this moment.",
       next_step: "If danger is immediate, call or text 988 now.",
       question: "Are you in immediate danger right now?"
     };

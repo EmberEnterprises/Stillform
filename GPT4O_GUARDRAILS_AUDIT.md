@@ -359,17 +359,13 @@ The Path A migration on May 8 closed the only previously-known substrate-side ga
 
 **Recommendation:** DEFER until after Action 1 telemetry has run for 1-2 weeks. The data may show some bans should be cut entirely; consolidating is easier once cuts are made.
 
-### Action 3 — Crisis fallback voice review
+### Action 3 — Crisis fallback voice review (SHIPPED May 8, 2026)
 
-**Why:** The line `"I'm still here — keep talking to me."` (line 712) reads, in the March 2026 Model Spec wellbeing framing, as inviting emotional reliance on the assistant. Stillform's intent is correct (don't disappear); the specific phrasing could be sharpened.
+**Shipped change:** option A applied. The crisis-fallback `reframe` text in `buildDeterministicFallback` (line 754) updated from `"I'm still here — keep talking to me."` to `"You're not alone — please reach 988 or the Crisis Text Line. They're equipped for exactly this moment."`
 
-**Possible alternatives** (Arlin's call, voice territory):
-- `"You're not alone — please reach 988 or the Crisis Text Line. They're equipped for exactly this moment."`
-- `"Please make the call. I'm here to help you get to the people who can help you right now."`
+**Rationale:** Removes Stillform's first-person presence framing (`I'm still here`, `keep talking to me`) which the March 2026 OpenAI Model Spec wellbeing guidance flags as inviting emotional reliance on the assistant. Replacement uses subject = user state observation (`You're not alone`) plus concrete action pointer (`please reach 988`) plus assertion about the resource (`They're equipped for exactly this moment`). Stillform's stay-with-them intent is preserved through the warmth of the directness; the assistant-as-destination framing is removed.
 
-**Estimated effort:** 5 min once decided.
-
-**Recommendation:** ARLIN'S CALL — voice territory. Audit surfaces; doesn't decide. The current line is not unsafe; it's a question of best alignment with the policy direction.
+**Layer 4 self-skepticism (love-language family check):** Stillform's voice contract bans subject = Stillform / object = user declarations (`I care about you`, `I'm proud of you`, `I'm here for you`). `You're not alone` is structurally distinct — subject = user, no Stillform claim. Verified clean against `BANNED_REFRAME_PATTERNS` (22 regex), `GENERIC_GARBAGE_PATTERNS` (11 regex), `GENERIC_GARBAGE_SNIPPETS` (11 substrings), `VOICE_CONTRACT_BANNED_PATTERNS` (6 regex) — no hits.
 
 ### Action 4 — Fallback-of-fallback path (VERIFIED, NO ACTION)
 
@@ -401,15 +397,15 @@ How this audit grounded in v1.3:
 
 ## 7. CLOSING
 
-26 of 30 server-side guardrails do real work that GPT-4o substrate would not do on its own. The MCT-vs-CBT distinction is operationally defended at three layers. The Path A migration on May 8 closed the substrate-side encryption gap. Four discrete actions were initially surfaced; Action 4 verified during this audit (no bug, fallback is terminus by design). The remaining three actions are improvements, not gaps:
+26 of 30 server-side guardrails do real work that GPT-4o substrate would not do on its own. The MCT-vs-CBT distinction is operationally defended at three layers. The Path A migration on May 8 closed the substrate-side encryption gap. Four discrete actions surfaced; two shipped (Action 1 banned-pattern telemetry, Action 3 crisis-fallback voice update); one verified during the audit (Action 4); one deferred pending data (Action 2):
 
-- **Action 1** (banned-pattern telemetry) — recommend SHIP, low risk
-- **Action 2** (consolidate ban lists) — DEFER until Action 1 telemetry runs
-- **Action 3** (crisis-fallback voice phrasing) — Arlin's call, voice territory
+- **Action 1** (banned-pattern telemetry) — SHIPPED May 8 (commit `289ccf0`)
+- **Action 2** (consolidate ban lists) — DEFER until Action 1 telemetry runs ~1-2 weeks
+- **Action 3** (crisis-fallback voice phrasing) — SHIPPED May 8, option A applied
 - **Action 4** (fallback-of-fallback) — VERIFIED NO ACTION
 
 **No ship-blockers for TestFlight against current substrate behavior.**
 
-The Stillform Reframe pipeline is in a defensible state. The post-March-2026 OpenAI Model Spec direction is structurally aligned with where Stillform already is: explicit MCT-vs-CBT distinction, explicit prohibition on emotional-reliance language, explicit user-as-operator framing.
+The Stillform Reframe pipeline is in a defensible state. The post-March-2026 OpenAI Model Spec direction is structurally aligned with where Stillform already is: explicit MCT-vs-CBT distinction, explicit prohibition on emotional-reliance language (now operationalized via Action 3), explicit user-as-operator framing.
 
 — end —
