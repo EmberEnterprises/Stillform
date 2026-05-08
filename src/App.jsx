@@ -5939,26 +5939,30 @@ const scheduleMeetingNotifications = async () => {
       const eventTime = new Date(event.start);
       if (isNaN(eventTime.getTime()) || eventTime <= now) continue;
       const title = event.title || "Upcoming event";
-      // First notification
+      const startIso = eventTime.toISOString();
+      // First notification — Pre-event Brief at the audit-spec 30-min fire.
+      // Body text updated per PRE_EVENT_BRIEF_FLOW_AUDIT.md §6 call 4 default.
+      // extra.screen routes to the pre-event-brief screen (Phase 7c+7d).
       const firstAt = new Date(eventTime.getTime() - firstMins * 60 * 1000);
       if (firstAt > now) {
         await LocalNotifications.schedule({ notifications: [{
           id: notifId++,
           title: "Prepare with Stillform",
-          body: `${title} in ${firstMins} minutes. Open Reframe to prepare.`,
+          body: `${title} in ${firstMins} minutes. Tap for your pre-event brief.`,
           schedule: { at: firstAt },
-          extra: { screen: "reframe", eventTitle: title }
+          extra: { screen: "pre-event-brief", eventTitle: title, eventStart: startIso }
         }]});
       }
-      // Second notification
+      // Second notification — same brief, follow-up reminder if user missed
+      // the first. Same routing so re-tap lands on the cached brief instantly.
       const secondAt = new Date(eventTime.getTime() - secondMins * 60 * 1000);
       if (secondAt > now && secondAt > firstAt) {
         await LocalNotifications.schedule({ notifications: [{
           id: notifId++,
           title: "Prepare with Stillform",
-          body: `${title} in ${secondMins} minutes. Still time to prepare.`,
+          body: `${title} in ${secondMins} minutes. Your pre-event brief is ready.`,
           schedule: { at: secondAt },
-          extra: { screen: "reframe", eventTitle: title }
+          extra: { screen: "pre-event-brief", eventTitle: title, eventStart: startIso }
         }]});
       }
     }
@@ -16802,6 +16806,21 @@ export default function Stillform() {
             if (extra.source === "pattern-disruption") {
               window.plausible?.("Pattern Push Tapped", { props: { patternId: extra.patternId || "unknown" } });
             }
+            // Phase 7c — Pre-event Brief notification routing. The 30-min
+            // pre-meeting notification carries extra.screen "pre-event-brief"
+            // plus eventTitle and eventStart (ISO). Set the target event and
+            // navigate to the brief screen. The screen branch (Phase 7d)
+            // reads cached brief or fires generation.
+            if (extra.screen === "pre-event-brief" && extra.eventTitle) {
+              try {
+                window.plausible?.("Pre-Event Brief Tapped", { props: { surface: "pre-meeting-notification" } });
+              } catch {}
+              setPreEventBriefTarget({
+                title: String(extra.eventTitle),
+                start: String(extra.eventStart || "")
+              });
+              setScreen("pre-event-brief");
+            }
           } catch {}
         });
       } catch {}
@@ -17213,6 +17232,12 @@ export default function Stillform() {
   // newly-persisted brief without requiring user interaction. Incremented by
   // a useEffect that polls every 1500ms for up to 12s after ciSaved flips true.
   const [todaysBriefPollTick, setTodaysBriefPollTick] = useState(0);
+  // Phase 7d — Pre-event Brief target event + poll tick. Set by notification
+  // tap handler when user opens the app from the 30-min pre-meeting alert.
+  // Same async-polling pattern as Today's Brief 3d so the brief renders as
+  // soon as generation completes after the first mount on the screen.
+  const [preEventBriefTarget, setPreEventBriefTarget] = useState(null); // { title, start } | null
+  const [preEventBriefPollTick, setPreEventBriefPollTick] = useState(0);
   const [eodOpen, setEodOpen] = useState(false);
   const [eodEnergy, setEodEnergy] = useState(null);
   const [eodComposure, setEodComposure] = useState(null);
@@ -17870,6 +17895,49 @@ export default function Stillform() {
       clearInterval(interval);
     };
   }, [ciSaved]);
+
+  // Phase 7d — Pre-event Brief generation + poll. When the user taps the
+  // 30-min pre-meeting notification, the handler sets preEventBriefTarget
+  // and routes to screen "pre-event-brief". This effect: (a) checks if a
+  // cached brief exists for that event-key; if not, fires generation
+  // fire-and-forget; (b) starts the same 1.5s poll-tick loop so the
+  // display branch re-reads storage as the brief arrives. Same operational
+  // pattern as Today's Brief 3d. Cleanup on unmount and on target change.
+  useEffect(() => {
+    if (!preEventBriefTarget?.title) return;
+    let cancelled = false;
+    let ticks = 0;
+    setPreEventBriefPollTick(0);
+    // If brief is already cached for this event-key, no generation needed —
+    // skip polling, the display branch will read directly. Otherwise fire
+    // generation fire-and-forget and start the poll.
+    let alreadyCached = false;
+    try {
+      alreadyCached = !!getPreEventBriefForEvent(preEventBriefTarget);
+    } catch {}
+    if (!alreadyCached) {
+      try { generatePreEventBrief(preEventBriefTarget).catch(() => {}); } catch {}
+      try { window.plausible("Pre-Event Brief Generated", { props: { surface: "pre-meeting-notification" } }); } catch {}
+    }
+    const interval = setInterval(() => {
+      if (cancelled) return;
+      ticks += 1;
+      try {
+        const present = getPreEventBriefForEvent(preEventBriefTarget);
+        if (present) {
+          clearInterval(interval);
+          setPreEventBriefPollTick(t => t + 1);
+          return;
+        }
+      } catch {}
+      setPreEventBriefPollTick(t => t + 1);
+      if (ticks >= 8) clearInterval(interval);
+    }, 1500);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [preEventBriefTarget]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -20473,7 +20541,7 @@ const isSignalProfileConfigured = () => {
         {/* FLOATING RESET — accessible from any screen except active tool sessions.
             Quick Breathe pill always available, including on home, so the user has an
             instant safety valve regardless of what else is showing (suggestions, panels, etc). */}
-        {screen !== "panic" && screen !== "setup-bridge" && screen !== "pricing" && 
+        {screen !== "panic" && screen !== "pre-event-brief" && screen !== "setup-bridge" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
           <QBPill onPress={() => setScreen("panic")} />
         )}
@@ -20482,7 +20550,7 @@ const isSignalProfileConfigured = () => {
             envelope. Same hide rules so it doesn't render on top of an active
             tool session, panic mode, setup-bridge, or pricing. Also hides during
             move-card itself so it doesn't stack on its own surface. */}
-        {screen !== "panic" && screen !== "move-card" && screen !== "setup-bridge" && screen !== "pricing" && 
+        {screen !== "panic" && screen !== "move-card" && screen !== "pre-event-brief" && screen !== "setup-bridge" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
           <MoveCardPill onPress={() => {
             try { window.plausible("Move Card Opened", { props: { surface: "pill" } }); } catch {}
@@ -20567,6 +20635,162 @@ const isSignalProfileConfigured = () => {
               onComplete={handleMoveCardComplete}
               onClose={() => goHomeSafely()}
             />
+          );
+        })()}
+
+        {/* PRE-EVENT BRIEF — Phase 7d (Build #7). User arrived here from the
+            30-min pre-meeting notification. Render the cached brief if it's
+            in storage, otherwise show the in-flight placeholder while the
+            poll useEffect (alongside todaysBriefPollTick poll) catches the
+            persisted brief as it lands. Three render states match Today's
+            Brief 3d display: present / in-flight / silent-fail. */}
+        {screen === "pre-event-brief" && (() => {
+          const target = preEventBriefTarget;
+          // No target — defensive fallback. The handler sets target before
+          // routing, but if user lands here via deep link or stale state,
+          // bounce home rather than render a hanging surface.
+          if (!target?.title) {
+            try { goHomeSafely(); } catch {}
+            return null;
+          }
+          let brief = null;
+          try { brief = getPreEventBriefForEvent(target); } catch {}
+          // Only show in-flight placeholder while the poll is active and
+          // brief hasn't landed. After 8 ticks (12s), polling stops; if no
+          // brief by then, silent-fail mode shows just the event header.
+          const inFlight = !brief && preEventBriefPollTick > 0 && preEventBriefPollTick < 8;
+          // Format event start for header
+          let eventTimeStr = "";
+          if (target.start) {
+            try {
+              const dt = new Date(target.start);
+              if (!Number.isNaN(dt.getTime())) {
+                eventTimeStr = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+              }
+            } catch {}
+          }
+          let generatedTime = "";
+          if (brief?.generatedAt) {
+            try {
+              const dt = new Date(brief.generatedAt);
+              if (!Number.isNaN(dt.getTime())) {
+                generatedTime = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+              }
+            } catch {}
+          }
+          const stillformAmber = "var(--amber)";
+          const muted = "var(--text-muted)";
+          return (
+            <div style={{ padding: "32px 24px", textAlign: "left", maxWidth: 480, margin: "0 auto" }}>
+              <button onClick={() => {
+                setPreEventBriefTarget(null);
+                goHomeSafely();
+              }} style={{
+                background: "none", border: "none", color: muted, fontSize: 12,
+                cursor: "pointer", marginBottom: 16, padding: "8px 0"
+              }} aria-label="Close brief">← Close</button>
+
+              <div className="t-mono-xs" style={{ color: stillformAmber, marginBottom: 4, letterSpacing: "0.14em" }}>
+                Pre-event Brief
+              </div>
+              <h2 className="t-display-md" style={{ marginBottom: 4, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>
+                {target.title}
+              </h2>
+              {eventTimeStr && (
+                <div className="t-body-sm quiet" style={{ marginBottom: 24, color: muted }}>
+                  {eventTimeStr}
+                </div>
+              )}
+
+              {inFlight && !brief && (
+                <div style={{
+                  background: "var(--surface)", border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20
+                }}>
+                  <div className="t-caption" style={{ color: muted, letterSpacing: "0.08em" }}>
+                    Brief generating…
+                  </div>
+                </div>
+              )}
+
+              {brief && (
+                <div style={{
+                  background: "var(--surface)", border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)", padding: "20px 18px", marginBottom: 20
+                }}>
+                  <div className="t-mono-xs" style={{ color: muted, letterSpacing: "0.14em", marginBottom: 6 }}>
+                    Hardware
+                  </div>
+                  <div style={{
+                    fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                    fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                  }}>
+                    {brief.hardware}
+                  </div>
+
+                  {brief.risks && (
+                    <>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                      <div className="t-mono-xs" style={{ color: muted, letterSpacing: "0.14em", marginBottom: 6 }}>
+                        Risks
+                      </div>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                        fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                      }}>
+                        {brief.risks}
+                      </div>
+                    </>
+                  )}
+
+                  {brief.moves && (
+                    <>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                      <div className="t-mono-xs" style={{ color: muted, letterSpacing: "0.14em", marginBottom: 6 }}>
+                        Moves
+                      </div>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                        fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                      }}>
+                        {brief.moves}
+                      </div>
+                    </>
+                  )}
+
+                  {brief.recovery && (
+                    <>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                      <div className="t-mono-xs" style={{ color: muted, letterSpacing: "0.14em", marginBottom: 6 }}>
+                        Recovery
+                      </div>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                        fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                      }}>
+                        {brief.recovery}
+                      </div>
+                    </>
+                  )}
+
+                  {generatedTime && (
+                    <div className="t-caption" style={{
+                      color: muted, letterSpacing: "0.04em",
+                      marginTop: 4, fontStyle: "italic"
+                    }}>
+                      Generated {generatedTime}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <button className="btn btn-primary" onClick={() => {
+                setPreEventBriefTarget(null);
+                goHomeSafely();
+              }} style={{ width: "100%" }}>
+                Done
+              </button>
+            </div>
           );
         })()}
 
