@@ -13645,6 +13645,450 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
 }
 
 
+// ─── TRIGGER PROFILE SECTION — Engagement Architecture Build #2 Phase 2a ────
+//
+// CRUD list view for the third diagnostic layer. Renders inside Settings →
+// Personalization. Foundation surface — every other Phase 2 capture point
+// (EOD prompt, Reframe close prompt, Mirror sheet section, calibration seed)
+// writes to the same `addTrigger` / `updateTrigger` / `deleteTrigger` helpers
+// this component already uses. Component is the contract that the user can
+// always view, edit, or delete their named triggers from one place.
+//
+// Spec: TRIGGER_PROFILE_PHASE_2_FLOW_AUDIT.md §3a (Settings CRUD).
+// Phase 1 data layer: src/App.jsx ~4304 (helpers, schema, AI formatter).
+//
+// Voice rubric: prestige-operator declarative. "Name it" not "Take a moment
+// to consider." Specific-not-category framing per the type-vs-instance
+// distinction Phase 1 locks (Signal Profile takes types from a chip-picker;
+// Trigger Profile takes instances as free text).
+const TRIGGER_CATEGORY_LABELS = Object.freeze({
+  "work": "Work",
+  "relational": "Relational",
+  "financial": "Financial",
+  "health": "Health",
+  "cross-cultural": "Cross-cultural",
+  "current-events": "Current events",
+  "other": "Other"
+});
+
+const _formatTriggerLastSeen = (iso) => {
+  if (!iso) return null;
+  try {
+    const dt = new Date(iso);
+    if (Number.isNaN(dt.getTime())) return null;
+    const today = TimeKeeper.stillformDay();
+    const ddate = TimeKeeper.stillformDayOf(dt);
+    if (ddate === today) return "today";
+    const yesterday = TimeKeeper.stillformYesterday();
+    if (ddate === yesterday) return "yesterday";
+    // Older than yesterday: "Mon Apr 28" style
+    return dt.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
+  } catch { return null; }
+};
+
+function TriggerProfileSection({ onChange }) {
+  const [profile, setProfile] = useState(() => getTriggerProfile());
+  const [adding, setAdding] = useState(false);
+  const [newLabel, setNewLabel] = useState("");
+  const [newCategory, setNewCategory] = useState("work");
+  const [editingId, setEditingId] = useState(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editCategory, setEditCategory] = useState("work");
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [error, setError] = useState("");
+
+  const refresh = () => {
+    const next = getTriggerProfile();
+    setProfile(next);
+    if (typeof onChange === "function") onChange(next);
+  };
+
+  const sorted = [...profile.triggers].sort((a, b) => {
+    const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
+    if (ec !== 0) return ec;
+    return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
+  });
+
+  const handleAdd = () => {
+    const trimmed = newLabel.trim();
+    if (!trimmed) { setError("Add a label."); return; }
+    if (trimmed.length > 64) { setError("Keep it under 64 characters."); return; }
+    const result = addTrigger({ label: trimmed, category: newCategory });
+    if (!result) { setError("Couldn't save. Try again."); return; }
+    setNewLabel("");
+    setNewCategory("work");
+    setAdding(false);
+    setError("");
+    refresh();
+  };
+
+  const handleEditStart = (t) => {
+    setEditingId(t.id);
+    setEditLabel(t.label);
+    setEditCategory(t.category || "other");
+    setConfirmDeleteId(null);
+    setAdding(false);
+  };
+
+  const handleEditSave = (id) => {
+    const trimmed = editLabel.trim();
+    if (!trimmed) { setError("Label can't be empty."); return; }
+    if (trimmed.length > 64) { setError("Keep it under 64 characters."); return; }
+    const result = updateTrigger(id, { label: trimmed, category: editCategory });
+    if (!result) { setError("Couldn't save. Try again."); return; }
+    setEditingId(null);
+    setEditLabel("");
+    setError("");
+    refresh();
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+    setEditLabel("");
+    setError("");
+  };
+
+  const handleDelete = (id) => {
+    deleteTrigger(id);
+    setConfirmDeleteId(null);
+    refresh();
+  };
+
+  const CategoryChipRow = ({ value, onChange: setVal }) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
+      {TRIGGER_PROFILE_CATEGORIES.map(cat => {
+        const isActive = value === cat;
+        return (
+          <button
+            key={cat}
+            onClick={() => setVal(cat)}
+            aria-pressed={isActive}
+            aria-label={`Category: ${TRIGGER_CATEGORY_LABELS[cat]}`}
+            style={{
+              background: isActive ? "var(--amber-glow)" : "var(--surface)",
+              border: `0.5px solid ${isActive ? "var(--amber-dim)" : "var(--border)"}`,
+              borderRadius: "var(--r-lg)",
+              padding: "8px 12px",
+              fontSize: 11,
+              color: isActive ? "var(--amber)" : "var(--text-muted)",
+              cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif",
+              letterSpacing: "0.02em",
+              WebkitTapHighlightColor: "transparent"
+            }}
+          >
+            {TRIGGER_CATEGORY_LABELS[cat]}
+          </button>
+        );
+      })}
+    </div>
+  );
+
+  return (
+    <div style={{ marginBottom: 14 }}>
+      <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 8 }}>Triggers</div>
+      <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 12, lineHeight: 1.6 }}>
+        Specific people, contexts, or moments where composure is hardest. Name them as they show up — instances, not categories. Editable anytime.
+      </div>
+
+      {/* List */}
+      {sorted.length === 0 && !adding && (
+        <div style={{
+          background: "var(--surface)",
+          border: "0.5px solid var(--border)",
+          borderRadius: "var(--r)",
+          padding: "14px 16px",
+          marginBottom: 10
+        }}>
+          <div className="t-body-sm" style={{ color: "var(--text-muted)", lineHeight: 1.6 }}>
+            No triggers named yet. Add the situations or people that reliably destabilize you — specific names, not categories.
+          </div>
+        </div>
+      )}
+
+      {sorted.length > 0 && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 12 }}>
+          {sorted.map(t => {
+            const isEditing = editingId === t.id;
+            const isConfirmingDelete = confirmDeleteId === t.id;
+            const lastSeen = _formatTriggerLastSeen(t.lastSeen);
+            const categoryLabel = TRIGGER_CATEGORY_LABELS[t.category] || "Other";
+            const count = t.encounterCount || 0;
+
+            if (isEditing) {
+              return (
+                <div key={t.id} style={{
+                  background: "var(--surface2)",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r)",
+                  padding: "12px 14px"
+                }}>
+                  <input
+                    type="text"
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    maxLength={64}
+                    placeholder="Trigger label"
+                    aria-label="Edit trigger label"
+                    style={{
+                      width: "100%",
+                      background: "var(--surface)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r-sm)",
+                      padding: "8px 10px",
+                      fontSize: 13,
+                      color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      marginBottom: 10,
+                      WebkitAppearance: "none"
+                    }}
+                  />
+                  <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Category</div>
+                  <CategoryChipRow value={editCategory} onChange={setEditCategory} />
+                  {error && (
+                    <div className="t-caption" style={{ color: "var(--state-negative, var(--text-muted))", marginBottom: 8 }}>
+                      {error}
+                    </div>
+                  )}
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() => handleEditSave(t.id)}
+                      style={{
+                        background: "var(--amber-glow)",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        color: "var(--amber)",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={handleEditCancel}
+                      style={{
+                        background: "var(--surface)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        color: "var(--text-muted)",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            if (isConfirmingDelete) {
+              return (
+                <div key={t.id} style={{
+                  background: "var(--surface2)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  padding: "12px 14px"
+                }}>
+                  <div className="t-body-sm" style={{ color: "var(--text)", marginBottom: 10 }}>
+                    Remove "{t.label}"?
+                  </div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                      onClick={() => handleDelete(t.id)}
+                      aria-label={`Confirm remove ${t.label}`}
+                      style={{
+                        background: "var(--surface)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        color: "var(--text)",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Remove
+                    </button>
+                    <button
+                      onClick={() => setConfirmDeleteId(null)}
+                      style={{
+                        background: "var(--surface)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "8px 14px",
+                        fontSize: 12,
+                        color: "var(--text-muted)",
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Keep
+                    </button>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div key={t.id} style={{
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                padding: "12px 14px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {t.label}
+                  </div>
+                  <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.04em" }}>
+                    {categoryLabel}
+                    {count > 0 && ` · ${count} encounter${count === 1 ? "" : "s"}`}
+                    {lastSeen && count > 0 && ` · last ${lastSeen}`}
+                  </div>
+                </div>
+                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                  <button
+                    onClick={() => handleEditStart(t)}
+                    aria-label={`Edit ${t.label}`}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--text-muted)",
+                      cursor: "pointer",
+                      padding: "6px 8px",
+                      fontSize: 13,
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { setConfirmDeleteId(t.id); setEditingId(null); setAdding(false); }}
+                    aria-label={`Remove ${t.label}`}
+                    style={{
+                      background: "transparent",
+                      border: "none",
+                      color: "var(--text-muted)",
+                      cursor: "pointer",
+                      padding: "6px 8px",
+                      fontSize: 13,
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Add affordance */}
+      {!adding && (
+        <button
+          onClick={() => { setAdding(true); setEditingId(null); setConfirmDeleteId(null); setError(""); }}
+          style={{
+            width: "100%",
+            background: "var(--surface)",
+            border: "1px solid var(--border)",
+            borderRadius: "var(--r-lg)",
+            padding: "14px 18px",
+            textAlign: "left",
+            cursor: "pointer",
+            color: "var(--text)",
+            fontSize: 14,
+            fontFamily: "'DM Sans', sans-serif"
+          }}
+        >
+          <div style={{ fontWeight: 500, marginBottom: 2 }}>+ Add a trigger</div>
+          <div className="t-caption">Name a specific person, context, or moment.</div>
+        </button>
+      )}
+
+      {adding && (
+        <div style={{
+          background: "var(--surface2)",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r)",
+          padding: "14px 16px"
+        }}>
+          <input
+            type="text"
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            maxLength={64}
+            placeholder="e.g., Mike's 1:1, Sunday family dinners"
+            aria-label="New trigger label"
+            autoFocus
+            style={{
+              width: "100%",
+              background: "var(--surface)",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-sm)",
+              padding: "10px 12px",
+              fontSize: 13,
+              color: "var(--text)",
+              fontFamily: "'DM Sans', sans-serif",
+              marginBottom: 12,
+              WebkitAppearance: "none"
+            }}
+          />
+          <div className="t-caption" style={{ color: "var(--text-muted)", marginBottom: 6 }}>Category</div>
+          <CategoryChipRow value={newCategory} onChange={setNewCategory} />
+          {error && (
+            <div className="t-caption" style={{ color: "var(--state-negative, var(--text-muted))", marginBottom: 10 }}>
+              {error}
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={handleAdd}
+              style={{
+                background: "var(--amber-glow)",
+                border: "0.5px solid var(--amber-dim)",
+                borderRadius: "var(--r-sm)",
+                padding: "9px 16px",
+                fontSize: 12,
+                color: "var(--amber)",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              Add
+            </button>
+            <button
+              onClick={() => { setAdding(false); setNewLabel(""); setNewCategory("work"); setError(""); }}
+              style={{
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r-sm)",
+                padding: "9px 16px",
+                fontSize: 12,
+                color: "var(--text-muted)",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif"
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -17003,7 +17447,7 @@ export default function Stillform() {
   }));
   const [settingsSubOpen, setSettingsSubOpen] = useState(() => ({
     theme: false, aiTone: false, language: false, display: false, sound: false,
-    processingType: false, breathingPattern: false, scanPace: false, signalMapping: false, scheduleNotif: false,
+    processingType: false, breathingPattern: false, scanPace: false, signalMapping: false, triggers: false, scheduleNotif: false,
     subscriptionStatus: false, syncControls: false,
     metrics: false, exports: false,
   }));
@@ -22496,6 +22940,22 @@ const isSignalProfileConfigured = () => {
                     <div className="t-caption">Where does it hit first? Takes 60 seconds.</div>
                   </button>
                 </div>
+                    </div>
+                  )}
+                </div>
+                                {/* Triggers — collapsible (Engagement Architecture Build #2 Phase 2a) */}
+                <div style={{ marginBottom: 10 }}>
+                  <button onClick={() => toggleSubOpen("triggers")} style={{
+                    width: "100%", background: "none", border: "none", padding: "8px 0",
+                    display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
+                    borderBottom: "0.5px solid var(--border)"
+                  }}>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Triggers</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: 11 }}>{settingsSubOpen.triggers ? "▾" : "▸"}</span>
+                  </button>
+                  {settingsSubOpen.triggers && (
+                    <div style={{ marginTop: 10 }}>
+                      <TriggerProfileSection />
                     </div>
                   )}
                 </div>
