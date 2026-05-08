@@ -3673,6 +3673,258 @@ const generateTodaysBrief = async (checkinToday) => {
   } catch { return null; }
 };
 
+// ─── PRE-EVENT BRIEF — Engagement Architecture Engine 2 Build #7 (frontend) ──
+// Spec: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 128-130 verbatim:
+//   "Same shape as Today's Brief, scoped to a specific calendar trigger.
+//    Fires 30 minutes before. User has it on their phone walking into the room."
+//
+// Audit doc: PRE_EVENT_BRIEF_FLOW_AUDIT.md (May 8) §6 call 1 default —
+// Option A (on-demand at notification tap). Backend at netlify/functions/
+// pre-event-brief.js (Phase 7a, commit 1e3a121) returns same 4-key JSON
+// (hardware/risks/moves/recovery) as Today's Brief, scoped to one event.
+//
+// READ/WRITE PATH:
+// stillform_pre_event_briefs joins SECURE_KEYS (encrypted at rest, parallel
+// to journal / profiles / eod_artifacts / todays_briefs) and SYNC_KEYS
+// (cross-device). keyed by composite eventKey = "title|start" so
+// rescheduled events get fresh briefs without manual cache invalidation.
+//
+// FAILURE MODE on AI-down / timeout / schema violation: skip silent — no
+// brief persisted. Same posture as Today's Brief / EOD artifact. The
+// moment-of-event value IS specificity to this user + this event; a
+// generic fallback would betray the voice rubric. Silent absence is right.
+//
+// TRIGGER: fire-and-forget from the Pre-event Brief display screen on
+// mount when no cached brief exists for that event-key (Phase 7d).
+
+const PRE_EVENT_BRIEF_API_URL = (() => {
+  try {
+    const isCapacitor = window?.Capacitor?.isNativePlatform?.();
+    return isCapacitor
+      ? "https://stillformapp.com/.netlify/functions/pre-event-brief"
+      : "/.netlify/functions/pre-event-brief";
+  } catch {
+    return "/.netlify/functions/pre-event-brief";
+  }
+})();
+const PRE_EVENT_BRIEFS_STORAGE_KEY = "stillform_pre_event_briefs";
+const PRE_EVENT_BRIEFS_MAX_ITEMS = 60; // ~2 weeks at 4-5 events/day
+
+// Composite event key. title|start uniquely identifies a calendar event
+// for cache lookup. If the event gets rescheduled (start changes), the
+// new key generates a fresh brief. The old key becomes orphan and trims
+// out at MAX_ITEMS oldest-out.
+const buildPreEventBriefKey = (event) => {
+  if (!event?.title) return null;
+  const t = String(event.title).slice(0, 200);
+  const s = String(event.start || "").slice(0, 40);
+  return `${t}|${s}`;
+};
+
+// Get all Pre-event Briefs newest-first. Returns [] on any read error.
+// Each record: { eventKey, eventTitle, eventStart, hardware, risks, moves,
+// recovery, generatedAt }.
+const getPreEventBriefs = () => {
+  try {
+    const raw = secureRead(PRE_EVENT_BRIEFS_STORAGE_KEY, []);
+    if (!Array.isArray(raw)) return [];
+    return [...raw].sort((a, b) =>
+      new Date(b.generatedAt || 0).getTime() - new Date(a.generatedAt || 0).getTime()
+    );
+  } catch { return []; }
+};
+
+// Lookup by event. Returns the persisted brief for that event-key, or
+// null. Used by Phase 7d display screen on mount to decide whether to
+// render directly or fire generation + start polling.
+const getPreEventBriefForEvent = (event) => {
+  const key = buildPreEventBriefKey(event);
+  if (!key) return null;
+  try {
+    return getPreEventBriefs().find(r => r.eventKey === key) || null;
+  } catch { return null; }
+};
+
+// Persist a brief, replacing any existing record for the same event-key
+// so re-fires after a rescheduled event overwrite cleanly. Trims to
+// MAX_ITEMS oldest-out, same policy as Today's Brief / EOD artifacts.
+const appendPreEventBrief = (record) => {
+  if (!record?.eventKey || !record?.hardware) return null;
+  try {
+    const existing = getPreEventBriefs();
+    const filtered = existing.filter(r => r.eventKey !== record.eventKey);
+    filtered.push({
+      eventKey: String(record.eventKey).slice(0, 240),
+      eventTitle: String(record.eventTitle || "").slice(0, 200),
+      eventStart: String(record.eventStart || "").slice(0, 40),
+      hardware: String(record.hardware).slice(0, 280),
+      risks: String(record.risks || "").slice(0, 280),
+      moves: String(record.moves || "").slice(0, 280),
+      recovery: String(record.recovery || "").slice(0, 280),
+      generatedAt: record.generatedAt || new Date().toISOString()
+    });
+    const trimmed = filtered.length > PRE_EVENT_BRIEFS_MAX_ITEMS
+      ? filtered.slice(-PRE_EVENT_BRIEFS_MAX_ITEMS)
+      : filtered;
+    secureWrite(PRE_EVENT_BRIEFS_STORAGE_KEY, trimmed);
+    return record;
+  } catch { return null; }
+};
+
+// Build the per-event payload. Reuses Today's Brief's state-context shape
+// verbatim (bio-filter, tension, outcome focus, profiles, stage, recent
+// practice, yesterday's EOD) plus event-specific fields. Backend
+// (pre-event-brief.js) bounds these server-side too; client truncation
+// here is defense-in-depth.
+const buildPreEventBriefPayload = (event) => {
+  // Event details (the new surface vs Today's Brief)
+  const eventTitle = String(event?.title || "");
+  const eventStart = String(event?.start || "");
+  const eventDescription = String(event?.description || "");
+
+  // Read morning check-in for state. Same path Today's Brief uses.
+  let morningEnergy = "";
+  let morningMood = "";
+  let bioFilter = [];
+  let tensionAreas = [];
+  try {
+    const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
+    if (ci?.date === TimeKeeper.stillformDay()) {
+      morningEnergy = ci.energy || "";
+      morningMood = ci.mood || "";
+      bioFilter = Array.isArray(ci.bio) ? ci.bio : [];
+      tensionAreas = ci.tension && typeof ci.tension === "object"
+        ? Object.keys(ci.tension).filter(k => Number(ci.tension[k]) > 0)
+        : [];
+    }
+  } catch {}
+
+  // Outcome focus
+  let outcomeFocus = "";
+  try {
+    const raw = localStorage.getItem("stillform_outcome_focus");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      outcomeFocus = String(parsed?.text || parsed?.value || raw || "");
+    }
+  } catch {}
+
+  // Trigger Profile — pre-formatted via existing helper
+  let triggerProfile = "";
+  try { triggerProfile = formatTriggerProfileForAI(8) || ""; } catch {}
+
+  // Bias profile — same inline format Reframe uses
+  let biasProfile = "";
+  try {
+    const biases = secureRead("stillform_bias_profile", null);
+    if (Array.isArray(biases) && biases.length) {
+      biasProfile = `User's identified decision patterns: ${biases.join(", ")}`;
+    }
+  } catch {}
+
+  // Signal profile — same inline format Reframe uses
+  let signalProfile = "";
+  try {
+    const p = secureRead("stillform_signal_profile", null);
+    if (p) {
+      const parts = [];
+      if (p.firstAreas?.length) parts.push(`Body signals first in: ${p.firstAreas.join(", ")}`);
+      if (p.preSensations?.length) parts.push(`Pre-escalation sensations: ${p.preSensations.join(", ")}`);
+      if (p.triggers?.length) parts.push(`Known triggers: ${p.triggers.join(", ")}`);
+      signalProfile = parts.length ? parts.join(". ") : "";
+    }
+  } catch {}
+
+  // Stage info
+  let stageId = null;
+  let stageName = "";
+  try {
+    const snap = getCurrentStage();
+    if (snap?.currentStageId) stageId = snap.currentStageId;
+    if (snap?.stage?.name) stageName = String(snap.stage.name);
+  } catch {}
+
+  // Recent practice — last 7 days
+  let recentSessionsCount = 0;
+  const recentSessionDays = 7;
+  try {
+    const sessions = secureRead("stillform_sessions", []);
+    if (Array.isArray(sessions)) {
+      const cutoff = TimeKeeper.daysAgoMs(recentSessionDays);
+      recentSessionsCount = sessions.filter(s => {
+        try { return new Date(s.timestamp).getTime() >= cutoff; }
+        catch { return false; }
+      }).length;
+    }
+  } catch {}
+
+  // Yesterday's EOD takeaway — same continuity hook Today's Brief uses
+  let yesterdayEodArtifact = "";
+  try {
+    const yesterday = TimeKeeper.stillformYesterday();
+    const briefs = getEodArtifacts();
+    const y = briefs.find(r => r.date === yesterday);
+    if (y?.artifact) yesterdayEodArtifact = String(y.artifact);
+  } catch {}
+
+  return {
+    eventTitle,
+    eventStart,
+    eventDescription,
+    morningEnergy,
+    morningMood,
+    bioFilter,
+    tensionAreas,
+    outcomeFocus,
+    triggerProfile,
+    biasProfile,
+    signalProfile,
+    stageId,
+    stageName,
+    recentSessionsCount,
+    recentSessionDays,
+    yesterdayEodArtifact
+  };
+};
+
+// Fire-and-forget. Returns a promise that resolves to the persisted record
+// on success or null on any failure. Caller (Phase 7d display screen) does
+// not need to await — the polling pattern picks up the persisted brief
+// once generation completes.
+const generatePreEventBrief = async (event) => {
+  if (!event?.title) return null;
+  const eventKey = buildPreEventBriefKey(event);
+  if (!eventKey) return null;
+  try {
+    const payload = buildPreEventBriefPayload(event);
+    const response = await fetch(PRE_EVENT_BRIEF_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const hardware = typeof data?.hardware === "string" ? data.hardware.trim() : "";
+    if (!hardware) return null;
+    const risks = typeof data?.risks === "string" ? data.risks.trim() : "";
+    const moves = typeof data?.moves === "string" ? data.moves.trim() : "";
+    const recovery = typeof data?.recovery === "string" ? data.recovery.trim() : "";
+    const generatedAt = typeof data?.generatedAt === "string"
+      ? data.generatedAt
+      : new Date().toISOString();
+    return appendPreEventBrief({
+      eventKey,
+      eventTitle: event.title,
+      eventStart: event.start || "",
+      hardware,
+      risks,
+      moves,
+      recovery,
+      generatedAt
+    });
+  } catch { return null; }
+};
+
 // ─── MOVE CARD HISTORY — Engagement Architecture Engine 2 Build #8 Phase 8e ──
 // Records every Move card session (completed or early-exit) to a persistent
 // history. Drives two consumer paths: (1) recentMoveIds passed to selection
@@ -8781,7 +9033,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -9392,6 +9644,7 @@ const SECURE_KEYS = [
   "stillform_eod_history",
   "stillform_eod_artifacts",
   "stillform_todays_briefs",
+  "stillform_pre_event_briefs",
   "stillform_move_card_history",
   "stillform_communication_events",
   "stillform_tool_debriefs",
@@ -24646,7 +24899,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
