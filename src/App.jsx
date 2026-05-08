@@ -14118,6 +14118,144 @@ function TriggerProfileSection({ onChange }) {
 }
 
 
+// MirrorSheetTriggers — Phase 2d.1. Replaces the inline IIFE Phase 2d used
+// inside the Mirror sheet. Lifting to a component buys two things: useState
+// for the inline-add affordance the audit §3d called for, and a refresh
+// hook so a freshly-added trigger appears immediately in the list. Add
+// here is *reflection-context*, not encounter-context — calls addTrigger
+// only (no incrementTriggerEncounter), matching the Settings CRUD pattern.
+// EOD (2b) and Reframe close (2c) remain the encounter-context surfaces.
+function MirrorSheetTriggers() {
+  const [profile, setProfile] = useState(() => {
+    try { return getTriggerProfile(); } catch { return { triggers: [] }; }
+  });
+  const [adding, setAdding] = useState(false);
+
+  const refresh = () => {
+    try { setProfile(getTriggerProfile()); } catch {}
+  };
+
+  const triggers = profile?.triggers || [];
+  const sorted = [...triggers].sort((a, b) => {
+    const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
+    if (ec !== 0) return ec;
+    return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
+  });
+  const top = sorted.slice(0, 3);
+  const moreCount = Math.max(0, sorted.length - 3);
+
+  const handleAdd = ({ label, category }) => {
+    try {
+      addTrigger({ label, category });
+      try { window.plausible("Trigger Added From Mirror", { props: { category } }); } catch {}
+    } catch {}
+    setAdding(false);
+    refresh();
+  };
+
+  const handleCancel = () => {
+    try { window.plausible("Trigger Prompt Skipped", { props: { surface: "mirror" } }); } catch {}
+    setAdding(false);
+  };
+
+  return (
+    <>
+      <div className="t-mono-xs" style={{
+        color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
+      }}>
+        What you've named
+      </div>
+      {sorted.length === 0 && !adding && (
+        <div style={{
+          fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6,
+          fontFamily: "'DM Sans', sans-serif", marginBottom: 12
+        }}>
+          No triggers named yet. Specific people, contexts, or moments where composure is hardest.
+        </div>
+      )}
+      {top.length > 0 && (
+        <div style={{ marginBottom: moreCount > 0 ? 8 : (adding ? 14 : 18) }}>
+          {top.map((t, idx) => {
+            const lastSeen = _formatTriggerLastSeen(t.lastSeen);
+            const categoryLabel = TRIGGER_CATEGORY_LABELS[t.category] || "Other";
+            const count = t.encounterCount || 0;
+            return (
+              <div key={t.id} style={{
+                padding: "10px 0",
+                borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+              }}>
+                <div style={{
+                  fontSize: 13, color: "var(--text)", lineHeight: 1.45,
+                  fontFamily: "'DM Sans', sans-serif", marginBottom: 4
+                }}>
+                  {t.label}
+                </div>
+                <div className="t-caption" style={{
+                  color: "var(--text-muted)", letterSpacing: "0.04em"
+                }}>
+                  {categoryLabel}
+                  {count > 0 && ` · ${count} encounter${count === 1 ? "" : "s"}`}
+                  {lastSeen && count > 0 && ` · last ${lastSeen}`}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+      {moreCount > 0 && (
+        <div style={{
+          fontSize: 11, color: "var(--text-muted)", fontStyle: "italic",
+          marginBottom: adding ? 14 : 18, fontFamily: "'DM Sans', sans-serif"
+        }}>
+          +{moreCount} more in Settings → Personalization → Triggers
+        </div>
+      )}
+      {adding && (
+        <div style={{
+          background: "var(--surface2)",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r)",
+          padding: "14px 16px",
+          marginBottom: 28
+        }}>
+          <TriggerForm
+            autoFocus
+            submitLabel="Add"
+            cancelLabel="Cancel"
+            placeholder="e.g., Mike's 1:1, Sunday family dinners"
+            onSubmit={handleAdd}
+            onCancel={handleCancel}
+          />
+        </div>
+      )}
+      {!adding && (
+        <button
+          onClick={() => {
+            setAdding(true);
+            try { window.plausible("Trigger Prompt Shown", { props: { surface: "mirror" } }); } catch {}
+          }}
+          aria-label="Add a trigger"
+          style={{
+            background: "none",
+            border: "none",
+            color: "var(--text-muted)",
+            cursor: "pointer",
+            padding: "0 0 28px 0",
+            fontSize: 12,
+            fontFamily: "'DM Sans', sans-serif",
+            letterSpacing: "0.02em",
+            textAlign: "left",
+            WebkitTapHighlightColor: "transparent"
+          }}
+        >
+          + Add a trigger
+        </button>
+      )}
+    </>
+  );
+}
+
+
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -18872,79 +19010,15 @@ const isSignalProfileConfigured = () => {
                 </>
               )}
 
-              {/* Phase 2d — Trigger Profile reflection in Mirror sheet.
+              {/* Phase 2d / 2d.1 — Trigger Profile reflection in Mirror sheet.
                   Per engagement architecture §3.1: "diagnostic stack (Signal
-                  Profile + Bias Profile + Trigger Profile)." Phase 2d ships
-                  the Trigger Profile surface; Signal/Bias sections in this
-                  sheet remain out of scope (separate work). Read-only here;
-                  capture happens at Settings (2a), EOD (2b), Reframe close
-                  (2c). Top 3 by encounterCount; rest visible in Settings. */}
-              {(() => {
-                let triggerProfile = null;
-                try { triggerProfile = getTriggerProfile(); } catch {}
-                const triggers = triggerProfile?.triggers || [];
-                const sorted = [...triggers].sort((a, b) => {
-                  const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
-                  if (ec !== 0) return ec;
-                  return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
-                });
-                const top = sorted.slice(0, 3);
-                const moreCount = Math.max(0, sorted.length - 3);
-                return (
-                  <>
-                    <div className="t-mono-xs" style={{
-                      color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-                    }}>
-                      What you've named
-                    </div>
-                    {sorted.length === 0 && (
-                      <div style={{
-                        fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6,
-                        fontFamily: "'DM Sans', sans-serif", marginBottom: 28
-                      }}>
-                        No triggers named yet. Specific people, contexts, or moments where composure is hardest. Add them at the end of any day or in Settings → Personalization → Triggers.
-                      </div>
-                    )}
-                    {top.length > 0 && (
-                      <div style={{ marginBottom: moreCount > 0 ? 8 : 28 }}>
-                        {top.map((t, idx) => {
-                          const lastSeen = _formatTriggerLastSeen(t.lastSeen);
-                          const categoryLabel = TRIGGER_CATEGORY_LABELS[t.category] || "Other";
-                          const count = t.encounterCount || 0;
-                          return (
-                            <div key={t.id} style={{
-                              padding: "10px 0",
-                              borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-                            }}>
-                              <div style={{
-                                fontSize: 13, color: "var(--text)", lineHeight: 1.45,
-                                fontFamily: "'DM Sans', sans-serif", marginBottom: 4
-                              }}>
-                                {t.label}
-                              </div>
-                              <div className="t-caption" style={{
-                                color: "var(--text-muted)", letterSpacing: "0.04em"
-                              }}>
-                                {categoryLabel}
-                                {count > 0 && ` · ${count} encounter${count === 1 ? "" : "s"}`}
-                                {lastSeen && count > 0 && ` · last ${lastSeen}`}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                    {moreCount > 0 && (
-                      <div style={{
-                        fontSize: 11, color: "var(--text-muted)", fontStyle: "italic",
-                        marginBottom: 28, fontFamily: "'DM Sans', sans-serif"
-                      }}>
-                        +{moreCount} more in Settings → Personalization → Triggers
-                      </div>
-                    )}
-                  </>
-                );
-              })()}
+                  Profile + Bias Profile + Trigger Profile)." Phase 2d shipped
+                  read-only display; 2d.1 lifts to a stateful component for the
+                  inline-add affordance audit §3d called for. Capture surfaces
+                  remain Settings (2a), EOD (2b), Reframe close (2c). Add here
+                  is reflection-context so no encounter increment.
+                  Signal/Bias sections in this sheet remain out of scope. */}
+              <MirrorSheetTriggers />
 
               <div className="t-mono-xs" style={{
                 color: "var(--text-muted)", marginBottom: 12, letterSpacing: "0.14em"
