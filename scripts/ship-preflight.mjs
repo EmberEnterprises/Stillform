@@ -72,6 +72,11 @@ const checks = [
   { label: "TimeKeeper guard: no toISOString().split(\"T\") UTC date keys", cmd: "rg", args: ["-n", "\\.toISOString\\(\\)\\.split\\(['\"]T['\"]\\)", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no inline ms day math (86400000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*86400000", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no inline ms day math (24*60*60*1000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\d+\\s*\\*\\s*24\\s*\\*\\s*60\\s*\\*\\s*60\\s*\\*\\s*1000", "src/App.jsx"], type: "must-not-match" },
+  // v1.3 (Layer 2.38) — the original two regexes only caught literal-number multipliers (e.g. `7 * 24 * 60 * 60 * 1000`).
+  // Variable-multiplier bypass (e.g. `windowDays * 24 * 60 * 60 * 1000` or `(PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000)`)
+  // slipped past undetected for months. The two guards below close that bypass.
+  { label: "TimeKeeper guard: no paren-wrapped ms day math (Date.now() - (X * 24*60*60*1000) form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*\\([^)]*\\*\\s*24\\s*\\*\\s*60\\s*\\*\\s*60\\s*\\*\\s*1000", "src/App.jsx"], type: "must-not-match" },
+  { label: "TimeKeeper guard: no multi-char identifier ms day math (Date.now() - VAR * 24*60*60*1000 form)", cmd: "rg", args: ["-n", "Date\\.now\\(\\)\\s*-\\s*[a-zA-Z_]\\w+\\s*\\*\\s*24\\s*\\*\\s*60\\s*\\*\\s*60\\s*\\*\\s*1000", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no UTC extraction from s.timestamp via slice", cmd: "rg", args: ["-n", "\\bs\\.timestamp\\??\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" },
   { label: "TimeKeeper guard: no UTC extraction from sentAt via slice", cmd: "rg", args: ["-n", "\\bsentAt\\.slice\\(\\s*0", "src/App.jsx"], type: "must-not-match" },
   // Block direct calls to the private helpers — all external date logic must route through TimeKeeper.

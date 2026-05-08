@@ -2668,7 +2668,7 @@ const detectPatternsDeterministic = () => {
     if (sessions.length < PATTERN_THRESHOLD) return [];
 
     // Window: most recent N sessions OR last D days, whichever is shorter.
-    const windowStart = Date.now() - (PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+    const windowStart = TimeKeeper.daysAgoMs(PATTERN_WINDOW_DAYS);
     const recent = sessions
       .filter(s => {
         const t = new Date(s.timestamp || 0).getTime();
@@ -3297,7 +3297,7 @@ const getSavedReframeDistortions = (limitDays = 90) => {
   try {
     const raw = secureRead("stillform_saved_reframes", []);
     if (!Array.isArray(raw)) return [];
-    const cutoff = Date.now() - (limitDays * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(limitDays);
     const counts = {};
     raw
       .filter(r => r.distortion && new Date(r.timestamp || 0).getTime() >= cutoff)
@@ -3321,7 +3321,7 @@ const getSavedReframeDistortions = (limitDays = 90) => {
 // Default 7 = "this week" rolling window.
 const countSessionsInDays = (days = 7) => {
   try {
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(days);
     return getSessionsFromStorage().filter(s => {
       const ts = new Date(s.timestamp || 0).getTime();
       return ts >= cutoff;
@@ -3335,7 +3335,7 @@ const countSessionsInDays = (days = 7) => {
 // multiple tools — e.g. breathe + ground.) Default 30 days.
 const getToolDistribution = (days = 30) => {
   try {
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(days);
     const sessions = getSessionsFromStorage().filter(s => {
       const ts = new Date(s.timestamp || 0).getTime();
       return ts >= cutoff;
@@ -3370,7 +3370,7 @@ const getAverageSessionDuration = (limit = 30) => {
 // the user practice consistently, in bursts, or sporadically? Default 30.
 const getSessionsPerDay = (days = 30) => {
   try {
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(days);
     const sessions = getSessionsFromStorage().filter(s => {
       const ts = new Date(s.timestamp || 0).getTime();
       return ts >= cutoff;
@@ -3537,7 +3537,7 @@ const STAGE_THRESHOLDS = Object.freeze({
 const _s1CountSpecificBodyAreaSessions = (windowDays = STAGE_THRESHOLDS.S1_BODY_AREA_WINDOW_DAYS) => {
   try {
     const sessions = getSessionsFromStorage();
-    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
     return sessions.filter(s => {
       const t = new Date(s.timestamp || 0).getTime();
       if (Number.isNaN(t) || t < cutoff) return false;
@@ -3558,7 +3558,7 @@ const _s1CountSpecificBodyAreaSessions = (windowDays = STAGE_THRESHOLDS.S1_BODY_
 const _s2CountDistinctChips = (windowDays = STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_WINDOW_DAYS) => {
   try {
     const sessions = getSessionsFromStorage();
-    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
     const chips = new Set();
     sessions.forEach(s => {
       const t = new Date(s.timestamp || 0).getTime();
@@ -3641,7 +3641,7 @@ const _s4SelfInitiatedDisruptorCount = (windowDays = STAGE_THRESHOLDS.S4_SELF_IN
   try {
     const sessions = getDisruptorSessionsFromStorage();
     if (!Array.isArray(sessions)) return 0;
-    const cutoff = Date.now() - (windowDays * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
     return sessions.filter(s => {
       if (!s || s.patternId) return false;
       const t = new Date(s.timestamp || 0).getTime();
@@ -3657,7 +3657,7 @@ const _s4SelfInitiatedDisruptorCount = (windowDays = STAGE_THRESHOLDS.S4_SELF_IN
 const _s5RecoveryTrendImproving = (lookbackDays = STAGE_THRESHOLDS.S5_RECOVERY_TREND_LOOKBACK_DAYS) => {
   try {
     const sessions = getSessionsFromStorage();
-    const cutoff = Date.now() - (lookbackDays * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(lookbackDays);
     const rated = sessions
       .filter(s => {
         const t = new Date(s.timestamp || 0).getTime();
@@ -4526,7 +4526,7 @@ const appendShiftEventToStorage = (entry, maxItems = SHIFT_EVENT_MAX_ITEMS) => {
 
 // Reads recent shift events to compute pattern context (sustained Flat / sustained HAN)
 function getRecentSustainedPatterns(shiftEvents) {
-  const cutoff = Date.now() - SHIFT_CATEGORY_PATTERN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  const cutoff = TimeKeeper.daysAgoMs(SHIFT_CATEGORY_PATTERN_WINDOW_DAYS);
   const recent = (shiftEvents || [])
     .filter(e => e && e.timestamp && new Date(e.timestamp).getTime() > cutoff)
     .filter(e => e.postState)
@@ -4937,7 +4937,7 @@ const withinDays = (value, days) => {
   try {
     const dt = new Date(value);
     if (Number.isNaN(dt.getTime())) return false;
-    const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+    const cutoff = TimeKeeper.daysAgoMs(days);
     return dt.getTime() >= cutoff;
   } catch {
     return false;
@@ -15702,7 +15702,7 @@ export default function Stillform() {
       try {
         const dt = new Date(rawDate);
         if (Number.isNaN(dt.getTime())) return false;
-        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+        const cutoff = TimeKeeper.daysAgoMs(days);
         return dt.getTime() >= cutoff;
       } catch {
         return false;
@@ -15843,7 +15843,7 @@ export default function Stillform() {
       if (lastDismiss) {
         try {
           const lastDt = new Date(`${lastDismiss}T00:00:00`);
-          const cutoff = Date.now() - (14 * 24 * 60 * 60 * 1000);
+          const cutoff = TimeKeeper.daysAgoMs(14);
           if (lastDt.getTime() > cutoff) {
             return { todayIso, showCategoryCNudge: false, reason: "streak-suppressed" };
           }
