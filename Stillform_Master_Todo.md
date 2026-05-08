@@ -711,6 +711,23 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 **ACTIVE — work that can ship now:**
 
+- [ ] **My Progress redesign — RE-QUEUED May 8, 2026 (was deferred May 7, never came back).** Spec: `MY_PROGRESS_REDESIGN_SPEC.md` (23K, May 7). Per Thursday May 7 morning sequencing decision: build steps 2-4 first (Settled chip, Body Scan What Shifted, three-category data feed), defer step 5 (this redesign) to its own dedicated session "after I can see real categorized data on your phone." Steps 2-4 shipped. Step 5 was never re-queued. Current `function MyProgress` at `src/App.jsx:13516` is the OLD layout — the categorized data feed shipped but the surface that VISUALIZES it didn't. **This is one of the deferred experiences directly tied to Arlin's "I see more stuff but don't feel more engaged" feedback (May 8).** Read the spec before scoping; it's substantial.
+- [ ] **Self Mode redesign — RE-QUEUED May 8, 2026 (drafted May 7, never confirmed, never implemented).** Spec: `SELF_MODE_REDESIGN_RESEARCH.md` (25K, May 7). Replaces the original 5-step flow (Notice / Name / Recognize / Perspective / Choose) with 4-step (Notice / Name / **Watch** / Release). The Watch step is the actual MCT moment Wells 2009 specifies — catch-and-release, not catch-and-analyze. Currently `MetacognitionTool` at `src/App.jsx:13012` still runs the original 5-step. Drops Step 3 (Recognize "have you been here before" — invites analysis) and Step 4 (Perspective "what do you need" — goal-directed coping). Five citations verified during May 7 research session. Pending Arlin's spec sign-off before code change. **Also tied to the felt-engagement gap.**
+- [ ] **Info button discipline pass — engagement architecture surfaces (added May 8, 2026).** The product principle "every Stillform surface answers WHY" is broken on the recently-shipped engagement architecture work + a few other May surfaces. Audit completed May 8; surfaces that ship without ⓘ:
+  - **Practice Trend** (3 renderings) — Reframe in-tool `:10740`, Reframe close `:11039`, Body Scan close `:7337`. Achievement micro-credit (Build #5) shows pre→post chip transition. Heider 1958 attribution science is in code comments but invisible to users.
+  - **Mirror anchor** (home stage marker) `:19287` — single tappable button opens Mirror sheet but no science modal explaining the stage system. **Arlin May 8: "Stage 1 on the screen? no info button. 50% to naming and it says I have 5 stages but no explanation as how I do it or how I get there."** This is the highest-priority gap.
+  - **Mirror sheet body** (full stage breakdown) `:17654` — no ⓘ on stage name, capacity description, or markers section.
+  - **Body Scan "What Shifted" header** `:7158` — caption explains activity but no ⓘ button.
+  - **"Settled" chip** — defined at `:7143, 10671, 12977, 19107` but NOT in `CHIP_DEFINITIONS` table (which powers the dynamic chip-info ⓘ buttons via line 7204). Other chips have ⓘ; Settled doesn't.
+  - **Three-category Russell classifier** surfaces (My Progress data feed) — no ⓘ explaining the framework.
+  
+  Three approach options to choose from when picking this up:
+    A) Add ⓘ + science modals to all surfaces in one focused pass (~60-90 min). Restores the discipline.
+    B) Add ⓘ to highest-visibility only — Practice Trend renderings + Mirror anchor + Settled chip — covers ~80% of user-facing impact in ~30-45 min.
+    C) Decide some surfaces don't need ⓘ (e.g., Mirror anchor opens Mirror sheet which IS the explanation, just not framed as ⓘ) and document rationale in code.
+  
+  Each surface has the science available — modal text mostly drafts from existing code comments + spec docs (engagement architecture, Russell circumplex, Heider attribution). **This is the third deferred experience tied to the felt-engagement gap.**
+
 - [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin. Build the Android App Bundle from existing Capacitor android/ project.
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough. **Sequenced last on purpose (Arlin direction May 4):** onboarding teaches users what the app does, so the calibration questions and tutorial flow can't be designed until the rest of the prelaunch product scope is locked. Building it earlier means rebuilding it as features land.
 
