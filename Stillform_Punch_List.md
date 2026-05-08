@@ -161,10 +161,10 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 - [ ] My Progress pin interaction backfilled as icon-led action pattern (no separate pin-open status button)
 
 ### AI quality and intention-integrity work
-- [ ] Reframe AI intention-fit validation pass added (anchors responses to user language)
-- [ ] Reframe voice guardrails tuned to reduce over-sanitized/generic outputs
-- [ ] Reframe retry quality prompt combines failure reasons for higher-specificity regeneration
-- [ ] Deterministic fallback responses now include user-input specificity
+- [x] Reframe AI intention-fit validation pass added (anchors responses to user language) — VERIFIED May 8, 2026: `validateIntentionFit` function at `netlify/functions/reframe.js:699`, called in main pipeline at `:1716`.
+- [x] Reframe voice guardrails tuned to reduce over-sanitized/generic outputs — VERIFIED May 8, 2026: `GENERIC_GARBAGE_PATTERNS` at `:312`, `VOICE_CONTRACT_BANNED_PATTERNS` at `:367`, `validateVoiceContract` function at `:731`. Multi-layer protection.
+- [x] Reframe retry quality prompt combines failure reasons for higher-specificity regeneration — VERIFIED May 8, 2026: `QUALITY_RETRY_PROMPT` at `:267`, retry path at `:1697` with `lastFailureReasons.join("; ")` combining failure reasons exactly as claimed.
+- [x] Deterministic fallback responses now include user-input specificity — VERIFIED May 8, 2026: `buildDeterministicFallback` at `:749` takes `input` parameter, called at `:1746` with user input passed through.
 
 ### “Teach how they process” system (processing pedagogy)
 - [ ] Tool-entry processing primers added to Reframe, Breathe, and Body Scan
