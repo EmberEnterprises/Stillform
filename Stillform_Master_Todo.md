@@ -761,6 +761,32 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
   **Read before scoping:** `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` (the architecture spec) + `MY_PROGRESS_REDESIGN_SPEC.md` (one slice of the connectivity surface). Both already in repo. The framework exists; the surfacing of it doesn't.
 
+- [ ] **🔥 Voice consistency audit — prestige-operator vs clinical-citation drift (added May 8, 2026 from Arlin direction).** Companion to the narrative-spine item above. The product's voice slips from prestige-operator into clinical-citation in multiple microcopy surfaces shipped as features without weaving. The pattern: science is paraded as credentialing rather than woven as language.
+
+  **Arlin's framing (May 8):** *"You took my ideas and created them on such a mass superficial layer rather than truly integrating the idea, weaving it in. These were huge opportunities to make the app elite and prestige."*
+
+  **Confirmed example (Cyclic Sighing breathing pattern card, settings):** *"Outperformed mindfulness, box breathing, and other patterns for mood and arousal reduction in a 2023 Stanford RCT (Balban et al., n=111). The most-studied breath for downregulation."*
+
+  **Why this is wrong tone:** It tries to convince via credentials. Prestige doesn't try. Compare to Quick Reset on the same screen: *"60 seconds. Reset and get back to it. Focused breathing slows your system. The shift starts in under a minute."* — declarative, experience-first, science woven not paraded.
+
+  **Likely additional surfaces (audit needed before scoping):**
+  - Plain-Language Neuroscience cards — may have the same citation-dump drift
+  - Mirror sheet capacity descriptions
+  - Body Scan What Shifted caption
+  - My Progress metric descriptions (the ⓘ modals that exist DO seem to have decent voice — sample: "Schön (1983)" cited at end as language, not lead)
+  - All `setInfoModal` body strings — full audit
+  - Reframe AI prompts — already audited and largely good (Wells 2009 woven, not paraded), but worth re-reading post-spine work
+  - Tutorial / onboarding cards
+
+  **Voice rubric (drafts from existing good examples):**
+  - Lead with experience or action, not credentials
+  - Science is the LANGUAGE not the AUTHORITY ("the shift starts in under a minute" not "studies show")
+  - Citations at the end, as artifacts of language, not as proof
+  - One declarative sentence often beats a paragraph of context
+  - The voice WHOOP / Bloomberg / Amex would use, not the voice Headspace / Calm would use
+
+  **Sequencing:** Probably runs alongside the narrative-spine work (item above) — the spine work IS the weaving, voice consistency IS the prestige tone of the woven content. Same pass. Different lens on the same problem.
+
 - [ ] Google Play Console setup ($25 one-time) — required for closed testing track, 14-day clock before public launch can begin. Build the Android App Bundle from existing Capacitor android/ project.
 - [ ] Onboarding redesign — 2 intro pages max, calibration, interactive first-use walkthrough. **Sequenced last on purpose (Arlin direction May 4):** onboarding teaches users what the app does, so the calibration questions and tutorial flow can't be designed until the rest of the prelaunch product scope is locked. Building it earlier means rebuilding it as features land.
 
