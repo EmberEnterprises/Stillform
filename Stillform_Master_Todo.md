@@ -730,23 +730,19 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 - [x] **7-session review specificity verification — SUPERSEDED May 8, 2026 (added May 2 from old ideas sweep).** Verified by reading code on May 8: the existing post-7-sessions surface at `src/App.jsx:19899-19950` is conditional on `sessionCount === 7 && !milestone7Seen` and renders three variants (7-day streak / processing-type mismatch / default "you're building something"), NOT evidence callouts. The "specific evidence callouts" version was never a finalized spec — `RESEARCH_PREP_SELF_MODE_AND_EVIDENCE_CALLOUTS.md` lines 62-100 framed it as research questions, not commitments. The May 7 engagement architecture decision (line 226 of that doc, line 87 of `STILLFORM_ENGAGEMENT_ARCHITECTURE.md`) absorbed item 7 into Roadmap markers across stages with evidence-backed dose-response timelines — a different design now being built (Phase 1 Mirror surface shipped May 7-8 as commit `c673dac`/`25a9bfe`). The old milestone-7 surface is queued for retirement per engagement architecture line 239 ("generalized into Stage-1-crossing moment specifically"); it currently coexists with the new Mirror surface on home but should retire when Stage-1-crossing replacement ships in a later engagement architecture phase. Verdict: not a spec gap, not already-shipped-as-described — superseded by a different design that IS shipping now.
 - [ ] **Research partnership outreach email (added May 2 — surfaced from old ideas sweep)** — email drafted for grad student / clinical psych researcher outreach per strategic roadmap. Locate the draft in archives or rewrite. Send when 4-6 weeks of post-launch user data accumulates.
 - [ ] **KetaRevive doctor contact (added May 2 — surfaced from old ideas sweep)** — get name and contact. Ask if they'd try Stillform personally. The signal that started the B2B clinical thread. Captured in KETAREVIVE_ONEPAGER.md but the specific contact details aren't in any active list.
-- [ ] **Internationalization (V1 launch language set chosen Apr 27)** — committed launch set: **English (baseline) + Spanish + Brazilian Portuguese + Armenian**. Reasoning grounded in market analysis:
-  - **Spanish** — 500M+ speakers, covers US Hispanic + all Latin America. Strong clinical-translation tradition, abundant translator availability.
-  - **Brazilian Portuguese** — Brazil is the fastest-growing wellness app market globally. 220M speakers. Close enough to Spanish that some translation infrastructure can be reused.
-  - **Armenian** — founder heritage (Arlin). Non-negotiable.
-  - All four use Latin script — no RTL engineering, no character-width layout issues. Translation work only.
+- [ ] **Internationalization — MOVED TO POST-LAUNCH May 8, 2026 (Arlin direction).** Original V1 launch set (English baseline + Spanish + Brazilian Portuguese + Armenian, decided Apr 27 after market analysis) is **deferred entirely** until post-launch revenue can fund clinical translation costs. V1 ships English-only.
+
+  Cost reality is the binding constraint: AI prompts (~1,500 lines) need a specialist clinical translator, not generic — Porges polyvagal / Siegel window of tolerance / Ochsner & Gross suppression-vs-reappraisal must keep precision across languages. Generic translation services would compromise the science alignment that's core to the product.
+
+  **Original committed launch set kept on file for post-launch sequencing:**
+  - **Spanish** — 500M+ speakers, covers US Hispanic + Latin America. Strong clinical-translation tradition, abundant translator availability.
+  - **Brazilian Portuguese** — fastest-growing wellness app market globally. 220M speakers. Translation infrastructure overlaps with Spanish.
+  - **Armenian** — founder heritage (Arlin). Non-negotiable for the eventual rollout.
+  - All four Latin script — no RTL engineering, no character-width layout issues.
   
-  **Deferred (post-launch international expansion):** German, French, Mandarin, Japanese, Korean, Hindi, Arabic. Each has distinct deferral rationale:
-  - German — strong wellness market but local-tool preference; needs enterprise partnerships first
-  - French — smaller wellness market than Brazilian Portuguese; defer
-  - Mandarin — China requires WeChat ecosystem + local hosting + regulatory work
-  - Hindi — needs country-specific pricing strategy first ($14.99/mo too high for India)
-  - Arabic — RTL layout requires real engineering work across every screen, not just translation
-  - Japanese/Korean — small total audience for the cost + script-width concerns
+  **Originally-deferred languages (still post-V2+):** German, French, Mandarin, Japanese, Korean, Hindi, Arabic — each with distinct deferral rationale (Mandarin needs WeChat + local hosting + regulatory work; Hindi needs country-specific pricing; Arabic needs RTL engineering across every screen; etc.).
   
-  **Build path (NOT yet implemented):** (1) i18n library install (i18next), (2) string extraction from all UI components into a translation table, (3) language picker in Settings persisted to localStorage + Supabase, (4) AI prompt translation for each language — REQUIRES clinical translator, not generic, because Porges polyvagal / Siegel window of tolerance / Ochsner & Gross suppression-vs-reappraisal must keep precision. (5) Per-language QA review.
-  
-  **Cost reality:** ~6,500 lines UI strings + ~1,500 lines AI prompts × 3 target languages × translator rates × QA review. Not free, not bolt-on. Plan as multi-session work with budget allocated.
+  **Sequencing trigger:** revisit when post-launch revenue covers clinical translator + per-language QA review costs. Build path remains: (1) i18next install, (2) string extraction, (3) language picker in Settings, (4) AI prompt translation by clinical specialist, (5) per-language QA. Estimated as multi-session work with budget allocated when triggered.
   
   Crisis region routing (App.jsx line 9538) already handles locale-driven hotline routing.
 
