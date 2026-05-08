@@ -16886,6 +16886,11 @@ export default function Stillform() {
   const [ciTension, setCiTension] = useState({});
   const [ciOffBaselineOpen, setCiOffBaselineOpen] = useState(false); // "something's off" branch
   const [ciSaved, setCiSaved] = useState(false);
+  // Phase 3d — Today's Brief poll tick. Forces a re-render after generation
+  // completes so the inline display in the post-checkin card picks up the
+  // newly-persisted brief without requiring user interaction. Incremented by
+  // a useEffect that polls every 1500ms for up to 12s after ciSaved flips true.
+  const [todaysBriefPollTick, setTodaysBriefPollTick] = useState(0);
   const [eodOpen, setEodOpen] = useState(false);
   const [eodEnergy, setEodEnergy] = useState(null);
   const [eodComposure, setEodComposure] = useState(null);
@@ -17511,6 +17516,38 @@ export default function Stillform() {
       });
     }
   }, [screen, loopNudgeDismissedDay, loopNudgeDismissStreak, ciOpen, ciSaved, eodOpen, eodSaved]);
+
+  // Phase 3d — Today's Brief poll. Generation fires fire-and-forget from
+  // saveCheckin (Phase 3c). The 4-section brief lands in storage 3-12s later
+  // depending on AI latency. Increment todaysBriefPollTick every 1.5s after
+  // ciSaved becomes true so the post-checkin card re-reads getTodaysBriefForToday()
+  // and renders the brief once it arrives. Stops early when the brief is
+  // present, after 8 ticks (12s) regardless, or when ciSaved flips false.
+  // Cleanup on unmount per the audit philosophy timer-leak guard.
+  useEffect(() => {
+    if (!ciSaved) return;
+    let cancelled = false;
+    let ticks = 0;
+    setTodaysBriefPollTick(0);
+    const interval = setInterval(() => {
+      if (cancelled) return;
+      ticks += 1;
+      try {
+        const present = getTodaysBriefForToday();
+        if (present) {
+          clearInterval(interval);
+          setTodaysBriefPollTick(t => t + 1);
+          return;
+        }
+      } catch {}
+      setTodaysBriefPollTick(t => t + 1);
+      if (ticks >= 8) clearInterval(interval);
+    }, 1500);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [ciSaved]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -20504,29 +20541,140 @@ const isSignalProfileConfigured = () => {
                   await launchScenarioProtocol(recommendedProtocol.id);
                 };
 
-                if (isCheckedIn && !ciOpen) return (
-                  <button onClick={() => {
+                if (isCheckedIn && !ciOpen) {
+                  // Phase 3d — Today's Brief inline display. Sits below the
+                  // tap-to-update button so the user sees the morning compass
+                  // immediately after checking in. Read happens here every
+                  // render; the polling tick (todaysBriefPollTick) re-triggers
+                  // this branch as the brief generates in the background.
+                  // Failure mode: getTodaysBriefForToday() returns null, no
+                  // brief section renders, no error surfaced (audit §6 call 6
+                  // default — silent absence beats wellness-app apology).
+                  let todaysBrief = null;
+                  try { todaysBrief = getTodaysBriefForToday(); } catch {}
+                  // Only show the in-flight placeholder when ciSaved is true
+                  // (just-checked-in this session) AND no brief is present yet
+                  // AND the poll is still running. After polling stops the
+                  // placeholder hides — we don't reveal that AI failed.
+                  const inFlight = !todaysBrief && ciSaved && todaysBriefPollTick > 0 && todaysBriefPollTick < 8;
+                  // Format the generated-at time for the trust footer.
+                  let generatedTime = "";
+                  if (todaysBrief?.generatedAt) {
                     try {
-                      trackMorningStart({
-                        date: today,
-                        timestamp: new Date().toISOString(),
-                        source: "update"
-                      });
+                      const dt = new Date(todaysBrief.generatedAt);
+                      if (!Number.isNaN(dt.getTime())) {
+                        generatedTime = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                      }
                     } catch {}
-                    setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
-                  }} style={{
-                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
-                    textAlign: "left", WebkitTapHighlightColor: "transparent"
-                  }}>
-                    {/* Prestige refresh May 6 — converted from inline mono/body styles to
-                        utility classes per STILLFORM_DESIGN_SYSTEM.md. .t-mono-xs ships
-                        9px/0.16em uppercase; color override stays amber for the accent
-                        moment. .t-body-sm.quiet ships 13px/1.50 at --text-dim. */}
-                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Morning Check-in</div>
-                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Done · tap to update</div>
-                  </button>
-                );
+                  }
+                  return (
+                    <>
+                      <button onClick={() => {
+                        try {
+                          trackMorningStart({
+                            date: today,
+                            timestamp: new Date().toISOString(),
+                            source: "update"
+                          });
+                        } catch {}
+                        setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
+                      }} style={{
+                        width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "14px 18px", marginBottom: todaysBrief || inFlight ? 12 : 20, cursor: "pointer",
+                        textAlign: "left", WebkitTapHighlightColor: "transparent"
+                      }}>
+                        <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Morning Check-in</div>
+                        <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Done · tap to update</div>
+                      </button>
+
+                      {inFlight && (
+                        <div style={{
+                          background: "var(--surface)", border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20
+                        }}>
+                          <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                            Brief generating…
+                          </div>
+                        </div>
+                      )}
+
+                      {todaysBrief && (
+                        <div style={{
+                          background: "var(--surface)", border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "20px 18px", marginBottom: 20
+                        }}>
+                          <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.14em" }}>
+                            Today's Brief
+                          </div>
+
+                          <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                            Hardware
+                          </div>
+                          <div style={{
+                            fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                            fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                          }}>
+                            {todaysBrief.hardware}
+                          </div>
+
+                          {todaysBrief.risks && (
+                            <>
+                              <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                                Risks
+                              </div>
+                              <div style={{
+                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                              }}>
+                                {todaysBrief.risks}
+                              </div>
+                            </>
+                          )}
+
+                          {todaysBrief.moves && (
+                            <>
+                              <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                                Moves
+                              </div>
+                              <div style={{
+                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                              }}>
+                                {todaysBrief.moves}
+                              </div>
+                            </>
+                          )}
+
+                          {todaysBrief.recovery && (
+                            <>
+                              <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
+                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
+                                Recovery
+                              </div>
+                              <div style={{
+                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
+                              }}>
+                                {todaysBrief.recovery}
+                              </div>
+                            </>
+                          )}
+
+                          {generatedTime && (
+                            <div className="t-caption" style={{
+                              color: "var(--text-muted)", letterSpacing: "0.04em",
+                              marginTop: 4, fontStyle: "italic"
+                            }}>
+                              Generated {generatedTime}
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  );
+                }
 
                 if (!ciOpen) return (
                   <button onClick={() => {
