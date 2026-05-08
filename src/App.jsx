@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, Component } from "react";
 import { WidgetBridge } from "./plugins/widgetBridge";
 import { integrationBridge } from "./plugins/integrationBridge";
 import { DisruptorTool } from "./disruptor/DisruptorTool";
+import { MoveCardTool } from "./move-card/MoveCardTool.jsx";
+import { MoveCardPill } from "./move-card/MoveCardPill.jsx";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -8713,7 +8715,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -8800,7 +8802,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_pattern_push_enabled"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_mc_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_pattern_push_enabled"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -20156,6 +20158,51 @@ const isSignalProfileConfigured = () => {
           <QBPill onPress={() => setScreen("panic")} />
         )}
 
+        {/* FLOATING MOVE CARD — Phase 8d (Build #8). Mirrors QBPill availability
+            envelope. Same hide rules so it doesn't render on top of an active
+            tool session, panic mode, setup-bridge, or pricing. Also hides during
+            move-card itself so it doesn't stack on its own surface. */}
+        {screen !== "panic" && screen !== "move-card" && screen !== "setup-bridge" && screen !== "pricing" && 
+         !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
+          <MoveCardPill onPress={() => setScreen("move-card")} />
+        )}
+
+        {/* MOVE CARD — user-summonable somatic move. State assembled at render
+            so MoveCardTool's selection useEffect sees the freshest bio-filter
+            and feel-state the user is in right now. Phase 8e wires history
+            persistence + recentMoveIds; Phase 8f wires telemetry. */}
+        {screen === "move-card" && (() => {
+          // Build state for selection. Empty fields are fine — the deterministic
+          // fallback's universal sequence #10 matches every state combination.
+          const moveCardState = {};
+          try {
+            const bf = getActiveBioFilter();
+            if (bf) moveCardState.bioFilter = String(bf).split(",").filter(Boolean);
+          } catch {}
+          try {
+            const fs = secureRead("stillform_feelstate", null);
+            // Schema: { value, day } — reader path matches the writer at saveCheckin
+            if (fs && fs.value && fs.day === TimeKeeper.stillformDay()) {
+              moveCardState.feelState = fs.value;
+            }
+          } catch {}
+          // Time of day — coarse bucket from local hours
+          try {
+            const h = new Date().getHours();
+            if (h < 11) moveCardState.timeOfDay = "morning";
+            else if (h < 17) moveCardState.timeOfDay = "midday";
+            else moveCardState.timeOfDay = "evening";
+          } catch {}
+          return (
+            <MoveCardTool
+              state={moveCardState}
+              recentMoveIds={[]}
+              onComplete={() => goHomeSafely()}
+              onClose={() => goHomeSafely()}
+            />
+          );
+        })()}
+
         {/* PANIC MODE — zero decisions, auto-start breathing */}
         {screen === "panic" && (
           <PanicMode onComplete={(redirectTo) => {
@@ -24485,7 +24532,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
