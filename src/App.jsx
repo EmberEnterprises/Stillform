@@ -2473,11 +2473,20 @@ const readArrayFromStorage = (key) => {
   }
 };
 
-const getSessionsFromStorage = () => readArrayFromStorage(SESSION_STORAGE_KEY);
+// READ + WRITE PATH (audit philosophy v1.3 Layer 2.39, Path A migration May 8 2026):
+// stillform_sessions is in SECURE_KEYS. Writes encrypt via secureWrite;
+// reads return decrypted SecureCache values via secureRead. The async
+// variants (getSessionsFromStorageAsync at line ~4372) already use the
+// encrypted readJSON/writeJSON path — sync and async are now consistent.
+//
+// Existing-user migration: primeSecureCache (line ~8954) detects plaintext
+// at boot, primes SecureCache from it, fires off background re-encryption.
+// No data loss across the migration boundary.
+const getSessionsFromStorage = () => secureRead(SESSION_STORAGE_KEY, []);
 
 const setSessionsInStorage = (sessions) => {
   try {
-    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(Array.isArray(sessions) ? sessions : []));
+    secureWrite(SESSION_STORAGE_KEY, Array.isArray(sessions) ? sessions : []);
   } catch {}
 };
 
@@ -3042,16 +3051,14 @@ const normalizeAreaKey = (k) => String(k || "").trim().toLowerCase();
 // Get all morning check-ins that captured tension data, sorted oldest-first.
 // Returns [] if none. Each record: { timestamp, date, energy, tension: { areaName: 1-5 } }.
 //
-// READ PATH (audit philosophy v1.3 Layer 2.36 + 2.37, May 7 2026):
-// Reads via raw localStorage to match the write path. trackMorningComplete
-// → appendDailyLoopHistory (line 5091) writes via localStorage.setItem.
-// SecureCache is primed once at boot from localStorage; subsequent raw
-// writes don't update it. Reading via secureRead would return stale boot-
-// time data, missing today's check-in. Raw read here matches what the
-// write path actually persisted. Same fix applied to getBodyScanTensionHistory.
+// READ PATH (audit philosophy v1.3 Layer 2.39 Path A migration, May 8 2026):
+// stillform_checkin_history is in SECURE_KEYS and now actually encrypted at rest.
+// Writes flow through trackMorningComplete → appendDailyLoopHistory's secure
+// branch → secureWrite. Reads via secureRead return the decrypted array primed
+// at boot. Same architecture for getBodyScanTensionHistory below.
 const getMorningTensionHistory = () => {
   try {
-    const raw = readArrayFromStorage("stillform_checkin_history");
+    const raw = secureRead("stillform_checkin_history", []);
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(c => c?.tension && Object.keys(c.tension).length > 0)
@@ -3072,20 +3079,15 @@ const getMorningTensionHistory = () => {
 // Get all body scan sessions that captured post-practice tension, oldest-first.
 // Returns [] if none. Each record: { timestamp, bodyScanTension: { areaName: 1-5 } }.
 // Excludes low-demand sessions where tension input was skipped (tensionDataCaptured: false).
-// Get all body scan sessions that captured post-practice tension, oldest-first.
-// Returns [] if none. Each record: { timestamp, bodyScanTension: { areaName: 1-5 } }.
-// Excludes low-demand sessions where tension input was skipped (tensionDataCaptured: false).
 //
-// READ PATH (audit philosophy v1.3 Layer 2.36 + 2.37, May 7 2026):
-// Reads via raw localStorage to match the write path. setSessionsInStorage
-// (line 2480) writes sessions via localStorage.setItem. SecureCache is
-// primed once at boot from localStorage; subsequent raw writes don't update
-// it. Reading via secureRead would return stale boot-time data, missing
-// today's body scan sessions. Raw read here matches what the write path
-// actually persisted. Same fix applied to getMorningTensionHistory.
+// READ PATH (audit philosophy v1.3 Layer 2.39 Path A migration, May 8 2026):
+// stillform_sessions is in SECURE_KEYS and now actually encrypted at rest.
+// Writes flow through setSessionsInStorage → secureWrite. Reads via
+// getSessionsFromStorage → secureRead return the decrypted array primed
+// at boot.
 const getBodyScanTensionHistory = () => {
   try {
-    const raw = readArrayFromStorage("stillform_sessions");
+    const raw = getSessionsFromStorage();
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(s => Array.isArray(s?.tools) && s.tools.includes("body-scan"))
@@ -3214,19 +3216,15 @@ const getMorningToScanDelta = (limitDays = 30) => {
 // will only have the partial shape; helpers handle missing fields gracefully.
 
 // Get all EOD records sorted oldest-first.
-// READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
-// Reads via raw localStorage to match the write path. trackEodComplete
-// → appendDailyLoopHistory (line 5139) writes via localStorage.setItem.
-// SecureCache is primed once at boot; subsequent raw writes don't update
-// it. Reading via secureRead would return stale boot-time data, missing
-// today's EOD record. Raw read here matches what the write path persisted.
-// Architectural note: stillform_eod_history is in SECURE_KEYS but the
-// write path doesn't use secureWrite — pre-existing inconsistency flagged
-// for future audit (failure class 15). Tonight's work aligns reads to
-// writes; the broader encryption-at-rest consistency is out of scope.
+// READ PATH (audit philosophy v1.3 Layer 2.39 Path A migration, May 8 2026):
+// stillform_eod_history is in SECURE_KEYS and now actually encrypted at rest.
+// Writes flow through appendDailyLoopHistory's secure branch (line ~5163) →
+// secureWrite → CryptoStore.encrypt → localStorage.setItem(__enc envelope).
+// Reads flow through secureRead, which returns the decrypted array primed
+// by primeSecureCache at boot.
 const getEodHistory = () => {
   try {
-    const raw = readArrayFromStorage("stillform_eod_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
+    const raw = secureRead("stillform_eod_history", []);
     if (!Array.isArray(raw)) return [];
     return raw
       .map(c => ({
@@ -3624,16 +3622,12 @@ const _s2CountDistinctChips = (windowDays = STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_W
 // week for the last 2 consecutive weeks").
 const _s2LongestSustainedCheckinRun = (perWeekMin = STAGE_THRESHOLDS.S2_CHECKINS_PER_WEEK_MIN) => {
   try {
-    // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
-    // Reads via raw localStorage to match the write path. trackMorningComplete
-    // → appendDailyLoopHistory (line 5139) writes via localStorage.setItem.
-    // SecureCache is primed once at boot; subsequent raw writes don't update
-    // it. Reading via secureRead would return stale boot-time data, missing
-    // today's check-in. Raw read here matches what the write path persisted.
-    // Architectural note: stillform_checkin_history is in SECURE_KEYS but
-    // the write path doesn't use secureWrite — pre-existing inconsistency
-    // flagged for future audit (failure class 15).
-    const raw = readArrayFromStorage("stillform_checkin_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
+    // READ PATH (audit philosophy v1.3 Layer 2.39 Path A migration, May 8 2026):
+    // stillform_checkin_history is in SECURE_KEYS and now actually encrypted at rest.
+    // Writes flow through appendDailyLoopHistory's secure branch → secureWrite →
+    // encrypted envelope. Reads via secureRead return the decrypted array
+    // primed by primeSecureCache at boot.
+    const raw = secureRead("stillform_checkin_history", []);
     if (!Array.isArray(raw) || raw.length === 0) return 0;
     // Group by ISO week (sunday-anchored). Use ISO date string normalized to
     // a week-start key: monday of the week containing the timestamp.
@@ -5026,19 +5020,18 @@ const toRate = (value) => {
 };
 
 const buildPerformanceMetricsSnapshot = ({ appVersion, packageVersion, isSubscribed }) => {
-  const sessions = readArrayFromStorage("stillform_sessions"); // SECURE-KEYS-ALLOW: write path is raw localStorage; read must match
-  // Layer 2.39 — journal and saved_reframes write via secureWrite. Raw read here
-  // returned the encrypted envelope { __enc: true, ... }, which Array.isArray
-  // returns false for → readArrayFromStorage falls through to []. Result:
-  // pulseEntries.length and savedReframes.length always 0 for encrypted users.
-  // Fixed v1.3 to use secureRead aligning with the write path.
+  // Layer 2.39 Path A — all SECURE_KEYS reads now go through secureRead
+  // since writes go through secureWrite. morningStart + eodStart are NOT in
+  // SECURE_KEYS (they're open-event timestamps, not protected payloads),
+  // so they stay raw.
+  const sessions = secureRead("stillform_sessions", []);
   const pulseEntries = secureRead("stillform_journal", []);
   const savedReframes = secureRead("stillform_saved_reframes", []);
   const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
-  const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
+  const morningHistory = secureRead(LOOP_HISTORY_KEYS.morning, []);
   const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
-  const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
-  const loopNudgeEvents = readArrayFromStorage(LOOP_NUDGE_EVENTS_KEY);
+  const eodHistory = secureRead(LOOP_HISTORY_KEYS.eod, []);
+  const loopNudgeEvents = secureRead(LOOP_NUDGE_EVENTS_KEY, []);
 
   const ratedSessions = sessions.filter((session) => {
     const pre = Number(session?.preRating);
@@ -5151,13 +5144,28 @@ const buildPerformanceMetricsSnapshot = ({ appVersion, packageVersion, isSubscri
   };
 };
 
+// READ-MODIFY-WRITE for daily loop history.
+// Layer 2.39 Path A migration (May 8 2026): morning + eod keys are in SECURE_KEYS,
+// morningStart + eodStart are NOT. Branch by key membership so each side uses
+// the correct storage mechanism. Existing-user migration handled by
+// primeSecureCache's plaintext fallback (line ~8954).
 const appendDailyLoopHistory = (storageKey, entry, maxItems = 120) => {
   try {
-    const current = JSON.parse(localStorage.getItem(storageKey) || "[]");
-    const base = Array.isArray(current) ? current.filter((item) => item?.date !== entry?.date) : [];
-    base.push(entry);
-    const trimmed = base.slice(-maxItems);
-    localStorage.setItem(storageKey, JSON.stringify(trimmed));
+    const isSecure = storageKey === LOOP_HISTORY_KEYS.morning || storageKey === LOOP_HISTORY_KEYS.eod;
+    if (isSecure) {
+      const current = secureRead(storageKey, []);
+      const base = Array.isArray(current) ? current.filter((item) => item?.date !== entry?.date) : [];
+      base.push(entry);
+      const trimmed = base.slice(-maxItems);
+      secureWrite(storageKey, trimmed);
+    } else {
+      // morningStart + eodStart: open-event timestamps, not in SECURE_KEYS, stay raw.
+      const current = JSON.parse(localStorage.getItem(storageKey) || "[]");
+      const base = Array.isArray(current) ? current.filter((item) => item?.date !== entry?.date) : [];
+      base.push(entry);
+      const trimmed = base.slice(-maxItems);
+      localStorage.setItem(storageKey, JSON.stringify(trimmed));
+    }
   } catch {}
 };
 
@@ -5166,18 +5174,20 @@ const trackMorningComplete = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS
 const trackEodStart = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.eodStart, entry, LOOP_HISTORY_MAX_ITEMS);
 const trackEodComplete = (entry) => appendDailyLoopHistory(LOOP_HISTORY_KEYS.eod, entry, LOOP_HISTORY_MAX_ITEMS);
 
+// Layer 2.39 Path A — LOOP_NUDGE_EVENTS_KEY is in SECURE_KEYS, write path migrated
+// to secureRead/secureWrite. Same dedup logic, same maxItems trim, encrypted at rest.
 const appendLoopNudgeEvent = (entry, maxItems = LOOP_NUDGE_EVENTS_MAX_ITEMS) => {
   try {
-    const current = JSON.parse(localStorage.getItem(LOOP_NUDGE_EVENTS_KEY) || "[]");
-    const list = Array.isArray(current) ? current : [];
-    const exists = list.some((item) => (
+    const list = secureRead(LOOP_NUDGE_EVENTS_KEY, []);
+    const safeList = Array.isArray(list) ? list : [];
+    const exists = safeList.some((item) => (
       item?.event === entry?.event &&
       item?.type === entry?.type &&
       item?.date === entry?.date
     ));
     if (exists) return false;
-    const next = [...list, entry].slice(-maxItems);
-    localStorage.setItem(LOOP_NUDGE_EVENTS_KEY, JSON.stringify(next));
+    const next = [...safeList, entry].slice(-maxItems);
+    secureWrite(LOOP_NUDGE_EVENTS_KEY, next);
     return true;
   } catch {
     return false;
@@ -9814,8 +9824,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const avgRecoveryMinutes30d = highActivationRecoveries.length
                 ? Math.round(highActivationRecoveries.reduce((sum, s) => sum + (Number(s.duration) || 0), 0) / highActivationRecoveries.length / 60)
                 : null;
-              const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
-              const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
+              const morningHistory = secureRead(LOOP_HISTORY_KEYS.morning, []);
+              const eodHistory = secureRead(LOOP_HISTORY_KEYS.eod, []);
               const morning14d = morningHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
               const eod14d = eodHistory.filter((entry) => withinDays(entry?.date || entry?.timestamp, 14)).length;
               const loopCompletion14d = Math.round(((morning14d + eod14d) / (14 * 2)) * 100);
@@ -13568,10 +13578,10 @@ function MyProgress({ onBack }) {
   const checkinToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
   const eodToday = (() => { try { const v = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return v?.date === stillformToday ? v : null; } catch { return null; } })();
   const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
-  const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
+  const morningHistory = secureRead(LOOP_HISTORY_KEYS.morning, []);
   const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
-  const eodHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eod);
-  const loopNudgeEvents = readArrayFromStorage(LOOP_NUDGE_EVENTS_KEY);
+  const eodHistory = secureRead(LOOP_HISTORY_KEYS.eod, []);
+  const loopNudgeEvents = secureRead(LOOP_NUDGE_EVENTS_KEY, []);
   const morningOpen14dDays = recentDaySet(morningOpenHistory);
   const morningDone14dDays = recentDaySet(morningHistory);
   const eodOpen14dDays = recentDaySet(eodOpenHistory);
@@ -15752,6 +15762,13 @@ export default function Stillform() {
   const getLoopNudgeSnapshot = () => {
     const todayIso = TimeKeeper.stillformDay();
     const parseLoopHistory = (key) => {
+      // Layer 2.39 Path A — morning + eod are SECURE_KEYS post-migration; reads
+      // must go through secureRead. morningStart + eodStart stay raw.
+      const isSecure = key === LOOP_HISTORY_KEYS.morning || key === LOOP_HISTORY_KEYS.eod;
+      if (isSecure) {
+        const cached = secureRead(key, []);
+        return Array.isArray(cached) ? cached : [];
+      }
       try {
         const parsed = JSON.parse(localStorage.getItem(key) || "[]");
         return Array.isArray(parsed) ? parsed : [];
@@ -17230,12 +17247,10 @@ const getSignalDivergence = () => {
     const mappedAreas = (profile?.firstAreas || []).map(a => a.toLowerCase());
     if (!mappedAreas.length) return null;
 
-    // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
-    // stillform_checkin_history is written via raw localStorage in
-    // appendDailyLoopHistory (line 5139). secureRead returns boot-time
-    // SecureCache snapshot, missing today's check-ins → divergence
-    // detection silently failed for current-session data. Aligned to raw read.
-    const history = readArrayFromStorage("stillform_checkin_history"); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
+    // READ PATH (audit philosophy v1.3 Layer 2.39 Path A migration, May 8 2026):
+    // stillform_checkin_history is now encrypted at rest. Writes via
+    // appendDailyLoopHistory's secure branch → secureWrite. Reads via secureRead.
+    const history = secureRead("stillform_checkin_history", []);
     const sevenDaysAgo = TimeKeeper.daysAgoMs(7);
     const recent = history.filter(c => new Date(c.timestamp || c.date).getTime() > sevenDaysAgo);
     if (recent.length < 3) return null;
@@ -19718,10 +19733,10 @@ const isSignalProfileConfigured = () => {
                           // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
                           // stillform_sessions is written via raw localStorage in
                           // setSessionsInStorage (line 2478). secureRead returns
-                          // boot-time SecureCache snapshot, missing current-session
-                          // sessions. Use getSessionsFromStorage which reads raw.
+                          // Layer 2.39 Path A — getSessionsFromStorage now reads via
+                          // secureRead (write path is secureWrite). Encrypted at rest.
                           try {
-                            const sessions = getSessionsFromStorage(); // SECURE-KEYS-ALLOW: write path uses raw localStorage; read must match
+                            const sessions = getSessionsFromStorage();
                             if (!Array.isArray(sessions) || sessions.length < 3) return null;
                             // 1. Signal Awareness — autonomous exits
                             const autoExits = sessions.filter(s => s.autonomousExit).length;

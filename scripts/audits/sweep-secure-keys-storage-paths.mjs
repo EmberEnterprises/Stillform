@@ -16,12 +16,26 @@ const READ_PATTERNS = [
   { name: "readArrayFromStorage",re: (k) => new RegExp(`readArrayFromStorage\\(['"]${k}['"]`) },
   { name: "readJSON",            re: (k) => new RegExp(`readJSON\\(['"]${k}['"]`) },
 ];
-const WRITE_PATTERNS = [
-  { name: "secureWrite",         re: (k) => new RegExp(`secureWrite\\(['"]${k}['"]`) },
-  { name: "raw localStorage.setItem", re: (k) => new RegExp(`localStorage\\.setItem\\(['"]${k}['"]`) },
-  { name: "secureSet (async)",   re: (k) => new RegExp(`secureSet\\(['"]${k}['"]`) },
-  { name: "setSessionsInStorage / appendDailyLoopHistory (raw via wrapper)", re: (k) => k === "stillform_sessions" || k === "stillform_checkin_history" || k === "stillform_eod_history" ? new RegExp("WRAPPER_NEVER_MATCHES") : null },
-];
+// Pattern-detect writes inside known wrapper functions by reading the
+// function body. After Path A migration these wrappers use secureWrite.
+const wrapperBody = (fnName) => {
+  const start = src.indexOf(`const ${fnName} = `);
+  if (start < 0) return null;
+  const end = src.indexOf("\n};", start);
+  if (end < 0) return null;
+  return src.slice(start, end + 3);
+};
+
+const wrapperWritesEncrypted = (fnName) => {
+  const body = wrapperBody(fnName);
+  if (!body) return false;
+  return body.includes("secureWrite(");
+};
+const wrapperWritesRaw = (fnName) => {
+  const body = wrapperBody(fnName);
+  if (!body) return false;
+  return body.includes("localStorage.setItem(");
+};
 
 console.log(`# SECURE_KEYS storage mechanism audit\n`);
 console.log(`Found ${secureKeys.length} SECURE_KEYS entries.\n`);
@@ -38,24 +52,40 @@ for (const key of secureKeys) {
     for (const p of READ_PATTERNS) {
       if (p.re(key) && p.re(key).test(line)) reads.push({ ln: i + 1, mech: p.name, src: line.trim().slice(0, 110) });
     }
-    for (const p of WRITE_PATTERNS) {
-      const re = p.re(key);
-      if (re && re.test(line)) writes.push({ ln: i + 1, mech: p.name, src: line.trim().slice(0, 110) });
+    // Direct write detection — secureWrite, localStorage.setItem, secureSet
+    if (new RegExp(`secureWrite\\(['"]${key}['"]`).test(line)) writes.push({ ln: i + 1, mech: "secureWrite", src: line.trim().slice(0, 110) });
+    if (new RegExp(`localStorage\\.setItem\\(['"]${key}['"]`).test(line)) writes.push({ ln: i + 1, mech: "raw localStorage.setItem", src: line.trim().slice(0, 110) });
+    if (new RegExp(`secureSet\\(['"]${key}['"]`).test(line)) writes.push({ ln: i + 1, mech: "secureSet (async)", src: line.trim().slice(0, 110) });
+  }
+  // Wrapper-body inspection — replaces previous hardcoded assumptions.
+  // Detects what the wrapper functions ACTUALLY do, not what they used to do.
+  if (key === "stillform_sessions") {
+    if (wrapperWritesEncrypted("setSessionsInStorage")) {
+      writes.push({ ln: 0, mech: "secureWrite (via setSessionsInStorage wrapper)", src: "wrapper inspected" });
+    } else if (wrapperWritesRaw("setSessionsInStorage")) {
+      writes.push({ ln: 0, mech: "raw localStorage.setItem (via setSessionsInStorage wrapper)", src: "wrapper inspected" });
     }
   }
-  // Special case: wrappers known to write raw
-  if (key === "stillform_sessions") {
-    writes.push({ ln: 2478, mech: "setSessionsInStorage (raw localStorage.setItem inside)", src: "appendSessionToStorage / setSessionsInStorage write raw" });
-  }
   if (key === "stillform_checkin_history" || key === "stillform_eod_history") {
-    writes.push({ ln: 5145, mech: "appendDailyLoopHistory (raw localStorage.setItem inside)", src: "trackMorningComplete / trackEodComplete write raw" });
+    if (wrapperWritesEncrypted("appendDailyLoopHistory")) {
+      writes.push({ ln: 0, mech: "secureWrite (via appendDailyLoopHistory wrapper, secure branch)", src: "wrapper inspected" });
+    } else if (wrapperWritesRaw("appendDailyLoopHistory")) {
+      writes.push({ ln: 0, mech: "raw localStorage.setItem (via appendDailyLoopHistory wrapper)", src: "wrapper inspected" });
+    }
+  }
+  if (key === "stillform_loop_nudge_events") {
+    if (wrapperWritesEncrypted("appendLoopNudgeEvent")) {
+      writes.push({ ln: 0, mech: "secureWrite (via appendLoopNudgeEvent wrapper)", src: "wrapper inspected" });
+    } else if (wrapperWritesRaw("appendLoopNudgeEvent")) {
+      writes.push({ ln: 0, mech: "raw localStorage.setItem (via appendLoopNudgeEvent wrapper)", src: "wrapper inspected" });
+    }
   }
   
   const readMechs = [...new Set(reads.map(r => r.mech))];
   const writeMechs = [...new Set(writes.map(w => w.mech))];
   
-  const isEncryptedWrite = writeMechs.some(m => m === "secureWrite" || m === "secureSet (async)");
-  const isRawWrite = writeMechs.some(m => m.includes("raw localStorage.setItem") || m.includes("(raw"));
+  const isEncryptedWrite = writeMechs.some(m => m.includes("secureWrite") || m === "secureSet (async)");
+  const isRawWrite = writeMechs.some(m => m.includes("raw localStorage.setItem"));
   
   if (isRawWrite) writeRawPlaintext.push(key);
   else if (isEncryptedWrite) writeEncrypted.push(key);
