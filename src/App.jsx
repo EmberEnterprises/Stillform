@@ -2936,8 +2936,13 @@ const buildPatternEnrichmentContext = (pattern) => {
     let signalProfile = null;
     let biasProfile = null;
     let bioFilter = null;
-    try { signalProfile = JSON.parse(localStorage.getItem("stillform_signal_profile") || "null"); } catch {}
-    try { biasProfile = JSON.parse(localStorage.getItem("stillform_bias_profile") || "null"); } catch {}
+    // Layer 2.37 source-of-truth: stillform_signal_profile and stillform_bias_profile
+    // are in SECURE_KEYS (line ~8855). After encryption migration the raw localStorage
+    // value is the encrypted envelope { __enc: true, ... }, NOT the profile data.
+    // Reading raw produced silent garbage being sent to the AI pattern enrichment call.
+    // Fixed v1.3 to use secureRead which returns the decrypted value from SecureCache.
+    try { signalProfile = secureRead("stillform_signal_profile", null); } catch {}
+    try { biasProfile = secureRead("stillform_bias_profile", null); } catch {}
     try { bioFilter = getActiveBioFilter ? getActiveBioFilter() : null; } catch {}
     return {
       dimension: pattern.dimension,
@@ -3034,9 +3039,19 @@ const normalizeAreaKey = (k) => String(k || "").trim().toLowerCase();
 
 // Get all morning check-in records that have tension data, sorted oldest-first.
 // Returns [] if none. Each record: { date, tension: { areaName: 1-5 } }.
+// Get all morning check-ins that captured tension data, sorted oldest-first.
+// Returns [] if none. Each record: { timestamp, date, energy, tension: { areaName: 1-5 } }.
+//
+// READ PATH (audit philosophy v1.3 Layer 2.36 + 2.37, May 7 2026):
+// Reads via raw localStorage to match the write path. trackMorningComplete
+// → appendDailyLoopHistory (line 5091) writes via localStorage.setItem.
+// SecureCache is primed once at boot from localStorage; subsequent raw
+// writes don't update it. Reading via secureRead would return stale boot-
+// time data, missing today's check-in. Raw read here matches what the
+// write path actually persisted. Same fix applied to getBodyScanTensionHistory.
 const getMorningTensionHistory = () => {
   try {
-    const raw = secureRead("stillform_checkin_history", []);
+    const raw = readArrayFromStorage("stillform_checkin_history");
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(c => c?.tension && Object.keys(c.tension).length > 0)
@@ -3057,9 +3072,20 @@ const getMorningTensionHistory = () => {
 // Get all body scan sessions that captured post-practice tension, oldest-first.
 // Returns [] if none. Each record: { timestamp, bodyScanTension: { areaName: 1-5 } }.
 // Excludes low-demand sessions where tension input was skipped (tensionDataCaptured: false).
+// Get all body scan sessions that captured post-practice tension, oldest-first.
+// Returns [] if none. Each record: { timestamp, bodyScanTension: { areaName: 1-5 } }.
+// Excludes low-demand sessions where tension input was skipped (tensionDataCaptured: false).
+//
+// READ PATH (audit philosophy v1.3 Layer 2.36 + 2.37, May 7 2026):
+// Reads via raw localStorage to match the write path. setSessionsInStorage
+// (line 2480) writes sessions via localStorage.setItem. SecureCache is
+// primed once at boot from localStorage; subsequent raw writes don't update
+// it. Reading via secureRead would return stale boot-time data, missing
+// today's body scan sessions. Raw read here matches what the write path
+// actually persisted. Same fix applied to getMorningTensionHistory.
 const getBodyScanTensionHistory = () => {
   try {
-    const raw = secureRead("stillform_sessions", []);
+    const raw = readArrayFromStorage("stillform_sessions");
     if (!Array.isArray(raw)) return [];
     return raw
       .filter(s => Array.isArray(s?.tools) && s.tools.includes("body-scan"))
@@ -3173,7 +3199,12 @@ const getMorningToScanDelta = (limitDays = 30) => {
 // EOD records capture: { date, timestamp, energy, composure, word, morningEnergy }
 // where:
 //   energy:        eod-end-of-day energy reading ("low" | "same" | "high" etc)
-//   composure:     self-rated composure that day ("strong" | "mostly" | "rough")
+//   composure:     self-rated composure that day. Layer 2.37 source-of-truth
+//                  (line 19532 chip picker): user picks Solid | Mixed | Rough,
+//                  stored lowercase as "solid" | "mixed" | "rough". Legacy
+//                  fallback default at lines 19425/19474/19482/19487 if user
+//                  didn't pick: "mostly". Old schema "strong" is never
+//                  written by any code path.
 //   word:          optional one-word reflection from user
 //   morningEnergy: snapshot of that morning's energy for pre/post compare
 //
@@ -3183,9 +3214,13 @@ const getMorningToScanDelta = (limitDays = 30) => {
 // will only have the partial shape; helpers handle missing fields gracefully.
 
 // Get all EOD records sorted oldest-first.
+// Layer 2.37 source-of-truth: stillform_eod_history is in SECURE_KEYS (line ~8855).
+// Encrypted users have an envelope { __enc: true, ... } at this localStorage key,
+// not the array. Reading raw produced an empty result (Array.isArray on envelope
+// is false → fall through to []). Fixed v1.3 to use secureRead.
 const getEodHistory = () => {
   try {
-    const raw = JSON.parse(localStorage.getItem("stillform_eod_history") || "[]");
+    const raw = secureRead("stillform_eod_history", []);
     if (!Array.isArray(raw)) return [];
     return raw
       .map(c => ({
@@ -3204,13 +3239,20 @@ const getEodHistory = () => {
   } catch { return []; }
 };
 
-// Composure trend across last N EOD records. Returns { strong, mostly, rough,
-// total, ratio: { strong: 0-1, mostly: 0-1, rough: 0-1 } } or null if no records.
+// Composure trend across last N EOD records.
+// Layer 2.37 source-of-truth (line 19532 chip picker): real schema is
+// solid | mixed | rough, with legacy fallback "mostly" when user submits
+// without picking. Original code counted "strong | mostly | rough" — wrong
+// schema, silently dropped the two most-common picks (solid, mixed) and the
+// "strong" bucket never incremented. Fixed v1.3.
+//
+// Returns { solid, mixed, rough, mostly, total,
+//           ratio: { solid, mixed, rough, mostly } } or null if no records.
 const getComposureTrend = (limit = 14) => {
   try {
     const recent = getEodHistory().slice(-limit).filter(r => r.composure);
     if (recent.length === 0) return null;
-    const counts = { strong: 0, mostly: 0, rough: 0 };
+    const counts = { solid: 0, mixed: 0, rough: 0, mostly: 0 };
     recent.forEach(r => {
       if (counts[r.composure] !== undefined) counts[r.composure]++;
     });
@@ -3219,9 +3261,10 @@ const getComposureTrend = (limit = 14) => {
       ...counts,
       total,
       ratio: {
-        strong: total > 0 ? counts.strong / total : 0,
-        mostly: total > 0 ? counts.mostly / total : 0,
-        rough: total > 0 ? counts.rough / total : 0
+        solid: total > 0 ? counts.solid / total : 0,
+        mixed: total > 0 ? counts.mixed / total : 0,
+        rough: total > 0 ? counts.rough / total : 0,
+        mostly: total > 0 ? counts.mostly / total : 0
       }
     };
   } catch { return null; }
@@ -3575,7 +3618,12 @@ const _s2CountDistinctChips = (windowDays = STAGE_THRESHOLDS.S2_DISTINCT_CHIPS_W
 // week for the last 2 consecutive weeks").
 const _s2LongestSustainedCheckinRun = (perWeekMin = STAGE_THRESHOLDS.S2_CHECKINS_PER_WEEK_MIN) => {
   try {
-    const raw = JSON.parse(localStorage.getItem("stillform_checkin_history") || "[]");
+    // Layer 2.37 source-of-truth: stillform_checkin_history is in SECURE_KEYS
+    // (line ~8855). Encrypted users have an envelope { __enc: true, ... } at
+    // this localStorage key, not the array. Reading raw produced an empty
+    // result for encrypted users → S2 sustained-run always evaluated 0,
+    // blocking Stage 2 progression. Fixed v1.3 to use secureRead.
+    const raw = secureRead("stillform_checkin_history", []);
     if (!Array.isArray(raw) || raw.length === 0) return 0;
     // Group by ISO week (sunday-anchored). Use ISO date string normalized to
     // a week-start key: monday of the week containing the timestamp.
