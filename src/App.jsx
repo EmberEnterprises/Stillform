@@ -3673,6 +3673,72 @@ const generateTodaysBrief = async (checkinToday) => {
   } catch { return null; }
 };
 
+// ─── MOVE CARD HISTORY — Engagement Architecture Engine 2 Build #8 Phase 8e ──
+// Records every Move card session (completed or early-exit) to a persistent
+// history. Drives two consumer paths: (1) recentMoveIds passed to selection
+// so the AI / deterministic fallback can vary sequences across summons
+// (orienting-response mechanism degrades on repeat); (2) future surfacing
+// in My Progress / engagement charts.
+//
+// Schema per entry:
+//   { sequenceId, durationMs, completed, pathway, sequenceState, reason, timestamp }
+//
+// Storage: stillform_move_card_history. Joins SECURE_KEYS (encrypted at rest,
+// parallel to disruptor_sessions / sessions / journal) + SYNC_KEYS (cross-
+// device) + keysToRemove (delete-all path). Cap 200 entries oldest-out.
+
+const MOVE_CARD_HISTORY_STORAGE_KEY = "stillform_move_card_history";
+const MOVE_CARD_HISTORY_MAX_ITEMS = 200;
+
+// Get all Move card history entries, newest-first.
+const getMoveCardHistory = () => {
+  try {
+    const raw = secureRead(MOVE_CARD_HISTORY_STORAGE_KEY, []);
+    if (!Array.isArray(raw)) return [];
+    return [...raw].sort((a, b) =>
+      new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime()
+    );
+  } catch { return []; }
+};
+
+// Append a new entry. Trims to MAX_ITEMS oldest-out. Returns the persisted
+// record on success, null on any failure. Caller does not need to await
+// or check — the Move card UX proceeds regardless.
+const appendMoveCardHistory = (record) => {
+  if (!record?.sequenceId) return null;
+  try {
+    const existing = getMoveCardHistory();
+    const persisted = {
+      sequenceId: String(record.sequenceId).slice(0, 80),
+      durationMs: Number.isFinite(record.durationMs) ? record.durationMs : 0,
+      completed: Boolean(record.completed),
+      pathway: String(record.pathway || "unknown").slice(0, 32),
+      sequenceState: record.sequenceState && typeof record.sequenceState === "object"
+        ? record.sequenceState : null,
+      reason: typeof record.reason === "string" ? record.reason.slice(0, 200) : null,
+      timestamp: record.timestamp || new Date().toISOString()
+    };
+    // Newest-first; cap from the tail (oldest entries)
+    const next = [persisted, ...existing];
+    const trimmed = next.length > MOVE_CARD_HISTORY_MAX_ITEMS
+      ? next.slice(0, MOVE_CARD_HISTORY_MAX_ITEMS)
+      : next;
+    secureWrite(MOVE_CARD_HISTORY_STORAGE_KEY, trimmed);
+    return persisted;
+  } catch { return null; }
+};
+
+// Recent sequenceIds for variety. Returns the last N completed-or-not
+// sequenceIds in newest-first order. Passed to selection so the AI can
+// avoid recent repeats. Variety matters because the orienting-response
+// mechanism (Sokolov 1963) degrades on repetition — same move twice in a
+// row captures less novelty.
+const getRecentMoveCardIds = (limit = 5) => {
+  try {
+    return getMoveCardHistory().slice(0, limit).map(r => r.sequenceId).filter(Boolean);
+  } catch { return []; }
+};
+
 // ─── SAVED REFRAMES INVENTORY HELPERS — Phase 0 for My Progress redesign ───
 // Saved reframes record: { text, distortion, timestamp, mode } where mode is
 // "calm" | "clarity" | "hype". Stored in stillform_saved_reframes (encrypted).
@@ -8715,7 +8781,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -9326,6 +9392,7 @@ const SECURE_KEYS = [
   "stillform_eod_history",
   "stillform_eod_artifacts",
   "stillform_todays_briefs",
+  "stillform_move_card_history",
   "stillform_communication_events",
   "stillform_tool_debriefs",
   "stillform_focus_check_history",
@@ -20193,11 +20260,33 @@ const isSignalProfileConfigured = () => {
             else if (h < 17) moveCardState.timeOfDay = "midday";
             else moveCardState.timeOfDay = "evening";
           } catch {}
+          // Phase 8e: recent ids drive variety. Selection passes them to AI
+          // (avoid recent repeats) AND to deterministic fallback (same).
+          let recentIds = [];
+          try { recentIds = getRecentMoveCardIds(5); } catch {}
+          // Phase 8e: persist on completion. onComplete payload from
+          // MoveCardTool already carries everything we need to record.
+          const handleMoveCardComplete = (payload) => {
+            try {
+              if (payload?.sequenceId) {
+                appendMoveCardHistory({
+                  sequenceId: payload.sequenceId,
+                  durationMs: payload.durationMs,
+                  completed: payload.completed,
+                  pathway: payload.pathway,
+                  sequenceState: payload.sequenceState,
+                  reason: payload.reason,
+                  timestamp: new Date().toISOString()
+                });
+              }
+            } catch {}
+            goHomeSafely();
+          };
           return (
             <MoveCardTool
               state={moveCardState}
-              recentMoveIds={[]}
-              onComplete={() => goHomeSafely()}
+              recentMoveIds={recentIds}
+              onComplete={handleMoveCardComplete}
               onClose={() => goHomeSafely()}
             />
           );
@@ -24532,7 +24621,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB

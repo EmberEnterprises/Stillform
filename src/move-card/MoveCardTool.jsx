@@ -110,6 +110,17 @@ export function MoveCardTool({
     }
   };
 
+  // Phase 8e — re-do affordance. Internal phase reset; same sequence
+  // stays in state, user starts again from intro. Pathway flips to
+  // "redo" so onComplete telemetry distinguishes a fresh selection
+  // from a deliberate repeat (8f wires the actual telemetry; this just
+  // labels the pathway correctly for it).
+  const handleRedo = () => {
+    setPathway("redo");
+    startTimeRef.current = 0;
+    setPhase("intro");
+  };
+
   const stillformAmber = "var(--amber)";
   const muted = "var(--text-muted)";
 
@@ -183,8 +194,11 @@ export function MoveCardTool({
           You can run that one again whenever you need it. The body remembers
           even when the head doesn't.
         </div>
-        <button className="btn btn-primary" onClick={handleFinish} style={{ width: "100%" }}>
+        <button className="btn btn-primary" onClick={handleFinish} style={{ width: "100%", marginBottom: 12 }}>
           Done
+        </button>
+        <button className="btn btn-ghost" onClick={handleRedo} style={{ width: "100%" }}>
+          Run that again
         </button>
       </div>
     );
