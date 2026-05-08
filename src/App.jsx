@@ -15083,6 +15083,256 @@ function RoadmapScreen({ onBack }) {
   );
 }
 
+// ─── SCRIPTS TOOL — Engagement Architecture Build #9 ────────────────────
+// Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
+//   "Scripts: Extension of State to Statement. Given a situation,
+//    generate verbatim language for the hard conversation. Either
+//    ready-to-send or starting point."
+//
+// Calls /.netlify/functions/scripts (created in same commit). Output is
+// a single deployable message + tone label + optional context note.
+//
+// Voice: prestige-operator. The composure is in the form, not the
+// padding. No "I just wanted to" softeners by default.
+//
+// Crisis safety: function detects crisis language server-side and
+// returns a redirect payload instead of a script. The frontend
+// honors that and shows a crisis-resources card, not the script UI.
+function ScriptsTool({ onBack }) {
+  const [recipient, setRecipient] = React.useState("");
+  const [situation, setSituation] = React.useState("");
+  const [outcome, setOutcome] = React.useState("");
+  const [channel, setChannel] = React.useState("text");
+  const [loading, setLoading] = React.useState(false);
+  const [result, setResult] = React.useState(null); // { script, tone, note, isCrisis }
+  const [error, setError] = React.useState(null);
+  const [copied, setCopied] = React.useState(false);
+
+  const apiUrl = (() => {
+    try {
+      const isCapacitor = typeof window !== "undefined" && (window.Capacitor?.isNativePlatform?.() || /capacitor:/.test(window.location.protocol));
+      return isCapacitor ? "https://stillformapp.com/.netlify/functions/scripts" : "/.netlify/functions/scripts";
+    } catch { return "/.netlify/functions/scripts"; }
+  })();
+
+  const submit = async () => {
+    if (!situation.trim() || situation.trim().length < 8) {
+      setError("Add a sentence about the situation so the script can land specifically.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    setCopied(false);
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipient: recipient.trim(), situation: situation.trim(), outcome: outcome.trim(), channel })
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        setError(data.error || `Request failed (${response.status}).`);
+        try { window.plausible?.("Scripts Failed", { props: { status: response.status } }); } catch {}
+        return;
+      }
+      setResult(data);
+      try {
+        window.plausible?.("Scripts Generated", {
+          props: {
+            channel,
+            isCrisis: data.isCrisis ? "yes" : "no",
+            length: data.script ? String(data.script.length) : "0"
+          }
+        });
+      } catch {}
+    } catch (e) {
+      setError("Network issue. Try again in a moment.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const copyScript = () => {
+    if (!result?.script) return;
+    try {
+      navigator.clipboard.writeText(result.script);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+      try { window.plausible?.("Scripts Copied", { props: { channel: channel } }); } catch {}
+    } catch {}
+  };
+
+  const tryAnother = () => {
+    setResult(null);
+    setError(null);
+  };
+
+  return (
+    <section className="screen" style={{ paddingBottom: 60 }}>
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "24px 20px" }}>
+        <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, letterSpacing: "0.16em" }}>
+          Scripts
+        </div>
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontStyle: "italic",
+          fontSize: 22,
+          color: "var(--text)",
+          lineHeight: 1.3,
+          marginBottom: 8,
+          letterSpacing: "0.01em"
+        }}>
+          Make the hard line land.
+        </div>
+        <div style={{
+          height: "0.5px", background: "var(--amber-dim)", width: 32, opacity: 0.7, marginBottom: 16
+        }} />
+        <div className="t-body-sm quiet" style={{ marginBottom: 28, lineHeight: 1.55 }}>
+          Tell the system the situation. Get one deployable line back. Adult-to-adult. No padding.
+        </div>
+
+        {!result && (
+          <>
+            {/* CHANNEL */}
+            <div style={{ marginBottom: 18 }}>
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em" }}>
+                Channel
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[
+                  { id: "text", label: "Text" },
+                  { id: "email", label: "Email" },
+                  { id: "in-person", label: "In person" },
+                  { id: "voice", label: "Voice / call" }
+                ].map(c => (
+                  <button key={c.id}
+                    aria-pressed={channel === c.id}
+                    onClick={() => setChannel(c.id)}
+                    style={{
+                      padding: "8px 14px",
+                      background: channel === c.id ? "var(--amber-glow)" : "transparent",
+                      border: `0.5px solid ${channel === c.id ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: "var(--r-lg)",
+                      color: channel === c.id ? "var(--amber)" : "var(--text-muted)",
+                      fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                      cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent"
+                    }}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* RECIPIENT */}
+            <div style={{ marginBottom: 18 }}>
+              <label htmlFor="scripts-recipient" className="t-mono-xs" style={{ color: "var(--text-muted)", display: "block", marginBottom: 8, letterSpacing: "0.14em" }}>
+                Who is this for? <span style={{ opacity: 0.5 }}>(optional)</span>
+              </label>
+              <input id="scripts-recipient" type="text" value={recipient} onChange={e => setRecipient(e.target.value)} maxLength={200}
+                placeholder="A name or relationship — partner, manager, mom"
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+            </div>
+
+            {/* SITUATION */}
+            <div style={{ marginBottom: 18 }}>
+              <label htmlFor="scripts-situation" className="t-mono-xs" style={{ color: "var(--text-muted)", display: "block", marginBottom: 8, letterSpacing: "0.14em" }}>
+                What's the situation?
+              </label>
+              <textarea id="scripts-situation" value={situation} onChange={e => setSituation(e.target.value)} maxLength={1500}
+                rows={4}
+                placeholder="What happened, what's been happening, what's at stake. Plain language."
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", lineHeight: 1.5 }} />
+              <div style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 4 }}>
+                {situation.length} / 1500
+              </div>
+            </div>
+
+            {/* OUTCOME */}
+            <div style={{ marginBottom: 24 }}>
+              <label htmlFor="scripts-outcome" className="t-mono-xs" style={{ color: "var(--text-muted)", display: "block", marginBottom: 8, letterSpacing: "0.14em" }}>
+                What do you want to happen? <span style={{ opacity: 0.5 }}>(optional)</span>
+              </label>
+              <input id="scripts-outcome" type="text" value={outcome} onChange={e => setOutcome(e.target.value)} maxLength={400}
+                placeholder="The specific move — they back off, we set a date, they hear me, etc."
+                style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none" }} />
+            </div>
+
+            {error && (
+              <div style={{ background: "var(--surface)", border: "0.5px solid #c05040", borderRadius: "var(--r)", padding: "10px 14px", marginBottom: 16, fontSize: 12, color: "#e09080", lineHeight: 1.5 }}>
+                {error}
+              </div>
+            )}
+
+            <button onClick={submit} disabled={loading || !situation.trim()} className="btn btn-primary"
+              style={{ width: "100%", padding: "14px", opacity: (loading || !situation.trim()) ? 0.5 : 1 }}>
+              {loading ? "Generating…" : "Generate the script"}
+            </button>
+
+            <button onClick={onBack} className="btn btn-ghost" style={{ width: "100%", marginTop: 8 }}>
+              Back
+            </button>
+          </>
+        )}
+
+        {result && result.isCrisis && (
+          <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 16 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, letterSpacing: "0.14em" }}>
+              Pause
+            </div>
+            <div style={{ fontSize: 14, color: "var(--text)", lineHeight: 1.6, marginBottom: 16 }}>
+              {result.note}
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button onClick={tryAnother} className="btn btn-ghost">Reword the situation</button>
+              <button onClick={onBack} className="btn btn-ghost">Back</button>
+            </div>
+          </div>
+        )}
+
+        {result && !result.isCrisis && (
+          <>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6, letterSpacing: "0.14em" }}>
+              {result.tone}
+            </div>
+            <div style={{
+              background: "var(--surface)",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              padding: "18px 20px",
+              marginBottom: 14,
+              fontSize: 15,
+              color: "var(--text)",
+              lineHeight: 1.6,
+              fontFamily: "'DM Sans', sans-serif",
+              whiteSpace: "pre-wrap"
+            }}>
+              {result.script}
+            </div>
+            {result.note && (
+              <div className="t-body-sm quiet" style={{ marginBottom: 18, lineHeight: 1.5, fontStyle: "italic" }}>
+                {result.note}
+              </div>
+            )}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+              <button onClick={copyScript} className="btn btn-primary" style={{ flex: 1 }}>
+                {copied ? "Copied" : "Copy"}
+              </button>
+              <button onClick={tryAnother} className="btn btn-ghost" style={{ flex: 1 }}>
+                Try another
+              </button>
+            </div>
+            <button onClick={onBack} className="btn btn-ghost" style={{ width: "100%" }}>
+              Done
+            </button>
+          </>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─── DRAGGABLE QUICK BREATHE PILL ───────────────────────────────────────────
 // Users can drag to reposition. Position saved in localStorage.
 function QBPill({ onPress }) {
@@ -15872,12 +16122,12 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "roadmap" || screen === "pricing" || screen === "pattern-transparency") {
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "roadmap" || screen === "scripts" || screen === "pricing" || screen === "pattern-transparency") {
       goHomeSafely();
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "scripts", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
@@ -19620,6 +19870,77 @@ const isSignalProfileConfigured = () => {
               </button>
 
 
+              {/* ── SCRIPTS CARD — engagement architecture Engine 2 (Application Layer), surface 2.
+                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
+                  "Scripts: Extension of State to Statement. Given a situation,
+                  generate verbatim language for the hard conversation. Either
+                  ready-to-send or starting point."
+
+                  Mechanism: opens ScriptsTool screen (defined at App.jsx ~line 15101).
+                  Calls /.netlify/functions/scripts which returns a single deployable
+                  message + tone label + optional context note.
+
+                  Voice: prestige-operator, mirrors Move card style. Same eyebrow +
+                  Cormorant italic headline + DM Sans subtitle pattern. */}
+              <button
+                onClick={() => {
+                  setScreen("scripts");
+                  try { window.plausible?.("Scripts Card Tapped", { props: { source: "home" } }); } catch {}
+                }}
+                aria-label="Scripts — generate the hard line you need to send or say"
+                style={{
+                  width: "100%", marginBottom: 24,
+                  padding: "16px 18px",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  textAlign: "left",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                  WebkitTapHighlightColor: "transparent",
+                  transition: "border-color var(--motion-default) var(--ease-prestige)"
+                }}
+              >
+                <div>
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--amber)",
+                    marginBottom: 6
+                  }}>
+                    Scripts
+                  </div>
+                  <div style={{
+                    fontSize: 15,
+                    color: "var(--text)",
+                    lineHeight: 1.35,
+                    marginBottom: 4,
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic",
+                    letterSpacing: "0.01em"
+                  }}>
+                    Make the hard line land.
+                  </div>
+                  <div style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.5
+                  }}>
+                    Tell the system the situation. Get one deployable line back.
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  →
+                </div>
+              </button>
+
+
               {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
@@ -20695,6 +21016,11 @@ const isSignalProfileConfigured = () => {
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
         {screen === "roadmap" && (
           <RoadmapScreen onBack={() => goHomeSafely()} />
+        )}
+
+        {/* SCRIPTS — engagement architecture Engine 2 (Application Layer) full screen */}
+        {screen === "scripts" && (
+          <ScriptsTool onBack={() => goHomeSafely()} />
         )}
 
         {/* FOCUS CHECK */}
