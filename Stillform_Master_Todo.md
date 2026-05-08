@@ -3,6 +3,24 @@
 
 ---
 
+## 🛑 LAUNCH/TESTING PATH PAUSED — May 8, 2026 (Arlin direction)
+
+The TestFlight + Google Play closed-testing path documented further below is **paused**, not retired. Pausing the path was Arlin's call after the May 8 audit revealed the engagement architecture's Engine 2 (Application Layer) was specced and never built — meaning the product would launch as observation-only, missing the bridge from app to life it was designed to have.
+
+**Arlin's directive (May 8):** *"I'm not testing shit. You need to update the to do and help me figure out how to TURN THIS APP INTO THE WINNER IT WAS MEANT TO BE."*
+
+The remaining launch-mechanical items below (icons, Termly, deploy, regression run, Google Play Console, TestFlight) stay on the list but are sequenced AFTER the load-bearing product work that turns Stillform from "another good app" into the prestige operator product the founder vision required. That product work is named in this doc; the new sequence is:
+
+1. **Pillar 1 — Application Layer (Engine 2):** Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact, Roadmap full screen, Build #2 Phase 2 (Trigger Profile UI). The bridge from regulation to life.
+2. **Pillar 2 — Spine + Voice:** narrative connectivity layer (line 730) + voice consistency audit (line 745). The connecting tissue across surfaces.
+3. **Pillar 3 — CFM redo:** Cognitive Function Measurement re-designed from spec + Phase 1 audit + revert lessons. Measurable evidence.
+
+Polish + redesigns + native + launch mechanics follow. Order not yet locked at item-level — Arlin's call which Pillar 1 surface ships first.
+
+**This pause has no expiration date.** It ends when Arlin says it ends, with eyes on the actual product not on a date.
+
+---
+
 ## 🌟 ENGAGEMENT ARCHITECTURE — Active design (May 7 brainstorm, awaiting build)
 
 Single largest architectural commitment of the launch sprint. Captured in full in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**. Read that doc for complete context — this is just the index entry.
