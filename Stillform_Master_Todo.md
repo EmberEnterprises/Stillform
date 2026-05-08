@@ -3,6 +3,12 @@
 
 ---
 
+## 📋 SESSION HANDOFF — May 8, 2026
+
+**For the next Claude session: read `STILLFORM_HANDOFF_MAY_8_2026.md` BEFORE doing anything else.** That doc captures the operating context, the failure patterns to avoid, current build state, three pillars sequenced for "winner state," and the immediate next move (complete EOD artifact frontend wiring — backend at commit `4c36283` is unwired). Reading the handoff doc is mandatory before reading the rest of this master todo.
+
+---
+
 ## 🛑 LAUNCH/TESTING PATH PAUSED — May 8, 2026 (Arlin direction)
 
 The TestFlight + Google Play closed-testing path documented further below is **paused**, not retired. Pausing the path was Arlin's call after the May 8 audit revealed the engagement architecture's Engine 2 (Application Layer) was specced and never built — meaning the product would launch as observation-only, missing the bridge from app to life it was designed to have.
