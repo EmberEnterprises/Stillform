@@ -1,5 +1,8 @@
 // Pattern Disruption — Disruptor Tool component
 // May 7, 2026 · per PATTERN_DISRUPTION_SPEC.md §4
+// May 8, 2026 · refactored to consume SomaticPromptRunner (Phase 8c) so the
+// running-phase state machine is shared with MoveCardTool. Intro and
+// reflection screens unchanged from the May 7 ship.
 //
 // Locked science (spec §4.2):
 //   - Attentional capture by novel stimulus (Sokolov orienting response)
@@ -21,7 +24,8 @@
 //   - Not a treatment intervention. The mechanic is a felt experience of
 //     the loop breaking. Anything more is over-claim.
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
+import { SomaticPromptRunner } from "../move-card/SomaticPromptRunner.jsx";
 
 // 8 prompts over ~90 seconds. Each prompt has a duration and a beat. Beats
 // are short tactile moves; durations vary so the rhythm itself feels novel
@@ -42,61 +46,21 @@ const TOTAL_DURATION_MS = SOMATIC_PROMPTS.reduce((sum, p) => sum + p.durationMs,
 
 export function DisruptorTool({ patternId = null, dimension = null, onComplete, onClose }) {
   const [phase, setPhase] = useState("intro"); // intro | running | reflection
-  const [promptIdx, setPromptIdx] = useState(0);
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const startTimeRef = useRef(0);
-  const promptTimeoutRef = useRef(null);
-  const tickIntervalRef = useRef(null);
-
-  // Cleanup on unmount.
-  useEffect(() => {
-    return () => {
-      if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
-      if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
-    };
-  }, []);
-
-  // Advance through prompts.
-  useEffect(() => {
-    if (phase !== "running") return;
-    if (promptIdx >= SOMATIC_PROMPTS.length) {
-      // Completed all prompts.
-      setPhase("reflection");
-      return;
-    }
-    const current = SOMATIC_PROMPTS[promptIdx];
-    promptTimeoutRef.current = setTimeout(() => {
-      setPromptIdx(i => i + 1);
-    }, current.durationMs);
-    return () => {
-      if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
-    };
-  }, [phase, promptIdx]);
-
-  // Tick elapsed time for the progress indicator.
-  useEffect(() => {
-    if (phase !== "running") return;
-    tickIntervalRef.current = setInterval(() => {
-      setElapsedMs(Date.now() - startTimeRef.current);
-    }, 100);
-    return () => {
-      if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
-    };
-  }, [phase]);
 
   const handleStart = () => {
-    startTimeRef.current = Date.now();
-    setElapsedMs(0);
-    setPromptIdx(0);
     setPhase("running");
   };
 
-  const handleEarlyExit = () => {
+  const handleRunnerComplete = () => {
+    setPhase("reflection");
+  };
+
+  const handleRunnerEarlyExit = ({ elapsedMs }) => {
     // Treat early exit as not completed but still record the session.
     const session = {
       patternId,
       dimension,
-      durationMs: Date.now() - startTimeRef.current,
+      durationMs: elapsedMs,
       completed: false,
       pathway: "somatic-redirection"
     };
@@ -146,50 +110,12 @@ export function DisruptorTool({ patternId = null, dimension = null, onComplete, 
 
   // ─── RUNNING ───────────────────────────────────────────────────────
   if (phase === "running") {
-    const current = SOMATIC_PROMPTS[promptIdx] || SOMATIC_PROMPTS[SOMATIC_PROMPTS.length - 1];
-    const totalProgress = Math.min(1, elapsedMs / TOTAL_DURATION_MS);
-    const remainingSec = Math.max(0, Math.ceil((TOTAL_DURATION_MS - elapsedMs) / 1000));
-
     return (
-      <div style={{ padding: "32px 24px", textAlign: "center", maxWidth: 480, margin: "0 auto", minHeight: "70vh", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-        {/* Progress bar — minimal, doesn't compete with the prompt */}
-        <div style={{ width: "100%", height: 2, background: "var(--border)", borderRadius: 1, marginBottom: 48, overflow: "hidden" }}>
-          <div style={{
-            width: `${(totalProgress * 100).toFixed(1)}%`,
-            height: "100%",
-            background: stillformAmber,
-            transition: "width 100ms linear"
-          }} />
-        </div>
-
-        {/* Pulsing focus ring — visual anchor synchronized to prompt cadence */}
-        <div style={{
-          width: 120, height: 120, borderRadius: "50%",
-          border: `1px solid ${stillformAmber}`,
-          margin: "0 auto 32px",
-          opacity: 0.4,
-          animation: "stillformDisruptorPulse 4s ease-in-out infinite"
-        }} />
-
-        <div style={{ fontSize: 22, lineHeight: 1.5, color: "var(--text)", fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", padding: "0 16px", maxWidth: 360, margin: "0 auto" }}>
-          {current.text}
-        </div>
-
-        <div className="t-mono-xs" style={{ color: muted, marginTop: 48 }}>
-          {remainingSec}s remaining
-        </div>
-
-        <button onClick={handleEarlyExit} style={{ background: "none", border: "none", color: muted, fontSize: 11, cursor: "pointer", marginTop: 32, padding: 8 }} aria-label="End early">
-          End early
-        </button>
-
-        <style>{`
-          @keyframes stillformDisruptorPulse {
-            0%, 100% { transform: scale(1); opacity: 0.3; }
-            50% { transform: scale(1.08); opacity: 0.5; }
-          }
-        `}</style>
-      </div>
+      <SomaticPromptRunner
+        prompts={SOMATIC_PROMPTS}
+        onComplete={handleRunnerComplete}
+        onEarlyExit={handleRunnerEarlyExit}
+      />
     );
   }
 
