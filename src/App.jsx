@@ -14872,6 +14872,217 @@ function MyProgress({ onBack }) {
   );
 }
 
+// ─── ROADMAP FULL SCREEN — engagement architecture Engine 1 (Retention engine), surface 3.
+// Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.1 ("The Roadmap — visible from
+// day 1, before earned"):
+//   "Stages of mastery shown as a path the user is currently walking. Stage 1
+//    today, stage 5 visible at the path's end. Personalized markers from existing
+//    data show position on each stage. Not levels, not points, not badges."
+//
+// Build #6 in spec §10 shipping order. Dependency: Stage definitions (shipped)
+// + Trigger Profile Phase 1 data layer (shipped). Phase 2 capture UI not built
+// — Stage 3 markers will appear as deferred for now, which is the correct
+// honest reflection of system state.
+//
+// Layer 1.1 verification (May 8): STAGE_DEFINITIONS at App.jsx:3732,
+// computeStageMarkers at :3769, getCurrentStage at :3828. All exist and stable.
+function RoadmapScreen({ onBack }) {
+  let snap = null;
+  try { snap = getCurrentStage(); } catch { return null; }
+  if (!snap) return null;
+
+  const allStages = [1, 2, 3, 4, 5].map(id => {
+    const def = STAGE_DEFINITIONS[id];
+    const markers = computeStageMarkers(id);
+    const shipped = markers.filter(m => m.status === "shipped");
+    const deferred = markers.filter(m => m.status === "deferred");
+    const metCount = shipped.filter(m => m.met).length;
+    const totalCount = shipped.length;
+    const percent = totalCount > 0 ? Math.round((metCount / totalCount) * 100) : 0;
+    let status;
+    if (id <= snap.highestStageMet) status = "met";
+    else if (id === snap.currentStageId) status = "current";
+    else status = "upcoming";
+    return { def, markers, shipped, deferred, status, metCount, totalCount, percent };
+  });
+
+  return (
+    <section className="screen" style={{ paddingBottom: 60 }}>
+      <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 0" }}>
+
+        {/* Eyebrow */}
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em"
+        }}>
+          The Roadmap
+        </div>
+
+        {/* Title — IBM Plex Mono, prestige operator instrument-readout */}
+        <div style={{
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
+          letterSpacing: "0.06em", color: "var(--text)", marginBottom: 12
+        }}>
+          Five stages. The path you're walking.
+        </div>
+
+        {/* Hairline accent — single editorial moment */}
+        <div style={{
+          height: "0.5px", background: "var(--amber-dim)", width: 32,
+          marginBottom: 18, opacity: 0.8
+        }} />
+
+        {/* Intro — Cormorant italic, one editorial paragraph. Voice from spec
+            verbatim: "build sequentially — notice before you can name, name
+            before you can anticipate, anticipate before you can recognize,
+            recognize before you can hold under load." */}
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontStyle: "italic",
+          color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 32,
+          letterSpacing: "0.01em"
+        }}>
+          Each stage is a capacity, not a level. Notice before you can name. Name before you can anticipate. Anticipate before you can recognize. Recognize before you can hold under load. The path is real on day 1, before any of it is earned.
+        </div>
+
+        {/* 5 stage cards */}
+        {allStages.map(({ def, shipped, deferred, status, metCount, totalCount, percent }) => {
+          const isCurrent = status === "current";
+          const isMet = status === "met";
+          const accentColor = isMet || isCurrent ? "var(--amber)" : "var(--text-muted)";
+          const cardOpacity = status === "upcoming" ? 0.55 : 1;
+
+          return (
+            <div key={def.id} style={{
+              padding: "20px 18px", marginBottom: 16,
+              border: isCurrent ? "1px solid var(--amber-dim)" : "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)",
+              background: isCurrent ? "var(--surface)" : "transparent",
+              opacity: cardOpacity,
+              transition: "border-color var(--motion-default) var(--ease-prestige)"
+            }}>
+
+              {/* Stage header — number + status indicator */}
+              <div style={{
+                display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                marginBottom: 10
+              }}>
+                <div className="t-mono-xs" style={{
+                  color: accentColor, letterSpacing: "0.14em"
+                }}>
+                  Stage {def.id}
+                </div>
+                <div style={{
+                  fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                  letterSpacing: "0.14em", textTransform: "uppercase",
+                  color: accentColor
+                }}>
+                  {isMet ? "Met" : isCurrent ? `${percent}%` : "Upcoming"}
+                </div>
+              </div>
+
+              {/* Stage name */}
+              <div style={{
+                fontFamily: "'IBM Plex Mono', monospace", fontSize: 16, fontWeight: 500,
+                letterSpacing: "0.06em", color: "var(--text)", marginBottom: 8
+              }}>
+                {def.name}
+              </div>
+
+              {/* Capacity — Cormorant italic, single editorial moment per card */}
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 16,
+                letterSpacing: "0.01em"
+              }}>
+                {def.capacity}
+              </div>
+
+              {/* Markers — show for current + met stages with full progress.
+                  For upcoming stages, show same structure but greyed (so user
+                  can see the path forward without it being hidden). */}
+              {shipped.length > 0 && (
+                <>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em"
+                  }}>
+                    {isMet ? "What you built" : isCurrent ? "What you're working on" : "What this stage will require"}
+                  </div>
+                  {shipped.map((m, idx) => (
+                    <div key={m.id} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                      padding: "8px 0",
+                      borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none",
+                      gap: 16
+                    }}>
+                      <div style={{
+                        fontSize: 12, color: "var(--text)", lineHeight: 1.45,
+                        fontFamily: "'DM Sans', sans-serif", flex: 1
+                      }}>
+                        {m.label}
+                      </div>
+                      <div style={{
+                        fontFamily: "'IBM Plex Mono', monospace", fontSize: 9,
+                        letterSpacing: "0.1em", textTransform: "uppercase",
+                        color: m.met ? "var(--amber)" : "var(--text-muted)",
+                        whiteSpace: "nowrap"
+                      }}>
+                        {m.met
+                          ? "Met"
+                          : (typeof m.value === "number" && typeof m.threshold === "number"
+                              ? `${m.value} / ${m.threshold}`
+                              : (m.value === false || m.value === null ? "—" : String(m.value)))}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Deferred markers — system still building (honest disclosure) */}
+              {deferred.length > 0 && (
+                <div style={{
+                  marginTop: 12,
+                  padding: "10px 12px",
+                  background: "var(--surface2)",
+                  borderRadius: "var(--r)",
+                  fontSize: 11,
+                  color: "var(--text-muted)",
+                  lineHeight: 1.55,
+                  fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  {deferred.length} marker{deferred.length === 1 ? "" : "s"} still being built into the system.
+                </div>
+              )}
+
+              {/* Science citations — small footer, language not credentials */}
+              <div style={{
+                marginTop: 14,
+                fontSize: 10,
+                color: "var(--text-dim)",
+                fontFamily: "'DM Sans', sans-serif",
+                letterSpacing: "0.02em",
+                lineHeight: 1.6
+              }}>
+                {def.science.join(" · ")}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Back button */}
+        <button onClick={onBack} style={{
+          background: "none", border: "0.5px solid var(--border)",
+          borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
+          color: "var(--text-muted)", cursor: "pointer",
+          fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em",
+          marginTop: 24
+        }}>
+          ← Back
+        </button>
+
+      </div>
+    </section>
+  );
+}
+
 // ─── DRAGGABLE QUICK BREATHE PILL ───────────────────────────────────────────
 // Users can drag to reposition. Position saved in localStorage.
 function QBPill({ onPress }) {
@@ -15661,12 +15872,12 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "pricing" || screen === "pattern-transparency") {
+    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "roadmap" || screen === "pricing" || screen === "pattern-transparency") {
       goHomeSafely();
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "focus-check", "pricing", "tool"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
@@ -17812,6 +18023,23 @@ const isSignalProfileConfigured = () => {
               }}>
                 {snap.stage.science.join(" · ")}
               </div>
+
+              {/* View full Roadmap — engagement architecture Engine 1 entry point.
+                  Per spec §3.1: "Stages of mastery shown as a path the user is
+                  currently walking. Stage 1 today, stage 5 visible at the path's
+                  end." Mirror sheet shows current stage; full Roadmap shows all 5. */}
+              <button
+                onClick={() => { setShowMirrorSheet(false); setScreen("roadmap"); }}
+                style={{
+                  background: "none", border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
+                  color: "var(--amber)", cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em",
+                  marginRight: 10
+                }}
+              >
+                View full Roadmap →
+              </button>
 
               <button onClick={() => setShowMirrorSheet(false)} style={{
                 background: "none", border: "0.5px solid var(--border)",
@@ -20462,6 +20690,11 @@ const isSignalProfileConfigured = () => {
         {/* MY PROGRESS */}
         {screen === "progress" && (
           <MyProgress onBack={() => goHomeSafely()} />
+        )}
+
+        {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
+        {screen === "roadmap" && (
+          <RoadmapScreen onBack={() => goHomeSafely()} />
         )}
 
         {/* FOCUS CHECK */}
