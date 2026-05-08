@@ -4843,6 +4843,16 @@ function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
   const capped = all.slice(0, maxEntries);
   if (capped.length === 0) return null;
 
+  // May 8, 2026: per-entry text truncation cap (250 chars). Master todo line 760 —
+  // entry count is already bounded (maxEntries=20) but per-entry text was unbounded.
+  // Self Mode 5-step responses and Grounding 5-senses writes can each be a paragraph
+  // per field, so 20 entries × unlimited length blew the AI context for heavy users.
+  // 250 chars matches the priorModeContext per-message cap (May 7 work).
+  const truncateText = (txt) => {
+    const s = String(txt || "");
+    return s.length > 250 ? s.slice(0, 247) + "..." : s;
+  };
+
   // Format for AI prompt: tagged origin + date + text. Keep compact.
   // Header tells the AI what this is and how to treat it (pattern recognition only,
   // do not quote back unless the user asks; do reference patterns naturally).
@@ -4851,7 +4861,7 @@ function buildUnifiedTextContext({ maxEntries = 20, dayLookback = 14 } = {}) {
       ? ` [${e.preState || "?"}→${e.postState || "?"}]`
       : "";
     const dateTag = e.date ? `[${e.date}] ` : "";
-    return `${dateTag}${e.origin}${stateTag}: ${e.text}`;
+    return `${dateTag}${e.origin}${stateTag}: ${truncateText(e.text)}`;
   });
   return [
     "RECENT REFLECTIONS (text the user has written across all tools in the last " + dayLookback + " days, for pattern recognition — do not quote back unless the user explicitly asks):",
@@ -9742,10 +9752,20 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               const entries = secureRead("stillform_journal", []);
               if (entries.length === 0) return null;
               const todayIso = TimeKeeper.stillformDay();
+              // May 8, 2026: per-entry trigger truncation cap (200 chars). Master
+              // todo line 760 — heavy users 6+ months in could log multi-paragraph
+              // triggers; without a cap the bundled context grows unbounded. Same
+              // pattern as priorModeContext (250) and sessionNotes (200) caps from
+              // May 7. Older entries already had a slice(-10) count cap; today's
+              // entries get the same so a high-log day can't dominate the prompt.
+              const truncate = (txt) => {
+                const s = String(txt || "");
+                return s.length > 200 ? s.slice(0, 197) + "..." : s;
+              };
               const fmtEntry = e => {
                 const emotions = e.emotions?.length ? `(${e.emotions.join(", ")})` : "";
-                const trigger = e.trigger?.trim();
-                const outcome = e.outcome ? ` → ${e.outcome}` : "";
+                const trigger = truncate(e.trigger?.trim() || "");
+                const outcome = e.outcome ? ` → ${truncate(e.outcome)}` : "";
                 return trigger ? `${trigger} ${emotions}${outcome}`.trim() : emotions + outcome;
               };
               // Exclude auto-logged state entries from proactive prompt — feelState already passed separately
@@ -9754,7 +9774,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               let ctx = "";
               if (todayManual.length > 0) {
                 ctx += "TODAY'S SIGNAL LOG ENTRIES (reference these PROACTIVELY — the user logged these today, ask if this is what's on their mind):\n";
-                ctx += todayManual.map(fmtEntry).join("\n");
+                ctx += todayManual.slice(-10).map(fmtEntry).join("\n");
               }
               if (older.length > 0) {
                 if (ctx) ctx += "\n\n";
