@@ -20482,6 +20482,22 @@ const isSignalProfileConfigured = () => {
                     const tensionAreas = Object.keys(ciTension).filter(k => ciTension[k] > 0);
                     window.plausible("Morning Check-In", { props: { energy: ciEnergy || "steady", mood: ciMood || "none", tension_areas: tensionAreas.length, upcoming_context: upcomingPressure ? "yes" : "no" } });
                   } catch {}
+                  // Today's Brief — engagement architecture Engine 2 Build #3 surface.
+                  // Fire-and-forget AI call: writes to stillform_todays_briefs on
+                  // success, no-ops on failure. Does NOT block check-in close UX.
+                  // Replaces any existing brief for today (re-fires after morning
+                  // check-in update). Mirrors EOD artifact pattern (Build #10).
+                  try {
+                    const checkinSnapshot = {
+                      date: today,
+                      energy: ciEnergy || "steady",
+                      mood: ciMood || null,
+                      bio: bioArray.length > 0 ? bioArray : ["clear"],
+                      tension: Object.keys(ciTension).length > 0 ? ciTension : null
+                    };
+                    generateTodaysBrief(checkinSnapshot).catch(() => {});
+                    try { window.plausible("Today's Brief Generated", { props: { surface: "morning-checkin" } }); } catch {}
+                  } catch {}
                   setCiSaved(true);
                   setCiOpen(false);
                   try { window.plausible("Morning Outcome Chosen", { props: { outcome: outcomeFocus?.id || "none", protocol: recommendedProtocol.id } }); } catch {}
