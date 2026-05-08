@@ -20231,7 +20231,10 @@ const isSignalProfileConfigured = () => {
             move-card itself so it doesn't stack on its own surface. */}
         {screen !== "panic" && screen !== "move-card" && screen !== "setup-bridge" && screen !== "pricing" && 
          !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
-          <MoveCardPill onPress={() => setScreen("move-card")} />
+          <MoveCardPill onPress={() => {
+            try { window.plausible("Move Card Opened", { props: { surface: "pill" } }); } catch {}
+            setScreen("move-card");
+          }} />
         )}
 
         {/* MOVE CARD — user-summonable somatic move. State assembled at render
@@ -20278,6 +20281,28 @@ const isSignalProfileConfigured = () => {
                   reason: payload.reason,
                   timestamp: new Date().toISOString()
                 });
+              }
+            } catch {}
+            // Phase 8f telemetry. Single event per session; type determined
+            // by combination of pathway and completed:
+            //   pathway "redo" + completed       → Move Card Repeated
+            //   completed (any other pathway)    → Move Card Completed
+            //   not completed (early exit)       → Move Card Abandoned
+            try {
+              const evtProps = {
+                surface: "pill",
+                sequenceId: payload?.sequenceId || "unknown",
+                pathway: payload?.pathway || "unknown",
+                durationSec: Number.isFinite(payload?.durationMs)
+                  ? Math.round(payload.durationMs / 1000)
+                  : 0
+              };
+              if (payload?.completed && payload?.pathway === "redo") {
+                window.plausible("Move Card Repeated", { props: evtProps });
+              } else if (payload?.completed) {
+                window.plausible("Move Card Completed", { props: evtProps });
+              } else {
+                window.plausible("Move Card Abandoned", { props: evtProps });
               }
             } catch {}
             goHomeSafely();
