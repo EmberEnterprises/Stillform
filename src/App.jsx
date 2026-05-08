@@ -3435,6 +3435,242 @@ const generateEodArtifact = async (eodToday) => {
   } catch { return null; }
 };
 
+// ─── TODAY'S BRIEF — Engagement Architecture Engine 2, Build #3 (frontend) ──
+// Spec: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 121-126 ("Morning
+// artifact summarizing hardware + risks + moves + recovery. Generated at
+// morning check-in from bio-filter + outcome focus + calendar + Trigger
+// Profile + bias profile. Re-readable all day. AI-generated, brand-voice
+// locked."). Audit doc: TODAYS_BRIEF_FLOW_AUDIT.md (May 8). Backend at
+// netlify/functions/todays-brief.js (Phase 3a, commit be4f23d) returns
+// { hardware, risks, moves, recovery, generatedAt } structured JSON via
+// gpt-4o response_format json_object.
+//
+// READ/WRITE PATH:
+// stillform_todays_briefs joins SECURE_KEYS (encrypted at rest, parallel
+// to journal / profiles / eod_artifacts) and SYNC_KEYS (cross-device).
+//
+// FAILURE MODE on AI-down / timeout / schema violation: skip silent — no
+// brief persisted. Same posture as EOD artifact. The morning-compass value
+// IS specificity to the user's day; a generic fallback would betray the
+// voice rubric. Silent absence is the right surface.
+//
+// TRIGGER: fire-and-forget from saveCheckin (Phase 3c, ships next), after
+// trackMorningComplete. Does not block the user-visible check-in close.
+const TODAYS_BRIEF_API_URL = (() => {
+  try {
+    const isCapacitor = window?.Capacitor?.isNativePlatform?.();
+    return isCapacitor
+      ? "https://stillformapp.com/.netlify/functions/todays-brief"
+      : "/.netlify/functions/todays-brief";
+  } catch {
+    return "/.netlify/functions/todays-brief";
+  }
+})();
+const TODAYS_BRIEFS_STORAGE_KEY = "stillform_todays_briefs";
+const TODAYS_BRIEFS_MAX_ITEMS = 90; // ~3 months parallel to EOD artifacts
+
+// Get all Today's Briefs oldest-first. Returns [] on any read error.
+// Each record:
+//   { date: "YYYY-MM-DD", hardware, risks, moves, recovery, generatedAt: ISO }
+const getTodaysBriefs = () => {
+  try {
+    const raw = secureRead(TODAYS_BRIEFS_STORAGE_KEY, []);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+// Persist a brief, replacing any existing record for the same date so
+// re-fires (after morning check-in update) overwrite cleanly. Trims to
+// MAX_ITEMS oldest-out, same policy as EOD artifacts.
+const appendTodaysBrief = (record) => {
+  if (!record?.date || !record?.hardware) return null;
+  try {
+    const existing = getTodaysBriefs();
+    const filtered = existing.filter(r => r.date !== record.date);
+    filtered.push({
+      date: record.date,
+      hardware: String(record.hardware).slice(0, 280),
+      risks: String(record.risks || "").slice(0, 280),
+      moves: String(record.moves || "").slice(0, 280),
+      recovery: String(record.recovery || "").slice(0, 280),
+      generatedAt: record.generatedAt || new Date().toISOString()
+    });
+    const trimmed = filtered.length > TODAYS_BRIEFS_MAX_ITEMS
+      ? filtered.slice(-TODAYS_BRIEFS_MAX_ITEMS)
+      : filtered;
+    secureWrite(TODAYS_BRIEFS_STORAGE_KEY, trimmed);
+    return record;
+  } catch { return null; }
+};
+
+// Convenience: today's brief if it exists, else null. Read by the inline
+// display in Phase 3d so the check-in close screen renders the brief if
+// it's already arrived (or shows a placeholder if AI is still in flight).
+const getTodaysBriefForToday = () => {
+  try {
+    const today = TimeKeeper.stillformDay();
+    return getTodaysBriefs().find(r => r.date === today) || null;
+  } catch { return null; }
+};
+
+// Build the morning-snapshot payload from existing storage. All field reads
+// align with actual write paths. Backend (todays-brief.js) bounds these
+// server-side too; client truncation here is defense-in-depth, not the
+// security boundary.
+//
+// Pre-formatted profile strings (signalProfile, biasProfile, triggerProfile)
+// mirror the inline IIFE pattern Reframe uses (line ~10030+) so the AI
+// receives identical context shape across surfaces.
+const buildTodaysBriefPayload = (checkinToday) => {
+  // Morning state
+  const morningEnergy = checkinToday?.energy || "";
+  const morningMood = checkinToday?.mood || "";
+  const bioFilter = Array.isArray(checkinToday?.bio) ? checkinToday.bio : [];
+  const tensionAreas = checkinToday?.tension && typeof checkinToday.tension === "object"
+    ? Object.keys(checkinToday.tension).filter(k => Number(checkinToday.tension[k]) > 0)
+    : [];
+
+  // Outcome focus — what they want to be true today
+  let outcomeFocus = "";
+  try {
+    const raw = localStorage.getItem("stillform_outcome_focus");
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      outcomeFocus = String(parsed?.text || parsed?.value || raw || "");
+    }
+  } catch {}
+
+  // Calendar — events array if present, summary string as fallback
+  let calendarEvents = [];
+  let calendarSummary = "";
+  try {
+    const ev = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
+    if (Array.isArray(ev)) {
+      calendarEvents = ev
+        .filter(e => e && e.title)
+        .slice(0, 6)
+        .map(e => ({ title: String(e.title), start: String(e.start || "") }));
+    }
+    calendarSummary = localStorage.getItem("stillform_calendar_summary") || "";
+  } catch {}
+
+  // Trigger Profile — pre-formatted via existing helper
+  let triggerProfile = "";
+  try { triggerProfile = formatTriggerProfileForAI(8) || ""; } catch {}
+
+  // Bias profile — same inline formatting Reframe uses
+  let biasProfile = "";
+  try {
+    const biases = secureRead("stillform_bias_profile", null);
+    if (Array.isArray(biases) && biases.length) {
+      biasProfile = `User's identified decision patterns: ${biases.join(", ")}`;
+    }
+  } catch {}
+
+  // Signal profile — same inline formatting Reframe uses
+  let signalProfile = "";
+  try {
+    const p = secureRead("stillform_signal_profile", null);
+    if (p) {
+      const parts = [];
+      if (p.firstAreas?.length) parts.push(`Body signals first in: ${p.firstAreas.join(", ")}`);
+      if (p.preSensations?.length) parts.push(`Pre-escalation sensations: ${p.preSensations.join(", ")}`);
+      if (p.triggers?.length) parts.push(`Known triggers: ${p.triggers.join(", ")}`);
+      signalProfile = parts.length ? parts.join(". ") : "";
+    }
+  } catch {}
+
+  // Stage info via existing helper
+  let stageId = null;
+  let stageName = "";
+  try {
+    const snap = getCurrentStage();
+    if (snap?.currentStageId) stageId = snap.currentStageId;
+    if (snap?.stage?.name) stageName = String(snap.stage.name);
+  } catch {}
+
+  // Recent practice — last 7 days session count
+  let recentSessionsCount = 0;
+  const recentSessionDays = 7;
+  try {
+    const sessions = secureRead("stillform_sessions", []);
+    if (Array.isArray(sessions)) {
+      const cutoff = TimeKeeper.daysAgoMs(recentSessionDays);
+      recentSessionsCount = sessions.filter(s => {
+        try { return new Date(s.timestamp).getTime() >= cutoff; }
+        catch { return false; }
+      }).length;
+    }
+  } catch {}
+
+  // Yesterday's EOD takeaway — give the morning brief continuity from the
+  // evening artifact. Powerful narrative hook: morning compass references
+  // what last night's compass named.
+  let yesterdayEodArtifact = "";
+  let yesterdayComposure = "";
+  try {
+    const yesterday = TimeKeeper.stillformYesterday();
+    const briefs = getEodArtifacts();
+    const y = briefs.find(r => r.date === yesterday);
+    if (y?.artifact) yesterdayEodArtifact = String(y.artifact);
+    const eodHistory = secureRead("stillform_eod_history", []);
+    if (Array.isArray(eodHistory)) {
+      const yEod = eodHistory.find(e => e.date === yesterday);
+      if (yEod?.composure) yesterdayComposure = String(yEod.composure);
+    }
+  } catch {}
+
+  return {
+    morningEnergy,
+    morningMood,
+    bioFilter,
+    tensionAreas,
+    outcomeFocus,
+    calendarEvents,
+    calendarSummary,
+    triggerProfile,
+    biasProfile,
+    signalProfile,
+    stageId,
+    stageName,
+    recentSessionsCount,
+    recentSessionDays,
+    yesterdayEodArtifact,
+    yesterdayComposure
+  };
+};
+
+// Fire-and-forget. Returns a promise that resolves to the persisted record
+// on success or null on any failure. Caller does not need to await — the
+// morning check-in close UI proceeds regardless. On success, today's brief
+// is in storage and Phase 3d's render branch picks it up. Polling pattern
+// is NOT used here — Phase 3d shows a placeholder while AI is in flight,
+// and a useEffect-driven re-read picks up the persisted brief once
+// generation completes.
+const generateTodaysBrief = async (checkinToday) => {
+  const today = TimeKeeper.stillformDay();
+  if (!checkinToday) return null;
+  try {
+    const payload = buildTodaysBriefPayload(checkinToday);
+    const response = await fetch(TODAYS_BRIEF_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const hardware = typeof data?.hardware === "string" ? data.hardware.trim() : "";
+    if (!hardware) return null;
+    const risks = typeof data?.risks === "string" ? data.risks.trim() : "";
+    const moves = typeof data?.moves === "string" ? data.moves.trim() : "";
+    const recovery = typeof data?.recovery === "string" ? data.recovery.trim() : "";
+    const generatedAt = typeof data?.generatedAt === "string"
+      ? data.generatedAt
+      : new Date().toISOString();
+    return appendTodaysBrief({ date: today, hardware, risks, moves, recovery, generatedAt });
+  } catch { return null; }
+};
+
 // ─── SAVED REFRAMES INVENTORY HELPERS — Phase 0 for My Progress redesign ───
 // Saved reframes record: { text, distortion, timestamp, mode } where mode is
 // "calm" | "clarity" | "hype". Stored in stillform_saved_reframes (encrypted).
@@ -8477,7 +8713,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -9087,6 +9323,7 @@ const SECURE_KEYS = [
   "stillform_checkin_history",
   "stillform_eod_history",
   "stillform_eod_artifacts",
+  "stillform_todays_briefs",
   "stillform_communication_events",
   "stillform_tool_debriefs",
   "stillform_focus_check_history",
@@ -24084,7 +24321,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
