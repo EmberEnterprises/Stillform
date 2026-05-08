@@ -296,7 +296,17 @@ const BANNED_REFRAME_PATTERNS = [
   /flyby thoughts?/gi,
   /\bchat about\b/gi,
   /\bunpack\b/gi,
-  /\bdive in\b/gi
+  /\bdive in\b/gi,
+  // Grief boilerplate — added May 8, 2026 (Concern 2 from
+  // AI_REGRESSION_STATIC_AUDIT_19.md, Test 13). General love-language /
+  // declaration rules cover these via prompt instruction, but model under
+  // grief context surfaces them anyway. Pattern-banning at post-process
+  // catches the leak. The "she's in a better place" platitude is
+  // intentionally NOT banned because user input may quote it (Test 13's
+  // user input contains it verbatim) and the model needs to reference what
+  // others said, not just produce comfort.
+  /i'?m (so |really |so really )?sorry for your loss/gi,
+  /(my |our |sincere |heartfelt |deepest )?(condolences|sympathies)\b/gi
 ];
 
 const GENERIC_GARBAGE_PATTERNS = [

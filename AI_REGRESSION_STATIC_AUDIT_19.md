@@ -424,13 +424,22 @@ Both Tests 8 and 11 are CLARITY mode. Users presenting accent / origin / racial-
 
 **Recommendation:** option C as the immediate next step. If live run shows tests 8 + 11 fail in CLARITY, do option A. If they pass via general rules, no change needed.
 
-### Concern 2 — Grief boilerplate not pattern-banned (affects Test 13)
+### Concern 2 — Grief boilerplate not pattern-banned (affects Test 13) — SHIPPED May 8, 2026
 
-The fail signal *"I'm so sorry for your loss"* boilerplate is named explicitly in the test but isn't covered by any banned-phrase pattern. General love-language rules apply but the specific phrase could still leak.
+**Resolved:** added two regex to `BANNED_REFRAME_PATTERNS` in `netlify/functions/reframe.js:298-300`:
 
-**Action:** Add `/i'?m (so |really |so really )?sorry for your loss/i` plus a couple of grief-boilerplate variants (`/please accept my (deepest |sincerest )?condolences/i`, `/she's in a better place/i`) to `BANNED_REFRAME_PATTERNS` at line 278-300. Cost: ~5 lines, ~30 minutes of work including test scenarios. Catches a specific named failure mode at post-process layer.
+- `/i'?m (so |really |so really )?sorry for your loss/gi`
+- `/(my |our |sincere |heartfelt |deepest )?(condolences|sympathies)\b/gi`
 
-**Recommendation:** SHIP. Low cost, real protection.
+**Decision NOT to ban "she's in a better place":** Test 13's user input contains that phrase verbatim (quoting what others said). A blanket regex would block the model from legitimate user-input-mirroring (referencing the platitude in critique mode). The two patterns above catch the failure mode (model produces grief-comfort boilerplate) without that risk.
+
+**Verified by 11-scenario synthetic test:**
+- All variants of "I'm sorry for your loss" caught
+- All condolences/sympathies variants caught
+- Pattern source surfaces in reason (Action 1 telemetry alignment)
+- Back-compat: existing 21 patterns still fire
+- User-input mirroring NOT blocked
+- Clean grief responses don't false-positive
 
 ### Concern 3 — Flirting/boundary lacks worked example (affects Test 16)
 
