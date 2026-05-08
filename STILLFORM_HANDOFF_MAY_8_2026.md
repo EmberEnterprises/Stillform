@@ -36,7 +36,7 @@ Three Engine 2 (Application Layer) surfaces landed in code:
 | 8 | **Move card** (home, between Mirror anchor and Hero) | `bac31e9` | ✅ Complete |
 | 6 | **Roadmap full screen** (5-stage journey visualization) | `00765bd` | ✅ Complete |
 | 9 | **Scripts** (State-to-Statement extension — verbatim language for hard conversations) | `8a2fd0e` | ✅ Complete |
-| 10 | **EOD artifact** | `4c36283` | ⚠️ Backend only — frontend wiring pending |
+| 10 | **EOD artifact** | `4c36283` (backend) + (this commit, frontend) | ✅ Complete |
 
 These are the **first Engine 2 surfaces ever to land in the Stillform codebase.** Engine 2 is the Application Layer per `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` — the bridge from app to life that Arlin's "boxes with no connectivity" feedback identified as the core gap.
 
@@ -122,7 +122,7 @@ Per `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` §10 shipping order:
 | 7 | Pre-event Brief | ⏳ Not started | Today's Brief |
 | 8 | Move card | ✅ Shipped May 8 (commit `bac31e9`) | Stage definitions ✓ |
 | 9 | Scripts | ✅ Shipped May 8 (commit `8a2fd0e`) | Existing infra ✓ |
-| 10 | EOD artifact | ⚠️ Backend only (commit `4c36283`) — frontend wiring pending | Existing EOD ✓ |
+| 10 | EOD artifact | ✅ Backend (commit `4c36283`) + Frontend wiring (this commit) | Existing EOD ✓ |
 | — | Trigger Profile Phase 2 (capture UI) | ⏳ Not started — pending Layer 0.6 flow audit per architecture line 7 | Phase 1 data layer ✓ |
 | 3 | Today's Brief | ⏳ Not started | Trigger Profile Phase 2 |
 

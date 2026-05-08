@@ -3304,6 +3304,137 @@ const getEodReflections = (limit = 30) => {
   } catch { return []; }
 };
 
+// ─── EOD ARTIFACT — Engagement Architecture Engine 2, Build #10 (frontend) ──
+// Spec: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 ("EOD artifact: 2-sentence
+// summary of what the day taught the user, accumulating into a vocabulary of
+// their own life. Distinct from the user's freewrite — this one is the
+// AI-named takeaway."). Backend at netlify/functions/eod-artifact.js
+// (commit 4c36283) returns { artifact, generatedAt } from gpt-4o; voice
+// rubric is locked in the system prompt (prestige-operator declarative,
+// exactly two sentences, no advice, no "tomorrow," no platitudes).
+//
+// READ/WRITE PATH (audit philosophy v1.3 Layer 2.39):
+// stillform_eod_artifacts is in SECURE_KEYS (encrypted at rest, parallel to
+// journal / signal profile / bias profile / EOD history). Writes via
+// secureWrite, reads via secureRead. SecureCache is primed at boot.
+//
+// FAILURE MODE on AI-down / timeout / voice violation: skip silent — no
+// artifact persisted for that day. A deterministic template would betray
+// the voice rubric (the artifact's value IS specificity to the user's day;
+// a generic fallback line is worse than no line). The vocabulary tolerates
+// gaps the way a real journal does.
+//
+// TRIGGER: fire-and-forget from EOD save flow (line ~20256), after
+// trackEodComplete. Does not block the user-visible save path.
+const EOD_ARTIFACT_API_URL = (() => {
+  try {
+    const isCapacitor = window?.Capacitor?.isNativePlatform?.();
+    return isCapacitor
+      ? "https://stillformapp.com/.netlify/functions/eod-artifact"
+      : "/.netlify/functions/eod-artifact";
+  } catch {
+    return "/.netlify/functions/eod-artifact";
+  }
+})();
+const EOD_ARTIFACTS_STORAGE_KEY = "stillform_eod_artifacts";
+const EOD_ARTIFACTS_MAX_ITEMS = 90; // ~3 months of vocabulary; older trims
+
+// Get all EOD artifacts oldest-first. Returns [] on any read error.
+// Each record: { date: "YYYY-MM-DD", artifact: string, generatedAt: ISO }.
+const getEodArtifacts = () => {
+  try {
+    const raw = secureRead(EOD_ARTIFACTS_STORAGE_KEY, []);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+// Persist an artifact, replacing any existing record for the same date so
+// re-fires (after EOD update) overwrite cleanly. Trims to MAX_ITEMS oldest-out.
+const appendEodArtifact = (record) => {
+  if (!record?.date || !record?.artifact) return null;
+  try {
+    const existing = getEodArtifacts();
+    const filtered = existing.filter(r => r.date !== record.date);
+    filtered.push({
+      date: record.date,
+      artifact: String(record.artifact).slice(0, 400),
+      generatedAt: record.generatedAt || new Date().toISOString()
+    });
+    const trimmed = filtered.length > EOD_ARTIFACTS_MAX_ITEMS
+      ? filtered.slice(-EOD_ARTIFACTS_MAX_ITEMS)
+      : filtered;
+    secureWrite(EOD_ARTIFACTS_STORAGE_KEY, trimmed);
+    return record;
+  } catch { return null; }
+};
+
+// Build the day-snapshot payload from existing storage. All field reads
+// align with actual write paths (Layer 1.1 + 2.39 verified):
+//   stillform_eod_today    — { date, energy, composure, word, morningEnergy }
+//   stillform_sessions     — [{ timestamp, tools, preState, postState, delta, ... }]
+// Backend (eod-artifact.js lines 151-162) bounds these server-side too;
+// client truncation here is defense-in-depth, not the security boundary.
+const buildEodArtifactPayload = (eodToday) => {
+  const today = TimeKeeper.stillformDay();
+  let sessionsToday = [];
+  try {
+    const all = secureRead("stillform_sessions", []);
+    sessionsToday = (Array.isArray(all) ? all : []).filter(s => {
+      try { return TimeKeeper.stillformDayOf(s.timestamp) === today; }
+      catch { return false; }
+    });
+  } catch {}
+  const toolsUsed = Array.from(new Set(
+    sessionsToday.flatMap(s => Array.isArray(s.tools) ? s.tools : []).filter(Boolean)
+  ));
+  const feelStatesToday = Array.from(new Set(
+    sessionsToday.flatMap(s => [s.preState, s.postState]).filter(Boolean)
+  ));
+  const recentShifts = sessionsToday
+    .filter(s => s.preState && s.postState)
+    .slice(-5)
+    .map(s => ({
+      pre: String(s.preState),
+      post: String(s.postState),
+      delta: Number.isFinite(s.delta) ? s.delta : null
+    }));
+  return {
+    eodEnergy: eodToday?.energy || "",
+    eodComposure: eodToday?.composure || "",
+    eodWord: eodToday?.word || "",
+    morningEnergy: eodToday?.morningEnergy || "",
+    sessionsToday: sessionsToday.length,
+    toolsUsed,
+    feelStatesToday,
+    recentShifts
+  };
+};
+
+// Fire-and-forget. Returns a promise that resolves to the persisted record
+// on success or null on any failure (network, 4xx, 5xx, parse error, empty
+// artifact). Caller does not need to await — the EOD save UI proceeds
+// regardless. On success, the new vocabulary entry is in storage and will
+// sync up via the normal SYNC_KEYS path on next launch / refresh.
+const generateEodArtifact = async (eodToday) => {
+  if (!eodToday?.date) return null;
+  try {
+    const payload = buildEodArtifactPayload(eodToday);
+    const response = await fetch(EOD_ARTIFACT_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    const artifact = typeof data?.artifact === "string" ? data.artifact.trim() : "";
+    if (!artifact) return null;
+    const generatedAt = typeof data?.generatedAt === "string"
+      ? data.generatedAt
+      : new Date().toISOString();
+    return appendEodArtifact({ date: eodToday.date, artifact, generatedAt });
+  } catch { return null; }
+};
+
 // ─── SAVED REFRAMES INVENTORY HELPERS — Phase 0 for My Progress redesign ───
 // Saved reframes record: { text, distortion, timestamp, mode } where mode is
 // "calm" | "clarity" | "hype". Stored in stillform_saved_reframes (encrypted).
@@ -8346,7 +8477,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -8955,6 +9086,7 @@ const SECURE_KEYS = [
   "stillform_trigger_profile",
   "stillform_checkin_history",
   "stillform_eod_history",
+  "stillform_eod_artifacts",
   "stillform_communication_events",
   "stillform_tool_debriefs",
   "stillform_focus_check_history",
@@ -20235,25 +20367,30 @@ const isSignalProfileConfigured = () => {
                 );
 
                 const saveEod = () => {
+                  let eodSnapshot = null;
                   try {
                     const morningRaw = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null");
                     const morningData = morningRaw?.date === today ? morningRaw : null;
-                    localStorage.setItem("stillform_eod_today", JSON.stringify({
+                    eodSnapshot = {
                       date: today,
                       energy: eodEnergy || "same",
                       composure: eodComposure || "mostly",
                       word: eodWord || null,
                       morningEnergy: morningData?.energy || null
-                    }));
+                    };
+                    localStorage.setItem("stillform_eod_today", JSON.stringify(eodSnapshot));
                     trackEodComplete({
-                      date: today,
                       timestamp: new Date().toISOString(),
-                      energy: eodEnergy || "same",
-                      composure: eodComposure || "mostly",
-                      word: eodWord || null,
-                      morningEnergy: morningData?.energy || null
+                      ...eodSnapshot
                     });
                   } catch {}
+                  // EOD artifact — engagement architecture Engine 2 surface 4.
+                  // Fire-and-forget AI call: writes to stillform_eod_artifacts on
+                  // success, no-ops on failure. Does NOT block save UX. Replaces
+                  // any existing artifact for today (re-fires after EOD update).
+                  if (eodSnapshot) {
+                    try { generateEodArtifact(eodSnapshot).catch(() => {}); } catch {}
+                  }
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
                   setEodPromptDismissed(false);
@@ -23260,7 +23397,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
