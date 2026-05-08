@@ -3837,27 +3837,37 @@ const computeAchievementForBodyScan = (sessionEntry) => {
   if (typeof primaryLevel !== "number") return null;
 
   // Look for same-day morning tension reading in this area for headline delta.
-  // Morning history uses lowercase area keys in some user paths; match
-  // case-insensitively per the existing helper convention.
+  // Source-of-truth verification (audit philosophy v1.3 Layer 2.37):
+  //   getMorningTensionHistory at line ~3037 returns { timestamp, date, energy, tension }.
+  //   The tension data lives at the `tension` field — NOT `tensionByArea`.
+  // The original v1.0 of this code read `sameDay.tensionByArea` which was
+  // always undefined → morning-delta line never fired in production.
+  // Fixed in v1.3 audit pass.
   let morningLevel = null;
   try {
     const morningHistory = getMorningTensionHistory();
     const today = TimeKeeper.stillformDay();
     const sameDay = morningHistory.find(h => h.date === today);
-    if (sameDay?.tensionByArea) {
-      const matchKey = Object.keys(sameDay.tensionByArea).find(
+    if (sameDay?.tension) {
+      const matchKey = Object.keys(sameDay.tension).find(
         k => k.toLowerCase() === primaryArea.toLowerCase()
       );
-      if (matchKey && typeof sameDay.tensionByArea[matchKey] === "number") {
-        morningLevel = sameDay.tensionByArea[matchKey];
+      if (matchKey && typeof sameDay.tension[matchKey] === "number") {
+        morningLevel = sameDay.tension[matchKey];
       }
     }
   } catch {}
 
   // Average tension in this area across last 14 days of body-scan sessions.
-  // Used for the trend context line. Excludes the current session if it's
-  // already saved (the sort below leaves most-recent at the end; we slice
-  // off the latest entry to avoid self-referential trend).
+  // Source-of-truth verification (audit philosophy v1.3 Layer 2.37):
+  //   getBodyScanTensionHistory at line ~3060 returns { timestamp, bodyScanTension, durationFormatted }.
+  //   The tension-by-area map lives at the `bodyScanTension` field — NOT `tensionByArea`.
+  // The original v1.0 of this code read `h.tensionByArea` which was always
+  // undefined → readings array always empty → trend-context line never
+  // fired in production. Fixed in v1.3 audit pass.
+  // Excludes the current session if it's already saved (the sort below leaves
+  // most-recent at the end; we slice off the latest entry to avoid
+  // self-referential trend).
   let avgPriorTension = null;
   let priorCount = 0;
   try {
@@ -3865,12 +3875,12 @@ const computeAchievementForBodyScan = (sessionEntry) => {
     const recent = scanHistory.slice(-15, -1); // last 14 PRIOR sessions, excluding current
     const readings = recent
       .map(h => {
-        if (!h.tensionByArea) return null;
-        const matchKey = Object.keys(h.tensionByArea).find(
+        if (!h.bodyScanTension) return null;
+        const matchKey = Object.keys(h.bodyScanTension).find(
           k => k.toLowerCase() === primaryArea.toLowerCase()
         );
-        return matchKey && typeof h.tensionByArea[matchKey] === "number"
-          ? h.tensionByArea[matchKey]
+        return matchKey && typeof h.bodyScanTension[matchKey] === "number"
+          ? h.bodyScanTension[matchKey]
           : null;
       })
       .filter(v => v !== null);
