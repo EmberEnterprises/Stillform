@@ -5026,9 +5026,14 @@ const toRate = (value) => {
 };
 
 const buildPerformanceMetricsSnapshot = ({ appVersion, packageVersion, isSubscribed }) => {
-  const sessions = readArrayFromStorage("stillform_sessions");
-  const pulseEntries = readArrayFromStorage("stillform_journal");
-  const savedReframes = readArrayFromStorage("stillform_saved_reframes");
+  const sessions = readArrayFromStorage("stillform_sessions"); // SECURE-KEYS-ALLOW: write path is raw localStorage; read must match
+  // Layer 2.39 — journal and saved_reframes write via secureWrite. Raw read here
+  // returned the encrypted envelope { __enc: true, ... }, which Array.isArray
+  // returns false for → readArrayFromStorage falls through to []. Result:
+  // pulseEntries.length and savedReframes.length always 0 for encrypted users.
+  // Fixed v1.3 to use secureRead aligning with the write path.
+  const pulseEntries = secureRead("stillform_journal", []);
+  const savedReframes = secureRead("stillform_saved_reframes", []);
   const morningOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morningStart);
   const morningHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.morning);
   const eodOpenHistory = readArrayFromStorage(LOOP_HISTORY_KEYS.eodStart);
@@ -16995,8 +17000,13 @@ export default function Stillform() {
   };
 
   const exportPulseLogPdf = () => {
-    const entries = readArrayFromStorage("stillform_journal");
-    if (entries.length === 0) {
+    // Layer 2.39 — stillform_journal writes via secureWrite. Raw read here
+    // returned the encrypted envelope; Array.isArray was false →
+    // readArrayFromStorage returned []. Encrypted users (which is everyone
+    // after the migration) saw "No pulse entries to export yet" even when
+    // they had entries. Fixed v1.3 to use secureRead aligning with write path.
+    const entries = secureRead("stillform_journal", []);
+    if (!Array.isArray(entries) || entries.length === 0) {
       setExportStatusWithClear("No pulse entries to export yet.");
       return;
     }
