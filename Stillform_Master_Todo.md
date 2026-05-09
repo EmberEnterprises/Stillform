@@ -3,6 +3,28 @@
 
 ---
 
+## 🗂️ AUDIT-STATE INVENTORY — May 8 late session
+
+Layer 0 verification across every audit doc in repo root. Recorded so future context-pickups don't misread stale status flags as unbuilt work (Claude made this mistake twice this session before doing the verification). **Audit doc status flags are stale by design — code state is ground truth.**
+
+| Audit doc | Actionable items | Status |
+|---|---|---|
+| `MOVE_CARD_FLOW_AUDIT.md` | 6 phases (8a-8f) | ALL SHIPPED this session. Deploy-gated on Arlin's library science review. |
+| `PRE_EVENT_BRIEF_FLOW_AUDIT.md` | 5 phases (7a-7e) | 7a-7d SHIPPED this session. 7e (Trigger Profile match detection) DEFERRED post-launch per audit recommendation. |
+| `TODAYS_BRIEF_FLOW_AUDIT.md` | 5 phases (3a-3e) | 3a-3d SHIPPED this session. 3e (re-read surface) DEFERRED post-launch per audit recommendation. |
+| `TRIGGER_PROFILE_PHASE_2_FLOW_AUDIT.md` | 6 phases (2a-2f) | 2a-2d.1 SHIPPED prior session. 2e (calibration seed) + 2f (trigger-tagged sessions) DEFERRED per audit defaults. |
+| `AI_REGRESSION_STATIC_AUDIT_19.md` | 4 concerns | Concern 2 SHIPPED May 8. Concerns 1, 3, 4 audit-recommended **defer until live run** — building them would override audit defaults. |
+| `GPT4O_GUARDRAILS_AUDIT.md` | 4 actions | Actions 1 + 3 SHIPPED May 8 (`289ccf0`). Action 2 audit-deferred 1-2 weeks pending Action 1 telemetry data. Action 4 VERIFIED NO ACTION. |
+| `STILLFORM_UI_FLOW_AUDIT.md` | 14 items | Items 1-3, 6-8: shipped May 7. Item 4: environment-blocked (Watch APK build, requires Android Studio locally). Item 5: **fix shipped later May 7** (see `App.jsx:7295-7317` Breathe + `App.jsx:10271-10297` Body Scan) — audit status flag is stale. Items 9, 11-14: voice/walk reviews requiring phone time, not code. |
+| `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md` | Phase 1 build | STALE — `stillform_function_checks` / Practice Signals feature was reverted entirely (May 7). Audit covers a feature that no longer exists. |
+| `STILLFORM_AUDIT_PHILOSOPHY.md` | N/A — meta-doc, not buildable | Active governing doc. |
+
+**Conclusion: zero unbuilt actionable code work across all audit docs.** Every audit is either fully shipped to its specified scope, deferred per its own recommendation, environment-blocked, or stale.
+
+The audit-then-build cadence is closed. New build work requires either (a) a new audit on a new surface, (b) live-run data on shipped surfaces driving refinement, (c) phone tap-through findings from Arlin, or (d) launch-prerequisite work outside the engagement architecture.
+
+---
+
 ## 📋 SESSION HANDOFF — May 8, 2026
 
 **For the next Claude session: read `STILLFORM_HANDOFF_MAY_8_2026.md` BEFORE doing anything else.** That doc captures the operating context, the failure patterns to avoid, current build state, three pillars sequenced for "winner state," and the immediate next move (complete EOD artifact frontend wiring — backend at commit `4c36283` is unwired). Reading the handoff doc is mandatory before reading the rest of this master todo.
