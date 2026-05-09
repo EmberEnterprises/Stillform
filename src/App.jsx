@@ -7845,8 +7845,26 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
     return (
       <div style={{ maxWidth: 460, margin: "0 auto", paddingTop: 24, padding: "24px 16px 8px" }}>
-        <div className="t-mono-sm" style={{ color: "var(--amber)", marginBottom: 12 }}>
-          What Shifted
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
+          <div className="t-mono-sm" style={{ color: "var(--amber)" }}>
+            What Shifted
+          </div>
+          {/* Info button discipline pass (May 8 master todo line 800) — header itself
+              should answer WHY, not just the chips. The science modal reaches into
+              interoception research (Seth 2013 active inference + Khalsa et al. 2018
+              interoceptive awareness). The caption below already names interoception
+              once; the modal expands the why. */}
+          {setInfoModal && (
+            <button
+              aria-label="Why What Shifted?"
+              onClick={() => setInfoModal({
+                title: "Why What Shifted?",
+                body: "Naming where you land trains interoception — the brain's awareness of internal body state. It's a measurable skill, and it strengthens with reps. Khalsa et al. 2018 names this capacity as foundational to emotion regulation: the more accurately you can read your own internal signals, the less your nervous system can hijack you with vague unease. The body scan moves you through six points; What Shifted is where you write the change down. Without it, the session evaporates and the work doesn't compound.\n\nThe chip you pick is data. Over time the system uses these to map your composure pattern — the states you actually move through, not the states you think you should be in."
+              })}
+              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>
+              ⓘ
+            </button>
+          )}
         </div>
         <div className="t-body-md quiet" style={{ marginBottom: 12 }}>
           Your body moved through six points. Name where it lands now — that's what locks the regulation in.
