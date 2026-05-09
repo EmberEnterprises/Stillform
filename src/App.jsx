@@ -11451,6 +11451,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   }}>
                     {f.label}
                   </button>
+                  {/* Info button discipline pass (May 8 master todo line 796) — every
+                      chip render site exposes the CHIP_DEFINITIONS science modal so the
+                      product principle "every Stillform surface answers WHY" holds even
+                      in the low-demand close path. Pattern mirrors site 7892-7899. */}
+                  {CHIP_DEFINITIONS[f.id] && setInfoModal && (
+                    <button
+                      onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
+                      aria-label={`What does ${f.label} mean?`}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
+                      ⓘ
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -21432,13 +21444,26 @@ const isSignalProfileConfigured = () => {
                         { id: "flat", label: "Flat" },
                         { id: "distant", label: "Distant" }
                       ].map(m => (
-                        <button key={m.id} onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
-                          background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
-                          border: `1px solid ${ciMood === m.id ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
-                          color: ciMood === m.id ? "var(--amber)" : "var(--text-muted)",
-                          fontFamily: "'DM Sans', sans-serif"
-                        }}>{m.label}</button>
+                        <div key={m.id} style={{ display: "inline-flex", alignItems: "center" }}>
+                          <button onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
+                            background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${ciMood === m.id ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                            color: ciMood === m.id ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{m.label}</button>
+                          {/* Info button discipline pass (May 8 master todo line 796) — chip
+                              definitions reachable from morning check-in too. Same canonical
+                              pattern as the Body Scan What Shifted site 7892-7899. */}
+                          {CHIP_DEFINITIONS[m.id] && (
+                            <button
+                              onClick={() => setInfoModal(CHIP_DEFINITIONS[m.id])}
+                              aria-label={`What does ${m.label} mean?`}
+                              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
+                              ⓘ
+                            </button>
+                          )}
+                        </div>
                       ))}
                     </div>
 
