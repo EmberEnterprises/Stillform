@@ -19797,6 +19797,72 @@ const isSignalProfileConfigured = () => {
                 {snap.stage.science.join(" · ")}
               </div>
 
+              {/* Today's Brief re-read surface (3e) — per TODAYS_BRIEF_FLOW_AUDIT
+                  audit recommendation deferred 3e until after 3a-3d ran in
+                  production. Arlin override: ship now. Mirror sheet is the
+                  cleanest semantic match — opened from the Mirror anchor on
+                  any screen, surfaces today's brief alongside the journey
+                  context. Renders only if today's brief exists. */}
+              {(() => {
+                let brief = null;
+                try { brief = getTodaysBriefForToday(); } catch {}
+                if (!brief) return null;
+                let generatedTime = "";
+                if (brief.generatedAt) {
+                  try {
+                    const dt = new Date(brief.generatedAt);
+                    if (!Number.isNaN(dt.getTime())) {
+                      generatedTime = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                    }
+                  } catch {}
+                }
+                return (
+                  <div style={{
+                    background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "16px 18px", marginTop: 24, marginBottom: 16
+                  }}>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12, letterSpacing: "0.14em" }}>
+                      Today's Brief
+                    </div>
+
+                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Hardware</div>
+                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+                      {brief.hardware}
+                    </div>
+
+                    {brief.risks && (<>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Risks</div>
+                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+                        {brief.risks}
+                      </div>
+                    </>)}
+
+                    {brief.moves && (<>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Moves</div>
+                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+                        {brief.moves}
+                      </div>
+                    </>)}
+
+                    {brief.recovery && (<>
+                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Recovery</div>
+                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+                        {brief.recovery}
+                      </div>
+                    </>)}
+
+                    {generatedTime && (
+                      <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: 4, fontStyle: "italic" }}>
+                        Generated {generatedTime}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* View full Roadmap — engagement architecture Engine 1 entry point.
                   Per spec §3.1: "Stages of mastery shown as a path the user is
                   currently walking. Stage 1 today, stage 5 visible at the path's
