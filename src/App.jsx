@@ -3839,6 +3839,27 @@ const buildPreEventBriefPayload = (event) => {
   let triggerProfile = "";
   try { triggerProfile = formatTriggerProfileForAI(8) || ""; } catch {}
 
+  // Phase 7e — Trigger Profile match detection. Case-insensitive substring
+  // match of any Trigger Profile entry label against the event title +
+  // description. Audit §3 7e listed "substring? fuzzy? embeddings?" as the
+  // open question; substring is the simplest viable shipped first. Matched
+  // triggers pass as a separate field so the AI knows which load-bearing
+  // patterns this event references.
+  let matchedTriggers = "";
+  try {
+    const profile = getTriggerProfile();
+    if (profile?.triggers?.length) {
+      const haystack = `${eventTitle} ${eventDescription}`.toLowerCase();
+      const matches = profile.triggers.filter(t => {
+        const label = String(t.label || "").trim().toLowerCase();
+        return label.length >= 2 && haystack.includes(label);
+      });
+      if (matches.length) {
+        matchedTriggers = `Trigger Profile match — this event references: ${matches.map(m => `"${m.label}" [${m.category}]`).join(", ")}`;
+      }
+    }
+  } catch {}
+
   // Bias profile — same inline format Reframe uses
   let biasProfile = "";
   try {
@@ -3903,6 +3924,7 @@ const buildPreEventBriefPayload = (event) => {
     tensionAreas,
     outcomeFocus,
     triggerProfile,
+    matchedTriggers,
     biasProfile,
     signalProfile,
     stageId,

@@ -201,6 +201,7 @@ exports.handler = async (event) => {
   // mirror the inline IIFE pattern Reframe uses (line ~10030+) so the AI
   // receives identical context shape across surfaces.
   const triggerProfile = String(payload.triggerProfile || "").slice(0, 600);
+  const matchedTriggers = String(payload.matchedTriggers || "").slice(0, 300);
   const biasProfile = String(payload.biasProfile || "").slice(0, 400);
   const signalProfile = String(payload.signalProfile || "").slice(0, 400);
   const stageName = String(payload.stageName || "").slice(0, 64);
@@ -229,6 +230,10 @@ exports.handler = async (event) => {
   if (triggerProfile) {
     contextLines.push("");
     contextLines.push(`Trigger Profile (load-bearing people/contexts/moments — check if event matches): ${triggerProfile}`);
+  }
+  if (matchedTriggers) {
+    contextLines.push(matchedTriggers);
+    contextLines.push("(This event references a known trigger. Risks should name this specifically. Moves should be calibrated to the named pattern.)");
   }
   if (biasProfile) contextLines.push(`Bias Profile: ${biasProfile}`);
   if (signalProfile) contextLines.push(`Signal Profile: ${signalProfile}`);
