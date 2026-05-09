@@ -17244,7 +17244,7 @@ export default function Stillform() {
   }, []);
 
   // Hash routing — keeps browser back button working
-  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge","reset-password"]);
+  const HASH_SCREENS = new Set(["home","settings","pricing","progress","faq","privacy","crisis","focus-check","tutorial","setup","setup-bridge","reset-password","calibration-trigger-seed"]);
   const screenToHash = (s) => {
     if (!s) return "#home";
     // Transient screens (tool, panic) keep whatever hash is current — no navigation entry
@@ -17338,6 +17338,9 @@ export default function Stillform() {
   // newly-persisted brief without requiring user interaction. Incremented by
   // a useEffect that polls every 1500ms for up to 12s after ciSaved flips true.
   const [todaysBriefPollTick, setTodaysBriefPollTick] = useState(0);
+  // Phase 2e — calibration trigger seed inputs (2-slot form)
+  const [calibrationSeedLabels, setCalibrationSeedLabels] = useState(["", ""]);
+  const [calibrationSeedCategories, setCalibrationSeedCategories] = useState(["other", "other"]);
   // Phase 7d — Pre-event Brief target event + poll tick. Set by notification
   // tap handler when user opens the app from the 30-min pre-meeting alert.
   // Same async-polling pattern as Today's Brief 3d so the brief renders as
@@ -19458,8 +19461,12 @@ const isSignalProfileConfigured = () => {
           return;
         }
         if (activeTool?.id === "bias") {
-          finalizeOnboarding();
-          goHomeSafely();
+          // Phase 2e — calibration trigger seed prompt. Single optional screen
+          // after Pattern Check, before finalizing onboarding. User can add
+          // 0-2 triggers and proceed, or skip. Either path lands them home
+          // with onboarding finalized.
+          setActiveTool(null);
+          setScreen("calibration-trigger-seed");
           return;
         }
       }
@@ -20156,6 +20163,122 @@ const isSignalProfileConfigured = () => {
                   {returnTo === "settings" ? "Return to settings" : "Continue →"}
                 </button>
               )}
+            </section>
+          );
+        })()}
+
+        {/* CALIBRATION TRIGGER SEED — Phase 2e (post-Pattern Check, pre-home) */}
+        {screen === "calibration-trigger-seed" && (() => {
+          // Local state via component-scoped consts isn't possible inside an IIFE
+          // (no hooks here). Use refs through closures over outer state.
+          const labels = calibrationSeedLabels;
+          const cats = calibrationSeedCategories;
+          const setLabels = setCalibrationSeedLabels;
+          const setCats = setCalibrationSeedCategories;
+
+          const finishAndGoHome = () => {
+            try {
+              labels.forEach((label, i) => {
+                const trimmed = (label || "").trim();
+                if (trimmed.length >= 2) {
+                  addTrigger({ label: trimmed, category: cats[i] || "other" });
+                }
+              });
+            } catch {}
+            try { window.plausible("Calibration Trigger Seed", { props: { count: labels.filter(l => (l || "").trim().length >= 2).length } }); } catch {}
+            setCalibrationSeedLabels(["", ""]);
+            setCalibrationSeedCategories(["other", "other"]);
+            finalizeOnboarding();
+            goHomeSafely();
+          };
+
+          const skipAndGoHome = () => {
+            try { window.plausible("Calibration Trigger Seed", { props: { count: 0, skipped: true } }); } catch {}
+            setCalibrationSeedLabels(["", ""]);
+            setCalibrationSeedCategories(["other", "other"]);
+            finalizeOnboarding();
+            goHomeSafely();
+          };
+
+          return (
+            <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
+                One last optional step
+              </div>
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, lineHeight: 1.2, marginBottom: 14 }}>
+                Name what destabilizes you
+              </h1>
+              <p className="t-body-md quiet" style={{ lineHeight: 1.7, marginBottom: 24 }}>
+                One or two situations or people that reliably pull you off-center. You can add more anytime in Settings. Skip if nothing comes to mind.
+              </p>
+
+              {[0, 1].map(idx => (
+                <div key={idx} style={{ marginBottom: 20 }}>
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
+                    {idx === 0 ? "Trigger 1" : "Trigger 2 (optional)"}
+                  </div>
+                  <input
+                    type="text"
+                    value={labels[idx] || ""}
+                    onChange={(e) => {
+                      const next = [...labels];
+                      next[idx] = e.target.value.slice(0, 60);
+                      setLabels(next);
+                    }}
+                    placeholder="Name it plainly"
+                    maxLength={60}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)", padding: "12px 14px", fontSize: 14, color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif", marginBottom: 10
+                    }}
+                  />
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {TRIGGER_PROFILE_CATEGORIES.map(cat => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          const next = [...cats];
+                          next[idx] = cat;
+                          setCats(next);
+                        }}
+                        style={{
+                          background: cats[idx] === cat ? "var(--amber-dim)" : "transparent",
+                          border: `0.5px solid ${cats[idx] === cat ? "var(--amber)" : "var(--border)"}`,
+                          borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                          color: cats[idx] === cat ? "var(--amber)" : "var(--text-muted)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          letterSpacing: "0.04em", textTransform: "capitalize"
+                        }}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+                <button
+                  onClick={skipAndGoHome}
+                  style={{
+                    flex: 1, background: "none", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "14px 20px", fontSize: 14,
+                    color: "var(--text-muted)", cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif"
+                  }}
+                >
+                  Skip for now
+                </button>
+                <button
+                  onClick={finishAndGoHome}
+                  disabled={!labels.some(l => (l || "").trim().length >= 2)}
+                  className="btn btn-primary"
+                  style={{ flex: 1, padding: "14px 20px", fontSize: 14 }}
+                >
+                  Add
+                </button>
+              </div>
             </section>
           );
         })()}
