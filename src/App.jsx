@@ -19549,8 +19549,25 @@ const isSignalProfileConfigured = () => {
               borderRadius: "var(--r-lg)", padding: "32px 24px", maxWidth: 480, width: "100%",
               maxHeight: "86vh", overflowY: "auto"
             }}>
-              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em" }}>
-                Stage {snap.currentStageId} of 5
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em", display: "flex", alignItems: "center", gap: 6 }}>
+                <span>Stage {snap.currentStageId} of 5</span>
+                {/* Master Todo line 798 — Arlin May 8: "Stage 1 on the screen? no info button.
+                    50% to naming and it says I have 5 stages but no explanation as how I do it
+                    or how I get there." Modal answers all three: WHY stages, WHAT they are, HOW
+                    you progress. Voice: prestige-operator, science as language (Wells 2009 cited
+                    as framing, not as proof). Mirror sheet header is the highest-discoverability
+                    slot — user reaches it in one tap from the Mirror anchor. */}
+                <button
+                  aria-label="How stages work"
+                  onClick={() => setInfoModal({
+                    title: "How stages work",
+                    body: "Composure is a learnable capacity, not a number that goes up. Stillform tracks five stages because each one names a different part of the work — not levels of skill, but distinct moves the system is building.\n\nStage 1 — Noticing. Catching what's happening in your body before thought.\nStage 2 — Naming. Language for what's present, fast and accurate.\nStage 3 — Anticipating. Pre-loading composure for known triggers.\nStage 4 — Recognizing. Seeing your own loops as they form.\nStage 5 — Holding. Composure under maximum load.\n\nHow you progress: each stage has markers — observable signals from your practice (sessions, chips selected, tools used, patterns surfaced). When the markers are met, you move forward. The markers tell you what to practice; the practice creates the data; the data moves the stage. This is what Wells 2009 calls metacognitive training — building the capacity to observe state, not just to escape it.\n\nYou won't max out a stage and stop. Stages drift if practice stops. The architecture reflects current capacity, not lifetime achievement."
+                  })}
+                  style={{
+                    background: "none", border: "none", color: "var(--text-muted)",
+                    cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1
+                  }}
+                >ⓘ</button>
               </div>
               <div style={{
                 fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
