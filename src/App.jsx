@@ -3426,15 +3426,38 @@ const generateEodArtifact = async (eodToday) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // Telemetry per master todo line 139 — measure AI-down rate +
+      // failure-mode frequency in production. Net status only; no PII.
+      try { window.plausible?.("EOD Artifact Generation Failed", { props: { reason: `http-${response.status}` } }); } catch {}
+      return null;
+    }
     const data = await response.json();
     const artifact = typeof data?.artifact === "string" ? data.artifact.trim() : "";
-    if (!artifact) return null;
+    if (!artifact) {
+      try { window.plausible?.("EOD Artifact Generation Failed", { props: { reason: "empty-artifact" } }); } catch {}
+      return null;
+    }
     const generatedAt = typeof data?.generatedAt === "string"
       ? data.generatedAt
       : new Date().toISOString();
-    return appendEodArtifact({ date: eodToday.date, artifact, generatedAt });
-  } catch { return null; }
+    const persisted = appendEodArtifact({ date: eodToday.date, artifact, generatedAt });
+    // Success branch — fire after persist, so the event reflects what
+    // actually landed in the user's storage tier, not just the wire return.
+    try {
+      window.plausible?.("EOD Artifact Generated", {
+        props: { length: String(artifact.length) }
+      });
+    } catch {}
+    return persisted;
+  } catch (err) {
+    try {
+      window.plausible?.("EOD Artifact Generation Failed", {
+        props: { reason: err?.name === "AbortError" ? "timeout" : "network" }
+      });
+    } catch {}
+    return null;
+  }
 };
 
 // ─── TODAY'S BRIEF — Engagement Architecture Engine 2, Build #3 (frontend) ──
