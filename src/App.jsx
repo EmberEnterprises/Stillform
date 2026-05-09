@@ -10816,6 +10816,22 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return `User's identified decision patterns: ${biases.join(", ")}`;
             } catch { return null; }
           })(),
+          // Stage 4 user-flagged-pattern context — patterns the user has caught
+          // themselves running in recent sessions. Gives the AI a signal that
+          // the user is doing their own metacognitive work; AI should reinforce
+          // not redundantly surface. Reads flaggedPattern from session entries.
+          userFlaggedPatterns: (() => {
+            try {
+              const sessions = getSessionsFromStorage();
+              const recent = sessions.slice(-15).filter(s => s?.flaggedPattern);
+              if (!recent.length) return null;
+              const counts = {};
+              recent.forEach(s => { counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1; });
+              const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+              const fmt = top.map(([p, n]) => n > 1 ? `${p} (${n}x)` : p).join(", ");
+              return `User has self-flagged catching these patterns recently: ${fmt}. They are doing their own metacognitive observation — reinforce the catch, do not surface these patterns as if naming them first.`;
+            } catch { return null; }
+          })(),
           // Build #2 Phase 1 — Trigger Profile (instance-level external triggers).
           // Distinct from Signal Profile's predefined `triggers` chip-picker
           // (type-level: "work pressure," "family dynamics") — Trigger Profile
