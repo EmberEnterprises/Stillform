@@ -8024,8 +8024,20 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               marginBottom: 16,
               textAlign: "left"
             }}>
-              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                Practice trend
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                <span>Practice trend</span>
+                {/* Master todo line 797 — info-button discipline pass. Heider 1958
+                    attribution: humans default to crediting themselves and forgetting
+                    the tool. Practice Trend exists so the work doesn't disappear into
+                    "I just got better." */}
+                <button
+                  aria-label="Why Practice Trend?"
+                  onClick={() => setInfoModal && setInfoModal({
+                    title: "Why Practice Trend?",
+                    body: "When you repeat the same shift, the system names it as a pattern you own. That's not flattery — it's data. Heider 1958 attribution theory: humans default to crediting themselves for improvement and forgetting the tool that helped. Without the credit being visible, the practice gets erased. Practice Trend exists so the work doesn't disappear into 'I just got better.'\n\nThe number isn't a score. It's the count of times you've done this specific move in the last week. The headline names the move you actually made — held the state, shifted the state, dropped the rating. The system reads what you did, not what it hoped you'd do."
+                  })}
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1 }}
+                >ⓘ</button>
               </div>
               <div style={{
                 fontSize: 14,
@@ -11473,8 +11485,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   maxWidth: 360,
                   margin: "0 auto 16px"
                 }}>
-                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                    Practice trend
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                    <span>Practice trend</span>
+                    <button
+                      aria-label="Why Practice Trend?"
+                      onClick={() => setInfoModal && setInfoModal({
+                        title: "Why Practice Trend?",
+                        body: "When you repeat the same shift, the system names it as a pattern you own. That's not flattery — it's data. Heider 1958 attribution theory: humans default to crediting themselves for improvement and forgetting the tool that helped. Without the credit being visible, the practice gets erased. Practice Trend exists so the work doesn't disappear into 'I just got better.'\n\nThe number isn't a score. It's the count of times you've done this specific move in the last week. The headline names the move you actually made — held the state, shifted the state, dropped the rating. The system reads what you did, not what it hoped you'd do."
+                      })}
+                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1 }}
+                    >ⓘ</button>
                   </div>
                   <div style={{
                     fontSize: 14,
@@ -11772,8 +11792,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 marginBottom: 16,
                 textAlign: "left"
               }}>
-                <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                  Practice trend
+                <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6, display: "flex", alignItems: "center", gap: 6 }}>
+                  <span>Practice trend</span>
+                  <button
+                    aria-label="Why Practice Trend?"
+                    onClick={() => setInfoModal && setInfoModal({
+                      title: "Why Practice Trend?",
+                      body: "When you repeat the same shift, the system names it as a pattern you own. That's not flattery — it's data. Heider 1958 attribution theory: humans default to crediting themselves for improvement and forgetting the tool that helped. Without the credit being visible, the practice gets erased. Practice Trend exists so the work doesn't disappear into 'I just got better.'\n\nThe number isn't a score. It's the count of times you've done this specific move in the last week. The headline names the move you actually made — held the state, shifted the state, dropped the rating. The system reads what you did, not what it hoped you'd do."
+                    })}
+                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1 }}
+                  >ⓘ</button>
                 </div>
                 <div style={{
                   fontSize: 14,
