@@ -4478,6 +4478,21 @@ const _s3AvgDeltaOnTriggerSessions = () => {
   } catch { return { avg: 0, count: 0 }; }
 };
 
+// Stage 1 — sessions where the user entered with bio-filter signaling
+// "activated" (i.e., they came in during an actual activated moment, not
+// routine practice). Reads the bioFilter snapshot now persisted on every
+// session entry (see appendSessionToStorage).
+const _s1CountActiveStateSessions = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return 0;
+    return sessions.filter(s => {
+      if (!s?.bioFilter) return false;
+      return String(s.bioFilter).toLowerCase().split(",").map(t => t.trim()).includes("activated");
+    }).length;
+  } catch { return 0; }
+};
+
 // Stage 5 — does a session's bioFilter snapshot indicate high-load hardware?
 // Any non-clear bio-filter token signals hardware compromise. The bioFilter
 // field is auto-attached to every session via appendSessionToStorage.
@@ -4587,10 +4602,11 @@ const computeStageMarkers = (stageId) => {
   if (stageId === 1) {
     const bioFilterSet = (() => { try { return !!localStorage.getItem("stillform_bio_filter"); } catch { return false; } })();
     const specificSessionsCount = _s1CountSpecificBodyAreaSessions();
+    const activeStateCount = _s1CountActiveStateSessions();
     return [
       { id: "bio-filter-setup", label: "Bio-filter setup completed", value: bioFilterSet, threshold: true, met: bioFilterSet, status: "shipped" },
       { id: "body-area-specificity", label: "Sessions with specific body-area tags", value: specificSessionsCount, threshold: STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, met: specificSessionsCount >= STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, status: "shipped" },
-      { id: "active-state-entry", label: "Sessions entered during an active state", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries; instrumentation pending" },
+      { id: "active-state-entry", label: "Sessions entered during an active state", value: activeStateCount, threshold: 1, met: activeStateCount >= 1, status: "shipped" },
       { id: "autonomous-exits", label: "Times you saw it and chose without a tool", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "no data trail for chip-without-tool today; instrumentation pending" },
     ];
   }
