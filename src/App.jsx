@@ -4451,6 +4451,17 @@ const _s3CountTriggers = () => {
   try { return (getTriggerProfile()?.triggers || []).length; } catch { return 0; }
 };
 
+// Stage 4 — count of sessions where the user self-flagged a pattern at
+// What Shifted close. Activates the marker tracking user catching their own
+// patterns (vs. system-only detection). Threshold 1 — single instance crosses.
+const _s4UserFlaggedPatternCount = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return 0;
+    return sessions.filter(s => s?.flaggedPattern && typeof s.flaggedPattern === "string").length;
+  } catch { return 0; }
+};
+
 // Stage 3 — Pre-event Briefs used in the last N days.
 const _s3CountPreEventBriefs = (windowDays = STAGE_THRESHOLDS.S3_PRE_EVENT_WINDOW_DAYS) => {
   try {
@@ -4633,10 +4644,11 @@ const computeStageMarkers = (stageId) => {
   if (stageId === 4) {
     const acceptance = _s4PatternAcceptanceRate();
     const selfInitiated = _s4SelfInitiatedDisruptorCount();
+    const userFlagged = _s4UserFlaggedPatternCount();
     return [
       { id: "pattern-acceptance-rate", label: "Pattern Disruption acceptance rate over last 5 surfaced", value: acceptance.count >= 3 ? acceptance.rate : null, threshold: STAGE_THRESHOLDS.S4_PATTERN_ACCEPTANCE_RATE_MIN, met: acceptance.count >= 3 && acceptance.rate >= STAGE_THRESHOLDS.S4_PATTERN_ACCEPTANCE_RATE_MIN, status: "shipped" },
       { id: "self-initiated-disruptor", label: "Self-initiated Disruptor sessions in last 30 days", value: selfInitiated, threshold: STAGE_THRESHOLDS.S4_SELF_INITIATED_DISRUPTOR_MIN, met: selfInitiated >= STAGE_THRESHOLDS.S4_SELF_INITIATED_DISRUPTOR_MIN, status: "shipped" },
-      { id: "user-flagged-pattern", label: "Self-flagged patterns preceding system detection", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "user-flag instrumentation in journal/EOD pending" },
+      { id: "user-flagged-pattern", label: "Self-flagged patterns preceding system detection", value: userFlagged, threshold: 1, met: userFlagged >= 1, status: "shipped" },
     ];
   }
   if (stageId === 5) {
@@ -9986,6 +9998,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // Phase 2f — trigger-tagged sessions. selectedTriggerId is read by saveSession
   // to write triggerId onto the session record. Optional; null if user skips.
   const [selectedTriggerId, setSelectedTriggerId] = useState(null);
+  // Stage 4 user-flagged-pattern instrumentation. Optional self-flag of which
+  // bias-profile pattern the user caught themselves running. Written to the
+  // session record as flaggedPattern; activates the Stage 4 marker.
+  const [selectedPattern, setSelectedPattern] = useState(null);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
   const [entryProtocolId, setEntryProtocolId] = useState(null);
@@ -10276,6 +10292,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       // on the What Shifted screen, write triggerId onto the session record.
       // Enables Stage 3 marker: pre→post delta on named-trigger sessions.
       if (selectedTriggerId) entry.triggerId = selectedTriggerId;
+      // Stage 4 user-flagged-pattern. If the user self-flagged a bias-profile
+      // pattern on the What Shifted screen, write flaggedPattern. Enables the
+      // Stage 4 marker that tracks the user catching their own patterns.
+      if (selectedPattern) entry.flaggedPattern = selectedPattern;
       appendSessionToStorage(entry);
       // Background cloud sync — non-blocking
       if (sbIsSignedIn()) sbSyncUp().catch(() => {});
@@ -11472,6 +11492,11 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Phase 2f — read user's triggers once for the optional tagger.
     let userTriggers = [];
     try { userTriggers = (getTriggerProfile()?.triggers || []).slice(0, 6); } catch {}
+    // Stage 4 user-flagged-pattern instrumentation. Read user's identified
+    // patterns from their Pattern Check bias profile. Same chip-selector
+    // pattern as the trigger tagger above. Optional, single-tap, opt-in.
+    let userPatterns = [];
+    try { userPatterns = (secureRead("stillform_bias_profile", null) || []); } catch {}
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
@@ -11501,6 +11526,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   }}
                 >
                   {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {userPatterns.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
+              Did you catch yourself running a pattern?
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {userPatterns.map(p => (
+                <button
+                  key={p}
+                  onClick={() => setSelectedPattern(selectedPattern === p ? null : p)}
+                  style={{
+                    background: selectedPattern === p ? "var(--amber-dim)" : "transparent",
+                    border: `0.5px solid ${selectedPattern === p ? "var(--amber)" : "var(--border)"}`,
+                    borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                    color: selectedPattern === p ? "var(--amber)" : "var(--text-muted)",
+                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: "0.04em"
+                  }}
+                >
+                  {p}
                 </button>
               ))}
             </div>
