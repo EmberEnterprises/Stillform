@@ -282,7 +282,10 @@ const styles = `
   .nav-logo {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 300;
-    font-size: 18px;
+    /* 16px (was 18px) per Arlin direction May 8: 'header needs to be smaller...
+       font needs to be smaller to compliment the footer'. Footer stays at 18px
+       so the header now reads visibly lighter than the bottom anchor. */
+    font-size: 16px;
     letter-spacing: 0.08em;
     text-transform: none;
     color: var(--text);
