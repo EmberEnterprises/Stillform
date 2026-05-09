@@ -23253,6 +23253,54 @@ const isSignalProfileConfigured = () => {
                 a: "A 12-week visual timeline on My Progress. Each session and Signal Log entry activates a cell. Brighter amber indicates more activity that day. It is a practice record — frequency and consistency over time — not a mood log."
               },
               {
+                q: "What is Settled?",
+                a: "A feel chip representing low arousal, positive valence. Body soft, breath even, nervous system at rest. Mind clear without effort. Not high energy, not low energy — at-ease. Added April 30 to close a coverage gap: before Settled, the chip set had no low-arousal-positive option, so a regulated user had no accurate way to name where they'd landed without inaccurately picking Focused (high-arousal-positive) or Flat (low-arousal-negative). Selecting Settled tells Stillform you're already there — the system stays out of your way and helps you use the state, not change it."
+              },
+              {
+                q: "What is Cyclic Sighing?",
+                a: "A breathing pattern in the Breathe tool: two consecutive nasal inhales (deep, then top-off) followed by a long oral exhale. About five minutes, 1:2 inhale-to-exhale ratio. In a 2023 Stanford RCT (n=111), cyclic sighing produced greater mood improvement and respiratory rate reduction than mindfulness meditation, box breathing, and cyclic hyperventilation across one month of daily practice. Stillform's implementation is the published protocol exactly. Sits alongside Quick Reset (4-4-6, sixty seconds) and Deep Regulate (4-4-8-2, three minutes)."
+              },
+              {
+                q: "What are the three categories Stillform tracks?",
+                a: "Every session is classified into one of three at close, based on your pre and post chip selections. Category A — regulated shift: you moved from a negative state to a positive one. Category B — persistent state: pre and post in the same quadrant. Sometimes the work is the holding, not the shifting — sustained acceptance under unresolved state IS the practice (Hayes ACT, Kabat-Zinn). Category C — concerning: post-state is Distant in a single session, OR pattern-based five-plus sustained Flat or high-arousal-negative chips in 14 days. The categories use Russell's circumplex (Russell 1980) — the dominant framework in affective neuroscience for mapping emotional states by valence and arousal. Computed on-device. Aggregate-anonymous category counts go to analytics; your specific chip values, free text, and identity never do."
+              },
+              {
+                q: "What is the Mirror anchor and stage system?",
+                a: "Stillform tracks five stages of mastery: Naming, Pattern recognition, Flexibility, Equanimity, Steadiness. Each stage names a learnable capacity, not a point score. Progress is observable from your practice — session count, pattern recognition events, sustained chip diversity. The Mirror anchor on home shows your current stage and percent toward the next. The Mirror sheet (tap the anchor) shows the markers you've met and the markers ahead. Grounded in metacognitive training research (Wells 2009) — capacity expands through repeated practice; the markers are observable signals of that expansion, not gates the user has to clear."
+              },
+              {
+                q: "What is the Roadmap?",
+                a: "A standalone view of all five stages of mastery. Shows your current stage, the markers you've met for it, and the markers ahead for stages two through five. Each stage names what capacity it represents and how it's measured. Open from the Mirror anchor on home, or from the Mirror sheet."
+              },
+              {
+                q: "What is Practice Trend?",
+                a: "After regulation sessions where you've shifted, Stillform names the move you made and counts how often you've made it in the last week. Not a score. The count of times you've done this specific move recently — a credit visible to you, sourced from your own data. Heider 1958 attribution theory: humans default to crediting themselves for improvement and forgetting the tool that helped. Practice Trend exists so the work doesn't disappear into 'I just got better.'"
+              },
+              {
+                q: "What is low-demand mode?",
+                a: "When your bio-filter signals a state that limits cognitive resources — depleted, medicated, post-anesthesia, sleep-deprived, in pain — the tools strip down. Breathing has fewer settings. Body Scan auto-advances. The post-session close drops to a single chip plus one button. The cohort came in to do ONE thing and is done. Affect labeling is preserved (one tap of a chip is the lowest-demand metacognitive act in the app); everything cognitively heavier is removed. The bio-filter is the trigger; the simplification is automatic."
+              },
+              {
+                q: "What is Today's Brief?",
+                a: "A morning artifact generated from your check-in: Hardware (your physical state right now), Risks (what's load-bearing about today), Moves (specific if-then plans for known pressures), Recovery (a move that buys back capacity later). Auto-generated when you complete the morning check-in, re-readable all day. Reads in under thirty seconds. Grounded in implementation intentions research (Gollwitzer 1999) — pre-committed moves halve the cognitive cost of execution under load. Generated from your data; no fallback templates if the AI is down."
+              },
+              {
+                q: "What is Pre-event Brief?",
+                a: "Thirty minutes before a calendar event, you get a notification. Tap it to see a four-section read scoped to that single event: Hardware right now, Risks specific to the event, Moves (if-then plans for it), Recovery (a downregulation move after it ends). Anticipatory regulation buys back capacity — naming a forecast pressure reduces its capture power (Heider 1958, Lazarus 1991). Requires calendar permission. Pre-event Brief never tells you to skip, leave, or avoid an event; it prepares you to walk into it."
+              },
+              {
+                q: "What is Move card?",
+                a: "A single concrete action you can summon when you need to do ONE thing. The pill on home opens it. Stillform picks a sequence calibrated to your current state — somatic, breath, attention, posture. You run it, mark whether it shifted you. Sequences come from a curated library, not AI generation. The AI only routes; the practice itself is locked-science. Designed for moments when even choosing among options is too much load."
+              },
+              {
+                q: "What is Scripts?",
+                a: "A tool that produces one verbatim message you could send or say in a hard conversation. Tell the system the situation, get back a deployable line. Adult-to-adult, no padding, no therapy-coded softeners. Your voice register, plain language. Scripts is for the language layer of regulation — translating a regulated state into deployable words. Not advice, not a reflection prompt — the line itself."
+              },
+              {
+                q: "What is the EOD artifact?",
+                a: "A two-sentence record produced at end of day from your check-in: how you arrived in the morning, what shifted across the day, where you landed. Reads as continuity between days — yesterday's takeaway feeds tomorrow's brief. Grounded in reflective practice research (Schön 1983) — structured end-of-day review accelerates pattern recognition. The artifact is yours; it doesn't go anywhere."
+              },
+              {
                 q: "What happens when I type rapidly in Reframe?",
                 a: "The system notices. Fast input is a behavioral signal — the body is ahead of the thinking. Physical tension during emotional processing amplifies the response. A brief somatic cue appears: \'Drop your shoulders\' or \'Unclench your jaw.\' It clears within seconds. The system reads behavior, not only content."
               },
