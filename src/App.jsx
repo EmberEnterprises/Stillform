@@ -9880,6 +9880,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [lockInCountdown, setLockInCountdown] = useState(20);
   const [showPostInsight, setShowPostInsight] = useState(false);
   const [showStateToStatement, setShowStateToStatement] = useState(false);
+  // Phase 2f — trigger-tagged sessions. selectedTriggerId is read by saveSession
+  // to write triggerId onto the session record. Optional; null if user skips.
+  const [selectedTriggerId, setSelectedTriggerId] = useState(null);
   const [postRating, setPostRating] = useState(null);
   const [entryMode, setEntryMode] = useState(null);
   const [entryProtocolId, setEntryProtocolId] = useState(null);
@@ -10166,6 +10169,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const entry = { timestamp, duration: elapsed, durationFormatted: fmt(elapsed), tools: ["reframe"], exitPoint: "reframe-done", source: "reframe", mode: effectiveMode, entryMode: entryMode || null, entryProtocolId: entryProtocolId || null, preRating: scoreState(feelState), preState: feelState || null };
       if (postRating) { entry.postRating = scoreState(postRating); entry.postState = postRating; }
       if (entry.preRating && entry.postRating) entry.delta = entry.postRating - entry.preRating;
+      // Phase 2f — trigger-tagged sessions. If the user selected a known trigger
+      // on the What Shifted screen, write triggerId onto the session record.
+      // Enables Stage 3 marker: pre→post delta on named-trigger sessions.
+      if (selectedTriggerId) entry.triggerId = selectedTriggerId;
       appendSessionToStorage(entry);
       // Background cloud sync — non-blocking
       if (sbIsSignedIn()) sbSyncUp().catch(() => {});
@@ -11359,6 +11366,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   }
 
   if (showStateToStatement) {
+    // Phase 2f — read user's triggers once for the optional tagger.
+    let userTriggers = [];
+    try { userTriggers = (getTriggerProfile()?.triggers || []).slice(0, 6); } catch {}
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
@@ -11367,6 +11377,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 16 }}>
           In one line — what shifted? Naming it locks in the shift.
         </div>
+
+        {userTriggers.length > 0 && (
+          <div style={{ marginBottom: 16 }}>
+            <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
+              Was this about a known trigger?
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {userTriggers.map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setSelectedTriggerId(selectedTriggerId === t.id ? null : t.id)}
+                  style={{
+                    background: selectedTriggerId === t.id ? "var(--amber-dim)" : "transparent",
+                    border: `0.5px solid ${selectedTriggerId === t.id ? "var(--amber)" : "var(--border)"}`,
+                    borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                    color: selectedTriggerId === t.id ? "var(--amber)" : "var(--text-muted)",
+                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                    letterSpacing: "0.04em"
+                  }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={finishStateToStatement}>
