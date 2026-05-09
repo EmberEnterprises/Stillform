@@ -4437,6 +4437,38 @@ const _s4SelfInitiatedDisruptorCount = (windowDays = STAGE_THRESHOLDS.S4_SELF_IN
   } catch { return 0; }
 };
 
+// Stage 3 — count of triggers in the user's profile.
+const _s3CountTriggers = () => {
+  try { return (getTriggerProfile()?.triggers || []).length; } catch { return 0; }
+};
+
+// Stage 3 — Pre-event Briefs used in the last N days.
+const _s3CountPreEventBriefs = (windowDays = STAGE_THRESHOLDS.S3_PRE_EVENT_WINDOW_DAYS) => {
+  try {
+    const briefs = secureRead(PRE_EVENT_BRIEFS_STORAGE_KEY, []);
+    if (!Array.isArray(briefs)) return 0;
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
+    return briefs.filter(b => {
+      const t = new Date(b?.generatedAt || 0).getTime();
+      return !Number.isNaN(t) && t >= cutoff;
+    }).length;
+  } catch { return 0; }
+};
+
+// Stage 3 — average pre→post delta on sessions tagged with a known trigger.
+// Returns { avg, count } so the marker can show the value when count >= 3
+// (need at least a small sample before the average is meaningful).
+const _s3AvgDeltaOnTriggerSessions = () => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return { avg: 0, count: 0 };
+    const tagged = sessions.filter(s => s?.triggerId && Number.isFinite(s.delta));
+    if (!tagged.length) return { avg: 0, count: 0 };
+    const sum = tagged.reduce((acc, s) => acc + s.delta, 0);
+    return { avg: sum / tagged.length, count: tagged.length };
+  } catch { return { avg: 0, count: 0 }; }
+};
+
 // Helper: recovery trend — does pre→post delta improve over time on
 // sessions where the user has rated both pre and post? Stage 5 marker
 // for "recovery time trending downward." Operationalized as "average
@@ -4523,10 +4555,13 @@ const computeStageMarkers = (stageId) => {
     ];
   }
   if (stageId === 3) {
+    const triggersNamed = _s3CountTriggers();
+    const preEventBriefs = _s3CountPreEventBriefs();
+    const triggerDelta = _s3AvgDeltaOnTriggerSessions();
     return [
-      { id: "triggers-named", label: "Triggers named in your profile", value: 0, threshold: STAGE_THRESHOLDS.S3_TRIGGERS_NAMED_MIN, met: false, status: "deferred", deferReason: "Trigger Profile not yet shipped (Build #2 in spec shipping order)" },
-      { id: "pre-event-briefs", label: "Pre-event Briefs used in last 14 days", value: 0, threshold: STAGE_THRESHOLDS.S3_PRE_EVENT_BRIEFS_MIN, met: false, status: "deferred", deferReason: "Pre-event Brief not yet shipped (Build #7 in spec shipping order)" },
-      { id: "trigger-session-delta", label: "Pre-to-post rate delta on named-trigger sessions", value: 0, threshold: STAGE_THRESHOLDS.S3_DELTA_ON_TRIGGER_SESSIONS_MIN, met: false, status: "deferred", deferReason: "Trigger tagging on sessions requires Trigger Profile" },
+      { id: "triggers-named", label: "Triggers named in your profile", value: triggersNamed, threshold: STAGE_THRESHOLDS.S3_TRIGGERS_NAMED_MIN, met: triggersNamed >= STAGE_THRESHOLDS.S3_TRIGGERS_NAMED_MIN, status: "shipped" },
+      { id: "pre-event-briefs", label: "Pre-event Briefs used in last 14 days", value: preEventBriefs, threshold: STAGE_THRESHOLDS.S3_PRE_EVENT_BRIEFS_MIN, met: preEventBriefs >= STAGE_THRESHOLDS.S3_PRE_EVENT_BRIEFS_MIN, status: "shipped" },
+      { id: "trigger-session-delta", label: "Pre-to-post rate delta on named-trigger sessions", value: triggerDelta.count >= 3 ? Number(triggerDelta.avg.toFixed(2)) : null, threshold: STAGE_THRESHOLDS.S3_DELTA_ON_TRIGGER_SESSIONS_MIN, met: triggerDelta.count >= 3 && triggerDelta.avg >= STAGE_THRESHOLDS.S3_DELTA_ON_TRIGGER_SESSIONS_MIN, status: "shipped" },
     ];
   }
   if (stageId === 4) {
