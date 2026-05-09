@@ -2497,6 +2497,15 @@ const setSessionsInStorage = (sessions) => {
 
 const appendSessionToStorage = (entry) => {
   if (!entry) return getSessionCountFromStorage();
+  // Auto-attach bioFilter snapshot if caller didn't set it. Closes the
+  // Stage 5 instrumentation gap ("high-load sessions" + "high-load delta")
+  // without requiring all 8 session-write sites to remember the field.
+  if (entry.bioFilter === undefined) {
+    try {
+      const bf = getActiveBioFilter();
+      if (bf) entry.bioFilter = bf;
+    } catch {}
+  }
   const sessions = getSessionsFromStorage();
   sessions.push(entry);
   setSessionsInStorage(sessions);
@@ -4469,6 +4478,47 @@ const _s3AvgDeltaOnTriggerSessions = () => {
   } catch { return { avg: 0, count: 0 }; }
 };
 
+// Stage 5 — does a session's bioFilter snapshot indicate high-load hardware?
+// Any non-clear bio-filter token signals hardware compromise. The bioFilter
+// field is auto-attached to every session via appendSessionToStorage.
+const _s5SessionIsHighLoad = (s) => {
+  if (!s?.bioFilter) return false;
+  const tokens = String(s.bioFilter).split(",").map(t => t.trim()).filter(Boolean);
+  return tokens.some(t => t !== "clear");
+};
+
+// Stage 5 — count of high-load sessions in the last N days.
+const _s5HighLoadSessionCount = (windowDays = STAGE_THRESHOLDS.S5_HIGH_LOAD_WINDOW_DAYS) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return 0;
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
+    return sessions.filter(s => {
+      if (!_s5SessionIsHighLoad(s)) return false;
+      const t = new Date(s.timestamp || 0).getTime();
+      return !Number.isNaN(t) && t >= cutoff;
+    }).length;
+  } catch { return 0; }
+};
+
+// Stage 5 — average pre→post delta on high-load sessions.
+// Returns { avg, count } so the marker can show value when count >= 3.
+const _s5AvgDeltaOnHighLoadSessions = (windowDays = STAGE_THRESHOLDS.S5_HIGH_LOAD_WINDOW_DAYS) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return { avg: 0, count: 0 };
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
+    const matching = sessions.filter(s => {
+      if (!_s5SessionIsHighLoad(s) || !Number.isFinite(s.delta)) return false;
+      const t = new Date(s.timestamp || 0).getTime();
+      return !Number.isNaN(t) && t >= cutoff;
+    });
+    if (!matching.length) return { avg: 0, count: 0 };
+    const sum = matching.reduce((acc, s) => acc + s.delta, 0);
+    return { avg: sum / matching.length, count: matching.length };
+  } catch { return { avg: 0, count: 0 }; }
+};
+
 // Helper: recovery trend — does pre→post delta improve over time on
 // sessions where the user has rated both pre and post? Stage 5 marker
 // for "recovery time trending downward." Operationalized as "average
@@ -4575,9 +4625,11 @@ const computeStageMarkers = (stageId) => {
   }
   if (stageId === 5) {
     const recovery = _s5RecoveryTrendImproving();
+    const highLoadCount = _s5HighLoadSessionCount();
+    const highLoadDelta = _s5AvgDeltaOnHighLoadSessions();
     return [
-      { id: "high-load-sessions", label: "Sessions completed under high-load hardware", value: 0, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_SESSIONS_MIN, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries; same instrumentation gap as Stage 1 active-state" },
-      { id: "high-load-delta", label: "Pre-to-post delta on high-load sessions", value: 0, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_DELTA_MIN, met: false, status: "deferred", deferReason: "bio-filter not persisted on session entries" },
+      { id: "high-load-sessions", label: "Sessions completed under high-load hardware", value: highLoadCount, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_SESSIONS_MIN, met: highLoadCount >= STAGE_THRESHOLDS.S5_HIGH_LOAD_SESSIONS_MIN, status: "shipped" },
+      { id: "high-load-delta", label: "Pre-to-post delta on high-load sessions", value: highLoadDelta.count >= 3 ? Number(highLoadDelta.avg.toFixed(2)) : null, threshold: STAGE_THRESHOLDS.S5_HIGH_LOAD_DELTA_MIN, met: highLoadDelta.count >= 3 && highLoadDelta.avg >= STAGE_THRESHOLDS.S5_HIGH_LOAD_DELTA_MIN, status: "shipped" },
       { id: "recovery-trend", label: "Recovery trending in the right direction", value: recovery ? recovery.improving : null, threshold: true, met: !!(recovery && recovery.improving), status: "shipped" },
     ];
   }
