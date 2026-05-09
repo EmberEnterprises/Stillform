@@ -1,10 +1,12 @@
 # Stillform Engagement Architecture
 
-**Status (May 8, 2026):** Foundation phases SHIPPED to repo. Build queue paused pending Arlin's manual Netlify deploy + direction on Build #2 Phase 2 (Trigger Profile UI design).
+**Status (May 8, 2026 — updated late session):** Engine 2 (application-layer) build queue COMPLETE. All originally-listed surfaces ship to repo. Build queue paused pending Arlin's deploy + phone tap-through across the full pile.
 
-**SHIPPED (HEAD = `1f49ddb`, awaiting deploy):** Phase 0 Stage Definitions data layer · Phase 1 Mirror surface (anchor + sheet) · Build #2 Phase 1 Trigger Profile data layer · Build #5 Phases 1-4 (Body Scan + Reframe + Breathe + EOD micro-credits at every close).
+**SHIPPED:** Phase 0 Stage Definitions data layer · Phase 1 Mirror surface (anchor + sheet) · Build #2 Trigger Profile (Phase 1 data layer + Phase 2 capture UI: Settings CRUD, EOD post-save, Reframe close, Mirror sheet inline add) · Build #3 Today's Brief (3a backend + 3b helpers + 3c saveCheckin hook + 3d inline display) · Build #5 Phases 1-4 (Body Scan + Reframe + Breathe + EOD micro-credits at every close) · Build #6 Roadmap full screen (RoadmapScreen + Mirror sheet entry) · Build #7 Pre-event Brief (7a backend + 7b helpers + 7c notification routing + 7d display screen) · Build #8 Move card (8a starter library + 8b selection function + 8c SomaticPromptRunner extraction + 8d pill + 8e history + 8f telemetry) · Build #9 Scripts (full backend + ScriptsTool component + home card) · Build #10 EOD artifact (frontend).
 
-**NOT YET BUILT:** Build #2 Phase 2 (Trigger Profile capture UI — pending Layer 0.6 flow audit before any UI proposal) · Today's Brief · Roadmap full screen · Pre-event Brief · Move card · Scripts · EOD artifact.
+**DEFERRED post-launch (per audit defaults):** Build #3 Phase 3e (Today's Brief re-read surface) · Build #7 Phase 7e (Pre-event Brief Trigger Profile match detection).
+
+**Pre-deploy gates:** Move card 10-sequence starter library (`src/move-card/library.js`) needs Arlin's science-fidelity pass against `PATTERN_DISRUPTION_SPEC` §4.2 mechanisms + expansion toward 25-30 sequences in production · Layer 5 phone tap-through across the full pile (Disruptor regression on the 8c refactor, Move card flow end-to-end, Today's Brief, Pre-event Brief, Phase 2 Trigger Profile, Scripts).
 
 **Audit philosophy v1.3** governs all build work. See `STILLFORM_AUDIT_PHILOSOPHY.md`.
 
