@@ -10061,6 +10061,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // Phase 2f — trigger-tagged sessions. selectedTriggerId is read by saveSession
   // to write triggerId onto the session record. Optional; null if user skips.
   const [selectedTriggerId, setSelectedTriggerId] = useState(null);
+  // Phase 2c — Reframe close trigger prompt. Toggles inline TriggerForm so
+  // user can name a new trigger from session close moment. Auto-selects the
+  // newly-added trigger so it tags the current session.
+  const [showAddTriggerForm, setShowAddTriggerForm] = useState(false);
   // Stage 4 user-flagged-pattern instrumentation. Optional self-flag of which
   // bias-profile pattern the user caught themselves running. Written to the
   // session record as flaggedPattern; activates the Stage 4 marker.
@@ -11599,7 +11603,82 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   {t.label}
                 </button>
               ))}
+              {/* Phase 2c — Reframe close trigger prompt. Single chip that
+                  expands inline TriggerForm. Lets user name a new trigger from
+                  the moment they realize one, instead of routing to Settings. */}
+              <button
+                onClick={() => setShowAddTriggerForm(prev => !prev)}
+                style={{
+                  background: showAddTriggerForm ? "var(--amber-dim)" : "transparent",
+                  border: `0.5px dashed ${showAddTriggerForm ? "var(--amber)" : "var(--border)"}`,
+                  borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                  color: showAddTriggerForm ? "var(--amber)" : "var(--text-muted)",
+                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  letterSpacing: "0.04em"
+                }}
+              >
+                {showAddTriggerForm ? "− Cancel" : "+ Name a new trigger"}
+              </button>
             </div>
+            {showAddTriggerForm && (
+              <div style={{ marginTop: 12 }}>
+                <TriggerForm
+                  autoFocus
+                  submitLabel="Add and select"
+                  cancelLabel="Cancel"
+                  onSubmit={({ label, category }) => {
+                    try {
+                      const result = addTrigger({ label, category });
+                      if (result?.id) {
+                        setSelectedTriggerId(result.id);
+                        try { window.plausible("Trigger Added", { props: { source: "reframe-close" } }); } catch {}
+                      }
+                    } catch {}
+                    setShowAddTriggerForm(false);
+                  }}
+                  onCancel={() => setShowAddTriggerForm(false)}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Empty-state path — user has no triggers yet but might realize one
+            now. Phase 2c with no profile to choose from. */}
+        {userTriggers.length === 0 && (
+          <div style={{ marginBottom: 16 }}>
+            {!showAddTriggerForm ? (
+              <button
+                onClick={() => setShowAddTriggerForm(true)}
+                style={{
+                  background: "transparent", border: "0.5px dashed var(--border)",
+                  borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                  color: "var(--text-muted)", cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
+                }}
+              >
+                + Did this session reveal a new trigger to name?
+              </button>
+            ) : (
+              <div>
+                <TriggerForm
+                  autoFocus
+                  submitLabel="Add and select"
+                  cancelLabel="Cancel"
+                  onSubmit={({ label, category }) => {
+                    try {
+                      const result = addTrigger({ label, category });
+                      if (result?.id) {
+                        setSelectedTriggerId(result.id);
+                        try { window.plausible("Trigger Added", { props: { source: "reframe-close" } }); } catch {}
+                      }
+                    } catch {}
+                    setShowAddTriggerForm(false);
+                  }}
+                  onCancel={() => setShowAddTriggerForm(false)}
+                />
+              </div>
+            )}
           </div>
         )}
 
