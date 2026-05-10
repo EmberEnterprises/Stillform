@@ -15753,6 +15753,130 @@ function MyProgress({ onBack }) {
           Your data builds here as you use the practice.
         </div>
       ) : (<>
+        {/* SECTION 1 — HEADLINE PATTERN (MY_PROGRESS_REDESIGN_SPEC.md §Section 1)
+            Within seconds of opening My Progress, surfaces the single strongest
+            pattern from recent practice. Pattern selector runs priority order
+            (autonomous exit → reactivity reduction → catching earlier → habit
+            consolidation → recurring trigger → first-7 default). Visual style
+            held per spec — uses current tokens, refined when design system
+            lands. Per Arlin's "build, don't wait for design system" directive. */}
+        {(() => {
+          const autoCount30d = _s1CountAutonomousExits(30);
+          const sessionsCount = sessions.length;
+          // Top trigger from journal (any count >= 3)
+          const topTriggerEntry = Object.entries(triggerFreq).sort((a, b) => b[1] - a[1])[0];
+
+          let headline = null;
+          let science = null;
+          // Priority 1 — first-time autonomous exit
+          if (autoCount30d === 1) {
+            headline = "First time you saw it and didn't need a tool. The observer just activated.";
+            science = "Wells 2009 — Detached Mindfulness. The shift from needing intervention to noticing-and-choosing is meta-awareness becoming automatic. Your nervous system just demonstrated this once. Reps make it default.";
+          }
+          // Priority 2 — reactivity reduction trend
+          else if (improving && sessionsWithRatings.length >= 6 && firstAvg !== null && secondAvg !== null) {
+            const lift = (secondAvg - firstAvg).toFixed(1);
+            headline = `Your sessions are landing softer. Average state shift is up ${lift} over your earlier sessions.`;
+            science = "Lieberman 2007 — Affect labeling reduces amygdala reactivity. Repeated naming-under-activation literally trains your nervous system to react less to recurring triggers. The lift you see is the conditioning, made measurable.";
+          }
+          // Priority 3 — catching it earlier
+          else if (durationTrend !== null && durationTrend > 0.5 && timedSessions.length >= 6) {
+            headline = `You're catching it ${durationTrend.toFixed(1)} minutes earlier than you used to. The signal is registering before it drives action.`;
+            science = "Meichenbaum 1985 — Stress inoculation. Practice when calm makes regulation available under pressure. Shorter sessions are not less work; they are interception happening earlier in the chain.";
+          }
+          // Priority 4 — habit consolidation milestone
+          else if (streak === 7 || streak === 14 || streak === 30) {
+            headline = `${streak} days running. You're in the window where new behavior consolidates into default.`;
+            science = "Wood & Rünger 2016 — Habit consolidation timeline. Schultz 1998 — dopamine reward prediction error wires practice in. The streak is not gamification; it is the science earning the claim that practice compounds.";
+          }
+          // Priority 5 — recurring trigger
+          else if (topTriggerEntry && topTriggerEntry[1] >= 3) {
+            headline = `${topTriggerEntry[0]} has shown up ${topTriggerEntry[1]} times this month. Recognition is the regulation.`;
+            science = "Wells 2009 MCT — Pattern surfacing. The trigger having a name and a count means it is no longer ambient. You can see it; you can prepare for it.";
+          }
+          // Priority 6 — early practice default
+          else {
+            headline = `You've practiced ${sessionsCount} time${sessionsCount === 1 ? "" : "s"}. The data layer is building. Patterns surface around session 8-10.`;
+            science = null;
+          }
+
+          return (
+            <div style={{
+              marginBottom: 20,
+              background: "var(--amber-glow)",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              padding: "20px 18px"
+            }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12, letterSpacing: "0.14em" }}>
+                Headline
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 22,
+                fontWeight: 300,
+                lineHeight: 1.35,
+                color: "var(--text)",
+                marginBottom: science ? 14 : 12
+              }}>
+                {headline}
+              </div>
+              {science && (
+                <button
+                  onClick={() => setOpenSections(prev => ({ ...prev, headlineScience: !prev.headlineScience }))}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--text-muted)",
+                    fontSize: 11,
+                    letterSpacing: "0.08em",
+                    cursor: "pointer",
+                    padding: 0,
+                    fontFamily: "'IBM Plex Mono', monospace"
+                  }}
+                >
+                  {openSections.headlineScience ? "▾ Hide" : "▸ What this means"}
+                </button>
+              )}
+              {science && openSections.headlineScience && (
+                <div style={{
+                  marginTop: 10,
+                  fontSize: 12,
+                  color: "var(--text-muted)",
+                  lineHeight: 1.65,
+                  fontFamily: "'DM Sans', sans-serif",
+                  paddingLeft: 12,
+                  borderLeft: "1px solid var(--amber-dim)"
+                }}>
+                  {science}
+                </div>
+              )}
+              {/* Supporting micro-numbers per spec */}
+              <div style={{
+                display: "flex",
+                gap: 16,
+                marginTop: 14,
+                paddingTop: 12,
+                borderTop: "0.5px solid var(--border-printed)",
+                fontSize: 11,
+                color: "var(--text-muted)",
+                fontFamily: "'IBM Plex Mono', monospace",
+                letterSpacing: "0.06em"
+              }}>
+                <span>{streak}-day streak</span>
+                <span>·</span>
+                <span>{sessionsCount} session{sessionsCount === 1 ? "" : "s"}</span>
+                {avgDelta !== null && Number(avgDelta) !== 0 && (
+                  <>
+                    <span>·</span>
+                    <span>avg shift {avgDelta > 0 ? "+" : ""}{avgDelta}</span>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
         {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
           <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
