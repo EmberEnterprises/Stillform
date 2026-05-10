@@ -3602,6 +3602,31 @@ const buildTodaysBriefPayload = (checkinToday) => {
   let triggerProfile = "";
   try { triggerProfile = formatTriggerProfileForAI(8) || ""; } catch {}
 
+  // Match user's named triggers against today's calendar events. Same
+  // substring rule as buildPreEventBriefPayload; here multi-event. Tells
+  // the AI WHICH events match WHICH triggers so Risks get scoped specifically
+  // rather than abstract.
+  let matchedEventTriggers = "";
+  try {
+    const profile = getTriggerProfile();
+    if (profile?.triggers?.length && calendarEvents.length) {
+      const eventMatches = [];
+      calendarEvents.forEach(ev => {
+        const haystack = String(ev.title || "").toLowerCase();
+        const matches = profile.triggers.filter(t => {
+          const label = String(t.label || "").trim().toLowerCase();
+          return label.length >= 2 && haystack.includes(label);
+        });
+        if (matches.length) {
+          eventMatches.push(`"${ev.title}" → ${matches.map(m => m.label).join(", ")}`);
+        }
+      });
+      if (eventMatches.length) {
+        matchedEventTriggers = `Calendar events that reference user's named triggers: ${eventMatches.join("; ")}. Risks section should name these specifically.`;
+      }
+    }
+  } catch {}
+
   // Bias profile — same inline formatting Reframe uses
   let biasProfile = "";
   try {
@@ -3678,6 +3703,7 @@ const buildTodaysBriefPayload = (checkinToday) => {
     calendarEvents,
     calendarSummary,
     triggerProfile,
+    matchedEventTriggers,
     biasProfile,
     userFlaggedPatterns,
     signalProfile,

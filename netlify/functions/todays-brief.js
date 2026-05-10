@@ -192,6 +192,7 @@ exports.handler = async (event) => {
   // triggerProfile / biasProfile / signalProfile come pre-formatted from the
   // client (formatTriggerProfileForAI, etc.) — they're already strings.
   const triggerProfile = String(payload.triggerProfile || "").slice(0, 600);
+  const matchedEventTriggers = String(payload.matchedEventTriggers || "").slice(0, 400);
   const biasProfile = String(payload.biasProfile || "").slice(0, 400);
   const userFlaggedPatterns = String(payload.userFlaggedPatterns || "").slice(0, 400);
   const signalProfile = String(payload.signalProfile || "").slice(0, 400);
@@ -222,6 +223,7 @@ exports.handler = async (event) => {
     contextLines.push(`Today's calendar summary: ${calendarSummary}`);
   }
   if (triggerProfile) contextLines.push(`Trigger Profile (specific people/contexts/moments the user has named as load-bearing): ${triggerProfile}`);
+  if (matchedEventTriggers) contextLines.push(matchedEventTriggers);
   if (biasProfile) contextLines.push(`Bias Profile (cognitive distortions the user is working with): ${biasProfile}`);
   if (userFlaggedPatterns) contextLines.push(userFlaggedPatterns);
   if (signalProfile) contextLines.push(`Signal Profile (where in the body intensity activates first for them): ${signalProfile}`);
