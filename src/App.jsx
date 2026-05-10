@@ -15877,6 +15877,167 @@ function MyProgress({ onBack }) {
           );
         })()}
 
+        {/* SECTION 2 — COMPOUNDING VIEW (MY_PROGRESS_REDESIGN_SPEC.md §Section 2)
+            Three sparklines over 12 weeks: Reactivity (delta), Catch-time
+            (duration), Independence (autonomous exits). Visual: minimal SVG
+            sparklines with current tokens — design system pass refines later
+            per spec. The shape over time IS the message; magnitudes show on
+            tap-and-hold, not by default. */}
+        {(() => {
+          const weeksBack = 12;
+          const dayMs = 24 * 60 * 60 * 1000;
+          const weekMs = 7 * dayMs;
+          const now = Date.now();
+
+          // Build 12 week buckets, each anchored at week-start (oldest first)
+          const weekBuckets = [];
+          for (let i = weeksBack - 1; i >= 0; i--) {
+            const start = now - (i + 1) * weekMs;
+            const end = now - i * weekMs;
+            weekBuckets.push({ start, end, deltas: [], durations: [], autoCount: 0 });
+          }
+
+          // Sessions → fill delta + duration buckets
+          sessions.forEach(s => {
+            try {
+              const t = new Date(s.timestamp).getTime();
+              const idx = weekBuckets.findIndex(b => t >= b.start && t < b.end);
+              if (idx === -1) return;
+              if (Number.isFinite(s.delta)) weekBuckets[idx].deltas.push(s.delta);
+              if (s.duration > 0) weekBuckets[idx].durations.push(s.duration / 1000 / 60);
+            } catch {}
+          });
+
+          // Check-in days without sessions → independence per week
+          try {
+            const checkins = secureRead("stillform_checkin_history", []) || [];
+            const checkinDays = new Map();
+            checkins.forEach(c => {
+              try {
+                const t = new Date(c?.timestamp || c?.date || 0).getTime();
+                if (!Number.isFinite(t) || t === 0) return;
+                const day = c?.date || TimeKeeper.stillformDayOf(c?.timestamp);
+                if (!day) return;
+                if (!checkinDays.has(day)) checkinDays.set(day, t);
+              } catch {}
+            });
+            const sessionDays = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
+            checkinDays.forEach((t, day) => {
+              if (sessionDays.has(day)) return;
+              const idx = weekBuckets.findIndex(b => t >= b.start && t < b.end);
+              if (idx >= 0) weekBuckets[idx].autoCount++;
+            });
+          } catch {}
+
+          // Series: avg/sum per bucket; null when no data
+          const reactivitySeries = weekBuckets.map(b => b.deltas.length ? b.deltas.reduce((a, n) => a + n, 0) / b.deltas.length : null);
+          const catchTimeSeries = weekBuckets.map(b => b.durations.length ? b.durations.reduce((a, n) => a + n, 0) / b.durations.length : null);
+          const independenceSeries = weekBuckets.map(b => b.autoCount);
+
+          // Don't render if there's almost no data at all
+          const reactivityHasData = reactivitySeries.some(v => v !== null);
+          const catchTimeHasData = catchTimeSeries.some(v => v !== null);
+          const independenceHasData = independenceSeries.some(v => v > 0);
+          if (!reactivityHasData && !catchTimeHasData && !independenceHasData) return null;
+
+          // Sparkline path builder — handles null gaps
+          const buildPath = (series, w, h, pad = 4) => {
+            const valid = series.filter(v => v !== null && Number.isFinite(v));
+            if (!valid.length) return "";
+            let min = Math.min(...valid);
+            let max = Math.max(...valid);
+            if (min === max) { min -= 1; max += 1; }
+            const dx = (w - pad * 2) / Math.max(1, series.length - 1);
+            let path = "";
+            let inSegment = false;
+            series.forEach((v, i) => {
+              if (v === null || !Number.isFinite(v)) { inSegment = false; return; }
+              const x = pad + i * dx;
+              const y = h - pad - ((v - min) / (max - min)) * (h - pad * 2);
+              path += (inSegment ? " L" : "M") + x.toFixed(1) + " " + y.toFixed(1);
+              inSegment = true;
+            });
+            return path;
+          };
+
+          // Trend direction for the summary sentence
+          const trendOf = (series) => {
+            const valid = series.map((v, i) => ({ v, i })).filter(p => p.v !== null && Number.isFinite(p.v));
+            if (valid.length < 3) return "steady";
+            const half = Math.floor(valid.length / 2);
+            const earlier = valid.slice(0, half).reduce((a, p) => a + p.v, 0) / half;
+            const later = valid.slice(half).reduce((a, p) => a + p.v, 0) / (valid.length - half);
+            const diff = later - earlier;
+            const threshold = Math.abs(earlier) * 0.1;
+            if (diff > threshold) return "up";
+            if (diff < -threshold) return "down";
+            return "steady";
+          };
+
+          const reactivityTrend = trendOf(reactivitySeries);
+          const catchTimeTrend = trendOf(catchTimeSeries);
+          const independenceTrend = trendOf(independenceSeries);
+
+          // Render summary sentence (positive directions per spec)
+          const reactivityWord = reactivityTrend === "up" ? "trending softer" : reactivityTrend === "down" ? "trending harder" : "holding steady";
+          const catchTimeWord = catchTimeTrend === "down" ? "getting shorter" : catchTimeTrend === "up" ? "getting longer" : "about the same";
+          const independenceWord = independenceTrend === "up" ? "less" : independenceTrend === "down" ? "more" : "about the same";
+
+          const Sparkline = ({ series, color, label, science }) => {
+            const w = 280, h = 32;
+            const path = buildPath(series, w, h);
+            return (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.06em", fontFamily: "'IBM Plex Mono', monospace" }}>
+                    {label}
+                  </div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", fontStyle: "italic" }}>
+                    {science}
+                  </div>
+                </div>
+                <svg width="100%" height={h} viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" style={{ display: "block" }}>
+                  <path d={path} stroke={color} strokeWidth="1.2" fill="none" />
+                </svg>
+              </div>
+            );
+          };
+
+          return (
+            <div style={{
+              marginBottom: 20,
+              background: "var(--surface)",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)",
+              padding: "16px 18px"
+            }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14, letterSpacing: "0.14em" }}>
+                Last 12 weeks
+              </div>
+              {reactivityHasData && (
+                <Sparkline series={reactivitySeries} color="var(--amber)" label="Reactivity (state shift)" science="Lieberman 2007" />
+              )}
+              {catchTimeHasData && (
+                <Sparkline series={catchTimeSeries} color="var(--text)" label="Catch-time (session duration)" science="Meichenbaum 1985" />
+              )}
+              {independenceHasData && (
+                <Sparkline series={independenceSeries} color="var(--text-muted)" label="Independence (autonomous days)" science="Wells 2009" />
+              )}
+              <div style={{
+                marginTop: 12,
+                paddingTop: 12,
+                borderTop: "0.5px solid var(--border-printed)",
+                fontSize: 12,
+                color: "var(--text-muted)",
+                lineHeight: 1.6,
+                fontFamily: "'DM Sans', sans-serif"
+              }}>
+                Over the last 12 weeks, your reactivity is {reactivityWord}. Sessions are {catchTimeWord}. You needed tools {independenceWord} often.
+              </div>
+            </div>
+          );
+        })()}
+
         {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
           <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
