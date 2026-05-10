@@ -275,53 +275,88 @@ Your previous output failed validation. Repair it to pass all constraints while 
 - Do not fallback to generic empathy wrappers. Do not validate framings of the user's own state. The user is the operator; you reflect what they have given you.
 Return only valid JSON.`;
 
-const BANNED_REFRAME_PATTERNS = [
-  /[Ii]t'?s understandable( that)?/,
-  /[Tt]hat'?s understandable/,
-  /completely valid/gi,
-  /that'?s valid/gi,
-  /your feelings? (are|is) valid/gi,
-  /[Yy]ou'?re navigating a lot/,
-  /[Yy]ou have a lot on your plate/,
-  /give yourself permission/gi,
-  /[Mm]ake sure to prioritize/,
-  /your needs are important/gi,
-  /that must be (really |so )?(hard|difficult|tough|overwhelming)/gi,
-  /I can (see|understand) why/gi,
-  /[Ii]t makes sense that/,
-  /[Oo]f course you/,
-  /Keeping it light can be a good way to unwind/gi,
-  /if there'?s anything specific on your mind/gi,
-  /we can pick it apart together/gi,
-  /flyby thoughts?/gi,
-  /\bchat about\b/gi,
-  /\bunpack\b/gi,
-  /\bdive in\b/gi,
-  // Grief boilerplate — added May 8, 2026 (Concern 2 from
-  // AI_REGRESSION_STATIC_AUDIT_19.md, Test 13). General love-language /
-  // declaration rules cover these via prompt instruction, but model under
-  // grief context surfaces them anyway. Pattern-banning at post-process
-  // catches the leak. The "she's in a better place" platitude is
-  // intentionally NOT banned because user input may quote it (Test 13's
-  // user input contains it verbatim) and the model needs to reference what
-  // others said, not just produce comfort.
-  /i'?m (so |really |so really )?sorry for your loss/gi,
-  /(my |our |sincere |heartfelt |deepest )?(condolences|sympathies)\b/gi
+// ─── BANNED_OUTPUT — Consolidated ban manifest (GPT4O Guardrails Audit Action 2)
+// Single source of truth for post-process patterns the AI must never produce.
+// Each entry: { pattern, type: "regex" | "substring", category, note? }
+// Categories:
+//   - validation_phrases: generic empathy/validation that flattens (Sub-A1)
+//   - generic_openers: stilted opener garbage (Sub-A2)
+//   - voice_contract: Stillform voice contract violations (Sub-A3)
+//   - next_step_garbage: closer/exit garbage at session end (Sub-A4)
+// The legacy arrays below (BANNED_REFRAME_PATTERNS, GENERIC_GARBAGE_PATTERNS,
+// VOICE_CONTRACT_BANNED_PATTERNS, GENERIC_GARBAGE_SNIPPETS, GENERIC_NEXT_STEP_SNIPPETS)
+// are now derived from this manifest so all callers continue working unchanged.
+// Audit recommendation: structural refactor, no semantic change. Synthetic test:
+// each old ban must still match against its original example. (See findMatchingPattern
+// telemetry — Action 1 — for production validation that bans are firing as expected.)
+const BANNED_OUTPUT = [
+  // ── validation_phrases ──────────────────────────────────────────────
+  { pattern: /[Ii]t'?s understandable( that)?/, type: "regex", category: "validation_phrases" },
+  { pattern: /[Tt]hat'?s understandable/, type: "regex", category: "validation_phrases" },
+  { pattern: /completely valid/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /that'?s valid/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /your feelings? (are|is) valid/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /[Yy]ou'?re navigating a lot/, type: "regex", category: "validation_phrases" },
+  { pattern: /[Yy]ou have a lot on your plate/, type: "regex", category: "validation_phrases" },
+  { pattern: /give yourself permission/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /[Mm]ake sure to prioritize/, type: "regex", category: "validation_phrases" },
+  { pattern: /your needs are important/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /that must be (really |so )?(hard|difficult|tough|overwhelming)/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /I can (see|understand) why/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /[Ii]t makes sense that/, type: "regex", category: "validation_phrases" },
+  { pattern: /[Oo]f course you/, type: "regex", category: "validation_phrases" },
+  { pattern: /Keeping it light can be a good way to unwind/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /if there'?s anything specific on your mind/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /we can pick it apart together/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /flyby thoughts?/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /\bchat about\b/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /\bunpack\b/gi, type: "regex", category: "validation_phrases" },
+  { pattern: /\bdive in\b/gi, type: "regex", category: "validation_phrases" },
+  // Grief boilerplate — added May 8, 2026 (Concern 2 from AI_REGRESSION_STATIC_AUDIT_19.md)
+  { pattern: /i'?m (so |really |so really )?sorry for your loss/gi, type: "regex", category: "validation_phrases", note: "grief boilerplate" },
+  { pattern: /(my |our |sincere |heartfelt |deepest )?(condolences|sympathies)\b/gi, type: "regex", category: "validation_phrases", note: "grief boilerplate" },
+  // ── generic_openers ─────────────────────────────────────────────────
+  { pattern: /sounds like something'?s circling in your mind/gi, type: "regex", category: "generic_openers" },
+  { pattern: /hasn'?t landed yet/gi, type: "regex", category: "generic_openers" },
+  { pattern: /pinpoint the key thought/gi, type: "regex", category: "generic_openers" },
+  { pattern: /taking up space/gi, type: "regex", category: "generic_openers" },
+  { pattern: /glad you dropped in/gi, type: "regex", category: "generic_openers" },
+  { pattern: /this space is for hard days and ordinary moments/gi, type: "regex", category: "generic_openers" },
+  { pattern: /keeping it light can be a good way to unwind/gi, type: "regex", category: "generic_openers" },
+  { pattern: /if there'?s anything specific on your mind/gi, type: "regex", category: "generic_openers" },
+  { pattern: /we can (pick it apart together|just enjoy)/gi, type: "regex", category: "generic_openers" },
+  { pattern: /flyby thoughts?/gi, type: "regex", category: "generic_openers" },
+  { pattern: /chat about/gi, type: "regex", category: "generic_openers" },
+  // ── voice_contract ──────────────────────────────────────────────────
+  { pattern: /\bthis space is for\b/gi, type: "regex", category: "voice_contract" },
+  { pattern: /\bglad you dropped in\b/gi, type: "regex", category: "voice_contract" },
+  { pattern: /\bwhat comes up for you\b/gi, type: "regex", category: "voice_contract" },
+  { pattern: /\bhow does that land in your body\b/gi, type: "regex", category: "voice_contract" },
+  { pattern: /\bi understand how you feel\b/gi, type: "regex", category: "voice_contract" },
+  { pattern: /\byou'?re navigating a lot\b/gi, type: "regex", category: "voice_contract" },
+  // ── next_step_garbage (substring matches at session close) ─────────
+  { pattern: "just chat about anything", type: "substring", category: "next_step_garbage" },
+  { pattern: "anything specific on your mind", type: "substring", category: "next_step_garbage" },
+  { pattern: "talk about whatever", type: "substring", category: "next_step_garbage" },
+  { pattern: "say anything", type: "substring", category: "next_step_garbage" },
 ];
 
-const GENERIC_GARBAGE_PATTERNS = [
-  /sounds like something'?s circling in your mind/gi,
-  /hasn'?t landed yet/gi,
-  /pinpoint the key thought/gi,
-  /taking up space/gi,
-  /glad you dropped in/gi,
-  /this space is for hard days and ordinary moments/gi,
-  /keeping it light can be a good way to unwind/gi,
-  /if there'?s anything specific on your mind/gi,
-  /we can (pick it apart together|just enjoy)/gi,
-  /flyby thoughts?/gi,
-  /chat about/gi
-];
+// Helper: filter manifest by category, return raw patterns. Lets the legacy
+// arrays below stay shape-identical (same regex/substring values) for callers.
+const _bansByCategory = (cat, type = "regex") => BANNED_OUTPUT
+  .filter(b => b.category === cat && b.type === type)
+  .map(b => b.pattern);
+
+const _bansBySubstringCategory = (cat) => BANNED_OUTPUT
+  .filter(b => b.category === cat && b.type === "substring")
+  .map(b => b.pattern);
+
+// Same patterns as before, derived from BANNED_OUTPUT. Kept by name so all
+// existing callsites (validateOutputs, hasAnyPattern, findMatchingPattern)
+// continue working without changes.
+const BANNED_REFRAME_PATTERNS = _bansByCategory("validation_phrases");
+
+const GENERIC_GARBAGE_PATTERNS = _bansByCategory("generic_openers");
 
 const FRIENDLY_SOFT_ENTRY_PATTERNS = [
   /\bhi+\b/i,
@@ -355,23 +390,11 @@ const GENERIC_GARBAGE_SNIPPETS = [
   "chat about"
 ];
 
-const GENERIC_NEXT_STEP_SNIPPETS = [
-  "just chat about anything",
-  "anything specific on your mind",
-  "talk about whatever",
-  "say anything"
-];
+const GENERIC_NEXT_STEP_SNIPPETS = _bansBySubstringCategory("next_step_garbage");
 
 const SOFT_ENTRY_LOCKED_REFRAME = "Hey good to see you. How are you doing?";
 
-const VOICE_CONTRACT_BANNED_PATTERNS = [
-  /\bthis space is for\b/gi,
-  /\bglad you dropped in\b/gi,
-  /\bwhat comes up for you\b/gi,
-  /\bhow does that land in your body\b/gi,
-  /\bi understand how you feel\b/gi,
-  /\byou'?re navigating a lot\b/gi
-];
+const VOICE_CONTRACT_BANNED_PATTERNS = _bansByCategory("voice_contract");
 
 const INTENTION_ANCHOR_MIN_INPUT_LEN = 48;
 const INTENTION_ANCHOR_STOPWORDS = new Set([
