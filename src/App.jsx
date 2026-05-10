@@ -4552,6 +4552,47 @@ const _s3AvgDeltaOnTriggerSessions = () => {
   } catch { return { avg: 0, count: 0 }; }
 };
 
+// Stage 1 — count of days where the user logged a morning check-in but did
+// NOT enter any tool that day. Per the marker definition: "Times you saw it
+// and chose without a tool." The check-in itself IS the metacognitive
+// noticing act (state named via energy/mood/bio chips). A day where they
+// noticed but didn't escalate to a tool intervention is autonomous regulation
+// — the practice working as intended.
+const _s1CountAutonomousExits = (windowDays = 30) => {
+  try {
+    const checkins = secureRead("stillform_checkin_history", []);
+    if (!Array.isArray(checkins) || !checkins.length) return 0;
+    const sessions = getSessionsFromStorage();
+    const cutoff = TimeKeeper.daysAgoMs(windowDays);
+    // Build set of stillformDay strings where ANY tool session occurred.
+    const toolDays = new Set();
+    if (Array.isArray(sessions)) {
+      sessions.forEach(s => {
+        try {
+          const t = new Date(s?.timestamp || 0).getTime();
+          if (Number.isNaN(t) || t < cutoff) return;
+          const day = TimeKeeper.stillformDayOf(s.timestamp);
+          if (day) toolDays.add(day);
+        } catch {}
+      });
+    }
+    // Count check-in days within window that are NOT in toolDays.
+    let autonomousCount = 0;
+    const seenDays = new Set();
+    checkins.forEach(c => {
+      try {
+        const t = new Date(c?.timestamp || c?.date || 0).getTime();
+        if (Number.isNaN(t) || t < cutoff) return;
+        const day = c?.date || TimeKeeper.stillformDayOf(c?.timestamp);
+        if (!day || seenDays.has(day)) return;
+        seenDays.add(day);
+        if (!toolDays.has(day)) autonomousCount++;
+      } catch {}
+    });
+    return autonomousCount;
+  } catch { return 0; }
+};
+
 // Stage 1 — sessions where the user entered with bio-filter signaling
 // "activated" (i.e., they came in during an actual activated moment, not
 // routine practice). Reads the bioFilter snapshot now persisted on every
@@ -4677,11 +4718,12 @@ const computeStageMarkers = (stageId) => {
     const bioFilterSet = (() => { try { return !!localStorage.getItem("stillform_bio_filter"); } catch { return false; } })();
     const specificSessionsCount = _s1CountSpecificBodyAreaSessions();
     const activeStateCount = _s1CountActiveStateSessions();
+    const autonomousCount = _s1CountAutonomousExits();
     return [
       { id: "bio-filter-setup", label: "Bio-filter setup completed", value: bioFilterSet, threshold: true, met: bioFilterSet, status: "shipped" },
       { id: "body-area-specificity", label: "Sessions with specific body-area tags", value: specificSessionsCount, threshold: STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, met: specificSessionsCount >= STAGE_THRESHOLDS.S1_BODY_AREA_SESSIONS_MIN, status: "shipped" },
       { id: "active-state-entry", label: "Sessions entered during an active state", value: activeStateCount, threshold: 1, met: activeStateCount >= 1, status: "shipped" },
-      { id: "autonomous-exits", label: "Times you saw it and chose without a tool", value: 0, threshold: 1, met: false, status: "deferred", deferReason: "no data trail for chip-without-tool today; instrumentation pending" },
+      { id: "autonomous-exits", label: "Times you saw it and chose without a tool", value: autonomousCount, threshold: 1, met: autonomousCount >= 1, status: "shipped" },
     ];
   }
   if (stageId === 2) {
