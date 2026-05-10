@@ -20153,6 +20153,47 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
+              {/* Recent catches — surface the user's pattern self-flags back to
+                  them so the metacognitive work is visible. The Stage 4 marker
+                  counts these silently; this section makes the count and
+                  pattern names legible to the user as evidence of their own
+                  observation. Renders only if at least one self-flag exists. */}
+              {(() => {
+                let aggregated = [];
+                try {
+                  const sessions = getSessionsFromStorage();
+                  if (Array.isArray(sessions)) {
+                    const counts = {};
+                    sessions.slice(-30).forEach(s => {
+                      if (s?.flaggedPattern) counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1;
+                    });
+                    aggregated = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
+                  }
+                } catch {}
+                if (!aggregated.length) return null;
+                return (
+                  <div style={{
+                    background: "var(--surface)", border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)", padding: "16px 18px", marginBottom: 16
+                  }}>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, letterSpacing: "0.14em" }}>
+                      Recent catches
+                    </div>
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
+                      Patterns you caught yourself running, last 30 sessions:
+                    </div>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                      {aggregated.map(([pattern, count]) => (
+                        <div key={pattern} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}>
+                          <span>{pattern}</span>
+                          <span className="t-mono-xs" style={{ color: "var(--amber)", fontSize: 11 }}>{count}×</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* View full Roadmap — engagement architecture Engine 1 entry point.
                   Per spec §3.1: "Stages of mastery shown as a path the user is
                   currently walking. Stage 1 today, stage 5 visible at the path's
