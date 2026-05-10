@@ -21265,6 +21265,36 @@ const isSignalProfileConfigured = () => {
                   background: "var(--surface)", border: "0.5px solid var(--border)",
                   borderRadius: "var(--r)", padding: "20px 18px", marginBottom: 20
                 }}>
+                  {/* Phase 7e visible — show the user the trigger match the AI
+                      is using. Same substring rule as buildPreEventBriefPayload.
+                      Builds trust ("the system saw what I would have flagged")
+                      and reinforces the user's own pattern recognition. */}
+                  {(() => {
+                    let matched = [];
+                    try {
+                      const profile = getTriggerProfile();
+                      if (profile?.triggers?.length) {
+                        const haystack = `${target.title || ""} ${target.description || ""}`.toLowerCase();
+                        matched = profile.triggers.filter(t => {
+                          const label = String(t.label || "").trim().toLowerCase();
+                          return label.length >= 2 && haystack.includes(label);
+                        });
+                      }
+                    } catch {}
+                    if (!matched.length) return null;
+                    return (
+                      <div style={{
+                        background: "var(--amber-dim)", border: `0.5px solid ${stillformAmber}`,
+                        borderRadius: "var(--r)", padding: "8px 12px", marginBottom: 14,
+                        display: "inline-block"
+                      }}>
+                        <div className="t-mono-xs" style={{ color: stillformAmber, letterSpacing: "0.06em", fontSize: 11 }}>
+                          References your trigger: {matched.map(m => m.label).join(", ")}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
                   <div className="t-mono-xs" style={{ color: muted, letterSpacing: "0.14em", marginBottom: 6 }}>
                     Hardware
                   </div>
