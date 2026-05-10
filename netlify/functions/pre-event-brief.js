@@ -203,6 +203,7 @@ exports.handler = async (event) => {
   const triggerProfile = String(payload.triggerProfile || "").slice(0, 600);
   const matchedTriggers = String(payload.matchedTriggers || "").slice(0, 300);
   const biasProfile = String(payload.biasProfile || "").slice(0, 400);
+  const userFlaggedPatterns = String(payload.userFlaggedPatterns || "").slice(0, 400);
   const signalProfile = String(payload.signalProfile || "").slice(0, 400);
   const stageName = String(payload.stageName || "").slice(0, 64);
   const stageId = Number.isFinite(payload.stageId) ? Math.max(1, Math.min(5, payload.stageId)) : null;
@@ -236,6 +237,7 @@ exports.handler = async (event) => {
     contextLines.push("(This event references a known trigger. Risks should name this specifically. Moves should be calibrated to the named pattern.)");
   }
   if (biasProfile) contextLines.push(`Bias Profile: ${biasProfile}`);
+  if (userFlaggedPatterns) contextLines.push(userFlaggedPatterns);
   if (signalProfile) contextLines.push(`Signal Profile: ${signalProfile}`);
   if (stageId && stageName) contextLines.push(`Engagement stage: ${stageId} of 5 (${stageName})`);
   if (recentSessionsCount > 0) contextLines.push(`Practice in last ${recentSessionDays || 7} days: ${recentSessionsCount} session(s)`);

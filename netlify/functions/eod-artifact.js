@@ -160,6 +160,9 @@ exports.handler = async (event) => {
     post: String(s?.post || "").slice(0, 32),
     delta: Number.isFinite(s?.delta) ? s.delta : null
   })) : [];
+  const patternsCaughtToday = Array.isArray(payload.patternsCaughtToday)
+    ? payload.patternsCaughtToday.slice(0, 6).map(p => String(p).slice(0, 64))
+    : [];
 
   // Construct user-message context block from the day's data.
   // The AI gets a structured snapshot it can pull from, not a question.
@@ -178,6 +181,9 @@ exports.handler = async (event) => {
       return `${s.pre} → ${s.post}${deltaStr}`;
     }).join("; ");
     contextLines.push(`Today's state shifts: ${shiftsText}`);
+  }
+  if (patternsCaughtToday.length) {
+    contextLines.push(`Patterns the user caught themselves running today: ${patternsCaughtToday.join(", ")}. This is metacognitive work — credit the catch in the artifact when relevant.`);
   }
 
   const userMessage = `Generate the two-sentence EOD artifact from this data:\n\n${contextLines.join("\n")}`;

@@ -3412,6 +3412,12 @@ const buildEodArtifactPayload = (eodToday) => {
       post: String(s.postState),
       delta: Number.isFinite(s.delta) ? s.delta : null
     }));
+  // Stage 4 — patterns the user self-flagged in today's sessions. Distinct
+  // from the rolling formatUserFlaggedPatternsForAI window: scoped to today
+  // only so the EOD artifact can credit today's catches specifically.
+  const patternsCaughtToday = Array.from(new Set(
+    sessionsToday.map(s => s.flaggedPattern).filter(Boolean)
+  ));
   return {
     eodEnergy: eodToday?.energy || "",
     eodComposure: eodToday?.composure || "",
@@ -3420,7 +3426,8 @@ const buildEodArtifactPayload = (eodToday) => {
     sessionsToday: sessionsToday.length,
     toolsUsed,
     feelStatesToday,
-    recentShifts
+    recentShifts,
+    patternsCaughtToday
   };
 };
 
@@ -3604,6 +3611,11 @@ const buildTodaysBriefPayload = (checkinToday) => {
     }
   } catch {}
 
+  // User-flagged patterns — pre-formatted via shared helper. Tells the AI
+  // which patterns the user has caught themselves running recently.
+  let userFlaggedPatterns = "";
+  try { userFlaggedPatterns = formatUserFlaggedPatternsForAI() || ""; } catch {}
+
   // Signal profile — same inline formatting Reframe uses
   let signalProfile = "";
   try {
@@ -3667,6 +3679,7 @@ const buildTodaysBriefPayload = (checkinToday) => {
     calendarSummary,
     triggerProfile,
     biasProfile,
+    userFlaggedPatterns,
     signalProfile,
     stageId,
     stageName,
@@ -3878,6 +3891,10 @@ const buildPreEventBriefPayload = (event) => {
     }
   } catch {}
 
+  // User-flagged patterns — same shared helper used by Today's Brief.
+  let userFlaggedPatterns = "";
+  try { userFlaggedPatterns = formatUserFlaggedPatternsForAI() || ""; } catch {}
+
   // Signal profile — same inline format Reframe uses
   let signalProfile = "";
   try {
@@ -3935,6 +3952,7 @@ const buildPreEventBriefPayload = (event) => {
     triggerProfile,
     matchedTriggers,
     biasProfile,
+    userFlaggedPatterns,
     signalProfile,
     stageId,
     stageName,
@@ -4460,6 +4478,25 @@ const _s4UserFlaggedPatternCount = () => {
     if (!Array.isArray(sessions)) return 0;
     return sessions.filter(s => s?.flaggedPattern && typeof s.flaggedPattern === "string").length;
   } catch { return 0; }
+};
+
+// Format user-flagged patterns from recent session history for AI context.
+// Used by Reframe + brief generators (Today's Brief, Pre-event Brief, EOD).
+// Tells the AI which patterns the user has caught themselves running so
+// the AI reinforces the catch rather than redundantly surfacing the pattern.
+// Returns null when no flags exist — callers should treat null as "skip".
+const formatUserFlaggedPatternsForAI = (lookback = 15) => {
+  try {
+    const sessions = getSessionsFromStorage();
+    if (!Array.isArray(sessions)) return null;
+    const recent = sessions.slice(-lookback).filter(s => s?.flaggedPattern);
+    if (!recent.length) return null;
+    const counts = {};
+    recent.forEach(s => { counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1; });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    const fmt = top.map(([p, n]) => n > 1 ? `${p} (${n}x)` : p).join(", ");
+    return `User has self-flagged catching these patterns recently: ${fmt}. They are doing their own metacognitive observation — reinforce the catch, do not surface these patterns as if naming them first.`;
+  } catch { return null; }
 };
 
 // Stage 3 — Pre-event Briefs used in the last N days.
@@ -10819,18 +10856,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           // Stage 4 user-flagged-pattern context — patterns the user has caught
           // themselves running in recent sessions. Gives the AI a signal that
           // the user is doing their own metacognitive work; AI should reinforce
-          // not redundantly surface. Reads flaggedPattern from session entries.
+          // not redundantly surface. Shared helper used by Today's Brief +
+          // Pre-event Brief too.
           userFlaggedPatterns: (() => {
-            try {
-              const sessions = getSessionsFromStorage();
-              const recent = sessions.slice(-15).filter(s => s?.flaggedPattern);
-              if (!recent.length) return null;
-              const counts = {};
-              recent.forEach(s => { counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1; });
-              const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
-              const fmt = top.map(([p, n]) => n > 1 ? `${p} (${n}x)` : p).join(", ");
-              return `User has self-flagged catching these patterns recently: ${fmt}. They are doing their own metacognitive observation — reinforce the catch, do not surface these patterns as if naming them first.`;
-            } catch { return null; }
+            try { return formatUserFlaggedPatternsForAI(); } catch { return null; }
           })(),
           // Build #2 Phase 1 — Trigger Profile (instance-level external triggers).
           // Distinct from Signal Profile's predefined `triggers` chip-picker

@@ -193,6 +193,7 @@ exports.handler = async (event) => {
   // client (formatTriggerProfileForAI, etc.) — they're already strings.
   const triggerProfile = String(payload.triggerProfile || "").slice(0, 600);
   const biasProfile = String(payload.biasProfile || "").slice(0, 400);
+  const userFlaggedPatterns = String(payload.userFlaggedPatterns || "").slice(0, 400);
   const signalProfile = String(payload.signalProfile || "").slice(0, 400);
   const stageName = String(payload.stageName || "").slice(0, 64);
   const stageId = Number.isFinite(payload.stageId) ? Math.max(1, Math.min(5, payload.stageId)) : null;
@@ -222,6 +223,7 @@ exports.handler = async (event) => {
   }
   if (triggerProfile) contextLines.push(`Trigger Profile (specific people/contexts/moments the user has named as load-bearing): ${triggerProfile}`);
   if (biasProfile) contextLines.push(`Bias Profile (cognitive distortions the user is working with): ${biasProfile}`);
+  if (userFlaggedPatterns) contextLines.push(userFlaggedPatterns);
   if (signalProfile) contextLines.push(`Signal Profile (where in the body intensity activates first for them): ${signalProfile}`);
   if (stageId && stageName) contextLines.push(`Engagement stage: ${stageId} of 5 (${stageName})`);
   if (recentSessionsCount > 0) contextLines.push(`Practice in last ${recentSessionDays || 7} days: ${recentSessionsCount} session(s)`);
