@@ -11409,6 +11409,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
+    // Reset session-scoped tags so the next Reframe doesn't inherit prior pick.
+    setSelectedTriggerId(null);
+    setSelectedPattern(null);
+    setShowAddTriggerForm(false);
     resetStateToStatementTracking();
     queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-complete");
   };
@@ -11450,6 +11454,9 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSessionShareSummary(null);
     setPostSessionInsight(null);
     setShowPostInsight(false);
+    setSelectedTriggerId(null);
+    setSelectedPattern(null);
+    setShowAddTriggerForm(false);
     resetStateToStatementTracking();
     queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-skip");
   };
