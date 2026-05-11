@@ -22627,137 +22627,102 @@ const isSignalProfileConfigured = () => {
               })()}
 
 
-              {/* ── MIRROR SURFACE — full visible per Arlin's decision May 9, 2026
-                  resolving STILLFORM_ENGAGEMENT_ARCHITECTURE.md §9 Open Question 3.
-                  Three lines per architecture §3.1 illustration (line 63-65):
-                    Working on: [named loops from diagnostic stack]
-                    Today: [calendar load-bearing items + matched triggers]
-                    Stage: N of 5 — [name]
-                  Whole surface tappable to open Mirror sheet for more detail
-                  (existing sheet now reached from surface, not from tiny pill).
-                  Sits at top of home as the always-visible centerpiece — not
-                  buried in Settings, not a tiny anchor. The spine starts here. */}
+              {/* ── MIRROR STATUS STRIP — quiet single-line context band, not a card.
+                  Science-corrected May 9, 2026 (Arlin pushback). The previous
+                  full-card placement competed visually with the processing tool
+                  hero, which fights Gollwitzer 1999 implementation intentions
+                  (Science Sheet line 399: home pre-programs the primary tool;
+                  the centerpiece must be the action, not the status). Affordance
+                  theory (Norman): status surfaces don't afford action; tools do.
+                  JITAI (Wysa 2025): navigation burden reduction. Therefore Mirror
+                  collapses to a single mono-text line above the hero. Same
+                  diagnostic data, single line, no card border, tappable to open
+                  the full Mirror sheet for detail. The hero CTA is now the
+                  unambiguous centerpiece. */}
               {(() => {
                 let snap = null;
                 try { snap = getCurrentStage(); } catch { return null; }
                 if (!snap || !snap.stage) return null;
 
-                // ── Compose "Working on" line ─────────────────────────────
-                // Top 2-3 named loops drawn from the 3-layer diagnostic stack:
-                // Bias Profile (cognitive distortions) + Signal Profile (body
-                // areas) + Trigger Profile (named external triggers).
-                const workingOnTokens = [];
+                // Compose the strip content. Each piece is conditional —
+                // omitted if no data, so the strip stays terse for new users.
+                const tokens = [];
+                tokens.push(`STAGE ${snap.currentStageId}`);
+                tokens.push(snap.stage.name);
+
+                // Top working-on item (bias profile > signal profile > trigger)
                 try {
                   const biases = secureRead("stillform_bias_profile", null);
                   if (Array.isArray(biases) && biases.length) {
-                    workingOnTokens.push(String(biases[0]).toLowerCase());
-                  }
-                } catch {}
-                try {
-                  const sig = secureRead("stillform_signal_profile", null);
-                  if (sig && typeof sig === "object") {
-                    const areas = Object.keys(sig).filter(k => sig[k]);
-                    if (areas.length) {
-                      workingOnTokens.push(`${areas[0]} is your tell`);
+                    tokens.push(String(biases[0]).toUpperCase());
+                  } else {
+                    const sig = secureRead("stillform_signal_profile", null);
+                    if (sig && typeof sig === "object") {
+                      const areas = Object.keys(sig).filter(k => sig[k]);
+                      if (areas.length) tokens.push(`${String(areas[0]).toUpperCase()} TELL`);
+                    } else {
+                      const profile = getTriggerProfile();
+                      if (profile?.triggers?.length) {
+                        const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
+                        if (top?.label) tokens.push(String(top.label).toUpperCase());
+                      }
                     }
                   }
                 } catch {}
-                try {
-                  const profile = getTriggerProfile();
-                  if (profile?.triggers?.length) {
-                    const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
-                    if (top?.label) workingOnTokens.push(String(top.label).toLowerCase());
-                  }
-                } catch {}
 
-                // ── Compose "Today" line ──────────────────────────────────
-                // Today's calendar events, with trigger matches highlighted
-                // (substring match — same logic as Today's Brief 3.5 and
-                // Pre-event Brief 7e for consistency across surfaces).
-                let todayTokens = [];
+                // Today's load-bearing event (one only — strip is single-line)
                 try {
                   const stillformToday = TimeKeeper.stillformDay();
                   const ev = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
                   if (Array.isArray(ev)) {
                     const profile = getTriggerProfile();
                     const triggers = profile?.triggers || [];
-                    todayTokens = ev
-                      .filter(e => {
-                        if (!e?.title) return false;
-                        try { return TimeKeeper.stillformDayOf(e.start) === stillformToday; }
-                        catch { return false; }
-                      })
-                      .slice(0, 3)
-                      .map(e => {
-                        const haystack = String(e.title).toLowerCase();
-                        const match = triggers.find(t => {
-                          const label = String(t.label || "").trim().toLowerCase();
-                          return label.length >= 2 && haystack.includes(label);
-                        });
-                        return { title: e.title, matched: !!match };
+                    const todayEvents = ev.filter(e => {
+                      if (!e?.title) return false;
+                      try { return TimeKeeper.stillformDayOf(e.start) === stillformToday; }
+                      catch { return false; }
+                    });
+                    // Prefer the first event that matches a trigger; fall back to first event
+                    const matched = todayEvents.find(e => {
+                      const haystack = String(e.title).toLowerCase();
+                      return triggers.some(t => {
+                        const label = String(t.label || "").trim().toLowerCase();
+                        return label.length >= 2 && haystack.includes(label);
                       });
+                    });
+                    const surface = matched || todayEvents[0];
+                    if (surface) tokens.push(String(surface.title).toUpperCase());
                   }
                 } catch {}
-
-                const atTop = snap.currentStageId === 5 && snap.highestStageMet === 5;
-                const stagePercent = atTop ? "maintained" : `${snap.progress.percent}% to ${snap.nextStage ? snap.nextStage.name.toLowerCase() : ""}`;
 
                 return (
                   <button
                     onClick={() => setShowMirrorSheet(true)}
-                    aria-label={`Mirror surface. Stage ${snap.currentStageId} of 5: ${snap.stage.name}. Tap for details.`}
+                    aria-label={`Mirror status: Stage ${snap.currentStageId} ${snap.stage.name}. Tap to open.`}
                     style={{
-                      width: "100%", marginBottom: 24,
-                      padding: "16px 18px",
-                      background: "var(--surface)",
-                      border: "0.5px solid var(--border)",
-                      borderRadius: "var(--r-lg)",
+                      width: "100%", marginBottom: 16,
+                      padding: "8px 4px",
+                      background: "transparent",
+                      border: "none",
                       cursor: "pointer",
                       textAlign: "left",
-                      transition: "border-color var(--motion-default) var(--ease-prestige)",
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.12em",
+                      color: "var(--text-muted)",
                       WebkitTapHighlightColor: "transparent",
-                      display: "block"
+                      display: "block",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis"
                     }}
                   >
-                    {workingOnTokens.length > 0 && (
-                      <div style={{ marginBottom: 10 }}>
-                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                          Working on
-                        </span>
-                        <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.5, marginTop: 3, fontFamily: "'DM Sans', sans-serif" }}>
-                          {workingOnTokens.join(" · ")}
-                        </div>
-                      </div>
-                    )}
-                    {todayTokens.length > 0 && (
-                      <div style={{ marginBottom: 10 }}>
-                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                          Today
-                        </span>
-                        <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.5, marginTop: 3, fontFamily: "'DM Sans', sans-serif" }}>
-                          {todayTokens.map((t, i) => (
-                            <span key={i}>
-                              {i > 0 && ", "}
-                              <span style={{ color: t.matched ? "var(--amber)" : "var(--text)" }}>{t.title}</span>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: (workingOnTokens.length || todayTokens.length) ? 10 : 0, borderTop: (workingOnTokens.length || todayTokens.length) ? "0.5px solid var(--border-printed)" : "none" }}>
-                      <div>
-                        <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--text-muted)" }}>
-                          Stage {snap.currentStageId} of 5
-                        </span>
-                        <span style={{ margin: "0 8px", color: "var(--text-dim)" }}>·</span>
-                        <span style={{ fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}>
-                          {snap.stage.name.toLowerCase()}
-                        </span>
-                      </div>
-                      <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em", color: "var(--text-muted)" }}>
-                        {stagePercent}
+                    {tokens.map((t, i) => (
+                      <span key={i}>
+                        {i > 0 && <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>}
+                        <span style={{ color: i === 0 ? "var(--text-dim)" : i === 1 ? "var(--text)" : "var(--text-muted)" }}>{t}</span>
                       </span>
-                    </div>
+                    ))}
                   </button>
                 );
               })()}
