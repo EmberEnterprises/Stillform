@@ -21986,45 +21986,118 @@ const isSignalProfileConfigured = () => {
                           {todaysBrief.risks && (
                             <>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
-                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                                Risks
-                              </div>
-                              <div style={{
-                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
-                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
-                              }}>
-                                {todaysBrief.risks}
-                              </div>
+                              <button
+                                onClick={() => {
+                                  try {
+                                    window.plausible("Today's Brief Item Tapped", { props: { item: "risks" } });
+                                  } catch {}
+                                  // Risks section maps to Reframe clarity mode — cognitive prep
+                                  // for the situations named. The brief content is fresh in the
+                                  // user's mind; Ship 4 may add explicit context preload, but
+                                  // for Ship 3 the routing itself is the unlock — user goes
+                                  // from reading a named risk to processing it in one tap.
+                                  setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
+                                  setScreen("tool");
+                                }}
+                                style={{
+                                  width: "100%", background: "transparent", border: "none",
+                                  cursor: "pointer", padding: 0, textAlign: "left",
+                                  WebkitTapHighlightColor: "transparent", marginBottom: 14,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}
+                              >
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em" }}>
+                                    Risks
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                                    Reframe →
+                                  </div>
+                                </div>
+                                <div style={{
+                                  fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}>
+                                  {todaysBrief.risks}
+                                </div>
+                              </button>
                             </>
                           )}
 
                           {todaysBrief.moves && (
                             <>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
-                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                                Moves
-                              </div>
-                              <div style={{
-                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
-                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
-                              }}>
-                                {todaysBrief.moves}
-                              </div>
+                              <button
+                                onClick={() => {
+                                  try {
+                                    window.plausible("Today's Brief Item Tapped", { props: { item: "moves" } });
+                                  } catch {}
+                                  // Moves section routes to Move card — the somatic intervention
+                                  // surface generates a 30-90s move based on current state.
+                                  setScreen("move-card");
+                                }}
+                                style={{
+                                  width: "100%", background: "transparent", border: "none",
+                                  cursor: "pointer", padding: 0, textAlign: "left",
+                                  WebkitTapHighlightColor: "transparent", marginBottom: 14,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}
+                              >
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em" }}>
+                                    Moves
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                                    Move card →
+                                  </div>
+                                </div>
+                                <div style={{
+                                  fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}>
+                                  {todaysBrief.moves}
+                                </div>
+                              </button>
                             </>
                           )}
 
                           {todaysBrief.recovery && (
                             <>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
-                              <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
-                                Recovery
-                              </div>
-                              <div style={{
-                                fontSize: 13, color: "var(--text)", lineHeight: 1.55,
-                                fontFamily: "'DM Sans', sans-serif", marginBottom: 14
-                              }}>
-                                {todaysBrief.recovery}
-                              </div>
+                              <button
+                                onClick={() => {
+                                  try {
+                                    window.plausible("Today's Brief Item Tapped", { props: { item: "recovery" } });
+                                  } catch {}
+                                  // Recovery section routes to Body Scan — post-event somatic
+                                  // anchoring. Pre-event = Reframe clarity (risks); post-event
+                                  // = Body Scan (recovery). The brief's two action sections
+                                  // bracket the day with cognitive prep and somatic settle.
+                                  setActiveTool(TOOLS.find(t => t.id === "scan"));
+                                  setScreen("tool");
+                                }}
+                                style={{
+                                  width: "100%", background: "transparent", border: "none",
+                                  cursor: "pointer", padding: 0, textAlign: "left",
+                                  WebkitTapHighlightColor: "transparent", marginBottom: 14,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}
+                              >
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em" }}>
+                                    Recovery
+                                  </div>
+                                  <div style={{ fontSize: 10, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                                    Body Scan →
+                                  </div>
+                                </div>
+                                <div style={{
+                                  fontSize: 13, color: "var(--text)", lineHeight: 1.55,
+                                  fontFamily: "'DM Sans', sans-serif"
+                                }}>
+                                  {todaysBrief.recovery}
+                                </div>
+                              </button>
                             </>
                           )}
 
