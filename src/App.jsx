@@ -22124,6 +22124,99 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
+                    {/* Ship 2 (May 11, 2026) — Spine inversion at home entry.
+                        The hero CTA was previously calibration-aware but the
+                        user couldn't see WHY this tool was being proposed.
+                        Per the locked hybrid intake spec (apprenticeship not
+                        authority): app proposes ONE action with VISIBLE
+                        REASONING; user retains override at one tap.
+
+                        Reasoning line above the CTA names the rule that
+                        fired (calibration default, bio-filter override,
+                        pain routing, etc.) so the user learns the if-then
+                        heuristic the app is applying. Over months the user
+                        can self-route; the app's value shifts to data +
+                        AI inference + continuity.
+
+                        "Not quite right" affordance below the CTA opens
+                        the existing Support Sheet (Breathe / Reframe /
+                        Body Scan direct access). This is the override
+                        pathway the spine spec requires — always one tap
+                        from the proposed action to user-driven correction.
+
+                        SCIENCE PRESERVED:
+                        - Gollwitzer 1999 implementation intentions: the
+                          visible reasoning IS the if-then pattern made
+                          explicit, training the user to internalize it.
+                        - Norman affordance perception: primary action +
+                          reasoning + override is a clean three-element
+                          hierarchy; no scanning, no menu.
+                        - Heider 1958 attribution: when the app names WHY
+                          before the action, the user can credit the
+                          system's read rather than defaulting to "I just
+                          knew what to do" (which erases the practice).
+                        - Brewer 2011 DMN: one primary action with reasoning
+                          short-circuits the self-evaluation loop that
+                          would otherwise fire if the user had to choose
+                          among 15 surfaces.
+
+                        FIVE LOSSES REDUCED at the open-app moment:
+                        - Clarity: app names the read + names the next
+                          move. User sees both at once.
+                        - Composure: no scanning a dashboard at activation.
+                        - Patience: one tap to tool, override visible.
+                        - Time: app makes the decision; user follows.
+                        - Money: practice feels guided from the moment
+                          they open it. */}
+                    {(() => {
+                      const bioFilter = getActiveBioFilter();
+                      const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+                      const hasPain = bioFilter.includes("pain");
+
+                      // Build reasoning string. Names what the app is reading
+                      // and what it concluded. Operator-tier register — direct
+                      // observation, no padding, no drama.
+                      let reasoning = null;
+                      if (isThoughtFirst) {
+                        if (offBaseline) {
+                          if (hasPain) reasoning = "Pain bio-filter — body work first.";
+                          else if (bioFilter.includes("activated")) reasoning = "Activated bio-filter — settle the system first.";
+                          else if (bioFilter.includes("depleted")) reasoning = "Depleted bio-filter — somatic intervention is lower demand.";
+                          else if (bioFilter.includes("sleep")) reasoning = "Sleep-deprived bio-filter — settle before thinking.";
+                          else if (bioFilter.includes("medicated")) reasoning = "Medicated bio-filter — calm path.";
+                          else reasoning = "Bio-filter off-baseline — body first.";
+                        } else {
+                          reasoning = "Bio-filter clear · calibration thought-first.";
+                        }
+                      } else if (isBodyFirst) {
+                        if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
+                          if (hasPain) reasoning = "Pain bio-filter — Body Scan maps the signal.";
+                          else reasoning = "Signal unnamed — Body Scan locates it.";
+                        } else if (offBaseline) {
+                          reasoning = "Bio-filter off-baseline · body-first calibration.";
+                        } else {
+                          reasoning = "Bio-filter clear · calibration body-first.";
+                        }
+                      } else {
+                        reasoning = "Start where it lands.";
+                      }
+
+                      if (!reasoning) return null;
+                      return (
+                        <div style={{
+                          fontSize: 11,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: "0.08em",
+                          color: "var(--text-muted)",
+                          textAlign: "center",
+                          marginBottom: 10,
+                          opacity: 0.9
+                        }}>
+                          {reasoning}
+                        </div>
+                      );
+                    })()}
+
                     {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
                     <button onClick={() => {
                       const bioFilter = getActiveBioFilter();
@@ -22232,6 +22325,35 @@ const isSignalProfileConfigured = () => {
                       })()}
                     </button>
 
+                    {/* Not quite right override (Ship 2, May 11, 2026) —
+                        opens existing Support Sheet for direct tool access.
+                        The Support Sheet was previously rendered but had no
+                        trigger anywhere in the codebase — effectively dead
+                        code. This wires it as the spine's override pathway:
+                        one tap from the proposed action to user-driven
+                        correction. Per the locked spec: "App proposes ONE
+                        action with reasoning. User always retains override
+                        authority." */}
+                    <button
+                      onClick={() => setShowSupportSheet(true)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "var(--text-muted)",
+                        fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: "0.08em",
+                        cursor: "pointer",
+                        padding: "8px 12px",
+                        marginTop: 4,
+                        display: "block",
+                        marginLeft: "auto",
+                        marginRight: "auto",
+                        WebkitTapHighlightColor: "transparent"
+                      }}
+                    >
+                      Not quite right →
+                    </button>
 
                   </>
                 )}
