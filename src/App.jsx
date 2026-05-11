@@ -17728,6 +17728,14 @@ export default function Stillform() {
   });
   const [showBioFilterSuggestion, setShowBioFilterSuggestion] = useState(null);
   const [showSupportSheet, setShowSupportSheet] = useState(false);
+  // Ship 4 (May 11, 2026) — 2-tap intake modal for spine override.
+  // When user taps "Not quite right →" below the hero CTA, this opens
+  // a focused 2-tap question ("What's true right now? Mind crowded /
+  // Body charged") that re-routes the spine. Lower friction than the
+  // full Support Sheet for the common "you read me wrong" case.
+  // Support Sheet remains accessible via the modal's "Show all tools"
+  // link for users who want full direct-access menu.
+  const [showSpineIntake, setShowSpineIntake] = useState(false);
   const [pendingNextMoveFollowUpSession, setPendingNextMoveFollowUpSession] = useState(() => getPendingNextMoveFollowUpSession());
 
   useEffect(() => {
@@ -22697,17 +22705,17 @@ const isSignalProfileConfigured = () => {
                       })()}
                     </button>
 
-                    {/* Not quite right override (Ship 2, May 11, 2026) —
-                        opens existing Support Sheet for direct tool access.
-                        The Support Sheet was previously rendered but had no
-                        trigger anywhere in the codebase — effectively dead
-                        code. This wires it as the spine's override pathway:
-                        one tap from the proposed action to user-driven
-                        correction. Per the locked spec: "App proposes ONE
-                        action with reasoning. User always retains override
-                        authority." */}
+                    {/* Not quite right override (Ship 2, May 11, 2026;
+                        upgraded Ship 4) — opens the 2-tap spine intake modal
+                        ("What's true right now?" + Mind crowded / Body charged
+                        + Show all tools link). This is the hybrid intake's
+                        correction pathway per the locked spec: the app
+                        proposes one action with reasoning; if the read was
+                        wrong, the user names which type of state they're in,
+                        and the spine re-routes. Support Sheet remains
+                        accessible from inside the intake modal. */}
                     <button
-                      onClick={() => setShowSupportSheet(true)}
+                      onClick={() => setShowSpineIntake(true)}
                       style={{
                         background: "none",
                         border: "none",
@@ -22730,6 +22738,160 @@ const isSignalProfileConfigured = () => {
                   </>
                 )}
               </div>
+
+              {/* Ship 4 (May 11, 2026) — 2-tap spine intake modal.
+                  Opens from "Not quite right →" below the hero CTA.
+                  Two-question hybrid intake per the locked spec:
+                  app proposes one action with reasoning; when wrong,
+                  user names cognitive vs somatic state in one tap;
+                  spine re-routes. "Show all tools" link inside provides
+                  Support Sheet access for users who want full menu.
+
+                  SCIENCE:
+                  - Two-pathway routing (Price & Hooven 2018, Webb 2012,
+                    Science Sheet line 200): "Routing by current state —
+                    not fixed type." This is the user-asserted moment for
+                    that routing override.
+                  - Kahneman System 1/2: two large buttons, one tap,
+                    no choosing among 5+ tools. System 1 friendly.
+                  - Norman affordance: two-button forced choice with a
+                    clear escape hatch (Show all tools). */}
+              {showSpineIntake && (
+                <div
+                  style={{
+                    position: "fixed", inset: 0, zIndex: 200,
+                    background: "rgba(0,0,0,0.7)", display: "flex",
+                    alignItems: "center", justifyContent: "center",
+                    padding: 24
+                  }}
+                  onClick={() => setShowSpineIntake(false)}
+                >
+                  <div
+                    onClick={e => e.stopPropagation()}
+                    style={{
+                      background: "var(--surface)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r-lg)",
+                      padding: "32px 28px",
+                      width: "100%",
+                      maxWidth: 420
+                    }}
+                  >
+                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 18, textAlign: "center" }}>
+                      Recalibrating
+                    </div>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 26,
+                      fontWeight: 300,
+                      color: "var(--text)",
+                      lineHeight: 1.3,
+                      marginBottom: 24,
+                      textAlign: "center"
+                    }}>
+                      What's true right now?
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        try {
+                          window.plausible("Spine Intake", { props: { choice: "mind-crowded" } });
+                        } catch {}
+                        setShowSpineIntake(false);
+                        setPathway("clarity");
+                        setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
+                        setScreen("tool");
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "var(--surface2)",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)",
+                        padding: "20px 18px",
+                        marginBottom: 12,
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        textAlign: "center",
+                        color: "var(--amber)",
+                        fontSize: 16,
+                        fontWeight: 400,
+                        WebkitTapHighlightColor: "transparent"
+                      }}
+                    >
+                      Mind crowded
+                      <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.02em" }}>
+                        → Reframe
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        try {
+                          window.plausible("Spine Intake", { props: { choice: "body-charged" } });
+                        } catch {}
+                        setShowSpineIntake(false);
+                        setPathway("calm");
+                        startTool(TOOLS.find(t => t.id === "breathe"));
+                      }}
+                      style={{
+                        width: "100%",
+                        background: "var(--surface2)",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)",
+                        padding: "20px 18px",
+                        marginBottom: 18,
+                        cursor: "pointer",
+                        fontFamily: "'DM Sans', sans-serif",
+                        textAlign: "center",
+                        color: "var(--amber)",
+                        fontSize: 16,
+                        fontWeight: 400,
+                        WebkitTapHighlightColor: "transparent"
+                      }}
+                    >
+                      Body charged
+                      <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.02em" }}>
+                        → Breathe
+                      </div>
+                    </button>
+
+                    <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "center" }}>
+                      <button
+                        onClick={() => {
+                          try {
+                            window.plausible("Spine Intake", { props: { choice: "show-all-tools" } });
+                          } catch {}
+                          setShowSpineIntake(false);
+                          setShowSupportSheet(true);
+                        }}
+                        style={{
+                          background: "none", border: "none",
+                          color: "var(--text-muted)", fontSize: 11,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: "0.08em", cursor: "pointer",
+                          padding: "8px 0",
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >
+                        Show all tools →
+                      </button>
+                      <button
+                        onClick={() => setShowSpineIntake(false)}
+                        style={{
+                          background: "none", border: "none",
+                          color: "var(--text-muted)", fontSize: 11,
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          letterSpacing: "0.08em", cursor: "pointer",
+                          padding: "8px 0",
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* SUPPORT SHEET — secondary fast-lane, discreet */}
               {showSupportSheet && (
