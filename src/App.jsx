@@ -10270,7 +10270,21 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [showStateToStatement, setShowStateToStatement] = useState(false);
   // Phase 2f — trigger-tagged sessions. selectedTriggerId is read by saveSession
   // to write triggerId onto the session record. Optional; null if user skips.
+  // Ship 1.3 (May 11, 2026) — selectedTriggerId is now set by the user
+  // confirming an AI-inferred trigger at close ('About: [label]? [Yes]/[Edit]')
+  // rather than the previous manual chip-tagger that Ship 1.2 stripped.
   const [selectedTriggerId, setSelectedTriggerId] = useState(null);
+  // Ship 1.3 — AI trigger inference result. Shape:
+  //   null         → not yet fired (or skipped for handoff path)
+  //   "pending"    → call in flight
+  //   { inferredTriggerId, confidence, reasoning } → result returned
+  // Client renders one-tap confirm only when confidence === "high" AND
+  // inferredTriggerId is non-null. All other states stay silent.
+  const [triggerInferenceResult, setTriggerInferenceResult] = useState(null);
+  // Ship 1.3 — Edit picker visibility. When user taps "Edit" on the
+  // inferred-trigger confirm, this opens a chip selector showing all
+  // triggers in the profile + "None of these" option.
+  const [triggerEditPickerOpen, setTriggerEditPickerOpen] = useState(false);
   // Phase 2c — Reframe close trigger prompt. Toggles inline TriggerForm so
   // user can name a new trigger from session close moment. Auto-selects the
   // newly-added trigger so it tags the current session.
@@ -10738,6 +10752,106 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSavedIds(new Set());
     setError(null);
   }, [effectiveMode]);
+
+  // Ship 1.3 (May 11, 2026) — AI trigger inference at What Shifted open.
+  //
+  // Fires when:
+  //   - showStateToStatement just became true (user reached close screen)
+  //   - we haven't already inferred for this session (null result)
+  //   - inference is gated on the LANDED path only (delta >= 1.0). The
+  //     handoff path keeps two-button UI clean; Stage 3 marker is about
+  //     "pre→post delta ≥ 1.5 on named-trigger sessions average" which is
+  //     intrinsically a landed-session metric. Low-delta sessions wouldn't
+  //     contribute meaningful data to that average even if tagged.
+  //
+  // Calls the netlify infer-trigger function with the user's Trigger Profile
+  // + recent messages. Server returns { inferredTriggerId, confidence,
+  // reasoning }. The render layer only shows the confirm UI on
+  // confidence === "high"; everything else stays silent.
+  //
+  // SCIENCE: Heider 1958 attribution — tagging trigger data with explicit
+  // user confirmation preserves the visibility of WHAT the practice is
+  // covering. Silent storage would feed Stage 3 markers but the user
+  // wouldn't see the linkage between this Reframe and that trigger, so
+  // their later attribution of progress would skip "the app helped me with
+  // the 2pm meeting" in favor of generic "I just got better at meetings."
+  // One-tap confirm is the lowest-friction way to keep the linkage legible.
+  useEffect(() => {
+    if (!showStateToStatement) return;
+    if (triggerInferenceResult !== null) return; // already fired or has result
+
+    // Gate on landed path. preRating / postRating both numeric, delta >= 1.0.
+    const preNum = Number(preRating);
+    const postNum = Number(postRating);
+    if (!Number.isFinite(preNum) || !Number.isFinite(postNum)) return;
+    if (postNum - preNum < 1.0) return; // handoff path — skip inference
+
+    let triggers = [];
+    try {
+      triggers = (getTriggerProfile()?.triggers || []).map(t => ({
+        id: t.id,
+        label: t.label,
+        category: t.category || null,
+        description: t.description || null
+      }));
+    } catch {}
+    if (triggers.length === 0) return; // nothing to match against
+
+    if (!Array.isArray(messages) || messages.length === 0) return; // no transcript
+
+    // Mark pending so we don't double-fire
+    setTriggerInferenceResult("pending");
+
+    // Truncate transcript — last 12 messages, each capped at 500 chars
+    // (matches server-side cap; defense in depth).
+    const transcriptPayload = messages
+      .slice(-12)
+      .map(m => ({
+        role: m.role === "user" ? "user" : "assistant",
+        content: String(m.content || "").slice(0, 500)
+      }));
+
+    fetch("/.netlify/functions/infer-trigger", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        triggers,
+        recentMessages: transcriptPayload,
+        preState: feelState || null,
+        postState: postRating || null,
+        regulationType: regulationType || null
+      })
+    })
+      .then(r => r.ok ? r.json() : Promise.reject(r.status))
+      .then(data => {
+        setTriggerInferenceResult({
+          inferredTriggerId: data?.inferredTriggerId || null,
+          confidence: data?.confidence === "high" ? "high" : "low",
+          reasoning: data?.reasoning || null
+        });
+        try {
+          window.plausible("Trigger Inference Result", {
+            props: {
+              has_match: data?.inferredTriggerId ? "yes" : "no",
+              confidence: data?.confidence || "unknown"
+            }
+          });
+        } catch {}
+      })
+      .catch(() => {
+        // Network or server failure — set a null-result so we don't retry
+        // this session. Silent for the user.
+        setTriggerInferenceResult({
+          inferredTriggerId: null,
+          confidence: "low",
+          reasoning: "fetch failed"
+        });
+      });
+    // Intentionally not depending on every state — runs once when What
+    // Shifted opens with valid landed-path data. The triggerInferenceResult
+    // null check guards against re-fire.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showStateToStatement]);
 
   // Voice input
   const speech = useSpeechToText((transcript) => {
@@ -11622,6 +11736,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSelectedTriggerId(null);
     setSelectedPattern(null);
     setShowAddTriggerForm(false);
+    setTriggerInferenceResult(null);
+    setTriggerEditPickerOpen(false);
     resetStateToStatementTracking();
     queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-complete");
   };
@@ -11694,6 +11810,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSelectedTriggerId(null);
     setSelectedPattern(null);
     setShowAddTriggerForm(false);
+    setTriggerInferenceResult(null);
+    setTriggerEditPickerOpen(false);
     resetStateToStatementTracking();
 
     // Direct exit — skip Next Move + Lock-in + Debrief Gate. Parent's
@@ -11742,6 +11860,8 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setSelectedTriggerId(null);
     setSelectedPattern(null);
     setShowAddTriggerForm(false);
+    setTriggerInferenceResult(null);
+    setTriggerEditPickerOpen(false);
     resetStateToStatementTracking();
     queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-skip");
   };
@@ -11987,11 +12107,190 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
           </>
         ) : (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <button className="btn btn-primary" onClick={finishStateToStatement}>
-              Finish session
-            </button>
-          </div>
+          <>
+            {/* Ship 1.3 (May 11, 2026) — AI trigger inference one-tap confirm.
+                Only renders on the landed path (delta >= 1.0). The effect
+                at ReframeTool top fires the netlify infer-trigger call when
+                What Shifted opens. UI states:
+
+                triggerInferenceResult === "pending"
+                  → silent (don't show a spinner — most cases resolve in
+                    1-2s, and the screen has the Finish session button
+                    available throughout. Loading shimmer would just be
+                    visual noise.)
+
+                triggerInferenceResult === null OR low confidence OR no match
+                  → silent. Stage 3 doesn't fire for this session; honest
+                    silence is better than fabricated tagging.
+
+                High confidence + inferredTriggerId set:
+                  → render "About: [label]? [Yes] [Edit]"
+                  → Yes: setSelectedTriggerId(inferredId), confirm UI
+                    collapses to "✓ Tagged: [label]"
+                  → Edit: opens chip picker with all triggers + None.
+
+                Tagging captures via existing selectedTriggerId state which
+                is read by saveSession (line ~10580) — no new persistence
+                code needed. */}
+            {(() => {
+              const result = triggerInferenceResult;
+              if (!result || result === "pending") return null;
+              if (typeof result !== "object") return null;
+              if (result.confidence !== "high") return null;
+              if (!result.inferredTriggerId) return null;
+
+              // Read trigger profile to display the label.
+              let triggers = [];
+              try { triggers = (getTriggerProfile()?.triggers || []); } catch {}
+              const inferred = triggers.find(t => t.id === result.inferredTriggerId);
+              if (!inferred) return null; // safety — trigger may have been deleted
+
+              // Confirmed (user tapped Yes or picked from Edit picker).
+              if (selectedTriggerId && !triggerEditPickerOpen) {
+                const confirmedTrigger = triggers.find(t => t.id === selectedTriggerId);
+                if (!confirmedTrigger) return null;
+                return (
+                  <div style={{
+                    fontSize: 11,
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: "0.08em",
+                    color: "var(--amber)",
+                    marginBottom: 16,
+                    padding: "10px 14px",
+                    background: "var(--amber-glow)",
+                    border: "0.5px solid var(--amber-dim)",
+                    borderRadius: "var(--r)",
+                  }}>
+                    ✓ Tagged: {confirmedTrigger.label}
+                  </div>
+                );
+              }
+
+              // Edit picker open — show all triggers + None of these.
+              if (triggerEditPickerOpen) {
+                return (
+                  <div style={{
+                    marginBottom: 16,
+                    padding: "12px 14px",
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)",
+                    background: "var(--surface)",
+                  }}>
+                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
+                      Which trigger?
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {triggers.slice(0, 8).map(t => (
+                        <button
+                          key={t.id}
+                          onClick={() => {
+                            setSelectedTriggerId(t.id);
+                            setTriggerEditPickerOpen(false);
+                            try {
+                              window.plausible("Trigger Confirm", {
+                                props: { path: "edit-picked", same_as_inferred: t.id === result.inferredTriggerId ? "yes" : "no" }
+                              });
+                            } catch {}
+                          }}
+                          style={{
+                            background: "transparent",
+                            border: "0.5px solid var(--border)",
+                            borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                            color: "var(--text-muted)",
+                            cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                            letterSpacing: "0.04em"
+                          }}
+                        >
+                          {t.label}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => {
+                          setSelectedTriggerId(null);
+                          setTriggerEditPickerOpen(false);
+                          try {
+                            window.plausible("Trigger Confirm", { props: { path: "edit-none" } });
+                          } catch {}
+                        }}
+                        style={{
+                          background: "transparent",
+                          border: "0.5px dashed var(--border)",
+                          borderRadius: 99, padding: "5px 12px", fontSize: 11,
+                          color: "var(--text-dim)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          letterSpacing: "0.04em"
+                        }}
+                      >
+                        None of these
+                      </button>
+                    </div>
+                  </div>
+                );
+              }
+
+              // Confirm prompt — Yes / Edit.
+              return (
+                <div style={{
+                  marginBottom: 16,
+                  padding: "12px 14px",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  background: "var(--surface)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  flexWrap: "wrap"
+                }}>
+                  <div style={{ fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", flex: 1, minWidth: 0 }}>
+                    About: <span style={{ color: "var(--amber)" }}>{inferred.label}</span>?
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => {
+                        setSelectedTriggerId(result.inferredTriggerId);
+                        try {
+                          window.plausible("Trigger Confirm", { props: { path: "yes" } });
+                        } catch {}
+                      }}
+                      style={{
+                        background: "var(--amber-glow)",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12,
+                        color: "var(--amber)", fontWeight: 500,
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Yes
+                    </button>
+                    <button
+                      onClick={() => {
+                        setTriggerEditPickerOpen(true);
+                        try {
+                          window.plausible("Trigger Confirm", { props: { path: "edit-opened" } });
+                        } catch {}
+                      }}
+                      style={{
+                        background: "transparent",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "6px 14px", fontSize: 12,
+                        color: "var(--text-muted)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+                      }}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button className="btn btn-primary" onClick={finishStateToStatement}>
+                Finish session
+              </button>
+            </div>
+          </>
         )}
 
       </div>
