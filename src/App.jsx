@@ -11362,25 +11362,24 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     setExternalAnchorSent(false);
     setStateToStatementExpanded(false);
     setPostSessionInsight(null);
-    // Phase 2c — Trigger Profile prompt gate. If the user actually engaged
-    // with Reframe (≥1 user message), surface the prompt before advancing
-    // to debrief / Next Move. Submit or skip resumes the original next-step
-    // decision via reframeTriggerPromptResumeRef. If 0 user messages (rare
-    // — quick close without engagement), advance directly with no prompt.
-    const userMessageCount = messages.filter(m => m && m.role === "user").length;
-    const advance = () => {
-      if (hadInlineNextMove) {
-        queueDebriefAndCompleteNow(resolvePostReframeRoute(), "reframe-merged-finish");
-      } else {
-        queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
-      }
-    };
-    if (userMessageCount >= 1) {
-      reframeTriggerPromptResumeRef.current = advance;
-      setReframeTriggerPromptOpen(true);
-      try { window.plausible("Trigger Prompt Shown", { props: { surface: "reframe-close" } }); } catch {}
+    // Phase 2c trigger prompt RETIRED FROM CLOSE FLOW (Ship 1, May 12, 2026).
+    // Previously this fired a "One more — name this trigger" modal after Finish
+    // when userMessageCount >= 1. Removed per spine inversion: the close was
+    // accumulating multiple optional categorization steps (chip + insight +
+    // next-move + lock-in + state-to-statement + trigger prompt) which is
+    // System 2 work piled on the user immediately after regulation, when they
+    // are in System 1 post-regulation state (Kahneman). Affect labeling
+    // (Lieberman 2007) is preserved via the post-state chip and one-line
+    // state-to-statement; trigger naming relocates to a deliberate
+    // retrospective annotation surface in My Progress (separate ship), where
+    // the user can review and name sessions when they actually want to.
+    // The render block at line ~12264 stays in place (also unreachable now)
+    // for clean revert if data integrity testing requires re-instating, or
+    // removal in a follow-up cleanup commit.
+    if (hadInlineNextMove) {
+      queueDebriefAndCompleteNow(resolvePostReframeRoute(), "reframe-merged-finish");
     } else {
-      advance();
+      queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-merged-finish");
     }
   };
 
@@ -11650,107 +11649,6 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                   }}
                 >
                   {t.label}
-                </button>
-              ))}
-              {/* Phase 2c — Reframe close trigger prompt. Single chip that
-                  expands inline TriggerForm. Lets user name a new trigger from
-                  the moment they realize one, instead of routing to Settings. */}
-              <button
-                onClick={() => setShowAddTriggerForm(prev => !prev)}
-                style={{
-                  background: showAddTriggerForm ? "var(--amber-dim)" : "transparent",
-                  border: `0.5px dashed ${showAddTriggerForm ? "var(--amber)" : "var(--border)"}`,
-                  borderRadius: 99, padding: "5px 12px", fontSize: 11,
-                  color: showAddTriggerForm ? "var(--amber)" : "var(--text-muted)",
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: "0.04em"
-                }}
-              >
-                {showAddTriggerForm ? "− Cancel" : "+ Name a new trigger"}
-              </button>
-            </div>
-            {showAddTriggerForm && (
-              <div style={{ marginTop: 12 }}>
-                <TriggerForm
-                  autoFocus
-                  submitLabel="Add and select"
-                  cancelLabel="Cancel"
-                  onSubmit={({ label, category }) => {
-                    try {
-                      const result = addTrigger({ label, category });
-                      if (result?.id) {
-                        setSelectedTriggerId(result.id);
-                        try { window.plausible("Trigger Added", { props: { source: "reframe-close" } }); } catch {}
-                      }
-                    } catch {}
-                    setShowAddTriggerForm(false);
-                  }}
-                  onCancel={() => setShowAddTriggerForm(false)}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Empty-state path — user has no triggers yet but might realize one
-            now. Phase 2c with no profile to choose from. */}
-        {userTriggers.length === 0 && (
-          <div style={{ marginBottom: 16 }}>
-            {!showAddTriggerForm ? (
-              <button
-                onClick={() => setShowAddTriggerForm(true)}
-                style={{
-                  background: "transparent", border: "0.5px dashed var(--border)",
-                  borderRadius: 99, padding: "5px 12px", fontSize: 11,
-                  color: "var(--text-muted)", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
-                }}
-              >
-                + Did this session reveal a new trigger to name?
-              </button>
-            ) : (
-              <div>
-                <TriggerForm
-                  autoFocus
-                  submitLabel="Add and select"
-                  cancelLabel="Cancel"
-                  onSubmit={({ label, category }) => {
-                    try {
-                      const result = addTrigger({ label, category });
-                      if (result?.id) {
-                        setSelectedTriggerId(result.id);
-                        try { window.plausible("Trigger Added", { props: { source: "reframe-close" } }); } catch {}
-                      }
-                    } catch {}
-                    setShowAddTriggerForm(false);
-                  }}
-                  onCancel={() => setShowAddTriggerForm(false)}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {userPatterns.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
-              Did you catch yourself running a pattern?
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {userPatterns.map(p => (
-                <button
-                  key={p}
-                  onClick={() => setSelectedPattern(selectedPattern === p ? null : p)}
-                  style={{
-                    background: selectedPattern === p ? "var(--amber-dim)" : "transparent",
-                    border: `0.5px solid ${selectedPattern === p ? "var(--amber)" : "var(--border)"}`,
-                    borderRadius: 99, padding: "5px 12px", fontSize: 11,
-                    color: selectedPattern === p ? "var(--amber)" : "var(--text-muted)",
-                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                    letterSpacing: "0.04em"
-                  }}
-                >
-                  {p}
                 </button>
               ))}
             </div>
