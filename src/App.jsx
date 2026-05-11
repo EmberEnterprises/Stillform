@@ -15754,6 +15754,120 @@ function MyProgress({ onBack }) {
         </div>
       ) : (<>
 
+        {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
+            STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
+            May 9). Architecture line 274: "Roadmap surface (stage display +
+            markers + what's next per stage) — new framing, existing data."
+            Reads from getCurrentStage() which already powers the Mirror
+            strip on home, but here surfaces the full markers + next-stage
+            preview. Tap to open the full Roadmap screen for detail. */}
+        {(() => {
+          let snap = null;
+          try { snap = getCurrentStage(); } catch { return null; }
+          if (!snap || !snap.stage) return null;
+
+          const atTop = snap.currentStageId === 5 && snap.highestStageMet === 5;
+          const shippedMarkers = snap.markers.filter(m => m.status === "shipped");
+          const metMarkers = shippedMarkers.filter(m => m.met);
+          const unmetMarkers = shippedMarkers.filter(m => !m.met);
+
+          return (
+            <button
+              onClick={() => setScreen("roadmap")}
+              aria-label={`Stage ${snap.currentStageId} of 5: ${snap.stage.name}. Tap to open full roadmap.`}
+              style={{
+                width: "100%",
+                marginBottom: 20,
+                background: "var(--surface)",
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r-lg)",
+                padding: "18px 18px",
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "border-color var(--motion-default) var(--ease-prestige)",
+                WebkitTapHighlightColor: "transparent",
+                display: "block"
+              }}
+            >
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "baseline",
+                marginBottom: 10
+              }}>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em" }}>
+                  Stage {snap.currentStageId} of 5
+                </div>
+                <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.08em" }}>
+                  {atTop ? "maintained" : `${snap.progress.percent}% to ${snap.nextStage ? snap.nextStage.name.toLowerCase() : ""}`}
+                </div>
+              </div>
+
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 24,
+                fontWeight: 300,
+                color: "var(--text)",
+                marginBottom: 4
+              }}>
+                {snap.stage.name}
+              </div>
+
+              {snap.stage.capacity && (
+                <div className="t-body-sm quiet" style={{ marginBottom: 14, lineHeight: 1.5 }}>
+                  {snap.stage.capacity}
+                </div>
+              )}
+
+              {/* What you have met — the markers that crossed threshold */}
+              {metMarkers.length > 0 && (
+                <div style={{ marginBottom: unmetMarkers.length > 0 ? 12 : 0 }}>
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 6 }}>
+                    Met
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {metMarkers.map(m => (
+                      <div key={m.id} style={{ fontSize: 12, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "baseline", gap: 8 }}>
+                        <span style={{ color: "var(--amber)", fontSize: 10 }}>✓</span>
+                        <span style={{ lineHeight: 1.5 }}>{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* What's next — the markers still to cross */}
+              {unmetMarkers.length > 0 && (
+                <div>
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 6 }}>
+                    What's next
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    {unmetMarkers.map(m => (
+                      <div key={m.id} style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif", display: "flex", alignItems: "baseline", gap: 8 }}>
+                        <span style={{ color: "var(--text-dim)", fontSize: 10 }}>○</span>
+                        <span style={{ lineHeight: 1.5 }}>{m.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div style={{
+                marginTop: 14,
+                paddingTop: 12,
+                borderTop: "0.5px solid var(--border-printed)",
+                fontSize: 10,
+                color: "var(--text-muted)",
+                letterSpacing: "0.08em",
+                fontFamily: "'IBM Plex Mono', monospace"
+              }}>
+                Tap to see all five stages →
+              </div>
+            </button>
+          );
+        })()}
+
         {/* PROOF AREAS — top focus */}
         <div style={{ marginBottom: 20, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "14px 14px 12px" }}>
           <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>
