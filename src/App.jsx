@@ -17185,14 +17185,14 @@ function RoadmapScreen({ onBack }) {
 // returns a redirect payload instead of a script. The frontend
 // honors that and shows a crisis-resources card, not the script UI.
 function ScriptsTool({ onBack }) {
-  const [recipient, setRecipient] = React.useState("");
-  const [situation, setSituation] = React.useState("");
-  const [outcome, setOutcome] = React.useState("");
-  const [channel, setChannel] = React.useState("text");
-  const [loading, setLoading] = React.useState(false);
-  const [result, setResult] = React.useState(null); // { script, tone, note, isCrisis }
-  const [error, setError] = React.useState(null);
-  const [copied, setCopied] = React.useState(false);
+  const [recipient, setRecipient] = useState("");
+  const [situation, setSituation] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [channel, setChannel] = useState("text");
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null); // { script, tone, note, isCrisis }
+  const [error, setError] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   const apiUrl = (() => {
     try {
