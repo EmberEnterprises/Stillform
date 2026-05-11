@@ -16618,6 +16618,16 @@ function QBPill({ onPress }) {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && typeof saved.x === "number" && typeof saved.y === "number") {
+        // One-time migration (May 9, 2026) — pre-May-9 default put the pill at
+        // y: 80 which now collides with the Mirror status strip and top nav.
+        // If a saved position is in the collision zone, reset to current
+        // default. New users go straight to the default; only legacy positions
+        // get migrated.
+        if (saved.y < 140) {
+          const W = typeof window !== "undefined" ? window.innerWidth : 400;
+          const H = typeof window !== "undefined" ? window.innerHeight : 800;
+          return clamp({ x: W - 160, y: H - 140 });
+        }
         return clamp(saved);
       }
     } catch {}
@@ -21905,154 +21915,6 @@ const isSignalProfileConfigured = () => {
               })()}
 
 
-              {/* ── MOVE CARD — engagement architecture Engine 2 (Application Layer), surface 1.
-                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 132-134:
-                  "Single 30-90-second somatic move generated for the user's current
-                  state, available anywhere (bathroom at work, car, between calls).
-                  Disruptor tool concept as a takeaway, not just at pattern-detection
-                  time."
-
-                  Mechanism: launches existing DisruptorTool (src/disruptor/DisruptorTool.jsx)
-                  with patternId=null + dimension=null. The null patternId is the signal
-                  that this is self-initiated, which is also what the S4 Stage marker
-                  "self-initiated-disruptor" tracks (master todo, line 3802 helper).
-
-                  Voice: prestige-operator. Declarative. Experience first. Science is the
-                  language not the authority. Mirrors the Quick Reset breathing card style.
-
-                  Placement decision: between Mirror anchor (status) and Main Hero (pathway
-                  selection). The user reads: where am I (Mirror) → if I just need to move
-                  right now (Move card) → otherwise pick a pathway (Hero). */}
-              <button
-                onClick={() => {
-                  setSurfacedPattern(null);
-                  setDisruptorActive(true);
-                  try { window.plausible?.("Move Card Tapped", { props: { source: "home" } }); } catch {}
-                }}
-                aria-label="Move now — 90-second body-led disruption"
-                style={{
-                  width: "100%", marginBottom: 24,
-                  padding: "16px 18px",
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r-lg)",
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  textAlign: "left",
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                  WebkitTapHighlightColor: "transparent",
-                  transition: "border-color var(--motion-default) var(--ease-prestige)"
-                }}
-              >
-                <div>
-                  <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: "var(--amber)",
-                    marginBottom: 6
-                  }}>
-                    Move
-                  </div>
-                  <div style={{
-                    fontSize: 15,
-                    color: "var(--text)",
-                    lineHeight: 1.35,
-                    marginBottom: 4,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontStyle: "italic",
-                    letterSpacing: "0.01em"
-                  }}>
-                    Disrupt the loop.
-                  </div>
-                  <div style={{
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                    lineHeight: 1.5
-                  }}>
-                    90 seconds, body-led. What thinking can't reach, the body can.
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}>
-                  →
-                </div>
-              </button>
-
-
-              {/* ── SCRIPTS CARD — engagement architecture Engine 2 (Application Layer), surface 2.
-                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
-                  "Scripts: Extension of State to Statement. Given a situation,
-                  generate verbatim language for the hard conversation. Either
-                  ready-to-send or starting point."
-
-                  Mechanism: opens ScriptsTool screen (defined at App.jsx ~line 15101).
-                  Calls /.netlify/functions/scripts which returns a single deployable
-                  message + tone label + optional context note.
-
-                  Voice: prestige-operator, mirrors Move card style. Same eyebrow +
-                  Cormorant italic headline + DM Sans subtitle pattern. */}
-              <button
-                onClick={() => {
-                  setScreen("scripts");
-                  try { window.plausible?.("Scripts Card Tapped", { props: { source: "home" } }); } catch {}
-                }}
-                aria-label="Scripts — generate the hard line you need to send or say"
-                style={{
-                  width: "100%", marginBottom: 24,
-                  padding: "16px 18px",
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r-lg)",
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  textAlign: "left",
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                  WebkitTapHighlightColor: "transparent",
-                  transition: "border-color var(--motion-default) var(--ease-prestige)"
-                }}
-              >
-                <div>
-                  <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: "var(--amber)",
-                    marginBottom: 6
-                  }}>
-                    Scripts
-                  </div>
-                  <div style={{
-                    fontSize: 15,
-                    color: "var(--text)",
-                    lineHeight: 1.35,
-                    marginBottom: 4,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontStyle: "italic",
-                    letterSpacing: "0.01em"
-                  }}>
-                    Make the hard line land.
-                  </div>
-                  <div style={{
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                    lineHeight: 1.5
-                  }}>
-                    Tell the system the situation. Get one deployable line back.
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}>
-                  →
-                </div>
-              </button>
-
 
               {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
@@ -22248,6 +22110,154 @@ const isSignalProfileConfigured = () => {
                   onSubmit={handleNextMoveFollowUpSubmit}
                 />
               )}
+
+              {/* ── MOVE CARD — engagement architecture Engine 2 (Application Layer), surface 1.
+                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 132-134:
+                  "Single 30-90-second somatic move generated for the user's current
+                  state, available anywhere (bathroom at work, car, between calls).
+                  Disruptor tool concept as a takeaway, not just at pattern-detection
+                  time."
+
+                  Mechanism: launches existing DisruptorTool (src/disruptor/DisruptorTool.jsx)
+                  with patternId=null + dimension=null. The null patternId is the signal
+                  that this is self-initiated, which is also what the S4 Stage marker
+                  "self-initiated-disruptor" tracks (master todo, line 3802 helper).
+
+                  Voice: prestige-operator. Declarative. Experience first. Science is the
+                  language not the authority. Mirrors the Quick Reset breathing card style.
+
+                  Placement decision: between Mirror anchor (status) and Main Hero (pathway
+                  selection). The user reads: where am I (Mirror) → if I just need to move
+                  right now (Move card) → otherwise pick a pathway (Hero). */}
+              <button
+                onClick={() => {
+                  setSurfacedPattern(null);
+                  setDisruptorActive(true);
+                  try { window.plausible?.("Move Card Tapped", { props: { source: "home" } }); } catch {}
+                }}
+                aria-label="Move now — 90-second body-led disruption"
+                style={{
+                  width: "100%", marginBottom: 24,
+                  padding: "16px 18px",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  textAlign: "left",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                  WebkitTapHighlightColor: "transparent",
+                  transition: "border-color var(--motion-default) var(--ease-prestige)"
+                }}
+              >
+                <div>
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--amber)",
+                    marginBottom: 6
+                  }}>
+                    Move
+                  </div>
+                  <div style={{
+                    fontSize: 15,
+                    color: "var(--text)",
+                    lineHeight: 1.35,
+                    marginBottom: 4,
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic",
+                    letterSpacing: "0.01em"
+                  }}>
+                    Disrupt the loop.
+                  </div>
+                  <div style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.5
+                  }}>
+                    90 seconds, body-led. What thinking can't reach, the body can.
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  →
+                </div>
+              </button>
+
+
+              {/* ── SCRIPTS CARD — engagement architecture Engine 2 (Application Layer), surface 2.
+                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
+                  "Scripts: Extension of State to Statement. Given a situation,
+                  generate verbatim language for the hard conversation. Either
+                  ready-to-send or starting point."
+
+                  Mechanism: opens ScriptsTool screen (defined at App.jsx ~line 15101).
+                  Calls /.netlify/functions/scripts which returns a single deployable
+                  message + tone label + optional context note.
+
+                  Voice: prestige-operator, mirrors Move card style. Same eyebrow +
+                  Cormorant italic headline + DM Sans subtitle pattern. */}
+              <button
+                onClick={() => {
+                  setScreen("scripts");
+                  try { window.plausible?.("Scripts Card Tapped", { props: { source: "home" } }); } catch {}
+                }}
+                aria-label="Scripts — generate the hard line you need to send or say"
+                style={{
+                  width: "100%", marginBottom: 24,
+                  padding: "16px 18px",
+                  background: "var(--surface)",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)",
+                  cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif",
+                  textAlign: "left",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                  WebkitTapHighlightColor: "transparent",
+                  transition: "border-color var(--motion-default) var(--ease-prestige)"
+                }}
+              >
+                <div>
+                  <div style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: 9,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: "var(--amber)",
+                    marginBottom: 6
+                  }}>
+                    Scripts
+                  </div>
+                  <div style={{
+                    fontSize: 15,
+                    color: "var(--text)",
+                    lineHeight: 1.35,
+                    marginBottom: 4,
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic",
+                    letterSpacing: "0.01em"
+                  }}>
+                    Make the hard line land.
+                  </div>
+                  <div style={{
+                    fontSize: 12,
+                    color: "var(--text-muted)",
+                    lineHeight: 1.5
+                  }}>
+                    Tell the system the situation. Get one deployable line back.
+                  </div>
+                </div>
+                <div style={{
+                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}>
+                  →
+                </div>
+              </button>
 
 
 
