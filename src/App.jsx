@@ -17444,9 +17444,12 @@ function QBPill({ onPress }) {
         return clamp(saved);
       }
     } catch {}
-    // Safe default — bottom right, evaluated lazily and clamped for narrow viewports
+    // Safe default — bottom-right, below the home content fold so it doesn't
+    // overlap the Mirror surface at top of home. Saved position is honored
+    // first; only first-run / cleared-storage users hit this default.
     const W = typeof window !== "undefined" ? window.innerWidth : 400;
-    return clamp({ x: W - 160, y: 80 });
+    const H = typeof window !== "undefined" ? window.innerHeight : 800;
+    return clamp({ x: W - 160, y: H - 140 });
   };
 
   const [pos, setPos] = useState(getSavedPos);
@@ -19045,7 +19048,20 @@ export default function Stillform() {
   const [resetPasswordError, setResetPasswordError] = useState(null);
   const [resetPasswordSuccess, setResetPasswordSuccess] = useState(false);
   const [installPrompt, setInstallPrompt] = useState(null);
-  const [installDismissed, setInstallDismissed] = useState(false);
+  // Persist install dismissal across sessions so a user who taps "Later" once
+  // doesn't get re-prompted on every reload. Previous behavior was session-
+  // only state — banner re-appeared every visit, contributing to home
+  // competition (Arlin pushback May 9, 2026).
+  const [installDismissed, setInstallDismissedState] = useState(() => {
+    try { return localStorage.getItem("stillform_install_dismissed") === "yes"; } catch { return false; }
+  });
+  const setInstallDismissed = (value) => {
+    setInstallDismissedState(value);
+    try {
+      if (value) localStorage.setItem("stillform_install_dismissed", "yes");
+      else localStorage.removeItem("stillform_install_dismissed");
+    } catch {}
+  };
   const [integrationActionStatus, setIntegrationActionStatus] = useState("");
   const [subscriptionStatusLoading, setSubscriptionStatusLoading] = useState(false);
   const [subscriptionStatusMessage, setSubscriptionStatusMessage] = useState("");
@@ -21577,13 +21593,12 @@ const isSignalProfileConfigured = () => {
             envelope. Same hide rules so it doesn't render on top of an active
             tool session, panic mode, setup-bridge, or pricing. Also hides during
             move-card itself so it doesn't stack on its own surface. */}
-        {screen !== "panic" && screen !== "move-card" && screen !== "pre-event-brief" && screen !== "setup-bridge" && screen !== "pricing" && 
-         !(screen === "tool" && (activeTool?.id === "breathe" || activeTool?.id === "sigh")) && (
-          <MoveCardPill onPress={() => {
-            try { window.plausible("Move Card Opened", { props: { surface: "pill" } }); } catch {}
-            setScreen("move-card");
-          }} />
-        )}
+        {/* FLOATING Move card pill REMOVED May 9, 2026 per architecture cleanup
+            (Arlin pushback on home competition). The Move card hero on home is
+            the affordance. Floating pill overlapped the Mirror surface and
+            duplicated the home card. Move card is still reachable from home
+            hero + from pill-row alternatives (Quick Breathe stays floating
+            as the legitimate "60 seconds from anywhere" pattern). */}
 
         {/* MOVE CARD — user-summonable somatic move. State assembled at render
             so MoveCardTool's selection useEffect sees the freshest bio-filter
@@ -22900,11 +22915,13 @@ const isSignalProfileConfigured = () => {
               {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic", color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.02em", animation: "entrain60 1s ease-in-out infinite" }}>
-                  <span>{isBodyFirst ? "Settle the body. Then think." : isThoughtFirst ? "Think clearly. Then settle." : "Choose your entry point."}</span>
-                  {isBodyFirst && <button aria-label="Why body first?" onClick={() => setInfoModal({ title: "Why body first?", body: "Your calibration identified a body-first tendency. When activation hits, physical signals arrive before cognition can intervene. Settling the nervous system first creates the conditions for clear thinking — not the other way around." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
-                  {isThoughtFirst && <button aria-label="Why thought first?" onClick={() => setInfoModal({ title: "Why thought first?", body: "Your calibration identified a thought-first tendency. When activation hits, the cognitive loop fires first. Processing the thinking directly is what releases the physical tension — your body follows your mind." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>}
-                </div>
+                {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
+                    italic line above the CTA echoing the same operating principle
+                    as the CTA subtitle ("Start with what the mind is doing") —
+                    two italic phrasings stacked, both saying thought-first or
+                    body-first depending on calibration. Redundant. The "Why
+                    body/thought-first" rationale lives in the FAQ and the
+                    Mirror sheet. CTA subtitle is now the sole action prompt. */}
 
                 {showBioFilterSuggestion ? (
                   /* Bio-filter override — suggestive, with skip back to normal pathway.
