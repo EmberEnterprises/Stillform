@@ -7610,6 +7610,18 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
 }
 
 function BodyScanTool({ onComplete, setInfoModal }) {
+  // Ship 1.6 (May 11, 2026) — Body Scan cross-tool handoff "landed" chip set.
+  // Post-state chips indicating the somatic intervention fully landed:
+  // settled (parasympathetic dominance), focused (positive activation,
+  // engaged), excited (positive arousal). Russell circumplex positive-
+  // valence chips. Everything else (anxious, angry, stuck, mixed, flat,
+  // distant, unsure) indicates body still active OR cognitive layer still
+  // loud — both routes benefit from a Reframe handoff.
+  //
+  // Threshold tunable post-launch against handoff acceptance data.
+  // Target: >60% acceptance per the spine prompt's behavioral signals.
+  const BODY_SCAN_LANDED_CHIPS = ["settled", "focused", "excited"];
+
   // LOW-DEMAND MODE — when bioFilter signals cognitive impairment, the tool renders
   // a stripped variant: no intro screen, no tension dot input, no What Shifted gate,
   // no ToolDebriefGate, no Next Move. Audio force-enabled. See LOW_DEMAND_PHASE_2_SPEC.md.
@@ -7799,6 +7811,73 @@ function BodyScanTool({ onComplete, setInfoModal }) {
     }
     queueDebriefAndCompleteNow(null, "body-scan-what-shifted-skip");
   };
+
+  // Ship 1.6 (May 11, 2026) — Body Scan cross-tool handoff for not-landed
+  // post-chip states. Symmetric to Reframe Ship 1.4: when the somatic
+  // intervention didn't fully land (post-chip indicates body still active
+  // OR cognitive layer still loud), the app offers Reframe as the next
+  // move instead of routing through Lock it in → Debrief → "Signal cleared."
+  //
+  // Body Scan uses chip-based post-state (no numeric rating like Reframe),
+  // so "landed" is detected by whether the post-chip is in the positive-
+  // valence set (settled / focused / excited per Russell circumplex).
+  // Everything else = body still active or cognitive layer still loud.
+  //
+  // Logs shift event with handoff-specific source tag (so analytics can
+  // distinguish Lock it in vs handoff routes) + Cross Tool Handoff event
+  // with accepted/declined for threshold tuning. Direct onComplete call
+  // skips Debrief Gate — same rationale as Reframe handoff: ritual screens
+  // for a not-landed session would be reflection-on-action on something
+  // that didn't deliver.
+  const handleWhatShiftedHandoff = (redirectTo, sourceTag) => {
+    const cleanLabel = String(shiftLabel || "").trim();
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: sourceTag || (redirectTo ? `body-scan-handoff-${redirectTo}` : "body-scan-handoff-done"),
+        toolId: "scan",
+        toolMode: null,
+        preState: feelState,
+        postState: postStateChip,
+        shiftLabel: cleanLabel,
+        sessionTimestamp: latestSessionTimestampRef.current,
+        regulationType
+      });
+      appendShiftEventToStorage(shiftEvent);
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: shiftEvent.subcategory || "none",
+          tool: "body-scan",
+          mode: "none"
+        }
+      });
+    } catch {}
+
+    try {
+      window.plausible("Cross Tool Handoff", {
+        props: {
+          from_tool: "body-scan",
+          to_tool: redirectTo || "none",
+          post_state: postStateChip || "none",
+          accepted: redirectTo ? "yes" : "no"
+        }
+      });
+    } catch {}
+
+    // User named the shift, so post-state replaces stale pre-state chip
+    if (postStateChip) {
+      try { secureWrite("stillform_feelstate", { value: postStateChip, day: TimeKeeper.stillformDay() }); } catch {}
+    }
+    setShowWhatShifted(false);
+    setShiftLabelExpanded(false);
+
+    // Direct exit — skip Debrief Gate + "Signal cleared" closing screen.
+    // Parent's onComplete routes: redirectTo="reframe" opens Reframe in
+    // calm mode (cognitive layer is what Body Scan didn't fully clear),
+    // null/undefined sends user home.
+    onComplete(redirectTo || undefined);
+  };
+
 
   const completeDebriefGate = (reflectionText) => {
     const skipped = reflectionText === null;
@@ -8231,18 +8310,96 @@ function BodyScanTool({ onComplete, setInfoModal }) {
           </div>
         )}
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
-          <button
-            className="btn btn-primary"
-            onClick={handleWhatShiftedLockIn}
-            disabled={!lockInEnabled}
-            style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
-            Lock it in
-          </button>
-          <button className="btn btn-ghost" onClick={() => handleWhatShiftedSkip()}>
-            Skip
-          </button>
-        </div>
+        {/* Ship 1.6 (May 11, 2026) — Body Scan cross-tool handoff at close.
+            When post-chip indicates body didn't fully land (not in
+            BODY_SCAN_LANDED_CHIPS), offer Reframe handoff instead of the
+            Lock it in → Debrief → "Signal cleared" closing ritual.
+            Mirrors Reframe Ship 1.4 pattern in the opposite cross-modal
+            direction.
+
+            Pre-chip state: only Skip button shows (no decision until user
+            has actually rated post-state).
+
+            SCIENCE PRESERVED:
+            - Affect labeling (Lieberman 2007) intact via post-chip — the
+              labeling moment is unchanged.
+            - Reflection on action (Schön 1983) preserved via "Signal
+              cleared" close on landed sessions only.
+            - "Signal cleared" closing language stays TRUE — fires only
+              when post-chip is in landed set, where "signal cleared"
+              actually describes what happened.
+            - System Observation + User Override (Science Sheet line 324):
+              app observes the chip, proposes Reframe for not-landed,
+              user accepts (Begin) or overrides (Done). Both train
+              interoceptive calibration.
+            - Window of Tolerance multi-modal (Siegel/Ogden/Porges) +
+              salience network reset (Menon 2011) — somatic intervention
+              that didn't fully land often means the cognitive layer is
+              what's still loud; Reframe is the appropriate next move.
+
+            FIVE LOSSES REDUCED (when body didn't fully land):
+            - Clarity: app names what didn't land + offers next move.
+            - Composure: no "Signal cleared" framing pretends the body
+              fully settled when post-chip says otherwise.
+            - Patience: handoff is two buttons, not ritual screens.
+            - Time: bypasses Debrief Gate on not-landed sessions.
+            - Money: practice feels guided — app routes between tools
+              instead of dropping user to home. */}
+
+        {postStateChip && !BODY_SCAN_LANDED_CHIPS.includes(postStateChip) ? (
+          <>
+            <div style={{
+              padding: "16px 18px",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)",
+              marginTop: 16,
+              marginBottom: 12
+            }}>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 20,
+                fontWeight: 300,
+                color: "var(--text)",
+                lineHeight: 1.4,
+                marginBottom: 8
+              }}>
+                Body cleared, mind still loud.
+              </div>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
+                A short Reframe clears the cognitive side.
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-handoff-not-landed-accepted")}
+              >
+                Begin Reframe
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => handleWhatShiftedHandoff(null, "body-scan-handoff-not-landed-declined")}
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
+            <button
+              className="btn btn-primary"
+              onClick={handleWhatShiftedLockIn}
+              disabled={!lockInEnabled}
+              style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
+              Lock it in
+            </button>
+            <button className="btn btn-ghost" onClick={() => handleWhatShiftedSkip()}>
+              Skip
+            </button>
+          </div>
+        )}
       </div>
     );
   }
