@@ -11626,102 +11626,52 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           What Shifted
         </div>
         <div className="t-body-sm quiet" style={{ lineHeight: 1.7, marginBottom: 16 }}>
-          In one line — what shifted? Naming it locks in the shift.
+          The shift was recorded with the chip. Naming it locks it in.
         </div>
 
-        {userTriggers.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 8 }}>
-              Was this about a known trigger?
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {userTriggers.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => setSelectedTriggerId(selectedTriggerId === t.id ? null : t.id)}
-                  style={{
-                    background: selectedTriggerId === t.id ? "var(--amber-dim)" : "transparent",
-                    border: `0.5px solid ${selectedTriggerId === t.id ? "var(--amber)" : "var(--border)"}`,
-                    borderRadius: 99, padding: "5px 12px", fontSize: 11,
-                    color: selectedTriggerId === t.id ? "var(--amber)" : "var(--text-muted)",
-                    cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                    letterSpacing: "0.04em"
-                  }}
-                >
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Ship 1 (May 11, 2026) — Spine inversion at session close.
+            Stripped at this commit:
+            - Trigger tagger ("Was this about a known trigger?") chip
+              selector. The Trigger Profile data is still captured via
+              context elsewhere (Settings CRUD, EOD post-save, Mirror sheet
+              inline add). Session-close categorization at the moment user
+              is post-regulation (Kahneman System 1) is the friction this
+              strip removes. Stage 3 marker will fire from AI-inferred
+              trigger tagging in Ship 1.3 instead.
+            - State-to-Statement expander ("Convert to message" textarea +
+              draft tools + skip reason chips). Per Arlin direction:
+              "relocate, don't delete — separate question." The state
+              variables, handlers, and helper functions (externalAnchorDraft,
+              stateToStatementExpanded, toggleStateToStatementExpanded,
+              skipStateToStatement, copyExternalAnchor, shareExternalAnchor,
+              markExternalAnchorSent, COMMUNICATION_SKIP_REASONS) are kept
+              in place so the feature can be relocated to its own surface
+              (likely Scripts or a dedicated post-session "draft a message"
+              moment) in a future commit without rewriting plumbing.
+
+            SCIENCE PRESERVED:
+            - Affect labeling (Lieberman 2007 + 2024 fNIRS + 2025 N=226
+              replications) preserved via post-state chip captured in the
+              prior post-rating screen — that IS the labeling moment.
+            - Trigger Profile (Gollwitzer 1999 implementation intentions)
+              still active via Today's Brief / Pre-event Brief / Reframe
+              context injection / Settings CRUD.
+            - Reflection on action (Schön 1983) preserved via Next Move +
+              Lock-in screens that follow Finish session.
+
+            FIVE LOSSES REDUCED:
+            - Clarity: one button at close, not three.
+            - Composure: no chip selection forced post-regulation.
+            - Patience: ~1-3 taps saved per session.
+            - Time: one-screen close, not multi-step.
+            - Money: practice feels guided, not transactional. */}
 
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button className="btn btn-primary" onClick={finishStateToStatement}>
             Finish session
           </button>
-          <button className="btn btn-ghost" onClick={toggleStateToStatementExpanded}>
-            {stateToStatementExpanded ? "Hide message draft" : "Convert to message"}
-          </button>
-          <button className="btn btn-ghost" onClick={() => skipStateToStatement(communicationSkipReason || "not-needed")}>
-            Skip for now
-          </button>
         </div>
 
-        {stateToStatementExpanded && (
-          <div style={{ marginTop: 16 }}>
-            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.06em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>
-              Make it sendable (optional)
-            </div>
-            <textarea
-              value={externalAnchorDraft}
-              onChange={(e) => {
-                setExternalAnchorDraft(e.target.value);
-                setExternalAnchorSent(false);
-                setCommunicationSkipReason(null);
-              }}
-              placeholder="In one line — what shifted?"
-              rows={3}
-              style={{ width: "100%", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "10px 12px", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif", outline: "none", resize: "vertical", marginBottom: 12 }}
-            />
-            <div className="t-caption" style={{ color: "var(--text-muted)", lineHeight: 1.6, marginTop: -4, marginBottom: 12 }}>
-              Purpose: convert what shifted into one clear message you can send outside Stillform (Slack, email, text, or talking point).
-            </div>
-
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <button className="btn btn-ghost" onClick={copyExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorCopied ? "Copied" : "Copy statement"}
-              </button>
-              <button className="btn btn-ghost" onClick={shareExternalAnchor} disabled={!externalAnchorDraft.trim()}>
-                Share
-              </button>
-              <button className="btn btn-ghost" onClick={markExternalAnchorSent} disabled={!externalAnchorDraft.trim()}>
-                {externalAnchorSent ? "Sent logged" : "Mark sent"}
-              </button>
-            </div>
-            <div style={{ marginTop: 12 }}>
-              <div style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>
-                Skip reason (for data quality)
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {COMMUNICATION_SKIP_REASONS.map((item) => (
-                  <button
-                    key={item.id}
-                    className="btn btn-ghost"
-                    onClick={() => setCommunicationSkipReason(item.id)}
-                    style={{
-                      fontSize: 11,
-                      padding: "6px 10px",
-                      borderColor: communicationSkipReason === item.id ? "var(--amber-dim)" : "var(--border)",
-                      color: communicationSkipReason === item.id ? "var(--amber)" : "var(--text-dim)"
-                    }}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
