@@ -10042,6 +10042,17 @@ function secureDelete(key) {
 
 
 function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null, setInfoModal }) {
+  // Ship 1.4 (May 11, 2026) — Cross-tool handoff threshold.
+  // Numeric pre→post rating delta (1-5 scale). If delta < this threshold,
+  // the regulation didn't fully land and the close screen offers a handoff
+  // to the complementary tool (Reframe→Body Scan) instead of routing
+  // through Next Move + Lock-in. Starting at 1.0 per the spine spec;
+  // tunable post-launch against real cohort data on cross-tool handoff
+  // acceptance rates. <40% acceptance signals threshold may be too generous
+  // (offering when user actually settled). >70% acceptance signals threshold
+  // may be too strict (offering on every session). Target is 60% acceptance
+  // per the spine prompt's primary behavioral signals.
+  const CROSS_TOOL_HANDOFF_THRESHOLD = 1.0;
   // LOW-DEMAND MODE — when bioFilter signals cognitive impairment (medicated), the tool
   // renders a stripped variant: no chip selection (uses persisted/inferred feelState),
   // no State-to-Statement option, no ToolDebriefGate, no Next Move, route to shared
@@ -11458,6 +11469,82 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     queueDebriefAndComplete(resolvePostReframeRoute(), "reframe-state-to-statement-complete");
   };
 
+  // Ship 1.4 (May 11, 2026) — Cross-tool handoff exit for low-delta sessions.
+  // When delta < CROSS_TOOL_HANDOFF_THRESHOLD, the regulation didn't fully
+  // land; routing the user through Next Move + Lock-in + Debrief Gate would
+  // be reflecting on a session that didn't deliver. This handler does the
+  // same shift-event logging and state cleanup as finishStateToStatement,
+  // but calls onComplete(redirectTo) DIRECTLY — bypassing Next Move, Lock-in,
+  // and Debrief Gate. When redirectTo is set, parent routes immediately to
+  // the next tool (e.g. "scan" for Reframe→Body Scan handoff). When redirectTo
+  // is null, user lands home.
+  //
+  // SCIENCE: This is the System Observation + User Override architectural
+  // conditioning pattern (Science Sheet line 324) applied at the spine layer.
+  // The app reads the delta, observes "didn't land," offers the next move
+  // (Body Scan). User accepts (Begin) or overrides (Done). Both directions
+  // train the user's interoceptive calibration over time.
+  const finishWithHandoff = (redirectTo, sourceTag) => {
+    ensureDraftLogged();
+    logCommunicationEvent(COMMUNICATION_ACTIONS.completedWithoutDraft);
+
+    try {
+      const shiftEvent = buildShiftEvent({
+        source: sourceTag || (redirectTo ? `reframe-handoff-${redirectTo}` : "reframe-handoff-done"),
+        toolId: "reframe",
+        toolMode: effectiveMode,
+        preState: feelState,
+        postState: postRating,
+        shiftLabel: "",
+        sessionTimestamp: sessionShareSummary?.timestamp || null,
+        regulationType
+      });
+      appendShiftEventToStorage(shiftEvent);
+      window.plausible("Shift Classified", {
+        props: {
+          category: shiftEvent.category || "null",
+          subcategory: shiftEvent.subcategory || "none",
+          tool: "reframe",
+          mode: effectiveMode || "none"
+        }
+      });
+    } catch {}
+
+    try {
+      const computedDelta = (Number.isFinite(Number(postRating)) && Number.isFinite(Number(preRating)))
+        ? Number(postRating) - Number(preRating)
+        : null;
+      window.plausible("Cross Tool Handoff", {
+        props: {
+          from_tool: "reframe",
+          to_tool: redirectTo || "none",
+          delta: computedDelta === null ? "null" : String(computedDelta),
+          accepted: redirectTo ? "yes" : "no"
+        }
+      });
+    } catch {}
+
+    try { secureDelete("stillform_feelstate"); } catch {}
+    setFeelStateRaw(null);
+    setShowStateToStatement(false);
+    setExternalAnchorDraft("");
+    setExternalAnchorCopied(false);
+    setExternalAnchorSent(false);
+    setStateToStatementExpanded(false);
+    setSessionShareSummary(null);
+    setPostSessionInsight(null);
+    setShowPostInsight(false);
+    setSelectedTriggerId(null);
+    setSelectedPattern(null);
+    setShowAddTriggerForm(false);
+    resetStateToStatementTracking();
+
+    // Direct exit — skip Next Move + Lock-in + Debrief Gate. Parent's
+    // onComplete handles routing: redirectTo="scan" opens Body Scan,
+    // null/undefined sends user home.
+    onComplete(redirectTo || undefined);
+  };
+
   const skipStateToStatement = (reason = null) => {
     const chosenReason = reason || communicationSkipReason || "not-needed";
     setCommunicationSkipReason(chosenReason);
@@ -11620,6 +11707,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // pattern as the trigger tagger above. Optional, single-tap, opt-in.
     let userPatterns = [];
     try { userPatterns = (secureRead("stillform_bias_profile", null) || []); } catch {}
+
+    // Ship 1.4 — compute pre→post delta to route the close.
+    // Delta is null when either rating is missing (e.g. user skipped post-rate
+    // or low-demand short-circuit fired). Null delta defaults to existing
+    // Finish session flow — handoff only offers when we have real data
+    // showing the session didn't land.
+    const preNum = Number(preRating);
+    const postNum = Number(postRating);
+    const ratingsValid = Number.isFinite(preNum) && Number.isFinite(postNum);
+    const deltaNumeric = ratingsValid ? postNum - preNum : null;
+    const offerHandoff = deltaNumeric !== null && deltaNumeric < CROSS_TOOL_HANDOFF_THRESHOLD;
+
     return (
       <div style={{ textAlign: "left", padding: "24px 0 8px" }}>
         <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
@@ -11649,6 +11748,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               (likely Scripts or a dedicated post-session "draft a message"
               moment) in a future commit without rewriting plumbing.
 
+            Added Ship 1.4 (this commit, May 11, 2026):
+            - Delta-aware close routing. If pre→post delta < 1.0, regulation
+              didn't fully land — offer cross-tool handoff to Body Scan
+              (the complementary somatic-layer tool). Two buttons: Begin
+              Body Scan / Done. Both skip Next Move + Lock-in + Debrief
+              Gate (no closing language for a session that didn't deliver).
+            - If delta >= 1.0 OR delta uncomputable (missing rating), the
+              existing Finish session button renders and routes through
+              the full Next Move → Lock-in → Debrief flow (closing ritual
+              preserved for sessions that landed).
+
             SCIENCE PRESERVED:
             - Affect labeling (Lieberman 2007 + 2024 fNIRS + 2025 N=226
               replications) preserved via post-state chip captured in the
@@ -11657,20 +11767,75 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               still active via Today's Brief / Pre-event Brief / Reframe
               context injection / Settings CRUD.
             - Reflection on action (Schön 1983) preserved via Next Move +
-              Lock-in screens that follow Finish session.
+              Lock-in screens that follow Finish session — only on
+              sessions that delivered shift.
+            - Lock-in statements remain TRUE — they fire only on
+              delta >= 1.0 sessions where "the physical state cleared"
+              and "the cognitive pattern was separated from the facts"
+              actually describe what happened.
+            - System Observation + User Override architectural conditioning
+              pattern (Science Sheet line 324) extended to the spine layer:
+              app observes the delta, proposes the next move, user accepts
+              (Begin Body Scan) or overrides (Done). Both directions train
+              interoceptive calibration.
 
             FIVE LOSSES REDUCED:
-            - Clarity: one button at close, not three.
-            - Composure: no chip selection forced post-regulation.
-            - Patience: ~1-3 taps saved per session.
-            - Time: one-screen close, not multi-step.
-            - Money: practice feels guided, not transactional. */}
+            - Clarity: app names what didn't land + offers the next move.
+              User doesn't have to figure out their own next step.
+            - Composure: no closing language pretends a partial shift
+              fully landed.
+            - Patience: low-delta close is two buttons, not three screens.
+            - Time: handoff bypasses Next Move + Lock-in + Debrief on
+              non-landing sessions.
+            - Money: practice feels guided — app routes between tools
+              instead of dropping the user back to home. */}
 
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-          <button className="btn btn-primary" onClick={finishStateToStatement}>
-            Finish session
-          </button>
-        </div>
+        {offerHandoff ? (
+          <>
+            <div style={{
+              padding: "16px 18px",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)",
+              marginBottom: 16
+            }}>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 20,
+                fontWeight: 300,
+                color: "var(--text)",
+                lineHeight: 1.4,
+                marginBottom: 8
+              }}>
+                Thought settled, body still active.
+              </div>
+              <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
+                A short Body Scan clears the somatic side.
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <button
+                className="btn btn-primary"
+                onClick={() => finishWithHandoff("scan", "reframe-handoff-low-delta-accepted")}
+              >
+                Begin Body Scan
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => finishWithHandoff(null, "reframe-handoff-low-delta-declined")}
+              >
+                Done
+              </button>
+            </div>
+          </>
+        ) : (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="btn btn-primary" onClick={finishStateToStatement}>
+              Finish session
+            </button>
+          </div>
+        )}
 
       </div>
     );
