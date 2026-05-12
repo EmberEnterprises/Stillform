@@ -282,10 +282,10 @@ const styles = `
   .nav-logo {
     font-family: 'Cormorant Garamond', serif;
     font-weight: 300;
-    /* 16px (was 18px) per Arlin direction May 8: 'header needs to be smaller...
-       font needs to be smaller to compliment the footer'. Footer stays at 18px
-       so the header now reads visibly lighter than the bottom anchor. */
-    font-size: 16px;
+    /* May 12, 2026 — bumped 16px → 18px per Arlin phone test:
+       "Stillform is smaller font than Subscribe." Footer is 18px so this
+       now matches and the wordmark holds its weight against the nav CTA. */
+    font-size: 18px;
     letter-spacing: 0.08em;
     text-transform: none;
     color: var(--text);
@@ -17912,12 +17912,22 @@ export default function Stillform() {
       handleActiveToolBack();
       return;
     }
-    if (screen === "settings" || screen === "privacy" || screen === "progress" || screen === "roadmap" || screen === "scripts" || screen === "pricing" || screen === "pattern-transparency") {
+    // May 12, 2026 (Arlin phone test): "when I hit privacy and disclaimers
+    // and hit back button it takes me to home page instead of back to
+    // settings." Privacy and pattern-transparency are sub-screens reached
+    // FROM settings; back should preserve that hierarchy. Top-level surfaces
+    // (settings, progress, roadmap, scripts, pricing) keep routing home as
+    // the natural exit.
+    if (screen === "privacy" || screen === "pattern-transparency") {
+      setScreen("settings");
+      return;
+    }
+    if (screen === "settings" || screen === "progress" || screen === "roadmap" || screen === "scripts" || screen === "pricing") {
       goHomeSafely();
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "scripts", "focus-check", "pricing", "tool"].includes(screen);
+  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "scripts", "focus-check", "pricing", "tool", "pattern-transparency"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
@@ -20017,8 +20027,29 @@ const isSignalProfileConfigured = () => {
             <div onClick={e => e.stopPropagation()} style={{
               background: "var(--ground-elev)", border: "0.5px solid var(--border)",
               borderRadius: "var(--r-lg)", padding: "32px 24px", maxWidth: 480, width: "100%",
-              maxHeight: "86vh", overflowY: "auto"
+              maxHeight: "86vh", overflowY: "auto", position: "relative"
             }}>
+              {/* X close (May 12, 2026) — Arlin phone test: 'there should be an
+                  x on the upper right of the noticing pattern window to close
+                  in case it was opened by accident and this is still not clear
+                  on its purpose.' The Mirror Sheet opens from a tappable strip
+                  that's easy to brush by accident; explicit close affordance
+                  prevents the modal feeling trapping. Tap-outside still works
+                  for power-users. */}
+              <button
+                onClick={() => setShowMirrorSheet(false)}
+                aria-label="Close"
+                style={{
+                  position: "absolute", top: 12, right: 12,
+                  background: "none", border: "none",
+                  color: "var(--text-muted)", cursor: "pointer",
+                  fontSize: 20, lineHeight: 1, padding: "8px 10px",
+                  WebkitTapHighlightColor: "transparent",
+                  fontFamily: "'IBM Plex Mono', monospace"
+                }}
+              >
+                ×
+              </button>
               <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em", display: "flex", alignItems: "center", gap: 6 }}>
                 <span>Stage {snap.currentStageId} of 5</span>
                 {/* Master Todo line 798 — Arlin May 8: "Stage 1 on the screen? no info button.
@@ -20365,12 +20396,12 @@ const isSignalProfileConfigured = () => {
                 Account
               </button>
             ) : syncSignedIn ? (
-              <button className="btn btn-primary" onClick={() => setScreen("pricing")}>
+              <button className="btn btn-ghost" onClick={() => setScreen("pricing")} style={{ padding: "8px 14px", fontSize: 13 }}>
                 Subscribe
               </button>
             ) : (
-              <button className="btn btn-primary" onClick={() => { setScreen("pricing"); setPricingAuthOpen(true); }}>
-                Log In / Sign Up
+              <button className="btn btn-ghost" onClick={() => { setScreen("pricing"); setPricingAuthOpen(true); }} style={{ padding: "8px 14px", fontSize: 13 }}>
+                Log In
               </button>
             )}
           </div>
@@ -22763,7 +22794,77 @@ const isSignalProfileConfigured = () => {
                     no choosing among 5+ tools. System 1 friendly.
                   - Norman affordance: two-button forced choice with a
                     clear escape hatch (Show all tools). */}
-              {showSpineIntake && (
+              {showSpineIntake && (() => {
+                // May 12, 2026 (Arlin phone test): "Where it says not quite right
+                // on the home screen, maybe try something else and it should only
+                // be the tool they don't already have on home screen."
+                //
+                // Compute which tool the home hero is currently proposing so
+                // the intake modal can exclude that option and offer only the
+                // alternatives. Mirrors the hero CTA's routing logic at line
+                // ~22592 (thought-first off-baseline → Body Scan/Breathe;
+                // thought-first clear → Reframe; body-first off-baseline
+                // pain/unnamed → Body Scan; body-first other → Breathe).
+                let heroToolId = "reframe";
+                try {
+                  const bioFilter = getActiveBioFilter();
+                  const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+                  const hasPain = bioFilter.includes("pain");
+                  if (isThoughtFirst) {
+                    if (offBaseline) heroToolId = hasPain ? "scan" : "breathe";
+                    else heroToolId = "reframe";
+                  } else if (isBodyFirst) {
+                    if (offBaseline && shouldBodyRouteToScan(bioFilter)) heroToolId = "scan";
+                    else heroToolId = "breathe";
+                  }
+                } catch {}
+
+                // Build the three possible options. Each option carries its
+                // tool ID so we can filter out whichever one the home hero
+                // already covers.
+                const allOptions = [
+                  {
+                    toolId: "reframe",
+                    label: "Mind crowded",
+                    sub: "→ Reframe",
+                    plausibleChoice: "mind-crowded",
+                    onTap: () => {
+                      setShowSpineIntake(false);
+                      setPathway("clarity");
+                      setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
+                      setScreen("tool");
+                    }
+                  },
+                  {
+                    toolId: "breathe",
+                    label: "Body charged",
+                    sub: "→ Breathe",
+                    plausibleChoice: "body-charged",
+                    onTap: () => {
+                      setShowSpineIntake(false);
+                      setPathway("calm");
+                      startTool(TOOLS.find(t => t.id === "breathe"));
+                    }
+                  },
+                  {
+                    toolId: "scan",
+                    label: "Locate the signal",
+                    sub: "→ Body Scan",
+                    plausibleChoice: "locate-signal",
+                    onTap: () => {
+                      setShowSpineIntake(false);
+                      startTool(TOOLS.find(t => t.id === "scan"));
+                    }
+                  }
+                ];
+
+                // Filter out the hero. If something goes wrong with the hero
+                // computation, show all 3 (defensive — better redundant than
+                // empty modal).
+                const visibleOptions = allOptions.filter(o => o.toolId !== heroToolId);
+                const optionsToRender = visibleOptions.length > 0 ? visibleOptions : allOptions;
+
+                return (
                 <div
                   style={{
                     position: "fixed", inset: 0, zIndex: 200,
@@ -22799,68 +22900,37 @@ const isSignalProfileConfigured = () => {
                       What's true right now?
                     </div>
 
-                    <button
-                      onClick={() => {
-                        try {
-                          window.plausible("Spine Intake", { props: { choice: "mind-crowded" } });
-                        } catch {}
-                        setShowSpineIntake(false);
-                        setPathway("clarity");
-                        setActiveTool({ ...TOOLS.find(t => t.id === "reframe"), mode: "clarity" });
-                        setScreen("tool");
-                      }}
-                      style={{
-                        width: "100%",
-                        background: "var(--surface2)",
-                        border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r)",
-                        padding: "20px 18px",
-                        marginBottom: 12,
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif",
-                        textAlign: "center",
-                        color: "var(--amber)",
-                        fontSize: 16,
-                        fontWeight: 400,
-                        WebkitTapHighlightColor: "transparent"
-                      }}
-                    >
-                      Mind crowded
-                      <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.02em" }}>
-                        → Reframe
-                      </div>
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        try {
-                          window.plausible("Spine Intake", { props: { choice: "body-charged" } });
-                        } catch {}
-                        setShowSpineIntake(false);
-                        setPathway("calm");
-                        startTool(TOOLS.find(t => t.id === "breathe"));
-                      }}
-                      style={{
-                        width: "100%",
-                        background: "var(--surface2)",
-                        border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r)",
-                        padding: "20px 18px",
-                        marginBottom: 18,
-                        cursor: "pointer",
-                        fontFamily: "'DM Sans', sans-serif",
-                        textAlign: "center",
-                        color: "var(--amber)",
-                        fontSize: 16,
-                        fontWeight: 400,
-                        WebkitTapHighlightColor: "transparent"
-                      }}
-                    >
-                      Body charged
-                      <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.02em" }}>
-                        → Breathe
-                      </div>
-                    </button>
+                    {optionsToRender.map((opt, idx) => (
+                      <button
+                        key={opt.toolId}
+                        onClick={() => {
+                          try {
+                            window.plausible("Spine Intake", { props: { choice: opt.plausibleChoice } });
+                          } catch {}
+                          opt.onTap();
+                        }}
+                        style={{
+                          width: "100%",
+                          background: "var(--surface2)",
+                          border: "0.5px solid var(--amber-dim)",
+                          borderRadius: "var(--r)",
+                          padding: "20px 18px",
+                          marginBottom: idx === optionsToRender.length - 1 ? 18 : 12,
+                          cursor: "pointer",
+                          fontFamily: "'DM Sans', sans-serif",
+                          textAlign: "center",
+                          color: "var(--amber)",
+                          fontSize: 16,
+                          fontWeight: 400,
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >
+                        {opt.label}
+                        <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 4, letterSpacing: "0.02em" }}>
+                          {opt.sub}
+                        </div>
+                      </button>
+                    ))}
 
                     <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "center" }}>
                       <button
@@ -22898,7 +22968,8 @@ const isSignalProfileConfigured = () => {
                     </div>
                   </div>
                 </div>
-              )}
+                );
+              })()}
 
               {/* SUPPORT SHEET — secondary fast-lane, discreet */}
               {showSupportSheet && (
@@ -26408,15 +26479,19 @@ const isSignalProfileConfigured = () => {
                   <span style={{ fontSize: 13, color: "var(--text)" }}>Replay tutorial</span>
                   <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
                 </button>
-                {/* Focus Check */}
+                {/* Focus Check (May 12, 2026): renamed to "Composure Check" so
+                    the Settings label matches the home surface name. Color
+                    explicitly set on the inner divs — previous version had no
+                    explicit color which inherited browser default (black on
+                    var(--surface) = invisible in dark theme). */}
                 <button onClick={() => openFocusCheck("settings")} style={{
                   background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                   padding: "14px 18px", textAlign: "left", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
-                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                  display: "flex", justifyContent: "space-between", alignItems: "center", color: "var(--text)"
                 }}>
                   <div>
-                    <div className="t-body-md">Run Focus Check (30s)</div>
-                    <div className="t-caption" style={{ marginTop: 2 }}>Quick signal on focus, inhibition, and response control.</div>
+                    <div className="t-body-md" style={{ color: "var(--text)" }}>Composure Check (30s)</div>
+                    <div className="t-caption" style={{ marginTop: 2, color: "var(--text-muted)" }}>Quick signal on focus, inhibition, and response control.</div>
                   </div>
                   <span style={{ color: "var(--amber)", fontSize: 12, letterSpacing: "0.08em", textTransform: "uppercase" }}>Open →</span>
                 </button>
