@@ -1,5 +1,7 @@
 # Self Mode Redesign — Research & Design Proposal
 
+> **SUPERSESSION NOTE — May 12, 2026:** Framing language in this document predates STILLFORM_FRAMING_LAW.md (May 12, 2026). Specific terms updated in-place: "regulation app" (line 51) → "metacognition practice"; "composure architecture is built FROM..." (line 126) → "the practice is built FROM...". The substance of the Self Mode redesign (body-first when arousal is high, past self → present self, one thing on screen at a time, AI-down resilience) remains valid under the framing law. When this doc is consulted for build work, refer to STILLFORM_FRAMING_LAW.md for current product framing; the design principles below stand.
+
 **Status:** Research + design proposal, May 7, 2026. Per Arlin's May 7 directive. Awaiting sign-off before any build.
 **Author of this draft:** Claude, synthesizing existing implementation + literature + design principles.
 **Replaces "absorbed into engagement architecture" framing.** Self Mode is its own design challenge — the engagement architecture's deterministic surfaces (Mirror, Achievement, Roadmap) survive AI being down, but those answer "what does the user see about progress." Self Mode answers "what does the user actually DO when activated and AI is unavailable." Different problem.
@@ -48,7 +50,7 @@ This is not the state in which to ask the user to type free text into five seque
 ## 3. Design principles (locked)
 
 **The user's own past self is the answer, not generic prompts.**
-The thing that distinguishes Stillform from any other regulation app is that it's been collecting the user's self-knowledge. Bias Profile, Signal Profile, saved Reframes, journal entries, Pattern Disruption history — that's a cached intelligence about THIS specific user. Self Mode should USE it. Not regenerate from scratch. The user's past self speaks to their current self.
+The thing that distinguishes Stillform from any other practice in this space is that it's been collecting the user's self-knowledge. Bias Profile, Signal Profile, saved Reframes, journal entries, Pattern Disruption history — that's a cached intelligence about THIS specific user. Self Mode should USE it. Not regenerate from scratch. The user's past self speaks to their current self.
 
 **Body-first when arousal is high.**
 When activated, language doesn't work yet. Body does. Self Mode entry should default to a somatic anchor before any verbal processing is asked of the user. This matches Stillform's existing four pillars (body first, then thought).
@@ -123,7 +125,7 @@ This is why the "Past Self / Present Self" framing earns its keep beyond Self Mo
 - It explains why Stillform's data architecture matters at all (the data isn't features, it's the user's accumulated self)
 - It positions Stillform against apps that treat user data as inputs to manipulate (we treat it as identity to reflect)
 - It gives Self Mode a reason to exist beyond AI-down (some users may choose Self Mode even when AI is up because reading their own past wisdom is more grounding than receiving generated insight)
-- It aligns with the broader Stillform thesis (composure architecture is built FROM the user's accumulated self-knowledge, not imposed on it)
+- It aligns with the broader Stillform thesis (the practice is built FROM the user's accumulated self-knowledge, not imposed on it)
 
 Functional version (what Self Mode does): when AI is down, surface the user's saved Reframes, journal entries, and named patterns as the in-the-moment intervention.
 
