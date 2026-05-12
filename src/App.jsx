@@ -2086,6 +2086,28 @@ const CHIP_DEFINITIONS = {
   }
 };
 
+// May 12, 2026 — Info button consolidation. Each chip render site used to
+// show its own ⓘ per chip (9-10 buttons cluttering the chip row). Per Arlin's
+// May 12 push-back on the morning check-in: replace per-chip ⓘ with one ⓘ
+// at the section header that opens a comprehensive modal of all chip
+// definitions in order. Same CHIP_DEFINITIONS source; cleaner visual; reading
+// is faster (linear scan) than 9 separate modal open/close cycles.
+//
+// Pass the chip IDs in the order they render at the site (typically the
+// Russell circumplex grouping order: positive arousal → low arousal positive →
+// negative arousal → cognitive states → low arousal negative → uncertain).
+const getChipDefinitionsBody = (chipIds) => {
+  const segments = [];
+  for (const id of chipIds) {
+    const def = CHIP_DEFINITIONS[id];
+    if (!def) continue;
+    if (segments.length > 0) segments.push(""); // blank line between definitions
+    segments.push(def.title);
+    segments.push(def.body);
+  }
+  return segments.join("\n");
+};
+
 const TOOL_DEBRIEF_COPY = {
   scan: {
     prompt: "What did the scan teach you about your pattern?",
@@ -8206,7 +8228,7 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               aria-label="Why What Shifted?"
               onClick={() => setInfoModal({
                 title: "Why What Shifted?",
-                body: "Naming where you land trains interoception — the brain's awareness of internal body state. It's a measurable skill, and it strengthens with reps. Khalsa et al. 2018 names this capacity as foundational to emotion regulation: the more accurately you can read your own internal signals, the less your nervous system can hijack you with vague unease. The body scan moves you through six points; What Shifted is where you write the change down. Without it, the session evaporates and the work doesn't compound.\n\nThe chip you pick is data. Over time the system uses these to map your composure pattern — the states you actually move through, not the states you think you should be in."
+                body: "Naming where you land trains interoception — the brain's awareness of internal body state. It's a measurable skill, and it strengthens with reps. Khalsa et al. 2018 names this capacity as foundational to emotion regulation: the more accurately you can read your own internal signals, the less your nervous system can hijack you with vague unease. The body scan moves you through six points; What Shifted is where you write the change down. Without it, the session evaporates and the work doesn't compound.\n\nThe chip you pick is data. Over time the system uses these to map your composure pattern — the states you actually move through, not the states you think you should be in.\n\n— WHAT THESE MEAN —\n\n" + getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant","unsure"])
               })}
               style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>
               ⓘ
@@ -8238,31 +8260,22 @@ function BodyScanTool({ onComplete, setInfoModal }) {
 
         <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 24 }}>
           {feelChips.map(f => (
-            <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-              <button
-                onClick={() => { haptic.tick(); setPostStateChip(f.id); }}
-                style={{
-                  background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
-                  border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
-                  borderRadius: 20,
-                  padding: "8px 16px",
-                  fontSize: 13,
-                  color: postStateChip === f.id ? "var(--amber)" : "var(--text-dim)",
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  transition: "border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige)"
-                }}>
-                {f.label}
-              </button>
-              {CHIP_DEFINITIONS[f.id] && setInfoModal && (
-                <button
-                  onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
-                  aria-label={`What does ${f.label} mean?`}
-                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
-                  ⓘ
-                </button>
-              )}
-            </div>
+            <button
+              key={f.id}
+              onClick={() => { haptic.tick(); setPostStateChip(f.id); }}
+              style={{
+                background: postStateChip === f.id ? "var(--amber-glow)" : "transparent",
+                border: `0.5px solid ${postStateChip === f.id ? "color-mix(in srgb, var(--amber) 60%, transparent)" : "var(--border)"}`,
+                borderRadius: 20,
+                padding: "8px 16px",
+                fontSize: 13,
+                color: postStateChip === f.id ? "var(--amber)" : "var(--text-dim)",
+                cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif",
+                transition: "border-color var(--motion-default) var(--ease-prestige), color var(--motion-default) var(--ease-prestige)"
+              }}>
+              {f.label}
+            </button>
           ))}
         </div>
 
@@ -12360,34 +12373,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       return (
         <div style={{ padding: "40px 0 8px" }}>
           <div style={{ textAlign: "center", marginBottom: 32 }}>
-            <div className="t-mono-xs" style={{ marginBottom: 20 }}>
-              Where are you now?
+            <div className="t-mono-xs" style={{ marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              <span>Where are you now?</span>
+              {setInfoModal && (
+                <button
+                  onClick={() => setInfoModal({
+                    title: "Where are you now?",
+                    body: getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant","unsure"])
+                  })}
+                  aria-label="What do these mean?"
+                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
+                >
+                  ⓘ
+                </button>
+              )}
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
               {feelChips.map(f => (
-                <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-                  <button onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
-                    background: postRating === f.id ? "var(--amber-glow)" : "transparent",
-                    border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 20, padding: "8px 20px", fontSize: 13,
-                    color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                  }}>
-                    {f.label}
-                  </button>
-                  {/* Info button discipline pass (May 8 master todo line 796) — every
-                      chip render site exposes the CHIP_DEFINITIONS science modal so the
-                      product principle "every Stillform surface answers WHY" holds even
-                      in the low-demand close path. Pattern mirrors site 7892-7899. */}
-                  {CHIP_DEFINITIONS[f.id] && setInfoModal && (
-                    <button
-                      onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
-                      aria-label={`What does ${f.label} mean?`}
-                      style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
-                      ⓘ
-                    </button>
-                  )}
-                </div>
+                <button key={f.id} onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
+                  background: postRating === f.id ? "var(--amber-glow)" : "transparent",
+                  border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                  borderRadius: 20, padding: "8px 20px", fontSize: 13,
+                  color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
+                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+                }}>
+                  {f.label}
+                </button>
               ))}
             </div>
           </div>
@@ -12505,30 +12516,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       <div style={{ padding: "40px 0 8px" }}>
         {/* FEEL CHIPS */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div className="t-mono-xs" style={{ marginBottom: 20 }}>
-            Where are you now?
+          <div className="t-mono-xs" style={{ marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+            <span>Where are you now?</span>
+            {setInfoModal && (
+              <button
+                onClick={() => setInfoModal({
+                  title: "Where are you now?",
+                  body: getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant","unsure"])
+                })}
+                aria-label="What do these mean?"
+                style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
+              >
+                ⓘ
+              </button>
+            )}
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "center" }}>
             {feelChips.map(f => (
-              <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-                <button onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
-                  background: postRating === f.id ? "var(--amber-glow)" : "transparent",
-                  border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: 20, padding: "8px 20px", fontSize: 13,
-                  color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                }}>
-                  {f.label}
-                </button>
-                {CHIP_DEFINITIONS[f.id] && setInfoModal && (
-                  <button
-                    onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
-                    aria-label={`What does ${f.label} mean?`}
-                    style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
-                    ⓘ
-                  </button>
-                )}
-              </div>
+              <button key={f.id} onClick={() => { haptic.tick(); setPostRating(f.id); }} style={{
+                background: postRating === f.id ? "var(--amber-glow)" : "transparent",
+                border: `1px solid ${postRating === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+                borderRadius: 20, padding: "8px 20px", fontSize: 13,
+                color: postRating === f.id ? "var(--amber)" : "var(--text-muted)", cursor: "pointer",
+                fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+              }}>
+                {f.label}
+              </button>
             ))}
           </div>
         </div>
@@ -14557,7 +14570,7 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, justifyContent: compact ? "center" : "flex-start" }}>
         <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
           What is present
-          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after the session, where naming what shifted consolidates the shift. Naming first establishes context; naming after consolidates change." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after the session, where naming what shifted consolidates the shift. Naming first establishes context; naming after consolidates change.\n\n— WHAT THESE MEAN —\n\n" + getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant"]) })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
         </div>
         {hasMorningData && (
           <button aria-label="Morning check-in"
@@ -14711,25 +14724,15 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             { id: "flat", label: "Flat" },
             { id: "distant", label: "Distant" }
           ].map(f => (
-            <div key={f.id} style={{ display: "inline-flex", alignItems: "center" }}>
-              <button onClick={() => { haptic.tick(); setFeelState(feelState === f.id ? null : f.id); }} style={{
-                background: feelState === f.id ? "var(--amber-glow)" : "transparent",
-                border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
-                borderRadius: 20, padding: "10px 14px", fontSize: 12,
-                color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
-                cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-              }}>
-                {f.label}
-              </button>
-              {CHIP_DEFINITIONS[f.id] && setInfoModal && (
-                <button
-                  onClick={() => setInfoModal(CHIP_DEFINITIONS[f.id])}
-                  aria-label={`What does ${f.label} mean?`}
-                  style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 3px", lineHeight: 1, marginLeft: -2 }}>
-                  ⓘ
-                </button>
-              )}
-            </div>
+            <button key={f.id} onClick={() => { haptic.tick(); setFeelState(feelState === f.id ? null : f.id); }} style={{
+              background: feelState === f.id ? "var(--amber-glow)" : "transparent",
+              border: `1px solid ${feelState === f.id ? "var(--amber-dim)" : "var(--border)"}`,
+              borderRadius: 20, padding: "10px 14px", fontSize: 12,
+              color: feelState === f.id ? "var(--amber)" : "var(--text-muted)",
+              cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
+            }}>
+              {f.label}
+            </button>
           ))}
         </div>
       </div>
@@ -19977,7 +19980,7 @@ const isSignalProfileConfigured = () => {
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
               {infoModal.title}
             </div>
-            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif" }}>
+            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-line" }}>
               {infoModal.body}
             </div>
             <button onClick={() => setInfoModal(null)} style={{
@@ -22182,8 +22185,25 @@ const isSignalProfileConfigured = () => {
                         it in "From this morning". Also seeds stillform_feelstate so the AI has
                         emotional context for the first session of the day without the user having
                         to re-pick at Reframe entry. Reuses the 9 feel-chips from PresentStateChips
-                        for consistency (Russell circumplex grouping). Single-select, optional. */}
-                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How are you arriving? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span></div>
+                        for consistency (Russell circumplex grouping). Single-select, optional.
+
+                        May 12, 2026 — Info button consolidated. Previously each chip had its own
+                        ⓘ button (9 buttons cluttering the row). Replaced with a single ⓘ next to
+                        the question header that opens a modal showing all 9 definitions in a
+                        structured list. Same chip data (CHIP_DEFINITIONS); cleaner visual. */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 10 }}>
+                      <div className="t-body-sm quiet">How are you arriving? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span></div>
+                      <button
+                        onClick={() => setInfoModal({
+                          title: "How are you arriving?",
+                          body: getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant"])
+                        })}
+                        aria-label="What do these mean?"
+                        style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}
+                      >
+                        ⓘ
+                      </button>
+                    </div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {[
                         { id: "excited", label: "Excited" },
@@ -22196,26 +22216,13 @@ const isSignalProfileConfigured = () => {
                         { id: "flat", label: "Flat" },
                         { id: "distant", label: "Distant" }
                       ].map(m => (
-                        <div key={m.id} style={{ display: "inline-flex", alignItems: "center" }}>
-                          <button onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
-                            background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
-                            border: `1px solid ${ciMood === m.id ? "var(--amber-dim)" : "var(--border)"}`,
-                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
-                            color: ciMood === m.id ? "var(--amber)" : "var(--text-muted)",
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>{m.label}</button>
-                          {/* Info button discipline pass (May 8 master todo line 796) — chip
-                              definitions reachable from morning check-in too. Same canonical
-                              pattern as the Body Scan What Shifted site 7892-7899. */}
-                          {CHIP_DEFINITIONS[m.id] && (
-                            <button
-                              onClick={() => setInfoModal(CHIP_DEFINITIONS[m.id])}
-                              aria-label={`What does ${m.label} mean?`}
-                              style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 12, padding: "0 4px", lineHeight: 1, marginLeft: -2 }}>
-                              ⓘ
-                            </button>
-                          )}
-                        </div>
+                        <button key={m.id} onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
+                          background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciMood === m.id ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                          color: ciMood === m.id ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{m.label}</button>
                       ))}
                     </div>
 
