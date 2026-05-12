@@ -16593,6 +16593,146 @@ function MyProgress({ onBack }) {
         </div>
       ) : (<>
 
+        {/* ── LAST 30 DAYS — Gap 9 (May 12, 2026) ──────────────────────
+            Synthesized insight report. Plain English observations sourced
+            from the user's real data over the prior 30 days. Hoemann 2021
+            granularity surfaced as the user's emerging vocabulary; Wells
+            2009 metacognitive practice surfaced as their pattern
+            accumulation. The user sees their own capacity expansion as
+            language, not as scores. Anti-gamification preserved: no
+            badges, no progression bars in the synthesis. The data
+            observed back as the user's pattern. */}
+        {(() => {
+          const now = Date.now();
+          const cutoff = now - (30 * 24 * 60 * 60 * 1000);
+          const recent = sessions.filter(s => {
+            try { return new Date(s.timestamp).getTime() >= cutoff; } catch { return false; }
+          });
+          if (recent.length === 0) return null;
+
+          const insights = [];
+
+          // Session volume
+          insights.push({
+            headline: `${recent.length} session${recent.length === 1 ? "" : "s"} in the last 30 days.`,
+            body: recent.length >= 15
+              ? "Practice that compounds. Consistency over magnitude."
+              : recent.length >= 6
+                ? "Regular practice forming. Each rep accrues."
+                : "Practice is starting to show up. Anchor it to a cue you can't miss.",
+          });
+
+          // Distinct chips (granularity)
+          const chips = new Set();
+          recent.forEach(s => {
+            if (s.preState) chips.add(s.preState);
+            if (s.postState) chips.add(s.postState);
+            if (s.feelState) chips.add(s.feelState);
+          });
+          if (chips.size > 0) {
+            insights.push({
+              headline: `${chips.size} different feel-state chip${chips.size === 1 ? "" : "s"} used.`,
+              body: chips.size >= 8
+                ? "Your interoceptive vocabulary is broad. Granularity is the practice (Hoemann 2021)."
+                : chips.size >= 4
+                  ? "Vocabulary building. Try a chip you haven't used before next session."
+                  : "Stretching beyond your default chips expands what you can name in real time.",
+            });
+          }
+
+          // Pre/post delta average
+          const withDelta = recent.filter(s => typeof s.delta === "number" && !Number.isNaN(s.delta));
+          if (withDelta.length >= 3) {
+            const avgDelta = withDelta.reduce((sum, s) => sum + s.delta, 0) / withDelta.length;
+            insights.push({
+              headline: `Average shift of ${avgDelta >= 0 ? "+" : ""}${avgDelta.toFixed(1)} across ${withDelta.length} rated sessions.`,
+              body: avgDelta >= 1.5
+                ? "Reps that move state reliably. The shift is the data."
+                : avgDelta >= 0.5
+                  ? "Small shifts add up over months. Composure is built, not summoned."
+                  : "Composure isn't always shift — sometimes it's holding. Reread your sessions that didn't move; that's the practice too.",
+            });
+          }
+
+          // Bias profile mention
+          if (biasProfile && Array.isArray(biasProfile) && biasProfile.length > 0) {
+            insights.push({
+              headline: `${biasProfile.length} cognitive distortion${biasProfile.length === 1 ? "" : "s"} on your watch list.`,
+              body: `Top: ${biasProfile[0]}. Each Reframe session is a rep against it — Wells 2009 metacognitive therapy. The distortion doesn't go away; your relationship to it changes.`,
+            });
+          }
+
+          // Trigger profile mention
+          try {
+            const profile = getTriggerProfile();
+            if (profile?.triggers?.length > 0) {
+              const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
+              if (top?.label && top?.encounterCount >= 1) {
+                insights.push({
+                  headline: `"${top.label}" has come up ${top.encounterCount} time${top.encounterCount === 1 ? "" : "s"}.`,
+                  body: "A named trigger you've encountered. Pre-event briefs sharpen with repetition — Gollwitzer 1999 implementation intentions become faster with reps.",
+                });
+              }
+            }
+          } catch {}
+
+          // Streak
+          if (streak >= 3) {
+            insights.push({
+              headline: `${streak}-day session streak active.`,
+              body: streak >= 14
+                ? "Habit forming. Neuroplasticity needs repetition (Lally 2010 — habits stabilize around 66 days)."
+                : "Consistency is the substrate. Don't break the chain on the worst days; those are the practice.",
+            });
+          }
+
+          if (insights.length === 0) return null;
+
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                LAST 30 DAYS
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 18,
+                letterSpacing: "0.01em"
+              }}>
+                What the data shows. Observations, not scores.
+              </div>
+              {insights.map((ins, idx) => (
+                <div key={idx} style={{
+                  padding: "12px 0",
+                  borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+                }}>
+                  <div style={{
+                    fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 500, marginBottom: 4
+                  }}>
+                    {ins.headline}
+                  </div>
+                  <div style={{
+                    fontSize: 12, color: "var(--text-muted)",
+                    lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    {ins.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
             May 9). Architecture line 274: "Roadmap surface (stage display +
