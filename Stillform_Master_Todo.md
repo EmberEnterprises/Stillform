@@ -1,5 +1,40 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (Journey-Spine gap analysis extended with three second-pass gaps from direct code walk: capacity gates, per-session rep counted, spine voice)**
+**ARA Embers LLC · last updated May 12, 2026 (Spine Ship complete: 10 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`, 31 commits ahead of main. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
+
+## SPINE SHIP — May 12, 2026 (commits `e123e07` through `111e08a`)
+
+Ten gaps shipped first-cut in a single batch this session. Branch `feat/home-wiring-surface` is at 31 commits ahead of main, all green (build + preflight pass on every commit), zero deployed.
+
+**What the user will see after the next Netlify deploy:**
+
+1. **Home — TODAY'S REP block at top of hero.** Eyebrow names current chapter; rep statement names the metacognitive objective from `getTodaysJourneyRep()`. Bio-filter reasoning + CTA preserved below (modality entry). Anchors strip below journey rep if anchors set.
+2. **Home — REP COUNTED banner.** When a session completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss X. Auto-clears on dismiss.
+3. **Mirror Strip → Roadmap (one tap).** No Mirror Sheet detour. Roadmap shows all 5 chapters with current highlighted, capacity gates visible on stages 2-5, science citations per gate.
+4. **Roadmap → Library button.** Browsable destination for the 20 science cards organized into 6 shelves by capacity. Each card expandable with source link.
+5. **My Progress — Last 30 Days synthesis card at top.** Plain-language observations across session volume, granularity, pre/post delta, biases, triggers, streak.
+6. **My Progress — Since You Started card below.** Baseline-to-current growth across stages, chips, triggers, biases, signals, sessions. Empty growth state still renders with baseline date.
+7. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
+8. **FAQ — Stage names and Mirror naming reconciled with code.**
+
+**What's NOT in this ship:**
+
+- Audio practice layer (Gap 7) — needs assets, deferred
+- Periodic re-assessment ritual (Gap 4 second cut) — needs UX decisions on cadence
+- Calibration-time anchor selection (Gap 8 second cut) — onboarding modification deferred
+- Personalized first-week starter sequence at calibration (Gap 3 second cut)
+- Anchor → marker auto-pairing (Gap 8 + Gap 11 integration)
+- Founder voice content pass (Gap 12 dedicated content production)
+- Mirror Sheet rewiring to in-tool contexts (component remains intact but unreachable from home; designed to be wired to Reframe close / tool completion screens in a future commit)
+
+**Deploy + test order (Arlin):**
+1. Trigger Netlify deploy from branch when ready.
+2. Phone walk: home → journey rep at top → tap Mirror Strip → Roadmap → tap "The Library →" → browse cards.
+3. Complete a session that might advance a marker → return home → REP COUNTED banner.
+4. Open Settings → Habit Anchors → add an anchor (or tap starter suggestion) → return home → STANDING ANCHORS strip visible.
+5. Open My Progress → see Last 30 Days card and Since You Started card.
+6. Open FAQ → "What is the Mirror and stage system?" → confirm stage names.
+
+---
 
 ---
 
@@ -85,6 +120,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 1 — Path visualization for the 5-stage architecture
 
+**STATUS: SHIPPED (first cut) — commit `7de3b15`, May 12, 2026.** Mirror Strip on home now opens the existing RoadmapScreen directly (one tap, was two). Roadmap renders all 5 chapters with current highlighted, past as built, future with capacity gates visible. Shipped alongside Gap 10 (designed together).
+
 **Code state:** `STAGE_DEFINITIONS` at `src/App.jsx:4718` defines five capacities with science citations. `computeStageMarkers` at `:4755` tracks real progress per stage (bio-filter setup, body-area-specific sessions, distinct chips, sustained check-in weeks, triggers named, pre-event briefs, pattern acceptance, high-load sessions, recovery trend). `getCurrentStage` at `:4822` returns current stage + percent to next. **User-visible representation: one line of 10pt monospace text at `:22790`** (Mirror Status Strip).
 
 **Competitor parallel:** Liven Journey tab — 4 chapters unlocking sequentially, current chapter highlighted. HMP My Path — self-paced lesson sequence with pillar mapping.
@@ -98,6 +135,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 ---
 
 ### Gap 2 — Single dominant daily focus replacing the 9-section feature panel
+
+**STATUS: SHIPPED (first cut) — commit `9f315ef`, May 12, 2026.** Hero on home now renders "TODAY'S REP · STAGE N · STAGENAME" eyebrow + rep statement above the existing bio-filter reasoning line + CTA. Journey rep names WHAT today's practice is (sourced from `getTodaysJourneyRep()` reading next unmet marker); processing type + bio-filter select HOW to enter (modality layer preserved). Between-stage state renders "CHAPTER BUILT" + gate-to-next-chapter framing. PracticeSurface and other home sections still present — the journey rep sits at the visual top of the hero block, not the entire home. Second cut would compress remaining sections if needed.
 
 **Code state:** Home render at `:21895` shows: greeting + PracticeSurface + Morning Strip + Morning Check-in form + Mirror Strip + Hero CTA + Move Card promo + Scripts promo + EOD Strip. Hero CTA at `:22881` is bio-filter-routed; reasoning line names the rule that fired (Ship 2, May 11), not the journey position. Every day reads the same structural shape.
 
@@ -113,6 +152,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 3 — Calibration outputs a starter path, not just a profile
 
+**STATUS: SHIPPED (first cut) — commit `9f315ef`, May 12, 2026.** No new persistence introduced. Instead: `STAGE_REPS` lookup at `:4807` maps every shipped marker to a one-sentence rep statement. `getTodaysJourneyRep()` returns the next unmet shipped marker as today's rep. The "starter path" is implicit in the markers themselves, surfaced in order as the user progresses. Cleaner than a separate path data structure — uses the existing capacity-tracking infrastructure as the path. Second cut could add calibration-time generation of personalized first-week sequence with cadence and modality variance.
+
 **Code state:** Calibration completion writes `stillform_signal_profile`, `stillform_bias_profile`, `stillform_regulation_type`, `stillform_breath_pattern`. Zero `stillform_path_*` keys exist in `SYNC_KEYS` (`:9567`). Profile data feeds the AI; user sees no time-sequenced journey artifact at calibration end.
 
 **Competitor parallel:** Liven 3-min quiz → personalized course unfolds with chapter structure visible immediately. HMP 3-5 min self-assessment → personalized path generated with pillar mapping shown on entry.
@@ -126,6 +167,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 ---
 
 ### Gap 4 — Re-assessment ritual that surfaces capacity expansion
+
+**STATUS: SHIPPED (first cut) — commit `111e08a`, May 12, 2026.** Capacity-growth baseline written to `stillform_growth_baseline` at calibration completion for new users (true baseline) or retroactively seeded on first app load for pre-existing users (source: `retroactive-seed`). Added to SYNC_KEYS so baseline persists across devices. "Since You Started" card in My Progress (above Roadmap surface) computes deltas from baseline → current and renders plain-language growth observations: stage advancement, chip vocabulary growth, triggers named, biases recognized, signal areas mapped, sessions logged. Empty growth state still renders the card so the surface exists from day one. Periodic re-assessment ritual (abbreviated calibration re-run) is the second cut — requires UX work on cadence (monthly/quarterly/user-triggered) and stripped calibration flow.
 
 **Code state:** Calibration runs once. Stage markers update silently in background data. `computeStageMarkers` at `:4755` returns current state; nothing compares against baseline. My Progress at `:13516` shows aggregates (avg shift, processing type, lock-in rate, day streak) but not a delta from the starting calibration.
 
@@ -141,6 +184,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 5 — Practice library as a destination, not a buried surface
 
+**STATUS: SHIPPED (first cut) — commit `12a2e35`, May 12, 2026.** New `LibraryScreen` component at `:17469`. The 20 static science cards from `STATIC_SCIENCE_CARDS` organized into 6 shelves: 5 stages + general mechanisms. `LIBRARY_CATEGORIES` and `LIBRARY_CARD_TITLES` map topics to shelves with humanized titles. Each card expandable on tap → body + citation + source link (paywall labeled). Reachable from Roadmap with "The Library →" entry button at bottom of Roadmap (natural connection: read the science behind the chapters). Screen state machine and back-nav extended for `library` route. Pure exposure of existing content — no new data layer.
+
 **Code state:** Plain-Language Neuroscience cards exist (`PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md`) but aren't surfaced as a destination tab. Science is woven in moments inside tools. There is no browsable library outside of practice flow.
 
 **Competitor parallel:** Liven Explore tab — articles, mini-courses, videos, organized for non-sequential discovery. HMP science lessons embedded inline with practices but also accessible separately.
@@ -155,6 +200,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 6 — FAQ stage names out of sync with code
 
+**STATUS: SHIPPED — commit `e123e07`, May 12, 2026.** FAQ at `:24820` reconciled with STAGE_DEFINITIONS at `:4718`. Stage names now read NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING (was: Naming, Pattern recognition, Flexibility, Equanimity, Steadiness). Each stage description includes science citations matching STAGE_DEFINITIONS. "Stages of mastery" replaced with "capacities of practice" per framing law. Mirror naming consistency: "Mirror" (umbrella) + "Mirror Sheet" (modal). Anti-gamification stance preserved: "markers are observable signals of expansion, not gates you have to clear."
+
 **Code state:** `STAGE_DEFINITIONS` at `:4718` uses NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING. FAQ at `:24820` describes stages as *"Naming, Pattern recognition, Flexibility, Equanimity, Steadiness."* Different lists. The user-facing copy describes a deprecated stage architecture.
 
 **Gap:** Bug. Documentation drift between source-of-truth (code) and user-facing copy (FAQ).
@@ -166,6 +213,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 ---
 
 ### Gap 7 — Audio practice layer
+
+**STATUS: DEFERRED — needs external assets, May 12, 2026.** Implementation blocked on either (a) Arlin's voice recordings for high-signal surfaces (founder voice for chapter intros, monthly synthesis narration, gate explanations), (b) TTS API integration with a chosen provider, or (c) pre-recorded session audio from a contractor. Code-only ship not possible without one of these. When audio assets exist, integration is straightforward: HTML5 audio with playback controls inside Library cards + Roadmap chapter pages + tool flows for ambient guidance. Library + Body Scan are the natural first integration points.
 
 **Code state:** Body Scan, Move card, Plain-Language Neuroscience cards, Reframe — all text-only. No spoken guidance, no audio modality anywhere in the build.
 
@@ -181,6 +230,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 8 — Habit anchor system (cue → routine → reward formalized)
 
+**STATUS: SHIPPED (first cut) — commit `de2be7a`, May 12, 2026.** `stillform_anchors` localStorage + SYNC_KEYS entry. Settings → Habit Anchors collapsible section with add/edit/delete UI, 5-anchor practical ceiling. Starter suggestions shown when zero anchors set (Slack/email, lunch, bedtime, walking, phone ringing — each paired to a specific metacognition rep). Home renders "STANDING ANCHORS" strip below journey rep showing first 2 anchors (more counted via "+N more in Settings"). Calibration flow integration (anchor selection at calibration end with auto-pairing to Stage 1 markers) is the second cut — onboarding modification deferred to its own scoped commit. No automatic marker-pairing in first ship; user maps mentally for now.
+
 **Code state:** Day streak counter (passive), morning/EOD strips (time-of-day passive cues at `:22177` and elsewhere), notification reminders via `stillform_reminder_time`. No explicit anchor pairing of metacognition reps to existing life cues. Onboarding doesn't ask for anchors. Settings doesn't expose anchor configuration.
 
 **Competitor parallel:** Both competitors build formal habit infrastructure (Liven's daily task system with named slots; HMP's daily reminders + path pacing). The habit-formation research (Wood 2007, Lally 2010, Gollwitzer 1999, BJ Fogg) informs both products explicitly.
@@ -194,6 +245,8 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 ---
 
 ### Gap 9 — Synthesized insight reports
+
+**STATUS: SHIPPED (first cut) — commit `133f6f6`, May 12, 2026.** "Last 30 Days" synthesized card at the top of My Progress (before Roadmap surface). Computes up to 6 plain-English observations from real session data over the prior 30 days: session volume, distinct chip vocabulary (granularity), pre/post delta average, top bias from profile with MCT framing, top trigger by encounter count with Gollwitzer framing, streak (only when ≥3 days, escalates language at 14+ days with Lally 2010). Empty-state handled: zero-session 30-day window → card doesn't render. When monthly re-assessment (Gap 4 second cut) ships, this synthesis becomes the artifact delivered at re-assessment time.
 
 **Code state:** Pattern Transparency surface at `:25344` shows pattern detection events as a list. EOD artifacts are per-session at `stillform_eod_artifacts`. Today's Briefs at `stillform_todays_briefs`. No periodic synthesis across sessions over a 30-day or 90-day window. Data layer is rich; synthesis layer is empty.
 
@@ -215,6 +268,8 @@ Three additional gaps emerged from walking `src/App.jsx` line-by-line after the 
 
 ### Gap 10 — Capacity gates as visible thresholds (not passive markers)
 
+**STATUS: SHIPPED — commit `7de3b15`, May 12, 2026.** `STAGE_DEFINITIONS` at `:4718` extended with `gate` field for stages 2-5 (Stage 1 has no gate). Each gate has three fields: `headline` (cognitive prerequisite one-liner), `body` (what that means in user's practice), `citation` (literature source). Examples: Stage 2 NAMING gate: "You can't name what you can't feel." (Lieberman 2007 + Farb 2015). RoadmapScreen renders the gate inside each upcoming stage card above the marker list. The gate IS the science — not a point threshold. Anti-gamification stance preserved: AI leveling stays invisible; capacity gating is visible because the science is the gate.
+
 **Code state:** `STAGE_DEFINITIONS` at `:4718` defines five chapters. `computeStageMarkers` at `:4755` tracks per-stage progress. But markers update **silently in background data** — there is no user-visible threshold the user can see approaching. `STILLFORM_PROJECT_TRANSFER.md` explicitly states *"Invisible leveling — AI gets smarter silently by session count. Never announced."* That anti-gamification stance, applied to the **whole journey**, makes path mechanics invisible — the user never sees what they're working toward, only what they're doing right now.
 
 **Competitor parallel:** Liven uses numerical lesson-completion gates (points/streaks). HMP uses self-paced pillar scoring (no gates). Both are extremes; neither fits Stillform.
@@ -231,6 +286,8 @@ This is structurally different from Gap 1 (which shows the path) and Gap 3 (whic
 
 ### Gap 11 — Per-session "rep counted" feedback
 
+**STATUS: SHIPPED (first cut) — commit `8703cb9`, May 12, 2026.** `appendSessionToStorage` at `:2538` instrumented: snapshot pre-session marker met-state across stages 1-5, write session, recompute, find first marker where pre-state was false and current is true → write payload to `stillform_last_rep_counted`. Only first flipped marker per session surfaces (discrete feedback, not flood). Home hero render reads the key and surfaces a bordered banner above the journey rep block: "✓ REP COUNTED · STAGE N · STAGENAME" + marker label + rep statement in Cormorant italic + dismiss X. Dismiss clears the key. Plausible event "Capacity Rep Counted" fires alongside. Per-session is the temporal layer that completes the trio: per-session (this) → monthly synthesis (Gap 9) → quarterly re-assessment (Gap 4 second cut).
+
 **Code state:** Sessions write extensive data — `stillform_sessions` captures pre/post rate, delta, tools used, durationSec, exitPoint, regulationType, bioFilter, feelState, triggerId, flaggedPattern, shiftLabel, breathPattern, sessionId. Chips used populate `stillform_feelstate` history. The session completion screen at `:24459` (tool render) shows a generic completion confirmation. **The user never sees which capacity rep they just did.** A first-time use of the chip "envious" — Stage 2 NAMING progress — registers in data with zero user-visible acknowledgment. A Move card session entered during an active state — Stage 1 NOTICING progress — same. The rep counts in the data; the rep is invisible to the user.
 
 **Competitor parallel:** Liven post-session reflection prompt (*"How are you feeling now vs before this lesson?"*). HMP shows pillar-score nudges after practices. Both reflect SOMETHING back to the user at the end of a session.
@@ -246,6 +303,8 @@ This is structurally different from Gap 4 (periodic, every 30 days) and Gap 9 (s
 ---
 
 ### Gap 12 — Spine voice & content language
+
+**STATUS: PARTIAL — voice applied per-surface as each gap shipped, May 12, 2026.** Every surface shipped in Gaps 1-11 was written with framing-law voice: science as language (citations earn their space), capacity as observation not achievement ("rep counted" not "level up"), enhancement framing (the reader wants to think sharper, not get calm). No dedicated content-production pass yet — the voice is consistent across ships because the framing law was the operating reference, but a unified editorial review across all spine surfaces is the remaining work. Founder voice (Arlin) for high-signal surfaces (chapter intros, monthly synthesis prose) is the natural next pass when Arlin has bandwidth for content writing.
 
 **Code state:** The only journey-related copy currently in the codebase is `STAGE 1 · NOTICING · JAW TELL · CLIENT CALL` (Mirror Strip at `:22790`, 10pt mono) and the FAQ entry at `:24820` (which has stale stage names — Gap 6). Every other spine surface from Gaps 1-11 — chapter pages, daily focus copy, capacity gates, re-assessment artifacts, per-session capacity feedback, insight reports — currently has **no content written**. The framing law at `STILLFORM_FRAMING_LAW.md` defines principles (capacity expansion not regulation; neuroplasticity not wellness; operator precision not warmth) but no body of journey-narration copy exists that derives from those principles.
 
