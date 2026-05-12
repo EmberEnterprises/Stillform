@@ -9853,7 +9853,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language","stillform_anchors"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language","stillform_anchors","stillform_growth_baseline"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -16829,6 +16829,162 @@ function MyProgress({ onBack }) {
           );
         })()}
 
+        {/* ── SINCE YOU STARTED — Gap 4 (May 12, 2026) ──────────────────
+            Capacity-growth baseline surface. Reads stillform_growth_baseline
+            (seeded once on calibration completion for new users, or
+            retroactively on first app load for pre-existing users) and
+            compares to current state. Surfaces growth in plain language:
+            stage advancement, chip vocabulary expansion, profile growth,
+            session accumulation since baseline.
+
+            This is the "your concept library has grown" surface the user
+            needs to see their own neuroplasticity over time (Hoemann 2021
+            granularity expansion is real but only visible if surfaced).
+            Different from Last 30 Days (rolling window) — this is from
+            baseline forward, the long arc.
+
+            Anti-gamification: no points, no badges, no completion
+            percentages. Plain observations: "X chips you didn't have when
+            you started." */}
+        {(() => {
+          let baseline = null;
+          try {
+            const raw = localStorage.getItem("stillform_growth_baseline");
+            if (raw) baseline = JSON.parse(raw);
+          } catch {}
+          if (!baseline || !baseline.capturedAt) return null;
+
+          // Current snapshot
+          const currentDistinctChips = (() => {
+            const set = new Set();
+            sessions.forEach(s => {
+              if (s.preState) set.add(s.preState);
+              if (s.postState) set.add(s.postState);
+              if (s.feelState) set.add(s.feelState);
+            });
+            return set.size;
+          })();
+          const currentBias = (biasProfile && Array.isArray(biasProfile)) ? biasProfile.length : 0;
+          const currentSignal = (signalProfile && Array.isArray(signalProfile)) ? signalProfile.length : (signalProfile && typeof signalProfile === "object" ? Object.keys(signalProfile).length : 0);
+          let currentTriggers = 0;
+          try { currentTriggers = (getTriggerProfile()?.triggers?.length) || 0; } catch {}
+          let currentStageId = 1;
+          try { currentStageId = getCurrentStage()?.currentStageId || 1; } catch {}
+
+          const chipDelta = currentDistinctChips - (baseline.distinctChips || 0);
+          const biasDelta = currentBias - (baseline.biasCount || 0);
+          const signalDelta = currentSignal - (baseline.signalCount || 0);
+          const triggerDelta = currentTriggers - (baseline.triggerCount || 0);
+          const sessionDelta = sessions.length - (baseline.sessionsCount || 0);
+          const stageDelta = currentStageId - (baseline.stage || 1);
+
+          const baselineDate = (() => {
+            try {
+              const d = new Date(baseline.capturedAt);
+              return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+            } catch { return "earlier"; }
+          })();
+
+          const lines = [];
+          if (stageDelta > 0) {
+            lines.push({
+              headline: `Stage ${baseline.stage} → Stage ${currentStageId}.`,
+              body: stageDelta === 1
+                ? "A capacity built. The chapter you started in is one you've passed through."
+                : `${stageDelta} chapters of capacity built since baseline.`,
+            });
+          }
+          if (chipDelta > 0) {
+            lines.push({
+              headline: `${chipDelta} new feel-state chip${chipDelta === 1 ? "" : "s"} in your vocabulary.`,
+              body: chipDelta >= 5
+                ? "Your interoceptive vocabulary has materially widened. Granularity is the practice (Hoemann 2021)."
+                : "Small additions to your library of named states. The naming is the rep.",
+            });
+          }
+          if (triggerDelta > 0) {
+            lines.push({
+              headline: `${triggerDelta} new trigger${triggerDelta === 1 ? "" : "s"} named.`,
+              body: "Triggers you've identified since you started. Pre-event briefs sharpen with reps — Gollwitzer 1999 implementation intentions.",
+            });
+          }
+          if (biasDelta > 0) {
+            lines.push({
+              headline: `${biasDelta} additional cognitive distortion${biasDelta === 1 ? "" : "s"} on your watch list.`,
+              body: "Recognition of how your thinking patterns show up — Wells 2009 metacognitive therapy.",
+            });
+          }
+          if (signalDelta > 0) {
+            lines.push({
+              headline: `${signalDelta} additional body tell${signalDelta === 1 ? "" : "s"} mapped.`,
+              body: "Specificity of where intensity registers in your body — interoceptive precision (Critchley 2017).",
+            });
+          }
+          if (sessionDelta > 0) {
+            lines.push({
+              headline: `${sessionDelta} session${sessionDelta === 1 ? "" : "s"} logged since baseline.`,
+              body: "Reps that accrued. The data layer captures what the body has been practicing.",
+            });
+          }
+
+          // If nothing has grown, still show the card with baseline date
+          // so the surface exists when growth starts.
+          if (lines.length === 0) {
+            lines.push({
+              headline: `Baseline captured ${baselineDate}.`,
+              body: baseline.source === "retroactive-seed"
+                ? "This baseline was seeded from your state at this surface's first load. Growth from this point forward will surface here."
+                : "Growth from your calibration baseline will surface here as it accrues.",
+            });
+          }
+
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                SINCE YOU STARTED · {baselineDate.toUpperCase()}
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 18,
+                letterSpacing: "0.01em"
+              }}>
+                {baseline.source === "retroactive-seed"
+                  ? "Baseline captured from your current state. Future growth measures from here."
+                  : "Growth from your calibration baseline."}
+              </div>
+              {lines.map((ln, idx) => (
+                <div key={idx} style={{
+                  padding: "12px 0",
+                  borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+                }}>
+                  <div style={{
+                    fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontWeight: 500, marginBottom: 4
+                  }}>
+                    {ln.headline}
+                  </div>
+                  <div style={{
+                    fontSize: 12, color: "var(--text-muted)",
+                    lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    {ln.body}
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
             May 9). Architecture line 274: "Roadmap surface (stage display +
@@ -18067,6 +18223,45 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+
+    // Gap 4 (May 12, 2026) — capacity-growth baseline seed.
+    // If onboarded and no baseline captured, snapshot current state once.
+    // For pre-existing users this is a retroactive seed (acknowledged in
+    // source field). For new users completing calibration on or after
+    // May 12, the calibration flow seeds at completion. Either way, the
+    // baseline lives in stillform_growth_baseline and never gets
+    // overwritten — it's the anchor against which growth is measured.
+    try {
+      const onboardedNow = localStorage.getItem("stillform_onboarded") === "yes";
+      const existing = localStorage.getItem("stillform_growth_baseline");
+      if (onboardedNow && !existing) {
+        const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+        const distinctChips = (() => {
+          const set = new Set();
+          sessions.forEach(s => {
+            if (s.preState) set.add(s.preState);
+            if (s.postState) set.add(s.postState);
+            if (s.feelState) set.add(s.feelState);
+          });
+          return set.size;
+        })();
+        const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+        const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+        const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+        const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+        const baseline = {
+          capturedAt: new Date().toISOString(),
+          stage: currentStageId,
+          distinctChips,
+          sessionsCount: sessions.length,
+          biasCount: bias,
+          signalCount: signal,
+          triggerCount: triggers,
+          source: "retroactive-seed",
+        };
+        localStorage.setItem("stillform_growth_baseline", JSON.stringify(baseline));
+      }
+    } catch {}
 
     // Local notification tap listener — fires when user taps a scheduled
     // local notification (pattern push, daily reminder, pre-meeting alert).
@@ -20665,6 +20860,41 @@ const isSignalProfileConfigured = () => {
 
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+
+    // Gap 4 (May 12, 2026) — capture growth baseline at calibration
+    // completion for new users. This is a true baseline (vs the
+    // retroactive-seed path on the mount useEffect for pre-existing
+    // users). The values capture the user's state at the moment they
+    // entered the practice. Never overwritten after first write.
+    try {
+      if (!localStorage.getItem("stillform_growth_baseline")) {
+        const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+        const distinctChips = (() => {
+          const set = new Set();
+          sessions.forEach(s => {
+            if (s.preState) set.add(s.preState);
+            if (s.postState) set.add(s.postState);
+            if (s.feelState) set.add(s.feelState);
+          });
+          return set.size;
+        })();
+        const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+        const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+        const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+        const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+        localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+          capturedAt: new Date().toISOString(),
+          stage: currentStageId,
+          distinctChips,
+          sessionsCount: sessions.length,
+          biasCount: bias,
+          signalCount: signal,
+          triggerCount: triggers,
+          source: "calibration-completion",
+        }));
+      }
+    } catch {}
+
     setFirstRunStage(null);
     // Ensure regType is always set before going to home — migrate balanced to thought-first
     // Apr 29: balanced regulation type fully retired. Migration now overwrites existing
