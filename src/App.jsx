@@ -20837,14 +20837,17 @@ const isSignalProfileConfigured = () => {
                       next[idx] = e.target.value.slice(0, 60);
                       setLabels(next);
                     }}
-                    placeholder="Name it plainly"
+                    placeholder="A specific situation or person"
                     maxLength={60}
                     style={{
                       width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
                       borderRadius: "var(--r)", padding: "12px 14px", fontSize: 14, color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", marginBottom: 10
+                      fontFamily: "'DM Sans', sans-serif", marginBottom: 8
                     }}
                   />
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 6 }}>
+                    Category
+                  </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {TRIGGER_PROFILE_CATEGORIES.map(cat => (
                       <button
