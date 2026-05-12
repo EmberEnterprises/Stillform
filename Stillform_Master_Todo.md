@@ -165,18 +165,63 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ---
 
+### Gap 7 — Audio practice layer
+
+**Code state:** Body Scan, Move card, Plain-Language Neuroscience cards, Reframe — all text-only. No spoken guidance, no audio modality anywhere in the build.
+
+**Competitor parallel:** HMP's structural spine is 600 days of audio lessons + audio-guided sittings (Davidson + colleagues as recorded voices). Liven includes audio components for some content. Audio is the primary modality for both competitors' between-session learning.
+
+**Gap:** Stillform has zero spoken modality. A user who's eyes-closed, eyes-tired, walking, driving, or cognitively depleted has no entry point into the practice. Low-Demand mode partially addresses cognitive load but still requires reading.
+
+**Fix (new lens):** Voice-led versions of Body Scan + Move card + PLN cards. Not meditation-app narration — operator-voice teaching of mechanism in plain language. Founder voice for PLN cards (Arlin reading the cards she wrote — voice IS the framing law in delivery). External voice for Body Scan pacing if needed. Audio IS the eyes-closed metacognition rep — turning the practice inward without screen burden. Frame: the practice is the rep; the modality is the entry point.
+
+**Cross-references:** Standalone modality. Audio versions of PLN cards live in the Library from Gap 5. Audio Body Scan plugs into existing Body Scan flow.
+
+---
+
+### Gap 8 — Habit anchor system (cue → routine → reward formalized)
+
+**Code state:** Day streak counter (passive), morning/EOD strips (time-of-day passive cues at `:22177` and elsewhere), notification reminders via `stillform_reminder_time`. No explicit anchor pairing of metacognition reps to existing life cues. Onboarding doesn't ask for anchors. Settings doesn't expose anchor configuration.
+
+**Competitor parallel:** Both competitors build formal habit infrastructure (Liven's daily task system with named slots; HMP's daily reminders + path pacing). The habit-formation research (Wood 2007, Lally 2010, Gollwitzer 1999, BJ Fogg) informs both products explicitly.
+
+**Gap:** Stillform has streaks but no formal anchor design. A metacognition rep that doesn't anchor to an existing life cue doesn't compound into capacity expansion — it stays "a thing the user does sometimes." Habits are how neuroplasticity becomes default behavior; without the anchor layer, the practice never crosses from intentional act to automatic capacity.
+
+**Fix (new lens):** Explicit anchor pairing introduced at calibration end and editable in Settings. *"Before opening Slack, name your state."* *"After lunch, one Naming rep."* *"Phone in hand before bed → EOD."* User picks two anchors at calibration completion; system pairs them to Stage 1 markers and surfaces them in the daily focus from Gap 2. Each anchor pair IS a Gollwitzer 1999 implementation intention. Habits ARE neuroplasticity in motion — the literature is settled. Currently absent from the build.
+
+**Cross-references:** Integrates with Gap 3 (calibration outputs starter path) — anchor selection is part of the path generation step. Integrates with Gap 2 (daily focus) — daily focus can reference the user's anchor pairing when surfacing today's rep.
+
+---
+
+### Gap 9 — Synthesized insight reports
+
+**Code state:** Pattern Transparency surface at `:25344` shows pattern detection events as a list. EOD artifacts are per-session at `stillform_eod_artifacts`. Today's Briefs at `stillform_todays_briefs`. No periodic synthesis across sessions over a 30-day or 90-day window. Data layer is rich; synthesis layer is empty.
+
+**Competitor parallel:** Liven's Mood Tracker analyzes behavioral patterns over time and surfaces insights. HMP shows pillar-level progress reports. Both periodically deliver "here's what the data says about you" as synthesized output.
+
+**Gap:** Stillform's data layer is richer than either competitor (sessions, chips, biases, triggers, EOD artifacts, move-card history, brief outcomes, pattern detections) — and the user sees zero synthesized output across that data. Pattern Transparency surfaces individual events, not synthesized observations.
+
+**Fix (new lens):** Monthly insight report — synthesized observations across the prior 30 days. Format: 4-6 plain-English statements (*"you named jaw-tension 14 times — your top somatic tell"*; *"your most common bias was personalization; your reframe rate on it held at 78%"*; *"you initiated 6 Move card sessions without prompt — that's autonomous Stage 1 mastery"*). Meta-meta-cognition: the system observes the user's metacognitive pattern accumulation and reflects it back. Frame: granularity is the practice (Hoemann 2021); the report makes the user's granularity visible TO the user. The report itself IS a metacognition rep — reading your own patterns is the next layer of practice.
+
+**Cross-references:** Integrates with Gap 4 (re-assessment ritual) — the monthly insight report can be the artifact handed to the user at re-assessment time. Builds on Pattern Transparency surface at `:25344` — synthesis is the next layer above event listing.
+
+---
+
 ### Build sequencing
 
-Gap 6 is a small fix — ship immediately, alongside the wider reconciliation.
+Gap 6 is a small fix — ship immediately, alongside the wider stage-name reconciliation pass.
 Gap 1 (path visualization) is the foundation — most other gaps reference the path schema.
 Gap 3 (calibration generates path) requires Gap 1's path schema defined.
-Gap 2 (daily focus) requires Gap 1 + Gap 3 (the hero's journey-position needs the path to exist).
+Gap 8 (habit anchors) lands inside Gap 3 — anchor selection is a calibration step.
+Gap 2 (daily focus) requires Gap 1 + Gap 3 + Gap 8 (the hero's journey-position needs the path AND the anchor pair).
 Gap 4 (re-assessment) requires Gap 3 (baseline recorded at calibration completion).
+Gap 9 (insight reports) lands inside Gap 4 — the synthesized report is the re-assessment artifact.
 Gap 5 (library) is independent — ship any time.
+Gap 7 (audio) is independent modality — Library + Body Scan get audio versions; ships any time.
 
-Build order: **Gap 6 → Gap 1 → Gap 3 → Gap 2 → Gap 4 → Gap 5.**
+Build order: **Gap 6 → Gap 1 → Gap 3 → Gap 8 → Gap 2 → Gap 4 → Gap 9 → Gap 5 → Gap 7.**
 
-Each gap exposes more of the existing spine. None of these invents new mechanics. Data layer is already in place.
+Each gap exposes more of the existing spine or adds a modality the spine already supports. None of these invents new mechanics. Data layer is already in place for every gap above; the work is surfacing what's there and adding the missing connective tissue.
 
 ---
 
