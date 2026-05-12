@@ -4714,37 +4714,62 @@ const _s5RecoveryTrendImproving = (lookbackDays = STAGE_THRESHOLDS.S5_RECOVERY_T
   } catch { return null; }
 };
 
-// — Stage definitions — names locked May 7, 2026 —
+// — Stage definitions — names locked May 7, 2026; capacity gates added May 12, 2026 (Gap 10) —
+// The `gate` field names the science-grounded prerequisite that opens this chapter.
+// It's the literal cognitive requirement of the next capacity, sourced from the
+// stacked literature — NOT a point threshold. The gate IS the science. Stage 1
+// has no gate (it's where the build starts).
 const STAGE_DEFINITIONS = Object.freeze({
   1: Object.freeze({
     id: 1,
     name: "NOTICING",
     capacity: "catching what's happening in your body before thought",
     science: ["Farb 2015 (interoceptive awareness)", "van der Kolk 2014", "Porges polyvagal theory"],
+    gate: null,
   }),
   2: Object.freeze({
     id: 2,
     name: "NAMING",
     capacity: "language for what's present, fast and accurate",
     science: ["Lieberman 2007 (affect labeling reduces amygdala activity)", "Barrett 2017 (emotional granularity)"],
+    gate: Object.freeze({
+      headline: "You can't name what you can't feel.",
+      body: "Naming opens once your interoceptive baseline is in place — the markers below show what that means in your practice.",
+      citation: "Lieberman 2007 affect labeling requires Farb 2015 interoceptive awareness as substrate.",
+    }),
   }),
   3: Object.freeze({
     id: 3,
     name: "ANTICIPATING",
     capacity: "pre-loading composure for known triggers",
     science: ["Gollwitzer 1999 (implementation intentions)", "Meichenbaum stress inoculation", "Gross 1998 (antecedent-focused regulation)"],
+    gate: Object.freeze({
+      headline: "You can't pre-load composure for triggers you can't name fast.",
+      body: "Anticipating opens once your feel-state vocabulary is broad and quick — the markers below show what that means in your practice.",
+      citation: "Gollwitzer 1999 implementation intentions require Barrett 2017 granularity as input.",
+    }),
   }),
   4: Object.freeze({
     id: 4,
     name: "RECOGNIZING",
     capacity: "seeing your own loops as they form",
     science: ["Wells 2009 (Metacognitive Therapy)", "Kross 2014 (self-distancing)", "Kabat-Zinn (decentering)"],
+    gate: Object.freeze({
+      headline: "You can't see your loops forming until you've practiced reading them in known triggers first.",
+      body: "Recognizing opens once you've named triggers, used briefs, and shown delta on the sessions where you did — the markers below.",
+      citation: "Wells 2009 metacognitive therapy requires Gross 1998 antecedent-focused regulation as rehearsal substrate.",
+    }),
   }),
   5: Object.freeze({
     id: 5,
     name: "HOLDING",
     capacity: "composure under maximum load",
     science: ["Meichenbaum stress inoculation outcomes", "McEwen allostatic load", "Porges vagal tone"],
+    gate: Object.freeze({
+      headline: "You can't hold composure under maximum load until you've disrupted patterns under moderate load.",
+      body: "Holding opens once Pattern Disruption is real for you — your acceptance rate, self-initiated disruptors, and self-flagged patterns all need to be present in the data.",
+      citation: "Meichenbaum stress inoculation outcomes require the Stage 4 metacognitive substrate as trained-in capacity.",
+    }),
   }),
 });
 
@@ -16905,6 +16930,51 @@ function RoadmapScreen({ onBack }) {
                 {def.capacity}
               </div>
 
+              {/* Capacity gate — only for upcoming stages with a defined gate.
+                  Gap 10 (May 12, 2026): names the science-grounded prerequisite
+                  that opens this chapter. The gate IS the science — not a point
+                  threshold. Headline + body + citation in three lines so the
+                  user reads the cognitive requirement, sees what it means in
+                  practice (the markers below), and the literature source.
+                  Renders for upcoming stages only because met/current users
+                  have already passed or are inside this chapter. */}
+              {status === "upcoming" && def.gate && (
+                <div style={{
+                  padding: "14px 14px 12px",
+                  marginBottom: 16,
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  background: "var(--surface2)"
+                }}>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--text-muted)", marginBottom: 8,
+                    letterSpacing: "0.14em"
+                  }}>
+                    The gate
+                  </div>
+                  <div style={{
+                    fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                    color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 8,
+                    letterSpacing: "0.01em"
+                  }}>
+                    {def.gate.headline}
+                  </div>
+                  <div style={{
+                    fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+                    color: "var(--text)", lineHeight: 1.55, marginBottom: 10
+                  }}>
+                    {def.gate.body}
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: "var(--text-dim)",
+                    fontFamily: "'DM Sans', sans-serif", lineHeight: 1.55,
+                    letterSpacing: "0.02em"
+                  }}>
+                    {def.gate.citation}
+                  </div>
+                </div>
+              )}
+
               {/* Markers — show for current + met stages with full progress.
                   For upcoming stages, show same structure but greyed (so user
                   can see the path forward without it being hidden). */}
@@ -22845,8 +22915,8 @@ const isSignalProfileConfigured = () => {
 
                 return (
                   <button
-                    onClick={() => setShowMirrorSheet(true)}
-                    aria-label={`Mirror status: Stage ${snap.currentStageId} ${snap.stage.name}. Tap to open.`}
+                    onClick={() => setScreen("roadmap")}
+                    aria-label={`Mirror: Stage ${snap.currentStageId} ${snap.stage.name}. Tap to open the Roadmap.`}
                     style={{
                       width: "100%", marginBottom: 16,
                       padding: "8px 4px",
