@@ -9094,6 +9094,102 @@ const STATIC_SCIENCE_CARDS = [
 
 // LocalStorage helpers for variety guard — last 5 card topics retained
 const SCIENCE_CARD_HISTORY_KEY = "stillform_card_history";
+
+// Library — Gap 5 (May 12, 2026)
+// The 20 static science cards organized into capacity shelves so the user
+// has a browsable destination outside of tool flow. Each card teaches
+// science as language (framing law) — pulls the literature spine into
+// the user's reading without requiring another tool rep. Six shelves:
+// five stages + general mechanisms.
+const LIBRARY_CATEGORIES = Object.freeze([
+  {
+    id: "stage-1",
+    title: "Stage 1 NOTICING",
+    subtitle: "Interoception, hardware diagnostics, polyvagal substrate.",
+    cardTopics: [
+      "interoception_emotion_mechanism",
+      "diaphragmatic_effect",
+      "pain_mechanism",
+      "misattribution_application",
+    ],
+  },
+  {
+    id: "stage-2",
+    title: "Stage 2 NAMING",
+    subtitle: "Affect labeling, emotional granularity, naming as intervention.",
+    cardTopics: [
+      "affect_labeling_mechanism",
+      "affect_labeling_implicit_mechanism",
+      "granularity_protective_effect",
+      "granularity_trainable_mechanism",
+    ],
+  },
+  {
+    id: "stage-3",
+    title: "Stage 3 ANTICIPATING",
+    subtitle: "Implementation intentions, stress inoculation, antecedent regulation.",
+    cardTopics: [
+      "implementation_intentions_effect",
+      "sit_application",
+      "reappraisal_meta_mechanism",
+    ],
+  },
+  {
+    id: "stage-4",
+    title: "Stage 4 RECOGNIZING",
+    subtitle: "Metacognitive therapy, decentering, the regulatory architecture.",
+    cardTopics: [
+      "mct_mechanism",
+      "mct_effect",
+      "dmn_breathing_mechanism",
+    ],
+  },
+  {
+    id: "stage-5",
+    title: "Stage 5 HOLDING",
+    subtitle: "HRV, vagal tone, the window of tolerance under load.",
+    cardTopics: [
+      "hrv_mechanism",
+      "window_mechanism",
+    ],
+  },
+  {
+    id: "general",
+    title: "General mechanisms",
+    subtitle: "Breath, sleep, acupressure — the substrate findings.",
+    cardTopics: [
+      "cyclic_sighing_effect",
+      "slow_breathing_mechanism",
+      "acupressure_effect",
+      "sleep_amygdala_effect",
+    ],
+  },
+]);
+
+// Humanized titles per topic — what the card teaches in one line.
+const LIBRARY_CARD_TITLES = Object.freeze({
+  cyclic_sighing_effect: "Cyclic sighing outperforms mindfulness for mood shift",
+  slow_breathing_mechanism: "Slow breathing changes autonomic state",
+  diaphragmatic_effect: "Diaphragmatic breathing reduces negative affect over 8 weeks",
+  acupressure_effect: "Acupressure produces measurable anxiety reduction",
+  interoception_emotion_mechanism: "Emotions arise from interpreting body signals",
+  reappraisal_meta_mechanism: "Reappraisal modulates the amygdala via cognitive control",
+  affect_labeling_mechanism: "Naming an emotion diminishes amygdala response",
+  affect_labeling_implicit_mechanism: "Affect labeling regulates without feeling like regulation",
+  granularity_protective_effect: "Higher granularity protects against maladaptive coping under distress",
+  granularity_trainable_mechanism: "Emotional granularity is a trainable skill",
+  sleep_amygdala_effect: "Sleep deprivation amplifies emotional reactivity",
+  dmn_breathing_mechanism: "Breath attention increases amygdala–prefrontal connectivity",
+  hrv_mechanism: "HRV biofeedback strengthens autonomic regulation",
+  sit_application: "Practice during low-stakes moments is the inoculation phase",
+  implementation_intentions_effect: "If-then planning produces medium-large effects on goals",
+  window_mechanism: "The window of tolerance — where thinking, regulating, and connecting are possible",
+  mct_mechanism: "Metacognitive therapy targets how you respond to thoughts, not their content",
+  mct_effect: "MCT shows large effect sizes for anxiety and depression",
+  misattribution_application: "Arousal is interpreted — the bio-filter intercepts that interpretation",
+  pain_mechanism: "Pain interrupts cognition by forcing attention prioritization",
+});
+
 function getRecentCardTopics() {
   try {
     const raw = localStorage.getItem(SCIENCE_CARD_HISTORY_KEY);
@@ -17128,7 +17224,7 @@ function MyProgress({ onBack }) {
 //
 // Layer 1.1 verification (May 8): STAGE_DEFINITIONS at App.jsx:3732,
 // computeStageMarkers at :3769, getCurrentStage at :3828. All exist and stable.
-function RoadmapScreen({ onBack }) {
+function RoadmapScreen({ onBack, onOpenLibrary }) {
   let snap = null;
   try { snap = getCurrentStage(); } catch { return null; }
   if (!snap) return null;
@@ -17354,6 +17450,29 @@ function RoadmapScreen({ onBack }) {
           );
         })}
 
+        {/* Library entry — Gap 5 (May 12, 2026). The user has just walked
+            the chapter view; offering the science library here lands at
+            the natural moment ("what's the research behind these
+            chapters?"). Quiet button — not the action, just the link out. */}
+        {onOpenLibrary && (
+          <button onClick={onOpenLibrary} style={{
+            width: "100%", marginTop: 12, marginBottom: 4,
+            padding: "12px 16px",
+            background: "var(--surface)",
+            border: "0.5px solid var(--amber-dim)",
+            borderRadius: "var(--r)",
+            cursor: "pointer", textAlign: "left",
+            WebkitTapHighlightColor: "transparent"
+          }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 4 }}>
+              The Library →
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+              Read the science behind each chapter — 20 findings, full citations, source links.
+            </div>
+          </button>
+        )}
+
         {/* Back button */}
         <button onClick={onBack} style={{
           background: "none", border: "0.5px solid var(--border)",
@@ -17365,6 +17484,167 @@ function RoadmapScreen({ onBack }) {
           ← Back
         </button>
 
+      </div>
+    </section>
+  );
+}
+
+// ─── LIBRARY SCREEN — Gap 5 (May 12, 2026) ─────────────────────────────
+// Browsable destination for the static science library. Organized by
+// capacity (5 stages) + general mechanisms. Each card shows the
+// humanized title, the body text, citation, and source link. The user
+// reads here when they're not in a tool moment — the practice's
+// intellectual frame stays accessible outside the rep itself.
+//
+// Per framing law: science as language, not credentialing. The cards
+// teach mechanism in plain English; the citations live in a small
+// footer so the user can dig deeper when they want.
+//
+// Different from Pattern Transparency (per-event surfacing) and
+// Mirror sheet (current stage status) — Library is for between-session
+// reading, learning, and orientation.
+function LibraryScreen({ onBack }) {
+  const [openCardId, setOpenCardId] = useState(null);
+
+  return (
+    <section className="screen" style={{ paddingBottom: 60 }}>
+      <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 0" }}>
+
+        {/* Eyebrow */}
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em"
+        }}>
+          The Library
+        </div>
+
+        {/* Title */}
+        <div style={{
+          fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
+          letterSpacing: "0.06em", color: "var(--text)", marginBottom: 12
+        }}>
+          The science behind the practice.
+        </div>
+
+        {/* Hairline accent */}
+        <div style={{
+          height: "0.5px", background: "var(--amber-dim)", width: 32,
+          marginBottom: 18, opacity: 0.8
+        }} />
+
+        {/* Intro */}
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontStyle: "italic",
+          color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 32,
+          letterSpacing: "0.01em"
+        }}>
+          Findings the practice is built on. Read in any order. The citations are real — follow them where you want.
+        </div>
+
+        {/* Categories — each shelf has a header + cards */}
+        {LIBRARY_CATEGORIES.map((cat) => {
+          const cards = cat.cardTopics
+            .map(topic => {
+              const card = STATIC_SCIENCE_CARDS.find(c => c.topic === topic);
+              if (!card) return null;
+              return { ...card, title: LIBRARY_CARD_TITLES[topic] || topic };
+            })
+            .filter(Boolean);
+          if (cards.length === 0) return null;
+
+          return (
+            <div key={cat.id} style={{ marginBottom: 28 }}>
+              {/* Shelf header */}
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 4,
+                letterSpacing: "0.14em"
+              }}>
+                {cat.title}
+              </div>
+              <div style={{
+                fontSize: 12, color: "var(--text-muted)",
+                marginBottom: 14, fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1.55
+              }}>
+                {cat.subtitle}
+              </div>
+
+              {/* Cards in this shelf */}
+              {cards.map((card) => {
+                const isOpen = openCardId === card.topic;
+                return (
+                  <div key={card.topic} style={{
+                    marginBottom: 10,
+                    border: "0.5px solid var(--border)",
+                    borderRadius: "var(--r)",
+                    background: isOpen ? "var(--surface)" : "transparent",
+                    overflow: "hidden"
+                  }}>
+                    <button
+                      onClick={() => setOpenCardId(isOpen ? null : card.topic)}
+                      style={{
+                        width: "100%", padding: "12px 14px",
+                        background: "none", border: "none", cursor: "pointer",
+                        textAlign: "left", color: "var(--text)",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontSize: 13, lineHeight: 1.5, fontWeight: 500,
+                        display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                        gap: 12,
+                        WebkitTapHighlightColor: "transparent"
+                      }}
+                    >
+                      <span style={{ flex: 1 }}>{card.title}</span>
+                      <span style={{
+                        color: "var(--text-muted)", fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        flexShrink: 0
+                      }}>{isOpen ? "▾" : "▸"}</span>
+                    </button>
+                    {isOpen && (
+                      <div style={{ padding: "0 14px 14px" }}>
+                        <div style={{
+                          fontSize: 13, color: "var(--text)",
+                          lineHeight: 1.65, marginBottom: 12,
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>
+                          {card.body}
+                        </div>
+                        <div style={{
+                          fontSize: 11, color: "var(--text-dim)",
+                          fontFamily: "'DM Sans', sans-serif",
+                          letterSpacing: "0.02em",
+                          lineHeight: 1.6,
+                          paddingTop: 8,
+                          borderTop: "0.5px solid var(--border-printed)"
+                        }}>
+                          {card.citation}
+                          {card.source_url && (
+                            <> · <a
+                              href={card.source_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{ color: "var(--amber)", textDecoration: "underline", textUnderlineOffset: 2 }}
+                            >Source{card.paywalled ? " (paywalled)" : ""}</a></>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+
+        {/* Back button */}
+        <button onClick={onBack} style={{
+          background: "none", border: "0.5px solid var(--border)",
+          borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
+          color: "var(--text-muted)", cursor: "pointer",
+          fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em",
+          marginTop: 24
+        }}>
+          ← Back
+        </button>
       </div>
     </section>
   );
@@ -18487,12 +18767,12 @@ export default function Stillform() {
       setScreen("settings");
       return;
     }
-    if (screen === "settings" || screen === "progress" || screen === "roadmap" || screen === "scripts" || screen === "pricing") {
+    if (screen === "settings" || screen === "progress" || screen === "roadmap" || screen === "scripts" || screen === "pricing" || screen === "library") {
       goHomeSafely();
       return;
     }
   };
-  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "scripts", "focus-check", "pricing", "tool", "pattern-transparency"].includes(screen);
+  const showBottomBack = ["tutorial", "setup-bridge", "setup", "faq", "privacy", "settings", "progress", "roadmap", "scripts", "library", "focus-check", "pricing", "tool", "pattern-transparency"].includes(screen);
   const dismissHomeContextTip = () => {
     setShowHomeContextTip(false);
     try { localStorage.setItem("stillform_tooltip_home_seen", "yes"); } catch {}
@@ -25123,7 +25403,12 @@ const isSignalProfileConfigured = () => {
 
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
         {screen === "roadmap" && (
-          <RoadmapScreen onBack={() => goHomeSafely()} />
+          <RoadmapScreen onBack={() => goHomeSafely()} onOpenLibrary={() => setScreen("library")} />
+        )}
+
+        {/* LIBRARY — Gap 5 (May 12, 2026): browsable science destination */}
+        {screen === "library" && (
+          <LibraryScreen onBack={() => goHomeSafely()} />
         )}
 
         {/* SCRIPTS — engagement architecture Engine 2 (Application Layer) full screen */}
