@@ -50,9 +50,23 @@ const KIND_LABELS = {
 export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
   const [promptIdx, setPromptIdx] = useState(0);
   const [elapsedMs, setElapsedMs] = useState(0);
+  // May 12, 2026 (Arlin: "literally a screen I do not feel engaged to
+  // for 90 seconds. I navigated away"): guided breath layer added as the
+  // engagement foundation. Previous design = single static prompt + generic
+  // 4s pulse ring → user has nothing to TRACK between prompt changes →
+  // attention drifts → exit. Now a continuous 4-in / 6-out breath cycle
+  // (parasympathetic-leaning ratio per Porges polyvagal + Gerritsen & Band
+  // 2018 vagal activation) runs as the visual + textual ground beneath the
+  // prompts. User has the breath to anchor to; prompts ride on top as
+  // specific actions. Even when prompt kind=breath has its own emphasis
+  // ("long exhale, slower than the inhale"), the steady breath rhythm
+  // remains the continuous anchor — the prompt names the EMPHASIS within
+  // the rhythm, not a separate rhythm.
+  const [breathPhase, setBreathPhase] = useState("inhale"); // "inhale" | "exhale"
   const startTimeRef = useRef(0);
   const promptTimeoutRef = useRef(null);
   const tickIntervalRef = useRef(null);
+  const breathTimerRef = useRef(null);
 
   // Total duration computed from props — recomputed if prompts change
   // (would only happen if parent swaps the sequence mid-run, which neither
@@ -71,6 +85,28 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
     return () => {
       if (promptTimeoutRef.current) clearTimeout(promptTimeoutRef.current);
       if (tickIntervalRef.current) clearInterval(tickIntervalRef.current);
+      if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
+    };
+  }, []);
+
+  // Breath cycle — alternates 4s inhale / 6s exhale. Recursive setTimeout
+  // (not setInterval) because the inhale/exhale durations are asymmetric.
+  // 4-in/6-out is parasympathetic-leaning (long exhale = vagal activation,
+  // Gerritsen & Band 2018). Default starts in inhale phase on mount; user
+  // sees ring grow first which matches the natural "breathe IN to begin."
+  useEffect(() => {
+    let cancelled = false;
+    const cycle = (phase) => {
+      if (cancelled) return;
+      setBreathPhase(phase);
+      const next = phase === "inhale" ? "exhale" : "inhale";
+      const dur = phase === "inhale" ? 4000 : 6000;
+      breathTimerRef.current = setTimeout(() => cycle(next), dur);
+    };
+    cycle("inhale");
+    return () => {
+      cancelled = true;
+      if (breathTimerRef.current) clearTimeout(breathTimerRef.current);
     };
   }, []);
 
@@ -177,14 +213,31 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
         }} />
       </div>
 
-      {/* Pulsing focus ring — visual anchor synchronized to prompt cadence */}
+      {/* Pulsing focus ring — now breath-paced. Scales up on inhale (4s),
+          scales down on exhale (6s). Color shift mirrors the breath state —
+          slightly brighter on exhale (release) than inhale. The CSS
+          transition is driven by the breathPhase state so React + browser
+          render in sync with the 4-6 cadence. */}
       <div style={{
         width: 120, height: 120, borderRadius: "50%",
-        border: `1px solid ${stillformAmber}`,
-        margin: "0 auto 32px",
-        opacity: 0.4,
-        animation: "stillformSomaticPulse 4s ease-in-out infinite"
+        border: `1.5px solid ${stillformAmber}`,
+        margin: "0 auto 16px",
+        opacity: breathPhase === "inhale" ? 0.55 : 0.75,
+        transform: breathPhase === "inhale" ? "scale(1.18)" : "scale(0.82)",
+        transition: breathPhase === "inhale"
+          ? "transform 4s cubic-bezier(0.4, 0, 0.2, 1), opacity 4s linear"
+          : "transform 6s cubic-bezier(0.4, 0, 0.2, 1), opacity 6s linear"
       }} />
+
+      {/* Breath phase label — names the rhythm so user has explicit anchor */}
+      <div className="t-mono-xs" style={{
+        color: stillformAmber, marginBottom: 24,
+        letterSpacing: "0.16em", fontSize: 11,
+        textTransform: "uppercase", opacity: 0.85,
+        transition: "opacity 300ms ease"
+      }}>
+        {breathPhase === "inhale" ? "Breathe in" : "Breathe out"}
+      </div>
 
       {/* Prompt text. Keyed on promptIdx so React unmounts/remounts on change,
           which retriggers the fade-in animation — visible cue that the
@@ -210,10 +263,6 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
       </button>
 
       <style>{`
-        @keyframes stillformSomaticPulse {
-          0%, 100% { transform: scale(1); opacity: 0.3; }
-          50% { transform: scale(1.08); opacity: 0.5; }
-        }
         @keyframes stillformPromptFade {
           0% { opacity: 0; transform: translateY(8px); }
           100% { opacity: 1; transform: translateY(0); }

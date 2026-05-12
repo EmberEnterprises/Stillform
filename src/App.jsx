@@ -8405,18 +8405,60 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             </div>
           </>
         ) : (
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 16 }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleWhatShiftedLockIn}
-              disabled={!lockInEnabled}
-              style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
-              Lock it in
-            </button>
-            <button className="btn btn-ghost" onClick={() => handleWhatShiftedSkip()}>
-              Skip
-            </button>
-          </div>
+          <>
+            {/* May 12, 2026 — Body Scan LANDED branch expanded with Continue
+                to Reframe option. Arlin: "the best way for metacognition
+                practice is through Reframe so the app is pointless if the
+                body-first users aren't experiencing it."
+
+                Ship 1.6 (May 11) added Reframe handoff for NOT-LANDED states
+                only. Landed-state users (post-chip in {settled, focused,
+                excited}) closed via Lock it in → Debrief → "Signal cleared"
+                → home with no Reframe invitation. This left body-first
+                users — whose primary tool path is Breathe/Body Scan — with
+                no consistent path to the metacognition surface even when
+                their body work was successful.
+
+                Three-button architecture:
+                1. Lock it in (primary) — affect-labeling close ritual,
+                   preserved from Ship 1.6. Requires chip.
+                2. Continue to Reframe → (ghost) — invitation to practice
+                   metacognition after body settled. Requires chip (so the
+                   post-state chip flows into Reframe context). Routes via
+                   handleWhatShiftedHandoff with "reframe" target — same
+                   path as the not-landed branch, just different framing.
+                3. Skip (small ghost) — honest "I don't know" exit, no
+                   chip required. Preserved from prior architecture.
+
+                Scientific framing: body work first, THEN metacognition.
+                Body Scan settles interoceptive signal (Khalsa et al. 2018);
+                Reframe practices the cognitive layer (memory reconsolidation
+                via Ecker / Schiller / Lane; cognitive reappraisal via
+                Ochsner & Gross). The two together = full self-mastery
+                practice. Either alone = incomplete. */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 16 }}>
+              <button
+                className="btn btn-primary"
+                onClick={handleWhatShiftedLockIn}
+                disabled={!lockInEnabled}
+                style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
+                Lock it in
+              </button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-landed-to-reframe")}
+                disabled={!lockInEnabled}
+                style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
+                Continue to Reframe →
+              </button>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: 12, color: "var(--text-muted)" }}
+                onClick={() => handleWhatShiftedSkip()}>
+                Skip
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
