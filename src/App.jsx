@@ -4773,7 +4773,124 @@ const STAGE_DEFINITIONS = Object.freeze({
   }),
 });
 
-// computeStageMarkers(stageId) → array of marker results.
+// — Marker reps — Gap 3 + Gap 11 (May 12, 2026) —
+// Each marker has a `rep` statement: the metacognitive practice action that
+// accrues toward meeting the marker. The rep is what the user DOES; the marker
+// is the data signal that they did it. STAGE_REPS keyed by marker.id so the
+// home hero can look up today's rep statement from the next unmet marker, and
+// per-session feedback (Gap 11) can name which rep was just counted.
+const STAGE_REPS = Object.freeze({
+  // Stage 1 NOTICING
+  "bio-filter-setup": Object.freeze({
+    statement: "Set your hardware state — name how your body is running right now.",
+    stageId: 1,
+  }),
+  "body-area-specificity": Object.freeze({
+    statement: "Do a Body Scan and tag the area where you felt the strongest tell.",
+    stageId: 1,
+  }),
+  "active-state-entry": Object.freeze({
+    statement: "Open a session next time you're feeling something. Don't wait for it to pass.",
+    stageId: 1,
+  }),
+  "autonomous-exits": Object.freeze({
+    statement: "Notice a state shift in your day and let it move without opening Stillform — then come back and log what happened.",
+    stageId: 1,
+  }),
+  // Stage 2 NAMING
+  "distinct-chips": Object.freeze({
+    statement: "Use a feel-state chip you haven't used before. The unfamiliar ones expand your vocabulary.",
+    stageId: 2,
+  }),
+  "checkin-consistency": Object.freeze({
+    statement: "Two check-ins this week — morning and evening, or two mornings. Consistency is the rep.",
+    stageId: 2,
+  }),
+  "affect-label-latency": Object.freeze({
+    statement: "Name what you're feeling fast — under four seconds is the target.",
+    stageId: 2,
+  }),
+  "affect-label-accuracy": Object.freeze({
+    statement: "Reach for the specific word — not 'bad,' but 'edgy' or 'flat' or 'cornered.'",
+    stageId: 2,
+  }),
+  // Stage 3 ANTICIPATING
+  "triggers-named": Object.freeze({
+    statement: "Open Trigger Profile and add one trigger you know lights you up.",
+    stageId: 3,
+  }),
+  "pre-event-briefs": Object.freeze({
+    statement: "Pick a known trigger event coming up. Run a Pre-event Brief before it.",
+    stageId: 3,
+  }),
+  "trigger-session-delta": Object.freeze({
+    statement: "Run a session around a named trigger — capture pre-rate before, post-rate after.",
+    stageId: 3,
+  }),
+  // Stage 4 RECOGNIZING
+  "pattern-acceptance-rate": Object.freeze({
+    statement: "When a Pattern Disruption surfaces, do the disrupt session. Don't dismiss.",
+    stageId: 4,
+  }),
+  "self-initiated-disruptor": Object.freeze({
+    statement: "Open Pattern Disruption when you notice a loop forming. Don't wait for the system to flag it.",
+    stageId: 4,
+  }),
+  "user-flagged-pattern": Object.freeze({
+    statement: "Tag a pattern in your sessions before the AI does — add it manually to your patterns.",
+    stageId: 4,
+  }),
+  // Stage 5 HOLDING
+  "high-load-sessions": Object.freeze({
+    statement: "Run a session when your bio-filter shows depleted, medicated, or activated — the conditions where it's hardest.",
+    stageId: 5,
+  }),
+  "high-load-delta": Object.freeze({
+    statement: "Practice the rep when your hardware is against you. Even a small shift IS the practice.",
+    stageId: 5,
+  }),
+  "recovery-trend": Object.freeze({
+    statement: "Stay consistent in high-load periods. Don't skip the worst days.",
+    stageId: 5,
+  }),
+});
+
+// getTodaysJourneyRep() → the next unmet shipped marker the user is working on.
+// Returns { rep, marker, stage, stageId, allMet } or null if no current stage.
+// allMet=true means user has finished current stage's shipped markers (between
+// stages — gate to next chapter is the focus, not a specific rep).
+const getTodaysJourneyRep = () => {
+  let snap;
+  try { snap = getCurrentStage(); } catch { return null; }
+  if (!snap || !snap.stage) return null;
+
+  const markers = computeStageMarkers(snap.currentStageId);
+  const shippedUnmet = markers.filter(m => m.status === "shipped" && !m.met);
+
+  if (shippedUnmet.length === 0) {
+    // All shipped markers met — between-stage state. Show gate-of-next-stage focus.
+    const nextStage = STAGE_DEFINITIONS[snap.currentStageId + 1];
+    return {
+      rep: null,
+      marker: null,
+      stage: snap.stage,
+      stageId: snap.currentStageId,
+      nextStage: nextStage || null,
+      allMet: true,
+    };
+  }
+
+  // First shipped unmet marker is today's rep.
+  const marker = shippedUnmet[0];
+  const repEntry = STAGE_REPS[marker.id];
+  return {
+    rep: repEntry ? repEntry.statement : marker.label,
+    marker,
+    stage: snap.stage,
+    stageId: snap.currentStageId,
+    allMet: false,
+  };
+};
 // Each marker: { id, label, value, threshold, met, status, deferReason? }
 // status: "shipped" (data source live, met reflects reality) or
 //         "deferred" (data source not yet live; met:false by definition).
@@ -22985,6 +23102,78 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
+                    {/* ── JOURNEY REP — Gap 2 + Gap 3 (May 12, 2026) ─────────────
+                        The journey rep names WHAT today's practice is (the
+                        metacognitive objective sourced from current stage's
+                        next unmet marker). The existing reasoning line + CTA
+                        below name HOW to enter that rep (modality routing
+                        from bio-filter + regType). Journey position first;
+                        modality entry second.
+
+                        This is the home becoming journey-routed at content
+                        layer while keeping the well-tested bio-filter routing
+                        intact at modality layer. Per the new lens: processing
+                        type is not the home's organizing principle — it
+                        modifies how the user enters today's journey rep.
+
+                        SCIENCE PRESERVED:
+                        - The rep statement comes directly from STAGE_REPS
+                          which is keyed to the actual shipped markers in
+                          computeStageMarkers — no new data invented, the
+                          existing capacity-tracking surface gets a user-
+                          facing voice.
+                        - Anti-gamification: no points, no levels, no
+                          progress bar inside the rep. The rep is just a
+                          named practice action. */}
+                    {(() => {
+                      const journeyRep = getTodaysJourneyRep();
+                      if (!journeyRep) return null;
+
+                      // Between-stage state: all shipped markers in current stage met.
+                      // Show gate-to-next-chapter framing instead of a specific rep.
+                      if (journeyRep.allMet) {
+                        const next = journeyRep.nextStage;
+                        return (
+                          <div style={{ marginBottom: 18, textAlign: "center" }}>
+                            <div className="t-mono-xs" style={{
+                              color: "var(--amber)", marginBottom: 8, letterSpacing: "0.14em"
+                            }}>
+                              STAGE {journeyRep.stageId} · {journeyRep.stage.name} · CHAPTER BUILT
+                            </div>
+                            <div style={{
+                              fontFamily: "'Cormorant Garamond', serif", fontSize: 15,
+                              fontStyle: "italic", color: "var(--text-cream)",
+                              lineHeight: 1.55, letterSpacing: "0.01em",
+                              padding: "0 8px"
+                            }}>
+                              {next
+                                ? `${next.name}'s gate is open — ${next.capacity}.`
+                                : "All five capacities built. Practice continues."}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Standard rep render — eyebrow + rep statement.
+                      return (
+                        <div style={{ marginBottom: 18, textAlign: "center" }}>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--amber)", marginBottom: 8, letterSpacing: "0.14em"
+                          }}>
+                            TODAY'S REP · STAGE {journeyRep.stageId} · {journeyRep.stage.name}
+                          </div>
+                          <div style={{
+                            fontFamily: "'DM Sans', sans-serif", fontSize: 15,
+                            fontWeight: 500, color: "var(--text)",
+                            lineHeight: 1.5, letterSpacing: "0.01em",
+                            padding: "0 8px"
+                          }}>
+                            {journeyRep.rep}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
                     {/* Ship 2 (May 11, 2026) — Spine inversion at home entry.
                         The hero CTA was previously calibration-aware but the
                         user couldn't see WHY this tool was being proposed.
