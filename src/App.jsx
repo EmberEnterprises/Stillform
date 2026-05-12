@@ -22723,14 +22723,41 @@ const isSignalProfileConfigured = () => {
                       // and what it concluded. Operator-tier register — direct
                       // observation, no padding, no drama.
                       let reasoning = null;
+                      // May 12, 2026 — recommendedAction: when bio-filter is
+                      // off-baseline, the reasoning line becomes the gateway
+                      // to the recommended override tool. Hero stays calibrated
+                      // (thought-first user's hero is always Reframe; body-first
+                      // is always Breathe). The reasoning line is the path for
+                      // users who read the recommendation and want to follow it
+                      // without going through the hero + modal flow. Arlin
+                      // May 12: "how are they going to know where to go?"
+                      let recommendedAction = null;
                       if (isThoughtFirst) {
                         if (offBaseline) {
-                          if (hasPain) reasoning = "Pain bio-filter — body work first.";
-                          else if (bioFilter.includes("activated")) reasoning = "Activated bio-filter — settle the system first.";
-                          else if (bioFilter.includes("depleted")) reasoning = "Depleted bio-filter — somatic intervention is lower demand.";
-                          else if (bioFilter.includes("sleep")) reasoning = "Sleep-deprived bio-filter — settle before thinking.";
-                          else if (bioFilter.includes("medicated")) reasoning = "Medicated bio-filter — calm path.";
-                          else reasoning = "Bio-filter off-baseline — body first.";
+                          if (hasPain) {
+                            reasoning = "Pain bio-filter — body work first.";
+                            recommendedAction = "scan";
+                          }
+                          else if (bioFilter.includes("activated")) {
+                            reasoning = "Activated bio-filter — settle the system first.";
+                            recommendedAction = "breathe";
+                          }
+                          else if (bioFilter.includes("depleted")) {
+                            reasoning = "Depleted bio-filter — somatic intervention is lower demand.";
+                            recommendedAction = "breathe";
+                          }
+                          else if (bioFilter.includes("sleep")) {
+                            reasoning = "Sleep-deprived bio-filter — settle before thinking.";
+                            recommendedAction = "breathe";
+                          }
+                          else if (bioFilter.includes("medicated")) {
+                            reasoning = "Medicated bio-filter — calm path.";
+                            recommendedAction = "breathe";
+                          }
+                          else {
+                            reasoning = "Bio-filter off-baseline — body first.";
+                            recommendedAction = "breathe";
+                          }
                         } else {
                           reasoning = "Bio-filter clear · calibration thought-first.";
                         }
@@ -22738,8 +22765,11 @@ const isSignalProfileConfigured = () => {
                         if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
                           if (hasPain) reasoning = "Pain bio-filter — Body Scan maps the signal.";
                           else reasoning = "Signal unnamed — Body Scan locates it.";
+                          recommendedAction = "scan";
                         } else if (offBaseline) {
                           reasoning = "Bio-filter off-baseline · body-first calibration.";
+                          // No recommendedAction — body-first hero (Breathe) already
+                          // handles this; the reasoning is informational only.
                         } else {
                           reasoning = "Bio-filter clear · calibration body-first.";
                         }
@@ -22748,18 +22778,49 @@ const isSignalProfileConfigured = () => {
                       }
 
                       if (!reasoning) return null;
+
+                      const baseStyle = {
+                        fontSize: 11,
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        letterSpacing: "0.08em",
+                        color: "var(--text-muted)",
+                        textAlign: "center",
+                        marginBottom: 10,
+                        opacity: 0.9
+                      };
+
+                      // No override → plain static div, no action.
+                      if (!recommendedAction) {
+                        return <div style={baseStyle}>{reasoning}</div>;
+                      }
+
+                      // Override available → tappable. Routes directly to
+                      // the recommended tool. Subtle "→" affordance hints
+                      // tap target without breaking the operator register.
+                      // Routes direct (not through BioFilterSuggestion modal)
+                      // because the user is choosing to follow the explicit
+                      // recommendation they just read — modal would be a
+                      // redundant explanation of what's already on screen.
+                      const handleTap = () => {
+                        try { window.plausible?.("Reasoning Line Tap", { props: { action: recommendedAction, bioFilter: bioFilter.slice(0, 32) } }); } catch {}
+                        if (recommendedAction === "scan") {
+                          startTool(TOOLS.find(t => t.id === "scan"));
+                        } else if (recommendedAction === "breathe") {
+                          startPathway("calm");
+                        }
+                      };
                       return (
-                        <div style={{
-                          fontSize: 11,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          letterSpacing: "0.08em",
-                          color: "var(--text-muted)",
-                          textAlign: "center",
-                          marginBottom: 10,
-                          opacity: 0.9
-                        }}>
-                          {reasoning}
-                        </div>
+                        <button onClick={handleTap} style={{
+                          ...baseStyle,
+                          background: "none", border: "none", padding: "4px 8px",
+                          cursor: "pointer", display: "block", margin: "0 auto 10px",
+                          textDecoration: "underline",
+                          textDecorationColor: "color-mix(in srgb, var(--text-muted) 35%, transparent)",
+                          textUnderlineOffset: 3,
+                          WebkitTapHighlightColor: "transparent"
+                        }} aria-label={`${reasoning} — open ${recommendedAction === "scan" ? "Body Scan" : "Breathe"}`}>
+                          {reasoning} →
+                        </button>
                       );
                     })()}
 
