@@ -10704,6 +10704,55 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
+  // PracticeSurface → Reframe context handoff (May 12, 2026).
+  // PracticeSurface writes stillform_practice_entry_context to localStorage
+  // when the user taps a pattern tile from the home (today retrieval or
+  // spaced return). This effect reads it ONCE on mount, formats it into an
+  // AI context string, holds it in a ref for the lifetime of this
+  // ReframeTool instance, and clears localStorage immediately so the
+  // context doesn't bleed into unrelated future sessions.
+  //
+  // Why ref not state: the value never changes during this Reframe session
+  // and rendering doesn't depend on it (no UI cue in this commit — pure AI
+  // wiring). A ref avoids unnecessary re-renders on the payload IIFE that
+  // would happen with useState.
+  //
+  // Why clear on mount not on consume: if the user opens Reframe but never
+  // sends a message (closes the tool, navigates away), the context still
+  // gets consumed in the sense that "this Reframe instance saw it." We
+  // don't want the context to fire on the NEXT Reframe open when the user
+  // might be coming from somewhere entirely different. One-shot semantics.
+  const practiceEntryRef = useRef(null);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("stillform_practice_entry_context");
+      if (raw) {
+        const ctx = JSON.parse(raw);
+        if (ctx && typeof ctx === "object" && ctx.pattern) {
+          const days = Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null;
+          const daysPhrase = days === null
+            ? "previously"
+            : days === 0
+              ? "earlier today"
+              : days === 1
+                ? "yesterday"
+                : `${days} days ago`;
+          const sourceNote = ctx.source === "spaced"
+            ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
+            : "Recent-retrieval surface — the home offered this for revisit because the user named it within the past week.";
+          practiceEntryRef.current =
+            `PRACTICE RETURN — READ THIS FIRST: The user came into Reframe from the home's practice surface, returning to a pattern they previously named: "${ctx.pattern}" (first named ${daysPhrase}). ${sourceNote} ` +
+            `This is not a fresh session — it is a planned revisit per spacing-effect literature (retrieval at increasing intervals consolidates the concept). ` +
+            `Open by briefly acknowledging the return — for example: "You named ${ctx.pattern.toLowerCase()} ${daysPhrase}. What's it doing today?" or similar. Keep it 1 sentence, oriented to NOW. ` +
+            `Let the user lead with what's actually present — do not recite the pattern as a label, do not assume the same situation applies, do not summarize what they said last time. The pattern name is shorthand for a class of experience, not a fixed event.`;
+        }
+        localStorage.removeItem("stillform_practice_entry_context");
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const inputNormalized = String(input || "").trim().toLowerCase();
   const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
 
@@ -11339,6 +11388,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return ctx;
             } catch { return null; }
           })(),
+          // PracticeSurface → Reframe handoff (May 12, 2026).
+          // The ref was populated on mount from stillform_practice_entry_context
+          // (read once, localStorage cleared). When the user entered Reframe
+          // by tapping a pattern tile on the home, this is the formatted AI
+          // directive that opens the conversation by acknowledging the return.
+          // Null when the user entered Reframe directly (not from a tile).
+          practiceEntryContext: practiceEntryRef.current,
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);

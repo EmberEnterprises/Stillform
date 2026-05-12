@@ -1236,6 +1236,7 @@ exports.handler = async function(event) {
       triggerProfile = null,
       deferredCalibration = null,
       priorToolContext = null,
+      practiceEntryContext = null,
       bioFilter = null,
       regulationType = null,
       sessionNotes = null,
@@ -1546,6 +1547,7 @@ exports.handler = async function(event) {
     if (userFlaggedPatterns) contextParts.push(userFlaggedPatterns);
     if (triggerProfile) contextParts.push(`${triggerProfile}. These are specific people, contexts, or moments the user has named as load-bearing — not categories, instances. If their current message names one of these by clear reference (the person, the meeting, the situation), recognize it directly: "This is [trigger] again." That recognition lands as continuity. Do NOT volunteer a trigger they did not raise; do NOT fabricate connections; do NOT moralize about why it shows up. The list is for orientation, not interrogation. If a high-encounter trigger has not surfaced in a while and the user seems off, you may ask gently: "Has [trigger] been quiet, or just out of frame?" Once per session, max.`);
     if (priorToolContext) contextParts.push(priorToolContext);
+    if (practiceEntryContext) contextParts.push(practiceEntryContext);
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 3) {
       // "TODAY'S SIGNAL LOG ENTRIES" = entries logged today (manual or auto) — reference proactively
