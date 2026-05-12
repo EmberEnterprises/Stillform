@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (phone-test fix session)**
+**ARA Embers LLC · last updated May 12, 2026 (Journey-Spine Competitive Gap Analysis added; framing-law cascade complete; pre-research marketing deleted)**
 
 ---
 
@@ -51,6 +51,132 @@ Arlin walked the spine ships from the previous day's build session (commits `204
 9. **Privacy / Pattern Transparency back**: from Settings → Patterns I'm watching for → confirm screen loads, tap Back → confirm returns to Settings (not home).
 10. **Composure Check**: Settings → Composure Check button — confirm text visible (was all-black), label matches home.
 11. **Move card cues**: run a Move card sequence. On each prompt change, confirm haptic tick + visual fade-in + step counter at top.
+
+---
+
+## 🌀 JOURNEY-SPINE COMPETITIVE GAP ANALYSIS — May 12, 2026
+
+Code-verified gaps cross-referenced against Liven and Healthy Minds Program (HMP) app architecture, framed through **STILLFORM_FRAMING_LAW.md** (metacognition practice / neuroplasticity spine / capacity expansion / composure as felt outcome). This section is the implementation breakdown of the narrative-spine / connectivity-layer entry below (originally added May 8) — the diagnosis was correct; the gaps are now concrete with line numbers.
+
+**Operating principle:** Stillform's data infrastructure is stronger than either competitor (5-stage architecture with shipped markers at `src/App.jsx:4718` and `:4755`, body-first/thought-first calibration routing, bio-filter hardware-state context, Russell circumplex classifier, EOD artifact pipeline, Pattern Transparency surface, Low-Demand mode). The UI does not surface that infrastructure as a journey. **The work below is exposure, not invention.** Stillform doesn't need new mechanics — it needs the existing mechanics turned into a felt path.
+
+**What Liven and HMP have that Stillform doesn't (architecture, not features):**
+- Onboarding quiz → personalized path generated as user-facing artifact (not just AI-consumption profile)
+- Single dominant daily call-to-action on home (not a feature panel)
+- Visible path/chapter visualization with current position + next marker
+- Re-assessment ritual that shows delta from baseline
+- Library/explore surface for between-session learning
+- Framework that names "what this builds" for every action
+
+**What Stillform has that they don't (preserve when closing gaps):**
+- Body-first / thought-first calibration routing (no competitor splits users by processing type)
+- In-moment AI Reframe with calm/clarity/hype routing (Liven's Livie is open-ended chat — much weaker structurally)
+- Bio-filter hardware-state context
+- Three specific breath protocols including Cyclic Sighing (Balban 2023)
+- Move card somatic redirection with AI selection from a science-fidelity library
+- Five-stage capacity ladder grounded in real markers (NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING)
+- Pre-event brief + EOD artifact pipeline
+- Pattern Transparency surface
+- Low-Demand mode for cognitive-bandwidth-limited users
+
+The fix is exposing the spine, not adopting competitor patterns wholesale.
+
+---
+
+### Gap 1 — Path visualization for the 5-stage architecture
+
+**Code state:** `STAGE_DEFINITIONS` at `src/App.jsx:4718` defines five capacities with science citations. `computeStageMarkers` at `:4755` tracks real progress per stage (bio-filter setup, body-area-specific sessions, distinct chips, sustained check-in weeks, triggers named, pre-event briefs, pattern acceptance, high-load sessions, recovery trend). `getCurrentStage` at `:4822` returns current stage + percent to next. **User-visible representation: one line of 10pt monospace text at `:22790`** (Mirror Status Strip).
+
+**Competitor parallel:** Liven Journey tab — 4 chapters unlocking sequentially, current chapter highlighted. HMP My Path — self-paced lesson sequence with pillar mapping.
+
+**Gap:** The 5-chapter journey is data-modeled and UI-invisible.
+
+**Fix (new lens):** Path surface where each chapter names the metacognitive capacity it builds, current position visible, next marker named, prior stages shown as past chapters. Frame as a neuroplasticity build sequence — early chapters are simpler observation, later chapters are integrated metacognition under load. Capacities of practice, not stages of achievement. Mirror Sheet stays as the in-context status; the Path is the destination view from My Progress or a dedicated tab.
+
+**Cross-references:** Supersedes solution shape A in narrative-spine entry below. Builds on `STILLFORM_ENGAGEMENT_ARCHITECTURE.md`.
+
+---
+
+### Gap 2 — Single dominant daily focus replacing the 9-section feature panel
+
+**Code state:** Home render at `:21895` shows: greeting + PracticeSurface + Morning Strip + Morning Check-in form + Mirror Strip + Hero CTA + Move Card promo + Scripts promo + EOD Strip. Hero CTA at `:22881` is bio-filter-routed; reasoning line names the rule that fired (Ship 2, May 11), not the journey position. Every day reads the same structural shape.
+
+**Competitor parallel:** Liven and HMP each present ONE primary action per day at home.
+
+**Gap:** No single daily focus. User scans 9 sections to decide what to do. Decision burden every app open.
+
+**Fix (new lens):** Single hero unit names today's metacognitive rep — what capacity it builds, why this specific objective today, how it ties to the current chapter. Bio-filter override stays (current state can change the somatic entry point), but underneath the override is a journey-positioned focus. *"Today: name three states by lunch — that's a Naming rep."* Bio-filter routing becomes the entry tactic; the journey rep is the goal. PracticeSurface (built today) can move below or fold into this single hero.
+
+**Cross-references:** Implements solution shape B from narrative-spine entry below. The 9-section feature panel is the visible expression of Arlin's May 8 diagnosis: "a bunch of boxes with no true data system or connectivity."
+
+---
+
+### Gap 3 — Calibration outputs a starter path, not just a profile
+
+**Code state:** Calibration completion writes `stillform_signal_profile`, `stillform_bias_profile`, `stillform_regulation_type`, `stillform_breath_pattern`. Zero `stillform_path_*` keys exist in `SYNC_KEYS` (`:9567`). Profile data feeds the AI; user sees no time-sequenced journey artifact at calibration end.
+
+**Competitor parallel:** Liven 3-min quiz → personalized course unfolds with chapter structure visible immediately. HMP 3-5 min self-assessment → personalized path generated with pillar mapping shown on entry.
+
+**Gap:** Onboarding profiles the user. It does not generate their journey.
+
+**Fix (new lens):** Calibration completion also writes a 30-day starter sequence — daily metacognitive objectives mapped to Stage 1 markers (bio-filter setup, body-area specificity, active-state entry, autonomous exits). Each day's objective IS a metacognition rep. By Day 30, the user has hit enough Stage 1 markers to advance — re-calibration unlocks Chapter 2. Path is calibration-personalized: a body-first user gets somatic-led early reps; a thought-first user gets cognitive-led early reps.
+
+**Cross-references:** Relates to "Onboarding redesign" item (line ~989, sequenced last). NOT redundant — the existing onboarding redesign was about teaching what the app does. This is about generating a journey artifact at calibration end. They merge cleanly: redesigned onboarding ends in a generated path.
+
+---
+
+### Gap 4 — Re-assessment ritual that surfaces capacity expansion
+
+**Code state:** Calibration runs once. Stage markers update silently in background data. `computeStageMarkers` at `:4755` returns current state; nothing compares against baseline. My Progress at `:13516` shows aggregates (avg shift, processing type, lock-in rate, day streak) but not a delta from the starting calibration.
+
+**Competitor parallel:** HMP re-runs the 4-pillar quiz periodically. Goal stated explicitly: *"increase each of the four scores from your original assessment."* Delta visible to user.
+
+**Gap:** No felt-progress moment. Markers move in the data; user never sees the movement.
+
+**Fix (new lens):** Monthly re-assessment ritual — abbreviated calibration that re-measures Signal Profile drift, Bias Profile granularity expansion, and Stage marker accumulation. Surface the delta from baseline. Frame as *"your concept library has grown"* (Hoemann 2021 emotional granularity) and *"your interoceptive vocabulary has expanded"* (Barrett 2017 constructed emotion), not *"you've achieved more composure"* (achievement framing). Re-assessment IS itself a metacognition rep — observing your own capacity change over time is meta-meta-cognition.
+
+**Cross-references:** Closes a specific slice of "My Progress redesign" (line ~917). NOT redundant: My Progress redesign is the surfacing of three-category shift data; this is the surfacing of capacity-delta data. Both should land together inside the redesigned My Progress.
+
+---
+
+### Gap 5 — Practice library as a destination, not a buried surface
+
+**Code state:** Plain-Language Neuroscience cards exist (`PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md`) but aren't surfaced as a destination tab. Science is woven in moments inside tools. There is no browsable library outside of practice flow.
+
+**Competitor parallel:** Liven Explore tab — articles, mini-courses, videos, organized for non-sequential discovery. HMP science lessons embedded inline with practices but also accessible separately.
+
+**Gap:** No destination for between-session learning. A user who's not in a tool moment has nowhere to go that pulls them back into the practice's intellectual frame.
+
+**Fix (new lens):** Library tab organized by capacity (one shelf per stage) + mechanism (interoception, granularity, MCT, neuroplasticity, constructed emotion, polyvagal theory). Each card teaches science as language, not credentialing — pulls in the framing law science spine without making the user do another tool rep. Founder writing lives here too. Answers *"what should I read between sessions?"*
+
+**Cross-references:** Adjacent to solution shape C in narrative-spine entry (the "How Stillform Works" surface). Different: this is a browsable library, not a linear walkthrough.
+
+---
+
+### Gap 6 — FAQ stage names out of sync with code
+
+**Code state:** `STAGE_DEFINITIONS` at `:4718` uses NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING. FAQ at `:24820` describes stages as *"Naming, Pattern recognition, Flexibility, Equanimity, Steadiness."* Different lists. The user-facing copy describes a deprecated stage architecture.
+
+**Gap:** Bug. Documentation drift between source-of-truth (code) and user-facing copy (FAQ).
+
+**Fix:** Reconcile FAQ to current STAGE_DEFINITIONS. Stage definitions are the spine; user-facing copy follows the spine. Same fix passes through any other surface that mentions stage names (search the codebase for the old names before shipping).
+
+**Cross-references:** Standalone — small, ship anytime.
+
+---
+
+### Build sequencing
+
+Gap 6 is a small fix — ship immediately, alongside the wider reconciliation.
+Gap 1 (path visualization) is the foundation — most other gaps reference the path schema.
+Gap 3 (calibration generates path) requires Gap 1's path schema defined.
+Gap 2 (daily focus) requires Gap 1 + Gap 3 (the hero's journey-position needs the path to exist).
+Gap 4 (re-assessment) requires Gap 3 (baseline recorded at calibration completion).
+Gap 5 (library) is independent — ship any time.
+
+Build order: **Gap 6 → Gap 1 → Gap 3 → Gap 2 → Gap 4 → Gap 5.**
+
+Each gap exposes more of the existing spine. None of these invents new mechanics. Data layer is already in place.
 
 ---
 
@@ -927,6 +1053,8 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
   Approach taken: Option A (focused pass, all reachable surfaces). 4 commits across one session arc. Each ⓘ uses the canonical pattern (`<button> Chip </button>` + adjacent `<button>ⓘ</button>` in inline-flex wrapper) verified at the canonical site `:7892`. Modal text grounded in code comments + spec docs (engagement architecture, Russell circumplex, Heider attribution, Khalsa interoception, Wells metacognitive training). **Connectivity-gap impact:** info buttons close one of the three deferred experiences tied to Arlin's "I see more stuff but don't feel more engaged" feedback. Remaining experiences: My Progress redesign (line 794) + Self Mode redesign (line 795).
 
 - [ ] **🔥 NARRATIVE SPINE / CONNECTIVITY LAYER — the absent integrative experience (added May 8, 2026 from Arlin direction).** This is the largest UX gap the product has and is structurally distinct from the info-button pass above (which fixes WHY for individual surfaces). The connectivity layer fixes the absent CHAIN that ties everything together as one journey.
+
+  **🌀 Implementation breakdown: See "JOURNEY-SPINE COMPETITIVE GAP ANALYSIS — May 12, 2026" at top of master todo.** That section has the code-verified specific gaps with line numbers, competitor parallels (Liven, HMP), and concrete fix directions per gap, all framed through STILLFORM_FRAMING_LAW.md. The entry below is preserved as the strategic diagnosis; the May 12 section is the unit-of-work breakdown.
 
   **Arlin's exact framing (May 8):** *"Where is the connectivity of the flow for everything? It doesn't feel connected. It doesn't show hey we are using metacognition to help you be your best self by stabilizing composure so you can be successful in your day to achieve your goals and these are the steps you need to take/practice to get these. It feels like a bunch of boxes with no true data system or connectivity."*
 
