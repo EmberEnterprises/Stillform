@@ -12,11 +12,11 @@ For current scope, status, and open items, see `Stillform_Master_Todo.md`. The s
 
 The seven testers (Ava, Bobby, Ari, Michelle, Paula, Ive, Jonny) tested Stillform, said it was cool, and bounced. Plausible confirms Arlin has been the only user for the past month. This is not a bug in user acquisition — it is the diagnostic signal for what is missing.
 
-The seven testers experienced **layer one only**: the regulation tool. The substance is real and the science is right. They had a "this is cool" reaction to the first session. Then nothing pulled them back. Cool is the most damning compliment a product can get — impressive but not necessary.
+The seven testers experienced **layer one only**: the practice surface. The substance is real and the science is right. They had a "this is cool" reaction to the first session. Then nothing pulled them back. Cool is the most damning compliment a product can get — impressive but not necessary.
 
 The launch product is a different product than what the testers used. The launch product has **three layers** that together produce return:
 
-**Layer 1: The Regulation Tool (SHIPPED).** Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. Verified by testers as "cool."
+**Layer 1: The Practice Surface (SHIPPED).** The metacognition practice itself — Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. The breath/body tools function as upstream noise-cutters that let the metacognitive work land; the chip system, pulse log, and Reframe sessions are the concept-building substance (per STILLFORM_FRAMING_LAW.md). Verified by testers as "cool."
 
 **Layer 2: The Return-Loop Infrastructure (PARTIALLY SHIPPED, MOSTLY PENDING).** What pulls the user back when they are not in the app. Watch integration, HRV measurement, Health Connect / HealthKit, biometric lock, notifications infrastructure. Notifications infrastructure has shipped via Capacitor. Biometric lock has shipped. Watch integration is wired in code but has a known pattern-ID bug and is not yet device-tested (see master todo). HRV and health platform integrations are still pending.
 
@@ -32,7 +32,7 @@ This is why "EVERYTHING needs to be done before launch" is not perfectionism —
 
 The Layer 3 work above ("recognition between sessions still pending," "kinesthetic close not yet drafted," "Cognitive Function Measurement still 6-8 weeks") got architectural specificity on May 7 in a working session with Arlin. The full spec lives in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**. The strategic commitments captured here:
 
-**Strategic decision 1: Self-obsoleting product is the actual retention killer.** Composure work, when it works, becomes baseline by month 2-3, and the user walks. This is the documented graduation problem in the regulation/wellness category. Layer 3 must directly counter it via attribution — Stillform must take honest credit for measurable change, in-flow, with the data we already collect.
+**Strategic decision 1: Self-obsoleting product is the actual retention killer.** When the practice works, the felt outcome (composure, sharper thinking) becomes baseline by month 2-3, and the user walks. This is the graduation problem documented across self-improvement and skill-building app categories — when the practice produces what it claims, the obvious instinct is to walk. Layer 3 must directly counter this via attribution — Stillform must take honest credit for measurable change, in-flow, with the data we already collect. Note: the framing-law-aligned reframe of this problem is that the practice is concept-building, not symptom-reduction; the concept library deepens with continued practice even after the felt outcomes feel baseline. Layer 3 surfaces THAT continued development, not just stabilization.
 
 **Strategic decision 2: Engagement comes from competence, not dopamine.** Self-determination theory (Deci & Ryan) names autonomy, competence, relatedness as core motivators. Stillform serves autonomy correctly and skips relatedness correctly. The miss is competence — there is no visible "I am getting better at this" arc. The fix is a Mastery Map of 5 stages visible from day 1, backed by data markers we already collect, NOT streaks, badges, or goal-pursuit.
 
@@ -93,10 +93,10 @@ Meta-analysis: chatbot improvements peak at 8 weeks, disappear at 3 months. Same
 - Three-category data feed (visible practice tracking, not state tracking) — shipped Apr 30
 - Push notifications via Capacitor — infrastructure shipped, contextual nudge logic pending
 
-### Emotion Regulation Shows the Strongest Effect
-Meta-analysis of 39 RCTs: emotion regulation apps showed g=0.49 (medium effect) — stronger than symptom reduction or well-being apps. Stillform IS an emotion regulation app. It's targeting the mechanism with the most evidence.
+### Emotion Regulation Mechanism Shows the Strongest Effect
+Meta-analysis of 39 RCTs: apps targeting emotion regulation mechanisms showed g=0.49 (medium effect) — stronger than symptom reduction or well-being apps. Stillform's body-first noise-cutters (Breathe, Body Scan) and granularity-building chip system engage emotion regulation mechanisms — but these are upstream supports for the metacognition practice, not the product framing.
 
-**Status:** Mechanism the strongest evidence supports. Marketing positioning per locked framing: composure architecture / self-mastery practiced through metacognition. Regulation language is not the product framing — composure is the visible silhouette, self-mastery is the substance, metacognition is the mechanism.
+**Status:** The strongest-evidence mechanisms are integrated into the product. Per STILLFORM_FRAMING_LAW.md: Stillform IS a metacognition practice that builds the concept library the brain uses to perceive its own states. Regulation tools (breath, body scan) serve the practice as noise-cutters; they are not the practice itself, and Stillform is NOT a regulation app or emotion regulation app.
 
 ### Anti-Gamification Is Evidence-Based
 The meta-analysis found gamification elements "did not improve, and might weaken, retention." Killing streaks, points, and badges wasn't just philosophical — it was the right call per the research.
@@ -145,18 +145,18 @@ The person who grew up in poverty has pattern recognition about scarcity that no
 
 Stillform's endgame is not "feel better." It's:
 
-**Regulate yourself → See yourself clearly → See others clearly → Let them in.**
+**Build the concept library → See yourself clearly → See others clearly → Let them in.**
 
-The microbiases layer isn't just about managing your emotions. It's about clearing the filter that prevents you from receiving someone else's experience. When the AI says "You dismissed that fast — was that about what they said, or who said it?" — that's not a lecture about bias. That's composure applied outward.
+The microbiases layer isn't just about managing your emotions. It's about clearing the filter that prevents you from receiving someone else's experience. When the AI says "You dismissed that fast — was that about what they said, or who said it?" — that's not a lecture about bias. That's the metacognition practice extending outward — naming a pattern with specificity at the speed of perception.
 
-Class isn't money. It isn't titles. It's holding yourself steady enough to let someone else's truth land — even when it challenges yours.
+Class isn't money. It isn't titles. It's holding yourself steady enough to let someone else's truth land — even when it challenges yours. That steadiness is the felt outcome of having done the practice work — concept-rich perception running fast enough that you can recognize what's happening in real time and not react from a thin emotional vocabulary.
 
-This is not DEI language. This is not a social justice feature. This is composure as a way of being — applied to every interaction, every meeting, every relationship. The app doesn't tell people to be less biased. It gets them composed enough to notice the bias themselves.
+This is not DEI language. This is not a social justice feature. This is what happens when the practice matures — applied to every interaction, every meeting, every relationship. The app doesn't tell people to be less biased. It builds the concept library that lets them notice the bias themselves at the moment it fires.
 
-People with real lived experience — trauma, hardship, different cultures, different classes — carry input that's vital to every table they sit at. The app's job is to make sure the person across from them is regulated enough to actually receive it.
+People with real lived experience — trauma, hardship, different cultures, different classes — carry input that's vital to every table they sit at. The app's job is to build the perceiving capacity of the person across from them so they can actually receive it.
 
 
-**Target market:** Everyone. The ND community is the beachhead because they need it most and talk about it openly. But composure is universal. A CEO, a parent, a student, a first responder — all need the same thing: clarity under pressure and self-awareness in every state.
+**Target market:** Everyone. The ND community is the beachhead because they need it most and talk about it openly. But the practice is universal. A CEO, a parent, a student, a first responder — all need the same thing: a richer concept library for their own internal states, and the analytical capacity to use it.
 
 ---
 

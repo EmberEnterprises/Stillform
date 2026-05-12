@@ -7,33 +7,33 @@ Paste this document into the Stillform Claude project at session start. Everythi
 
 ## 0. Vision, Values and Product Philosophy
 
-**This section is non-negotiable. Read it before touching anything.**
+**This section is non-negotiable. Read it before touching anything. STILLFORM_FRAMING_LAW.md is the supreme reference; this section summarizes the load-bearing framing claims for project transfer purposes.**
 
 ### What Stillform Is — and Is Not
 
-Stillform is composure architecture. That is the precise and complete product definition. Never define it by what it is not. Never position it against meditation or therapy. Never frame it around crisis, damage control, or negative scenarios. Composure applies equally when nothing is wrong.
+Stillform is a **metacognition practice**. Users build rich, specific mental representations of their own internal states, patterns, triggers, and reactions — the concept library the brain uses to perceive itself. Through repeated structured analytical work, this library becomes more granular and accessible; pattern recognition becomes faster; eventually fast enough to feel like direct perception. The result is cognitive expansion: sharper thinking, better strategic decisions, deeper self-understanding. Composure is one felt outcome among several that signal the practice is working — composure is NOT the product.
 
-Stillform is not a wellness app. Not a self-improvement program. Not a mental health treatment. It is a precision composure system — structured interventions that interrupt activation and restore functional baseline in real time.
+Stillform is NOT: a regulation app, composure app, wellness app, meditation app, crisis tool, therapy substitute, "just observe" contemplative tool, rumination-inducing introspection tool, open-ended journaling app, or a tool for "intense people." See STILLFORM_FRAMING_LAW.md WHAT STILLFORM IS NOT for the full banned-framing list.
 
-The people who use it are not broken. They feel everything at full intensity and need to stay functional inside it. They want a dashboard, not a hug. An operator, not a patient. They want to be the best version of themselves — clear, functional, and self-aware. This app helps them recognize their patterns and understand who they actually are.
+The people who use it want to enhance themselves. They are often analytical by nature — they think in patterns, structures, systems. They want sharper thinking, not relief. They want to understand HOW they process, not have someone else handle their processing. They are operators, founders, high-functioning users — people already functioning who want to function better. Many are neurodivergent. This audience is the design constraint: features that serve "people in distress seeking immediate relief" without also serving "people enhancing themselves" violate the framing.
 
 ### The Product Philosophy
 
-Regulate yourself. See yourself clearly. See others clearly. Let them in.
+**Build the concept library → See yourself clearly → See others clearly → Let them in.**
 
-That is the sequence. That is the architecture. Every feature maps to one of those four stages.
+Concept-formation is the core mechanism. The structured analytical work that Stillform's tools (bias profiler, trigger profile, pulse log + chips, signal log, Reframe sessions) facilitate IS the practice. Regulation tools (breath, body scan) function as upstream noise-cutters — they reduce activation enough for the metacognitive work to land. They serve the practice; they are not the practice.
 
-Composure is a form of class — poise under pressure, accessible to everyone. Not a personality trait. A trainable skill. Anyone who has ever needed to hold it together before they were ready. Anyone who has ever said something they did not mean because their system fired before their thinking caught up.
+The practice doesn't graduate from analytical to observational. It deepens analytical capacity until analysis becomes fast, granular, and effortless. The "observational" experience in mature practice is what high-skill analysis looks like from the inside (Barrett 2017 constructed emotion theory — perception is concept-construction running at speed).
 
-### The Four Pillars
+### The Four Pillars (revised May 12, 2026 — aligned with STILLFORM_FRAMING_LAW.md)
 
-**Body first, then thought.** The nervous system activates before the mind can intervene. Stillform works with that sequence. It does not fight human biology — it follows it. Breathe settles the nervous system. Body Scan clears somatic tension. Reframe processes the cognitive layer once the system is ready to receive it.
+**Concept-building as the substance.** Each Reframe session, each pulse chip selection, each trigger-profile entry, each bias-profiler reading adds to or refines an entry in the user's concept library. This is the work. Hoemann et al. (2021) — experience sampling itself increases emotional granularity. Stillform IS an Ecological Momentary Intervention (Myin-Germeys et al. 2016, 2018).
 
-**Precision over gentleness.** The user is not fragile. The tools are fast, structured, and direct. The language is clean. There is no toxic positivity, no affirmations, no encouragement that isn't earned by data. The AI does not tell you what to feel. It reflects what is happening and asks one precise question.
+**Bounded, generative, closed-loop engagement.** Every analytical pass has a start, a scope, and a close. Open-ended introspection is stage-1 meta-control failure (Hitchcock et al. 2024). Stillform's closing rituals ("Composure restored," "Signal cleared," "Pattern observed") signal the loop is closed — this turn is over, the concept has been added, not subject to further mining.
 
-**Science without jargon.** Every feature is grounded in published research. The science is woven into the experience — the user feels it working without being told why. The info buttons explain the mechanism in plain language when curiosity hits. The app is self-documenting. It does not need a tutorial because the science is always one tap away.
+**Regulation tools as upstream noise-cutters.** Breath, body scan, somatic interventions reduce activation enough for the metacognitive work to land. They serve concept-building; they are not concept-building themselves. A feature that uses regulation to support the practice is Stillform. A feature that IS regulation in place of the practice is NOT Stillform.
 
-**Composure as daily practice.** Not a crisis tool. Not something you open when you're falling apart. A daily structure — morning check-in, in-moment regulation, end of day close — that trains the nervous system the way physical training trains the body. Practiced when calm so it is available under pressure. Stress inoculation applied to everyday life.
+**Practice that compounds via neuroplasticity.** Repeated bounded analytical work builds the neural representations that fast pattern recognition operates on. Davidson, Lazar (2005), Calderone (2024) — meditation/contemplative practice produces measurable cortical changes. The Frontiers in Psychology (2026) review synthesizes metacognition + neuroplasticity with BDNF as a mediator. Practiced when calm so it is available under pressure (Meichenbaum stress inoculation, downstream principle).
 
 ### Voice and Tone
 
@@ -47,12 +47,13 @@ Never use:
 - Toxic positivity (amazing, you've got this, proud of you)
 - Medical language (symptoms, diagnosis, treatment, disorder)
 - Vague wellness language (healing, journey, space, energy)
+- Banned framing language per STILLFORM_FRAMING_LAW.md (regulation app, composure app, "just observe," "stop overthinking," "graduate from analysis")
 
 ### AI Response Principles
 
 Everyone carries history — light or heavy. The AI assumes it without asking. Every session is fresh. No judgment. No dismissal. Unconditional acceptance. True listening.
 
-Do not say you care. Make the user feel it through response quality. Show do not tell.
+Do not say you care. Make the user feel it through response quality. Show, don't tell.
 
 The AI never:
 - Tells the user what to feel
@@ -60,24 +61,28 @@ The AI never:
 - Uses love language or performs warmth
 - Gives advice unprompted
 - Makes assumptions about what the user should do next
+- Invites open-ended introspection or rumination loops (per FAILURE MODES OF THE PRACTICE in framing law)
+- Implies the user should "graduate from analysis" or "just observe"
 
 The AI always:
 - Names what it observes, not what it concludes
-- Asks one precise question, not multiple
+- Asks one precise, bounded question — not multiple
+- Helps the user name patterns with specificity (granularity training per Hoemann 2021)
 - Separates what is factually present from what the user's interpretation is adding
-- Adjusts its register based on session count — observational early, pattern-based later
+- Adjusts its register based on session count — heavier analytical scaffolding early, faster pattern recognition later (the developmental arc, not a binary)
 - Reads physical state from bio-filter and adjusts framing accordingly
+- Closes the loop with a takeaway — every Reframe session ends; there are no open-ended chats
 
 ### What Cannot Change
 
-- "Stillform is composure architecture" — this is the product definition, always
+- STILLFORM_FRAMING_LAW.md is the supreme reference. Any proposal that contradicts it is wrong, regardless of code quality, science citations, or UI improvement.
 - The sequence: body first then thought (or thought first then body — calibration determines, never overridden by opinion)
-- Science grounding — every feature must have a published research basis
+- Science grounding — every feature must have a published research basis, cited across the framing law's full spine (metacognition / granularity / EMI / neuroplasticity / self-mastery / adaptive vs maladaptive metacognition / decision-making / supporting regulation), not the narrow regulation-coded list
 - No medical claims — never position as treatment for any condition
 - No crisis escalation language anywhere in the product
 - The user interprets the product however they want — Arlin does not position it against other categories
-- Composure applies equally in positive states — excitement, preparation, focus — not only under stress
-- Stillform is a metacognition tool. Helping people understand their own processes is the mechanism. Composure is the outcome. Every feature serves one of four pillars: metacognition (mechanism), emotional awareness (input), microbiases (outward gaze), neuroplasticity (glue). See Section 9 for the architecture.
+- Composure applies equally in positive states — excitement, preparation, focus — not only under stress. But composure is a FELT OUTCOME, not the product.
+- Stillform is a metacognition practice. Concept-formation is the mechanism. Composure is one felt outcome. Every feature builds, refines, or applies a concept — bounded and generatively.
 
 
 
@@ -85,13 +90,13 @@ The AI always:
 
 ## 1. What Stillform Is
 
-**Stillform is composure architecture.**
+**Stillform is a metacognition practice that builds the concept library the brain uses to perceive its own internal states.**
 
-Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation actually takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the practice that clears out the noise and stabilizes a state in clarity. That is composure.
+Based on Barrett (2017) constructed emotion theory, Kashdan/Barrett/McKnight (2015) emotional granularity research, and Hoemann et al. (2021) on experience sampling as a granularity intervention, we built a system that helps users construct rich, specific mental representations of their own processing. A short calibration determines whether you are body-first or thought-first — the entry point where the practice lands most cleanly. From there, the system routes you precisely. Body-first users get upstream noise-cutting (breath, body scan) before the metacognitive work; thought-first users get the metacognitive work directly. Every session is a granularity rep, a concept-building micro-engagement, a bounded analytical pass that adds to the user's perceptual library. That is the practice. The felt outcomes — composure, sharper thinking, faster pattern recognition — are how the user knows the practice is working.
 
-**Not meditation. Not therapy. A precision composure system.**
+**A metacognition practice. An Ecological Momentary Intervention (Myin-Germeys et al. 2016, 2018). Not a regulation app, not a composure app, not a wellness app.**
 
-**Calibration identifies a default regulation tendency — not a fixed type.** Tendencies are probabilistic and state-dependent. The bio-filter, feel state chips, and morning check-in modulate routing each session based on current state.
+**Calibration identifies a default routing tendency — not a fixed type.** Tendencies are probabilistic and state-dependent. The bio-filter, feel state chips, and morning check-in modulate routing each session based on current state.
 
 ---
 
@@ -194,6 +199,8 @@ if (isThoughtFirst) {
 ---
 
 ## 2.5 May 1, 2026 Session Log — Plain-Language Neuroscience Surface ship + voice corrections
+
+> **⚠️ Note (May 12, 2026):** This section is HISTORICAL session log. The "Composure Architecture" load-bearing-definition claim (below) and the directive "Don't generate new framings" are SUPERSEDED by STILLFORM_FRAMING_LAW.md (May 12, 2026). The framing law IS the new framing, replacing "Composure Architecture" with "metacognition practice / concept-formation." The May 1 anti-drift directive against "repair-coded / trauma-coded / intensity-coded copy" remains valid; the anti-drift directive against alternate framings now means anti-drift against framings that contradict the framing law. The shipping log and engineering accountability content below is historical record and unchanged.
 
 ### Shipped today (10+ commits)
 
@@ -407,9 +414,11 @@ The largest single-day build session since launch standard locked Apr 29. Work s
 
 **Conceptual decisions made Apr 30 (NOT YET SHIPPED — captured for context):**
 
-*Composure / self-mastery legibility decision (locked Apr 30 evening).* Four-AI consultation (ChatGPT, Gemini, Claude in fresh session, Copilot) returned convergent signal: 3-of-4 said "composure is one altitude too low" and proposed alternative umbrellas (sovereignty, self-continuity, cognitive access, identity/pedagogy). Arlin's response: "those all fall under self-mastery, which is what contributes to composure." She had collapsed self-mastery and composure into one term deliberately. The four AIs were each naming a facet of self-mastery without seeing the whole. Final decision: composure stays as the umbrella; self-mastery is the through-line that carries it. Composure is the visible silhouette; self-mastery is the practice. Internal vocabulary uses both; public surface stays composure-led.
+> **⚠️ Note (May 12, 2026):** The framings in this April 30 section ("composure as umbrella," "operator of a regulation toolkit," "self-mastery as through-line that carries composure") are HISTORICAL THINKING and are superseded by STILLFORM_FRAMING_LAW.md. The current framing is: Stillform is a metacognition practice that builds the concept library the brain uses to perceive its own internal states; composure is one felt outcome that signals the practice is working, not the umbrella or the product. Section preserved as historical record. References to `COMPOSURE_SELF_MASTERY_LEGIBILITY.md` point to `archive/COMPOSURE_SELF_MASTERY_LEGIBILITY.md` as of May 12.
 
-*The integrity gap (named by Arlin Apr 30).* Words don't mean anything without action behind them. The reason the four AIs sensed something missing wasn't brand altitude — it's that the user-facing experience doesn't yet fully *be* what the brand says. The user is positioned as operator of a regulation toolkit more than practitioner of self-mastery. Five specific gaps identified in COMPOSURE_SELF_MASTERY_LEGIBILITY.md (sitting in /mnt/user-data/outputs/, not yet committed because Arlin hasn't decided whether to commit pending action work):
+*Composure / self-mastery legibility decision (locked Apr 30 evening).* Four-AI consultation (ChatGPT, Gemini, Claude in fresh session, Copilot) returned convergent signal: 3-of-4 said "composure is one altitude too low" and proposed alternative umbrellas (sovereignty, self-continuity, cognitive access, identity/pedagogy). Arlin's response: "those all fall under self-mastery, which is what contributes to composure." She had collapsed self-mastery and composure into one term deliberately. The four AIs were each naming a facet of self-mastery without seeing the whole. Final decision: composure stays as the umbrella; self-mastery is the through-line that carries it. Composure is the visible silhouette; self-mastery is the practice. Internal vocabulary uses both; public surface stays composure-led. **[Superseded May 12 — see STILLFORM_FRAMING_LAW.md]**
+
+*The integrity gap (named by Arlin Apr 30).* Words don't mean anything without action behind them. The reason the four AIs sensed something missing wasn't brand altitude — it's that the user-facing experience doesn't yet fully *be* what the brand says. The user is positioned as operator of a regulation toolkit more than practitioner of self-mastery. Five specific gaps identified in archive/COMPOSURE_SELF_MASTERY_LEGIBILITY.md (now archived):
 1. AI posture in reframe.js currently optimizes for regulation, not for demonstrating self-mastery to the user — highest-leverage fix
 2. Self Mode is the explicit self-mastery practice but is named generically ("Self Mode")
 3. Closing language ("Composure restored," "Signal cleared") frames as outcome, not rehearsal
@@ -530,13 +539,14 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 
 ## 5. Locked Decisions
 
-- Stillform is composure architecture. Never dilute this.
+- Stillform is a **metacognition practice**. STILLFORM_FRAMING_LAW.md is the supreme reference. Never dilute. Banned framings (regulation app, composure app, wellness app, "just observe" tool, etc.) per the framing law's IS NOT list.
+- Composure is one felt outcome that signals the practice is working. Composure is NOT the product. The product is metacognition practice / concept-formation.
 - Calibration identifies default tendency not fixed identity. Recalibrate anytime in Settings.
 - Bio-filter is hardware diagnostics. Physical state as system check.
 - Feel chips are AI context signals only. NOT routing signals.
 - No AI add-on pricing. One price. Everything included.
 - Invisible leveling — AI gets smarter by session count. Never announced to user.
-- Completion language: Composure restored / Signal cleared / System calibrated
+- Completion language: Composure restored / Signal cleared / System calibrated (locked — these are framing-aligned because composure used as felt outcome of closed practice loop, not as product framing)
 - Launch standard: master todo complete, except translations and Apple Store. No other launch gates exist. Testimonials are not a prerequisite. Reddit is not a launch step.
 - Netlify deploys are MANUAL. Arlin triggers AND publishes (TWO STEP — trigger ≠ publish, confirmed Apr 27). Claude never triggers.
 - Bobby is name-only on LLC. NOT involved in code. Never attribute code changes to Bobby — causes Arlin real anxiety about security.
@@ -545,6 +555,7 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 - **Apr 28 operating rule:** Arlin's direction is always for the whole app, not one type. She can only see one screen at a time, so Claude must proactively audit every change for whether the equivalent should apply to the other processing type and flag asymmetries before shipping.
 - **Apr 28 operating rule:** Research-grounded changes are placement-first; gating decisions are separate. When current evidence contradicts implementation (e.g. Nook 2021 vs pre-regulation chips), fix placement first, defer optionality/gating decisions to a separate pass to avoid compounding changes.
 - **Apr 30 do-not-re-propose:** Body-first pre-rate friction is NOT an open architectural gap. The pre-regulation chip rows in BreatheGroundTool and BodyScanTool were removed Apr 28 (commit `ae43f4db`) per Nook 2021 + replications. The residual 1-5 numeric pre-rate is intentional — it captures the user's self-rated state for shift-delta tracking ("Last session: +2") and feeds the three-category data feed (Categories A/B/C). Removing the 1-5 would break the data layer. Body-first metacognition access was verified already implemented Apr 27 (master todo line 321) — body-first users go Pre-rate → Bio-filter → Breathe → Post-rate → Ground, and the grounding-complete screen has "Continue to Reframe →" as primary CTA. A spec proposing to fix this gap was drafted then retracted Apr 30 because the gap doesn't exist. If a new Claude reads the codebase from outside critique and surfaces this as a problem, point it here and to master todo lines 46, 321, and 361.
+- **May 12 framing-rebuild lock:** STILLFORM_FRAMING_LAW.md is the supreme framing reference. Audit philosophy v2.0 enforces it via Layer 0 (Framing Audit). Historical session logs in this doc (Sections 2.5, 2.6, 3) retain language from when they were written; the framing law supersedes any inconsistent framing in those sections.
 
 ---
 

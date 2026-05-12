@@ -7,29 +7,29 @@
 
 ## What Stillform Is
 
-**One sentence:** Stillform is a composure architecture — how you carry yourself every day, in every moment that matters.
+**One sentence:** Stillform is a metacognition practice that builds the concept library the brain uses to perceive its own internal states.
 
-**Category:** Composure Architecture. Metacognitive Therapy (MCT) applied to daily life — building the skill of observing your own state before it drives behavior, then choosing deliberately. Every feature trains the shift from experiencing a state to observing one.
+**Category:** Metacognition practice / Ecological Momentary Intervention (EMI). Users practice understanding their own processing — through structured analytical work that, repeated over time, becomes fast pattern recognition operating on a rich concept library. Every feature builds, refines, or applies a concept.
 
 ### The Core Idea
 
-Stillform is a metacognition trainer that stabilizes composure. It builds the skill of observing your own state before it drives your behavior — then choosing your response deliberately.
+Stillform is a metacognition practice. Users build rich, specific mental representations of their own internal states, patterns, triggers, and reactions — the concept library the brain uses to perceive itself. Through repeated structured analytical work, this library becomes more granular and more accessible. As the analytical capacity strengthens, pattern recognition operates at increasing speed, eventually feeling like direct perception.
 
-Metacognition is the ability to observe your own thinking and emotional state as it happens — and then choose what to do with it. Stillform makes that skill trainable, daily, in real moments. The result is inner poise and outward presence: fewer impulsive actions, fewer regrets, fewer moments of guilt or shame after the fact.
+This is grounded in Barrett (2017) constructed emotion theory: the brain perceives internal states by constructing them using concepts. The richer the concept library, the more granular the perception. Stillform's analytical tools — bias profiler, trigger profile, pulse log + chips, signal log, Reframe sessions — are concept-building tools. They construct the mental representations that permanently shape how the brain perceives itself.
 
-Composure is a way of being — not just damage control. It applies equally to difficulty and momentum: the anxiety before a performance, the excitement before a big moment, the steadiness required to stay present when everything is going right. The butterflies before you walk on stage are the same signal as the tension before a hard conversation — both are your system activating. Stillform trains you to work with that activation instead of being driven by it. The daily practice and the in-the-moment intervention are the same skill: notice, regulate, choose.
+The result is **cognitive expansion**: sharper thinking, better strategic decisions, deeper self-understanding, and — as one felt outcome among many — composure under load. Composure is what users notice after the practice has worked. It signals the practice is working; it is not the product.
 
-The product philosophy: regulate yourself → see yourself clearly → see others clearly → let them in.
+The practice doesn't graduate from analytical to observational. It deepens analytical capacity until analysis itself becomes fast, granular, and effortless. The "observational" experience in mature practice is what high-skill analysis looks like from the inside.
 
 **Trainer, not a crutch.** Signal Awareness Latency (how fast the user catches themselves before acting from state instead of decision) is the proof the app is building a skill they eventually own. The less you need the app, the more it's working.
 
-**Every feature must train noticing — not collect data.** The shift from "I am this state" to "I can see this state happening and choose my response" is what gets built over time. If a feature feels like a form, it's wrong. If it feels like a mirror, it's right.
+**Every feature must build, refine, or apply a concept — bounded and generatively.** The shift from "I am this state" to "I have a precise name for this state and a pattern around it I can recognize at a glance" is what gets built over time. If a feature feels like a form, it's wrong. If it feels like the brain learning to perceive itself more clearly, it's right.
 
-### Identity Lines (locked)
+### Identity Lines (locked, updated May 12, 2026 per STILLFORM_FRAMING_LAW.md)
 
-- Stabilize. Then think clearly.
-- Body. Then thought.
-- Composure architecture.
+- Build the concept library. Perception follows.
+- Analyze with structure. Observe with speed.
+- A metacognition practice — concept-formation through repeated naming.
 - The less you need the app, the more it's working.
 
 ---
@@ -311,11 +311,11 @@ adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk
 
 ## What's Left Before Launch
 
-**Launch standard (locked April 29, 2026):** master todo complete, except translations and Apple Store. No testimonial gate. Reddit not a launch step. The seven testers tested the regulation tool and bounced (cool-and-bounced pattern). The launch product needs the return-loop infrastructure and engagement craft layer to ship together to avoid replicating that pattern at scale.
+**Launch standard (locked April 29, 2026):** master todo complete, except translations and Apple Store. No testimonial gate. Reddit not a launch step. The seven testers tested the practice surface and bounced (cool-and-bounced pattern). The launch product needs the return-loop infrastructure and engagement craft layer to ship together to avoid replicating that pattern at scale.
 
 ### Three layers that must ship together (return-loop architecture)
 
-**Layer 1 — Regulation tool (SHIPPED).** Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. This is what the testers experienced.
+**Layer 1 — Practice surface (SHIPPED).** The metacognition practice itself — Breathe / Body Scan / Reframe / Self Mode. Bio-filter, Russell circumplex chips, three-category data feed, override pathways. Breath/body tools function as upstream noise-cutters that let the metacognitive work land; the chip system, pulse log, and Reframe sessions are the concept-building substance. This is what the testers experienced.
 
 **Layer 2 — Return-loop infrastructure (PARTIALLY SHIPPED, MOSTLY PENDING).**
 - Watch integration (Wear OS haptic breathing companion — Galaxy Watch Ultra is the test device; requires Android Studio installed locally)
@@ -349,8 +349,8 @@ adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk
 
 ## Locked Decisions (Do Not Relitigate)
 
-- Stillform is a composure SYSTEM, not a wellness app.
-- Composure applies equally when nothing is wrong — not just crisis management.
+- Stillform is a **metacognition practice**, not a wellness app, regulation app, composure app, or crisis tool. See STILLFORM_FRAMING_LAW.md for the supreme reference.
+- Composure is one felt outcome that signals the practice is working — it is NOT the product. The practice produces cognitive expansion: sharper thinking, better strategic decisions, deeper self-understanding, emotional granularity, interoceptive accuracy. Composure is one notable outcome among several.
 - One price. AI included. Cloud sync included. No add-ons. No upsells.
 - AI gets smarter silently by session count. Never announced.
 - Reddit is a one-shot moment. Do not post without paywall and testimonials.
