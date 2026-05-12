@@ -9757,7 +9757,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language","stillform_anchors"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors.
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -19177,6 +19177,7 @@ export default function Stillform() {
   const [settingsShareQrOpen, setSettingsShareQrOpen] = useState(false);
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
     personalization: false,
+    anchors: false,
     account: false,
     integrations: false,
     data: false,
@@ -19188,6 +19189,21 @@ export default function Stillform() {
     subscriptionStatus: false, syncControls: false,
     metrics: false, exports: false,
   }));
+  // Gap 8 (May 12, 2026) — habit anchors. Implementation intentions
+  // (Gollwitzer 1999) explicitly paired to existing life cues. User-defined
+  // cue → action pairs. Persisted to localStorage stillform_anchors.
+  const [anchors, setAnchorsState] = useState(() => {
+    try {
+      const raw = localStorage.getItem("stillform_anchors");
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+  const persistAnchors = (next) => {
+    setAnchorsState(next);
+    try { localStorage.setItem("stillform_anchors", JSON.stringify(next)); } catch {}
+  };
+  const [anchorCueDraft, setAnchorCueDraft] = useState("");
+  const [anchorActionDraft, setAnchorActionDraft] = useState("");
   const toggleSubOpen = (key) => setSettingsSubOpen(prev => ({ ...prev, [key]: !prev[key] }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -23301,6 +23317,59 @@ const isSignalProfileConfigured = () => {
                       );
                     })()}
 
+                    {/* ── ANCHOR STRIP — Gap 8 (May 12, 2026) ─────────────────
+                        Surfaces user-defined habit anchors below the journey
+                        rep on home. Each anchor is a Gollwitzer 1999
+                        implementation intention — existing life cue paired
+                        to a metacognition rep. Rendered as a quiet list,
+                        not a card. The anchors are standing intentions the
+                        user has committed to; home renders them so they're
+                        visible as the user moves through the day, not
+                        buried in Settings. Tap anchor to scroll to Settings
+                        for edits. */}
+                    {(() => {
+                      if (!anchors || anchors.length === 0) return null;
+                      // Render at most 2 anchors on home (more is visual noise).
+                      const visible = anchors.slice(0, 2);
+                      return (
+                        <div style={{ marginBottom: 20, padding: "0 4px" }}>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--text-muted)", marginBottom: 8,
+                            letterSpacing: "0.14em", textAlign: "center"
+                          }}>
+                            STANDING ANCHORS
+                          </div>
+                          {visible.map((a, idx) => (
+                            <div key={a.id || idx} style={{
+                              fontSize: 12, color: "var(--text)",
+                              lineHeight: 1.55, padding: "4px 0",
+                              fontFamily: "'DM Sans', sans-serif",
+                              textAlign: "center",
+                              borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+                            }}>
+                              <span style={{ color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                When {a.cue}
+                              </span>
+                              <span style={{ margin: "0 6px", color: "var(--text-dim)" }}>·</span>
+                              <span style={{ fontStyle: "italic", color: "var(--text-cream)", fontFamily: "'Cormorant Garamond', serif", fontSize: 13 }}>
+                                {a.action}
+                              </span>
+                            </div>
+                          ))}
+                          {anchors.length > 2 && (
+                            <div style={{
+                              fontSize: 10, color: "var(--text-dim)",
+                              textAlign: "center", marginTop: 6,
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              letterSpacing: "0.08em"
+                            }}>
+                              +{anchors.length - 2} more in Settings
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     {/* Ship 2 (May 11, 2026) — Spine inversion at home entry.
                         The hero CTA was previously calibration-aware but the
                         user couldn't see WHY this tool was being proposed.
@@ -26512,6 +26581,190 @@ const isSignalProfileConfigured = () => {
                   </button>
                 </div>
 
+              </>)}
+            </div>
+
+            {/* HABIT ANCHORS — Gap 8 (May 12, 2026)
+                Implementation intentions (Gollwitzer 1999): pair existing
+                life cues to metacognition reps. The user defines cue → action
+                pairs in their own language. Habits become neuroplasticity in
+                motion when the rep anchors to a cue the user already
+                encounters reliably. Stillform's daily focus reads these
+                anchors and surfaces them on home (Gap 8 → Gap 2 integration). */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("anchors")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Habit anchors</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.anchors ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.anchors && (<>
+                <div style={{
+                  fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                  color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 16,
+                  letterSpacing: "0.01em"
+                }}>
+                  Pair an existing life cue to a metacognition rep. The rep becomes default behavior once the cue fires reliably. <span style={{ fontSize: 11, fontStyle: "normal", color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>Gollwitzer 1999 implementation intentions.</span>
+                </div>
+
+                {/* Existing anchors list */}
+                {anchors.length > 0 && (
+                  <div style={{ marginBottom: 16 }}>
+                    {anchors.map((a, idx) => (
+                      <div key={a.id || idx} style={{
+                        padding: "12px 14px", marginBottom: 8,
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        background: "var(--surface)",
+                        position: "relative"
+                      }}>
+                        <button
+                          onClick={() => persistAnchors(anchors.filter((_, i) => i !== idx))}
+                          aria-label="Remove anchor"
+                          style={{
+                            position: "absolute", top: 8, right: 10,
+                            background: "none", border: "none",
+                            color: "var(--text-muted)", fontSize: 16,
+                            cursor: "pointer", padding: 4, lineHeight: 1,
+                            WebkitTapHighlightColor: "transparent"
+                          }}
+                        >×</button>
+                        <div style={{
+                          fontSize: 12, color: "var(--text-muted)", marginBottom: 4,
+                          fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em",
+                          textTransform: "uppercase", paddingRight: 20
+                        }}>
+                          When {a.cue}
+                        </div>
+                        <div style={{
+                          fontSize: 14, color: "var(--text)", lineHeight: 1.5,
+                          fontFamily: "'DM Sans', sans-serif", paddingRight: 20
+                        }}>
+                          → {a.action}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add new anchor form */}
+                {anchors.length < 5 && (
+                  <div style={{
+                    padding: "14px", marginBottom: 12,
+                    border: "0.5px dashed var(--border)",
+                    borderRadius: "var(--r)"
+                  }}>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Cue (when)</div>
+                    <input
+                      type="text"
+                      value={anchorCueDraft}
+                      onChange={(e) => setAnchorCueDraft(e.target.value)}
+                      placeholder="opening Slack / phone in hand before bed / after lunch"
+                      maxLength={120}
+                      style={{
+                        width: "100%", padding: "8px 10px", marginBottom: 12,
+                        background: "var(--surface)", color: "var(--text)",
+                        border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Action (then)</div>
+                    <input
+                      type="text"
+                      value={anchorActionDraft}
+                      onChange={(e) => setAnchorActionDraft(e.target.value)}
+                      placeholder="name your state / one body scan / sigh once before answering"
+                      maxLength={160}
+                      style={{
+                        width: "100%", padding: "8px 10px", marginBottom: 12,
+                        background: "var(--surface)", color: "var(--text)",
+                        border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const cue = anchorCueDraft.trim();
+                        const action = anchorActionDraft.trim();
+                        if (!cue || !action) return;
+                        const newAnchor = {
+                          id: `anchor_${Date.now()}`,
+                          cue, action,
+                          createdAt: new Date().toISOString()
+                        };
+                        persistAnchors([...anchors, newAnchor]);
+                        setAnchorCueDraft("");
+                        setAnchorActionDraft("");
+                        try { window.plausible?.("Anchor Added", { props: { count: anchors.length + 1 } }); } catch {}
+                      }}
+                      disabled={!anchorCueDraft.trim() || !anchorActionDraft.trim()}
+                      style={{
+                        width: "100%", padding: "10px",
+                        background: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "var(--amber-glow)" : "var(--surface)",
+                        color: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "var(--bg)" : "var(--text-muted)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        cursor: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "pointer" : "not-allowed",
+                        opacity: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? 1 : 0.6
+                      }}
+                    >
+                      Add anchor
+                    </button>
+                  </div>
+                )}
+
+                {/* Suggestion seeds — populated only when zero anchors set */}
+                {anchors.length === 0 && (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Starter suggestions (tap to add)</div>
+                    {[
+                      { cue: "opening Slack or email", action: "Name your state in one word" },
+                      { cue: "after lunch", action: "Name one feel-state you moved through this morning" },
+                      { cue: "phone in hand before bed", action: "Open EOD check-in" },
+                      { cue: "walking from car to door", action: "Body scan — find your strongest tell" },
+                      { cue: "phone ringing", action: "One physiological sigh before answering" },
+                    ].map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          const newAnchor = {
+                            id: `anchor_${Date.now()}_${idx}`,
+                            cue: s.cue,
+                            action: s.action,
+                            createdAt: new Date().toISOString()
+                          };
+                          persistAnchors([...anchors, newAnchor]);
+                          try { window.plausible?.("Anchor Added", { props: { source: "starter", count: anchors.length + 1 } }); } catch {}
+                        }}
+                        style={{
+                          width: "100%", textAlign: "left",
+                          padding: "10px 12px", marginBottom: 6,
+                          background: "var(--surface)",
+                          color: "var(--text)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                          lineHeight: 1.5, cursor: "pointer",
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >
+                        <span style={{ color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 8 }}>When {s.cue}</span>
+                        <br />
+                        <span>→ {s.action}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {anchors.length >= 5 && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic", padding: "8px 0" }}>
+                    Five anchors is the practical ceiling. Remove one to add another.
+                  </div>
+                )}
               </>)}
             </div>
 
