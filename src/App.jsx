@@ -10708,50 +10708,58 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // PracticeSurface → Reframe context handoff (May 12, 2026).
   // PracticeSurface writes stillform_practice_entry_context to localStorage
   // when the user taps a pattern tile from the home (today retrieval or
-  // spaced return). This effect reads it ONCE on mount, formats it into an
-  // AI context string, holds it in a ref for the lifetime of this
-  // ReframeTool instance, and clears localStorage immediately so the
-  // context doesn't bleed into unrelated future sessions.
+  // spaced return). This effect reads it ONCE on mount, stores the parsed
+  // structured object in state for the lifetime of this ReframeTool
+  // instance, and clears localStorage immediately so the context doesn't
+  // bleed into unrelated future sessions.
   //
-  // Why ref not state: the value never changes during this Reframe session
-  // and rendering doesn't depend on it (no UI cue in this commit — pure AI
-  // wiring). A ref avoids unnecessary re-renders on the payload IIFE that
-  // would happen with useState.
+  // Two consumers read this state:
+  //   1. The UI cue at the top of the empty-state Reframe view ("Returning
+  //      to: [pattern] · [N days ago]") so the user sees the system received
+  //      the handoff without waiting for the AI response.
+  //   2. The API payload IIFE, which formats the AI directive string from
+  //      the structured fields (pattern, source, daysAgo) so the AI opens
+  //      the conversation by acknowledging the return.
+  //
+  // Why useState not useRef: useRef doesn't trigger re-renders. The UI cue
+  // is conditional on messages.length === 0, which is true on first paint.
+  // The useEffect runs after first paint and needs to schedule a re-render
+  // so the cue actually appears. useState handles that automatically.
   //
   // Why clear on mount not on consume: if the user opens Reframe but never
-  // sends a message (closes the tool, navigates away), the context still
-  // gets consumed in the sense that "this Reframe instance saw it." We
-  // don't want the context to fire on the NEXT Reframe open when the user
-  // might be coming from somewhere entirely different. One-shot semantics.
-  const practiceEntryRef = useRef(null);
+  // sends a message (closes the tool, navigates away), the context is still
+  // consumed in the sense that "this Reframe instance saw it." One-shot
+  // semantics. We do NOT want the cue firing on the next unrelated Reframe
+  // open because the user navigated away with localStorage still set.
+  const [practiceEntryContext, setPracticeEntryContext] = useState(null);
   useEffect(() => {
     try {
       const raw = localStorage.getItem("stillform_practice_entry_context");
       if (raw) {
         const ctx = JSON.parse(raw);
         if (ctx && typeof ctx === "object" && ctx.pattern) {
-          const days = Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null;
-          const daysPhrase = days === null
-            ? "previously"
-            : days === 0
-              ? "earlier today"
-              : days === 1
-                ? "yesterday"
-                : `${days} days ago`;
-          const sourceNote = ctx.source === "spaced"
-            ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
-            : "Recent-retrieval surface — the home offered this for revisit because the user named it within the past week.";
-          practiceEntryRef.current =
-            `PRACTICE RETURN — READ THIS FIRST: The user came into Reframe from the home's practice surface, returning to a pattern they previously named: "${ctx.pattern}" (first named ${daysPhrase}). ${sourceNote} ` +
-            `This is not a fresh session — it is a planned revisit per spacing-effect literature (retrieval at increasing intervals consolidates the concept). ` +
-            `Open by briefly acknowledging the return — for example: "You named ${ctx.pattern.toLowerCase()} ${daysPhrase}. What's it doing today?" or similar. Keep it 1 sentence, oriented to NOW. ` +
-            `Let the user lead with what's actually present — do not recite the pattern as a label, do not assume the same situation applies, do not summarize what they said last time. The pattern name is shorthand for a class of experience, not a fixed event.`;
+          setPracticeEntryContext({
+            pattern: String(ctx.pattern),
+            source: ctx.source || null,
+            daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
+          });
         }
         localStorage.removeItem("stillform_practice_entry_context");
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Helper: format "N days ago" / "yesterday" / "earlier today". Shared
+  // between the UI cue and the AI directive string so the two stay in
+  // sync — if the user sees "yesterday" on screen, the AI gets "yesterday"
+  // in its directive (no version skew that would confuse the AI's reply).
+  const formatDaysAgo = (days) => {
+    if (days === null || days === undefined) return "previously";
+    if (days === 0) return "earlier today";
+    if (days === 1) return "yesterday";
+    return `${days} days ago`;
+  };
 
   const inputNormalized = String(input || "").trim().toLowerCase();
   const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
@@ -11389,12 +11397,23 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             } catch { return null; }
           })(),
           // PracticeSurface → Reframe handoff (May 12, 2026).
-          // The ref was populated on mount from stillform_practice_entry_context
+          // State was populated on mount from stillform_practice_entry_context
           // (read once, localStorage cleared). When the user entered Reframe
-          // by tapping a pattern tile on the home, this is the formatted AI
-          // directive that opens the conversation by acknowledging the return.
-          // Null when the user entered Reframe directly (not from a tile).
-          practiceEntryContext: practiceEntryRef.current,
+          // by tapping a pattern tile on the home, this builds the AI
+          // directive that opens the conversation by acknowledging the
+          // return. Null when the user entered Reframe directly.
+          practiceEntryContext: (() => {
+            if (!practiceEntryContext) return null;
+            const { pattern, source, daysAgo } = practiceEntryContext;
+            const daysPhrase = formatDaysAgo(daysAgo);
+            const sourceNote = source === "spaced"
+              ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
+              : "Recent-retrieval surface — the home offered this for revisit because the user named it within the past week.";
+            return `PRACTICE RETURN — READ THIS FIRST: The user came into Reframe from the home's practice surface, returning to a pattern they previously named: "${pattern}" (first named ${daysPhrase}). ${sourceNote} ` +
+              `This is not a fresh session — it is a planned revisit per spacing-effect literature (retrieval at increasing intervals consolidates the concept). ` +
+              `Open by briefly acknowledging the return — for example: "You named ${pattern.toLowerCase()} ${daysPhrase}. What's it doing today?" or similar. Keep it 1 sentence, oriented to NOW. ` +
+              `Let the user lead with what's actually present — do not recite the pattern as a label, do not assume the same situation applies, do not summarize what they said last time. The pattern name is shorthand for a class of experience, not a fixed event.`;
+          })(),
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);
@@ -13359,6 +13378,46 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div className="ai-messages">
           {messages.length === 0 && (
             <>
+              {/* Practice return cue (May 12, 2026).
+                  Renders ONLY when the user entered Reframe from the home's
+                  PracticeSurface (tapped a pattern tile, not a fresh entry).
+                  The cue makes the system's memory visible to the user
+                  BEFORE the AI responds — they tapped "criticism" on the
+                  home; this confirms the system received it.
+                  Renders only in the empty state (messages.length === 0).
+                  Once the user sends their first message, the context is
+                  alive in the conversation and the cue is no longer
+                  needed; persistent rendering would become visual noise. */}
+              {practiceEntryContext && (
+                <div style={{
+                  marginBottom: 16,
+                  padding: "12px 14px",
+                  background: "var(--amber-glow, rgba(255,180,80,0.06))",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)"
+                }}>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--amber)",
+                    marginBottom: 6,
+                    letterSpacing: "0.14em"
+                  }}>
+                    Returning to
+                  </div>
+                  <div style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 18,
+                    fontWeight: 400,
+                    lineHeight: 1.3,
+                    color: "var(--text)",
+                    marginBottom: 4
+                  }}>
+                    {practiceEntryContext.pattern}
+                  </div>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
+                    Last named {formatDaysAgo(practiceEntryContext.daysAgo)}. What's it doing today?
+                  </div>
+                </div>
+              )}
               {getSavedReframes().length > 0 && (
                 <div style={{ marginBottom: 16, padding: "12px 14px", background: mc.aiBubble, border: `1px solid ${mc.border}`, borderRadius: "var(--r-lg)" }}>
                   <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>What helped before</div>
