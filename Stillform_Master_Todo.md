@@ -1,5 +1,56 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 8, 2026 (post-audit night session)**
+**ARA Embers LLC · last updated May 12, 2026 (phone-test fix session)**
+
+---
+
+## 📱 MAY 12, 2026 — PHONE TEST FIX SESSION
+
+Arlin walked the spine ships from the previous day's build session (commits `2043917` → `0e74512` covering Ships 1.2 / 1.4 / 1.6 / 2 / 1.3 / 3 / 4 + the info-button consolidation pass `f0f085b`). Found 11 issues. All fixed in three commits today plus the bio-filter label resolution.
+
+### Issues fixed this session
+
+| # | Issue | Commit | Surface |
+|---|---|---|---|
+| 1 | X close on Stage modal (opened by accident, unclear purpose) | `afc28e5` | Mirror Sheet |
+| 2 | "Not quite right" should exclude tool already on home | `afc28e5` | Spine intake modal |
+| 3 | Header sizing — Stillform wordmark smaller than Subscribe button | `afc28e5` | Nav header |
+| 4 | Signed in user seeing Subscribe button (stale local sub state) | `0398f9e` | Nav header |
+| 5 | Auto-sync not running on app open (debounce too aggressive) | `0398f9e` | Launch sync |
+| 6 | PDF export = blank pages (iframe + field extraction broken) | `0398f9e` | Settings → Download My Data |
+| 7 | CSV download missing data (11 fields → 19 + new pulse CSV) | `0398f9e` | Settings → Download My Data |
+| 8 | Privacy & Pattern Transparency back nav → home (should be settings) | `afc28e5` | Settings sub-screens |
+| 9 | Run Focus Check rendering all-black (no explicit text color) | `afc28e5` | Settings |
+| 10 | Move card prompt transitions invisible to user | `0398f9e` | SomaticPromptRunner |
+| 11 | Bio-filter reasoning says "body work first" but CTA labeled "Talk it out" | `dff9d3b` | Hero label |
+
+### Open from this session — NOT YET ADDRESSED
+
+**"Move card better" (Arlin's note: 'I also feel like we can make this tool better')**
+- Status: Awaiting scoping conversation. The body-part notification cue (commit `0398f9e`) was the targeted fix for the named bug; the broader "make it better" needs Arlin to articulate what's not working before a redesign can be specced.
+- Next move: Arlin walks Move card on phone post-deploy, names specifically what's off, Claude scopes redesign.
+
+**Integration permissions not granted (Arlin's note)**
+- Status: Unknown — Arlin didn't specify which integrations. Possible candidates: Apple Health (HealthKit), Google Calendar, Push notifications, native haptics, biometric lock.
+- Next move: Arlin names which integration is missing permission. Claude investigates that specific binding.
+
+**Bio-filter reinforcement when user forgets the recommendation (Arlin's question: 'how do we guide them there let's say they forget')**
+- Status: Partially addressed via commit `dff9d3b` (hero label now matches recommendation). Three-layer reinforcement chain documented in commit message: reasoning line → hero label → BioFilterSuggestion modal on tap.
+- Open question: Does the three-layer chain suffice, or does the app need additional reinforcement (persistent banner, more prominent reasoning line treatment, etc.)? Arlin's phone walk post-deploy will tell.
+- Deferred unless phone walk surfaces specific friction.
+
+### What to test on the next phone walk
+
+1. **Stage modal**: open from Mirror anchor → confirm X close works + tap-outside still works.
+2. **Hero label + reasoning alignment**: change bio-filter to Pain. Confirm reasoning says "body work first" AND hero says "Locate the signal" (not "Talk it out"). Tap → BioFilterSuggestion modal shows.
+3. **Not quite right modal**: confirm Mind crowded / Body charged / Body Scan options shown depend on what hero is already proposing.
+4. **Header**: confirm Stillform wordmark holds visual weight, Subscribe/Account button is ghost-style.
+5. **Subscribe auto-check**: if you see Subscribe while signed in, tap once and see if it flips to Account (auto sub-status check before navigation).
+6. **Sync**: open app, go to Settings → Cloud Sync. Confirm "Last synced X ago" indicator appears.
+7. **PDF export**: Settings → Download My Data → Download pulse log (PDF). Should open new tab with print dialog. If popup blocked, downloads HTML file.
+8. **Session CSV**: download and verify 19 fields (timestamp, source, mode, entryMode, tools, durationSec, preState, postState, delta, selfGuided, exitPoint, regulationType, bioFilter, feelState, triggerId, flaggedPattern, shiftLabel, breathPattern, sessionId).
+9. **Privacy / Pattern Transparency back**: from Settings → Patterns I'm watching for → confirm screen loads, tap Back → confirm returns to Settings (not home).
+10. **Composure Check**: Settings → Composure Check button — confirm text visible (was all-black), label matches home.
+11. **Move card cues**: run a Move card sequence. On each prompt change, confirm haptic tick + visual fade-in + step counter at top.
 
 ---
 

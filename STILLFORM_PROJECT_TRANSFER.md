@@ -651,4 +651,33 @@ All 11 surgical corrections to `Stillform_Science_Sheet.md` committed (commits 1
 
 ---
 
-*ARA Embers LLC · Stillform Project Transfer · April 28, 2026*
+## May 11-12, 2026 — Spine inversion + phone-test fix sessions
+
+### May 11 spine inversion (shipped end-to-end)
+
+Hybrid intake spec landed after external AI consultation. Two-day session shipped the spine across home + tool close + Today's Brief in one vertical slice:
+
+- **Ship 1.2** `edc0909` — stripped trigger tagger + State-to-Statement expander from Reframe What Shifted
+- **Ship 1.4** `598b330` — Reframe close → Body Scan handoff when delta < 1.0 (`CROSS_TOOL_HANDOFF_THRESHOLD = 1.0`)
+- **Ship 1.6** `7eb2388` — Body Scan close → Reframe handoff when post-chip not in landed set `{settled, focused, excited}`
+- **Ship 2** `e6a435a` — Home: visible reasoning above hero CTA + "Not quite right →" override
+- **Ship 1.3** `25e0d6e` — AI trigger inference + one-tap confirm at Reframe close. NEW netlify function `infer-trigger.js` (gpt-4o-mini, temp 0.2, json_object). Confidence categorical (high|low). Client gates on high+match; everything else silent.
+- **Ship 3** `a7cc9be` — Today's Brief items tappable (Risks→Reframe clarity, Moves→Move card, Recovery→Body Scan)
+- **Ship 4** `0e74512` — 2-tap intake modal (Mind crowded / Body charged + Show all tools fallback)
+
+### May 12 info-button consolidation + phone-test fixes
+
+- **`f0f085b`** — Info button consolidation across 5 chip-render sites. Per-chip ⓘ buttons removed; one ⓘ per section opens a modal with all chip definitions in order. New helper `getChipDefinitionsBody(chipIds)` near `CHIP_DEFINITIONS`. Incidental fix: InfoModal body div gained `whiteSpace: pre-line` so `\n\n` paragraph breaks render properly across all existing modals.
+- **`afc28e5`** — 5 phone-test bug fixes: Stage modal × close, "Not quite right" excludes hero tool, header sizing (wordmark 16→18px + Subscribe ghost-style), Privacy/Pattern-Transparency back nav to settings, Focus Check button color+rename to Composure Check.
+- **`0398f9e`** — Data integrity + sync: PDF export fixed (Blob URL + new tab instead of hidden iframe, time extracted from timestamp, source column added), session CSV expanded from 11 → 19 fields, separate pulse log CSV button added, Subscribe button auto-checks status before navigating, sync debounce 2min → 30sec, "Last synced X ago" indicator in Settings, Move card haptic + fade-in + step counter on prompt transitions.
+- **`dff9d3b`** — Hero label is bio-filter aware. Resolves contradiction Arlin caught where reasoning said "body work first" but CTA said "Talk it out." Label now matches recommendation: pain → "Locate the signal", other off-baseline (thought-first) → "Settle the system", body-first unnamed → "Map the signal".
+
+### Open questions from May 12 walk
+
+1. Move card "make it better" — needs scoping conversation with Arlin
+2. Integration permissions not granted — needs Arlin to specify which integration
+3. Bio-filter reinforcement chain — three layers in place (reasoning + label + modal); phone walk will tell if more reinforcement is needed
+
+---
+
+*ARA Embers LLC · Stillform Project Transfer · April 28, 2026 · May 12, 2026 addendum*
