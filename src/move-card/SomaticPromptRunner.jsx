@@ -26,8 +26,26 @@
 // Voice rule (carried from DisruptorTool source comment, May 7):
 //   "Auto-advances through prompts; no verbal input required (body-first
 //    compliant per PATTERN_DISRUPTION_SPEC §2.3 + Q6)."
+//
+// May 12, 2026 (Arlin phone test): "Move... there needs to be some sort of
+// notification that it's asking you to move different body parts." Added
+// transition cues on prompt change:
+//   - Haptic tick (uses global haptic helper if available)
+//   - Fade-in animation on prompt text (key change forces re-render with anim)
+//   - Step counter ("Step 2 of 5") so user knows where they are in sequence
+//   - Kind label ("pressure" / "breath" / etc.) above the prompt for at-a-glance
+//     recognition of what type of action is being asked
 
 import { useState, useEffect, useRef } from "react";
+
+// KIND_LABELS — human-readable + visual treatment for prompt.kind
+const KIND_LABELS = {
+  pressure: "Pressure",
+  breath: "Breath",
+  temperature: "Temperature",
+  posture: "Posture",
+  attention: "Attention"
+};
 
 export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
   const [promptIdx, setPromptIdx] = useState(0);
@@ -93,6 +111,22 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
     };
   }, []);
 
+  // May 12, 2026 — Haptic cue on prompt transition. Skips the very first
+  // prompt (mount) so the user gets the silent intro, then ticks on each
+  // subsequent advance. Uses global haptic.tick() if present; falls back to
+  // navigator.vibrate. Silent failure on devices without haptic support.
+  useEffect(() => {
+    if (promptIdx === 0) return; // no buzz on first prompt
+    if (promptIdx >= prompts.length) return; // no buzz after completion
+    try {
+      if (typeof window !== "undefined" && window.__stillformHaptic?.tick) {
+        window.__stillformHaptic.tick();
+      } else if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate([12]);
+      }
+    } catch {}
+  }, [promptIdx, prompts.length]);
+
   // Empty / malformed prompts — fire onComplete on next tick so parent
   // can move to reflection rather than hanging on a blank screen. Hook
   // is always called per React rules; the effect body is gated.
@@ -114,6 +148,8 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
   const current = prompts[Math.min(promptIdx, prompts.length - 1)];
   const totalProgress = totalDurationMs > 0 ? Math.min(1, elapsedMs / totalDurationMs) : 0;
   const remainingSec = Math.max(0, Math.ceil((totalDurationMs - elapsedMs) / 1000));
+  const stepLabel = `Step ${Math.min(promptIdx + 1, prompts.length)} of ${prompts.length}`;
+  const kindLabel = KIND_LABELS[current?.kind] || null;
 
   const stillformAmber = "var(--amber)";
   const muted = "var(--text-muted)";
@@ -123,6 +159,14 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
       padding: "32px 24px", textAlign: "center", maxWidth: 480, margin: "0 auto",
       minHeight: "70vh", display: "flex", flexDirection: "column", justifyContent: "center"
     }}>
+      {/* Step counter — operator-tier mono caps, top of screen */}
+      <div className="t-mono-xs" style={{
+        color: muted, letterSpacing: "0.14em", marginBottom: 12,
+        textTransform: "uppercase", fontSize: 10
+      }}>
+        {stepLabel}{kindLabel ? ` · ${kindLabel}` : ""}
+      </div>
+
       {/* Progress bar — minimal, doesn't compete with the prompt */}
       <div style={{ width: "100%", height: 2, background: "var(--border)", borderRadius: 1, marginBottom: 48, overflow: "hidden" }}>
         <div style={{
@@ -142,10 +186,14 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
         animation: "stillformSomaticPulse 4s ease-in-out infinite"
       }} />
 
-      <div style={{
+      {/* Prompt text. Keyed on promptIdx so React unmounts/remounts on change,
+          which retriggers the fade-in animation — visible cue that the
+          instruction just changed. */}
+      <div key={promptIdx} style={{
         fontSize: 22, lineHeight: 1.5, color: "var(--text)",
         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic",
-        padding: "0 16px", maxWidth: 360, margin: "0 auto"
+        padding: "0 16px", maxWidth: 360, margin: "0 auto",
+        animation: "stillformPromptFade 0.6s ease-out"
       }}>
         {current.text}
       </div>
@@ -165,6 +213,10 @@ export function SomaticPromptRunner({ prompts = [], onComplete, onEarlyExit }) {
         @keyframes stillformSomaticPulse {
           0%, 100% { transform: scale(1); opacity: 0.3; }
           50% { transform: scale(1.08); opacity: 0.5; }
+        }
+        @keyframes stillformPromptFade {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>

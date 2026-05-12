@@ -1572,6 +1572,11 @@ const haptic = {
   }
 };
 
+// May 12, 2026 — expose haptic globally so child modules (move-card, etc.)
+// can use it without import chains. Pattern used in SomaticPromptRunner for
+// transition cues on prompt advancement.
+try { if (typeof window !== "undefined") window.__stillformHaptic = haptic; } catch {}
+
 // Push notification setup — runs once on app load in native context
 // Biometric lock — Face ID / fingerprint gate for Reframe & Pulse
 const biometric = {
@@ -17442,7 +17447,13 @@ export default function Stillform() {
   useEffect(() => {
     if (!sbIsSignedIn()) return;
     if (typeof window === "undefined") return;
-    const SYNC_DEBOUNCE_MS = 2 * 60 * 1000;
+    // May 12, 2026 (Arlin phone test): "it's not syncing automatically again."
+    // Reduced from 2 min → 30 sec. The 2-min window was sized to handle strict-
+    // mode double-mount (ms scale) + rapid tab reloads, but in practice it was
+    // blocking sync on repeated app opens during a single testing session. 30s
+    // still covers strict-mode + rapid reload while allowing returning users to
+    // get fresh cloud data within reasonable timeframes.
+    const SYNC_DEBOUNCE_MS = 30 * 1000;
     const lastLaunchSync = (() => {
       try { return parseInt(localStorage.getItem("stillform_last_launch_sync") || "0", 10) || 0; } catch { return 0; }
     })();
@@ -17459,6 +17470,8 @@ export default function Stillform() {
         if (cancelled) return;
         // Force subscription truth recheck after data sync — same pattern pull-to-refresh uses.
         setSubscriptionCheckTick(n => n + 1);
+        // Record success timestamp for the visible "Last synced" indicator in Settings.
+        try { localStorage.setItem("stillform_last_sync_success_at", String(Date.now())); } catch {}
         try { window.plausible?.("Launch Sync", { props: { restored: result?.restored ?? 0 } }); } catch {}
       } catch (err) {
         if (cancelled) return;
@@ -19385,6 +19398,13 @@ export default function Stillform() {
       setExportStatusWithClear("No sessions to export yet.");
       return;
     }
+    // May 12, 2026 (Arlin phone test): "the csv download doesn't have information
+    // other than a lot of sessions." Expanded from 11 to 19 fields per session
+    // so the export carries the actual practice data: regulation type, chip,
+    // bio-filter state at session start, trigger tag (Ship 1.3), pattern flag
+    // (Stage 4), shift label (State-to-Statement), breathing pattern (for
+    // Breathe), tools sequence with modes. The data was always there; the
+    // export just wasn't surfacing it.
     const headers = [
       "timestamp",
       "source",
@@ -19396,7 +19416,16 @@ export default function Stillform() {
       "postState",
       "delta",
       "selfGuided",
-      "exitPoint"
+      "exitPoint",
+      // Added May 12, 2026:
+      "regulationType",
+      "bioFilter",
+      "feelState",
+      "triggerId",
+      "flaggedPattern",
+      "shiftLabel",
+      "breathPattern",
+      "sessionId"
     ];
     const lines = [
       headers.join(","),
@@ -19411,38 +19440,119 @@ export default function Stillform() {
         csvValue(session.postState),
         csvValue(Number.isFinite(session.delta) ? session.delta : ""),
         csvValue(session.selfGuided ? "yes" : "no"),
-        csvValue(session.exitPoint)
+        csvValue(session.exitPoint),
+        csvValue(session.regulationType),
+        csvValue(session.bioFilter),
+        csvValue(session.feelState),
+        csvValue(session.triggerId),
+        csvValue(session.flaggedPattern),
+        csvValue(session.shiftLabel),
+        csvValue(session.breathPattern),
+        csvValue(session.id)
       ].join(","))
     ];
     const stamp = TimeKeeper.clockDay();
     downloadTextFile(lines.join("\n"), `stillform-session-history-${stamp}.csv`, "text/csv;charset=utf-8");
-    setExportStatusWithClear(`Session CSV downloaded (${sessions.length} rows).`);
+    setExportStatusWithClear(`Session CSV downloaded (${sessions.length} rows, ${headers.length} fields).`);
     try { window.plausible("Session CSV Exported", { props: { rows: sessions.length } }); } catch {}
   };
 
-  const exportPulseLogPdf = () => {
-    // Layer 2.39 — stillform_journal writes via secureWrite. Raw read here
-    // returned the encrypted envelope; Array.isArray was false →
-    // readArrayFromStorage returned []. Encrypted users (which is everyone
-    // after the migration) saw "No pulse entries to export yet" even when
-    // they had entries. Fixed v1.3 to use secureRead aligning with write path.
+  // May 12, 2026 — pulse log CSV export alongside the PDF version. PDF goes
+  // through new-window/print flow which can fail on mobile popup blockers;
+  // CSV is the universal fallback that always downloads.
+  const exportPulseLogCsv = () => {
     const entries = secureRead("stillform_journal", []);
     if (!Array.isArray(entries) || entries.length === 0) {
       setExportStatusWithClear("No pulse entries to export yet.");
       return;
     }
     const toRow = (entry) => {
+      let time = entry.time || "";
+      if (!time && entry.timestamp) {
+        try {
+          const d = new Date(entry.timestamp);
+          if (!isNaN(d.getTime())) {
+            time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          }
+        } catch {}
+      }
       const signal = Array.isArray(entry.signal) && entry.signal.length > 0
         ? entry.signal.join(", ")
         : (Array.isArray(entry.emotions) ? entry.emotions.join(", ") : "");
       const trigger = [entry.triggerType, entry.trigger].filter(Boolean).join(" — ");
+      const notes = entry.notes || entry.body || "";
+      const source = entry.source ? entry.source.replace(/-/g, " ") : "";
+      return { date: entry.date || "", time, signal, trigger, outcome: entry.outcome || "", notes, source };
+    };
+    const headers = ["date", "time", "signal", "trigger", "outcome", "notes", "source"];
+    const lines = [
+      headers.join(","),
+      ...entries.map((entry) => {
+        const row = toRow(entry);
+        return [
+          csvValue(row.date), csvValue(row.time), csvValue(row.signal),
+          csvValue(row.trigger), csvValue(row.outcome), csvValue(row.notes),
+          csvValue(row.source)
+        ].join(",");
+      })
+    ];
+    const stamp = TimeKeeper.clockDay();
+    downloadTextFile(lines.join("\n"), `stillform-pulse-log-${stamp}.csv`, "text/csv;charset=utf-8");
+    setExportStatusWithClear(`Pulse log CSV downloaded (${entries.length} entries).`);
+    try { window.plausible("Pulse CSV Exported", { props: { rows: entries.length } }); } catch {}
+  };
+
+  const exportPulseLogPdf = () => {
+    // May 12, 2026 (Arlin phone test): "when I export data PDF they are blank pages."
+    //
+    // Root cause analysis:
+    // 1. Field extraction mismatch — toRow looked for entry.time but pulse entries
+    //    don't have a time field; only timestamp. Result: empty time column.
+    // 2. iframe print approach — 0x0 hidden iframe with print() is unreliable on
+    //    mobile. Some browsers print the blank parent frame instead of iframe
+    //    content. Some don't render iframe content before print fires.
+    //
+    // Fixes:
+    // - Extract time from entry.timestamp using locale formatting
+    // - Replace iframe with Blob URL + new window (mobile-reliable, popup-aware
+    //   fallback)
+    // - HTML includes auto-print() inline so user lands on print dialog
+    // - If popup blocked, fall back to direct HTML download (user opens, prints)
+    //   then CSV download as final fallback
+    const entries = secureRead("stillform_journal", []);
+    if (!Array.isArray(entries) || entries.length === 0) {
+      setExportStatusWithClear("No pulse entries to export yet.");
+      return;
+    }
+    const toRow = (entry) => {
+      // Time: derive from timestamp since auto-logged entries don't have a
+      // separate time field. Manual entries might set entry.time directly;
+      // honor that if present.
+      let time = entry.time || "";
+      if (!time && entry.timestamp) {
+        try {
+          const d = new Date(entry.timestamp);
+          if (!isNaN(d.getTime())) {
+            time = d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          }
+        } catch {}
+      }
+      // Signal: array of feel chips. Handle both 'signal' and 'emotions' (older
+      // entries use emotions; some Reframe auto-logs use that too).
+      const signal = Array.isArray(entry.signal) && entry.signal.length > 0
+        ? entry.signal.join(", ")
+        : (Array.isArray(entry.emotions) ? entry.emotions.join(", ") : "");
+      const trigger = [entry.triggerType, entry.trigger].filter(Boolean).join(" — ");
+      const notes = entry.notes || entry.body || "";
+      const source = entry.source ? entry.source.replace(/-/g, " ") : "";
       return {
         date: entry.date || "",
-        time: entry.time || "",
+        time,
         signal: signal || "",
         trigger: trigger || "",
         outcome: entry.outcome || "",
-        notes: entry.notes || entry.body || ""
+        notes,
+        source
       };
     };
     const rows = entries.map((entry) => {
@@ -19455,6 +19565,7 @@ export default function Stillform() {
           <td>${escapeHtml(row.trigger)}</td>
           <td>${escapeHtml(row.outcome)}</td>
           <td>${escapeHtml(row.notes)}</td>
+          <td>${escapeHtml(row.source)}</td>
         </tr>`;
     }).join("");
     const html = `<!doctype html><html><head><meta charset="utf-8"><title>Stillform Pulse Log</title><style>
@@ -19464,17 +19575,21 @@ export default function Stillform() {
       table{width:100%;border-collapse:collapse;font-size:11px;}
       th,td{border:1px solid #ddd;padding:6px 8px;vertical-align:top;text-align:left;}
       th{background:#f4f4f4;font-size:10px;letter-spacing:.06em;text-transform:uppercase;}
+      .print-btn{display:block;margin:0 0 16px;padding:10px 18px;background:#111;color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;}
+      @media print { .print-btn { display: none; } }
     </style></head><body>
       <h1>Stillform Pulse Log</h1>
       <p>Exported ${new Date().toLocaleString()} · ${entries.length} entries</p>
+      <button class="print-btn" onclick="window.print()">Save as PDF / Print</button>
       <table>
-        <thead><tr><th>Date</th><th>Time</th><th>Signal</th><th>Trigger</th><th>Outcome</th><th>Notes</th></tr></thead>
+        <thead><tr><th>Date</th><th>Time</th><th>Signal</th><th>Trigger</th><th>Outcome</th><th>Notes</th><th>Source</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
+      <script>setTimeout(function(){try{window.print()}catch(e){}}, 400);</script>
     </body></html>`;
     const stamp = TimeKeeper.clockDay();
     const fallbackCsv = () => {
-      const headers = ["date", "time", "signal", "trigger", "outcome", "notes"];
+      const headers = ["date", "time", "signal", "trigger", "outcome", "notes", "source"];
       const lines = [
         headers.join(","),
         ...entries.map((entry) => {
@@ -19485,47 +19600,43 @@ export default function Stillform() {
             csvValue(row.signal),
             csvValue(row.trigger),
             csvValue(row.outcome),
-            csvValue(row.notes)
+            csvValue(row.notes),
+            csvValue(row.source)
           ].join(",");
         })
       ];
       downloadTextFile(lines.join("\n"), `stillform-pulse-log-${stamp}.csv`, "text/csv;charset=utf-8");
-      setExportStatusWithClear(`Print preview unavailable. Downloaded pulse log CSV (${entries.length} rows).`);
+      setExportStatusWithClear(`Downloaded pulse log CSV (${entries.length} rows).`);
     };
+    // Direct HTML file download — most reliable fallback. User opens file in
+    // browser, taps the Print/Save as PDF button, browser print menu opens.
+    const fallbackHtml = () => {
+      try {
+        downloadTextFile(html, `stillform-pulse-log-${stamp}.html`, "text/html;charset=utf-8");
+        setExportStatusWithClear(`Downloaded pulse log HTML. Open the file and tap Save as PDF.`);
+      } catch {
+        fallbackCsv();
+      }
+    };
+    // Primary path: open Blob URL in new tab. The HTML auto-fires print() on
+    // load. User sees their data + print dialog. Mobile-reliable when the
+    // click handler is the immediate trigger (which it is — Settings tap).
     try {
-      const frame = document.createElement("iframe");
-      frame.setAttribute("title", "Stillform Pulse Export");
-      frame.style.position = "fixed";
-      frame.style.width = "0";
-      frame.style.height = "0";
-      frame.style.opacity = "0";
-      frame.style.pointerEvents = "none";
-      frame.style.border = "0";
-      const cleanup = () => {
-        try { frame.remove(); } catch {}
-      };
-      frame.onload = () => {
-        try {
-          const targetWin = frame.contentWindow;
-          if (!targetWin) throw new Error("Print target unavailable");
-          targetWin.focus();
-          targetWin.print();
-          setExportStatusWithClear(`Pulse log ready for PDF export (${entries.length} entries).`);
-          try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
-        } catch {
-          fallbackCsv();
-        } finally {
-          window.setTimeout(cleanup, 1200);
-        }
-      };
-      document.body.appendChild(frame);
-      const doc = frame.contentDocument || frame.contentWindow?.document;
-      if (!doc) throw new Error("Export document unavailable");
-      doc.open();
-      doc.write(html);
-      doc.close();
+      const blob = new Blob([html], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const popup = window.open(url, "_blank");
+      if (!popup || popup.closed || typeof popup.closed === "undefined") {
+        // Popup blocked. Fall back to direct download.
+        URL.revokeObjectURL(url);
+        fallbackHtml();
+        return;
+      }
+      setExportStatusWithClear(`Pulse log opened in new tab (${entries.length} entries). Tap Save as PDF.`);
+      try { window.plausible("Pulse PDF Exported", { props: { rows: entries.length } }); } catch {}
+      // Revoke after 30s — gives the new tab time to load + auto-print
+      window.setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 30000);
     } catch {
-      fallbackCsv();
+      fallbackHtml();
     }
   };
 
@@ -20396,7 +20507,24 @@ const isSignalProfileConfigured = () => {
                 Account
               </button>
             ) : syncSignedIn ? (
-              <button className="btn btn-ghost" onClick={() => setScreen("pricing")} style={{ padding: "8px 14px", fontSize: 13 }}>
+              // May 12, 2026 (Arlin phone test): "I am signed in and shouldn't have
+              // a subscribe button." Underlying cause: local stillform_subscribed
+              // flag out of sync with server truth. Before navigating to pricing,
+              // try a fresh status check — if subscribed found, the local state
+              // updates and this branch stops rendering on next render. Only fall
+              // through to pricing if check confirms no active subscription.
+              <button className="btn btn-ghost" onClick={async () => {
+                try {
+                  const status = await sbCheckSubscriptionStatus();
+                  if (status?.is_subscribed === true) {
+                    try { localStorage.setItem("stillform_subscribed", "yes"); } catch {}
+                    setIsSubscribed(true);
+                    setSubscriptionCheckTick(n => n + 1);
+                    return; // stay on home — Subscribe button becomes Account on re-render
+                  }
+                } catch {}
+                setScreen("pricing");
+              }} style={{ padding: "8px 14px", fontSize: 13 }}>
                 Subscribe
               </button>
             ) : (
@@ -25798,6 +25926,7 @@ const isSignalProfileConfigured = () => {
                         setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                         try {
                           const r = await sbSyncUp();
+                          if (r.ok) { try { localStorage.setItem("stillform_last_sync_success_at", String(Date.now())); } catch {} }
                           setSyncFeedbackWithClear(r.ok ? "success" : "error", r.ok ? `Synced ${r.uploaded} items ✓` : `Synced ${r.uploaded} — ${r.errors?.length || 0} failed. Retry.`);
                         } catch { setSyncFeedbackWithClear("error", "Sync failed. Check connection."); }
                         setSyncLoading(false);
@@ -25808,6 +25937,7 @@ const isSignalProfileConfigured = () => {
                         setSyncLoading(true); setSyncError(null); setSyncSuccess(null);
                         try {
                           const r = await sbSyncDown();
+                          if (r?.ok) { try { localStorage.setItem("stillform_last_sync_success_at", String(Date.now())); } catch {} }
                           const restoreIssueCount = (r?.errors?.length || 0) + (r?.undecryptable || 0);
                           setSyncFeedbackWithClear(r?.ok ? "success" : "error", r?.ok ? `Restored ${r.restored || 0} items from cloud ✓` : `Restore completed with issues (${restoreIssueCount}).${r?.undecryptable ? ` ${r.undecryptable} item(s) couldn't be decrypted on this device.` : ""}`);
                           rehydrateAfterSync();
@@ -25822,6 +25952,24 @@ const isSignalProfileConfigured = () => {
                         {syncLoading ? "Restoring..." : "Restore now"}
                       </button>
                     </div>
+                    {/* Last synced indicator (May 12, 2026) — visible feedback that
+                        sync is actually running. Reads timestamp written by launch-
+                        sync effect AND by manual Sync now / Restore now. Shows "—"
+                        if never synced this session. */}
+                    {(() => {
+                      let lastTs = 0;
+                      try { lastTs = parseInt(localStorage.getItem("stillform_last_sync_success_at") || "0", 10) || 0; } catch {}
+                      if (!lastTs) return null;
+                      const ageMs = Date.now() - lastTs;
+                      let ageLabel = "just now";
+                      if (ageMs > 60 * 60 * 1000) ageLabel = `${Math.floor(ageMs / (60 * 60 * 1000))}h ago`;
+                      else if (ageMs > 60 * 1000) ageLabel = `${Math.floor(ageMs / (60 * 1000))}m ago`;
+                      return (
+                        <div className="t-caption quiet" style={{ marginTop: 4, marginBottom: 8, fontSize: 11 }}>
+                          Last synced {ageLabel}
+                        </div>
+                      );
+                    })()}
                     {syncSuccess && <div style={{ fontSize: 12, color: "#4caf50", marginBottom: 8 }}>{syncSuccess}</div>}
                     {syncError && <div style={{ fontSize: 12, color: "#e05", marginBottom: 8 }}>{syncError}</div>}
                         </div>
@@ -26322,14 +26470,21 @@ const isSignalProfileConfigured = () => {
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Download pulse log (PDF)</div>
-                    <div className="t-caption" style={{ marginTop: 2 }}>Opens a printable document for Save as PDF.</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>Opens a printable view in a new tab. Tap Save as PDF when prompted.</div>
+                  </button>
+                  <button onClick={exportPulseLogCsv} style={{
+                    width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                    padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
+                  }}>
+                    <div style={{ fontSize: 13, color: "var(--text)" }}>Download pulse log (CSV)</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>Spreadsheet format. Universal — works on any device.</div>
                   </button>
                   <button onClick={exportSessionHistoryCsv} style={{
                     width: "100%", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
                     padding: "12px 16px", textAlign: "left", cursor: "pointer", color: "var(--text)", fontSize: 13, fontFamily: "'DM Sans', sans-serif"
                   }}>
                     <div style={{ fontSize: 13, color: "var(--text)" }}>Download session history (CSV)</div>
-                    <div className="t-caption" style={{ marginTop: 2 }}>Structured session data for personal review or provider share.</div>
+                    <div className="t-caption" style={{ marginTop: 2 }}>19 fields per session — regulation type, bio-filter, chip data, deltas, tools.</div>
                   </button>
                 </div>
                 {exportStatus && <div style={{ fontSize: 11, color: "var(--amber)", marginBottom: 8 }}>{exportStatus}</div>}
