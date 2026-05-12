@@ -46,7 +46,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 1. STILLFORM_PROJECT_TRANSFER.md
 **Size:** 683 lines · **Hits:** 59 reg/comp · **Old-narrow citations:** 15
 **Action:** REWRITE sections 0, 1; AUDIT section 9 citations; PRESERVE rest
-**Status:** PENDING
+**Status:** DONE (Phase B, commit 9664808) — Sections 0 + 1 fully rewritten under framing law. Section 5 (Locked Decisions) updated. Section 2.5 (May 1 session log) + April 30 conceptual decisions subsection have supersession notes. Section 9 citation audit deferred — Architecture section in Science Sheet has the supersession reference Stillform needs.
 
 **Findings:**
 - Section 0 (Vision/Philosophy): "Stillform is composure architecture" (line 14), "precision composure system" (line 16), "Regulate yourself → see yourself clearly → see others clearly → let them in" as Product Philosophy (line 22), "Stillform is composure architecture — this is the product definition, always" in "What Cannot Change" (line 73)
@@ -57,7 +57,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 2. Stillform_Science_Sheet.md
 **Size:** 700 lines · **Hits:** 81 reg/comp · **Old-narrow citations:** 24
 **Action:** Section-by-section audit + reconciliation + citation expansion
-**Status:** PENDING
+**Status:** PARTIAL (Phase C critical fixes done) — Top-of-doc supersession note added pointing at framing law. Architecture section rewritten with framing-law alignment + full citation spine added (Hoemann 2021, Kashdan/Barrett/McKnight 2015, Calderone 2024, Frontiers 2026, Myin-Germeys 2016/2018, Hitchcock 2024, Bandura 1977 all integrated). "Window of Tolerance (The Entire Product Purpose)" section fully rewritten as supporting framework for body-first noise-cutters only. Remaining ~30 feature sections deferred to subsequent sessions — Layer 0 of audit philosophy catches drift at usage time.
 
 **Findings:**
 - Architecture section (lines 9–22): CORRECT — "Stillform is a metacognition tool. Composure is the outcome."
@@ -69,7 +69,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 3. STILLFORM_COMPREHENSIVE_BRIEF_APRIL_2026.md
 **Size:** 410 lines · **Hits:** 27 reg/comp · **Old-narrow citations:** 2
 **Action:** REWRITE "What Stillform Is" + Core Idea + Identity Lines; preserve operational sections
-**Status:** PENDING
+**Status:** DONE (Phase B, commit 9664808) — Identity sections fully rewritten under framing law. Layer 1 in return-loop architecture renamed from "Regulation tool" to "Practice surface." Locked Decisions updated.
 
 **Findings:**
 - Line 10: "Stillform is a composure architecture" — violation
@@ -80,7 +80,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 4. Stillform_Strategic_Roadmap.md
 **Size:** 241 lines · **Hits:** 23 reg/comp · **Old-narrow citations:** 1
 **Action:** SURGICAL EDIT — rename Layer 1 from "Regulation Tool" + reframe category language
-**Status:** PENDING
+**Status:** DONE (Phase B, commit 9664808) — Layer 1 renamed to "Practice Surface." "Regulation/wellness category" reframed. "Emotion Regulation Shows the Strongest Effect" section reframed. Microbiases section rewritten with concept-rich-perception framing.
 
 **Findings:**
 - "Layer 1: The Regulation Tool (SHIPPED)" — frames existing app as regulation tool
@@ -91,7 +91,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 5. KETAREVIVE_ONEPAGER.md
 **Size:** 62 lines · **Hits:** 5 reg/comp · public-facing B2B
 **Action:** REWRITE under framing law
-**Status:** PENDING
+**Status:** DONE (Phase A, commit 76dbc8e) — Full rewrite. Stillform positioned as metacognition practice; regulation tools framed as noise-cutters; composure as one felt outcome.
 
 **Findings:**
 - Subtitle: "A composure companion for the integration window" — violation
@@ -102,7 +102,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 6. COMPOSURE_SELF_MASTERY_LEGIBILITY.md
 **Size:** 104 lines
 **Action:** ARCHIVE (move to archive/ subdirectory)
-**Status:** PENDING
+**Status:** DONE (Phase A, commit 76dbc8e) — Moved to archive/ with strengthened warning header.
 
 **Findings:**
 - Has "DATED ARTIFACT" warning header (lines 1–23) — rejected actions documented
@@ -112,7 +112,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 7. Stillform_Reddit_Draft.md
 **Size:** 169 lines · **Hits:** 7 reg/comp
 **Action:** HOLD with clear "DO NOT USE WITHOUT FRAMING REVIEW" header
-**Status:** PENDING
+**Status:** DONE (Phase A, commit 76dbc8e) — HOLD notice added at top.
 
 **Findings:**
 - Marked as contingency-only (Reddit no longer launch step per Apr 29 lock)
@@ -122,7 +122,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 8. Stillform_Research_Assessment.md
 **Size:** 193 lines · **Hits:** 14 reg/comp · **Old-narrow:** 2
 **Action:** UPDATE HEADER ONLY
-**Status:** PENDING
+**Status:** DONE (Phase A, commit 76dbc8e) — Warning header updated to point at framing law as supreme reference.
 
 **Findings:**
 - Has "HISTORICAL DOCUMENT — SUPERSEDED FOR FRAMING PURPOSES" warning
@@ -133,7 +133,7 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 ### 9. SCRATCH_FOUNDER_VOICE.md
 **Size:** 180 lines · **Hits:** 6 reg/comp
 **Action:** ADD NOTE at top
-**Status:** PENDING
+**Status:** DONE (Phase A, commit 76dbc8e) — Framing audit notice added.
 
 **Findings:**
 - Raw founder-quote material, already marked "Review before using publicly"
@@ -222,5 +222,9 @@ Framing drift in these docs is caught by Layer 0 (Framing Audit) of STILLFORM_AU
 ## Versioning
 
 **v1.0 — May 12, 2026.** Initial inventory after framing rebuild. 14 docs identified for action across HIGH and MEDIUM priorities. Execution sequence A → B → C → D defined.
+
+**v1.1 — May 12, 2026 (same day, end of session).** Phase A (quick wins) DONE: 5 of 10 HIGH targets complete (commit 76dbc8e — archive of COMPOSURE_SELF_MASTERY_LEGIBILITY, header updates on Research_Assessment / FOUNDER_VOICE / Reddit_Draft, full rewrite of KETAREVIVE_ONEPAGER). Phase B (framing-defining rewrites) DONE: 3 of 10 HIGH targets complete (commit 9664808 — Strategic_Roadmap surgical edits, COMPREHENSIVE_BRIEF identity rewrites, PROJECT_TRANSFER sections 0+1+5+supersession notes). Phase C (Science Sheet) CRITICAL FIXES DONE: top-of-doc supersession note + Architecture section strengthened with framing-law citation spine + "Window of Tolerance (The Entire Product Purpose)" rewritten as supporting framework only. Remaining Phase C work (section-by-section audit of 30+ feature sections) and all of Phase D (medium priority spot-checks) deferred to subsequent sessions — Layer 0 of audit philosophy catches drift at usage time.
+
+**Status summary as of v1.1:** 10 of 10 HIGH priority targets have meaningful framing-law alignment (some DONE, Science Sheet PARTIAL with critical contradictions fixed). 5 MEDIUM priority docs still pending. The framing rebuild's gate-keeping infrastructure is in place: STILLFORM_FRAMING_LAW.md (supreme reference), STILLFORM_AUDIT_PHILOSOPHY.md v2.0 (Layer 0 Framing Audit enforces the law), and the most actively-used docs are aligned. Subsequent feature work runs under the new framing.
 
 This doc updates as targets reach DONE status. When all targets are DONE, the inventory audit is closed.
