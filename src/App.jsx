@@ -22840,54 +22840,12 @@ const isSignalProfileConfigured = () => {
                       WebkitTapHighlightColor: "transparent", marginBottom: 8,
                       transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
-                      {/* May 12, 2026 — Hero label is bio-filter aware.
-                          Arlin phone test caught the contradiction: reasoning
-                          line said 'Pain bio-filter — body work first.' but
-                          the hero CTA still said 'Talk it out' (Reframe).
-                          Routing already handled this correctly (showed
-                          BioFilterSuggestion modal on tap) but the label
-                          didn't reflect what would actually happen. Now the
-                          label NAMES the recommended tool so reasoning + CTA
-                          + action all align.
-
-                          Body Scan: "Locate the signal" (pain context) or
-                          "Map the signal" (unnamed off-baseline). Names
-                          interoception as the action.
-
-                          Breathe: "Settle the system" — names parasympathetic
-                          regulation as the action.
-
-                          Reframe: calibration-default labels stay ("Talk it
-                          out" / "Calm my body") when bio-filter is clear. */}
-                      {(() => {
-                        const bioFilter = getActiveBioFilter();
-                        const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
-                        const hasPain = bioFilter.includes("pain");
-                        let title, subtitle;
-                        if (isThoughtFirst) {
-                          if (offBaseline) {
-                            if (hasPain) { title = "Locate the signal"; subtitle = "Map where pain registers first."; }
-                            else { title = "Settle the system"; subtitle = "Breathe before thinking."; }
-                          } else { title = "Talk it out"; subtitle = "Start with what the mind is doing."; }
-                        } else if (isBodyFirst) {
-                          if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
-                            if (hasPain) { title = "Locate the signal"; subtitle = "Map where pain registers first."; }
-                            else { title = "Map the signal"; subtitle = "Body Scan locates what's loudest."; }
-                          } else { title = "Calm my body"; subtitle = "Start with what the body is doing."; }
-                        } else {
-                          title = "Start here"; subtitle = "Start with what's loudest.";
-                        }
-                        return (
-                          <>
-                            <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
-                              {title}
-                            </div>
-                            <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
-                              {subtitle}
-                            </div>
-                          </>
-                        );
-                      })()}
+                      <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
+                        {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
+                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start with what the body is doing." : "Start with what's loudest."}
+                      </div>
                       {/* May 7, 2026 — last-session info folded in here from the standalone pill above.
                           Only renders when there's a recent session >2min old (avoids "just now"
                           loop right after exit). Subtle, contextual, anchored to the action it relates to. */}
