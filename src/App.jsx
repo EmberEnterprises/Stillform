@@ -195,6 +195,18 @@ const styles = `
        References (Aesop, Hermès, MUBI, Linear) use no grain; depth comes from the radial gradient alone. */
   }
 
+  /* Button color reset (May 12, 2026).
+     HTML <button> elements have a User-Agent default style of color: ButtonText
+     — a system color that does NOT inherit from the parent cascade. On dark
+     backgrounds in iOS Safari and mobile Chrome, ButtonText resolves to near-black
+     and renders as invisible text on near-black surfaces. Forcing color: inherit
+     makes buttons inherit from .app (var(--text), light-on-dark).
+     Buttons that set their own color in inline style or className override this
+     reset — the fix only catches buttons that didn't set a color. */
+  button {
+    color: inherit;
+  }
+
   .app::before {
     /* Cinematic radial — single depth effect, slightly strengthened to compensate for grain removal.
        Reference: Linear's deep-blue-black with ~2% radial lightness shift toward center. */
