@@ -1,7 +1,29 @@
 # FRAMING LAW vs COPY_LOCKS — Structural Conflict
-**ARA Embers LLC · May 12, 2026 · v1.0 · Awaits Arlin's resolution before further work on user-facing copy**
+**ARA Embers LLC · May 12, 2026 · v2.0 · RESOLVED via Path A (framing law cascades)**
+
+> **RESOLUTION — May 12, 2026 (same day):** Arlin's direction: *"ALL OF THE THINGS WE CREATED TODAY ARE FROM RESEARCH."* The framing law established today is the research-grounded truth; the pre-research COPY_LOCKS are stale relative to the research. Path A executed — framing law cascades to user-facing brand surfaces.
+>
+> **Surgical substitutions applied:**
+> - Splash tagline: "Composure architecture" → "Metacognition practice"
+> - Tutorial opening close: "Stillform. Composure Architecture." → "Stillform. Metacognition Practice."
+> - Tutorial line two-up: "instrumentation for self-mastery. A composure system you operate." → "instrumentation for metacognition. A practice you operate." (preserved coherence with new close)
+> - Subscription disclaimer: "Stillform is composure architecture, not medical treatment." → metacognition practice
+> - App description opener: same surgical substitution
+> - FAQ method-style answers (2 sites): opener "Stillform is composure architecture" substituted; deeper voice work in answer body deferred
+> - Crisis disclaimer: same surgical substitution
+> - Privacy footer: "for AI-assisted composure architecture" → metacognition practice
+> - `docs/COPY_LOCKS.md` updated with new locked strings + framing law alignment note
+> - `scripts/ship-preflight.mjs` regex updated to enforce new tutorial close
+>
+> **Deferred to voice work (not surgical):**
+> - Tutorial opening prose: "Composure is a full-spectrum practice. It governs how you respond in difficulty..." (LOCKED in COPY_LOCKS but not actually in current App.jsx code — opening page uses different copy). The locked entry may itself be stale.
+> - FAQ answer body content (24746 deeper text about regulation taking hold; 24754 "restore a functional baseline" — both contain framing-law-conflicting phrases inside paragraphs that require voice rewriting, not substring substitution)
+>
+> The internal AI surface + brand-identifier surfaces (splash, tutorial close, disclaimers) are framing-law-aligned. Substantive content surfaces (tutorial opening prose, deep FAQ answers) are flagged for Arlin's voice rewrite session.
 
 ---
+
+## ORIGINAL CONFLICT DOC (preserved as design record)
 
 ## The conflict
 

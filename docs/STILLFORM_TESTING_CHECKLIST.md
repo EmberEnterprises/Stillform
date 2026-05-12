@@ -16,9 +16,9 @@
 ## SECTION 0 — First Load (clean browser, no localStorage)
 
 - [ ] Page loads. URL shows `stillformapp.com` (or `/#home` after splash).
-- [ ] Splash shows "Stillform" then subtitle "Composure architecture" then fades.
+- [ ] Splash shows "Stillform" then subtitle "Metacognition practice" then fades.
 - [ ] After splash, lands on Tutorial (NOT home — first-run users see tutorial).
-- [ ] Tutorial card 1 of 4 visible: opening lock copy `Stillform. Composure Architecture.`
+- [ ] Tutorial card 1 of 4 visible: opening lock copy `Stillform. Metacognition Practice.`
 - [ ] "Next →" button advances through cards.
 - [ ] Tutorial card 2 of 4: "Composure Check — Time to First Value".
 - [ ] Tutorial card 2 contains the embedded Composure Check (auto-starts a 30-trial Go/No-Go).

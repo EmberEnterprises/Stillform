@@ -20649,7 +20649,7 @@ const isSignalProfileConfigured = () => {
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Composure architecture</div>
+            }}>Metacognition practice</div>
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
@@ -20717,8 +20717,8 @@ const isSignalProfileConfigured = () => {
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
                 "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
-                "This is instrumentation for self-mastery. A composure system you operate.",
-                "Stillform. Composure Architecture."
+                "This is instrumentation for metacognition. A practice you operate.",
+                "Stillform. Metacognition Practice."
               ]
             },
             {
@@ -24686,7 +24686,7 @@ const isSignalProfileConfigured = () => {
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
-              Stillform is composure architecture, not medical treatment. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
+              Stillform is a metacognition practice, not medical treatment. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
             </p>
           </section>
         )}
@@ -24700,7 +24700,7 @@ const isSignalProfileConfigured = () => {
             <p style={{ marginBottom: 24 }}><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>View full Privacy Policy</a></p>
 
             <h2>What Stillform Is</h2>
-            <p>Stillform is composure architecture. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and stabilize composure.</p>
+            <p>Stillform is a metacognition practice. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and stabilize composure.</p>
 
             <h2>What Stillform Is Not</h2>
             <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health crisis, please see our Crisis Resources page for international helplines.</p>
@@ -24743,7 +24743,7 @@ const isSignalProfileConfigured = () => {
           const FAQ_ITEMS = [
 {
                 q: "What is Stillform?",
-                a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
+                a: "Stillform is a metacognition practice. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
               },
               {
                 q: "What does composure mean here?",
@@ -24751,7 +24751,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is composure architecture — structured interventions that interrupt activation and restore a functional baseline in real time. It's a daily practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. It is not a substitute for clinical care."
+                a: "Stillform is a metacognition practice — structured interventions that interrupt activation and restore a functional baseline in real time. It's a daily practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. It is not a substitute for clinical care."
               },
               {
                 q: "What is calibration?",
@@ -25142,7 +25142,7 @@ const isSignalProfileConfigured = () => {
               );
             })()}
             <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-              Stillform is composure architecture, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
+              Stillform is a metacognition practice, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
             {(() => {
               const crisisResources = [
@@ -25340,7 +25340,7 @@ const isSignalProfileConfigured = () => {
             Per PATTERN_DISRUPTION_SPEC.md §5: user can view what AI is watching
             for, history of patterns surfaced/accepted/dismissed, and clear
             history. The agency principle in concrete form — user signed up
-            for AI-assisted composure architecture; transparency is the deal.
+            for AI-assisted metacognition practice; transparency is the deal.
         */}
         {screen === "pattern-transparency" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>

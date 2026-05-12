@@ -3,6 +3,8 @@
 This document defines locked and constrained copy anchors for setup bridge, tutorial, and AI entry copy surfaces.
 Any edits to **LOCKED** strings require explicit approval and a matching preflight update.
 
+> **Framing law alignment — May 12, 2026:** Splash tagline updated from "Composure architecture" to "Metacognition practice" and tutorial close updated from "Stillform. Composure Architecture." to "Stillform. Metacognition Practice." per STILLFORM_FRAMING_LAW.md (May 12, 2026 — the research-grounded framing). Per Arlin's direction: today's framing rebuild is FROM research (Flavell 1979; Schraw & Moshman 1995; Veenman et al. 2006; Frontiers 2026; Barrett 2017; Hoemann 2021; Wells 2009; Hitchcock 2024; Bandura; Ericsson; Davidson; Lazar; Calderone; Lieberman; Porges; Lehrer), not synthesis. The pre-research locks are stale by design relative to the research; updating them brings external brand surfaces into alignment with the research-grounded product framing. Tutorial opening prose ("Composure is a full-spectrum practice...") and FAQ content remain locked at current copy pending substantive voice rewrite — those are content with voice, not surgical brand-identifier substitutions.
+
 ## Status Legend
 - **LOCKED**: Must remain exact.
 - **CONSTRAINED**: Can change only with explicit approved replacement text.
@@ -12,10 +14,10 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 
 | Surface | Status | Exact copy |
 |---|---|---|
-| Splash tagline | LOCKED | `Composure architecture` |
+| Splash tagline | LOCKED | `Metacognition practice` |
 | Tutorial opening line | LOCKED | `Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.` |
 | Tutorial opening support line | LOCKED | `Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.` |
-| Tutorial opening close | LOCKED | `Stillform. Composure Architecture.` |
+| Tutorial opening close | LOCKED | `Stillform. Metacognition Practice.` |
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Pattern Check` |
 | Combined setup flow key | LOCKED | `setupFlow: "calibration-combined"` |
