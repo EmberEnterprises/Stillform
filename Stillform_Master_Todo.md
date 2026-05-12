@@ -58,7 +58,7 @@ Arlin walked the spine ships from the previous day's build session (commits `204
 
 Code-verified gaps cross-referenced against Liven and Healthy Minds Program (HMP) app architecture, framed through **STILLFORM_FRAMING_LAW.md** (metacognition practice / neuroplasticity spine / capacity expansion / composure as felt outcome). This section is the implementation breakdown of the narrative-spine / connectivity-layer entry below (originally added May 8) — the diagnosis was correct; the gaps are now concrete with line numbers.
 
-**Operating principle:** Stillform's data infrastructure is stronger than either competitor (5-stage architecture with shipped markers at `src/App.jsx:4718` and `:4755`, body-first/thought-first calibration routing, bio-filter hardware-state context, Russell circumplex classifier, EOD artifact pipeline, Pattern Transparency surface, Low-Demand mode). The UI does not surface that infrastructure as a journey. **The work below is exposure, not invention.** Stillform doesn't need new mechanics — it needs the existing mechanics turned into a felt path.
+**Operating principle:** Stillform's data infrastructure is stronger than either competitor (5-stage architecture with shipped markers at `src/App.jsx:4718` and `:4755`, processing-type-modulated rep delivery, bio-filter hardware-state context, Russell circumplex classifier, EOD artifact pipeline, Pattern Transparency surface, Low-Demand mode). The UI does not surface that infrastructure as a journey. **The work below is exposure, not invention.** Stillform doesn't need new mechanics — it needs the existing mechanics turned into a felt path.
 
 **What Liven and HMP have that Stillform doesn't (architecture, not features):**
 - Onboarding quiz → personalized path generated as user-facing artifact (not just AI-consumption profile)
@@ -69,7 +69,7 @@ Code-verified gaps cross-referenced against Liven and Healthy Minds Program (HMP
 - Framework that names "what this builds" for every action
 
 **What Stillform has that they don't (preserve when closing gaps):**
-- Body-first / thought-first calibration routing (no competitor splits users by processing type)
+- Processing-type-modulated rep delivery (body-first vs thought-first as somatic vs cognitive entry into the same journey content — no competitor personalizes modality this way; lives inside the rep, not at the home level)
 - In-moment AI Reframe with calm/clarity/hype routing (Liven's Livie is open-ended chat — much weaker structurally)
 - Bio-filter hardware-state context
 - Three specific breath protocols including Cyclic Sighing (Balban 2023)
@@ -105,7 +105,7 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 **Gap:** No single daily focus. User scans 9 sections to decide what to do. Decision burden every app open.
 
-**Fix (new lens):** Single hero unit names today's metacognitive rep — what capacity it builds, why this specific objective today, how it ties to the current chapter. Bio-filter override stays (current state can change the somatic entry point), but underneath the override is a journey-positioned focus. *"Today: name three states by lunch — that's a Naming rep."* Bio-filter routing becomes the entry tactic; the journey rep is the goal. PracticeSurface (built today) can move below or fold into this single hero.
+**Fix (new lens):** Single hero unit names today's metacognitive rep — what capacity it builds, why this specific objective today, how it ties to the current chapter. *"Today: name three states by lunch — that's a Naming rep."* The rep itself is journey-positioned (from `getCurrentStage()` + the path generated at calibration via Gap 3). **Processing type (`regType`) and bio-filter are modality modifiers, not the home's organizing principle:** they choose HOW the user enters today's rep (somatic entry point vs cognitive entry point), not WHAT the rep is. A body-first user entering today's Naming rep starts with a body scan and names what each tell is telling them; a thought-first user opens Reframe and names three states they've moved through this morning — **same rep, different modality of entry**. Bio-filter beats processing type when current-state demands it; both live inside the rep entry, not at the home render level. The `if (!regType) return null;` at `:21899` stays as a safety net but stops gating home routing; the hero rendering at `:22881–22952` is restructured from "bio-filter-routed CTA with override" to "journey-positioned rep with modality entry chosen by bio-filter > processing type." PracticeSurface (built today) can move below or fold into this single hero.
 
 **Cross-references:** Implements solution shape B from narrative-spine entry below. The 9-section feature panel is the visible expression of Arlin's May 8 diagnosis: "a bunch of boxes with no true data system or connectivity."
 
