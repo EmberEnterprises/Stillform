@@ -20147,11 +20147,13 @@ const isSignalProfileConfigured = () => {
       {infoModal && (
         <div onClick={() => setInfoModal(null)} style={{
           position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
-          display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 48px"
+          display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 48px",
+          overflowY: "auto"
         }}>
           <div onClick={e => e.stopPropagation()} style={{
             background: "var(--bg2, #111)", border: "0.5px solid var(--border)",
-            borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%"
+            borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%",
+            maxHeight: "84vh", overflowY: "auto"
           }}>
             <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
               {infoModal.title}
