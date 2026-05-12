@@ -3,7 +3,7 @@
 This document defines locked and constrained copy anchors for setup bridge, tutorial, and AI entry copy surfaces.
 Any edits to **LOCKED** strings require explicit approval and a matching preflight update.
 
-> **Framing law alignment — May 12, 2026:** Splash tagline updated from "Composure architecture" to "Metacognition practice" and tutorial close updated from "Stillform. Composure Architecture." to "Stillform. Metacognition Practice." per STILLFORM_FRAMING_LAW.md (May 12, 2026 — the research-grounded framing). Per Arlin's direction: today's framing rebuild is FROM research (Flavell 1979; Schraw & Moshman 1995; Veenman et al. 2006; Frontiers 2026; Barrett 2017; Hoemann 2021; Wells 2009; Hitchcock 2024; Bandura; Ericsson; Davidson; Lazar; Calderone; Lieberman; Porges; Lehrer), not synthesis. The pre-research locks are stale by design relative to the research; updating them brings external brand surfaces into alignment with the research-grounded product framing. Tutorial opening prose ("Composure is a full-spectrum practice...") and FAQ content remain locked at current copy pending substantive voice rewrite — those are content with voice, not surgical brand-identifier substitutions.
+> **Framing law alignment — May 12, 2026:** Per Arlin's direction: today's framing rebuild is FROM research (Flavell 1979; Schraw & Moshman 1995; Veenman et al. 2006; Frontiers 2026; Barrett 2017; Hoemann 2021; Wells 2009; Hitchcock 2024; Bandura; Ericsson; Davidson; Lazar; Calderone; Lieberman; Porges; Lehrer), not synthesis. The pre-research locks were stale relative to the research. Path A cascade applied — splash tagline, full Tutorial Page 0 opening sequence, FAQ bodies, all disclaimers, and AI prompt surfaces now aligned with the research-grounded product framing. Tutorial Page 0 opening lines re-locked to reflect the actual shipped copy (the previous "Composure is a full-spectrum practice..." LOCKED entry referred to deprecated/never-shipped content; removed to match reality). The full FAQ bodies for "What is Stillform?" and "How is this different from meditation or therapy?" were rewritten in-place to substitute regulation-framing phrases (where regulation takes hold, structured interventions that interrupt activation, restore a functional baseline) with practice/expansion framing (where the practice takes hold, daily cognitive work that builds the concept library, expands cognitive capacity over time).
 
 ## Status Legend
 - **LOCKED**: Must remain exact.
@@ -15,8 +15,9 @@ Any edits to **LOCKED** strings require explicit approval and a matching preflig
 | Surface | Status | Exact copy |
 |---|---|---|
 | Splash tagline | LOCKED | `Metacognition practice` |
-| Tutorial opening line | LOCKED | `Composure is a full-spectrum practice. It governs how you respond in difficulty, in momentum, and in daily life. Composure is a daily choice: build grace, poise, and better reflexes under every kind of pressure.` |
-| Tutorial opening support line | LOCKED | `Stillform disciplines how you respond with a daily system for regulation, perception, and deliberate action.` |
+| Tutorial Page 0 opening line 1 | LOCKED | `Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.` |
+| Tutorial Page 0 opening line 2 | LOCKED | `Stillform trains you to catch it earlier — before your state drives the outcome. That's the practice. And it builds.` |
+| Tutorial Page 0 opening line 3 | LOCKED | `This is instrumentation for metacognition. A practice you operate.` |
 | Tutorial opening close | LOCKED | `Stillform. Metacognition Practice.` |
 | Tutorial FAQ guidance sentence | LOCKED | `If you want to know more about the app, please go to our FAQ page.` |
 | Combined setup step title | LOCKED | `Signal Profile + Pattern Check` |

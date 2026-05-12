@@ -4327,9 +4327,8 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
 // ENGAGEMENT ARCHITECTURE — STAGE DEFINITIONS (Phase 0 — May 7, 2026)
 // ═══════════════════════════════════════════════════════════════════════
 //
-// Five-stage developmental architecture for self-mastery through
-// metacognition that stabilizes composure. Stages build sequentially —
-// each capacity prerequisites the next.
+// Five-stage developmental architecture mapping the metacognition practice.
+// Stages build sequentially — each capacity prerequisites the next.
 //
 // Spec source of truth: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.1
 // Stage NAMES locked May 7, 2026.
@@ -20716,7 +20715,7 @@ const isSignalProfileConfigured = () => {
               title: "Stillform",
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
-                "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
+                "Stillform trains you to catch it earlier — before your state drives the outcome. That's the practice. And it builds.",
                 "This is instrumentation for metacognition. A practice you operate.",
                 "Stillform. Metacognition Practice."
               ]
@@ -24700,7 +24699,7 @@ const isSignalProfileConfigured = () => {
             <p style={{ marginBottom: 24 }}><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>View full Privacy Policy</a></p>
 
             <h2>What Stillform Is</h2>
-            <p>Stillform is a metacognition practice. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and stabilize composure.</p>
+            <p>Stillform is a metacognition practice. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and build capacity over time.</p>
 
             <h2>What Stillform Is Not</h2>
             <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health crisis, please see our Crisis Resources page for international helplines.</p>
@@ -24743,7 +24742,7 @@ const isSignalProfileConfigured = () => {
           const FAQ_ITEMS = [
 {
                 q: "What is Stillform?",
-                a: "Stillform is a metacognition practice. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
+                a: "Stillform is a metacognition practice. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where the practice takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is metacognition. Composure follows."
               },
               {
                 q: "What does composure mean here?",
@@ -24751,7 +24750,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is a metacognition practice — structured interventions that interrupt activation and restore a functional baseline in real time. It's a daily practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. It is not a substitute for clinical care."
+                a: "Stillform is a metacognition practice — daily cognitive work that builds the concept library your brain uses to read its own internal states. It's a practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. The practice expands cognitive capacity over time — not just regulating, building. It is not a substitute for clinical care."
               },
               {
                 q: "What is calibration?",
