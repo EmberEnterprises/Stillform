@@ -1,23 +1,24 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (Spine Ship complete: 10 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`, 31 commits ahead of main. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
+**ARA Embers LLC · last updated May 12, 2026 (Spine Ship complete: 9 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`. Gap 5 rejected after review — competitor-pattern misread. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
 
-## SPINE SHIP — May 12, 2026 (commits `e123e07` through `111e08a`)
+## SPINE SHIP — May 12, 2026 (commits `e123e07` through latest)
 
-Ten gaps shipped first-cut in a single batch this session. Branch `feat/home-wiring-surface` is at 31 commits ahead of main, all green (build + preflight pass on every commit), zero deployed.
+Nine gaps shipped first-cut in a single batch this session. Branch `feat/home-wiring-surface` is well ahead of main, all green (build + preflight pass on every commit), zero deployed.
 
 **What the user will see after the next Netlify deploy:**
 
-1. **Home — TODAY'S REP block at top of hero.** Eyebrow names current chapter; rep statement names the metacognitive objective from `getTodaysJourneyRep()`. Bio-filter reasoning + CTA preserved below (modality entry). Anchors strip below journey rep if anchors set.
+1. **Home — TODAY'S REP block at top of hero.** Eyebrow names current chapter; rep statement names the metacognitive objective from `getTodaysJourneyRep()`. Bio-filter reasoning + CTA preserved below (modality entry). Anchors strip below journey rep if anchors are set.
 2. **Home — REP COUNTED banner.** When a session completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss X. Auto-clears on dismiss.
 3. **Mirror Strip → Roadmap (one tap).** No Mirror Sheet detour. Roadmap shows all 5 chapters with current highlighted, capacity gates visible on stages 2-5, science citations per gate.
-4. **Roadmap → Library button.** Browsable destination for the 20 science cards organized into 6 shelves by capacity. Each card expandable with source link.
-5. **My Progress — Last 30 Days synthesis card at top.** Plain-language observations across session volume, granularity, pre/post delta, biases, triggers, streak.
-6. **My Progress — Since You Started card below.** Baseline-to-current growth across stages, chips, triggers, biases, signals, sessions. Empty growth state still renders with baseline date.
-7. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
+4. **My Progress — Last 30 Days synthesis card at top.** Plain-language observations across session volume, granularity, pre/post delta, biases, triggers, streak.
+5. **My Progress — Since You Started card below.** Baseline-to-current growth across stages, chips, triggers, biases, signals, sessions. Empty growth state still renders with baseline date.
+6. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
+7. **Settings — Capacity Baseline section.** Shows current baseline + Reset button (lets user wipe retroactive seed for a fresh measurement point).
 8. **FAQ — Stage names and Mirror naming reconciled with code.**
 
 **What's NOT in this ship:**
 
+- Library destination (Gap 5) — rejected after review; competitor-pattern misread. Static cards retained as AI fallbacks + contextual `ScienceCard` post-session surface (existing pattern preserved).
 - Audio practice layer (Gap 7) — needs assets, deferred
 - Periodic re-assessment ritual (Gap 4 second cut) — needs UX decisions on cadence
 - Calibration-time anchor selection (Gap 8 second cut) — onboarding modification deferred
@@ -28,11 +29,12 @@ Ten gaps shipped first-cut in a single batch this session. Branch `feat/home-wir
 
 **Deploy + test order (Arlin):**
 1. Trigger Netlify deploy from branch when ready.
-2. Phone walk: home → journey rep at top → tap Mirror Strip → Roadmap → tap "The Library →" → browse cards.
+2. Phone walk: home → journey rep at top → tap Mirror Strip → Roadmap → back.
 3. Complete a session that might advance a marker → return home → REP COUNTED banner.
 4. Open Settings → Habit Anchors → add an anchor (or tap starter suggestion) → return home → STANDING ANCHORS strip visible.
 5. Open My Progress → see Last 30 Days card and Since You Started card.
 6. Open FAQ → "What is the Mirror and stage system?" → confirm stage names.
+7. Settings → Capacity Baseline → Reset baseline from current state (recommended before a fresh full app test).
 
 ---
 
@@ -184,7 +186,7 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ### Gap 5 — Practice library as a destination, not a buried surface
 
-**STATUS: SHIPPED (first cut) — commit `12a2e35`, May 12, 2026.** New `LibraryScreen` component at `:17469`. The 20 static science cards from `STATIC_SCIENCE_CARDS` organized into 6 shelves: 5 stages + general mechanisms. `LIBRARY_CATEGORIES` and `LIBRARY_CARD_TITLES` map topics to shelves with humanized titles. Each card expandable on tap → body + citation + source link (paywall labeled). Reachable from Roadmap with "The Library →" entry button at bottom of Roadmap (natural connection: read the science behind the chapters). Screen state machine and back-nav extended for `library` route. Pure exposure of existing content — no new data layer.
+**STATUS: REJECTED after review — May 12, 2026 (commit reverting the ship).** The Library destination was a competitor-pattern import that doesn't fit Stillform's architecture. The 20 cards in `STATIC_SCIENCE_CARDS` are designed as (a) randomized fallbacks when the AI science card generator fails and (b) source material for the post-session `ScienceCard` surface that appears contextually after a tool run with the framing *"this is the science behind what you just did."* Exposing them as a browsable archive reads as a thin library (20 cards looks empty when the user expects depth) and violates the design pattern that surfaces science contextually rather than as a reading destination. No plan to write more cards. The competitor pattern doesn't transfer: Liven and HMP are content-delivery platforms; Stillform is a practice. Content lives in flows, not in destinations. Reverted in full — `LibraryScreen`, `LIBRARY_CATEGORIES`, `LIBRARY_CARD_TITLES`, `library` screen state, entry buttons in Roadmap + My Progress all removed. Static cards and contextual `ScienceCard` surface preserved.
 
 **Code state:** Plain-Language Neuroscience cards exist (`PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md`) but aren't surfaced as a destination tab. Science is woven in moments inside tools. There is no browsable library outside of practice flow.
 
