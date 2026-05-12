@@ -127,12 +127,12 @@ Durable signal from early users and founder testing:
 
 **Stillform IS:**
 - An architect that helps remove the scaffolding
-- A composure system for the full spectrum — hard moments AND winning moments
-- A conditioning tool — daily practice builds the neural pathways
+- A metacognition practice for the full spectrum — hard moments AND winning moments
+- Built on neuroplasticity — daily reps build neural pathways
 - A channel to self-awareness, not a replacement for human connection
 - The opposite of faster, more, numb, perform, mask, bypass
 
-**The unfolding:** The app doesn't teach people who to be. It strips away the noise, the distortions, the misreads, the masks — and what's left is the person. The AI's job is to get them regulated enough to see themselves honestly, then shut up. "You didn't need a tool for that one. You handled it. Notice that." — that's the scaffolding coming down.
+**The unfolding:** The app doesn't teach people who to be. It strips away the noise, the distortions, the misreads, the masks — and what's left is the person. The AI's job is to help them settle enough to see themselves honestly, then shut up. "You didn't need a tool for that one. You handled it. Notice that." — that's the scaffolding coming down.
 
 
 ### The Endgame — Composure as Class
