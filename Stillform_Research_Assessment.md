@@ -6,11 +6,13 @@
 
 > **⚠️ HISTORICAL DOCUMENT — SUPERSEDED FOR FRAMING PURPOSES**
 >
-> This document was compiled April 8, 2026, before Stillform's framing was clarified as **metacognitive therapy (MCT)** rather than cognitive-behavioral therapy (CBT). It refers to Reframe as "cognitive reappraisal" and groups Stillform with CBT-lineage tools — both framings have been superseded.
+> This document was compiled April 8, 2026, before STILLFORM_FRAMING_LAW.md (May 12, 2026) defined Stillform's framing comprehensively. It refers to Reframe as "cognitive reappraisal" and groups Stillform with regulation/wellness-category tools — both framings are superseded.
 >
-> This doc is preserved as a historical record of the pre-pivot research due diligence (real research question, real risks documented, real citations). It should NOT be read as a current statement of what Stillform is. For current framing see `Stillform_Science_Sheet.md` and the locked framing in active session prompts.
+> This doc is preserved as a historical record of the pre-framing-law research due diligence (real research question, real risks documented, real citations). It should NOT be read as a current statement of what Stillform is.
 >
-> **Current framing:** Stillform is self-mastery through metacognition that stabilizes composure. The mechanism is metacognitive observation (Wells 2009), not cognitive content-challenging. The neural science of reappraisal (amygdala / PFC) still applies as a substrate; the user-facing engagement is metacognitive.
+> **Current framing:** See `STILLFORM_FRAMING_LAW.md` for the supreme reference. In brief: Stillform is a metacognition practice that builds the concept library the brain uses to perceive its own states. Composure is one felt outcome that signals the practice is working, not the product. Analytical work is the substance of the practice, not training wheels to graduate from.
+>
+> The body of this document is preserved as historical due diligence. Citations and reasoning below were honest at the time; framing references below predate the framing law and should be read with that in mind.
 
 ---
 

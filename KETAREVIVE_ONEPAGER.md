@@ -1,13 +1,15 @@
 # Stillform + KetaRevive
-### A composure companion for the integration window
+### A metacognition practice companion for the integration window
 
 ---
 
 ## What Stillform Is
 
-Stillform is a metacognition trainer that stabilizes composure. It helps people observe their own state before it drives their behavior — and then choose their response deliberately.
+Stillform is a metacognition practice. Users build rich, specific mental representations of their own internal states — the concept library the brain uses to perceive itself. Through repeated structured analytical work, this library becomes more granular and more accessible, and pattern recognition becomes faster. The result is sharper thinking, better strategic decisions, deeper self-understanding, and — as one felt outcome — composure under load.
 
-It is not therapy. It is not a medical tool. It is a structured space for breathing, grounding, and reflection — available anytime, on any device, without a clinician present.
+Stillform is AI-assisted. The AI is the practice partner. It structures the analytical work, holds the boundaries of each session, and helps the user reach a takeaway that adds to the concept library.
+
+It is not a substitute for clinical care. It is a structured space for breathing, body scanning, and reframing — available anytime, on any device, between or outside clinical sessions.
 
 ---
 
@@ -15,31 +17,31 @@ It is not therapy. It is not a medical tool. It is a structured space for breath
 
 Ketamine opens a window of neuroplasticity — the brain becomes more malleable, patterns more accessible, defenses lower. Most infusion centers administer the treatment without a structured way for clients to work with what surfaces during or after the experience.
 
-Stillform fills that gap:
+Stillform fills that gap by providing structured concept-building work that uses the post-infusion plasticity window:
 
 **During the infusion:**
-Breathing patterns (Quick Reset and Deep Regulate) help clients stay grounded and regulate the nervous system. Visual grounding and fractal breathing visuals provide a calm anchor.
+Brief breathing patterns (Quick Reset, Deep Regulate, Cyclic Sighing) and fractal visual grounding give the client a steady anchor during the experience itself. These are noise-cutters — they reduce activation enough for the metacognitive work to land later.
 
 **After the infusion:**
-The AI reflection tool — Reframe — creates a no-judgment space to process what came up. No labels, no diagnosis, no verdicts. The client speaks. The AI listens and reflects. What matters is what they feel and what they think.
+Reframe — the AI-assisted metacognitive sessions — creates a bounded space to name what surfaced. Each session is short, structured, and closed. The client speaks; the AI helps them name patterns with specificity and reach a takeaway. The work is observational and analytical, not interpretive. No labels, no diagnosis, no verdicts.
 
 **Between sessions:**
-Daily morning check-in, body scan, and composure tracking build the integration habit over time — not just in the clinical window, but in the days and weeks that follow.
+Daily morning check-in, body scan, signal log, and pulse tracking build the concept library over time. Each entry is a granularity rep — the brain learns to differentiate internal states with increasing specificity. This is concept-formation work in the methodology of Ecological Momentary Intervention (EMI).
 
 ---
 
 ## How It Works
 
 1. Client downloads Stillform (web or Android app — iOS coming soon)
-2. One-time 3-minute calibration personalizes the experience to how they process
-3. Tools are available immediately — no login required to start breathing
+2. One-time three-minute calibration personalizes the practice path
+3. Tools are available immediately — no login required to start
 4. Optional account for cloud sync across devices
 
 ---
 
 ## What It Doesn't Do
 
-Stillform does not diagnose, treat, or cure any condition. It is not a substitute for clinical care. It does not replace the work of a therapist or physician. It is a companion — a structured space for the client's own reflection and regulation.
+Stillform does not diagnose, treat, or cure any condition. It is not a substitute for clinical care or the work of a therapist or physician. It is a structured practice — a concept-building tool for the client's own self-understanding.
 
 ---
 

@@ -1,6 +1,18 @@
 # COMPOSURE / SELF-MASTERY LEGIBILITY PARAGRAPH
 
-> ## ⚠️ DATED ARTIFACT — April 30, 2026 morning thinking, superseded later that day
+> ## ⚠️ ARCHIVED MAY 12, 2026 — DATED ARTIFACT — DO NOT USE FOR CURRENT FRAMING
+>
+> **This document is in /archive because the framing it proposes is superseded by STILLFORM_FRAMING_LAW.md (May 12, 2026).**
+>
+> The "load-bearing paragraph" below frames Stillform as "composure architecture." That framing is INCORRECT per the current framing law: Stillform is a metacognition practice; composure is one felt outcome, not the product itself. See STILLFORM_FRAMING_LAW.md sections WHAT STILLFORM IS / WHAT STILLFORM IS NOT.
+>
+> **DO NOT** copy the paragraph into Science Sheet, Project Transfer, or any user-facing surface. Doing so contradicts the current framing law.
+>
+> Preserved here as historical record of April 30, 2026 thinking. The action items below were honest reasoning at a specific moment; flattening them out would pretend the path was cleaner than it was. Future-Claude or future-Arlin can reread the original thinking and know exactly when the divergence happened.
+>
+> ---
+>
+> ## Original April 30 header (preserved for context)
 >
 > This document was written before the engagement-craft reframe that happened the same day. The conceptual decision at the top — composure as the umbrella, self-mastery as the internal through-line — is current and load-bearing (captured in STILLFORM_PROJECT_TRANSFER.md and Stillform_Master_Todo.md).
 >
@@ -20,7 +32,7 @@
 >
 > **Why this doc is preserved instead of deleted:** the conceptual thinking that produced the composure/self-mastery decision is part of that decision's integrity. The action items below were honest reasoning at a specific moment; flattening them out would pretend the path was cleaner than it was. Future-Claude or future-Arlin can reread the original thinking and know exactly when the divergence happened.
 >
-> **What IS current direction from this doc:** the relationship paragraph (immediately below) describing composure as umbrella + self-mastery as through-line. That framing is load-bearing.
+> **What was framed as "current direction" on April 30** — the relationship paragraph (below) describing composure as umbrella + self-mastery as through-line — is **NOT current as of May 12, 2026.** The framing law has reframed this entirely. The paragraph below is archived for historical reference only.
 
 ---
 

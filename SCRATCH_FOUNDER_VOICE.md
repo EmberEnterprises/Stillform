@@ -1,5 +1,13 @@
 # Scratch — Founder Voice / Reddit / Marketing
 
+> **⚠️ FRAMING AUDIT REQUIRED BEFORE PUBLIC USE**
+>
+> This is raw scratch material — Arlin's personal quotes and AI reflections from earlier sessions. Some passages reference "Two Regulation Pathways," "finding your center," and other framings that predate STILLFORM_FRAMING_LAW.md (May 12, 2026).
+>
+> Arlin's personal quotes are source material and are fine as-is — they're founder voice, not product framing. The AI reflections embedded in this doc may carry banned framings.
+>
+> **Before publishing ANY content from this doc externally, audit against STILLFORM_FRAMING_LAW.md.** Specifically check for: regulation/composure as product framing, "compose yourself" imperatives, "just observe" framing, defining Stillform by negation. The framing law is the supreme reference.
+
 Raw material. Review before using publicly. Do not edit for polish here — keep it raw.
 
 ---

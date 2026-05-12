@@ -1,7 +1,15 @@
 # REDDIT POST DRAFT — for Arlin to personalize
 ## Universal version — speaks to everyone, not just ND community
 
-> **Status (April 30, 2026):** Reddit is no longer a launch step per launch standard locked Apr 29. Held as a contingency lever only if organic post-launch traction is weak. Drafts below preserved for future use; no action needed on this doc until/unless contingency is triggered.
+> **⚠️ HOLD — DO NOT USE WITHOUT FRAMING REWRITE (added May 12, 2026)**
+>
+> **Status (April 30, 2026):** Reddit is no longer a launch step per launch standard locked Apr 29. Held as a contingency lever only if organic post-launch traction is weak.
+>
+> **Framing status (May 12, 2026):** The drafts below predate STILLFORM_FRAMING_LAW.md and carry banned framings throughout — "composure tool," "Regulate your body. Reset your thinking," defining Stillform by negation ("Not meditation, not therapy"). These violate the framing law.
+>
+> **If the contingency activates and Reddit launch is needed:** drafts below CANNOT be used as-is. Full rewrite under STILLFORM_FRAMING_LAW.md is required. The rewrite must position Stillform as a metacognition practice that builds the concept library the brain uses to perceive its own states. Composure is one felt outcome, not the product. Analytical work is the substance, not training wheels.
+>
+> Drafts below preserved for structural reference (length, voice cadence, hook patterns), not for content copying.
 
 ---
 
