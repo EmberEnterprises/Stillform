@@ -16249,7 +16249,7 @@ function MirrorSheetTriggers() {
 }
 
 
-function MyProgress({ onBack }) {
+function MyProgress({ onBack, onOpenLibrary }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   const [shareCardStatus, setShareCardStatus] = useState("");
@@ -16984,6 +16984,31 @@ function MyProgress({ onBack }) {
             </div>
           );
         })()}
+
+        {/* Library entry from My Progress — Gap 5 follow-up (May 12, 2026).
+            Second discoverable entry point for the Library beyond the
+            Roadmap → Library button. Lands here because My Progress is
+            where users orient to "what does my practice show" — the
+            science library is the natural deepening surface from that
+            orientation. */}
+        {onOpenLibrary && (
+          <button onClick={onOpenLibrary} style={{
+            width: "100%", marginBottom: 28,
+            padding: "14px 18px",
+            background: "var(--surface)",
+            border: "0.5px solid var(--amber-dim)",
+            borderRadius: "var(--r-lg)",
+            cursor: "pointer", textAlign: "left",
+            WebkitTapHighlightColor: "transparent"
+          }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 6 }}>
+              The Library →
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+              The literature behind what you're seeing here. 20 findings, full citations, source links.
+            </div>
+          </button>
+        )}
 
         {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
@@ -19793,6 +19818,7 @@ export default function Stillform() {
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
     personalization: false,
     anchors: false,
+    baseline: false,
     account: false,
     integrations: false,
     data: false,
@@ -25628,7 +25654,7 @@ const isSignalProfileConfigured = () => {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => goHomeSafely()} />
+          <MyProgress onBack={() => goHomeSafely()} onOpenLibrary={() => setScreen("library")} />
         )}
 
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
@@ -27420,6 +27446,123 @@ const isSignalProfileConfigured = () => {
                     Five anchors is the practical ceiling. Remove one to add another.
                   </div>
                 )}
+              </>)}
+            </div>
+
+            {/* CAPACITY BASELINE — Gap 4 (May 12, 2026)
+                Lets the user recapture their growth baseline. Useful for
+                pre-existing users who got a retroactive seed (their baseline
+                reflects current advanced state, not day-zero) and want to
+                reset to a meaningful baseline before a fresh test or new
+                practice phase. Also useful if Arlin is testing the app
+                and wants to wipe the retroactive baseline to see a true
+                first-capture experience. */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("baseline")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Capacity baseline</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.baseline ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.baseline && (<>
+                {(() => {
+                  let baseline = null;
+                  try {
+                    const raw = localStorage.getItem("stillform_growth_baseline");
+                    if (raw) baseline = JSON.parse(raw);
+                  } catch {}
+                  if (!baseline) {
+                    return (
+                      <div style={{
+                        fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+                        color: "var(--text-muted)", lineHeight: 1.55,
+                      }}>
+                        Baseline not yet captured. It will seed on next app load.
+                      </div>
+                    );
+                  }
+                  const baselineDate = (() => {
+                    try {
+                      const d = new Date(baseline.capturedAt);
+                      return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+                    } catch { return "earlier"; }
+                  })();
+                  return (
+                    <>
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                        color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 14,
+                        letterSpacing: "0.01em"
+                      }}>
+                        {baseline.source === "retroactive-seed"
+                          ? "Baseline was seeded retroactively from your current state. Reset if you want a fresh measurement point."
+                          : "Baseline was captured at calibration. Reset only if you're starting a new practice phase."}
+                      </div>
+                      <div style={{
+                        padding: "12px 14px", marginBottom: 14,
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        background: "var(--surface)"
+                      }}>
+                        <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.14em" }}>
+                          CURRENT BASELINE · {baselineDate.toUpperCase()}
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+                          Stage {baseline.stage} · {baseline.distinctChips ?? 0} chip{baseline.distinctChips === 1 ? "" : "s"} · {baseline.sessionsCount ?? 0} session{baseline.sessionsCount === 1 ? "" : "s"} · {baseline.biasCount ?? 0} bias{baseline.biasCount === 1 ? "" : "es"} · {baseline.signalCount ?? 0} signal{baseline.signalCount === 1 ? "" : "s"} · {baseline.triggerCount ?? 0} trigger{baseline.triggerCount === 1 ? "" : "s"}
+                        </div>
+                        <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 6, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>
+                          Source: {baseline.source}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!window.confirm("Reset capacity baseline? Your growth data from baseline forward will lose its anchor. New baseline will capture from your current state.")) return;
+                          const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+                          const distinctChips = (() => {
+                            const set = new Set();
+                            sessions.forEach(s => {
+                              if (s.preState) set.add(s.preState);
+                              if (s.postState) set.add(s.postState);
+                              if (s.feelState) set.add(s.feelState);
+                            });
+                            return set.size;
+                          })();
+                          const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+                          const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+                          const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+                          const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+                          try {
+                            localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+                              capturedAt: new Date().toISOString(),
+                              stage: currentStageId,
+                              distinctChips,
+                              sessionsCount: sessions.length,
+                              biasCount: bias,
+                              signalCount: signal,
+                              triggerCount: triggers,
+                              source: "user-reset",
+                            }));
+                            window.plausible?.("Baseline Reset");
+                            toggleSettingsSection("baseline");
+                            toggleSettingsSection("baseline");
+                          } catch {}
+                        }}
+                        style={{
+                          width: "100%", padding: "10px",
+                          background: "var(--surface)",
+                          color: "var(--text-muted)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer", letterSpacing: "0.02em"
+                        }}
+                      >
+                        Reset baseline from current state
+                      </button>
+                    </>
+                  );
+                })()}
               </>)}
             </div>
 
