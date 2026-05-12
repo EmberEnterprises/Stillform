@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (Journey-Spine Competitive Gap Analysis added; framing-law cascade complete; pre-research marketing deleted)**
+**ARA Embers LLC · last updated May 12, 2026 (Journey-Spine gap analysis extended with three second-pass gaps from direct code walk: capacity gates, per-session rep counted, spine voice)**
 
 ---
 
@@ -207,19 +207,76 @@ The fix is exposing the spine, not adopting competitor patterns wholesale.
 
 ---
 
-### Build sequencing
+## SECOND-PASS GAPS — surfaced by direct code walk May 12 (evening)
+
+Three additional gaps emerged from walking `src/App.jsx` line-by-line after the initial competitor analysis. These wouldn't surface from external Liven/HMP comparison alone — they're internal structural gaps in how the spine connects to the user's per-session and per-surface experience. Not redundant with Gaps 1-9; each occupies its own structural slot.
+
+---
+
+### Gap 10 — Capacity gates as visible thresholds (not passive markers)
+
+**Code state:** `STAGE_DEFINITIONS` at `:4718` defines five chapters. `computeStageMarkers` at `:4755` tracks per-stage progress. But markers update **silently in background data** — there is no user-visible threshold the user can see approaching. `STILLFORM_PROJECT_TRANSFER.md` explicitly states *"Invisible leveling — AI gets smarter silently by session count. Never announced."* That anti-gamification stance, applied to the **whole journey**, makes path mechanics invisible — the user never sees what they're working toward, only what they're doing right now.
+
+**Competitor parallel:** Liven uses numerical lesson-completion gates (points/streaks). HMP uses self-paced pillar scoring (no gates). Both are extremes; neither fits Stillform.
+
+**Gap:** No middle path between hidden leveling and gamified gates. The user can't see *what would have to be true* for them to enter the next chapter. The 5 stages have actual science-grounded prerequisites (you can't anticipate triggers — Stage 3 — without first being able to name what you're feeling — Stage 2; this is Gollwitzer 1999 + Barrett 2017 stacked) but those prerequisites are invisible.
+
+**Fix (new lens):** **Capacity-prerequisite gates** — not point thresholds. Each chapter names what cognitive prerequisite the next chapter requires, sourced from the science: *"Anticipating triggers requires being able to name your states fast and specifically — Naming chapter caps when you've used 8+ distinct chips in 30 days across at least 2 active-state sessions."* The gate is the literal cognitive requirement of the next capacity. User sees the gate from the moment Chapter 1 begins. AI leveling stays invisible per project-transfer rule; **capacity gating is visible because the science is the gate**.
+
+This is structurally different from Gap 1 (which shows the path) and Gap 3 (which generates the path at calibration). This is the **progression mechanic** — how the user moves along the path. None of the existing gaps address the mechanic, only the surfaces.
+
+**Cross-references:** Requires Gap 1 (path defined) + Gap 3 (markers serialized as user-facing prerequisites at calibration). Should be designed alongside Gap 1, not after. Anti-gamification stance preserved: gates are scientific prerequisites, not points.
+
+---
+
+### Gap 11 — Per-session "rep counted" feedback
+
+**Code state:** Sessions write extensive data — `stillform_sessions` captures pre/post rate, delta, tools used, durationSec, exitPoint, regulationType, bioFilter, feelState, triggerId, flaggedPattern, shiftLabel, breathPattern, sessionId. Chips used populate `stillform_feelstate` history. The session completion screen at `:24459` (tool render) shows a generic completion confirmation. **The user never sees which capacity rep they just did.** A first-time use of the chip "envious" — Stage 2 NAMING progress — registers in data with zero user-visible acknowledgment. A Move card session entered during an active state — Stage 1 NOTICING progress — same. The rep counts in the data; the rep is invisible to the user.
+
+**Competitor parallel:** Liven post-session reflection prompt (*"How are you feeling now vs before this lesson?"*). HMP shows pillar-score nudges after practices. Both reflect SOMETHING back to the user at the end of a session.
+
+**Gap:** No per-session capacity-rep feedback. Without it, the user does the practice but never sees their capacity expanding — the felt-progress moment is missing at the most natural place to surface it (immediately after the rep). Gap 4 covers monthly re-assessment; Gap 9 covers monthly synthesis report. **Neither covers the per-session moment.**
+
+**Fix (new lens):** Capacity-specific micro-feedback after sessions where a meaningful marker fired. *"You named 'envious' for the first time — new language in your library."* *"You entered this session in an active state — a Stage 1 rep."* *"Your pre-to-post delta on a named trigger was +3 — that's an Anticipating rep counted."* Plain language, no badges, no points. Framed as **observation of the user's growing capacity**, not reward for behavior. Connects to Hoemann 2021 emotional granularity (the practice IS the granularity expansion; the feedback names the expansion as it happens). The feedback itself is a metacognition rep — the user sees their own pattern of capacity acquisition.
+
+This is structurally different from Gap 4 (periodic, every 30 days) and Gap 9 (synthesized, monthly insight reports). This is **per-session, in the moment, when the rep is freshest**. All three temporal layers needed: per-session (Gap 11) → monthly synthesis (Gap 9) → quarterly re-assessment (Gap 4).
+
+**Cross-references:** Requires Gap 1 (capacity vocabulary defined). Integrates with the existing Tool Debrief flow at `:25344` adjacent surfaces. Tool completion screens are where this lands — touchpoint already exists; content layer is missing.
+
+---
+
+### Gap 12 — Spine voice & content language
+
+**Code state:** The only journey-related copy currently in the codebase is `STAGE 1 · NOTICING · JAW TELL · CLIENT CALL` (Mirror Strip at `:22790`, 10pt mono) and the FAQ entry at `:24820` (which has stale stage names — Gap 6). Every other spine surface from Gaps 1-11 — chapter pages, daily focus copy, capacity gates, re-assessment artifacts, per-session capacity feedback, insight reports — currently has **no content written**. The framing law at `STILLFORM_FRAMING_LAW.md` defines principles (capacity expansion not regulation; neuroplasticity not wellness; operator precision not warmth) but no body of journey-narration copy exists that derives from those principles.
+
+**Competitor parallel:** Liven's voice is gentle wellness coach (*"Today, let's explore..."*). HMP's voice is neuroscience educator (*"This practice trains..."*). Both have substantial bodies of journey-surface content written in a unified voice.
+
+**Gap:** When the surfaces from Gaps 1-11 ship, they need to **speak**. Without a unified spine voice derived from the framing law, the surfaces default to either generic AI-cheerleader copy (banned) or bare technical labels (current Mirror Strip approach — works for a strip; not enough for a chapter page). Substantial content-production work, currently zero progress.
+
+**Fix (new lens):** Develop the Stillform spine voice as its own content track running alongside Gaps 1-11 architecture work. Voice principles derived from framing law: **operator precision** (no warmth performance), **science as language not credentialing** (mechanisms named in working English, sources cited where they earn space), **capacity as observation not achievement** (*"your library has grown"* not *"you've leveled up"*), **enhancement framing** (assume the reader wants to think sharper, not get calm). One coherent voice across chapter pages, daily focus copy, capacity gates, per-session feedback, re-assessment narration, insight reports. Founder voice (Arlin) for high-signal surfaces (chapter introductions, monthly synthesis); functional system voice for repeated surfaces (per-session feedback, gate descriptions).
+
+This is **content production**, not architecture. Distinct from every existing gap (1-11), which all describe surfaces and mechanics. This is the **language those surfaces speak**.
+
+**Cross-references:** Runs parallel to Gap 1 (chapter page copy), Gap 3 (calibration handoff narration), Gap 4 (re-assessment artifact prose), Gap 9 (insight report prose), Gap 11 (per-session feedback templates). Should NOT block Gaps 1-11 architecture work — voice can iterate after the surface ships. But shipping a chapter page with placeholder copy guarantees that copy becomes load-bearing; better to scope voice work in parallel and ship surfaces with voice already aligned to framing law from first deploy.
+
+---
+
+### Build sequencing (updated)
 
 Gap 6 is a small fix — ship immediately, alongside the wider stage-name reconciliation pass.
 Gap 1 (path visualization) is the foundation — most other gaps reference the path schema.
+Gap 10 (capacity gates) is designed alongside Gap 1 — gates are part of the path schema, not after.
 Gap 3 (calibration generates path) requires Gap 1's path schema defined.
 Gap 8 (habit anchors) lands inside Gap 3 — anchor selection is a calibration step.
 Gap 2 (daily focus) requires Gap 1 + Gap 3 + Gap 8 (the hero's journey-position needs the path AND the anchor pair).
+Gap 11 (per-session capacity feedback) requires Gap 1 — capacity vocabulary defined first.
 Gap 4 (re-assessment) requires Gap 3 (baseline recorded at calibration completion).
 Gap 9 (insight reports) lands inside Gap 4 — the synthesized report is the re-assessment artifact.
 Gap 5 (library) is independent — ship any time.
 Gap 7 (audio) is independent modality — Library + Body Scan get audio versions; ships any time.
+Gap 12 (spine voice) runs parallel to all surface work — content production track, not sequential.
 
-Build order: **Gap 6 → Gap 1 → Gap 3 → Gap 8 → Gap 2 → Gap 4 → Gap 9 → Gap 5 → Gap 7.**
+Build order: **Gap 6 → Gap 1 + Gap 10 (designed together) → Gap 3 → Gap 8 → Gap 2 → Gap 11 → Gap 4 → Gap 9 → Gap 5 → Gap 7.**  Gap 12 voice work runs alongside every surface.
 
 Each gap exposes more of the existing spine or adds a modality the spine already supports. None of these invents new mechanics. Data layer is already in place for every gap above; the work is surfacing what's there and adding the missing connective tissue.
 
