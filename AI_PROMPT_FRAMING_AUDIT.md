@@ -1,5 +1,21 @@
 # AI PROMPT FRAMING AUDIT — `netlify/functions/reframe.js`
-**ARA Embers LLC · May 12, 2026 · v1.0 · Catalog only — no edits applied**
+**ARA Embers LLC · May 12, 2026 · v1.1 · EXECUTED**
+
+> **STATUS UPDATE — May 12, 2026 (later that day):** All 5 violations cataloged below have been fixed across all three prompts (CALM, CLARITY, HYPE). Fix commits on branch `feat/home-wiring-surface`:
+>
+> - **Commit 2.1** (`ed85427`) — CALM_SYSTEM framing law alignment
+> - **Commit 2.2** (`d3acf46`) — CLARITY_SYSTEM framing law alignment
+> - **Commit 2.3** (`90836ea`) — HYPE_SYSTEM framing law alignment
+>
+> Verification: `grep -n -E 'self-mastery tool|Low conceptual processing|composure as a discipline|composure as a daily discipline' netlify/functions/reframe.js` returns **zero matches**.
+>
+> PracticeSurface (commit `d84a916`) is now safe to expose to users — the AI surface no longer contradicts the home framing.
+>
+> The catalog below is preserved as the design record. Each "Proposed fix" was applied as documented; see commit messages for fix-specific details.
+
+---
+
+## ORIGINAL CATALOG (May 12, 2026 morning)
 
 This audit catalogs framing violations in the three AI system prompts in `netlify/functions/reframe.js` against STILLFORM_FRAMING_LAW.md (May 12, 2026). It is **catalog only** — no edits to the prompts are applied in this commit. Reframe system prompts shape the deepest user-facing surface (every Reframe session is built on them); changes need Arlin's eyes before they land.
 
