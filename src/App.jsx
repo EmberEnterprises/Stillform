@@ -2546,9 +2546,60 @@ const appendSessionToStorage = (entry) => {
       if (bf) entry.bioFilter = bf;
     } catch {}
   }
+
+  // Gap 11 (May 12, 2026) — capture pre-session marker met-state across
+  // all five stages so post-session compute can detect flips. computeStageMarkers
+  // and STAGE_REPS are defined later in module source order but resolved at
+  // call time (this is a const-defined function whose body runs at invocation,
+  // not definition). All module-level consts have evaluated by then.
+  let preStates = null;
+  try {
+    if (typeof computeStageMarkers === "function") {
+      preStates = {};
+      for (let sid = 1; sid <= 5; sid++) {
+        computeStageMarkers(sid).forEach(m => {
+          if (m.status === "shipped") preStates[m.id] = m.met;
+        });
+      }
+    }
+  } catch {}
+
   const sessions = getSessionsFromStorage();
   sessions.push(entry);
   setSessionsInStorage(sessions);
+
+  // Gap 11 — recompute marker met-state. If any shipped marker flipped from
+  // false to true, write stillform_last_rep_counted for the next home render
+  // to surface as a capacity-rep-counted banner. Only the FIRST flipped marker
+  // per session is surfaced (one rep per session keeps the feedback discrete).
+  try {
+    if (preStates && typeof computeStageMarkers === "function" && typeof STAGE_DEFINITIONS !== "undefined") {
+      let surfaced = false;
+      for (let sid = 1; sid <= 5 && !surfaced; sid++) {
+        const markers = computeStageMarkers(sid);
+        const stage = STAGE_DEFINITIONS[sid];
+        for (const m of markers) {
+          if (m.status !== "shipped") continue;
+          if (preStates[m.id] === false && m.met === true) {
+            const repEntry = (typeof STAGE_REPS !== "undefined") ? STAGE_REPS[m.id] : null;
+            const payload = {
+              markerId: m.id,
+              markerLabel: m.label,
+              stageId: sid,
+              stageName: stage.name,
+              repStatement: repEntry ? repEntry.statement : null,
+              timestamp: new Date().toISOString(),
+            };
+            try { localStorage.setItem("stillform_last_rep_counted", JSON.stringify(payload)); } catch {}
+            try { window.plausible?.("Capacity Rep Counted", { props: { marker: m.id, stage: stage.name } }); } catch {}
+            surfaced = true;
+            break;
+          }
+        }
+      }
+    }
+  } catch {}
+
   return sessions.length;
 };
 
@@ -17567,6 +17618,11 @@ export default function Stillform() {
   // Engagement architecture Phase 0 (May 7) — Mirror sheet visibility.
   // Sheet renders the full stage breakdown; anchor on home opens it.
   const [showMirrorSheet, setShowMirrorSheet] = useState(false);
+  // Gap 11 (May 12, 2026) — tick state to force re-render after the
+  // rep-counted banner is dismissed. The banner reads localStorage at
+  // render time; bumping this tick causes a re-render that picks up
+  // the cleared key. Cheap, no global state machine needed.
+  const [repCountedTick, setRepCountedTick] = useState(0);
   const readFirstRunStage = () => {
     try {
       const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
@@ -23102,6 +23158,77 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
+                    {/* ── REP COUNTED BANNER — Gap 11 (May 12, 2026) ─────────────
+                        Reads stillform_last_rep_counted (written from
+                        appendSessionToStorage when a shipped marker flips
+                        unmet → met). Renders once on home; user dismisses
+                        with X to clear the key. Surfaces the capacity rep
+                        that just got counted in plain language. Hoemann
+                        2021 emotional granularity / Barrett 2017 constructed
+                        emotion: the user's library of named capacities
+                        grows; this banner makes that growth visible at the
+                        moment it happens. */}
+                    {(() => {
+                      let repCounted = null;
+                      try {
+                        const raw = localStorage.getItem("stillform_last_rep_counted");
+                        if (raw) repCounted = JSON.parse(raw);
+                      } catch {}
+                      if (!repCounted || !repCounted.markerLabel) return null;
+
+                      const dismiss = () => {
+                        try { localStorage.removeItem("stillform_last_rep_counted"); } catch {}
+                        // Force re-render via a state nudge
+                        setRepCountedTick(t => t + 1);
+                      };
+
+                      return (
+                        <div style={{
+                          marginBottom: 18,
+                          padding: "14px 14px 14px 16px",
+                          border: "0.5px solid var(--amber-dim)",
+                          borderRadius: "var(--r)",
+                          background: "var(--surface)",
+                          position: "relative"
+                        }}>
+                          <button
+                            onClick={dismiss}
+                            aria-label="Dismiss"
+                            style={{
+                              position: "absolute", top: 8, right: 10,
+                              background: "none", border: "none",
+                              color: "var(--text-muted)", fontSize: 16,
+                              cursor: "pointer", padding: 4, lineHeight: 1,
+                              WebkitTapHighlightColor: "transparent"
+                            }}
+                          >×</button>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--amber)", marginBottom: 6,
+                            letterSpacing: "0.14em"
+                          }}>
+                            ✓ REP COUNTED · STAGE {repCounted.stageId} · {repCounted.stageName}
+                          </div>
+                          <div style={{
+                            fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+                            color: "var(--text)", lineHeight: 1.5,
+                            paddingRight: 20
+                          }}>
+                            {repCounted.markerLabel}
+                          </div>
+                          {repCounted.repStatement && (
+                            <div style={{
+                              fontFamily: "'Cormorant Garamond', serif", fontSize: 13,
+                              fontStyle: "italic", color: "var(--text-cream)",
+                              lineHeight: 1.55, marginTop: 6, paddingRight: 20,
+                              letterSpacing: "0.01em"
+                            }}>
+                              {repCounted.repStatement}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     {/* ── JOURNEY REP — Gap 2 + Gap 3 (May 12, 2026) ─────────────
                         The journey rep names WHAT today's practice is (the
                         metacognitive objective sourced from current stage's
