@@ -20,13 +20,11 @@
 > - `scripts/ship-preflight.mjs` regex updated to enforce new locked strings
 > - `docs/STILLFORM_TESTING_CHECKLIST.md` test steps updated to match new locked copy
 >
-> **Deferred — substantive content with voice that requires Arlin's structural review:**
+> **May 12, 2026 — pre-research marketing surfaces DELETED:**
 >
-> 1. **`public/promo.html`** — 11-slide marketing deck. Built on TWO pre-research framings: (a) audience targeting "Built for intensity" / "You feel everything at full volume" — per framing law memory, banned: "tool for intense/high-intensity people"; (b) product framing "A composure system" (slide 01) and "A precision composure system." (slide 11) — banned per framing law. Both require brand voice rewrite, not substring substitution. The whole deck is positioned around the banned audience framing.
+> `public/promo.html`, `public/blog-two-pathway-regulation.html`, and `Stillform_Reddit_Draft.md` all removed from the repo per Arlin's direction. Each was built on pre-research framing that the framing law supersedes. Not deferred for rewrite — deleted. When new marketing surfaces ship, they will be built from the framing law forward, not retrofitted from old material.
 >
-> 2. **`public/blog-two-pathway-regulation.html`** — Thought leadership blog post titled "Two-Pathway Regulation: Why Composure Apps Should Assess Before They Intervene." Mostly legitimate scientific content about Gross (2015) emotion regulation strategy families — that science discussion isn't framing-law-conflicting. But the post frames Stillform itself as "A composure system" (line 63) which IS product framing violation. Plus the title's "Why Composure Apps Should Assess" still uses "composure apps" framing. Requires editorial decision: does this blog post stay at all under the new framing, or does it get rewritten as a metacognition-practice piece, or does it pivot to a different topic entirely?
->
-> The internal AI surface + brand-identifier surfaces (splash, tutorial, FAQ bodies, disclaimers, manifest, browser title, meta description, UAT roadmap) + all internal docs all now speak the framing-law language. Two substantive content surfaces (promo deck + thought leadership blog) remain flagged for Arlin's voice/editorial work.
+> The internal AI surface + brand-identifier surfaces (splash, tutorial, FAQ bodies, disclaimers, manifest, browser title, meta description, UAT roadmap) + all internal docs all now speak the framing-law language. No pre-research marketing surfaces remain in the codebase.
 
 ---
 

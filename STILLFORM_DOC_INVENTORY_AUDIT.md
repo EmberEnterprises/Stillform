@@ -111,13 +111,8 @@ Also: the word "composure" itself isn't banned — it's a valid felt outcome of 
 
 ### 7. Stillform_Reddit_Draft.md
 **Size:** 169 lines · **Hits:** 7 reg/comp
-**Action:** HOLD with clear "DO NOT USE WITHOUT FRAMING REVIEW" header
-**Status:** DONE (Phase A, commit 76dbc8e) — HOLD notice added at top.
-
-**Findings:**
-- Marked as contingency-only (Reddit no longer launch step per Apr 29 lock)
-- Heavy framing violations throughout: "composure tool," "Regulate your body. Reset your thinking," defines by negation
-- If contingency activates, full rewrite under framing law required
+**Action:** DELETED May 12, 2026
+**Status:** Per Arlin direction May 12: pre-research marketing surfaces deleted, not deferred. New marketing built from framing law forward when shipped, not retrofitted from old material.
 
 ### 8. Stillform_Research_Assessment.md
 **Size:** 193 lines · **Hits:** 14 reg/comp · **Old-narrow:** 2
@@ -199,7 +194,7 @@ Framing drift in these docs is caught by Layer 0 (Framing Audit) of STILLFORM_AU
 1. COMPOSURE_SELF_MASTERY_LEGIBILITY.md → archive
 2. Stillform_Research_Assessment.md → header update
 3. SCRATCH_FOUNDER_VOICE.md → add note
-4. Stillform_Reddit_Draft.md → hold notice
+4. Stillform_Reddit_Draft.md → DELETED May 12 (was: hold notice)
 5. KETAREVIVE_ONEPAGER.md → rewrite (62 lines)
 
 **Phase B — Framing-Defining Rewrites:**

@@ -315,8 +315,8 @@ All 12 user-facing code commits from Apr 30 deployed and live as of Apr 30 / May
 - [ ] Goals configured for: Breathing Completed, Body Scan Completed, Reframe Deep Engagement, Morning Check-In, Assessment Completed, Pulse Entry, End of Day Check-In
 
 ### Content
-- [ ] Blog post live: stillformapp.com/blog-two-pathway-regulation.html
-- [ ] Promo reel live: stillformapp.com/promo.html
+- [x] ~~Blog post live~~ — DELETED May 12, 2026 (pre-research framing). New marketing built from framing law forward when shipped.
+- [x] ~~Promo reel live~~ — DELETED May 12, 2026 (pre-research framing). Same reason.
 
 ---
 
