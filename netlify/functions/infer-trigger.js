@@ -53,7 +53,7 @@ import {
 
 const CORS_OPTIONS = { methods: "POST, OPTIONS" };
 
-const SYSTEM_PROMPT = `You are a trigger-matching engine for Stillform, a composure architecture app.
+const SYSTEM_PROMPT = `You are a trigger-matching engine for Stillform, a metacognition practice.
 
 A user just finished a Reframe session. They have a Trigger Profile naming the people, contexts, and recurring situations that destabilize them. Your job: identify which trigger (if any) this session was about.
 
