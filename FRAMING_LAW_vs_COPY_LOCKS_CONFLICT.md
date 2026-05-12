@@ -1,25 +1,32 @@
 # FRAMING LAW vs COPY_LOCKS — Structural Conflict
 **ARA Embers LLC · May 12, 2026 · v2.0 · RESOLVED via Path A (framing law cascades)**
 
-> **RESOLUTION — May 12, 2026 (same day):** Arlin's direction: *"ALL OF THE THINGS WE CREATED TODAY ARE FROM RESEARCH."* The framing law established today is the research-grounded truth; the pre-research COPY_LOCKS are stale relative to the research. Path A executed — framing law cascades to user-facing brand surfaces.
+> **RESOLUTION — May 12, 2026 (same day):** Arlin's direction: *"ALL OF THE THINGS WE CREATED TODAY ARE FROM RESEARCH."* and *"CONTINUE BUILDING PLEASE"*. The framing law established today is the research-grounded truth; the pre-research COPY_LOCKS and external brand surfaces are stale relative to the research. Path A executed across multiple commits — framing law cascades to ALL user-facing surfaces where surgical alignment is possible.
 >
-> **Surgical substitutions applied:**
+> **Surgical substitutions applied (across commits 53076bd → 8d456c0 → [this commit]):**
 > - Splash tagline: "Composure architecture" → "Metacognition practice"
-> - Tutorial opening close: "Stillform. Composure Architecture." → "Stillform. Metacognition Practice."
-> - Tutorial line two-up: "instrumentation for self-mastery. A composure system you operate." → "instrumentation for metacognition. A practice you operate." (preserved coherence with new close)
-> - Subscription disclaimer: "Stillform is composure architecture, not medical treatment." → metacognition practice
-> - App description opener: same surgical substitution
-> - FAQ method-style answers (2 sites): opener "Stillform is composure architecture" substituted; deeper voice work in answer body deferred
-> - Crisis disclaimer: same surgical substitution
-> - Privacy footer: "for AI-assisted composure architecture" → metacognition practice
-> - `docs/COPY_LOCKS.md` updated with new locked strings + framing law alignment note
-> - `scripts/ship-preflight.mjs` regex updated to enforce new tutorial close
+> - Browser tab title: "Stillform — Composure Mastery" → "Stillform — Metacognition Practice"
+> - Meta description (search results, social previews): rewritten to framing-law-aligned
+> - PWA manifest description (install dialog): "Stabilize in under two minutes" → "Build the in-the-moment skill of catching your state"
+> - Tutorial Page 0 (all 4 opening lines): aligned including "That's the practice. And it builds." replacement
+> - Tutorial close: "Stillform. Composure Architecture." → "Stillform. Metacognition Practice."
+> - App description: "stabilize composure" → "build capacity over time"
+> - FAQ "What is Stillform?": full body alignment — "regulation takes hold" → "the practice takes hold"; "architecture of composure" → "That is metacognition. Composure follows."
+> - FAQ "How is this different from meditation or therapy?": full body alignment — "structured interventions that interrupt activation and restore a functional baseline" → "daily cognitive work that builds the concept library... expands cognitive capacity over time"
+> - All disclaimer surfaces (subscription, crisis, privacy footer): aligned
+> - UAT roadmap public page footer: "Stillform is a composure tool" → "Stillform is a metacognition practice"
+> - Internal architecture stage-definitions comment: aligned
+> - `docs/COPY_LOCKS.md` updated with new LOCKED entries (Tutorial Page 0 lines now correctly reflect shipped copy; stale "Composure is a full-spectrum practice..." entries removed)
+> - `scripts/ship-preflight.mjs` regex updated to enforce new locked strings
+> - `docs/STILLFORM_TESTING_CHECKLIST.md` test steps updated to match new locked copy
 >
-> **Deferred to voice work (not surgical):**
-> - Tutorial opening prose: "Composure is a full-spectrum practice. It governs how you respond in difficulty..." (LOCKED in COPY_LOCKS but not actually in current App.jsx code — opening page uses different copy). The locked entry may itself be stale.
-> - FAQ answer body content (24746 deeper text about regulation taking hold; 24754 "restore a functional baseline" — both contain framing-law-conflicting phrases inside paragraphs that require voice rewriting, not substring substitution)
+> **Deferred — substantive content with voice that requires Arlin's structural review:**
 >
-> The internal AI surface + brand-identifier surfaces (splash, tutorial close, disclaimers) are framing-law-aligned. Substantive content surfaces (tutorial opening prose, deep FAQ answers) are flagged for Arlin's voice rewrite session.
+> 1. **`public/promo.html`** — 11-slide marketing deck. Built on TWO pre-research framings: (a) audience targeting "Built for intensity" / "You feel everything at full volume" — per framing law memory, banned: "tool for intense/high-intensity people"; (b) product framing "A composure system" (slide 01) and "A precision composure system." (slide 11) — banned per framing law. Both require brand voice rewrite, not substring substitution. The whole deck is positioned around the banned audience framing.
+>
+> 2. **`public/blog-two-pathway-regulation.html`** — Thought leadership blog post titled "Two-Pathway Regulation: Why Composure Apps Should Assess Before They Intervene." Mostly legitimate scientific content about Gross (2015) emotion regulation strategy families — that science discussion isn't framing-law-conflicting. But the post frames Stillform itself as "A composure system" (line 63) which IS product framing violation. Plus the title's "Why Composure Apps Should Assess" still uses "composure apps" framing. Requires editorial decision: does this blog post stay at all under the new framing, or does it get rewritten as a metacognition-practice piece, or does it pivot to a different topic entirely?
+>
+> The internal AI surface + brand-identifier surfaces (splash, tutorial, FAQ bodies, disclaimers, manifest, browser title, meta description, UAT roadmap) + all internal docs all now speak the framing-law language. Two substantive content surfaces (promo deck + thought leadership blog) remain flagged for Arlin's voice/editorial work.
 
 ---
 
