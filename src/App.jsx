@@ -4,6 +4,7 @@ import { integrationBridge } from "./plugins/integrationBridge";
 import { DisruptorTool } from "./disruptor/DisruptorTool";
 import { MoveCardTool } from "./move-card/MoveCardTool.jsx";
 import { MoveCardPill } from "./move-card/MoveCardPill.jsx";
+import { PracticeSurface } from "./practice-surface/PracticeSurface.jsx";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -21970,6 +21971,77 @@ const isSignalProfileConfigured = () => {
                    (May 7, 2026: Arlin's call — pill at top of greeting felt too prominent
                    for a non-tappable status line. The info is now a subtle subtitle on the
                    Talk it out CTA where it's contextually useful, not standalone noise.) ─ */}
+
+              {/* ── PRACTICE SURFACE ─────────────────────────────────────────────
+                   Added May 12, 2026 per STILLFORM_FRAMING_LAW.md (May 12, 2026)
+                   on branch feat/home-wiring-surface.
+
+                   Renders the home's first substantive surface as a metacognition
+                   practice (concept library + retrieval prompt + spaced returns),
+                   not a regulation-tool dashboard. Subsequent commits will
+                   subordinate or remove the existing Mirror strip + reasoning
+                   line + hero CTA as this surface validates with real use.
+
+                   Per audit philosophy v2.0 Layer 1 (don't break existing
+                   functionality): no existing home features are removed in this
+                   commit. The Morning strip, Mirror strip, hero CTA, and "Not
+                   quite right" override all continue to render below.
+
+                   Neuroplasticity factors baked in (per framing law science spine):
+                   - Retrieval prompt (active retrieval over passive review)
+                   - Spaced re-exposure queue (spacing effect)
+                   - Library growth visible (compounding proof)
+                   - Forward prime in primary action (specific pattern + tool)
+
+                   Prediction-error surfacing ("Stillform caught a pattern: X
+                   fires after Y") is deferred — requires cross-session AI
+                   analysis pipeline that doesn't yet exist. Reserved for a
+                   future commit. */}
+              {(() => {
+                let biasProfile = null;
+                let triggerArr = [];
+                try { biasProfile = secureRead("stillform_bias_profile", null); } catch {}
+                try {
+                  const tp = getTriggerProfile();
+                  triggerArr = Array.isArray(tp?.triggers) ? tp.triggers : [];
+                } catch {}
+
+                // Pattern-context handoff to the practice tool. Reframe will
+                // read this key in a follow-on commit; harmless if unread.
+                const handleEnterPracticeFromSurface = (toolId, context) => {
+                  if (context) {
+                    try {
+                      localStorage.setItem(
+                        "stillform_practice_entry_context",
+                        JSON.stringify({ ...context, enteredAt: new Date().toISOString() })
+                      );
+                    } catch {}
+                  } else {
+                    try { localStorage.removeItem("stillform_practice_entry_context"); } catch {}
+                  }
+                  try {
+                    window.plausible?.("Practice Surface Entry", {
+                      props: {
+                        tool: toolId,
+                        source: context?.source || "empty",
+                        hasPattern: context?.pattern ? "yes" : "no"
+                      }
+                    });
+                  } catch {}
+                  const tool = TOOLS.find(t => t.id === toolId);
+                  if (tool) startTool(tool);
+                };
+
+                return (
+                  <PracticeSurface
+                    sessions={sessions}
+                    biasProfile={biasProfile}
+                    triggers={triggerArr}
+                    onEnterPractice={handleEnterPracticeFromSurface}
+                    onOpenInfo={(title, body) => setInfoModal({ title, body })}
+                  />
+                );
+              })()}
 
               {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
               {(() => {
