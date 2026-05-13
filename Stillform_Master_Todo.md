@@ -1257,6 +1257,8 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
   **Why this is wrong tone:** It tries to convince via credentials. Prestige doesn't try. Compare to Quick Reset on the same screen: *"60 seconds. Reset and get back to it. Focused breathing slows your system. The shift starts in under a minute."* — declarative, experience-first, science woven not paraded.
 
+  **STATUS — confirmed example FIXED May 12, 2026 (audit-pass cleanup):** Cyclic Sighing settings card at `src/App.jsx:26182` rewritten to *"The double inhale tops off your oxygen; the long exhale empties your system completely. The deepest downshift of the three."* — parallel structure to Quick Reset and Deep Regulate on the same screen, mechanism-as-language, no citation in user-facing copy. Balban 2023 citation preserved in code comment (`src/App.jsx:6881`), FAQ answer (`:25159`), and static science card (`:9073`) where the citation register is appropriate. **The broader voice audit across the surface list below still pending Arlin's direction.**
+
   **Likely additional surfaces (audit needed before scoping):**
   - Plain-Language Neuroscience cards — may have the same citation-dump drift
   - Mirror sheet capacity descriptions
@@ -1316,11 +1318,7 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 - [x] **FAQ completeness — SHIPPED `6f056f1` May 8 night.** 12 new entries added between 'Composure Telemetry' and 'rapid typing in Reframe' covering features that had zero FAQ presence. Each entry pulled directly from `Stillform_Science_Sheet.md` so the language is already approved (science sheet is in repo, ARA Embers branded, voice-locked). Entries: Settled chip (science sheet line 133), Cyclic Sighing (line 113, Stanford 2023 RCT n=111), three categories (lines 144-163, Russell circumplex + Hayes ACT for Category B legitimacy), Mirror anchor / stage system (Wells 2009 metacognitive training), Roadmap, Practice Trend (Heider 1958 attribution), low-demand mode, plus Engagement Architecture Engine 2 surfaces (Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact). Self Mode redesign FAQ NOT added — redesign hasn't shipped, existing entry covers current 5-step accurately. Voice rubric matches existing FAQ — short, declarative, science-grounded. **Layer 0 lesson:** science sheet should be a mandatory read on every audit; Claude had been skipping it (Arlin called this directly May 8). The FAQ build is the science-sheet-unlock that produced concrete code work.
 
-- [ ] **Language picker UI half-built (added May 8 from audit).** Verified at `src/App.jsx:8349`: `stillform_language` storage key is in SYNC_KEYS (synced to Supabase on every save) but NO language picker UI exists in Settings. Storage is wired, surface is not. Since internationalization is post-launch (line 758), this is currently dead infrastructure. Two options:
-  - Remove `stillform_language` from SYNC_KEYS until i18n actually ships (cleanest)
-  - Leave the key in place as forward-compat for the post-launch i18n work (current state)
-  
-  Either is fine; flagging because dead-code drift is worth being honest about.
+- [x] **Language picker UI dead infrastructure — RESOLVED May 12, 2026.** `stillform_language` removed from SYNC_KEYS and UNENCRYPTED_SYNC_KEYS at `src/App.jsx:9760` and `:9847`. No reader, no writer, no UI; i18n moved to post-launch (line 1363); removing prevents dead-code drift. Will re-add when i18n actually ships per the post-launch build path (i18next install → string extraction → language picker → AI prompt translation → per-language QA). Audit-pass cleanup commit, build green, preflight green.
 
 - [x] **"How much do you owe this guy?" footer text — VERIFIED NOT IN APP May 8.** Originally flagged in May 7 UI Flow Audit (#9) as "likely browser overlay, not app." Re-verified May 8: `grep -rn 'how much do you owe' .` across entire repo returns zero matches. Confirmed: this was a browser extension overlay or tracker-block message, not Stillform source. Closed.
 
