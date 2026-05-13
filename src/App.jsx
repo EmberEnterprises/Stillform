@@ -21068,37 +21068,34 @@ const isSignalProfileConfigured = () => {
   };
 
   // ── GUIDED SESSION HELPERS ────────────────────────────────────────────
-  // Calibration is sovereign. The user already made the entry decision
-  // during onboarding (body-first or thought-first) — the science is
-  // built into THAT choice. The session honors it. Bio-filter is AI
-  // CONTEXT (passed to Reframe so the AI knows the user's state); it is
-  // NOT a session-structure router.
+  // The session is the metacognition rep loop: Notice → Reframe → Close.
+  // UNIVERSAL. No fork on calibration, no fork on bio-filter. Per Framing
+  // Law, the practice IS the central concept-building loop; regulation
+  // tools support but do not replace the practice.
   //
-  // Body-first calibration  → Body (Breathe, user's saved pattern) → Notice → Reframe → Close
-  // Thought-first calibration → Notice → Reframe → Close
+  // Body work (Breathe, Body Scan) lives as opt-in standalone tools the
+  // user can compose with the session. Each ends with a "Continue to
+  // Notice?" handoff so a user who chooses to settle first flows into the
+  // spine in one motion (no return-to-home in between).
   //
-  // Body Scan is a standalone destination tool the user opts into from
-  // the tools surface. It is never a forced session step.
+  // Calibration (body-first / thought-first) stays in storage as AI
+  // context and reserves for future pressure-event reps (calendar / HRV
+  // integrations that fire calibrated entry prompts before high-pressure
+  // moments). It does not fork the regular session shape.
   const startGuidedSession = (entryReason = "home-cta", overrideMode = null) => {
     const bioFilter = getActiveBioFilter();
-    const isBodyFirstUser = regType === "body-first";
-
-    // Body step — ONLY for body-first calibration. Uses the Breathe tool
-    // with the user's saved pattern preference (stillform_breath_pattern).
-    // No session-level pattern override; no bio-filter override.
-    const bodyStep = isBodyFirstUser
-      ? { id: "body", label: "Body", toolId: "breathe" }
-      : null;
 
     // Reframe step — mode determined by override or default calm.
     const reframeMode = overrideMode || "calm";
     const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
 
-    // Notice step — discrete affect-labeling beat. Universal.
+    // Notice step — discrete affect-labeling beat. Universal entry to the
+    // metacognition rep.
     const noticeStep = { id: "notice", label: "Notice", screenName: "session-notice" };
 
-    // Steps: body-first gets 3, thought-first gets 2.
-    const steps = bodyStep ? [bodyStep, noticeStep, reframeStep] : [noticeStep, reframeStep];
+    // Universal session: two steps. Notice surfaces state, Reframe is the
+    // metacognitive examination. Close follows the last step as a screen.
+    const steps = [noticeStep, reframeStep];
 
     const session = {
       id: `s-${Date.now()}`,
@@ -21164,8 +21161,6 @@ const isSignalProfileConfigured = () => {
         props: {
           entry: entryReason,
           step_count: steps.length,
-          has_body_step: bodyStep ? "yes" : "no",
-          body_tool: bodyStep ? (bodyStep.breathPattern || bodyStep.toolId) : "none",
           reframe_mode: reframeMode,
           bio_filter: bioFilter.slice(0, 32),
           reg_type: regType || "unknown"
