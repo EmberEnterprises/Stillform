@@ -7837,7 +7837,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                 {delta <= 0 ? (
                   <>
                     <button className="btn btn-primary" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Try again</button>
-                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-done-for-now")}>Done for now</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("session-from-breathe", "post-rate-handoff-to-notice")}>Continue into the practice →</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-done-for-now")} style={{ color: "var(--text-muted)", fontSize: 12 }}>Done for now</button>
                   </>
                 ) : (
                   <>
@@ -7845,7 +7846,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                     <div className="t-body-sm faint" style={{ textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
                       Moving to grounding…
                     </div>
-                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("reframe-calm", "post-rate-skip-to-reframe")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("session-from-breathe", "post-rate-handoff-to-notice")} style={{ fontSize: 13 }}>Continue into the practice →</button>
                     <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-exit")} style={{ color: "var(--text-muted)", fontSize: 12 }}>Exit session</button>
                   </>
                 )}
@@ -8614,9 +8615,9 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button
                 className="btn btn-primary"
-                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-handoff-not-landed-accepted")}
+                onClick={() => handleWhatShiftedHandoff("session-from-scan", "body-scan-handoff-not-landed-accepted")}
               >
-                Begin Reframe
+                Continue into the practice
               </button>
               <button
                 className="btn btn-ghost"
@@ -8668,10 +8669,10 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               </button>
               <button
                 className="btn btn-ghost"
-                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-landed-to-reframe")}
+                onClick={() => handleWhatShiftedHandoff("session-from-scan", "body-scan-landed-to-spine")}
                 disabled={!lockInEnabled}
                 style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
-                Continue to Reframe →
+                Continue into the practice →
               </button>
               <button
                 className="btn btn-ghost"
@@ -21272,6 +21273,19 @@ const isSignalProfileConfigured = () => {
           setEodPromptDismissed(false);
           setEodOpen(true);
           goHomeSafely();
+          return;
+        }
+        // ── BODY-TOOL → SPINE HANDOFF ───────────────────────────────────
+        // Breathe and Body Scan can route their completion into the
+        // universal session. The user has already settled; they flow into
+        // Notice → Reframe → Close in one motion (no return to home in
+        // between). Entry reason logged for Plausible.
+        if (redirectTo === "session" || redirectTo === "session-from-breathe" || redirectTo === "session-from-scan") {
+          const entry = redirectTo === "session-from-breathe" ? "breathe-handoff"
+                      : redirectTo === "session-from-scan" ? "scan-handoff"
+                      : "tool-handoff";
+          setActiveTool(null);
+          startGuidedSession(entry);
           return;
         }
         if (redirectTo === "reframe") {
