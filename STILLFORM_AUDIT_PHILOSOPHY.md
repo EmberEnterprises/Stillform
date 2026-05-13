@@ -1,6 +1,8 @@
 # STILLFORM AUDIT PHILOSOPHY
 **ARA Embers LLC · May 12, 2026 · v2.0**
 
+> **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full nine-layer audit with 35+ specific questions, evidence requirements, war stories). Read CANON first.
+
 *v1.0 (May 7 morning) established after Practice Signals revert.*
 *v1.1 (May 7 afternoon) added the Science + UI Flow standing requirement.*
 *v1.2 (May 7 evening) added Layer 1.0 (session-start ground truth), refined Layer 1.1 (adjacent-name grep), added Layer 6.4 (diff anomaly investigation) — all from the Mirror-duplicate near-miss.*
