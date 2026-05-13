@@ -10481,7 +10481,7 @@ function secureDelete(key) {
 // GPT-4o vision handles image reading
 
 
-function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null, setInfoModal }) {
+function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedText = null, onSharedTextConsumed = null, toolBackOverrideRef = null, setInfoModal, inSession = false }) {
   // Ship 1.4 (May 11, 2026) — Cross-tool handoff threshold.
   // Numeric pre→post rating delta (1-5 scale). If delta < this threshold,
   // the regulation didn't fully land and the close screen offers a handoff
@@ -13352,14 +13352,39 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             Hidden in low-demand: chip selection is a cognitive task (picking among 9 options requires
             executive function this cohort doesn't have available). feelState still flows from persisted
             value or morning check-in inference, so the AI has context — the user just doesn't have to
-            pick. */}
-        {!isLowDemand && (
-          <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} />
+            pick.
+
+            May 13, 2026 — also hidden when inSession (user came from NoticeStepScreen
+            inside the guided session arc). The chip was already picked on Notice and
+            persists via stillform_feelstate. Re-rendering the picker here was the
+            redundancy phone-test caught. In its place: a quiet carry-forward line
+            so the user can see what state the AI is reading without re-doing the pick. */}
+        {inSession ? (
+          feelState ? (
+            <div style={{
+              marginBottom: 14,
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 11,
+              color: "var(--text-muted)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase"
+            }}>
+              Carrying forward · {feelState}
+            </div>
+          ) : null
+        ) : (
+          !isLowDemand && (
+            <PresentStateChips feelState={feelState} setFeelState={setFeelState} setInfoModal={setInfoModal} />
+          )
         )}
       </div>
 
       {/* MODE AUTO-DETECTED — from feel state + input content */}
 
+      {/* REFRAME TONE control. May 13, 2026 — hidden when inSession (the session
+          arc auto-routes tone via feel state + content). Surfaces only when the
+          user enters Reframe standalone, where they can override. */}
+      {!inSession && (
       <div style={{ marginTop: -6, marginBottom: 10, display: "flex", justifyContent: "center", position: "relative" }}>
         <button
           type="button"
@@ -13500,6 +13525,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </>
         )}
       </div>
+      )}
 
 
       <>
@@ -13529,7 +13555,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         </div>
       )}
 
-      {/* TAB BAR — AI vs Self Mode */}
+      {/* TAB BAR — AI vs Self Mode. May 13, 2026 — hidden when inSession.
+          AI is the canonical session path; Self Mode is still reachable via
+          the AI-failure handoff (showSelfModeOffer + switchToSelfModeFromFailure).
+          Surfacing both as parallel tabs inside a session contradicted the
+          one-spine architecture. */}
+      {!inSession && (
       <div style={{ display: "flex", gap: 0, marginBottom: 12, borderBottom: "1px solid var(--border)" }}>
         <button
           onClick={() => setActiveReframeTab("ai")}
@@ -13619,6 +13650,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           )}
         </button>
       </div>
+      )}
 
       {/* SELF MODE — MetacognitionTool inline */}
       {activeReframeTab === "self" && (
@@ -15323,7 +15355,10 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
         </div>
       )}
 
-      {/* Continue + Skip — Continue active when chip picked, Skip always available */}
+      {/* Continue + Skip — Continue active when chip picked, Skip only visible
+          when no chip is picked. May 13, 2026 — Skip used to always render
+          alongside Continue, creating competing CTAs once the user had picked.
+          Now Skip is an exit-only affordance when the user hasn't engaged. */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         <button
           className="btn btn-primary"
@@ -15337,18 +15372,20 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
         >
           Continue
         </button>
-        <button
-          className="btn btn-ghost"
-          onClick={handleSkip}
-          style={{
-            padding: "10px 24px", fontSize: 12,
-            color: "var(--text-muted)",
-            fontFamily: "'IBM Plex Mono', monospace",
-            letterSpacing: "0.08em", textTransform: "uppercase"
-          }}
-        >
-          Skip · move to reframe
-        </button>
+        {!picked && (
+          <button
+            className="btn btn-ghost"
+            onClick={handleSkip}
+            style={{
+              padding: "10px 24px", fontSize: 12,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.08em", textTransform: "uppercase"
+            }}
+          >
+            Skip · move to reframe
+          </button>
+        )}
       </div>
     </section>
   );
@@ -15434,7 +15471,10 @@ function SessionCloseScreen({ session, onClose }) {
     ? `Stage ${repCounted.stageId} · ${repCounted.stageName || ""}`
     : "";
 
-  const showRep = rep && rep.rep && !rep.allMet;
+  // May 13, 2026 — showRep declaration removed. Was used to gate rendering
+  // of the rep.rep quote at close; the rep is no longer quoted at close
+  // because it's the goal-frame (visible on home), not the concept added.
+  // The session's actual reflection is the chip + precision label below.
 
   return (
     <section style={{
@@ -15469,24 +15509,74 @@ function SessionCloseScreen({ session, onClose }) {
         </div>
       )}
 
-      {showRep && (
-        <p style={{
-          fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
-          color: "var(--text)", marginBottom: 36, maxWidth: 380,
-          lineHeight: 1.5, fontStyle: "italic",
-          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
-        }}>
-          "{rep.rep}"
-        </p>
-      )}
-      {!showRep && (
-        <p className="t-body-md quiet" style={{
-          marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
-          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
-        }}>
-          The arc compounds with practice.
-        </p>
-      )}
+      {/* May 13, 2026 — close reflection rewrite. Was previously quoting the
+          session's TODAY'S REP statement as if it were the concept added. Phone
+          test caught the framing mismatch: the rep is the goal-frame for the
+          session; the concept added is what the user actually did. Now reflects
+          the chip the user picked at Notice (+ precision label from Granularity
+          Gym if set) — the actual artifact of the rep. Rep-as-goal stays
+          visible on home as TODAY'S REP; no need to re-quote at close. */}
+      {(() => {
+        // Pull the chip the user picked at Notice (persisted via
+        // stillform_feelstate by handlePick) and the precision label (if the
+        // Granularity Gym was used this session — written transiently at
+        // Notice's handleContinue, cleared by Reframe on read but the value
+        // may still be in scope if Reframe hasn't consumed it; we read
+        // defensively).
+        let chipLabel = "";
+        let precisionLabel = "";
+        try {
+          const fs = secureRead("stillform_feelstate", null);
+          if (fs && fs.day === TimeKeeper.stillformDay() && fs.value) {
+            chipLabel = String(fs.value);
+          }
+        } catch {}
+        try {
+          const raw = localStorage.getItem("stillform_session_precision");
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.value && parsed.day === TimeKeeper.stillformDay()) {
+              precisionLabel = String(parsed.value);
+            }
+          }
+        } catch {}
+
+        if (!chipLabel) {
+          return (
+            <p className="t-body-md quiet" style={{
+              marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
+              animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+            }}>
+              The arc compounds with practice.
+            </p>
+          );
+        }
+
+        return (
+          <div style={{
+            marginBottom: 36, maxWidth: 380,
+            animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+          }}>
+            <div className="t-mono-xs" style={{
+              color: "var(--text-muted)",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              marginBottom: precisionLabel ? 10 : 0
+            }}>
+              You named · {chipLabel}
+            </div>
+            {precisionLabel && (
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
+                color: "var(--text)", margin: 0,
+                lineHeight: 1.5, fontStyle: "italic"
+              }}>
+                "{precisionLabel}"
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* NAME THE MOVE — brainstorm #10 (May 13, 2026). Optional close-time
           externalization. User types one short label for what they just did;
@@ -15921,32 +16011,26 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
   const checkinTension = checkinIsToday ? Object.entries(checkin?.tension || {}).filter(([,v]) => v > 0).map(([k]) => k) : [];
   const hasMorningData = checkinMood || checkinTension.length > 0;
 
-  // Bio-filter status — read fresh on every render so an edit elsewhere reflects here.
-  const [bioEditOpen, setBioEditOpen] = useState(false);
-  const [bioFilterValue, setBioFilterValue] = useState(() => {
-    try { return getActiveBioFilter() || ""; } catch { return ""; }
-  });
-  // First token wins for label display when multiple flags are stored comma-separated.
-  const bioPrimary = bioFilterValue.split(",").map(t => t.trim()).filter(Boolean)[0] || "";
-  const bioLabel = bioPrimary ? (BIO_FILTER_LABELS[bioPrimary] || bioPrimary) : "not set";
+  // May 13, 2026 — bio-filter local state removed. Was used by the inline
+  // BIO-FILTER STATUS LINE which is no longer rendered here (set on home /
+  // morning check-in / Settings — canonical surfaces). The setInfoModal prop
+  // is retained for the chip-definition modal below.
 
   return (
     <div style={{ marginBottom: compact ? 8 : 12 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, justifyContent: compact ? "center" : "flex-start" }}>
-        <div style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: 4 }}>
-          What is present
-          <button aria-label="Why name your state?" onClick={() => setInfoModal && setInfoModal({ title: "Why name your state?", body: "Selecting a chip here tells Stillform what's present so what comes next meets you accurately. The chip becomes part of the session context — it shapes which tool surfaces next and how your input is read. The deeper labeling work happens after the session, where naming what shifted consolidates the shift. Naming first establishes context; naming after consolidates change.\n\n— WHAT THESE MEAN —\n\n" + getChipDefinitionsBody(["excited","focused","settled","anxious","angry","stuck","mixed","flat","distant"]) })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
-        </div>
-        {hasMorningData && (
-          <button aria-label="Morning check-in"
-            title="Pre-filled from your morning check-in. This is read-only here — your check-in record is never overwritten by a session."
-            onClick={() => setInfoModal && setInfoModal({ title: "Morning check-in", body: "Your physiological baseline changes every day. Sleep debt, physical tension, and energy level directly alter how you perceive situations before any external stressor arrives. This check sets the context the AI uses in every session that follows. Shown here read-only — only updated from your morning check-in itself." })}
-            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: 0, lineHeight: 1 }}
-          >
-            ⓘ
-          </button>
-        )}
-      </div>
+      {/* May 13, 2026 — header row removed. The "WHAT IS PRESENT" label was
+          vestigial: both surfaces that render this component (NoticeStepScreen
+          and ReframeTool) now have their own screen-level headers. Rendering it
+          again here created redundant labeling. The chip strip below speaks
+          for itself. Morning check-in info chip stays accessible via the
+          "From this morning" row when applicable.
+
+          Bio-filter status row also removed — bio-filter is set on home /
+          morning check-in / Settings. Re-rendering it on every chip surface
+          was the redundancy phone-test (May 13) caught: bio-filter shown
+          "NOT SET" on Notice and Reframe even though home read "clear",
+          because the labeling here differed from the home string. Single
+          source of truth wins; the inline edit drawer is gone too. */}
 
       {/* LINE 1 — pre-populated from morning check-in (read-only display) */}
       {hasMorningData && (
@@ -15976,97 +16060,6 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
           </div>
         </div>
       )}
-
-      {/* BIO-FILTER STATUS LINE — transparency on what hardware state the AI is reading.
-          Tap to open inline edit drawer. May 7, 2026 addition. */}
-      <div style={{ marginBottom: 8, textAlign: compact ? "center" : "left" }}>
-        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, fontFamily: "'IBM Plex Mono', monospace" }}>
-          <span style={{ fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Bio-filter ·
-          </span>
-          <span style={{ fontSize: 11, color: bioPrimary ? "var(--amber)" : "var(--text-muted)", letterSpacing: "0.04em", textTransform: "uppercase" }}>
-            {bioLabel}
-          </span>
-          <button
-            onClick={() => setInfoModal && setInfoModal({ title: "Why the bio-filter?", body: "The bio-filter tells Stillform what hardware state you're in — depleted, under-rested, in pain, on substances, hormonal shift, or none of the above. The same situation interpreted through a depleted body produces a different prediction than the same situation through a rested body (Seth 2013, Barrett & Simmons 2015). It changes how the AI reads your input and how the close flow runs — six bio-filter values currently route you into low-demand mode, which simplifies the close to reduce cognitive load when bandwidth is limited." })}
-            aria-label="Why the bio-filter?"
-            style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}
-          >
-            ⓘ
-          </button>
-          <button
-            onClick={() => setBioEditOpen(o => !o)}
-            aria-label={bioEditOpen ? "Close bio-filter edit" : "Edit bio-filter"}
-            aria-expanded={bioEditOpen}
-            style={{
-              background: bioEditOpen ? "var(--surface2)" : "transparent",
-              border: "0.5px solid var(--amber-dim)",
-              borderRadius: 12,
-              color: "var(--amber)",
-              cursor: "pointer",
-              fontSize: 11,
-              padding: "1px 8px",
-              lineHeight: 1.4,
-              fontFamily: "'IBM Plex Mono', monospace",
-              letterSpacing: "0.06em"
-            }}
-          >
-            {bioEditOpen ? "✕" : "edit"}
-          </button>
-        </div>
-        {bioEditOpen && (
-          <div style={{
-            marginTop: 8,
-            padding: 10,
-            background: "var(--surface)",
-            border: "0.5px solid var(--amber-dim)",
-            borderRadius: 10,
-            display: "flex",
-            gap: 5,
-            flexWrap: "wrap",
-            justifyContent: compact ? "center" : "flex-start"
-          }}>
-            {BIO_FILTER_OPTIONS.map(opt => {
-              const isActive = bioPrimary === opt.id;
-              return (
-                <button
-                  key={opt.id}
-                  aria-pressed={isActive}
-                  aria-label={opt.label}
-                  onClick={() => {
-                    haptic.tick();
-                    // Toggle off if tapping the active filter; otherwise set new.
-                    const next = isActive ? "" : opt.id;
-                    setBioFilterValue(next);
-                    if (next) {
-                      setActiveBioFilter(next);
-                    } else {
-                      // Clear active bio-filter for today via canonical setter (file comment
-                      // at line 2150 explicitly bans direct secureWrite to this key — staleness
-                      // check lives inside getActiveBioFilter and bypassing the setter risks
-                      // future schema drift).
-                      setActiveBioFilter("");
-                    }
-                    setBioEditOpen(false);
-                  }}
-                  style={{
-                    background: isActive ? "var(--amber-glow)" : "transparent",
-                    border: `1px solid ${isActive ? "var(--amber-dim)" : "var(--border)"}`,
-                    borderRadius: 16,
-                    padding: "10px 12px",
-                    fontSize: 11,
-                    color: isActive ? "var(--amber)" : "var(--text-dim)",
-                    cursor: "pointer",
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}
-                >
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
       {/* LINE 2 — Anything to add (in-the-moment feel chips, session-local) */}
       <div>
@@ -18881,25 +18874,29 @@ function QBPill({ onPress }) {
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey));
       if (saved && typeof saved.x === "number" && typeof saved.y === "number") {
-        // One-time migration (May 9, 2026) — pre-May-9 default put the pill at
-        // y: 80 which now collides with the Mirror status strip and top nav.
-        // If a saved position is in the collision zone, reset to current
-        // default. New users go straight to the default; only legacy positions
-        // get migrated.
-        if (saved.y < 140) {
+        // Migration (May 9, 2026 + May 13, 2026) — pre-May-9 default put the
+        // pill at y: 80 which collides with the Mirror status strip and top
+        // nav. May 13 phone test surfaced a second collision: bottom-default
+        // positions (y near H - 140) overlap the text input on Reframe and
+        // the Name-the-move input on the close screen. Both legacy zones
+        // (top < 140) and bottom-default zones near H - 140 get migrated.
+        const H_check = typeof window !== "undefined" ? window.innerHeight : 800;
+        const inTopCollision = saved.y < 140;
+        const inBottomCollision = saved.y > H_check - 200;
+        if (inTopCollision || inBottomCollision) {
           const W = typeof window !== "undefined" ? window.innerWidth : 400;
           const H = typeof window !== "undefined" ? window.innerHeight : 800;
-          return clamp({ x: W - 160, y: H - 140 });
+          return clamp({ x: W - 160, y: Math.round(H * 0.42) });
         }
         return clamp(saved);
       }
     } catch {}
-    // Safe default — bottom-right, below the home content fold so it doesn't
-    // overlap the Mirror surface at top of home. Saved position is honored
+    // Safe default — middle-right of viewport. Off the bottom (text inputs)
+    // and off the top (header / Mirror strip). Saved position is honored
     // first; only first-run / cleared-storage users hit this default.
     const W = typeof window !== "undefined" ? window.innerWidth : 400;
     const H = typeof window !== "undefined" ? window.innerHeight : 800;
-    return clamp({ x: W - 160, y: H - 140 });
+    return clamp({ x: W - 160, y: Math.round(H * 0.42) });
   };
 
   const [pos, setPos] = useState(getSavedPos);
@@ -22225,7 +22222,7 @@ const isSignalProfileConfigured = () => {
       case "breathe": return <BreatheGroundTool {...props} pathway={pathway} quickStart={activeTool?.quickStart} />;
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
-      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} toolBackOverrideRef={toolBackOverrideRef} />;
+      case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} toolBackOverrideRef={toolBackOverrideRef} inSession={!!activeSession} />;
       case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 1 : null} />;
 
       case "bias": return <MicroBiasTool {...props} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 2 : null} />;
@@ -25275,10 +25272,10 @@ const isSignalProfileConfigured = () => {
                           bioFilter, offBaseline, hasPain
                         });
                       } catch {}
-                      // Start the guided session. Body step is selected internally
-                      // based on bio-filter (pain → scan, off-baseline → breathe,
-                      // thought-first baseline → sigh, body-first baseline → breathe).
-                      // Reframe step follows; close screen terminates the arc.
+                      // Start the guided session. Universal arc — Notice → Reframe → Close.
+                      // No body step in the arc itself (commit 3190d70). Body-first
+                      // users access body work via standalone Breathe/Body Scan which
+                      // hand off into the spine on completion (commit d455de1).
                       startGuidedSession("home-hero");
                     }}
                     className="hero-cta-reflect"
@@ -25293,10 +25290,10 @@ const isSignalProfileConfigured = () => {
                       transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
-                        {isThoughtFirst ? "Begin session" : isBodyFirst ? "Begin session" : "Begin session"}
+                        Begin session
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
-                        Body, then thought. {isThoughtFirst ? "~5–8 min." : isBodyFirst ? "~5–8 min." : "~5–8 min."}
+                        Notice → Reframe. ~5–8 min.
                       </div>
                       {/* May 7, 2026 — last-session info folded in here from the standalone pill above.
                           Only renders when there's a recent session >2min old (avoids "just now"
