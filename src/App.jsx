@@ -14765,6 +14765,111 @@ function SignalMapTransition({ phase, onAdvance }) {
   );
 }
 
+// --------------------------------------------------------------------
+// SESSION SHELL — Guided composure session that chains tools through a
+// felt arc: Body → Reframe → Close. Mirrors SignalMap shell pattern but
+// for daily practice instead of calibration.
+//
+// Per Stillform_Master_Todo.md Gap 2 second cut + narrative-spine work:
+// hero CTA becomes a session entry, not a single-tool launch. Each tool
+// completion advances to the next step instead of returning home —
+// producing a woven session experience.
+//
+// Body-before-cognition arc is the actual neuroscience: physiological
+// regulation precedes cognitive work. Body-first calibration → full
+// Breathe; thought-first → brief Physiological Sigh; pain → Body Scan.
+// All paths converge on Reframe (AI cognitive work) → Close (what shifted).
+// --------------------------------------------------------------------
+function SessionHeader({ session }) {
+  if (!session || !session.steps) return null;
+  const totalSteps = session.steps.length;
+  const currentIndex = session.currentStep;
+  const currentLabel = session.steps[currentIndex]?.label || "";
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 10,
+        textTransform: "uppercase"
+      }}>
+        Session · Step {currentIndex + 1} of {totalSteps} · {currentLabel}
+      </div>
+      <div style={{ display: "flex", gap: 4 }}>
+        {session.steps.map((step, idx) => {
+          const isCurrent = idx === currentIndex;
+          const isPast = idx < currentIndex;
+          return (
+            <div key={step.id} style={{
+              flex: 1, height: 2, borderRadius: 1,
+              background: isCurrent ? "var(--amber)" : (isPast ? "var(--amber-dim, rgba(184,134,43,0.4))" : "var(--border)"),
+              transition: "background 0.3s"
+            }} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Session transition — 1.5s loading moment between steps. Same signal-
+// architecture aesthetic as SignalMapTransition: Cormorant primary line,
+// mono caption, thin amber line drawing left-to-right. Self-advances via
+// internal setTimeout on mount; parent supplies onAdvance.
+function SessionTransition({ phase, onAdvance }) {
+  const messages = {
+    "body-to-reframe":   { primary: "Body settled.",       secondary: "Moving to reframe..." },
+    "reframe-to-close":  { primary: "Reframe complete.",   secondary: "Closing the session..." },
+    "scan-to-reframe":   { primary: "Signal located.",     secondary: "Moving to reframe..." },
+    "sigh-to-reframe":   { primary: "System reset.",       secondary: "Moving to reframe..." }
+  };
+  const msg = messages[phase] || { primary: "...", secondary: "" };
+
+  useEffect(() => {
+    if (typeof onAdvance !== "function") return;
+    const t = setTimeout(() => { onAdvance(); }, 1500);
+    return () => clearTimeout(t);
+  }, [phase, onAdvance]);
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
+        color: "var(--text)", textAlign: "center", marginBottom: 12,
+        animation: "stnFadeIn 0.4s ease-out forwards", opacity: 0
+      }}>
+        {msg.primary}
+      </div>
+      <div className="t-mono-xs" style={{
+        color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 32,
+        textTransform: "uppercase",
+        animation: "stnFadeIn 0.4s ease-out 0.15s forwards", opacity: 0
+      }}>
+        {msg.secondary}
+      </div>
+      <div style={{
+        width: 200, height: 1, background: "var(--border)",
+        position: "relative", overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "var(--amber)",
+          transformOrigin: "left center",
+          transform: "scaleX(0)",
+          animation: "stnLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards"
+        }} />
+      </div>
+      <style>{`
+        @keyframes stnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes stnLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      `}</style>
+    </section>
+  );
+}
+
 function MicroBiasTool({ onComplete, calibrationPart = null }) {
   const [current, setCurrent] = useState(0);
   const [identified, setIdentified] = useState([]);
@@ -19152,6 +19257,15 @@ export default function Stillform() {
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
+
+  // ── GUIDED SESSION STATE ──────────────────────────────────────────────
+  // activeSession drives the woven Body → Reframe → Close arc. When non-null,
+  // tool completion advances to next step instead of going home. See helpers
+  // startGuidedSession / advanceSessionStep / endGuidedSession further below.
+  // Shape: { id, steps[{id,label,toolId,mode?}], currentStep, startedAt,
+  //          originalRep, abandoned }
+  const [activeSession, setActiveSession] = useState(null);
+  const [sessionTransitionPhase, setSessionTransitionPhase] = useState(null);
   // outcomeFocus: morning intention — user picks a daily outcome (sharp / composed / recovered)
   // during morning check-in. Drives which protocol is recommended for the day.
   // Science: Implementation Intentions (Gollwitzer 1999) + Mental Contrasting (MCII / Oettingen).
@@ -20675,6 +20789,141 @@ const isSignalProfileConfigured = () => {
     }
   };
 
+  // ── GUIDED SESSION HELPERS ────────────────────────────────────────────
+  // The session orchestrates Body → Reframe → Close. Body step varies by
+  // user state (calibration + bio-filter); Reframe step is constant; Close
+  // is a screen, not a tool. See SessionHeader/SessionTransition components.
+  const startGuidedSession = (entryReason = "home-cta", overrideMode = null) => {
+    const bioFilter = getActiveBioFilter();
+    const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+    const hasPain = bioFilter.includes("pain");
+    const isThoughtFirstUser = regType === "thought-first";
+    const isBodyFirstUser = regType === "body-first";
+
+    // Body step selection — body-before-cognition is the actual neuroscience.
+    // Thought-first user still gets a body step (brief sigh), not skipped.
+    let bodyStep;
+    if (hasPain) {
+      bodyStep = { id: "body", label: "Body", toolId: "scan" };
+    } else if (offBaseline) {
+      // Off-baseline overrides calibration — body work is the entry, full breathe
+      bodyStep = { id: "body", label: "Body", toolId: "breathe" };
+    } else if (isThoughtFirstUser) {
+      // Thought-first baseline → brief physiological sigh, then cognitive work
+      bodyStep = { id: "body", label: "Body", toolId: "sigh" };
+    } else {
+      // Body-first baseline → full breathe
+      bodyStep = { id: "body", label: "Body", toolId: "breathe" };
+    }
+
+    // Reframe step — mode determined by override or default calm. Calm is the
+    // default arc; users in hype/clarity moments take direct tool routes outside
+    // the guided session (existing scenario protocols handle those).
+    const reframeMode = overrideMode || "calm";
+    const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
+
+    // Steps array. Close is NOT a step (it's a terminal screen).
+    const steps = [bodyStep, reframeStep];
+
+    const session = {
+      id: `s-${Date.now()}`,
+      entryReason,
+      steps,
+      currentStep: 0,
+      startedAt: Date.now(),
+      abandoned: false,
+      originalRep: (() => { try { return getTodaysJourneyRep(); } catch { return null; } })()
+    };
+    setActiveSession(session);
+
+    // Launch first step's tool. Pathway is set so calm tools downstream pick
+    // up the right register.
+    setPathway(reframeMode);
+    const firstTool = TOOLS.find(t => t.id === steps[0].toolId);
+    if (firstTool) {
+      const toolEntry = steps[0].mode ? { ...firstTool, mode: steps[0].mode } : firstTool;
+      setActiveTool(toolEntry);
+      setScreen("tool");
+    } else {
+      // Defensive — should not happen for known tool ids. Abandon cleanly.
+      setActiveSession(null);
+      goHomeSafely();
+      return;
+    }
+
+    try {
+      window.plausible("Session Started", {
+        props: {
+          entry: entryReason,
+          step_count: steps.length,
+          body_tool: bodyStep.toolId,
+          reframe_mode: reframeMode,
+          bio_filter: bioFilter.slice(0, 32),
+          reg_type: regType || "unknown"
+        }
+      });
+    } catch {}
+  };
+
+  const advanceSessionStep = () => {
+    if (!activeSession) { goHomeSafely(); return; }
+    const fromStep = activeSession.steps[activeSession.currentStep];
+    const nextIndex = activeSession.currentStep + 1;
+
+    if (nextIndex >= activeSession.steps.length) {
+      // All steps complete — route to close screen via transition
+      setActiveTool(null);
+      setSessionTransitionPhase("reframe-to-close");
+      setScreen("session-transition");
+      return;
+    }
+
+    const nextStep = activeSession.steps[nextIndex];
+    // Update session state to next step
+    setActiveSession({ ...activeSession, currentStep: nextIndex });
+    // Route through transition first — natural beat between tools
+    setActiveTool(null);
+    const phase = `${fromStep.id === "body" ? fromStep.toolId : fromStep.id}-to-${nextStep.id}`;
+    // Phase names accepted by SessionTransition: body-to-reframe, scan-to-reframe,
+    // sigh-to-reframe, reframe-to-close. Default fallback above-mapped.
+    setSessionTransitionPhase(phase);
+    setScreen("session-transition");
+  };
+
+  const endGuidedSession = () => {
+    try {
+      if (activeSession) {
+        window.plausible("Session Completed", {
+          props: {
+            duration_sec: Math.round((Date.now() - activeSession.startedAt) / 1000),
+            steps: activeSession.steps.length,
+            entry: activeSession.entryReason
+          }
+        });
+      }
+    } catch {}
+    setActiveSession(null);
+    setSessionTransitionPhase(null);
+    goHomeSafely();
+  };
+
+  const abandonGuidedSession = (reason = "user-exit") => {
+    try {
+      if (activeSession) {
+        window.plausible("Session Abandoned", {
+          props: {
+            reason,
+            at_step: activeSession.steps[activeSession.currentStep]?.id || "unknown",
+            duration_sec: Math.round((Date.now() - activeSession.startedAt) / 1000)
+          }
+        });
+      }
+    } catch {}
+    setActiveSession(null);
+    setSessionTransitionPhase(null);
+    goHomeSafely();
+  };
+
   const launchScenarioProtocol = async (protocolId) => {
     const launched = await launchScenarioProtocolById({
       protocolId,
@@ -20696,6 +20945,15 @@ const isSignalProfileConfigured = () => {
 
   const renderTool = () => {
     const props = { setInfoModal, onComplete: (redirectTo) => {
+      // ── GUIDED SESSION INTERCEPT ────────────────────────────────────
+      // If we're in an active session, this tool just finished a session
+      // step. Advance the session instead of routing through the standard
+      // exit logic. Redirects (crisis, eod-close, etc.) still take priority
+      // because they represent abnormal exits that should break the session.
+      if (activeSession && !redirectTo && !activeTool?.setupFlow && !activeTool?.returnTo) {
+        advanceSessionStep();
+        return;
+      }
       if (redirectTo) {
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
         if (redirectTo === "eod-close") {
@@ -21260,6 +21518,114 @@ const isSignalProfileConfigured = () => {
             `}</style>
           </section>
         )}
+
+        {/* SESSION TRANSITION — 1.5s loading moment between session steps.
+            Phase values: body-to-reframe / scan-to-reframe / sigh-to-reframe
+            / reframe-to-close. Advance handler routes to next tool or close. */}
+        {screen === "session-transition" && (
+          <SessionTransition
+            phase={sessionTransitionPhase}
+            onAdvance={() => {
+              const phase = sessionTransitionPhase;
+              setSessionTransitionPhase(null);
+              if (phase === "reframe-to-close") {
+                setScreen("session-close");
+                return;
+              }
+              // Body-to-reframe (and variants) → route to reframe tool with
+              // the mode the session locked in. Pathway already set at session
+              // start; reframe step's mode lives in steps[currentStep].
+              if (activeSession) {
+                const step = activeSession.steps[activeSession.currentStep];
+                const tool = TOOLS.find(t => t.id === step.toolId);
+                if (tool) {
+                  const toolEntry = step.mode ? { ...tool, mode: step.mode } : tool;
+                  setActiveTool(toolEntry);
+                  setScreen("tool");
+                  return;
+                }
+              }
+              // Fallback — should not happen, route home defensively
+              goHomeSafely();
+            }}
+          />
+        )}
+
+        {/* SESSION CLOSE — terminal screen for guided sessions. Ties what
+            the user just did back to today's rep (if any), then routes home.
+            Mirrors signalmap-complete pattern but for daily practice arcs. */}
+        {screen === "session-close" && (() => {
+          const rep = activeSession?.originalRep || null;
+          const durationSec = activeSession ? Math.round((Date.now() - activeSession.startedAt) / 1000) : 0;
+          const mins = Math.floor(durationSec / 60);
+          const secs = durationSec % 60;
+          const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+          // Heuristic: was there a meaningful arc? At least one minute and both
+          // steps reached. If not, render a quieter close.
+          const meaningfulArc = durationSec >= 60 && activeSession && activeSession.currentStep >= activeSession.steps.length - 1;
+          return (
+            <section style={{
+              maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+              minHeight: "100vh", display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              position: "relative", zIndex: 1, textAlign: "center"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
+                textTransform: "uppercase",
+                animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+              }}>
+                Session Complete · {durationLabel}
+              </div>
+              <h1 style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
+                lineHeight: 1.2, marginBottom: 16, color: "var(--text)",
+                animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+              }}>
+                {meaningfulArc ? "Something shifted." : "Session closed."}
+              </h1>
+              {rep && rep.rep && !rep.allMet && (
+                <p className="t-body-md quiet" style={{
+                  marginBottom: 12, maxWidth: 380, lineHeight: 1.7,
+                  animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+                }}>
+                  You worked the rep:
+                </p>
+              )}
+              {rep && rep.rep && !rep.allMet && (
+                <p style={{
+                  fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
+                  color: "var(--text-cream)", marginBottom: 36, maxWidth: 380,
+                  lineHeight: 1.6, fontStyle: "italic",
+                  animation: "scnFadeIn 0.5s ease-out 0.4s forwards", opacity: 0
+                }}>
+                  {rep.rep}
+                </p>
+              )}
+              {(!rep || !rep.rep || rep.allMet) && (
+                <p className="t-body-md quiet" style={{
+                  marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
+                  animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+                }}>
+                  Body, then thought. The arc compounds with practice.
+                </p>
+              )}
+              <button
+                className="btn btn-primary"
+                style={{
+                  padding: "14px 36px", fontSize: 15, minWidth: 200,
+                  animation: "scnFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
+                }}
+                onClick={() => endGuidedSession()}
+              >
+                Close
+              </button>
+              <style>{`
+                @keyframes scnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+              `}</style>
+            </section>
+          );
+        })()}
 
         {/* CALIBRATION TRIGGER SEED — Phase 2e (post-Pattern Check, pre-home) */}
         {screen === "calibration-trigger-seed" && (() => {
@@ -23623,71 +23989,28 @@ const isSignalProfileConfigured = () => {
                       );
                     })()}
 
-                    {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
+                    {/* Hero CTA — initiates a GUIDED SESSION (Body → Reframe → Close).
+                        The session arc adapts internally to calibration + bio-filter
+                        state via startGuidedSession() helpers above. This replaces the
+                        prior single-tool routing — the hero is now a session entry,
+                        not a tool launcher. Per Stillform_Master_Todo.md Gap 2 second
+                        cut + narrative-spine work (May 13, 2026). */}
                     <button onClick={() => {
-                      const bioFilter = getActiveBioFilter();
-                      const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
-                      const hasPain = bioFilter.includes("pain");
-
-                      // Day-memory: if user already chose for this exact (date, bioFilter) combo today,
-                      // honor that choice silently. Updating bio-filter creates a new key → suggestion re-fires.
-                      const priorChoice = (() => {
-                        try {
-                          const raw = JSON.parse(localStorage.getItem("stillform_biofilter_choice") || "null");
-                          if (!raw) return null;
-                          if (raw.date !== TimeKeeper.stillformDay()) return null;
-                          if (raw.bioFilter !== bioFilter) return null;
-                          return raw.choice; // "accept" or "skip"
-                        } catch { return null; }
-                      })();
-
                       // DIAGNOSTIC LOG (temporary — remove once root cause identified)
-                      console.log("[Stillform Hero CTA]", {
-                        regType, isBodyFirst, isThoughtFirst,
-                        bioFilter, offBaseline, hasPain, priorChoice,
-                        showBioFilterSuggestion: !!showBioFilterSuggestion
-                      });
-
-                      if (isThoughtFirst) {
-                        if (offBaseline) {
-                          // Pain → Body Scan (Kabat-Zinn / Reiner / Farb). Other off-baseline → Breathe (Ochsner & Gross / Li 2023).
-                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
-                          if (priorChoice === "accept") {
-                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
-                            else startPathway("calm");
-                          } else if (priorChoice === "skip") {
-                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                          } else {
-                            setShowBioFilterSuggestion({ kind, bioFilter });
-                          }
-                        } else {
-                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                        }
-                      } else if (isBodyFirst) {
-                        if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
-                          // Pain (Kabat-Zinn/Reiner/Farb) or unnamed signal (locate first) → Body Scan suggestion
-                          if (priorChoice === "accept") startTool(TOOLS.find(t => t.id === "scan"));
-                          else if (priorChoice === "skip") startPathway("calm");
-                          else setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
-                        }
-                        else startPathway("calm");  // Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005)
-                      } else {
-                        // Defensive fallback — regType migrates to thought-first on load (Apr 29).
-                        // This branch should be unreachable in practice; route as thought-first if hit.
-                        if (offBaseline) {
-                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
-                          if (priorChoice === "accept") {
-                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
-                            else startPathway("calm");
-                          } else if (priorChoice === "skip") {
-                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                          } else {
-                            setShowBioFilterSuggestion({ kind, bioFilter });
-                          }
-                        } else {
-                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                        }
-                      }
+                      try {
+                        const bioFilter = getActiveBioFilter();
+                        const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+                        const hasPain = bioFilter.includes("pain");
+                        console.log("[Stillform Hero CTA → Session]", {
+                          regType, isBodyFirst, isThoughtFirst,
+                          bioFilter, offBaseline, hasPain
+                        });
+                      } catch {}
+                      // Start the guided session. Body step is selected internally
+                      // based on bio-filter (pain → scan, off-baseline → breathe,
+                      // thought-first baseline → sigh, body-first baseline → breathe).
+                      // Reframe step follows; close screen terminates the arc.
+                      startGuidedSession("home-hero");
                     }}
                     className="hero-cta-reflect"
                     style={{
@@ -23701,10 +24024,10 @@ const isSignalProfileConfigured = () => {
                       transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
-                        {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
+                        {isThoughtFirst ? "Begin session" : isBodyFirst ? "Begin session" : "Begin session"}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
-                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start with what the body is doing." : "Start with what's loudest."}
+                        Body, then thought. {isThoughtFirst ? "~5–8 min." : isBodyFirst ? "~5–8 min." : "~5–8 min."}
                       </div>
                       {/* May 7, 2026 — last-session info folded in here from the standalone pill above.
                           Only renders when there's a recent session >2min old (avoids "just now"
