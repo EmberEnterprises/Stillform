@@ -20758,24 +20758,30 @@ const isSignalProfileConfigured = () => {
       {infoModal && (
         <div onClick={() => setInfoModal(null)} style={{
           position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)", zIndex: 9999,
-          display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 48px",
-          overflowY: "auto"
+          display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 48px"
         }}>
           <div onClick={e => e.stopPropagation()} style={{
             background: "var(--bg2, #111)", border: "0.5px solid var(--border)",
             borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%",
-            maxHeight: "84vh", overflowY: "auto"
+            maxHeight: "84vh", display: "flex", flexDirection: "column"
           }}>
-            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14, flexShrink: 0 }}>
               {infoModal.title}
             </div>
-            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-line" }}>
+            <div style={{
+              fontSize: 13, color: "var(--text)", lineHeight: 1.8,
+              fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-line",
+              overflowY: "auto", flex: "1 1 auto", minHeight: 0,
+              WebkitOverflowScrolling: "touch", overscrollBehavior: "contain",
+              paddingRight: 4
+            }}>
               {infoModal.body}
             </div>
             <button onClick={() => setInfoModal(null)} style={{
-              marginTop: 24, background: "none", border: "0.5px solid var(--border)",
+              marginTop: 20, background: "none", border: "0.5px solid var(--border)",
               borderRadius: "var(--r)", padding: "8px 24px", fontSize: 12,
-              color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+              color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              alignSelf: "flex-start", flexShrink: 0
             }}>
               Got it
             </button>
