@@ -691,4 +691,66 @@ Hybrid intake spec landed after external AI consultation. Two-day session shippe
 
 ---
 
-*ARA Embers LLC · Stillform Project Transfer · April 28, 2026 · May 12, 2026 addendum*
+## May 12, 2026 evening — Spine Ship + audit resolution + deployment
+
+Single-session vertical slice that exposed the existing capacity-tracking infrastructure as a felt journey, plus full audit philosophy v2.0 run + two real findings resolved + small voice/infrastructure cleanup. All shipped to `feat/home-wiring-surface`. **Arlin deployed to production at session end.**
+
+### Spine Ship — 9 of 12 Journey-Spine Competitive Gaps shipped first-cut
+
+Competitor analysis (Liven, HMP) cross-referenced against Stillform's existing infrastructure produced 12 gaps. Operating principle: **the work is EXPOSURE, not invention.** Stillform's data layer is stronger than competitors; the UI doesn't surface it as a journey.
+
+| Gap | Ship | Surface |
+|---|---|---|
+| 6 | `e123e07` | FAQ stage names reconciled with `STAGE_DEFINITIONS` (NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING) |
+| 1 + 10 | `7de3b15` | Mirror Strip → Roadmap direct (one tap, was two). Capacity gates visible on stages 2-5 with science citations (Lieberman 2007 + Farb 2015; Gollwitzer 1999 + Barrett 2017; Wells 2009 + Gross 1998; Meichenbaum). |
+| 2 + 3 | `9f315ef` | Home hero gets TODAY'S REP block at visual top, names current chapter + metacognitive objective from next unmet shipped marker. Processing type + bio-filter preserved as modality routing below. |
+| 11 | `8703cb9` | Per-session REP COUNTED banner — when a completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss. Auto-clears on dismiss. |
+| 8 | `de2be7a` | Settings → Habit Anchors (cue/action pairs, 5-anchor ceiling, starter suggestions). Home → STANDING ANCHORS strip below journey rep. Implementation intentions per Gollwitzer 1999. |
+| 9 | `133f6f6` | My Progress Last 30 Days synthesized observations (session volume, distinct chips, pre/post delta, top bias with MCT framing, top trigger, streak with Lally 2010). |
+| 4 | `111e08a` | Capacity-growth baseline written at calibration completion (new users) or retroactively seeded on first app load (existing users). My Progress "Since You Started" surface computes deltas baseline → current. |
+| 4 follow-up | `72929e3` | Settings → Capacity Baseline section + Reset button (lets Arlin wipe retroactive seed for fresh measurement point on phone test). |
+
+**Gap 5 REJECTED** (`9cc896b` revert) — Library destination was competitor-pattern misread. The 20 `STATIC_SCIENCE_CARDS` are designed as AI fallbacks + contextual post-session `ScienceCard` surfaces, NOT browsable content. Liven and HMP are content-delivery platforms; Stillform is a practice. Content lives in flows, not in destinations.
+
+**Gap 7 DEFERRED** — audio practice layer; needs external assets (Arlin voice / TTS / contractor).
+
+**Gap 12 PARTIAL** — voice applied per-surface during ships; dedicated content-production pass pending.
+
+### Audit resolution (`019491a`) — Two Layer 0.5 findings closed
+
+Full audit per STILLFORM_AUDIT_PHILOSOPHY.md v2.0 run after the Spine Ship. Two real findings surfaced and resolved before phone test.
+
+**Finding 1 — Mirror surface flow change.** The Mirror Strip → Roadmap direct rewire (Gap 1 ship) left Mirror Sheet with zero callers. Resolution: Mirror Sheet retired entirely (~340 lines removed). Unique content distributed:
+- "How stages work" info modal → moved to RoadmapScreen header (ⓘ button, uses `setInfoModal` prop)
+- MirrorSheetTriggers (Phase 2d.1 inline-add) → retired; Settings has full Trigger Profile CRUD as canonical surface
+- Today's Brief re-read surface → retired; post-checkin card re-reads brief on save
+- Markers + science citations → already duplicated in Roadmap via Gap 10 capacity gates
+- STILLFORM_ENGAGEMENT_ARCHITECTURE.md updated to record the change
+
+**Finding 2 — My Progress structure violated Path A.** STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 275-281 specs My Progress = 4 sections (Roadmap surface / Composure telemetry / Weekly reflection / Saved Reframes + AI notes + Shareable card). Gap 9 + Gap 4 had shipped as two separate cards, violating the 4-section structure. Consolidated into ONE "Weekly Reflection" section per Path A Section 3 — single bordered card with two sub-blocks:
+- `THE LAST 30 DAYS` — rolling 30-day window observations
+- `SINCE YOU STARTED · {BASELINE DATE}` — growth from baseline
+
+If only one sub-block has data, only that renders. If both empty, entire section returns null.
+
+### Audit-pass cleanup (`cf970eb`)
+
+**Cyclic Sighing settings card voice fix.** Voice-consistency audit named the card as the confirmed prestige-operator-tone violation. Rewritten from credentialing-paragraph to mechanism-as-language parallel to Quick Reset and Deep Regulate on the same screen: *"The double inhale tops off your oxygen; the long exhale empties your system completely. The deepest downshift of the three."* Balban 2023 citation preserved in code comment, FAQ answer, and static science card.
+
+**Language picker dead infrastructure removed.** `stillform_language` removed from SYNC_KEYS and UNENCRYPTED_SYNC_KEYS — no reader, no writer, no UI. i18n is post-launch; key will re-add when i18n actually ships.
+
+### Deployment + handoff
+
+Arlin deployed the cumulative branch state to production at session end. Phone testing in progress — screenshot-heavy findings expected. Handoff doc for next Claude: **STILLFORM_HANDOFF_MAY_12_EVENING.md** in repo root. Read it before responding to any phone-test findings.
+
+### Outstanding from this session
+
+- Phone-test follow-ups from May 12 morning (Move card better, integrations, bio-filter reinforcement) still pending Arlin's articulation
+- Broader voice consistency audit (PLN cards, info modals, Body Scan What Shifted caption) pending her direction — only Cyclic Sighing card shipped from that audit list
+- Gap 7 audio, Gap 12 voice content production
+- Spine Ship second cuts: Gap 3 first-week starter sequence, Gap 4 periodic re-assessment ritual UX, Gap 8 calibration-time anchor selection + marker auto-pairing
+- Mirror Sheet's in-tool wiring deferred — component retired entirely as of audit resolution; the Phase 2d inline-add affordance was the only unique value and it was redundant with Settings CRUD
+
+---
+
+*ARA Embers LLC · Stillform Project Transfer · April 28, 2026 · May 12, 2026 evening addendum*

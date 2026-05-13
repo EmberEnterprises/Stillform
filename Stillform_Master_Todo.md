@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (Spine Ship + audit resolution complete: 9 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`. Two Layer 0.5 findings from full audit resolved: Mirror Sheet retired with content distributed, My Progress consolidated to Path A 4-section structure. Gap 5 rejected after review — competitor-pattern misread. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
+**ARA Embers LLC · last updated May 12, 2026 evening (Spine Ship + audit resolution + cleanup all DEPLOYED to production. 36 commits on `feat/home-wiring-surface`. Arlin is now phone-testing the live build; testing will be screenshot-heavy. New Claude session handoff: see STILLFORM_HANDOFF_MAY_12_EVENING.md in repo root. 9 of 12 Journey-Spine gaps shipped first-cut. Gap 5 rejected. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface.)**
 
 ## SPINE SHIP — May 12, 2026 (commits `e123e07` through audit-resolution commit)
 
