@@ -14864,19 +14864,37 @@ function SessionTransition({ phase, onAdvance }) {
   };
   const msg = messages[phase] || { primary: "...", secondary: "" };
 
+  // Tap-forward: user advances when ready. The "tap to continue" prompt
+  // fades in after the line draws (~1.1s + 0.3s delay = appears ~1.4s in).
+  // Safety auto-advance at 5s prevents user getting stuck if they don't
+  // tap. Tapping anywhere on the screen advances.
+  const [canTap, setCanTap] = useState(false);
+
   useEffect(() => {
     if (typeof onAdvance !== "function") return;
-    const t = setTimeout(() => { onAdvance(); }, 1500);
-    return () => clearTimeout(t);
+    // Allow tap after the animation completes
+    const tapTimer = setTimeout(() => setCanTap(true), 1400);
+    // Safety auto-advance — don't strand the user
+    const autoTimer = setTimeout(() => { onAdvance(); }, 5000);
+    return () => { clearTimeout(tapTimer); clearTimeout(autoTimer); };
   }, [phase, onAdvance]);
 
+  const handleTap = () => {
+    if (canTap) onAdvance();
+  };
+
   return (
-    <section style={{
-      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
-      minHeight: "100vh", display: "flex", flexDirection: "column",
-      alignItems: "center", justifyContent: "center",
-      position: "relative", zIndex: 1
-    }}>
+    <section
+      onClick={handleTap}
+      style={{
+        maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+        minHeight: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        position: "relative", zIndex: 1,
+        cursor: canTap ? "pointer" : "default",
+        WebkitTapHighlightColor: "transparent"
+      }}
+    >
       <div style={{
         fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
         color: "var(--text)", textAlign: "center", marginBottom: 12,
@@ -14903,9 +14921,21 @@ function SessionTransition({ phase, onAdvance }) {
           animation: "stnLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards"
         }} />
       </div>
+      {/* Tap-to-continue micro-prompt — appears after line draws.
+          Pulses subtly to signal interactivity. */}
+      {canTap && (
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", letterSpacing: "0.18em",
+          textTransform: "uppercase", marginTop: 32,
+          animation: "stnPulse 1.8s ease-in-out infinite"
+        }}>
+          Tap to continue
+        </div>
+      )}
       <style>{`
         @keyframes stnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes stnLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        @keyframes stnPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
       `}</style>
     </section>
   );
