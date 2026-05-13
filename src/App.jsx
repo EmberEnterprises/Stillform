@@ -14936,6 +14936,36 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
     return null;
   });
 
+  // PracticeSurface → Notice context handoff (May 13, 2026, brainstorm #1
+  // spine integration). PracticeSurface writes stillform_practice_entry_context
+  // when the user taps a retrieval card. Notice reads it on mount
+  // NON-DESTRUCTIVELY so it can render the retrieval banner without
+  // consuming the handoff — Reframe reads + clears it later as the final
+  // consumer. Two reads, last-read clears.
+  //
+  // Stored in component state so the read happens once and the banner is
+  // stable across re-renders (chip selection updates).
+  const [retrievalContext] = useState(() => {
+    try {
+      const raw = localStorage.getItem("stillform_practice_entry_context");
+      if (!raw) return null;
+      const ctx = JSON.parse(raw);
+      if (!ctx || typeof ctx !== "object" || !ctx.pattern) return null;
+      return {
+        pattern: String(ctx.pattern),
+        source: ctx.source || null,
+        daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
+      };
+    } catch { return null; }
+  });
+
+  const formatDaysAgo = (days) => {
+    if (days === null || days === undefined) return "previously";
+    if (days === 0) return "earlier today";
+    if (days === 1) return "yesterday";
+    return `${days} days ago`;
+  };
+
   const handlePick = (chipId) => {
     setPicked(chipId);
     try {
@@ -14968,6 +14998,47 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
     }}>
       {/* Session header so user sees the arc position */}
       <SessionHeader session={session} />
+
+      {/* RETRIEVAL BANNER — surfaces only when entry came from a
+          PracticeSurface retrieval or spaced-return card. Shows the
+          pattern + when it was last named so the user is oriented
+          before they pick a chip. Bounded design per Wells 2009 / Roediger
+          & Karpicke spacing literature: single specific question, no
+          browsable archive, no analytics. The banner is context, not
+          content — the chip picker stays the primary action. */}
+      {retrievalContext && (
+        <div style={{
+          marginBottom: 24,
+          padding: "14px 16px",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r-lg)",
+          background: "var(--amber-glow, rgba(255,180,80,0.05))"
+        }}>
+          <div className="t-mono-xs" style={{
+            color: "var(--amber)",
+            letterSpacing: "0.14em",
+            marginBottom: 6
+          }}>
+            {retrievalContext.source === "spaced" ? "PLANNED REVISIT" : "RETURNING TO"}
+          </div>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
+            color: "var(--text-cream)", lineHeight: 1.4,
+            letterSpacing: "0.005em"
+          }}>
+            You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.
+          </div>
+          <div style={{
+            marginTop: 4,
+            fontSize: 12,
+            color: "var(--text-muted)",
+            fontFamily: "'DM Sans', sans-serif",
+            lineHeight: 1.55
+          }}>
+            What's it doing today? Name what's present — your answer can hold the pattern or step past it.
+          </div>
+        </div>
+      )}
 
       {/* Prompt — Cormorant primary, mono subcaption.
           Granularity framing: specific naming is the trainable capacity
@@ -23322,8 +23393,21 @@ const isSignalProfileConfigured = () => {
                   triggerArr = Array.isArray(tp?.triggers) ? tp.triggers : [];
                 } catch {}
 
-                // Pattern-context handoff to the practice tool. Reframe will
-                // read this key in a follow-on commit; harmless if unread.
+                // Pattern-context handoff to the practice spine.
+                //
+                // May 13, 2026 (brainstorm idea #1 spine integration): entries
+                // from PracticeSurface now route through startGuidedSession
+                // (Notice → Reframe → Close), not direct-to-Reframe. Per
+                // Arlin's directive on spine integration: "they have to be a
+                // part of the spine, so there needs to be a strong transition
+                // between these." Skipping Notice broke the spine — the user
+                // dropped straight into Reframe without the affect-labeling
+                // beat. The retrieval prompt belongs at the top of the arc,
+                // not as a side cue inside Reframe.
+                //
+                // localStorage handoff stays the same — Notice reads it
+                // non-destructively, Reframe reads + clears as before. Both
+                // steps now see the retrieval context.
                 const handleEnterPracticeFromSurface = (toolId, context) => {
                   if (context) {
                     try {
@@ -23344,8 +23428,17 @@ const isSignalProfileConfigured = () => {
                       }
                     });
                   } catch {}
-                  const tool = TOOLS.find(t => t.id === toolId);
-                  if (tool) startTool(tool);
+                  // Route through the universal session arc. The entryReason
+                  // distinguishes practice-surface entries from the hero CTA
+                  // for telemetry + AI context. Retrieval-sourced entries
+                  // carry a more specific reason so the AI directive can
+                  // calibrate to "planned revisit" framing.
+                  const entryReason = context?.source === "spaced"
+                    ? "home-practice-spaced"
+                    : context?.pattern
+                      ? "home-practice-retrieval"
+                      : "home-practice";
+                  startGuidedSession(entryReason);
                 };
 
                 return (
