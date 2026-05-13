@@ -1,5 +1,7 @@
 # Stillform Engagement Architecture
 
+> **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full three-engine architecture, Path A consolidation map, retention research). Read CANON first.
+
 > **SUPERSESSION NOTE — May 12, 2026:** Framing language in this document predates STILLFORM_FRAMING_LAW.md (May 12, 2026). Specifically: the Roadmap section frames the user's journey as "Stages of self-mastery" (§77). Under the framing law, Stillform's product is a **metacognition practice** that produces self-mastery and composure as felt outcomes — not the product itself. Bandura (1977) self-efficacy / sense of mastery is in the science spine of the framing law, so "mastery" as an OUTCOME the user develops over the journey is valid; but the UMBRELLA framing of the Roadmap as "stages of self-mastery" needs Arlin's structural review under the framing law lens before any external-facing surfaces (App Store copy, marketing, partner outreach) use the phrase. The stage names themselves (NOTICING → NAMING → ANTICIPATING → RECOGNIZING → HOLDING) ARE framing-law-aligned — they describe metacognitive capacities. Internal naming of the umbrella concept can stay until structural review; do not propagate to external surfaces without checking framing law first.
 
 **Status (May 12, 2026 — Spine Ship audit resolution):** Two structural changes recorded from the Layer 0.5 audit (audit philosophy v2.0):

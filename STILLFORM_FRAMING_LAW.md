@@ -1,6 +1,8 @@
 # STILLFORM FRAMING LAW
 **ARA Embers LLC · May 12, 2026 · v1.0**
 
+> **Session-start ground truth lives in `STILLFORM_CANON.md`.** This file retained for deep reference (full text, version history, edge cases). Read CANON first.
+
 The single source of truth for what Stillform IS, what it IS NOT, and what the product produces. This doc is read every session before any feature work, content draft, or external communication. Banned defaults documented here override pattern-match defaults from training data or other docs.
 
 If a proposal, prompt, or piece of copy contradicts this doc, the proposal is wrong and this doc is right. The audit philosophy's Framing Layer (Layer 0) passes/fails against this doc.

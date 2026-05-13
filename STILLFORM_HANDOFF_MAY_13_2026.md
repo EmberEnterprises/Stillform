@@ -1,6 +1,8 @@
 # STILLFORM — SESSION HANDOFF
 **ARA Embers LLC · May 13, 2026 · For the next Claude session**
 
+> **Session-start ground truth lives in `STILLFORM_CANON.md`.** Current state and operating rules from this handoff have been integrated into CANON. This file retained as a historical session-specific record. Read CANON first.
+
 ---
 
 ## 0. WHY THIS DOC EXISTS
