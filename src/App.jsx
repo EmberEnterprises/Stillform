@@ -14864,48 +14864,34 @@ function SessionTransition({ phase, onAdvance }) {
   };
   const msg = messages[phase] || { primary: "...", secondary: "" };
 
-  // Tap-forward: user advances when ready. The "tap to continue" prompt
-  // fades in after the line draws (~1.1s + 0.3s delay = appears ~1.4s in).
-  // Safety auto-advance at 5s prevents user getting stuck if they don't
-  // tap. Tapping anywhere on the screen advances.
-  const [canTap, setCanTap] = useState(false);
-
+  // Brief passive transition — 0.9s. Earlier tap-forward variant added 3
+  // extra user actions per session for no substance gain. The user has
+  // already engaged; a transition is a beat, not an interaction. Simple
+  // and prestige > tap-density theater.
   useEffect(() => {
     if (typeof onAdvance !== "function") return;
-    // Allow tap after the animation completes
-    const tapTimer = setTimeout(() => setCanTap(true), 1400);
-    // Safety auto-advance — don't strand the user
-    const autoTimer = setTimeout(() => { onAdvance(); }, 5000);
-    return () => { clearTimeout(tapTimer); clearTimeout(autoTimer); };
+    const t = setTimeout(() => { onAdvance(); }, 900);
+    return () => clearTimeout(t);
   }, [phase, onAdvance]);
 
-  const handleTap = () => {
-    if (canTap) onAdvance();
-  };
-
   return (
-    <section
-      onClick={handleTap}
-      style={{
-        maxWidth: 480, margin: "0 auto", padding: "48px 24px",
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        position: "relative", zIndex: 1,
-        cursor: canTap ? "pointer" : "default",
-        WebkitTapHighlightColor: "transparent"
-      }}
-    >
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1
+    }}>
       <div style={{
         fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
         color: "var(--text)", textAlign: "center", marginBottom: 12,
-        animation: "stnFadeIn 0.4s ease-out forwards", opacity: 0
+        animation: "stnFadeIn 0.35s ease-out forwards", opacity: 0
       }}>
         {msg.primary}
       </div>
       <div className="t-mono-xs" style={{
         color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 32,
         textTransform: "uppercase",
-        animation: "stnFadeIn 0.4s ease-out 0.15s forwards", opacity: 0
+        animation: "stnFadeIn 0.35s ease-out 0.12s forwards", opacity: 0
       }}>
         {msg.secondary}
       </div>
@@ -14918,24 +14904,12 @@ function SessionTransition({ phase, onAdvance }) {
           background: "var(--amber)",
           transformOrigin: "left center",
           transform: "scaleX(0)",
-          animation: "stnLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards"
+          animation: "stnLineDraw 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards"
         }} />
       </div>
-      {/* Tap-to-continue micro-prompt — appears after line draws.
-          Pulses subtly to signal interactivity. */}
-      {canTap && (
-        <div className="t-mono-xs" style={{
-          color: "var(--text-muted)", letterSpacing: "0.18em",
-          textTransform: "uppercase", marginTop: 32,
-          animation: "stnPulse 1.8s ease-in-out infinite"
-        }}>
-          Tap to continue
-        </div>
-      )}
       <style>{`
         @keyframes stnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes stnLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-        @keyframes stnPulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
       `}</style>
     </section>
   );
@@ -15056,38 +15030,25 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
 }
 
 // --------------------------------------------------------------------
-// SESSION CLOSE — multi-beat close ritual for guided sessions.
-// Three beats revealed by tap-forward (Liven-style REVEAL pacing but
-// precision-elite voice, not gentle-wellness illustration cards):
-//
-//   Beat 1 — Outcome: "Rep counted." / "Concept added." / "Session closed."
-//   Beat 2 — Substance: rep statement + what was trained
-//   Beat 3 — Close: single Close button (replaces tap-to-continue micro-prompt)
-//
-// Each tap reveals the next beat with sharp Cormorant fade-in. Prior
-// beats stay visible — cumulative reveal, not slideshow. Final tap
-// closes the session via onClose callback.
+// SESSION CLOSE — single-screen close for guided sessions.
+// Simple and prestige: outcome line, rep echoed (if there was one),
+// Close button. No tap-forward reveal theater — the user has already
+// done the work; the close honors that with restraint, not ceremony.
 //
 // Rep-counted detection reads stillform_last_rep_counted timestamp vs
 // session startedAt — if a marker flipped DURING this session, the
-// outcome beat is "Rep counted" instead of "Concept added". Aligns with
-// Gap 11 (Per-session capacity-rep feedback) already-shipped marker
-// detection in appendSessionToStorage at :2538.
+// outcome reads 'Rep counted' instead of 'Concept added'.
 // --------------------------------------------------------------------
 function SessionCloseScreen({ session, onClose }) {
-  const [beat, setBeat] = useState(1);
-
   const rep = session?.originalRep || null;
   const durationSec = session ? Math.round((Date.now() - session.startedAt) / 1000) : 0;
   const mins = Math.floor(durationSec / 60);
   const secs = durationSec % 60;
   const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
-  // Did a capacity rep get counted during THIS session? Read the
-  // stillform_last_rep_counted key (written by appendSessionToStorage
-  // when a marker flipped on session save) and check timestamp vs
-  // session.startedAt — anything written after session start belongs
-  // to this session.
+  // Did a capacity rep get counted during THIS session? Read
+  // stillform_last_rep_counted (written by appendSessionToStorage when
+  // a marker flipped on save) and check timestamp vs session.startedAt.
   const repCounted = (() => {
     try {
       const raw = localStorage.getItem("stillform_last_rep_counted");
@@ -15102,37 +15063,22 @@ function SessionCloseScreen({ session, onClose }) {
 
   const meaningfulArc = durationSec >= 60 && session && session.currentStep >= session.steps.length - 1;
 
-  // Beat 1 — outcome line
   const outcomeHeadline = repCounted
     ? "Rep counted."
     : (meaningfulArc ? "Concept added." : "Session closed.");
   const outcomeSubline = repCounted
     ? `Stage ${repCounted.stageId} · ${repCounted.stageName || ""}`
-    : (meaningfulArc ? "The library grew." : "");
+    : "";
 
-  // Beat 2 — substance
-  const showRepInSubstance = rep && rep.rep && !rep.allMet;
-
-  const handleTap = () => {
-    if (beat < 3) {
-      setBeat(beat + 1);
-      try { window.plausible("Session Close Beat", { props: { beat: beat + 1 } }); } catch {}
-    }
-  };
+  const showRep = rep && rep.rep && !rep.allMet;
 
   return (
-    <section
-      onClick={beat < 3 ? handleTap : undefined}
-      style={{
-        maxWidth: 480, margin: "0 auto", padding: "48px 24px",
-        minHeight: "100vh", display: "flex", flexDirection: "column",
-        alignItems: "center", justifyContent: "center",
-        position: "relative", zIndex: 1, textAlign: "center",
-        cursor: beat < 3 ? "pointer" : "default",
-        WebkitTapHighlightColor: "transparent"
-      }}
-    >
-      {/* Session-complete eyebrow always visible */}
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1, textAlign: "center"
+    }}>
       <div className="t-mono-xs" style={{
         color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
         textTransform: "uppercase",
@@ -15141,99 +15087,56 @@ function SessionCloseScreen({ session, onClose }) {
         Session Complete · {durationLabel}
       </div>
 
-      {/* Beat 1 — outcome headline + subline */}
-      {beat >= 1 && (
-        <>
-          <h1 style={{
-            fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
-            lineHeight: 1.2, marginBottom: 8, color: "var(--text)",
-            animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
-          }}>
-            {outcomeHeadline}
-          </h1>
-          {outcomeSubline && (
-            <div className="t-mono-xs" style={{
-              color: "var(--text-muted)", letterSpacing: "0.12em",
-              textTransform: "uppercase", marginBottom: 24,
-              animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
-            }}>
-              {outcomeSubline}
-            </div>
-          )}
-          {!outcomeSubline && <div style={{ marginBottom: 24 }} />}
-        </>
-      )}
+      <h1 style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
+        lineHeight: 1.2, marginBottom: outcomeSubline ? 8 : 24, color: "var(--text)",
+        animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+      }}>
+        {outcomeHeadline}
+      </h1>
 
-      {/* Beat 2 — substance (rep statement or generic close note) */}
-      {beat >= 2 && (
-        <>
-          {repCounted && (
-            <p style={{
-              fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-              color: "var(--text-cream)", marginBottom: 8, maxWidth: 380,
-              lineHeight: 1.6,
-              animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
-            }}>
-              {repCounted.markerLabel || "A marker flipped this session."}
-            </p>
-          )}
-          {showRepInSubstance && (
-            <>
-              {!repCounted && (
-                <p className="t-body-md quiet" style={{
-                  marginBottom: 12, maxWidth: 380, lineHeight: 1.7,
-                  animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
-                }}>
-                  You worked the rep:
-                </p>
-              )}
-              <p style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
-                color: "var(--text)", marginBottom: 32, maxWidth: 380,
-                lineHeight: 1.5, fontStyle: "italic",
-                animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
-              }}>
-                "{rep.rep}"
-              </p>
-            </>
-          )}
-          {!showRepInSubstance && (
-            <p className="t-body-md quiet" style={{
-              marginBottom: 32, maxWidth: 380, lineHeight: 1.7,
-              animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
-            }}>
-              Body, then thought. The arc compounds with practice.
-            </p>
-          )}
-        </>
-      )}
-
-      {/* Beat 3 — close button OR tap-to-continue micro-prompt */}
-      {beat < 3 && (
+      {outcomeSubline && (
         <div className="t-mono-xs" style={{
-          color: "var(--text-muted)", letterSpacing: "0.18em",
-          textTransform: "uppercase", marginTop: 12,
-          animation: "scnPulse 1.8s ease-in-out infinite"
+          color: "var(--text-muted)", letterSpacing: "0.12em",
+          textTransform: "uppercase", marginBottom: 24,
+          animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
         }}>
-          Tap to continue
+          {outcomeSubline}
         </div>
       )}
-      {beat >= 3 && (
-        <button
-          className="btn btn-primary"
-          style={{
-            padding: "14px 36px", fontSize: 15, minWidth: 200,
-            animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
-          }}
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
-        >
-          Close
-        </button>
+
+      {showRep && (
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
+          color: "var(--text)", marginBottom: 36, maxWidth: 380,
+          lineHeight: 1.5, fontStyle: "italic",
+          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+        }}>
+          "{rep.rep}"
+        </p>
       )}
+      {!showRep && (
+        <p className="t-body-md quiet" style={{
+          marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
+          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+        }}>
+          The arc compounds with practice.
+        </p>
+      )}
+
+      <button
+        className="btn btn-primary"
+        style={{
+          padding: "14px 36px", fontSize: 15, minWidth: 200,
+          animation: "scnFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
+        }}
+        onClick={onClose}
+      >
+        Close
+      </button>
 
       <style>{`
         @keyframes scnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes scnPulse  { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
       `}</style>
     </section>
   );
