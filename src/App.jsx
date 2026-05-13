@@ -7084,7 +7084,24 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   };
 
   // --- BREATHE ---
-  const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
+  // Pattern source priority:
+  //   1) Session override (stillform_session_breath_override) — set by
+  //      startGuidedSession when Breathe runs as the session's Body step.
+  //      Read-once: consumed and deleted on first read so a subsequent
+  //      standalone Breathe launch falls back to user preference.
+  //   2) User preference (stillform_breath_pattern) — what the user
+  //      configured in Settings; persists across sessions.
+  //   3) Default fallback ("quick") — Quick Reset, ~60s.
+  const savedPatternId = (() => {
+    try {
+      const sessionOverride = localStorage.getItem("stillform_session_breath_override");
+      if (sessionOverride) {
+        try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
+        return sessionOverride;
+      }
+      return localStorage.getItem("stillform_breath_pattern") || "quick";
+    } catch { return "quick"; }
+  })();
   const [patternId] = useState(savedPatternId);
   const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
   const phases = pattern.phases;
@@ -21118,9 +21135,15 @@ const isSignalProfileConfigured = () => {
   };
 
   // ── GUIDED SESSION HELPERS ────────────────────────────────────────────
-  // The session orchestrates Body → Reframe → Close. Body step varies by
-  // user state (calibration + bio-filter); Reframe step is constant; Close
-  // is a screen, not a tool. See SessionHeader/SessionTransition components.
+  // The session orchestrates Body → Notice → Reframe → Close. Body step
+  // is CONDITIONAL on user state — body-before-cognition is the
+  // neuroscience when the body is LOUD (off-baseline/pain), not a
+  // universal mandate. Thought-first baseline users skip the body step
+  // entirely (their calibration is the entry point). When body work IS
+  // the right entry, it's Cyclic Sighing (Balban 2023, ~5 min) via the
+  // Breathe tool with session override — not the 10-min Body Scan.
+  // Body Scan stays as the body tool only when pain is the bio-filter
+  // (locating the signal IS the move, distinct from regulation).
   const startGuidedSession = (entryReason = "home-cta", overrideMode = null) => {
     const bioFilter = getActiveBioFilter();
     const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
@@ -21128,34 +21151,39 @@ const isSignalProfileConfigured = () => {
     const isThoughtFirstUser = regType === "thought-first";
     const isBodyFirstUser = regType === "body-first";
 
-    // Body step selection — body-before-cognition is the actual neuroscience.
-    // Thought-first user still gets a body step (brief sigh), not skipped.
-    let bodyStep;
+    // Body step selection — CONDITIONAL on actual need, not universal.
+    let bodyStep = null;
     if (hasPain) {
+      // Pain bio-filter: Body Scan stays. Locating the signal IS the
+      // move (interoception), distinct from breath regulation.
       bodyStep = { id: "body", label: "Body", toolId: "scan" };
     } else if (offBaseline) {
-      // Off-baseline overrides calibration — body work is the entry, full breathe
-      bodyStep = { id: "body", label: "Body", toolId: "breathe" };
-    } else if (isThoughtFirstUser) {
-      // Thought-first baseline → brief physiological sigh, then cognitive work
-      bodyStep = { id: "body", label: "Body", toolId: "sigh" };
-    } else {
-      // Body-first baseline → full breathe
-      bodyStep = { id: "body", label: "Body", toolId: "breathe" };
+      // Off-baseline (activated/depleted/sleep/medicated/something-off):
+      // body is loud, cuts the channel. Cyclic Sighing — Balban 2023
+      // RCT showed greater mood improvement than mindfulness, box
+      // breathing, and hyperventilation. ~5 min via Breathe tool with
+      // session override on the pattern.
+      bodyStep = { id: "body", label: "Body", toolId: "breathe", breathPattern: "cyclic_sigh" };
+    } else if (isBodyFirstUser) {
+      // Body-first baseline: calibration preference is body entry.
+      // Brief Cyclic Sighing respects the calibration without forcing
+      // the 10-min scan.
+      bodyStep = { id: "body", label: "Body", toolId: "breathe", breathPattern: "cyclic_sigh" };
     }
+    // else: thought-first baseline → NO body step. Their calibration IS
+    // cognitive entry; forcing body work here adds friction the science
+    // doesn't require. Notice + Reframe directly.
 
-    // Reframe step — mode determined by override or default calm. Calm is the
-    // default arc; users in hype/clarity moments take direct tool routes outside
-    // the guided session (existing scenario protocols handle those).
+    // Reframe step — mode determined by override or default calm.
     const reframeMode = overrideMode || "calm";
     const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
 
-    // Notice step — discrete affect-labeling beat between Body and Reframe.
-    // Screen-based, not tool-based. Sits between bodyStep and reframeStep.
+    // Notice step — discrete affect-labeling beat. Universal (granularity
+    // applies regardless of entry modality).
     const noticeStep = { id: "notice", label: "Notice", screenName: "session-notice" };
 
-    // Steps array — three-step arc. Close is NOT a step (terminal screen).
-    const steps = [bodyStep, noticeStep, reframeStep];
+    // Steps array — body is conditional, notice + reframe always.
+    const steps = bodyStep ? [bodyStep, noticeStep, reframeStep] : [noticeStep, reframeStep];
 
     const session = {
       id: `s-${Date.now()}`,
@@ -21169,11 +21197,9 @@ const isSignalProfileConfigured = () => {
     setActiveSession(session);
 
     // ── REP-POSITIONED SESSION ──────────────────────────────────────────
-    // Write today's rep to a transient localStorage key so the Reframe step
-    // can read it and pass to the AI as the session's organizing objective.
-    // This makes the session "know" what capacity it's training — Reframe
-    // shapes the conversation toward the rep, not generic cognitive work.
-    // Cleared by endGuidedSession / abandonGuidedSession.
+    // Write today's rep to a transient localStorage key so the Reframe
+    // step can read it and pass to the AI as the session's organizing
+    // objective.
     try {
       const rep = session.originalRep;
       if (rep && rep.rep && !rep.allMet) {
@@ -21187,25 +21213,35 @@ const isSignalProfileConfigured = () => {
           at: Date.now()
         }));
       } else {
-        // No active rep (all markers met, or rep null) — clear so Reframe
-        // doesn't inherit stale context from a prior session.
         localStorage.removeItem("stillform_session_rep_context");
       }
     } catch {}
 
-    // Launch first step's tool. Pathway is set so calm tools downstream pick
-    // up the right register.
+    // Launch first step — handle both tool-based and screen-based.
     setPathway(reframeMode);
-    const firstTool = TOOLS.find(t => t.id === steps[0].toolId);
-    if (firstTool) {
-      const toolEntry = steps[0].mode ? { ...firstTool, mode: steps[0].mode } : firstTool;
-      setActiveTool(toolEntry);
-      setScreen("tool");
-    } else {
-      // Defensive — should not happen for known tool ids. Abandon cleanly.
-      setActiveSession(null);
-      goHomeSafely();
-      return;
+    const firstStep = steps[0];
+
+    // If first step is screen-based (Notice when no body step), route directly
+    if (firstStep.screenName) {
+      setScreen(firstStep.screenName);
+    } else if (firstStep.toolId) {
+      // Tool-based step. If breathPattern override is set (Cyclic Sighing
+      // for session body work), write the session-scoped override that
+      // Breathe reads on mount.
+      if (firstStep.toolId === "breathe" && firstStep.breathPattern) {
+        try { localStorage.setItem("stillform_session_breath_override", firstStep.breathPattern); } catch {}
+      }
+      const firstTool = TOOLS.find(t => t.id === firstStep.toolId);
+      if (firstTool) {
+        const toolEntry = firstStep.mode ? { ...firstTool, mode: firstStep.mode } : firstTool;
+        setActiveTool(toolEntry);
+        setScreen("tool");
+      } else {
+        // Defensive — should not happen for known tool ids
+        setActiveSession(null);
+        goHomeSafely();
+        return;
+      }
     }
 
     try {
@@ -21213,7 +21249,8 @@ const isSignalProfileConfigured = () => {
         props: {
           entry: entryReason,
           step_count: steps.length,
-          body_tool: bodyStep.toolId,
+          has_body_step: bodyStep ? "yes" : "no",
+          body_tool: bodyStep ? (bodyStep.breathPattern || bodyStep.toolId) : "none",
           reframe_mode: reframeMode,
           bio_filter: bioFilter.slice(0, 32),
           reg_type: regType || "unknown"
@@ -21260,8 +21297,9 @@ const isSignalProfileConfigured = () => {
         });
       }
     } catch {}
-    // Clear rep context so the next session starts clean
+    // Clear rep context + breath override so the next session starts clean
     try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
+    try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
     setActiveSession(null);
     setSessionTransitionPhase(null);
     goHomeSafely();
@@ -21279,8 +21317,9 @@ const isSignalProfileConfigured = () => {
         });
       }
     } catch {}
-    // Clear rep context so the next session starts clean
+    // Clear rep context + breath override so the next session starts clean
     try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
+    try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
     setActiveSession(null);
     setSessionTransitionPhase(null);
     goHomeSafely();
@@ -21904,6 +21943,12 @@ const isSignalProfileConfigured = () => {
                   return;
                 }
                 if (step?.toolId) {
+                  // If this step asks Breathe to use a specific pattern (e.g.
+                  // Cyclic Sighing for session body work), write the session
+                  // override so Breathe picks it up on mount.
+                  if (step.toolId === "breathe" && step.breathPattern) {
+                    try { localStorage.setItem("stillform_session_breath_override", step.breathPattern); } catch {}
+                  }
                   const tool = TOOLS.find(t => t.id === step.toolId);
                   if (tool) {
                     const toolEntry = step.mode ? { ...tool, mode: step.mode } : tool;
