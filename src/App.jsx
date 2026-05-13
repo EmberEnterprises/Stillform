@@ -11633,6 +11633,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })(),
           aiTone: aiToneChoice,
           sessionEntryMode: entryMode,
+          // ── REP-POSITIONED SESSION CONTEXT ──────────────────────────────
+          // When the user is in a guided session, today's metacognitive rep
+          // (capacity-building objective from the Roadmap) is the session's
+          // organizing principle. The AI receives the rep + stage name and
+          // shapes the conversation toward it — connecting the user's input
+          // to the capacity they're training, not generic cognitive work.
+          // Written at startGuidedSession; cleared at endGuidedSession /
+          // abandonGuidedSession. Null when not in a session or no active rep.
+          sessionRepContext: (() => {
+            try {
+              const raw = localStorage.getItem("stillform_session_rep_context");
+              if (!raw) return null;
+              const ctx = JSON.parse(raw);
+              if (!ctx || !ctx.repStatement) return null;
+              return {
+                stageId: ctx.stageId,
+                stageName: ctx.stageName,
+                markerLabel: ctx.markerLabel,
+                repStatement: ctx.repStatement
+              };
+            } catch { return null; }
+          })(),
           sessionNotes: (() => {
             try {
               const notes = secureRead("stillform_ai_session_notes", []);
@@ -14815,10 +14837,13 @@ function SessionHeader({ session }) {
 // mono caption, thin amber line drawing left-to-right. Self-advances via
 // internal setTimeout on mount; parent supplies onAdvance.
 function SessionTransition({ phase, onAdvance }) {
+  // Framing-aligned phase messages: regulation cuts noise so the practice
+  // can land. Transitions name what's NEXT (concept work), not what
+  // resolved (amplitude framing).
   const messages = {
-    "body-to-notice":     { primary: "Body settled.",        secondary: "Naming what's present..." },
-    "notice-to-reframe":  { primary: "Named.",               secondary: "Moving to reframe..." },
-    "reframe-to-close":   { primary: "Reframe complete.",    secondary: "Closing the session..." }
+    "body-to-notice":     { primary: "Noise cleared.",      secondary: "Bringing the concept up..." },
+    "notice-to-reframe":  { primary: "Concept named.",      secondary: "Bringing it into reframe..." },
+    "reframe-to-close":   { primary: "Concept worked.",     secondary: "Closing the rep..." }
   };
   const msg = messages[phase] || { primary: "...", secondary: "" };
 
@@ -14923,7 +14948,9 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
       <SessionHeader session={session} />
 
       {/* Prompt — Cormorant primary, mono subcaption.
-          Lieberman 2007 affect labeling: amygdala downregulation through naming. */}
+          Granularity framing: specific naming is the trainable capacity
+          (Hoemann 2021; Barrett 2017 constructed emotion). Each name added
+          is a concept built — not amplitude reduction. */}
       <div style={{ marginBottom: 24, textAlign: "center" }}>
         <h1 style={{
           fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300,
@@ -14935,7 +14962,7 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
         <div className="t-mono-xs" style={{
           color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase"
         }}>
-          Labeling reduces amplitude.
+          Each specific name is a concept built.
         </div>
       </div>
 
@@ -14977,6 +15004,190 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
           Skip · move to reframe
         </button>
       </div>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------------
+// SESSION CLOSE — multi-beat close ritual for guided sessions.
+// Three beats revealed by tap-forward (Liven-style REVEAL pacing but
+// precision-elite voice, not gentle-wellness illustration cards):
+//
+//   Beat 1 — Outcome: "Rep counted." / "Concept added." / "Session closed."
+//   Beat 2 — Substance: rep statement + what was trained
+//   Beat 3 — Close: single Close button (replaces tap-to-continue micro-prompt)
+//
+// Each tap reveals the next beat with sharp Cormorant fade-in. Prior
+// beats stay visible — cumulative reveal, not slideshow. Final tap
+// closes the session via onClose callback.
+//
+// Rep-counted detection reads stillform_last_rep_counted timestamp vs
+// session startedAt — if a marker flipped DURING this session, the
+// outcome beat is "Rep counted" instead of "Concept added". Aligns with
+// Gap 11 (Per-session capacity-rep feedback) already-shipped marker
+// detection in appendSessionToStorage at :2538.
+// --------------------------------------------------------------------
+function SessionCloseScreen({ session, onClose }) {
+  const [beat, setBeat] = useState(1);
+
+  const rep = session?.originalRep || null;
+  const durationSec = session ? Math.round((Date.now() - session.startedAt) / 1000) : 0;
+  const mins = Math.floor(durationSec / 60);
+  const secs = durationSec % 60;
+  const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+  // Did a capacity rep get counted during THIS session? Read the
+  // stillform_last_rep_counted key (written by appendSessionToStorage
+  // when a marker flipped on session save) and check timestamp vs
+  // session.startedAt — anything written after session start belongs
+  // to this session.
+  const repCounted = (() => {
+    try {
+      const raw = localStorage.getItem("stillform_last_rep_counted");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.at) return null;
+      if (!session?.startedAt) return null;
+      if (parsed.at < session.startedAt) return null;
+      return parsed;
+    } catch { return null; }
+  })();
+
+  const meaningfulArc = durationSec >= 60 && session && session.currentStep >= session.steps.length - 1;
+
+  // Beat 1 — outcome line
+  const outcomeHeadline = repCounted
+    ? "Rep counted."
+    : (meaningfulArc ? "Concept added." : "Session closed.");
+  const outcomeSubline = repCounted
+    ? `Stage ${repCounted.stageId} · ${repCounted.stageName || ""}`
+    : (meaningfulArc ? "The library grew." : "");
+
+  // Beat 2 — substance
+  const showRepInSubstance = rep && rep.rep && !rep.allMet;
+
+  const handleTap = () => {
+    if (beat < 3) {
+      setBeat(beat + 1);
+      try { window.plausible("Session Close Beat", { props: { beat: beat + 1 } }); } catch {}
+    }
+  };
+
+  return (
+    <section
+      onClick={beat < 3 ? handleTap : undefined}
+      style={{
+        maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+        minHeight: "100vh", display: "flex", flexDirection: "column",
+        alignItems: "center", justifyContent: "center",
+        position: "relative", zIndex: 1, textAlign: "center",
+        cursor: beat < 3 ? "pointer" : "default",
+        WebkitTapHighlightColor: "transparent"
+      }}
+    >
+      {/* Session-complete eyebrow always visible */}
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
+        textTransform: "uppercase",
+        animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+      }}>
+        Session Complete · {durationLabel}
+      </div>
+
+      {/* Beat 1 — outcome headline + subline */}
+      {beat >= 1 && (
+        <>
+          <h1 style={{
+            fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
+            lineHeight: 1.2, marginBottom: 8, color: "var(--text)",
+            animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+          }}>
+            {outcomeHeadline}
+          </h1>
+          {outcomeSubline && (
+            <div className="t-mono-xs" style={{
+              color: "var(--text-muted)", letterSpacing: "0.12em",
+              textTransform: "uppercase", marginBottom: 24,
+              animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+            }}>
+              {outcomeSubline}
+            </div>
+          )}
+          {!outcomeSubline && <div style={{ marginBottom: 24 }} />}
+        </>
+      )}
+
+      {/* Beat 2 — substance (rep statement or generic close note) */}
+      {beat >= 2 && (
+        <>
+          {repCounted && (
+            <p style={{
+              fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
+              color: "var(--text-cream)", marginBottom: 8, maxWidth: 380,
+              lineHeight: 1.6,
+              animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+            }}>
+              {repCounted.markerLabel || "A marker flipped this session."}
+            </p>
+          )}
+          {showRepInSubstance && (
+            <>
+              {!repCounted && (
+                <p className="t-body-md quiet" style={{
+                  marginBottom: 12, maxWidth: 380, lineHeight: 1.7,
+                  animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+                }}>
+                  You worked the rep:
+                </p>
+              )}
+              <p style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
+                color: "var(--text)", marginBottom: 32, maxWidth: 380,
+                lineHeight: 1.5, fontStyle: "italic",
+                animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+              }}>
+                "{rep.rep}"
+              </p>
+            </>
+          )}
+          {!showRepInSubstance && (
+            <p className="t-body-md quiet" style={{
+              marginBottom: 32, maxWidth: 380, lineHeight: 1.7,
+              animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+            }}>
+              Body, then thought. The arc compounds with practice.
+            </p>
+          )}
+        </>
+      )}
+
+      {/* Beat 3 — close button OR tap-to-continue micro-prompt */}
+      {beat < 3 && (
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", letterSpacing: "0.18em",
+          textTransform: "uppercase", marginTop: 12,
+          animation: "scnPulse 1.8s ease-in-out infinite"
+        }}>
+          Tap to continue
+        </div>
+      )}
+      {beat >= 3 && (
+        <button
+          className="btn btn-primary"
+          style={{
+            padding: "14px 36px", fontSize: 15, minWidth: 200,
+            animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+          }}
+          onClick={(e) => { e.stopPropagation(); onClose(); }}
+        >
+          Close
+        </button>
+      )}
+
+      <style>{`
+        @keyframes scnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scnPulse  { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+      `}</style>
     </section>
   );
 }
@@ -20957,6 +21168,31 @@ const isSignalProfileConfigured = () => {
     };
     setActiveSession(session);
 
+    // ── REP-POSITIONED SESSION ──────────────────────────────────────────
+    // Write today's rep to a transient localStorage key so the Reframe step
+    // can read it and pass to the AI as the session's organizing objective.
+    // This makes the session "know" what capacity it's training — Reframe
+    // shapes the conversation toward the rep, not generic cognitive work.
+    // Cleared by endGuidedSession / abandonGuidedSession.
+    try {
+      const rep = session.originalRep;
+      if (rep && rep.rep && !rep.allMet) {
+        localStorage.setItem("stillform_session_rep_context", JSON.stringify({
+          stageId: rep.stageId,
+          stageName: rep.stage?.name || "",
+          markerId: rep.marker?.id || "",
+          markerLabel: rep.marker?.label || "",
+          repStatement: rep.rep,
+          sessionId: session.id,
+          at: Date.now()
+        }));
+      } else {
+        // No active rep (all markers met, or rep null) — clear so Reframe
+        // doesn't inherit stale context from a prior session.
+        localStorage.removeItem("stillform_session_rep_context");
+      }
+    } catch {}
+
     // Launch first step's tool. Pathway is set so calm tools downstream pick
     // up the right register.
     setPathway(reframeMode);
@@ -21024,6 +21260,8 @@ const isSignalProfileConfigured = () => {
         });
       }
     } catch {}
+    // Clear rep context so the next session starts clean
+    try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
     setActiveSession(null);
     setSessionTransitionPhase(null);
     goHomeSafely();
@@ -21041,6 +21279,8 @@ const isSignalProfileConfigured = () => {
         });
       }
     } catch {}
+    // Clear rep context so the next session starts clean
+    try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
     setActiveSession(null);
     setSessionTransitionPhase(null);
     goHomeSafely();
@@ -21693,78 +21933,16 @@ const isSignalProfileConfigured = () => {
         {/* SESSION CLOSE — terminal screen for guided sessions. Ties what
             the user just did back to today's rep (if any), then routes home.
             Mirrors signalmap-complete pattern but for daily practice arcs. */}
-        {screen === "session-close" && (() => {
-          const rep = activeSession?.originalRep || null;
-          const durationSec = activeSession ? Math.round((Date.now() - activeSession.startedAt) / 1000) : 0;
-          const mins = Math.floor(durationSec / 60);
-          const secs = durationSec % 60;
-          const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-          // Heuristic: was there a meaningful arc? At least one minute and both
-          // steps reached. If not, render a quieter close.
-          const meaningfulArc = durationSec >= 60 && activeSession && activeSession.currentStep >= activeSession.steps.length - 1;
-          return (
-            <section style={{
-              maxWidth: 480, margin: "0 auto", padding: "48px 24px",
-              minHeight: "100vh", display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              position: "relative", zIndex: 1, textAlign: "center"
-            }}>
-              <div className="t-mono-xs" style={{
-                color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
-                textTransform: "uppercase",
-                animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
-              }}>
-                Session Complete · {durationLabel}
-              </div>
-              <h1 style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
-                lineHeight: 1.2, marginBottom: 16, color: "var(--text)",
-                animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
-              }}>
-                {meaningfulArc ? "Something shifted." : "Session closed."}
-              </h1>
-              {rep && rep.rep && !rep.allMet && (
-                <p className="t-body-md quiet" style={{
-                  marginBottom: 12, maxWidth: 380, lineHeight: 1.7,
-                  animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
-                }}>
-                  You worked the rep:
-                </p>
-              )}
-              {rep && rep.rep && !rep.allMet && (
-                <p style={{
-                  fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500,
-                  color: "var(--text-cream)", marginBottom: 36, maxWidth: 380,
-                  lineHeight: 1.6, fontStyle: "italic",
-                  animation: "scnFadeIn 0.5s ease-out 0.4s forwards", opacity: 0
-                }}>
-                  {rep.rep}
-                </p>
-              )}
-              {(!rep || !rep.rep || rep.allMet) && (
-                <p className="t-body-md quiet" style={{
-                  marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
-                  animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
-                }}>
-                  Body, then thought. The arc compounds with practice.
-                </p>
-              )}
-              <button
-                className="btn btn-primary"
-                style={{
-                  padding: "14px 36px", fontSize: 15, minWidth: 200,
-                  animation: "scnFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
-                }}
-                onClick={() => endGuidedSession()}
-              >
-                Close
-              </button>
-              <style>{`
-                @keyframes scnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-              `}</style>
-            </section>
-          );
-        })()}
+        {/* SESSION CLOSE — multi-beat close ritual. Beat 1 outcome, Beat 2
+            substance (rep echoed), Beat 3 close button. Tap-forward reveals
+            with sharp Cormorant fade-in. Component handles rep-counted vs
+            concept-added distinction via stillform_last_rep_counted check. */}
+        {screen === "session-close" && (
+          <SessionCloseScreen
+            session={activeSession}
+            onClose={() => endGuidedSession()}
+          />
+        )}
 
         {/* CALIBRATION TRIGGER SEED — Phase 2e (post-Pattern Check, pre-home) */}
         {screen === "calibration-trigger-seed" && (() => {

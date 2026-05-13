@@ -1241,6 +1241,7 @@ exports.handler = async function(event) {
       regulationType = null,
       sessionNotes = null,
       sessionEntryMode = null,
+      sessionRepContext = null,
       aiTone = "balanced",
       userLocalNowMs = null,
       userTimeZone = null,
@@ -1548,6 +1549,32 @@ exports.handler = async function(event) {
     if (triggerProfile) contextParts.push(`${triggerProfile}. These are specific people, contexts, or moments the user has named as load-bearing — not categories, instances. If their current message names one of these by clear reference (the person, the meeting, the situation), recognize it directly: "This is [trigger] again." That recognition lands as continuity. Do NOT volunteer a trigger they did not raise; do NOT fabricate connections; do NOT moralize about why it shows up. The list is for orientation, not interrogation. If a high-encounter trigger has not surfaced in a while and the user seems off, you may ask gently: "Has [trigger] been quiet, or just out of frame?" Once per session, max.`);
     if (priorToolContext) contextParts.push(priorToolContext);
     if (practiceEntryContext) contextParts.push(practiceEntryContext);
+    // ── REP-POSITIONED SESSION ────────────────────────────────────────
+    // When the user enters Reframe as part of a guided session, the
+    // session has an organizing rep — today's metacognitive objective
+    // from the Roadmap. The AI's job inside that session is to help the
+    // user CONNECT what's present to that rep — building/refining the
+    // specific capacity, not generic cognitive work.
+    //
+    // Per STILLFORM_FRAMING_LAW.md: regulation tools cut noise so the
+    // metacognition practice can land. Reframe IS the practice. The rep
+    // names what's being trained. Without this context the AI does
+    // generic reframe work; with it, the AI shapes the conversation
+    // toward the named capacity expansion.
+    if (sessionRepContext && sessionRepContext.repStatement) {
+      const stageLabel = sessionRepContext.stageName
+        ? `Stage ${sessionRepContext.stageId} · ${sessionRepContext.stageName}`
+        : "the current chapter";
+      const markerNote = sessionRepContext.markerLabel
+        ? ` (marker: ${sessionRepContext.markerLabel})`
+        : "";
+      contextParts.push(
+        `TODAY'S REP (organizing objective of this session): "${sessionRepContext.repStatement}". This is the capacity rep the user is training right now from ${stageLabel}${markerNote}. ` +
+        `Your job in this session is to help them connect what's actually present to this rep — naming with specificity (Hoemann 2021 / Barrett 2017), building the concept library that makes future perception more granular. Not amplitude reduction; concept refinement. ` +
+        `Do not announce the rep mechanically ("today we're working on..."). Hold it as your orienting frame and let it shape what you notice, what you ask, and what you reflect. ` +
+        `Close should produce a takeaway that adds to the user's concept library — a sharper name, a clearer pattern, a recognized move. The session counts toward the rep when a meaningful capacity moment occurs; the user-side system handles marker accounting. You stay focused on producing the concept refinement that earns the rep.`
+      );
+    }
     if (priorModeContext) contextParts.push(priorModeContext);
     if (journalContext && sessionCount >= 3) {
       // "TODAY'S SIGNAL LOG ENTRIES" = entries logged today (manual or auto) — reference proactively
