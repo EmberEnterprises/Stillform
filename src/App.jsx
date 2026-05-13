@@ -17235,6 +17235,181 @@ function MyProgress({ onBack }) {
           );
         })()}
 
+        {/* ── YOUR LIBRARY ──────────────────────────────────────────────
+            Brainstorm idea #5 (May 13, 2026): concept library visibility.
+            The user has been building a concept library through every
+            named state, identified trigger, mapped body signal, and
+            recognized distortion. Most of that data lives as AI context
+            only — the user never sees the library they've built.
+
+            Per Framing Law: surfacing this risks Type 2 rumination if
+            framed as state surveillance ("you've felt anxious 8 times").
+            Safe framing: mastery experience visible (Bandura 1977) —
+            "you've named these concepts." List, not frequency. Concrete
+            acquisition, not analytics dashboard.
+
+            Each subsection:
+            - States (granularity vocabulary): Hoemann 2021 — naming IS
+              the granularity training; visible library closes the loop
+            - Triggers identified: Gollwitzer 1999 implementation
+              intentions — each named trigger is a pre-installed move
+            - Body signals mapped: Critchley 2017 / Khalsa 2018 —
+              interoceptive precision as visible capacity
+            - Distortions on your watch list: Wells 2009 — metacognitive
+              awareness of one's own thinking patterns
+
+            Bounded design:
+            - List of labels only, no frequency counts (no "you've felt X
+              N times" — that's Type 2 affordance)
+            - Empty sections hidden
+            - Whole card hidden if user has zero of everything
+            - Paired with practice flow (My Progress is the home for
+              reflection; library lives where reflection happens)
+        */}
+        {(() => {
+          // States named — derive from sessions' chip fields, same source
+          // as Block 1 above (consistent vocabulary across surfaces).
+          const stateChips = new Set();
+          sessions.forEach(s => {
+            if (s.preState) stateChips.add(s.preState);
+            if (s.postState) stateChips.add(s.postState);
+            if (s.feelState) stateChips.add(s.feelState);
+          });
+          const stateList = Array.from(stateChips).filter(Boolean).sort();
+
+          // Triggers identified
+          let triggerList = [];
+          try {
+            const profile = getTriggerProfile();
+            if (profile?.triggers?.length > 0) {
+              triggerList = profile.triggers
+                .map(t => t?.label)
+                .filter(Boolean)
+                .sort();
+            }
+          } catch {}
+
+          // Body signals mapped — signalProfile may be array (firstAreas)
+          // or object with category keys. Handle both.
+          let bodyList = [];
+          if (Array.isArray(signalProfile)) {
+            bodyList = signalProfile.filter(Boolean).sort();
+          } else if (signalProfile && typeof signalProfile === "object") {
+            // Object shape: collect values across known keys
+            const collected = [];
+            if (Array.isArray(signalProfile.firstAreas)) collected.push(...signalProfile.firstAreas);
+            if (Array.isArray(signalProfile.bodyAreas)) collected.push(...signalProfile.bodyAreas);
+            if (Array.isArray(signalProfile.areas)) collected.push(...signalProfile.areas);
+            bodyList = Array.from(new Set(collected.filter(Boolean))).sort();
+          }
+
+          // Distortions on watch list
+          const biasList = Array.isArray(biasProfile)
+            ? biasProfile.filter(Boolean).sort()
+            : [];
+
+          // Hide whole card if library is empty
+          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length;
+          if (totalConcepts === 0) return null;
+
+          const subSectionHeaderStyle = {
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            color: "var(--text-muted)", letterSpacing: "0.14em",
+            marginTop: 24, marginBottom: 8, paddingBottom: 8,
+            borderBottom: "0.5px solid var(--border-printed)"
+          };
+          const labelListStyle = {
+            fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+            color: "var(--text)", lineHeight: 1.7,
+            letterSpacing: "0.005em"
+          };
+          const subSectionBodyStyle = {
+            fontSize: 11, color: "var(--text-muted)",
+            lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif",
+            marginTop: 6
+          };
+
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                YOUR LIBRARY
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55,
+                letterSpacing: "0.01em"
+              }}>
+                What you've built — concept by concept.
+              </div>
+
+              {stateList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    STATES NAMED · {stateList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {stateList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Your granularity vocabulary. Each name added is a concept the brain can use to perceive itself with more nuance (Hoemann 2021; Barrett 2017 constructed emotion).
+                  </div>
+                </>
+              )}
+
+              {triggerList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    TRIGGERS IDENTIFIED · {triggerList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {triggerList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Specific situations, people, or moments you've named as load-bearing. Each named trigger is a pre-installed move ready to fire (Gollwitzer 1999 implementation intentions).
+                  </div>
+                </>
+              )}
+
+              {bodyList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    BODY SIGNALS MAPPED · {bodyList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {bodyList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Where intensity registers in your body first. Specificity is interoceptive precision (Critchley 2017; Khalsa 2018).
+                  </div>
+                </>
+              )}
+
+              {biasList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    DISTORTIONS YOU WATCH · {biasList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {biasList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Cognitive patterns you've recognized in your own thinking. Each Reframe session is a rep against them — the distortion doesn't disappear; your relationship to it changes (Wells 2009 metacognitive therapy).
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
             May 9). Architecture line 274: "Roadmap surface (stage display +
