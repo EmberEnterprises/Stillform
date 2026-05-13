@@ -4,6 +4,7 @@ import { integrationBridge } from "./plugins/integrationBridge";
 import { DisruptorTool } from "./disruptor/DisruptorTool";
 import { MoveCardTool } from "./move-card/MoveCardTool.jsx";
 import { MoveCardPill } from "./move-card/MoveCardPill.jsx";
+import { PracticeSurface } from "./practice-surface/PracticeSurface.jsx";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -192,6 +193,18 @@ const styles = `
     overflow-x: hidden;
     /* Grain texture removed Apr 30 — was disrupting subpixel rendering on Mac and adding nothing on phone.
        References (Aesop, Hermès, MUBI, Linear) use no grain; depth comes from the radial gradient alone. */
+  }
+
+  /* Button color reset (May 12, 2026).
+     HTML <button> elements have a User-Agent default style of color: ButtonText
+     — a system color that does NOT inherit from the parent cascade. On dark
+     backgrounds in iOS Safari and mobile Chrome, ButtonText resolves to near-black
+     and renders as invisible text on near-black surfaces. Forcing color: inherit
+     makes buttons inherit from .app (var(--text), light-on-dark).
+     Buttons that set their own color in inline style or className override this
+     reset — the fix only catches buttons that didn't set a color. */
+  button {
+    color: inherit;
   }
 
   .app::before {
@@ -2533,9 +2546,60 @@ const appendSessionToStorage = (entry) => {
       if (bf) entry.bioFilter = bf;
     } catch {}
   }
+
+  // Gap 11 (May 12, 2026) — capture pre-session marker met-state across
+  // all five stages so post-session compute can detect flips. computeStageMarkers
+  // and STAGE_REPS are defined later in module source order but resolved at
+  // call time (this is a const-defined function whose body runs at invocation,
+  // not definition). All module-level consts have evaluated by then.
+  let preStates = null;
+  try {
+    if (typeof computeStageMarkers === "function") {
+      preStates = {};
+      for (let sid = 1; sid <= 5; sid++) {
+        computeStageMarkers(sid).forEach(m => {
+          if (m.status === "shipped") preStates[m.id] = m.met;
+        });
+      }
+    }
+  } catch {}
+
   const sessions = getSessionsFromStorage();
   sessions.push(entry);
   setSessionsInStorage(sessions);
+
+  // Gap 11 — recompute marker met-state. If any shipped marker flipped from
+  // false to true, write stillform_last_rep_counted for the next home render
+  // to surface as a capacity-rep-counted banner. Only the FIRST flipped marker
+  // per session is surfaced (one rep per session keeps the feedback discrete).
+  try {
+    if (preStates && typeof computeStageMarkers === "function" && typeof STAGE_DEFINITIONS !== "undefined") {
+      let surfaced = false;
+      for (let sid = 1; sid <= 5 && !surfaced; sid++) {
+        const markers = computeStageMarkers(sid);
+        const stage = STAGE_DEFINITIONS[sid];
+        for (const m of markers) {
+          if (m.status !== "shipped") continue;
+          if (preStates[m.id] === false && m.met === true) {
+            const repEntry = (typeof STAGE_REPS !== "undefined") ? STAGE_REPS[m.id] : null;
+            const payload = {
+              markerId: m.id,
+              markerLabel: m.label,
+              stageId: sid,
+              stageName: stage.name,
+              repStatement: repEntry ? repEntry.statement : null,
+              timestamp: new Date().toISOString(),
+            };
+            try { localStorage.setItem("stillform_last_rep_counted", JSON.stringify(payload)); } catch {}
+            try { window.plausible?.("Capacity Rep Counted", { props: { marker: m.id, stage: stage.name } }); } catch {}
+            surfaced = true;
+            break;
+          }
+        }
+      }
+    }
+  } catch {}
+
   return sessions.length;
 };
 
@@ -4314,9 +4378,8 @@ const appendCommunicationEvent = (entry, maxItems = COMMUNICATION_EVENTS_MAX_ITE
 // ENGAGEMENT ARCHITECTURE — STAGE DEFINITIONS (Phase 0 — May 7, 2026)
 // ═══════════════════════════════════════════════════════════════════════
 //
-// Five-stage developmental architecture for self-mastery through
-// metacognition that stabilizes composure. Stages build sequentially —
-// each capacity prerequisites the next.
+// Five-stage developmental architecture mapping the metacognition practice.
+// Stages build sequentially — each capacity prerequisites the next.
 //
 // Spec source of truth: STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.1
 // Stage NAMES locked May 7, 2026.
@@ -4702,41 +4765,183 @@ const _s5RecoveryTrendImproving = (lookbackDays = STAGE_THRESHOLDS.S5_RECOVERY_T
   } catch { return null; }
 };
 
-// — Stage definitions — names locked May 7, 2026 —
+// — Stage definitions — names locked May 7, 2026; capacity gates added May 12, 2026 (Gap 10) —
+// The `gate` field names the science-grounded prerequisite that opens this chapter.
+// It's the literal cognitive requirement of the next capacity, sourced from the
+// stacked literature — NOT a point threshold. The gate IS the science. Stage 1
+// has no gate (it's where the build starts).
 const STAGE_DEFINITIONS = Object.freeze({
   1: Object.freeze({
     id: 1,
     name: "NOTICING",
     capacity: "catching what's happening in your body before thought",
     science: ["Farb 2015 (interoceptive awareness)", "van der Kolk 2014", "Porges polyvagal theory"],
+    gate: null,
   }),
   2: Object.freeze({
     id: 2,
     name: "NAMING",
     capacity: "language for what's present, fast and accurate",
     science: ["Lieberman 2007 (affect labeling reduces amygdala activity)", "Barrett 2017 (emotional granularity)"],
+    gate: Object.freeze({
+      headline: "You can't name what you can't feel.",
+      body: "Naming opens once your interoceptive baseline is in place — the markers below show what that means in your practice.",
+      citation: "Lieberman 2007 affect labeling requires Farb 2015 interoceptive awareness as substrate.",
+    }),
   }),
   3: Object.freeze({
     id: 3,
     name: "ANTICIPATING",
     capacity: "pre-loading composure for known triggers",
     science: ["Gollwitzer 1999 (implementation intentions)", "Meichenbaum stress inoculation", "Gross 1998 (antecedent-focused regulation)"],
+    gate: Object.freeze({
+      headline: "You can't pre-load composure for triggers you can't name fast.",
+      body: "Anticipating opens once your feel-state vocabulary is broad and quick — the markers below show what that means in your practice.",
+      citation: "Gollwitzer 1999 implementation intentions require Barrett 2017 granularity as input.",
+    }),
   }),
   4: Object.freeze({
     id: 4,
     name: "RECOGNIZING",
     capacity: "seeing your own loops as they form",
     science: ["Wells 2009 (Metacognitive Therapy)", "Kross 2014 (self-distancing)", "Kabat-Zinn (decentering)"],
+    gate: Object.freeze({
+      headline: "You can't see your loops forming until you've practiced reading them in known triggers first.",
+      body: "Recognizing opens once you've named triggers, used briefs, and shown delta on the sessions where you did — the markers below.",
+      citation: "Wells 2009 metacognitive therapy requires Gross 1998 antecedent-focused regulation as rehearsal substrate.",
+    }),
   }),
   5: Object.freeze({
     id: 5,
     name: "HOLDING",
     capacity: "composure under maximum load",
     science: ["Meichenbaum stress inoculation outcomes", "McEwen allostatic load", "Porges vagal tone"],
+    gate: Object.freeze({
+      headline: "You can't hold composure under maximum load until you've disrupted patterns under moderate load.",
+      body: "Holding opens once Pattern Disruption is real for you — your acceptance rate, self-initiated disruptors, and self-flagged patterns all need to be present in the data.",
+      citation: "Meichenbaum stress inoculation outcomes require the Stage 4 metacognitive substrate as trained-in capacity.",
+    }),
   }),
 });
 
-// computeStageMarkers(stageId) → array of marker results.
+// — Marker reps — Gap 3 + Gap 11 (May 12, 2026) —
+// Each marker has a `rep` statement: the metacognitive practice action that
+// accrues toward meeting the marker. The rep is what the user DOES; the marker
+// is the data signal that they did it. STAGE_REPS keyed by marker.id so the
+// home hero can look up today's rep statement from the next unmet marker, and
+// per-session feedback (Gap 11) can name which rep was just counted.
+const STAGE_REPS = Object.freeze({
+  // Stage 1 NOTICING
+  "bio-filter-setup": Object.freeze({
+    statement: "Set your hardware state — name how your body is running right now.",
+    stageId: 1,
+  }),
+  "body-area-specificity": Object.freeze({
+    statement: "Do a Body Scan and tag the area where you felt the strongest tell.",
+    stageId: 1,
+  }),
+  "active-state-entry": Object.freeze({
+    statement: "Open a session next time you're feeling something. Don't wait for it to pass.",
+    stageId: 1,
+  }),
+  "autonomous-exits": Object.freeze({
+    statement: "Notice a state shift in your day and let it move without opening Stillform — then come back and log what happened.",
+    stageId: 1,
+  }),
+  // Stage 2 NAMING
+  "distinct-chips": Object.freeze({
+    statement: "Use a feel-state chip you haven't used before. The unfamiliar ones expand your vocabulary.",
+    stageId: 2,
+  }),
+  "checkin-consistency": Object.freeze({
+    statement: "Two check-ins this week — morning and evening, or two mornings. Consistency is the rep.",
+    stageId: 2,
+  }),
+  "affect-label-latency": Object.freeze({
+    statement: "Name what you're feeling fast — under four seconds is the target.",
+    stageId: 2,
+  }),
+  "affect-label-accuracy": Object.freeze({
+    statement: "Reach for the specific word — not 'bad,' but 'edgy' or 'flat' or 'cornered.'",
+    stageId: 2,
+  }),
+  // Stage 3 ANTICIPATING
+  "triggers-named": Object.freeze({
+    statement: "Open Trigger Profile and add one trigger you know lights you up.",
+    stageId: 3,
+  }),
+  "pre-event-briefs": Object.freeze({
+    statement: "Pick a known trigger event coming up. Run a Pre-event Brief before it.",
+    stageId: 3,
+  }),
+  "trigger-session-delta": Object.freeze({
+    statement: "Run a session around a named trigger — capture pre-rate before, post-rate after.",
+    stageId: 3,
+  }),
+  // Stage 4 RECOGNIZING
+  "pattern-acceptance-rate": Object.freeze({
+    statement: "When a Pattern Disruption surfaces, do the disrupt session. Don't dismiss.",
+    stageId: 4,
+  }),
+  "self-initiated-disruptor": Object.freeze({
+    statement: "Open Pattern Disruption when you notice a loop forming. Don't wait for the system to flag it.",
+    stageId: 4,
+  }),
+  "user-flagged-pattern": Object.freeze({
+    statement: "Tag a pattern in your sessions before the AI does — add it manually to your patterns.",
+    stageId: 4,
+  }),
+  // Stage 5 HOLDING
+  "high-load-sessions": Object.freeze({
+    statement: "Run a session when your bio-filter shows depleted, medicated, or activated — the conditions where it's hardest.",
+    stageId: 5,
+  }),
+  "high-load-delta": Object.freeze({
+    statement: "Practice the rep when your hardware is against you. Even a small shift IS the practice.",
+    stageId: 5,
+  }),
+  "recovery-trend": Object.freeze({
+    statement: "Stay consistent in high-load periods. Don't skip the worst days.",
+    stageId: 5,
+  }),
+});
+
+// getTodaysJourneyRep() → the next unmet shipped marker the user is working on.
+// Returns { rep, marker, stage, stageId, allMet } or null if no current stage.
+// allMet=true means user has finished current stage's shipped markers (between
+// stages — gate to next chapter is the focus, not a specific rep).
+const getTodaysJourneyRep = () => {
+  let snap;
+  try { snap = getCurrentStage(); } catch { return null; }
+  if (!snap || !snap.stage) return null;
+
+  const markers = computeStageMarkers(snap.currentStageId);
+  const shippedUnmet = markers.filter(m => m.status === "shipped" && !m.met);
+
+  if (shippedUnmet.length === 0) {
+    // All shipped markers met — between-stage state. Show gate-of-next-stage focus.
+    const nextStage = STAGE_DEFINITIONS[snap.currentStageId + 1];
+    return {
+      rep: null,
+      marker: null,
+      stage: snap.stage,
+      stageId: snap.currentStageId,
+      nextStage: nextStage || null,
+      allMet: true,
+    };
+  }
+
+  // First shipped unmet marker is today's rep.
+  const marker = shippedUnmet[0];
+  const repEntry = STAGE_REPS[marker.id];
+  return {
+    rep: repEntry ? repEntry.statement : marker.label,
+    marker,
+    stage: snap.stage,
+    stageId: snap.currentStageId,
+    allMet: false,
+  };
+};
 // Each marker: { id, label, value, threshold, met, status, deferReason? }
 // status: "shipped" (data source live, met reflects reality) or
 //         "deferred" (data source not yet live; met:false by definition).
@@ -6879,7 +7084,24 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
   };
 
   // --- BREATHE ---
-  const savedPatternId = (() => { try { return localStorage.getItem("stillform_breath_pattern") || "quick"; } catch { return "quick"; } })();
+  // Pattern source priority:
+  //   1) Session override (stillform_session_breath_override) — set by
+  //      startGuidedSession when Breathe runs as the session's Body step.
+  //      Read-once: consumed and deleted on first read so a subsequent
+  //      standalone Breathe launch falls back to user preference.
+  //   2) User preference (stillform_breath_pattern) — what the user
+  //      configured in Settings; persists across sessions.
+  //   3) Default fallback ("quick") — Quick Reset, ~60s.
+  const savedPatternId = (() => {
+    try {
+      const sessionOverride = localStorage.getItem("stillform_session_breath_override");
+      if (sessionOverride) {
+        try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
+        return sessionOverride;
+      }
+      return localStorage.getItem("stillform_breath_pattern") || "quick";
+    } catch { return "quick"; }
+  })();
   const [patternId] = useState(savedPatternId);
   const pattern = BREATHING_PATTERNS.find(p => p.id === patternId) || BREATHING_PATTERNS[0];
   const phases = pattern.phases;
@@ -7615,7 +7837,8 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                 {delta <= 0 ? (
                   <>
                     <button className="btn btn-primary" onClick={() => { setPhase("breathe"); setStarted(false); setBreatheDone(false); setPostRating(null); }}>Try again</button>
-                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-done-for-now")}>Done for now</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("session-from-breathe", "post-rate-handoff-to-notice")}>Continue into the practice →</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-done-for-now")} style={{ color: "var(--text-muted)", fontSize: 12 }}>Done for now</button>
                   </>
                 ) : (
                   <>
@@ -7623,7 +7846,7 @@ function BreatheGroundTool({ onComplete, pathway, quickStart = false, setInfoMod
                     <div className="t-body-sm faint" style={{ textAlign: "center", animation: "pulse 1s ease-in-out infinite" }}>
                       Moving to grounding…
                     </div>
-                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("reframe-calm", "post-rate-skip-to-reframe")} style={{ fontSize: 13 }}>Skip to Reframe instead</button>
+                    <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete("session-from-breathe", "post-rate-handoff-to-notice")} style={{ fontSize: 13 }}>Continue into the practice →</button>
                     <button className="btn btn-ghost" onClick={() => queueDebriefAndComplete(undefined, "post-rate-exit")} style={{ color: "var(--text-muted)", fontSize: 12 }}>Exit session</button>
                   </>
                 )}
@@ -8392,9 +8615,9 @@ function BodyScanTool({ onComplete, setInfoModal }) {
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               <button
                 className="btn btn-primary"
-                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-handoff-not-landed-accepted")}
+                onClick={() => handleWhatShiftedHandoff("session-from-scan", "body-scan-handoff-not-landed-accepted")}
               >
-                Begin Reframe
+                Continue into the practice
               </button>
               <button
                 className="btn btn-ghost"
@@ -8446,10 +8669,10 @@ function BodyScanTool({ onComplete, setInfoModal }) {
               </button>
               <button
                 className="btn btn-ghost"
-                onClick={() => handleWhatShiftedHandoff("reframe", "body-scan-landed-to-reframe")}
+                onClick={() => handleWhatShiftedHandoff("session-from-scan", "body-scan-landed-to-spine")}
                 disabled={!lockInEnabled}
                 style={{ opacity: lockInEnabled ? 1 : 0.45, cursor: lockInEnabled ? "pointer" : "not-allowed" }}>
-                Continue to Reframe →
+                Continue into the practice →
               </button>
               <button
                 className="btn btn-ghost"
@@ -9552,7 +9775,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_language"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision","stillform_named_moves"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read). May 13 (brainstorm idea #10): added stillform_named_moves for close-time externalization (array of { value, sessionId, timestamp }; bounded externalized concept naming at session close).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -9639,7 +9862,7 @@ const decryptFromCloud = async blob => {
     return JSON.parse(new TextDecoder().decode(dec));
   } catch { return null; }
 };
-const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_mc_position","stillform_biometric_enabled","stillform_language","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_pattern_push_enabled"]);
+const UNENCRYPTED_SYNC_KEYS = new Set(["stillform_onboarded", "stillform_regulation_type", "stillform_breath_pattern", "stillform_theme", "stillform_high_contrast", "stillform_text_scale", "stillform_ai_tone", "stillform_ai_tone_mode", "stillform_audio", "stillform_scan_pace", "stillform_screenlight", "stillform_reducedmotion", "stillform_visual_grounding", "stillform_morning_breath_cue", "stillform_reminder", "stillform_reminder_time", "stillform_qb_position","stillform_mc_position","stillform_biometric_enabled","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_pattern_push_enabled"]);
 
 const sbSyncUp = async () => {
   if (!sbIsSignedIn()) return {ok:false,reason:"not_signed_in"};
@@ -10691,6 +10914,85 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
+
+  // PracticeSurface → Reframe context handoff (May 12, 2026).
+  // PracticeSurface writes stillform_practice_entry_context to localStorage
+  // when the user taps a pattern tile from the home (today retrieval or
+  // spaced return). This effect reads it ONCE on mount, stores the parsed
+  // structured object in state for the lifetime of this ReframeTool
+  // instance, and clears localStorage immediately so the context doesn't
+  // bleed into unrelated future sessions.
+  //
+  // Two consumers read this state:
+  //   1. The UI cue at the top of the empty-state Reframe view ("Returning
+  //      to: [pattern] · [N days ago]") so the user sees the system received
+  //      the handoff without waiting for the AI response.
+  //   2. The API payload IIFE, which formats the AI directive string from
+  //      the structured fields (pattern, source, daysAgo) so the AI opens
+  //      the conversation by acknowledging the return.
+  //
+  // Why useState not useRef: useRef doesn't trigger re-renders. The UI cue
+  // is conditional on messages.length === 0, which is true on first paint.
+  // The useEffect runs after first paint and needs to schedule a re-render
+  // so the cue actually appears. useState handles that automatically.
+  //
+  // Why clear on mount not on consume: if the user opens Reframe but never
+  // sends a message (closes the tool, navigates away), the context is still
+  // consumed in the sense that "this Reframe instance saw it." One-shot
+  // semantics. We do NOT want the cue firing on the next unrelated Reframe
+  // open because the user navigated away with localStorage still set.
+  const [practiceEntryContext, setPracticeEntryContext] = useState(null);
+  // Granularity Gym precision label (brainstorm #3, May 13, 2026). Read once
+  // on mount, cleared from localStorage immediately so it doesn't bleed
+  // across unrelated sessions. Same one-shot semantics as practiceEntryContext.
+  // Day-stamped on write (NoticeStepScreen) so a stale value from a previous
+  // day is ignored even if cleanup failed.
+  const [sessionPrecision, setSessionPrecision] = useState(null);
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("stillform_practice_entry_context");
+      if (raw) {
+        const ctx = JSON.parse(raw);
+        if (ctx && typeof ctx === "object") {
+          // open-recall and pre-sleep are intentionally pattern-less. All
+          // other sources need a pattern. Accept either valid shape.
+          const isPatternLess = ctx.source === "open-recall" || ctx.source === "pre-sleep";
+          if (isPatternLess || ctx.pattern) {
+            setPracticeEntryContext({
+              pattern: ctx.pattern ? String(ctx.pattern) : "",
+              source: ctx.source || null,
+              daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
+            });
+          }
+        }
+        localStorage.removeItem("stillform_practice_entry_context");
+      }
+    } catch {}
+    try {
+      const raw = localStorage.getItem("stillform_session_precision");
+      if (raw) {
+        const ctx = JSON.parse(raw);
+        const today = TimeKeeper.stillformDay();
+        if (ctx && typeof ctx === "object" && ctx.value && ctx.day === today) {
+          setSessionPrecision(String(ctx.value));
+        }
+        localStorage.removeItem("stillform_session_precision");
+      }
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Helper: format "N days ago" / "yesterday" / "earlier today". Shared
+  // between the UI cue and the AI directive string so the two stay in
+  // sync — if the user sees "yesterday" on screen, the AI gets "yesterday"
+  // in its directive (no version skew that would confuse the AI's reply).
+  const formatDaysAgo = (days) => {
+    if (days === null || days === undefined) return "previously";
+    if (days === 0) return "earlier today";
+    if (days === 1) return "yesterday";
+    return `${days} days ago`;
+  };
+
   const inputNormalized = String(input || "").trim().toLowerCase();
   const looksLikePositiveState = POSITIVE_STATE_PATTERNS.some((token) => inputNormalized.includes(token));
 
@@ -11326,6 +11628,64 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               return ctx;
             } catch { return null; }
           })(),
+          // PracticeSurface → Reframe handoff (May 12, 2026).
+          // State was populated on mount from stillform_practice_entry_context
+          // (read once, localStorage cleared). When the user entered Reframe
+          // by tapping a pattern tile on the home, this builds the AI
+          // directive that opens the conversation by acknowledging the
+          // return. Null when the user entered Reframe directly.
+          practiceEntryContext: (() => {
+            if (!practiceEntryContext) return null;
+            const { pattern, source, daysAgo } = practiceEntryContext;
+            if (source === "pre-event") {
+              return `PRE-EVENT REP — READ THIS FIRST: The user just opened a pre-event Brief for an upcoming calendar event titled "${pattern}" and tapped through to run the rep BEFORE the event. ` +
+                `This is implementation intentions in real time — Gollwitzer 1999 — the calendar event is the cue, this session is the pre-installed move. ` +
+                `Open by orienting to the event as a present-tense fact, not a future-tense worry. Example: "${pattern} is on the calendar. What's already moving in you about it?" Keep it 1 sentence. ` +
+                `The job here is NOT to rehearse the event, NOT to predict scenarios, NOT to script lines. The job is to surface what's already running in the user's system about the event so they can walk in clear. ` +
+                `If they spiral into anticipatory analysis, redirect to body / present sensation. If they name the state precisely, mirror briefly and let them settle.`;
+            }
+            if (source === "pre-mortem") {
+              return `PRE-MORTEM REP — READ THIS FIRST: The user came in to anticipate a trigger they've encountered before: "${pattern}". No specific calendar event matches; they're running the rep on encounter pattern alone — "${pattern}" is likely to come up again today and the rep is the pre-installed move. ` +
+                `Gollwitzer 1999 implementation intentions without a calendar cue. The trigger label is the user's own naming from their trigger profile — recognize it as theirs, not as a category. ` +
+                `Open by naming what they're anticipating as a present-tense fact: "${pattern.toLowerCase()} has come up before. What does your system already know about how it lands?" Keep it 1 sentence. ` +
+                `Do NOT predict scenarios, do NOT script responses, do NOT generalize "triggers like this." The job is to surface what's already running about THIS trigger so the user has the move pre-loaded when it shows up.`;
+            }
+            if (source === "open-recall") {
+              return `OPEN-RECALL REP — READ THIS FIRST: The user came in to recall a pattern from their own memory — no pre-filled label, no specific retrieval target. ` +
+                `Roediger & Karpicke 2006 testing effect: free recall from memory is more potent for consolidation than recognition of a prompt. The user is being asked to retrieve and name a pattern they've noticed since their last session. ` +
+                `Open by holding the question simply: "What pattern have you been seeing since the last session?" Keep it 1 sentence, no scaffolding. ` +
+                `Let the user lead. Do NOT suggest a pattern, do NOT list options, do NOT prime with examples. The act of recalling is the rep. Once they name something, mirror it back precisely (their words, not yours) and continue from there.`;
+            }
+            if (source === "pre-sleep") {
+              return `PRE-SLEEP REP — READ THIS FIRST: The user came in for a short rep before sleep. Late-evening window. Stickgold & Walker memory-consolidation literature: practice within the pre-sleep window has stronger consolidation than mid-day practice — sleep encodes the day's learning into long-term structure. ` +
+                `Open with brevity. Example: "Last thing — what's most present from the day?" Keep it 1 sentence. ` +
+                `This is a SHORT session. The user is winding down, not opening up. Match that energy: terse, present-tense, no follow-up cascade. ` +
+                `Once they name something, mirror briefly (one short reflection, not analysis), then move toward close. The job is to surface the day's residue, not to process it deeply. If they go deep, follow once; if they're brief, accept the brevity. Sleep is the next step, not more reframing.`;
+            }
+            if (source === "deep-revisit") {
+              return `DEEP REVISIT — READ THIS FIRST: The user named "${pattern}" in a saved Reframe ${formatDaysAgo(daysAgo)} — work they explicitly chose to save. They've come back to revisit the distortion itself, not the past conversation. ` +
+                `Roediger & Karpicke 2006 testing effect: spaced retrieval of named concepts at increasing intervals strengthens the trace. Wells 2009 metacognitive therapy: re-engaging with the distortion (recognizing it again, in new context) is the consolidation rep; re-reading the original Reframe is the rumination failure mode. ` +
+                `Open by acknowledging the distortion as a named concept they're carrying forward: "${pattern.toLowerCase()} again — recognized. What does it look like today?" Keep it 1 sentence. ` +
+                `Do NOT reference what they said in the past Reframe (you don't have access and shouldn't pretend to). Do NOT ask them to recap what they wrote then. The job is present-tense recognition: does the pattern look the same, different, weaker, sharper? Let the user lead with current observation.`;
+            }
+            const daysPhrase = formatDaysAgo(daysAgo);
+            const sourceNote = source === "spaced"
+              ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
+              : "Recent-retrieval surface — the home offered this for revisit because the user named it within the past week.";
+            return `PRACTICE RETURN — READ THIS FIRST: The user came into Reframe from the home's practice surface, returning to a pattern they previously named: "${pattern}" (first named ${daysPhrase}). ${sourceNote} ` +
+              `This is not a fresh session — it is a planned revisit per spacing-effect literature (retrieval at increasing intervals consolidates the concept). ` +
+              `Open by briefly acknowledging the return — for example: "You named ${pattern.toLowerCase()} ${daysPhrase}. What's it doing today?" or similar. Keep it 1 sentence, oriented to NOW. ` +
+              `Let the user lead with what's actually present — do not recite the pattern as a label, do not assume the same situation applies, do not summarize what they said last time. The pattern name is shorthand for a class of experience, not a fixed event.`;
+          })(),
+          // Granularity Gym precision label (brainstorm #3, May 13, 2026).
+          // When the user named with precision at the Notice step (inline
+          // Granularity Gym expansion), the label flows to the AI here. The
+          // AI uses it as the user's most precise self-description for this
+          // session — not as a label to recite back, but as a starting
+          // resolution for the conversation. Single string, max 60 chars.
+          sessionPrecision: sessionPrecision
+            ? `GRANULARITY LABEL (user's own precise word for present state, named at Notice): "${sessionPrecision}". This is the user's specificity, not yours to grade or psychoanalyze. Treat it as their working name for what's here. You may reference it once if natural; do not orbit around it.`
+            : null,
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);
@@ -11353,6 +11713,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           regulationType: (() => { try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; } })(),
           aiTone: aiToneChoice,
           sessionEntryMode: entryMode,
+          // ── REP-POSITIONED SESSION CONTEXT ──────────────────────────────
+          // When the user is in a guided session, today's metacognitive rep
+          // (capacity-building objective from the Roadmap) is the session's
+          // organizing principle. The AI receives the rep + stage name and
+          // shapes the conversation toward it — connecting the user's input
+          // to the capacity they're training, not generic cognitive work.
+          // Written at startGuidedSession; cleared at endGuidedSession /
+          // abandonGuidedSession. Null when not in a session or no active rep.
+          sessionRepContext: (() => {
+            try {
+              const raw = localStorage.getItem("stillform_session_rep_context");
+              if (!raw) return null;
+              const ctx = JSON.parse(raw);
+              if (!ctx || !ctx.repStatement) return null;
+              return {
+                stageId: ctx.stageId,
+                stageName: ctx.stageName,
+                markerLabel: ctx.markerLabel,
+                repStatement: ctx.repStatement
+              };
+            } catch { return null; }
+          })(),
           sessionNotes: (() => {
             try {
               const notes = secureRead("stillform_ai_session_notes", []);
@@ -13290,6 +13672,46 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         <div className="ai-messages">
           {messages.length === 0 && (
             <>
+              {/* Practice return cue (May 12, 2026).
+                  Renders ONLY when the user entered Reframe from the home's
+                  PracticeSurface (tapped a pattern tile, not a fresh entry).
+                  The cue makes the system's memory visible to the user
+                  BEFORE the AI responds — they tapped "criticism" on the
+                  home; this confirms the system received it.
+                  Renders only in the empty state (messages.length === 0).
+                  Once the user sends their first message, the context is
+                  alive in the conversation and the cue is no longer
+                  needed; persistent rendering would become visual noise. */}
+              {practiceEntryContext && (
+                <div style={{
+                  marginBottom: 16,
+                  padding: "12px 14px",
+                  background: "var(--amber-glow, rgba(255,180,80,0.06))",
+                  border: "0.5px solid var(--amber-dim)",
+                  borderRadius: "var(--r-lg)"
+                }}>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--amber)",
+                    marginBottom: 6,
+                    letterSpacing: "0.14em"
+                  }}>
+                    Returning to
+                  </div>
+                  <div style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: 18,
+                    fontWeight: 400,
+                    lineHeight: 1.3,
+                    color: "var(--text)",
+                    marginBottom: 4
+                  }}>
+                    {practiceEntryContext.pattern}
+                  </div>
+                  <div className="t-body-sm quiet" style={{ lineHeight: 1.5 }}>
+                    Last named {formatDaysAgo(practiceEntryContext.daysAgo)}. What's it doing today?
+                  </div>
+                </div>
+              )}
               {getSavedReframes().length > 0 && (
                 <div style={{ marginBottom: 16, padding: "12px 14px", background: mc.aiBubble, border: `1px solid ${mc.border}`, borderRadius: "var(--r-lg)" }}>
                   <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>What helped before</div>
@@ -14339,7 +14761,897 @@ function FocusCheckValidation({
   );
 }
 
-function MicroBiasTool({ onComplete }) {
+// Signal Map header — shared across all three calibration parts to give the
+// user one arc-aware frame regardless of which sub-tool is currently active.
+// Body / Mind / Triggers map to Parts 1 / 2 / 3.
+//
+// Rendered at the top of: SignalProfileTool (when in setup), the setup
+// screen (How You Process), MicroBiasTool (Pattern Check), and the
+// calibration-trigger-seed screen. Sub-tool internal counters demote to
+// secondary; this is the primary frame.
+//
+// Designed to disappear after the Close screen routes user to home — never
+// shown outside calibration onboarding.
+function SignalMapHeader({ part }) {
+  const parts = [
+    { num: 1, label: "Body" },
+    { num: 2, label: "Mind" },
+    { num: 3, label: "Triggers" }
+  ];
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 10,
+        textTransform: "uppercase"
+      }}>
+        Signal Map · Part {part} of 3 · {parts[part - 1].label}
+      </div>
+      {/* Three-segment progress bar — current filled, prior filled-dim, future empty */}
+      <div style={{ display: "flex", gap: 4 }}>
+        {parts.map((p) => {
+          const isCurrent = p.num === part;
+          const isPast = p.num < part;
+          return (
+            <div key={p.num} style={{
+              flex: 1, height: 2, borderRadius: 1,
+              background: isCurrent ? "var(--amber)" : (isPast ? "var(--amber-dim, rgba(184,134,43,0.4))" : "var(--border)"),
+              transition: "background 0.3s"
+            }} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Signal Map transition — 1.5 second loading moment between parts. Signal-
+// architecture themed: a thin amber line drawing horizontally beneath status
+// text. Self-advances via internal setTimeout on mount; parent supplies the
+// onAdvance callback. Pure presentational once timing is handled.
+function SignalMapTransition({ phase, onAdvance }) {
+  // phase values:
+  //   "body-to-mind"     — after Part 1, before Part 2
+  //   "mind-to-triggers" — after Part 2, before Part 3
+  //   "triggers-to-map"  — after Part 3, before Close
+  const messages = {
+    "body-to-mind":     { primary: "Body mapped.",        secondary: "Reading mind patterns..." },
+    "mind-to-triggers": { primary: "Patterns captured.",  secondary: "Compiling triggers..." },
+    "triggers-to-map":  { primary: "Triggers named.",     secondary: "Compiling your signal map..." }
+  };
+  const msg = messages[phase] || { primary: "...", secondary: "" };
+
+  useEffect(() => {
+    if (typeof onAdvance !== "function") return;
+    const t = setTimeout(() => { onAdvance(); }, 1500);
+    return () => clearTimeout(t);
+  }, [phase, onAdvance]);
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
+        color: "var(--text)", textAlign: "center", marginBottom: 12,
+        animation: "smtFadeIn 0.4s ease-out forwards", opacity: 0
+      }}>
+        {msg.primary}
+      </div>
+      <div className="t-mono-xs" style={{
+        color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 32,
+        textTransform: "uppercase",
+        animation: "smtFadeIn 0.4s ease-out 0.15s forwards", opacity: 0
+      }}>
+        {msg.secondary}
+      </div>
+      <div style={{
+        width: 200, height: 1, background: "var(--border)",
+        position: "relative", overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "var(--amber)",
+          transformOrigin: "left center",
+          transform: "scaleX(0)",
+          animation: "smtLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards"
+        }} />
+      </div>
+      <style>{`
+        @keyframes smtFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes smtLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      `}</style>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------------
+// SESSION SHELL — Guided composure session that chains tools through a
+// felt arc: Body → Reframe → Close. Mirrors SignalMap shell pattern but
+// for daily practice instead of calibration.
+//
+// Per Stillform_Master_Todo.md Gap 2 second cut + narrative-spine work:
+// hero CTA becomes a session entry, not a single-tool launch. Each tool
+// completion advances to the next step instead of returning home —
+// producing a woven session experience.
+//
+// Body-before-cognition arc is the actual neuroscience: physiological
+// regulation precedes cognitive work. Body-first calibration → full
+// Breathe; thought-first → brief Physiological Sigh; pain → Body Scan.
+// All paths converge on Reframe (AI cognitive work) → Close (what shifted).
+// --------------------------------------------------------------------
+function SessionHeader({ session }) {
+  if (!session || !session.steps) return null;
+  const totalSteps = session.steps.length;
+  const currentIndex = session.currentStep;
+  const currentLabel = session.steps[currentIndex]?.label || "";
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 10,
+        textTransform: "uppercase"
+      }}>
+        Session · Step {currentIndex + 1} of {totalSteps} · {currentLabel}
+      </div>
+      <div style={{ display: "flex", gap: 4 }}>
+        {session.steps.map((step, idx) => {
+          const isCurrent = idx === currentIndex;
+          const isPast = idx < currentIndex;
+          return (
+            <div key={step.id} style={{
+              flex: 1, height: 2, borderRadius: 1,
+              background: isCurrent ? "var(--amber)" : (isPast ? "var(--amber-dim, rgba(184,134,43,0.4))" : "var(--border)"),
+              transition: "background 0.3s"
+            }} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Session transition — 1.5s loading moment between steps. Same signal-
+// architecture aesthetic as SignalMapTransition: Cormorant primary line,
+// mono caption, thin amber line drawing left-to-right. Self-advances via
+// internal setTimeout on mount; parent supplies onAdvance.
+function SessionTransition({ phase, onAdvance }) {
+  // Framing-aligned phase messages: regulation cuts noise so the practice
+  // can land. Transitions name what's NEXT (concept work), not what
+  // resolved (amplitude framing).
+  const messages = {
+    "body-to-notice":     { primary: "Noise cleared.",      secondary: "Bringing the concept up..." },
+    "notice-to-reframe":  { primary: "Concept named.",      secondary: "Bringing it into reframe..." },
+    "reframe-to-close":   { primary: "Concept worked.",     secondary: "Closing the rep..." }
+  };
+  const msg = messages[phase] || { primary: "...", secondary: "" };
+
+  // Brief passive transition — 0.9s. Earlier tap-forward variant added 3
+  // extra user actions per session for no substance gain. The user has
+  // already engaged; a transition is a beat, not an interaction. Simple
+  // and prestige > tap-density theater.
+  useEffect(() => {
+    if (typeof onAdvance !== "function") return;
+    const t = setTimeout(() => { onAdvance(); }, 900);
+    return () => clearTimeout(t);
+  }, [phase, onAdvance]);
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
+        color: "var(--text)", textAlign: "center", marginBottom: 12,
+        animation: "stnFadeIn 0.35s ease-out forwards", opacity: 0
+      }}>
+        {msg.primary}
+      </div>
+      <div className="t-mono-xs" style={{
+        color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 32,
+        textTransform: "uppercase",
+        animation: "stnFadeIn 0.35s ease-out 0.12s forwards", opacity: 0
+      }}>
+        {msg.secondary}
+      </div>
+      <div style={{
+        width: 200, height: 1, background: "var(--border)",
+        position: "relative", overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "var(--amber)",
+          transformOrigin: "left center",
+          transform: "scaleX(0)",
+          animation: "stnLineDraw 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards"
+        }} />
+      </div>
+      <style>{`
+        @keyframes stnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes stnLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      `}</style>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------------
+// NOTICE STEP — discrete affect-labeling beat between Body and Reframe.
+// Body regulates physiology. Reframe does cognitive work. Notice is the
+// labeling moment in between — Lieberman 2007's amygdala downregulation
+// through naming, made into its own beat instead of an implicit detail
+// inside Reframe's open.
+//
+// User picks a present-state chip (and optionally one line of context).
+// The chip writes to stillform_feelstate, which Reframe reads on entry.
+// ~30 seconds. Pure session-internal screen, not a top-level tool.
+// --------------------------------------------------------------------
+function NoticeStepScreen({ session, onContinue, setInfoModal }) {
+  const [picked, setPicked] = useState(() => {
+    try {
+      const fs = secureRead("stillform_feelstate", null);
+      if (fs && fs.day === TimeKeeper.stillformDay()) return fs.value;
+    } catch {}
+    return null;
+  });
+
+  // PracticeSurface → Notice context handoff (May 13, 2026, brainstorm #1
+  // spine integration). PracticeSurface writes stillform_practice_entry_context
+  // when the user taps a retrieval card. Notice reads it on mount
+  // NON-DESTRUCTIVELY so it can render the retrieval banner without
+  // consuming the handoff — Reframe reads + clears it later as the final
+  // consumer. Two reads, last-read clears.
+  //
+  // Stored in component state so the read happens once and the banner is
+  // stable across re-renders (chip selection updates).
+  const [retrievalContext] = useState(() => {
+    try {
+      const raw = localStorage.getItem("stillform_practice_entry_context");
+      if (!raw) return null;
+      const ctx = JSON.parse(raw);
+      if (!ctx || typeof ctx !== "object") return null;
+      // open-recall and pre-sleep are intentionally pattern-less — the user
+      // names the pattern themselves at Notice. All other sources require a
+      // pattern label.
+      const isPatternLess = ctx.source === "open-recall" || ctx.source === "pre-sleep";
+      if (!isPatternLess && !ctx.pattern) return null;
+      return {
+        pattern: ctx.pattern ? String(ctx.pattern) : "",
+        source: ctx.source || null,
+        daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
+      };
+    } catch { return null; }
+  });
+
+  const formatDaysAgo = (days) => {
+    if (days === null || days === undefined) return "previously";
+    if (days === 0) return "earlier today";
+    if (days === 1) return "yesterday";
+    return `${days} days ago`;
+  };
+
+  // ── GRANULARITY GYM (inline) — brainstorm #3 ──────────────────────────
+  // Optional precision-naming layer below the chip picker. The chip is the
+  // broad granularity tier; the precision input is the fine tier. Together
+  // they form a Hoemann 2021 / Barrett 2017 granularity rep: name broad,
+  // then name specific. The TYPING is the rep — the act of articulating
+  // with maximum precision builds the concept.
+  //
+  // Bounded design per Wells 2009 — this is NOT open journaling. Single
+  // line, 60-character cap, no multi-line, no save-to-archive surface.
+  // The user names ONE precise word or short phrase; the act of naming is
+  // the practice. The label persists transiently to stillform_session_precision
+  // (cleared by Reframe on read) so the AI can use it for the session.
+  const [precisionOpen, setPrecisionOpen] = useState(false);
+  const [precisionText, setPrecisionText] = useState("");
+  const PRECISION_MAX = 60;
+
+  const handlePick = (chipId) => {
+    setPicked(chipId);
+    try {
+      if (chipId) {
+        secureWrite("stillform_feelstate", { value: chipId, day: TimeKeeper.stillformDay() });
+      } else {
+        secureDelete("stillform_feelstate");
+      }
+    } catch {}
+  };
+
+  const handleContinue = () => {
+    // Granularity Gym precision — write to transient storage so Reframe can
+    // consume it. Stored as { value, day } so a stale entry from a previous
+    // day doesn't bleed into a new session. Reframe clears on read.
+    const trimmedPrecision = String(precisionText || "").trim();
+    if (trimmedPrecision.length > 0) {
+      try {
+        localStorage.setItem("stillform_session_precision", JSON.stringify({
+          value: trimmedPrecision.slice(0, PRECISION_MAX),
+          day: TimeKeeper.stillformDay(),
+          at: Date.now()
+        }));
+      } catch {}
+    } else {
+      // No precision typed — make sure no stale value carries over.
+      try { localStorage.removeItem("stillform_session_precision"); } catch {}
+    }
+    try {
+      window.plausible("Session Notice Complete", {
+        props: {
+          picked: picked || "skipped",
+          precision: trimmedPrecision.length > 0 ? "yes" : "no",
+          precisionLen: trimmedPrecision.length
+        }
+      });
+    } catch {}
+    onContinue();
+  };
+
+  const handleSkip = () => {
+    try { localStorage.removeItem("stillform_session_precision"); } catch {}
+    try { window.plausible("Session Notice Skipped"); } catch {}
+    onContinue();
+  };
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "32px 24px",
+      minHeight: "100vh", position: "relative", zIndex: 1
+    }}>
+      {/* Session header so user sees the arc position */}
+      <SessionHeader session={session} />
+
+      {/* RETRIEVAL BANNER — surfaces only when entry came from a
+          PracticeSurface retrieval or spaced-return card. Shows the
+          pattern + when it was last named so the user is oriented
+          before they pick a chip. Bounded design per Wells 2009 / Roediger
+          & Karpicke spacing literature: single specific question, no
+          browsable archive, no analytics. The banner is context, not
+          content — the chip picker stays the primary action. */}
+      {retrievalContext && (
+        <div style={{
+          marginBottom: 24,
+          padding: "14px 16px",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r-lg)",
+          background: "var(--amber-glow, rgba(255,180,80,0.05))"
+        }}>
+          <div className="t-mono-xs" style={{
+            color: "var(--amber)",
+            letterSpacing: "0.14em",
+            marginBottom: 6
+          }}>
+            {retrievalContext.source === "pre-event"
+              ? "BEFORE"
+              : retrievalContext.source === "pre-mortem"
+                ? "ANTICIPATE"
+                : retrievalContext.source === "open-recall"
+                  ? "OPEN RECALL"
+                  : retrievalContext.source === "pre-sleep"
+                    ? "PRE-SLEEP"
+                    : retrievalContext.source === "deep-revisit"
+                      ? "DEEP REVISIT"
+                      : retrievalContext.source === "spaced"
+                        ? "PLANNED REVISIT"
+                        : "RETURNING TO"}
+          </div>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
+            color: "var(--text-cream)", lineHeight: 1.4,
+            letterSpacing: "0.005em"
+          }}>
+            {retrievalContext.source === "pre-event" ? (
+              <>You're about to walk into <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern}</span>.</>
+            ) : retrievalContext.source === "pre-mortem" ? (
+              <><span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> has come up before. Today might bring it again.</>
+            ) : retrievalContext.source === "open-recall" ? (
+              <>What's a pattern you've noticed since the last session?</>
+            ) : retrievalContext.source === "pre-sleep" ? (
+              <>One short rep before sleep cements the day.</>
+            ) : retrievalContext.source === "deep-revisit" ? (
+              <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)} and chose to save it.</>
+            ) : (
+              <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.</>
+            )}
+          </div>
+          <div style={{
+            marginTop: 4,
+            fontSize: 12,
+            color: "var(--text-muted)",
+            fontFamily: "'DM Sans', sans-serif",
+            lineHeight: 1.55
+          }}>
+            {retrievalContext.source === "pre-event"
+              ? "Name what's present first. The rep before the event is the move that lands inside it."
+              : retrievalContext.source === "pre-mortem"
+                ? "Pre-installed moves fire faster than improvised ones. Name what's already moving in you before it arrives."
+                : retrievalContext.source === "open-recall"
+                  ? "Pull it from your own memory — recall is the rep (Roediger & Karpicke 2006). Name the pattern below in your own words after the chip."
+                  : retrievalContext.source === "pre-sleep"
+                    ? "Sleep encodes the day's learning into long-term structure (Stickgold & Walker). Name what's most present, then close it down."
+                    : retrievalContext.source === "deep-revisit"
+                      ? "The work you marked worth keeping. Re-engaging with the pattern strengthens the trace — re-reading the past Reframe doesn't (Wells 2009). Name what's present now."
+                      : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
+          </div>
+        </div>
+      )}
+
+      {/* Prompt — Cormorant primary, mono subcaption.
+          Granularity framing: specific naming is the trainable capacity
+          (Hoemann 2021; Barrett 2017 constructed emotion). Each name added
+          is a concept built — not amplitude reduction. */}
+      <div style={{ marginBottom: 24, textAlign: "center" }}>
+        <h1 style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300,
+          color: "var(--text)", lineHeight: 1.25, marginBottom: 8,
+          letterSpacing: "0.005em"
+        }}>
+          Name what's present.
+        </h1>
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase"
+        }}>
+          Each specific name is a concept built.
+        </div>
+      </div>
+
+      {/* Chip picker — reuses PresentStateChips component already in the build.
+          The chip persists to stillform_feelstate, which Reframe reads on entry,
+          so the labeled state flows through to cognitive work automatically. */}
+      <div style={{ marginBottom: 16 }}>
+        <PresentStateChips
+          feelState={picked}
+          setFeelState={handlePick}
+          setInfoModal={setInfoModal}
+        />
+      </div>
+
+      {/* GRANULARITY GYM (inline) — brainstorm #3 (May 13, 2026).
+          The chip names what's present at the broad tier; this expansion lets
+          the user name with maximum specificity. Optional, not required.
+          Renders only after a chip is picked so the order is: broad → fine.
+          Hoemann 2021 / Barrett 2017 — granularity is the trainable substrate;
+          the typing is the rep. Bounded design (Wells 2009): single line,
+          60-char cap, no multi-line, no archive — naming, not journaling. */}
+      {picked && (
+        <div style={{ marginBottom: 24 }}>
+          {!precisionOpen ? (
+            <button
+              onClick={() => setPrecisionOpen(true)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                color: "var(--text-muted)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                textAlign: "left",
+                width: "100%"
+              }}
+            >
+              + Name with precision · granularity gym
+            </button>
+          ) : (
+            <div style={{
+              padding: "14px 14px 12px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)",
+                letterSpacing: "0.14em",
+                marginBottom: 6
+              }}>
+                GRANULARITY GYM
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 16,
+                fontStyle: "italic",
+                color: "var(--text-cream)",
+                lineHeight: 1.4,
+                marginBottom: 10
+              }}>
+                The most precise word for what's here.
+              </div>
+              <input
+                type="text"
+                value={precisionText}
+                onChange={e => setPrecisionText(e.target.value.slice(0, PRECISION_MAX))}
+                maxLength={PRECISION_MAX}
+                placeholder="e.g. fluttered, low-grade-tight, between-things"
+                aria-label="Precision label"
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  background: "var(--surface2)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  fontSize: 14,
+                  color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+              <div style={{
+                marginTop: 8,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                fontSize: 10,
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: "var(--text-muted)",
+                letterSpacing: "0.06em"
+              }}>
+                <span>{precisionText.length}/{PRECISION_MAX}</span>
+                <button
+                  onClick={() => { setPrecisionText(""); setPrecisionOpen(false); }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    fontSize: 10,
+                    color: "var(--text-muted)",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase"
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{
+                marginTop: 8,
+                fontSize: 11,
+                color: "var(--text-muted)",
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1.5
+              }}>
+                The naming is the rep. One precise word builds more concept than a paragraph of analysis (Hoemann 2021).
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Continue + Skip — Continue active when chip picked, Skip always available */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <button
+          className="btn btn-primary"
+          onClick={handleContinue}
+          disabled={!picked}
+          style={{
+            padding: "14px 24px", fontSize: 15,
+            opacity: picked ? 1 : 0.5,
+            cursor: picked ? "pointer" : "not-allowed"
+          }}
+        >
+          Continue
+        </button>
+        <button
+          className="btn btn-ghost"
+          onClick={handleSkip}
+          style={{
+            padding: "10px 24px", fontSize: 12,
+            color: "var(--text-muted)",
+            fontFamily: "'IBM Plex Mono', monospace",
+            letterSpacing: "0.08em", textTransform: "uppercase"
+          }}
+        >
+          Skip · move to reframe
+        </button>
+      </div>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------------
+// SESSION CLOSE — single-screen close for guided sessions.
+// Simple and prestige: outcome line, rep echoed (if there was one),
+// Close button. No tap-forward reveal theater — the user has already
+// done the work; the close honors that with restraint, not ceremony.
+//
+// Rep-counted detection reads stillform_last_rep_counted timestamp vs
+// session startedAt — if a marker flipped DURING this session, the
+// outcome reads 'Rep counted' instead of 'Concept added'.
+// --------------------------------------------------------------------
+function SessionCloseScreen({ session, onClose }) {
+  const rep = session?.originalRep || null;
+  const durationSec = session ? Math.round((Date.now() - session.startedAt) / 1000) : 0;
+  const mins = Math.floor(durationSec / 60);
+  const secs = durationSec % 60;
+  const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+  // Close-time externalization — brainstorm #10 (May 13, 2026). Optional.
+  // The user names "the move" in their own words at session close. The
+  // typed label persists to stillform_named_moves and shows up in YOUR
+  // LIBRARY as a MOVES NAMED subsection. Different temporal slot from #3
+  // Granularity Gym (which captures the entry-state precision at Notice).
+  // #10 captures the OUTCOME concept — what the user just DID, not what
+  // they noticed.
+  //
+  // Bounded design (Wells 2009): single line, 60-char cap, no archive
+  // browse from the close screen (only the LIBRARY surface displays the
+  // list). One save per session — once saved, the input collapses to a
+  // confirmation. Cannot save empty.
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveText, setMoveText] = useState("");
+  const [moveSaved, setMoveSaved] = useState(false);
+  const MOVE_MAX = 60;
+
+  const handleSaveMove = () => {
+    const trimmed = String(moveText || "").trim();
+    if (trimmed.length === 0) return;
+    try {
+      const raw = localStorage.getItem("stillform_named_moves");
+      const existing = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(existing) ? existing : [];
+      list.push({
+        value: trimmed.slice(0, MOVE_MAX),
+        sessionId: session?.id || null,
+        timestamp: new Date().toISOString(),
+      });
+      // Bounded — keep last 50.
+      const trimmedList = list.slice(-50);
+      localStorage.setItem("stillform_named_moves", JSON.stringify(trimmedList));
+    } catch {}
+    try {
+      window.plausible?.("Named Move Saved", { props: { length: trimmed.length } });
+    } catch {}
+    setMoveSaved(true);
+  };
+
+  // Did a capacity rep get counted during THIS session? Read
+  // stillform_last_rep_counted (written by appendSessionToStorage when
+  // a marker flipped on save) and check timestamp vs session.startedAt.
+  const repCounted = (() => {
+    try {
+      const raw = localStorage.getItem("stillform_last_rep_counted");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed || !parsed.at) return null;
+      if (!session?.startedAt) return null;
+      if (parsed.at < session.startedAt) return null;
+      return parsed;
+    } catch { return null; }
+  })();
+
+  const meaningfulArc = durationSec >= 60 && session && session.currentStep >= session.steps.length - 1;
+
+  const outcomeHeadline = repCounted
+    ? "Rep counted."
+    : (meaningfulArc ? "Concept added." : "Session closed.");
+  const outcomeSubline = repCounted
+    ? `Stage ${repCounted.stageId} · ${repCounted.stageName || ""}`
+    : "";
+
+  const showRep = rep && rep.rep && !rep.allMet;
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1, textAlign: "center"
+    }}>
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
+        textTransform: "uppercase",
+        animation: "scnFadeIn 0.5s ease-out forwards", opacity: 0
+      }}>
+        Session Complete · {durationLabel}
+      </div>
+
+      <h1 style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300,
+        lineHeight: 1.2, marginBottom: outcomeSubline ? 8 : 24, color: "var(--text)",
+        animation: "scnFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+      }}>
+        {outcomeHeadline}
+      </h1>
+
+      {outcomeSubline && (
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", letterSpacing: "0.12em",
+          textTransform: "uppercase", marginBottom: 24,
+          animation: "scnFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+        }}>
+          {outcomeSubline}
+        </div>
+      )}
+
+      {showRep && (
+        <p style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 19, fontWeight: 300,
+          color: "var(--text)", marginBottom: 36, maxWidth: 380,
+          lineHeight: 1.5, fontStyle: "italic",
+          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+        }}>
+          "{rep.rep}"
+        </p>
+      )}
+      {!showRep && (
+        <p className="t-body-md quiet" style={{
+          marginBottom: 36, maxWidth: 380, lineHeight: 1.7,
+          animation: "scnFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+        }}>
+          The arc compounds with practice.
+        </p>
+      )}
+
+      {/* NAME THE MOVE — brainstorm #10 (May 13, 2026). Optional close-time
+          externalization. User types one short label for what they just did;
+          it joins their library as a MOVES NAMED concept. Different from #3
+          Granularity Gym (entry-state precision) — this captures the OUTCOME
+          concept at the moment it was made. */}
+      {!moveOpen && !moveSaved && (
+        <button
+          onClick={() => setMoveOpen(true)}
+          style={{
+            background: "none",
+            border: "none",
+            padding: "0 0 24px",
+            cursor: "pointer",
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 11,
+            color: "var(--text-muted)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            animation: "scnFadeIn 0.5s ease-out 0.55s forwards", opacity: 0
+          }}
+        >
+          + Name the move
+        </button>
+      )}
+      {moveOpen && !moveSaved && (
+        <div style={{
+          width: "100%", maxWidth: 380,
+          padding: "14px 14px 12px",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r-lg)",
+          background: "var(--surface)",
+          marginBottom: 24,
+          textAlign: "left",
+          animation: "scnFadeIn 0.5s ease-out 0.55s forwards", opacity: 0
+        }}>
+          <div className="t-mono-xs" style={{
+            color: "var(--amber)",
+            letterSpacing: "0.14em",
+            marginBottom: 6
+          }}>
+            NAME THE MOVE
+          </div>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 16,
+            fontStyle: "italic",
+            color: "var(--text-cream)",
+            lineHeight: 1.4,
+            marginBottom: 10
+          }}>
+            In your own words, what did you just do?
+          </div>
+          <input
+            type="text"
+            value={moveText}
+            onChange={e => setMoveText(e.target.value.slice(0, MOVE_MAX))}
+            maxLength={MOVE_MAX}
+            placeholder="e.g. caught-it-before-it-spiraled, stayed-with-the-edge"
+            aria-label="Name the move"
+            autoFocus
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              background: "var(--surface2)",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r)",
+              fontSize: 14,
+              color: "var(--text)",
+              fontFamily: "'DM Sans', sans-serif",
+              outline: "none",
+              boxSizing: "border-box"
+            }}
+          />
+          <div style={{
+            marginTop: 8,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 10,
+            fontFamily: "'IBM Plex Mono', monospace",
+            color: "var(--text-muted)",
+            letterSpacing: "0.06em"
+          }}>
+            <span>{moveText.length}/{MOVE_MAX}</span>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={() => { setMoveText(""); setMoveOpen(false); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontSize: 10,
+                  color: "var(--text-muted)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Skip
+              </button>
+              <button
+                onClick={handleSaveMove}
+                disabled={moveText.trim().length === 0}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: moveText.trim().length === 0 ? "not-allowed" : "pointer",
+                  fontSize: 10,
+                  color: moveText.trim().length === 0 ? "var(--text-muted)" : "var(--amber)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  opacity: moveText.trim().length === 0 ? 0.5 : 1
+                }}
+              >
+                Save to library →
+              </button>
+            </div>
+          </div>
+          <div style={{
+            marginTop: 8,
+            fontSize: 11,
+            color: "var(--text-muted)",
+            fontFamily: "'DM Sans', sans-serif",
+            lineHeight: 1.5
+          }}>
+            Concrete naming consolidates the concept. The move you can name is one you can repeat.
+          </div>
+        </div>
+      )}
+      {moveSaved && (
+        <div style={{
+          marginBottom: 24,
+          fontSize: 12,
+          color: "var(--amber)",
+          fontFamily: "'IBM Plex Mono', monospace",
+          letterSpacing: "0.06em",
+          animation: "scnFadeIn 0.3s ease-out forwards"
+        }}>
+          ✓ Added to your library
+        </div>
+      )}
+
+      <button
+        className="btn btn-primary"
+        style={{
+          padding: "14px 36px", fontSize: 15, minWidth: 200,
+          animation: "scnFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
+        }}
+        onClick={onClose}
+      >
+        Close
+      </button>
+
+      <style>{`
+        @keyframes scnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+    </section>
+  );
+}
+
+function MicroBiasTool({ onComplete, calibrationPart = null }) {
   const [current, setCurrent] = useState(0);
   const [identified, setIdentified] = useState([]);
   const [done, setDone] = useState(false);
@@ -14391,63 +15703,69 @@ function MicroBiasTool({ onComplete }) {
 
   if (done) {
     return (
-      <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
-        <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
-          Pattern baseline captured.
-        </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
-          This is not a diagnosis. It is a starting map for decision patterns that can appear under load. Reframe uses this signal alongside your check-ins and language to improve pattern recognition over time.
-        </p>
-        {identified.length > 0 && (
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized today</div>
-            {identified.map((b, i) => (
-              <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
-            ))}
-          </div>
-        )}
-        {identified.length === 0 && (
-          <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>No strong match right now. That is normal. Patterns can shift by context and intensity.</p>
-        )}
-        <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
+      <div style={{ maxWidth: 480, margin: "0 auto" }}>
+        {calibrationPart && <SignalMapHeader part={calibrationPart} />}
+        <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
+          <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
+          <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
+            Pattern baseline captured.
+          </h2>
+          <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
+            This is not a diagnosis. It is a starting map for decision patterns that can appear under load. Reframe uses this signal alongside your check-ins and language to improve pattern recognition over time.
+          </p>
+          {identified.length > 0 && (
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized today</div>
+              {identified.map((b, i) => (
+                <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
+              ))}
+            </div>
+          )}
+          {identified.length === 0 && (
+            <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>No strong match right now. That is normal. Patterns can shift by context and intensity.</p>
+          )}
+          <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
+        </div>
       </div>
     );
   }
 
   const pattern = patterns[current];
   return (
-    <div style={{ maxWidth: 420, margin: "0 auto" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
-        Pattern Check · {current + 1} of {patterns.length}
-      </div>
+    <div style={{ maxWidth: 480, margin: "0 auto" }}>
+      {calibrationPart && <SignalMapHeader part={calibrationPart} />}
+      <div style={{ maxWidth: 420, margin: "0 auto" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 24, textAlign: "center" }}>
+          Pattern Check · {current + 1} of {patterns.length}
+        </div>
 
-      <h2 className="t-display-lg" style={{ marginBottom: 16 }}>
-        {pattern.name}
-      </h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 16 }}>
+          {pattern.name}
+        </h2>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
-        <div className="t-body-md" style={{ marginBottom: 12 }}>{pattern.what}</div>
-        <div className="t-body-sm quiet" style={{ lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
-      </div>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
+          <div className="t-body-md" style={{ marginBottom: 12 }}>{pattern.what}</div>
+          <div className="t-body-sm quiet" style={{ lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
+        </div>
 
-      <p className="t-body-md" style={{ marginBottom: 24 }}>
-        {pattern.question}
-      </p>
+        <p className="t-body-md" style={{ marginBottom: 24 }}>
+          {pattern.question}
+        </p>
 
-      <div style={{ display: "flex", gap: 10 }}>
-        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
-          Shows up for me
-        </button>
-        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
-          Not today
-        </button>
-      </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
+            Shows up for me
+          </button>
+          <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
+            Doesn't apply
+          </button>
+        </div>
 
-      <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
-        {patterns.map((_, i) => (
-          <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
-        ))}
+        <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
+          {patterns.map((_, i) => (
+            <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -14993,7 +16311,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
   );
 }
 
-function SignalMapTool({ onComplete, skipIntro = false }) {
+function SignalMapTool({ onComplete, skipIntro = false, calibrationPart = null }) {
   const [step, setStep] = useState(skipIntro ? 1 : 0);
   const [signals, setSignals] = useState(() => {
     try { return secureRead("stillform_signal_profile", null) || {}; } catch { return {}; }
@@ -15212,9 +16530,10 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
               <div key={group.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                 <button onClick={() => toggleTriggerGroup(group.id)} style={{
                   width: "100%", background: "none", border: "none", padding: "10px 12px",
-                  cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center"
+                  cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
+                  color: "var(--text)"
                 }}>
-                  <span className="t-body-sm">{group.label}</span>
+                  <span className="t-body-sm" style={{ color: "var(--text)" }}>{group.label}</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
                     {selectedInGroup > 0 ? `${selectedInGroup} selected` : ""} {openTriggerGroups[group.id] ? "▾" : "▸"}
                   </span>
@@ -15286,6 +16605,11 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
 
   return (
     <div>
+      {calibrationPart && (
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 8px" }}>
+          <SignalMapHeader part={calibrationPart} />
+        </div>
+      )}
       {steps[step]()}
     </div>
   );
@@ -15693,145 +17017,6 @@ function TriggerProfileSection({ onChange }) {
     </div>
   );
 }
-
-
-// MirrorSheetTriggers — Phase 2d.1. Replaces the inline IIFE Phase 2d used
-// inside the Mirror sheet. Lifting to a component buys two things: useState
-// for the inline-add affordance the audit §3d called for, and a refresh
-// hook so a freshly-added trigger appears immediately in the list. Add
-// here is *reflection-context*, not encounter-context — calls addTrigger
-// only (no incrementTriggerEncounter), matching the Settings CRUD pattern.
-// EOD (2b) and Reframe close (2c) remain the encounter-context surfaces.
-function MirrorSheetTriggers() {
-  const [profile, setProfile] = useState(() => {
-    try { return getTriggerProfile(); } catch { return { triggers: [] }; }
-  });
-  const [adding, setAdding] = useState(false);
-
-  const refresh = () => {
-    try { setProfile(getTriggerProfile()); } catch {}
-  };
-
-  const triggers = profile?.triggers || [];
-  const sorted = [...triggers].sort((a, b) => {
-    const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
-    if (ec !== 0) return ec;
-    return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
-  });
-  const top = sorted.slice(0, 3);
-  const moreCount = Math.max(0, sorted.length - 3);
-
-  const handleAdd = ({ label, category }) => {
-    try {
-      addTrigger({ label, category });
-      try { window.plausible("Trigger Added From Mirror", { props: { category } }); } catch {}
-    } catch {}
-    setAdding(false);
-    refresh();
-  };
-
-  const handleCancel = () => {
-    try { window.plausible("Trigger Prompt Skipped", { props: { surface: "mirror" } }); } catch {}
-    setAdding(false);
-  };
-
-  return (
-    <>
-      <div className="t-mono-xs" style={{
-        color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-      }}>
-        What you've named
-      </div>
-      {sorted.length === 0 && !adding && (
-        <div style={{
-          fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6,
-          fontFamily: "'DM Sans', sans-serif", marginBottom: 12
-        }}>
-          No triggers named yet. Specific people, contexts, or moments where composure is hardest.
-        </div>
-      )}
-      {top.length > 0 && (
-        <div style={{ marginBottom: moreCount > 0 ? 8 : (adding ? 14 : 18) }}>
-          {top.map((t, idx) => {
-            const lastSeen = _formatTriggerLastSeen(t.lastSeen);
-            const categoryLabel = TRIGGER_CATEGORY_LABELS[t.category] || "Other";
-            const count = t.encounterCount || 0;
-            return (
-              <div key={t.id} style={{
-                padding: "10px 0",
-                borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-              }}>
-                <div style={{
-                  fontSize: 13, color: "var(--text)", lineHeight: 1.45,
-                  fontFamily: "'DM Sans', sans-serif", marginBottom: 4
-                }}>
-                  {t.label}
-                </div>
-                <div className="t-caption" style={{
-                  color: "var(--text-muted)", letterSpacing: "0.04em"
-                }}>
-                  {categoryLabel}
-                  {count > 0 && ` · ${count} encounter${count === 1 ? "" : "s"}`}
-                  {lastSeen && count > 0 && ` · last ${lastSeen}`}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {moreCount > 0 && (
-        <div style={{
-          fontSize: 11, color: "var(--text-muted)", fontStyle: "italic",
-          marginBottom: adding ? 14 : 18, fontFamily: "'DM Sans', sans-serif"
-        }}>
-          +{moreCount} more in Settings → Personalization → Triggers
-        </div>
-      )}
-      {adding && (
-        <div style={{
-          background: "var(--surface2)",
-          border: "0.5px solid var(--amber-dim)",
-          borderRadius: "var(--r)",
-          padding: "14px 16px",
-          marginBottom: 28
-        }}>
-          <TriggerForm
-            autoFocus
-            submitLabel="Add"
-            cancelLabel="Cancel"
-            placeholder="e.g., Mike's 1:1, Sunday family dinners"
-            onSubmit={handleAdd}
-            onCancel={handleCancel}
-          />
-        </div>
-      )}
-      {!adding && (
-        <button
-          onClick={() => {
-            setAdding(true);
-            try { window.plausible("Trigger Prompt Shown", { props: { surface: "mirror" } }); } catch {}
-          }}
-          aria-label="Add a trigger"
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            padding: "0 0 28px 0",
-            fontSize: 12,
-            fontFamily: "'DM Sans', sans-serif",
-            letterSpacing: "0.02em",
-            textAlign: "left",
-            WebkitTapHighlightColor: "transparent"
-          }}
-        >
-          + Add a trigger
-        </button>
-      )}
-    </>
-  );
-}
-
 
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
@@ -16273,6 +17458,501 @@ function MyProgress({ onBack }) {
         </div>
       ) : (<>
 
+        {/* ── WEEKLY REFLECTION — Path A Section 3 of My Progress per
+            STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 278: "Weekly
+            reflection (narrative) — kept as-is." Consolidates Gap 9
+            (Last 30 days synthesis) + Gap 4 (Since You Started growth)
+            into one section per audit philosophy v2.0 Layer 0.5 Finding 1
+            (May 12, 2026). The two sub-blocks share temporal frames —
+            rolling 30-day window vs since-baseline arc — and render
+            inside one card to honor Path A's reduce-heaviness intent.
+
+            Block 1: Last 30 days — Hoemann 2021 granularity + Wells 2009
+            metacognitive practice surfaced as the user's current pattern
+            accumulation.
+
+            Block 2: Since you started — capacity-growth baseline. Reads
+            stillform_growth_baseline (seeded once on calibration completion
+            for new users, or retroactively on first app load for pre-
+            existing users) and compares to current state.
+
+            Anti-gamification across both: no points, no badges, no
+            completion percentages. Plain observations. */}
+        {(() => {
+          // Block 1: Last 30 days insights
+          const now = Date.now();
+          const cutoff = now - (30 * 24 * 60 * 60 * 1000);
+          const recent = sessions.filter(s => {
+            try { return new Date(s.timestamp).getTime() >= cutoff; } catch { return false; }
+          });
+
+          const recentInsights = [];
+          if (recent.length > 0) {
+            recentInsights.push({
+              headline: `${recent.length} session${recent.length === 1 ? "" : "s"} in the last 30 days.`,
+              body: recent.length >= 15
+                ? "Practice that compounds. Consistency over magnitude."
+                : recent.length >= 6
+                  ? "Regular practice forming. Each rep accrues."
+                  : "Practice is starting to show up. Anchor it to a cue you can't miss.",
+            });
+
+            const chips = new Set();
+            recent.forEach(s => {
+              if (s.preState) chips.add(s.preState);
+              if (s.postState) chips.add(s.postState);
+              if (s.feelState) chips.add(s.feelState);
+            });
+            if (chips.size > 0) {
+              recentInsights.push({
+                headline: `${chips.size} different feel-state chip${chips.size === 1 ? "" : "s"} used.`,
+                body: chips.size >= 8
+                  ? "Your interoceptive vocabulary is broad. Granularity is the practice (Hoemann 2021)."
+                  : chips.size >= 4
+                    ? "Vocabulary building. Try a chip you haven't used before next session."
+                    : "Stretching beyond your default chips expands what you can name in real time.",
+              });
+            }
+
+            const withDelta = recent.filter(s => typeof s.delta === "number" && !Number.isNaN(s.delta));
+            if (withDelta.length >= 3) {
+              const avgDelta = withDelta.reduce((sum, s) => sum + s.delta, 0) / withDelta.length;
+              recentInsights.push({
+                headline: `Average shift of ${avgDelta >= 0 ? "+" : ""}${avgDelta.toFixed(1)} across ${withDelta.length} rated sessions.`,
+                body: avgDelta >= 1.5
+                  ? "Reps that move state reliably. The shift is the data."
+                  : avgDelta >= 0.5
+                    ? "Small shifts add up over months. Composure is built, not summoned."
+                    : "Composure isn't always shift — sometimes it's holding. Reread your sessions that didn't move; that's the practice too.",
+              });
+            }
+
+            if (biasProfile && Array.isArray(biasProfile) && biasProfile.length > 0) {
+              recentInsights.push({
+                headline: `${biasProfile.length} cognitive distortion${biasProfile.length === 1 ? "" : "s"} on your watch list.`,
+                body: `Top: ${biasProfile[0]}. Each Reframe session is a rep against it — Wells 2009 metacognitive therapy. The distortion doesn't go away; your relationship to it changes.`,
+              });
+            }
+
+            try {
+              const profile = getTriggerProfile();
+              if (profile?.triggers?.length > 0) {
+                const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
+                if (top?.label && top?.encounterCount >= 1) {
+                  recentInsights.push({
+                    headline: `"${top.label}" has come up ${top.encounterCount} time${top.encounterCount === 1 ? "" : "s"}.`,
+                    body: "A named trigger you've encountered. Pre-event briefs sharpen with repetition — Gollwitzer 1999 implementation intentions become faster with reps.",
+                  });
+                }
+              }
+            } catch {}
+
+            if (streak >= 3) {
+              recentInsights.push({
+                headline: `${streak}-day session streak active.`,
+                body: streak >= 14
+                  ? "Habit forming. Neuroplasticity needs repetition (Lally 2010 — habits stabilize around 66 days)."
+                  : "Consistency is the substrate. Don't break the chain on the worst days; those are the practice.",
+              });
+            }
+          }
+
+          // Block 2: Since you started growth
+          let baseline = null;
+          try {
+            const raw = localStorage.getItem("stillform_growth_baseline");
+            if (raw) baseline = JSON.parse(raw);
+          } catch {}
+
+          const growthLines = [];
+          let baselineDate = "";
+          let baselineSource = "";
+          if (baseline && baseline.capturedAt) {
+            baselineSource = baseline.source || "";
+            baselineDate = (() => {
+              try {
+                const d = new Date(baseline.capturedAt);
+                return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+              } catch { return "earlier"; }
+            })();
+
+            const currentDistinctChips = (() => {
+              const set = new Set();
+              sessions.forEach(s => {
+                if (s.preState) set.add(s.preState);
+                if (s.postState) set.add(s.postState);
+                if (s.feelState) set.add(s.feelState);
+              });
+              return set.size;
+            })();
+            const currentBias = (biasProfile && Array.isArray(biasProfile)) ? biasProfile.length : 0;
+            const currentSignal = (signalProfile && Array.isArray(signalProfile)) ? signalProfile.length : (signalProfile && typeof signalProfile === "object" ? Object.keys(signalProfile).length : 0);
+            let currentTriggers = 0;
+            try { currentTriggers = (getTriggerProfile()?.triggers?.length) || 0; } catch {}
+            let currentStageId = 1;
+            try { currentStageId = getCurrentStage()?.currentStageId || 1; } catch {}
+
+            const chipDelta = currentDistinctChips - (baseline.distinctChips || 0);
+            const biasDelta = currentBias - (baseline.biasCount || 0);
+            const signalDelta = currentSignal - (baseline.signalCount || 0);
+            const triggerDelta = currentTriggers - (baseline.triggerCount || 0);
+            const sessionDelta = sessions.length - (baseline.sessionsCount || 0);
+            const stageDelta = currentStageId - (baseline.stage || 1);
+
+            if (stageDelta > 0) {
+              growthLines.push({
+                headline: `Stage ${baseline.stage} → Stage ${currentStageId}.`,
+                body: stageDelta === 1
+                  ? "A capacity built. The chapter you started in is one you've passed through."
+                  : `${stageDelta} chapters of capacity built since baseline.`,
+              });
+            }
+            if (chipDelta > 0) {
+              growthLines.push({
+                headline: `${chipDelta} new feel-state chip${chipDelta === 1 ? "" : "s"} in your vocabulary.`,
+                body: chipDelta >= 5
+                  ? "Your interoceptive vocabulary has materially widened. Granularity is the practice (Hoemann 2021)."
+                  : "Small additions to your library of named states. The naming is the rep.",
+              });
+            }
+            if (triggerDelta > 0) {
+              growthLines.push({
+                headline: `${triggerDelta} new trigger${triggerDelta === 1 ? "" : "s"} named.`,
+                body: "Triggers you've identified since you started. Pre-event briefs sharpen with reps — Gollwitzer 1999 implementation intentions.",
+              });
+            }
+            if (biasDelta > 0) {
+              growthLines.push({
+                headline: `${biasDelta} additional cognitive distortion${biasDelta === 1 ? "" : "s"} on your watch list.`,
+                body: "Recognition of how your thinking patterns show up — Wells 2009 metacognitive therapy.",
+              });
+            }
+            if (signalDelta > 0) {
+              growthLines.push({
+                headline: `${signalDelta} additional body tell${signalDelta === 1 ? "" : "s"} mapped.`,
+                body: "Specificity of where intensity registers in your body — interoceptive precision (Critchley 2017).",
+              });
+            }
+            if (sessionDelta > 0) {
+              growthLines.push({
+                headline: `${sessionDelta} session${sessionDelta === 1 ? "" : "s"} logged since baseline.`,
+                body: "Reps that accrued. The data layer captures what the body has been practicing.",
+              });
+            }
+
+            // If nothing has grown, still show the baseline date line so
+            // the surface exists when growth starts.
+            if (growthLines.length === 0) {
+              growthLines.push({
+                headline: `Baseline captured ${baselineDate}.`,
+                body: baselineSource === "retroactive-seed"
+                  ? "This baseline was seeded from your state at this surface's first load. Growth from this point forward will surface here."
+                  : "Growth from your calibration baseline will surface here as it accrues.",
+              });
+            }
+          }
+
+          // If both blocks are empty, render nothing
+          if (recentInsights.length === 0 && growthLines.length === 0) return null;
+
+          const subSectionHeaderStyle = {
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            color: "var(--text-muted)", letterSpacing: "0.14em",
+            marginTop: 24, marginBottom: 12, paddingBottom: 8,
+            borderBottom: "0.5px solid var(--border-printed)"
+          };
+          const insightRowStyle = (idx) => ({
+            padding: "12px 0",
+            borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+          });
+
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                WEEKLY REFLECTION
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55,
+                letterSpacing: "0.01em"
+              }}>
+                Where your practice stands and how far it has come.
+              </div>
+
+              {/* Block 1: Last 30 days */}
+              {recentInsights.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    THE LAST 30 DAYS
+                  </div>
+                  {recentInsights.map((ins, idx) => (
+                    <div key={`recent-${idx}`} style={insightRowStyle(idx)}>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 500, marginBottom: 4
+                      }}>
+                        {ins.headline}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: "var(--text-muted)",
+                        lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {ins.body}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Block 2: Since you started */}
+              {growthLines.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    SINCE YOU STARTED · {baselineDate.toUpperCase()}
+                  </div>
+                  {growthLines.map((ln, idx) => (
+                    <div key={`growth-${idx}`} style={insightRowStyle(idx)}>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 500, marginBottom: 4
+                      }}>
+                        {ln.headline}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: "var(--text-muted)",
+                        lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {ln.body}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ── YOUR LIBRARY ──────────────────────────────────────────────
+            Brainstorm idea #5 (May 13, 2026): concept library visibility.
+            The user has been building a concept library through every
+            named state, identified trigger, mapped body signal, and
+            recognized distortion. Most of that data lives as AI context
+            only — the user never sees the library they've built.
+
+            Per Framing Law: surfacing this risks Type 2 rumination if
+            framed as state surveillance ("you've felt anxious 8 times").
+            Safe framing: mastery experience visible (Bandura 1977) —
+            "you've named these concepts." List, not frequency. Concrete
+            acquisition, not analytics dashboard.
+
+            Each subsection:
+            - States (granularity vocabulary): Hoemann 2021 — naming IS
+              the granularity training; visible library closes the loop
+            - Triggers identified: Gollwitzer 1999 implementation
+              intentions — each named trigger is a pre-installed move
+            - Body signals mapped: Critchley 2017 / Khalsa 2018 —
+              interoceptive precision as visible capacity
+            - Distortions on your watch list: Wells 2009 — metacognitive
+              awareness of one's own thinking patterns
+
+            Bounded design:
+            - List of labels only, no frequency counts (no "you've felt X
+              N times" — that's Type 2 affordance)
+            - Empty sections hidden
+            - Whole card hidden if user has zero of everything
+            - Paired with practice flow (My Progress is the home for
+              reflection; library lives where reflection happens)
+        */}
+        {(() => {
+          // States named — derive from sessions' chip fields, same source
+          // as Block 1 above (consistent vocabulary across surfaces).
+          const stateChips = new Set();
+          sessions.forEach(s => {
+            if (s.preState) stateChips.add(s.preState);
+            if (s.postState) stateChips.add(s.postState);
+            if (s.feelState) stateChips.add(s.feelState);
+          });
+          const stateList = Array.from(stateChips).filter(Boolean).sort();
+
+          // Triggers identified
+          let triggerList = [];
+          try {
+            const profile = getTriggerProfile();
+            if (profile?.triggers?.length > 0) {
+              triggerList = profile.triggers
+                .map(t => t?.label)
+                .filter(Boolean)
+                .sort();
+            }
+          } catch {}
+
+          // Body signals mapped — signalProfile may be array (firstAreas)
+          // or object with category keys. Handle both.
+          let bodyList = [];
+          if (Array.isArray(signalProfile)) {
+            bodyList = signalProfile.filter(Boolean).sort();
+          } else if (signalProfile && typeof signalProfile === "object") {
+            // Object shape: collect values across known keys
+            const collected = [];
+            if (Array.isArray(signalProfile.firstAreas)) collected.push(...signalProfile.firstAreas);
+            if (Array.isArray(signalProfile.bodyAreas)) collected.push(...signalProfile.bodyAreas);
+            if (Array.isArray(signalProfile.areas)) collected.push(...signalProfile.areas);
+            bodyList = Array.from(new Set(collected.filter(Boolean))).sort();
+          }
+
+          // Distortions on watch list
+          const biasList = Array.isArray(biasProfile)
+            ? biasProfile.filter(Boolean).sort()
+            : [];
+
+          // Named moves — brainstorm #10 close-time externalization (May 13,
+          // 2026). Read stillform_named_moves; surface labels only, no
+          // timestamps or per-session attribution shown.
+          let movesList = [];
+          try {
+            const raw = localStorage.getItem("stillform_named_moves");
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                // Dedupe by value, preserve most recent occurrence, then sort.
+                const seen = new Map();
+                for (const m of parsed) {
+                  if (m && typeof m.value === "string" && m.value.trim()) {
+                    seen.set(m.value.trim(), true);
+                  }
+                }
+                movesList = Array.from(seen.keys()).sort();
+              }
+            }
+          } catch {}
+
+          // Hide whole card if library is empty
+          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length + movesList.length;
+          if (totalConcepts === 0) return null;
+
+          const subSectionHeaderStyle = {
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            color: "var(--text-muted)", letterSpacing: "0.14em",
+            marginTop: 24, marginBottom: 8, paddingBottom: 8,
+            borderBottom: "0.5px solid var(--border-printed)"
+          };
+          const labelListStyle = {
+            fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+            color: "var(--text)", lineHeight: 1.7,
+            letterSpacing: "0.005em"
+          };
+          const subSectionBodyStyle = {
+            fontSize: 11, color: "var(--text-muted)",
+            lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif",
+            marginTop: 6
+          };
+
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                YOUR LIBRARY
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55,
+                letterSpacing: "0.01em"
+              }}>
+                What you've built — concept by concept.
+              </div>
+
+              {stateList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    STATES NAMED · {stateList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {stateList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Your granularity vocabulary. Each name added is a concept the brain can use to perceive itself with more nuance (Hoemann 2021; Barrett 2017 constructed emotion).
+                  </div>
+                </>
+              )}
+
+              {triggerList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    TRIGGERS IDENTIFIED · {triggerList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {triggerList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Specific situations, people, or moments you've named as load-bearing. Each named trigger is a pre-installed move ready to fire (Gollwitzer 1999 implementation intentions).
+                  </div>
+                </>
+              )}
+
+              {bodyList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    BODY SIGNALS MAPPED · {bodyList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {bodyList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Where intensity registers in your body first. Specificity is interoceptive precision (Critchley 2017; Khalsa 2018).
+                  </div>
+                </>
+              )}
+
+              {biasList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    DISTORTIONS YOU WATCH · {biasList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {biasList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    Cognitive patterns you've recognized in your own thinking. Each Reframe session is a rep against them — the distortion doesn't disappear; your relationship to it changes (Wells 2009 metacognitive therapy).
+                  </div>
+                </>
+              )}
+
+              {movesList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    MOVES NAMED · {movesList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {movesList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    What you've done in session, named in your own words at close. The move you can name is one you can repeat — concrete labels for procedural concepts (Anderson 2007 procedural knowledge).
+                  </div>
+                </>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ROADMAP SURFACE — Path A Section 1 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 (May 7, 2026; executed
             May 9). Architecture line 274: "Roadmap surface (stage display +
@@ -16668,7 +18348,7 @@ function MyProgress({ onBack }) {
 //
 // Layer 1.1 verification (May 8): STAGE_DEFINITIONS at App.jsx:3732,
 // computeStageMarkers at :3769, getCurrentStage at :3828. All exist and stable.
-function RoadmapScreen({ onBack }) {
+function RoadmapScreen({ onBack, setInfoModal }) {
   let snap = null;
   try { snap = getCurrentStage(); } catch { return null; }
   if (!snap) return null;
@@ -16692,11 +18372,29 @@ function RoadmapScreen({ onBack }) {
     <section className="screen" style={{ paddingBottom: 60 }}>
       <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 0" }}>
 
-        {/* Eyebrow */}
+        {/* Eyebrow with How stages work info button — moved here from Mirror
+            Sheet on May 12, 2026 audit (Layer 0.5 Finding 2). The Mirror Strip
+            now goes direct to Roadmap (Gap 1 ship); Mirror Sheet was dormant.
+            Preserving the "How stages work" educational content here since
+            Roadmap is now the canonical journey-overview surface. */}
         <div className="t-mono-xs" style={{
-          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em"
+          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em",
+          display: "flex", alignItems: "center", gap: 6
         }}>
-          The Roadmap
+          <span>The Roadmap</span>
+          {setInfoModal && (
+            <button
+              aria-label="How stages work"
+              onClick={() => setInfoModal({
+                title: "How stages work",
+                body: "Composure is a learnable capacity, not a number that goes up. Stillform tracks five stages because each one names a different part of the work — not levels of skill, but distinct moves the system is building.\n\nStage 1 — Noticing. Catching what's happening in your body before thought.\nStage 2 — Naming. Language for what's present, fast and accurate.\nStage 3 — Anticipating. Pre-loading composure for known triggers.\nStage 4 — Recognizing. Seeing your own loops as they form.\nStage 5 — Holding. Composure under maximum load.\n\nHow you progress: each stage has markers — observable signals from your practice (sessions, chips selected, tools used, patterns surfaced). When the markers are met, you move forward. The markers tell you what to practice; the practice creates the data; the data moves the stage. This is what Wells 2009 calls metacognitive training — building the capacity to observe state, not just to escape it.\n\nYou won't max out a stage and stop. Stages drift if practice stops. The architecture reflects current capacity, not lifetime achievement."
+              })}
+              style={{
+                background: "none", border: "none", color: "var(--text-muted)",
+                cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1
+              }}
+            >ⓘ</button>
+          )}
         </div>
 
         {/* Title — IBM Plex Mono, prestige operator instrument-readout */}
@@ -16777,6 +18475,51 @@ function RoadmapScreen({ onBack }) {
               }}>
                 {def.capacity}
               </div>
+
+              {/* Capacity gate — only for upcoming stages with a defined gate.
+                  Gap 10 (May 12, 2026): names the science-grounded prerequisite
+                  that opens this chapter. The gate IS the science — not a point
+                  threshold. Headline + body + citation in three lines so the
+                  user reads the cognitive requirement, sees what it means in
+                  practice (the markers below), and the literature source.
+                  Renders for upcoming stages only because met/current users
+                  have already passed or are inside this chapter. */}
+              {status === "upcoming" && def.gate && (
+                <div style={{
+                  padding: "14px 14px 12px",
+                  marginBottom: 16,
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  background: "var(--surface2)"
+                }}>
+                  <div className="t-mono-xs" style={{
+                    color: "var(--text-muted)", marginBottom: 8,
+                    letterSpacing: "0.14em"
+                  }}>
+                    The gate
+                  </div>
+                  <div style={{
+                    fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                    color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 8,
+                    letterSpacing: "0.01em"
+                  }}>
+                    {def.gate.headline}
+                  </div>
+                  <div style={{
+                    fontFamily: "'DM Sans', sans-serif", fontSize: 12,
+                    color: "var(--text)", lineHeight: 1.55, marginBottom: 10
+                  }}>
+                    {def.gate.body}
+                  </div>
+                  <div style={{
+                    fontSize: 10, color: "var(--text-dim)",
+                    fontFamily: "'DM Sans', sans-serif", lineHeight: 1.55,
+                    letterSpacing: "0.02em"
+                  }}>
+                    {def.gate.citation}
+                  </div>
+                </div>
+              )}
 
               {/* Markers — show for current + met stages with full progress.
                   For upcoming stages, show same structure but greyed (so user
@@ -16864,6 +18607,7 @@ function RoadmapScreen({ onBack }) {
     </section>
   );
 }
+
 
 // ─── SCRIPTS TOOL — Engagement Architecture Build #9 ────────────────────
 // Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
@@ -17247,12 +18991,182 @@ function QBPill({ onPress }) {
   );
 }
 
+// --------------------------------------------------------------------
+// STAGE TRANSITION RITUAL — brainstorm idea #8 (May 13, 2026)
+// --------------------------------------------------------------------
+// Surfaces a one-time consolidation moment when the user crosses a stage
+// in the Roadmap. Detection: read getCurrentStage().highestStageMet on
+// mount; compare to stillform_stage_acknowledged. If higher, render
+// modal overlay. On Continue, persist the new acknowledged stage so the
+// ritual fires once per crossing — never twice.
+//
+// FRAMING — Stage advancement is a real neuroplastic moment: capacity
+// the user did not have before is now load-bearing. Per Bandura 1977
+// mastery experience: making the moment visible strengthens the self-
+// efficacy that supports the next stage's reps. Per Roediger & Karpicke
+// 2006: the ritual is itself a retrieval — the user articulates (by
+// reading) what they built, which consolidates the concept. Per
+// Gollwitzer 1999 implementation intentions: the NEXT-stage prime sets
+// up the next chapter's work as a pre-installed direction.
+//
+// BOUNDED DESIGN per Framing Law / audit philosophy
+// - No "Congratulations" / "Achievement Unlocked" / exclamation points
+// - No badges, points, dopamine count-up — operator-tier voice
+// - Single dismiss button, no second pass, no "share" affordance
+// - Modal is interruptive ON PURPOSE — the moment is rare (max 4 times
+//   in a user's lifetime: crossing stages 1→2, 2→3, 3→4, 4→5). The
+//   user has earned an interruption. This is not a routine nudge.
+// - Renders only on home (gating via parent JSX). Never interrupts
+//   mid-session.
+function StageRitualOverlay() {
+  const [data] = useState(() => {
+    try {
+      const snap = getCurrentStage();
+      if (!snap || !Number.isFinite(snap.highestStageMet)) return null;
+      if (snap.highestStageMet < 1) return null;
+      let acknowledged = 0;
+      try {
+        const raw = localStorage.getItem("stillform_stage_acknowledged");
+        if (raw) acknowledged = Number(raw) || 0;
+      } catch {}
+      if (snap.highestStageMet <= acknowledged) return null;
+      const stage = STAGE_DEFINITIONS[snap.highestStageMet];
+      const nextStage = STAGE_DEFINITIONS[snap.highestStageMet + 1] || null;
+      if (!stage) return null;
+      return {
+        stageId: snap.highestStageMet,
+        stage,
+        nextStage,
+      };
+    } catch { return null; }
+  });
+
+  const [visible, setVisible] = useState(!!data);
+
+  if (!data || !visible) return null;
+
+  const handleAcknowledge = () => {
+    try {
+      localStorage.setItem("stillform_stage_acknowledged", String(data.stageId));
+    } catch {}
+    try {
+      window.plausible?.("Stage Ritual Acknowledged", {
+        props: { stageId: data.stageId, stageName: data.stage?.name || "" }
+      });
+    } catch {}
+    setVisible(false);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stage-ritual-title"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0, 0, 0, 0.78)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px"
+      }}
+    >
+      <div style={{
+        maxWidth: 440,
+        width: "100%",
+        background: "var(--bg)",
+        border: "0.5px solid var(--amber)",
+        borderRadius: "var(--r-lg)",
+        padding: "32px 26px"
+      }}>
+        <div className="t-mono-xs" style={{
+          color: "var(--amber)",
+          letterSpacing: "0.16em",
+          marginBottom: 22
+        }}>
+          STAGE {data.stageId} CROSSED
+        </div>
+        <h2 id="stage-ritual-title" style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 34,
+          fontWeight: 300,
+          color: "var(--text)",
+          lineHeight: 1.15,
+          marginBottom: 8,
+          letterSpacing: "0.005em"
+        }}>
+          {data.stage.name}
+        </h2>
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 17,
+          fontStyle: "italic",
+          color: "var(--text-cream)",
+          lineHeight: 1.45,
+          letterSpacing: "0.005em",
+          marginBottom: 26
+        }}>
+          {data.stage.capacity}.
+        </div>
+        <div style={{
+          fontSize: 13,
+          color: "var(--text)",
+          fontFamily: "'DM Sans', sans-serif",
+          lineHeight: 1.65,
+          marginBottom: data.nextStage ? 22 : 28
+        }}>
+          A capacity built. What you can do now, you couldn't before — the reps that brought you here are concepts named into your library. Neuroplastic change is the substrate of the shift (Davidson &amp; McEwen 2012).
+        </div>
+        {data.nextStage && (
+          <>
+            <div className="t-mono-xs" style={{
+              color: "var(--text-muted)",
+              letterSpacing: "0.14em",
+              marginTop: 20,
+              marginBottom: 6,
+              paddingTop: 18,
+              borderTop: "0.5px solid var(--border-printed)"
+            }}>
+              NEXT · {data.nextStage.name}
+            </div>
+            <div style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 15,
+              fontStyle: "italic",
+              color: "var(--text)",
+              lineHeight: 1.45,
+              marginBottom: 26
+            }}>
+              {data.nextStage.capacity}.
+            </div>
+          </>
+        )}
+        <button
+          className="btn btn-primary"
+          onClick={handleAcknowledge}
+          style={{
+            width: "100%",
+            padding: "14px 24px",
+            fontSize: 15
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Stillform() {
   const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
   const [infoModal, setInfoModal] = useState(null);
-  // Engagement architecture Phase 0 (May 7) — Mirror sheet visibility.
-  // Sheet renders the full stage breakdown; anchor on home opens it.
-  const [showMirrorSheet, setShowMirrorSheet] = useState(false);
+  // Gap 11 (May 12, 2026) — tick state to force re-render after the
+  // rep-counted banner is dismissed. The banner reads localStorage at
+  // render time; bumping this tick causes a re-render that picks up
+  // the cleared key. Cheap, no global state machine needed.
+  const [repCountedTick, setRepCountedTick] = useState(0);
   const readFirstRunStage = () => {
     try {
       const raw = localStorage.getItem(FIRST_RUN_STAGE_KEY);
@@ -17277,6 +19191,45 @@ export default function Stillform() {
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2500);
     setupPushNotifications();
+
+    // Gap 4 (May 12, 2026) — capacity-growth baseline seed.
+    // If onboarded and no baseline captured, snapshot current state once.
+    // For pre-existing users this is a retroactive seed (acknowledged in
+    // source field). For new users completing calibration on or after
+    // May 12, the calibration flow seeds at completion. Either way, the
+    // baseline lives in stillform_growth_baseline and never gets
+    // overwritten — it's the anchor against which growth is measured.
+    try {
+      const onboardedNow = localStorage.getItem("stillform_onboarded") === "yes";
+      const existing = localStorage.getItem("stillform_growth_baseline");
+      if (onboardedNow && !existing) {
+        const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+        const distinctChips = (() => {
+          const set = new Set();
+          sessions.forEach(s => {
+            if (s.preState) set.add(s.preState);
+            if (s.postState) set.add(s.postState);
+            if (s.feelState) set.add(s.feelState);
+          });
+          return set.size;
+        })();
+        const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+        const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+        const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+        const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+        const baseline = {
+          capturedAt: new Date().toISOString(),
+          stage: currentStageId,
+          distinctChips,
+          sessionsCount: sessions.length,
+          biasCount: bias,
+          signalCount: signal,
+          triggerCount: triggers,
+          source: "retroactive-seed",
+        };
+        localStorage.setItem("stillform_growth_baseline", JSON.stringify(baseline));
+      }
+    } catch {}
 
     // Local notification tap listener — fires when user taps a scheduled
     // local notification (pattern push, daily reminder, pre-meeting alert).
@@ -17598,6 +19551,10 @@ export default function Stillform() {
 
   const [screen, setScreenRaw] = useState(null);
   const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
+  // Signal Map transition phase — "body-to-mind" | "mind-to-triggers" | "triggers-to-map".
+  // Set when the user crosses between parts of calibration; the transition screen reads
+  // it to pick the right loading caption, then auto-advances to the next surface.
+  const [signalMapTransitionPhase, setSignalMapTransitionPhase] = useState(null);
 
   // Recovery hash parser — runs once on mount before any other hash-based routing.
   // Supabase appends recovery tokens to the URL hash when the user clicks the
@@ -18459,6 +20416,15 @@ export default function Stillform() {
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
+
+  // ── GUIDED SESSION STATE ──────────────────────────────────────────────
+  // activeSession drives the woven Body → Reframe → Close arc. When non-null,
+  // tool completion advances to next step instead of going home. See helpers
+  // startGuidedSession / advanceSessionStep / endGuidedSession further below.
+  // Shape: { id, steps[{id,label,toolId,mode?}], currentStep, startedAt,
+  //          originalRep, abandoned }
+  const [activeSession, setActiveSession] = useState(null);
+  const [sessionTransitionPhase, setSessionTransitionPhase] = useState(null);
   // outcomeFocus: morning intention — user picks a daily outcome (sharp / composed / recovered)
   // during morning check-in. Drives which protocol is recommended for the day.
   // Science: Implementation Intentions (Gollwitzer 1999) + Mental Contrasting (MCII / Oettingen).
@@ -18807,6 +20773,8 @@ export default function Stillform() {
   const [settingsShareQrOpen, setSettingsShareQrOpen] = useState(false);
   const [settingsSectionOpen, setSettingsSectionOpen] = useState(() => ({
     personalization: false,
+    anchors: false,
+    baseline: false,
     account: false,
     integrations: false,
     data: false,
@@ -18818,6 +20786,21 @@ export default function Stillform() {
     subscriptionStatus: false, syncControls: false,
     metrics: false, exports: false,
   }));
+  // Gap 8 (May 12, 2026) — habit anchors. Implementation intentions
+  // (Gollwitzer 1999) explicitly paired to existing life cues. User-defined
+  // cue → action pairs. Persisted to localStorage stillform_anchors.
+  const [anchors, setAnchorsState] = useState(() => {
+    try {
+      const raw = localStorage.getItem("stillform_anchors");
+      return raw ? JSON.parse(raw) : [];
+    } catch { return []; }
+  });
+  const persistAnchors = (next) => {
+    setAnchorsState(next);
+    try { localStorage.setItem("stillform_anchors", JSON.stringify(next)); } catch {}
+  };
+  const [anchorCueDraft, setAnchorCueDraft] = useState("");
+  const [anchorActionDraft, setAnchorActionDraft] = useState("");
   const toggleSubOpen = (key) => setSettingsSubOpen(prev => ({ ...prev, [key]: !prev[key] }));
   const [metricsOptIn, setMetricsOptIn] = useState(() => {
     try { return localStorage.getItem(METRICS_OPT_IN_KEY) !== "no"; } catch { return true; }
@@ -19859,6 +21842,41 @@ const isSignalProfileConfigured = () => {
 
   const finalizeOnboarding = () => {
     try { localStorage.setItem("stillform_onboarded", "yes"); } catch {}
+
+    // Gap 4 (May 12, 2026) — capture growth baseline at calibration
+    // completion for new users. This is a true baseline (vs the
+    // retroactive-seed path on the mount useEffect for pre-existing
+    // users). The values capture the user's state at the moment they
+    // entered the practice. Never overwritten after first write.
+    try {
+      if (!localStorage.getItem("stillform_growth_baseline")) {
+        const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+        const distinctChips = (() => {
+          const set = new Set();
+          sessions.forEach(s => {
+            if (s.preState) set.add(s.preState);
+            if (s.postState) set.add(s.postState);
+            if (s.feelState) set.add(s.feelState);
+          });
+          return set.size;
+        })();
+        const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+        const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+        const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+        const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+        localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+          capturedAt: new Date().toISOString(),
+          stage: currentStageId,
+          distinctChips,
+          sessionsCount: sessions.length,
+          biasCount: bias,
+          signalCount: signal,
+          triggerCount: triggers,
+          source: "calibration-completion",
+        }));
+      }
+    } catch {}
+
     setFirstRunStage(null);
     // Ensure regType is always set before going to home — migrate balanced to thought-first
     // Apr 29: balanced regulation type fully retired. Migration now overwrites existing
@@ -19891,6 +21909,12 @@ const isSignalProfileConfigured = () => {
     if (toolBackOverrideRef.current) {
       toolBackOverrideRef.current();
       toolBackOverrideRef.current = null;
+      return;
+    }
+    // If a guided session is active, back = abandon session cleanly (tracks
+    // drop-off telemetry, clears session state, routes home).
+    if (activeSession) {
+      abandonGuidedSession("tool-back");
       return;
     }
     if (activeTool?.returnTo) {
@@ -19930,6 +21954,174 @@ const isSignalProfileConfigured = () => {
     }
   };
 
+  // ── GUIDED SESSION HELPERS ────────────────────────────────────────────
+  // The session is the metacognition rep loop: Notice → Reframe → Close.
+  // UNIVERSAL. No fork on calibration, no fork on bio-filter. Per Framing
+  // Law, the practice IS the central concept-building loop; regulation
+  // tools support but do not replace the practice.
+  //
+  // Body work (Breathe, Body Scan) lives as opt-in standalone tools the
+  // user can compose with the session. Each ends with a "Continue to
+  // Notice?" handoff so a user who chooses to settle first flows into the
+  // spine in one motion (no return-to-home in between).
+  //
+  // Calibration (body-first / thought-first) stays in storage as AI
+  // context and reserves for future pressure-event reps (calendar / HRV
+  // integrations that fire calibrated entry prompts before high-pressure
+  // moments). It does not fork the regular session shape.
+  const startGuidedSession = (entryReason = "home-cta", overrideMode = null) => {
+    const bioFilter = getActiveBioFilter();
+
+    // Reframe step — mode determined by override or default calm.
+    const reframeMode = overrideMode || "calm";
+    const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
+
+    // Notice step — discrete affect-labeling beat. Universal entry to the
+    // metacognition rep.
+    const noticeStep = { id: "notice", label: "Notice", screenName: "session-notice" };
+
+    // Universal session: two steps. Notice surfaces state, Reframe is the
+    // metacognitive examination. Close follows the last step as a screen.
+    const steps = [noticeStep, reframeStep];
+
+    const session = {
+      id: `s-${Date.now()}`,
+      entryReason,
+      steps,
+      currentStep: 0,
+      startedAt: Date.now(),
+      abandoned: false,
+      originalRep: (() => { try { return getTodaysJourneyRep(); } catch { return null; } })()
+    };
+    setActiveSession(session);
+
+    // ── REP-POSITIONED SESSION ──────────────────────────────────────────
+    // Write today's rep to a transient localStorage key so the Reframe
+    // step can read it and pass to the AI as the session's organizing
+    // objective.
+    try {
+      const rep = session.originalRep;
+      if (rep && rep.rep && !rep.allMet) {
+        localStorage.setItem("stillform_session_rep_context", JSON.stringify({
+          stageId: rep.stageId,
+          stageName: rep.stage?.name || "",
+          markerId: rep.marker?.id || "",
+          markerLabel: rep.marker?.label || "",
+          repStatement: rep.rep,
+          sessionId: session.id,
+          at: Date.now()
+        }));
+      } else {
+        localStorage.removeItem("stillform_session_rep_context");
+      }
+    } catch {}
+
+    // Launch first step — handle both tool-based and screen-based.
+    setPathway(reframeMode);
+    const firstStep = steps[0];
+
+    // If first step is screen-based (Notice when no body step), route directly
+    if (firstStep.screenName) {
+      setScreen(firstStep.screenName);
+    } else if (firstStep.toolId) {
+      // Tool-based step. If breathPattern override is set (Cyclic Sighing
+      // for session body work), write the session-scoped override that
+      // Breathe reads on mount.
+      if (firstStep.toolId === "breathe" && firstStep.breathPattern) {
+        try { localStorage.setItem("stillform_session_breath_override", firstStep.breathPattern); } catch {}
+      }
+      const firstTool = TOOLS.find(t => t.id === firstStep.toolId);
+      if (firstTool) {
+        const toolEntry = firstStep.mode ? { ...firstTool, mode: firstStep.mode } : firstTool;
+        setActiveTool(toolEntry);
+        setScreen("tool");
+      } else {
+        // Defensive — should not happen for known tool ids
+        setActiveSession(null);
+        goHomeSafely();
+        return;
+      }
+    }
+
+    try {
+      window.plausible("Session Started", {
+        props: {
+          entry: entryReason,
+          step_count: steps.length,
+          reframe_mode: reframeMode,
+          bio_filter: bioFilter.slice(0, 32),
+          reg_type: regType || "unknown"
+        }
+      });
+    } catch {}
+  };
+
+  const advanceSessionStep = () => {
+    if (!activeSession) { goHomeSafely(); return; }
+    const fromStep = activeSession.steps[activeSession.currentStep];
+    const nextIndex = activeSession.currentStep + 1;
+
+    if (nextIndex >= activeSession.steps.length) {
+      // All steps complete — route to close screen via transition
+      setActiveTool(null);
+      setSessionTransitionPhase("reframe-to-close");
+      setScreen("session-transition");
+      return;
+    }
+
+    const nextStep = activeSession.steps[nextIndex];
+    // Update session state to next step
+    setActiveSession({ ...activeSession, currentStep: nextIndex });
+    // Route through transition first — natural beat between tools/screens.
+    // Phase names are step-id based (body-to-notice, notice-to-reframe,
+    // reframe-to-close). Tool-variant-specific phases dropped — all body
+    // tools flow to notice the same way.
+    setActiveTool(null);
+    const phase = `${fromStep.id}-to-${nextStep.id}`;
+    setSessionTransitionPhase(phase);
+    setScreen("session-transition");
+  };
+
+  const endGuidedSession = () => {
+    try {
+      if (activeSession) {
+        window.plausible("Session Completed", {
+          props: {
+            duration_sec: Math.round((Date.now() - activeSession.startedAt) / 1000),
+            steps: activeSession.steps.length,
+            entry: activeSession.entryReason
+          }
+        });
+      }
+    } catch {}
+    // Clear rep context + breath override so the next session starts clean
+    try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
+    try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
+    setActiveSession(null);
+    setSessionTransitionPhase(null);
+    goHomeSafely();
+  };
+
+  const abandonGuidedSession = (reason = "user-exit") => {
+    try {
+      if (activeSession) {
+        window.plausible("Session Abandoned", {
+          props: {
+            reason,
+            at_step: activeSession.steps[activeSession.currentStep]?.id || "unknown",
+            duration_sec: Math.round((Date.now() - activeSession.startedAt) / 1000)
+          }
+        });
+      }
+    } catch {}
+    // Clear rep context + breath override so the next session starts clean
+    try { localStorage.removeItem("stillform_session_rep_context"); } catch {}
+    try { localStorage.removeItem("stillform_session_breath_override"); } catch {}
+    setActiveSession(null);
+    setSessionTransitionPhase(null);
+    goHomeSafely();
+  };
+
   const launchScenarioProtocol = async (protocolId) => {
     const launched = await launchScenarioProtocolById({
       protocolId,
@@ -19951,6 +22143,15 @@ const isSignalProfileConfigured = () => {
 
   const renderTool = () => {
     const props = { setInfoModal, onComplete: (redirectTo) => {
+      // ── GUIDED SESSION INTERCEPT ────────────────────────────────────
+      // If we're in an active session, this tool just finished a session
+      // step. Advance the session instead of routing through the standard
+      // exit logic. Redirects (crisis, eod-close, etc.) still take priority
+      // because they represent abnormal exits that should break the session.
+      if (activeSession && !redirectTo && !activeTool?.setupFlow && !activeTool?.returnTo) {
+        advanceSessionStep();
+        return;
+      }
       if (redirectTo) {
         if (redirectTo === "crisis") { setScreen("crisis"); return; }
         if (redirectTo === "eod-close") {
@@ -19958,6 +22159,19 @@ const isSignalProfileConfigured = () => {
           setEodPromptDismissed(false);
           setEodOpen(true);
           goHomeSafely();
+          return;
+        }
+        // ── BODY-TOOL → SPINE HANDOFF ───────────────────────────────────
+        // Breathe and Body Scan can route their completion into the
+        // universal session. The user has already settled; they flow into
+        // Notice → Reframe → Close in one motion (no return to home in
+        // between). Entry reason logged for Plausible.
+        if (redirectTo === "session" || redirectTo === "session-from-breathe" || redirectTo === "session-from-scan") {
+          const entry = redirectTo === "session-from-breathe" ? "breathe-handoff"
+                      : redirectTo === "session-from-scan" ? "scan-handoff"
+                      : "tool-handoff";
+          setActiveTool(null);
+          startGuidedSession(entry);
           return;
         }
         if (redirectTo === "reframe") {
@@ -19976,17 +22190,20 @@ const isSignalProfileConfigured = () => {
       }
       if (!redirectTo && activeTool?.setupFlow === "calibration-combined") {
         if (activeTool?.id === "signals") {
-          setActiveTool({ ...TOOLS.find(t => t.id === "bias"), setupFlow: "calibration-combined" });
-          setScreen("tool");
+          // Body (Part 1) → Mind (Part 2). Route through transition; the
+          // transition advance handler opens the setup screen at step 0
+          // (How You Process) which kicks off Part 2.
+          setActiveTool(null);
+          setSignalMapTransitionPhase("body-to-mind");
+          setScreen("signalmap-transition");
           return;
         }
         if (activeTool?.id === "bias") {
-          // Phase 2e — calibration trigger seed prompt. Single optional screen
-          // after Pattern Check, before finalizing onboarding. User can add
-          // 0-2 triggers and proceed, or skip. Either path lands them home
-          // with onboarding finalized.
+          // Mind (Part 2) → Triggers (Part 3). Route through transition;
+          // advance handler opens calibration-trigger-seed.
           setActiveTool(null);
-          setScreen("calibration-trigger-seed");
+          setSignalMapTransitionPhase("mind-to-triggers");
+          setScreen("signalmap-transition");
           return;
         }
       }
@@ -20009,9 +22226,9 @@ const isSignalProfileConfigured = () => {
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} toolBackOverrideRef={toolBackOverrideRef} />;
-      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} />;
+      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 1 : null} />;
 
-      case "bias": return <MicroBiasTool {...props} />;
+      case "bias": return <MicroBiasTool {...props} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 2 : null} />;
       case "metacognition": return (
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
           <MetacognitionTool onComplete={(redirectTo) => {
@@ -20138,18 +22355,26 @@ const isSignalProfileConfigured = () => {
         }}>
           <div onClick={e => e.stopPropagation()} style={{
             background: "var(--bg2, #111)", border: "0.5px solid var(--border)",
-            borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%"
+            borderRadius: "var(--r-lg)", padding: "28px 20px", maxWidth: 440, width: "100%",
+            maxHeight: "84vh", display: "flex", flexDirection: "column"
           }}>
-            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14 }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 14, flexShrink: 0 }}>
               {infoModal.title}
             </div>
-            <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.8, fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-line" }}>
+            <div style={{
+              fontSize: 13, color: "var(--text)", lineHeight: 1.8,
+              fontFamily: "'DM Sans', sans-serif", whiteSpace: "pre-line",
+              overflowY: "auto", flex: "1 1 auto", minHeight: 0,
+              WebkitOverflowScrolling: "touch", overscrollBehavior: "contain",
+              paddingRight: 4
+            }}>
               {infoModal.body}
             </div>
             <button onClick={() => setInfoModal(null)} style={{
-              marginTop: 24, background: "none", border: "0.5px solid var(--border)",
+              marginTop: 20, background: "none", border: "0.5px solid var(--border)",
               borderRadius: "var(--r)", padding: "8px 24px", fontSize: 12,
-              color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
+              color: "var(--text-muted)", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+              alignSelf: "flex-start", flexShrink: 0
             }}>
               Got it
             </button>
@@ -20157,352 +22382,6 @@ const isSignalProfileConfigured = () => {
         </div>
       )}
 
-      {/* ── MIRROR SHEET — engagement architecture full stage breakdown ──────
-          Opens from the home anchor. Editorial-luxury treatment per design
-          system spec: dark ground, hairline borders, mono caps for stage
-          label, Cormorant for capacity (one editorial moment), DM Sans for
-          body, accent only as a 0.5px line under the headline (5% rule).
-          Renders complete marker breakdown including deferred markers
-          flagged as "system still building" per spec §3.1 — honest
-          transparency about what's measured vs what's coming. */}
-      {showMirrorSheet && (() => {
-        let snap = null;
-        try { snap = getCurrentStage(); } catch { return null; }
-        if (!snap || !snap.stage) return null;
-        const shippedMarkers = snap.markers.filter(m => m.status === "shipped");
-        const deferredMarkers = snap.markers.filter(m => m.status === "deferred");
-        return (
-          <div onClick={() => setShowMirrorSheet(false)} style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.78)", zIndex: 9998,
-            display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 32px",
-            overflowY: "auto"
-          }}>
-            <div onClick={e => e.stopPropagation()} style={{
-              background: "var(--ground-elev)", border: "0.5px solid var(--border)",
-              borderRadius: "var(--r-lg)", padding: "32px 24px", maxWidth: 480, width: "100%",
-              maxHeight: "86vh", overflowY: "auto", position: "relative"
-            }}>
-              {/* X close (May 12, 2026) — Arlin phone test: 'there should be an
-                  x on the upper right of the noticing pattern window to close
-                  in case it was opened by accident and this is still not clear
-                  on its purpose.' The Mirror Sheet opens from a tappable strip
-                  that's easy to brush by accident; explicit close affordance
-                  prevents the modal feeling trapping. Tap-outside still works
-                  for power-users. */}
-              <button
-                onClick={() => setShowMirrorSheet(false)}
-                aria-label="Close"
-                style={{
-                  position: "absolute", top: 12, right: 12,
-                  background: "none", border: "none",
-                  color: "var(--text-muted)", cursor: "pointer",
-                  fontSize: 20, lineHeight: 1, padding: "8px 10px",
-                  WebkitTapHighlightColor: "transparent",
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}
-              >
-                ×
-              </button>
-              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em", display: "flex", alignItems: "center", gap: 6 }}>
-                <span>Stage {snap.currentStageId} of 5</span>
-                {/* Master Todo line 798 — Arlin May 8: "Stage 1 on the screen? no info button.
-                    50% to naming and it says I have 5 stages but no explanation as how I do it
-                    or how I get there." Modal answers all three: WHY stages, WHAT they are, HOW
-                    you progress. Voice: prestige-operator, science as language (Wells 2009 cited
-                    as framing, not as proof). Mirror sheet header is the highest-discoverability
-                    slot — user reaches it in one tap from the Mirror anchor. */}
-                <button
-                  aria-label="How stages work"
-                  onClick={() => setInfoModal({
-                    title: "How stages work",
-                    body: "Composure is a learnable capacity, not a number that goes up. Stillform tracks five stages because each one names a different part of the work — not levels of skill, but distinct moves the system is building.\n\nStage 1 — Noticing. Catching what's happening in your body before thought.\nStage 2 — Naming. Language for what's present, fast and accurate.\nStage 3 — Anticipating. Pre-loading composure for known triggers.\nStage 4 — Recognizing. Seeing your own loops as they form.\nStage 5 — Holding. Composure under maximum load.\n\nHow you progress: each stage has markers — observable signals from your practice (sessions, chips selected, tools used, patterns surfaced). When the markers are met, you move forward. The markers tell you what to practice; the practice creates the data; the data moves the stage. This is what Wells 2009 calls metacognitive training — building the capacity to observe state, not just to escape it.\n\nYou won't max out a stage and stop. Stages drift if practice stops. The architecture reflects current capacity, not lifetime achievement."
-                  })}
-                  style={{
-                    background: "none", border: "none", color: "var(--text-muted)",
-                    cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1
-                  }}
-                >ⓘ</button>
-              </div>
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
-                letterSpacing: "0.06em", color: "var(--text)", marginBottom: 12
-              }}>
-                {snap.stage.name}
-              </div>
-              <div style={{
-                height: "0.5px", background: "var(--amber-dim)", width: 32,
-                marginBottom: 18, opacity: 0.8
-              }} />
-              <div style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontStyle: "italic",
-                color: "var(--text-cream)", lineHeight: 1.5, marginBottom: 28,
-                letterSpacing: "0.01em"
-              }}>
-                {snap.stage.capacity}
-              </div>
-
-              <div className="t-mono-xs" style={{
-                color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-              }}>
-                What you're working on
-              </div>
-              <div style={{ marginBottom: 24 }}>
-                {shippedMarkers.map((m, idx) => (
-                  <div key={m.id} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                    padding: "10px 0",
-                    borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none",
-                    gap: 16
-                  }}>
-                    <div style={{
-                      fontSize: 13, color: "var(--text)", lineHeight: 1.45,
-                      fontFamily: "'DM Sans', sans-serif", flex: 1
-                    }}>
-                      {m.label}
-                    </div>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                      letterSpacing: "0.1em", textTransform: "uppercase",
-                      color: m.met ? "var(--amber)" : "var(--text-muted)",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {m.met
-                        ? "Met"
-                        : (typeof m.value === "number" && typeof m.threshold === "number"
-                            ? `${m.value} / ${m.threshold}`
-                            : (m.value === false || m.value === null ? "—" : String(m.value)))}
-                    </div>
-                  </div>
-                ))}
-                {shippedMarkers.length === 0 && (
-                  <div style={{
-                    fontSize: 12, color: "var(--text-muted)", fontStyle: "italic",
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    Markers for this stage are still being instrumented.
-                  </div>
-                )}
-              </div>
-
-              {deferredMarkers.length > 0 && (
-                <>
-                  <div className="t-mono-xs" style={{
-                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-                  }}>
-                    System still building
-                  </div>
-                  <div style={{ marginBottom: 28 }}>
-                    {deferredMarkers.map((m, idx) => (
-                      <div key={m.id} style={{
-                        padding: "10px 0",
-                        borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-                      }}>
-                        <div style={{
-                          fontSize: 13, color: "var(--text-dim)", lineHeight: 1.45,
-                          fontFamily: "'DM Sans', sans-serif", marginBottom: 4
-                        }}>
-                          {m.label}
-                        </div>
-                        {m.deferReason && (
-                          <div style={{
-                            fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            {m.deferReason}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {snap.nextStage && (
-                <>
-                  <div className="t-mono-xs" style={{
-                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-                  }}>
-                    Next
-                  </div>
-                  <div style={{
-                    padding: "16px 18px", marginBottom: 28,
-                    border: "0.5px solid var(--border)", borderRadius: "var(--r)",
-                    background: "transparent"
-                  }}>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500,
-                      letterSpacing: "0.06em", color: "var(--text)", marginBottom: 6
-                    }}>
-                      {snap.nextStage.name}
-                    </div>
-                    <div style={{
-                      fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55,
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>
-                      {snap.nextStage.capacity}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Phase 2d / 2d.1 — Trigger Profile reflection in Mirror sheet.
-                  Per engagement architecture §3.1: "diagnostic stack (Signal
-                  Profile + Bias Profile + Trigger Profile)." Phase 2d shipped
-                  read-only display; 2d.1 lifts to a stateful component for the
-                  inline-add affordance audit §3d called for. Capture surfaces
-                  remain Settings (2a), EOD (2b), Reframe close (2c). Add here
-                  is reflection-context so no encounter increment.
-                  Signal/Bias sections in this sheet remain out of scope. */}
-              <MirrorSheetTriggers />
-
-              <div className="t-mono-xs" style={{
-                color: "var(--text-muted)", marginBottom: 12, letterSpacing: "0.14em"
-              }}>
-                The science
-              </div>
-              <div style={{
-                fontSize: 11, color: "var(--text-muted)", lineHeight: 1.7,
-                fontFamily: "'DM Sans', sans-serif", marginBottom: 28
-              }}>
-                {snap.stage.science.join(" · ")}
-              </div>
-
-              {/* Today's Brief re-read surface (3e) — per TODAYS_BRIEF_FLOW_AUDIT
-                  audit recommendation deferred 3e until after 3a-3d ran in
-                  production. Arlin override: ship now. Mirror sheet is the
-                  cleanest semantic match — opened from the Mirror anchor on
-                  any screen, surfaces today's brief alongside the journey
-                  context. Renders only if today's brief exists. */}
-              {(() => {
-                let brief = null;
-                try { brief = getTodaysBriefForToday(); } catch {}
-                if (!brief) return null;
-                let generatedTime = "";
-                if (brief.generatedAt) {
-                  try {
-                    const dt = new Date(brief.generatedAt);
-                    if (!Number.isNaN(dt.getTime())) {
-                      generatedTime = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-                    }
-                  } catch {}
-                }
-                return (
-                  <div style={{
-                    background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "16px 18px", marginTop: 24, marginBottom: 16
-                  }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12, letterSpacing: "0.14em" }}>
-                      Today's Brief
-                    </div>
-
-                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Hardware</div>
-                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                      {brief.hardware}
-                    </div>
-
-                    {brief.risks && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Risks</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.risks}
-                      </div>
-                    </>)}
-
-                    {brief.moves && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Moves</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.moves}
-                      </div>
-                    </>)}
-
-                    {brief.recovery && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Recovery</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.recovery}
-                      </div>
-                    </>)}
-
-                    {generatedTime && (
-                      <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: 4, fontStyle: "italic" }}>
-                        Generated {generatedTime}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Recent catches — surface the user's pattern self-flags back to
-                  them so the metacognitive work is visible. The Stage 4 marker
-                  counts these silently; this section makes the count and
-                  pattern names legible to the user as evidence of their own
-                  observation. Renders only if at least one self-flag exists. */}
-              {(() => {
-                let aggregated = [];
-                try {
-                  const sessions = getSessionsFromStorage();
-                  if (Array.isArray(sessions)) {
-                    const counts = {};
-                    sessions.slice(-30).forEach(s => {
-                      if (s?.flaggedPattern) counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1;
-                    });
-                    aggregated = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-                  }
-                } catch {}
-                if (!aggregated.length) return null;
-                return (
-                  <div style={{
-                    background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "16px 18px", marginBottom: 16
-                  }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, letterSpacing: "0.14em" }}>
-                      Recent catches
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                      Patterns you caught yourself running, last 30 sessions:
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {aggregated.map(([pattern, count]) => (
-                        <div key={pattern} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}>
-                          <span>{pattern}</span>
-                          <span className="t-mono-xs" style={{ color: "var(--amber)", fontSize: 11 }}>{count}×</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* View full Roadmap — engagement architecture Engine 1 entry point.
-                  Per spec §3.1: "Stages of mastery shown as a path the user is
-                  currently walking. Stage 1 today, stage 5 visible at the path's
-                  end." Mirror sheet shows current stage; full Roadmap shows all 5. */}
-              <button
-                onClick={() => { setShowMirrorSheet(false); setScreen("roadmap"); }}
-                style={{
-                  background: "none", border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
-                  color: "var(--amber)", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em",
-                  marginRight: 10
-                }}
-              >
-                View full Roadmap →
-              </button>
-
-              <button onClick={() => setShowMirrorSheet(false)} style={{
-                background: "none", border: "0.5px solid var(--border)",
-                borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
-                color: "var(--text-muted)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
-              }}>
-                Close
-              </button>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* SPLASH OVERLAY — fades out, never blocks hooks */}
         {(!splashDone || !screenReady || (biometric.isEnabled() && !biometricCleared)) && (
@@ -20519,7 +22398,7 @@ const isSignalProfileConfigured = () => {
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Composure architecture</div>
+            }}>Metacognition practice</div>
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
@@ -20586,9 +22465,9 @@ const isSignalProfileConfigured = () => {
               title: "Stillform",
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
-                "Stillform trains you to catch it earlier — before your state drives the outcome. That's composure. And it's a skill that builds.",
-                "This is instrumentation for self-mastery. A composure system you operate.",
-                "Stillform. Composure Architecture."
+                "Stillform trains you to catch it earlier — before your state drives the outcome. That's the practice. And it builds.",
+                "This is instrumentation for metacognition. A practice you operate.",
+                "Stillform. Metacognition Practice."
               ]
             },
             {
@@ -20602,7 +22481,7 @@ const isSignalProfileConfigured = () => {
             },
             {
               kicker: "Tutorial · 2 of 4",
-              title: "Composure Check — Time to First Value",
+              title: "Cognitive Baseline — Your First Read",
               focusCheckTTFV: true,
               paragraphs: [
                 "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
@@ -20622,7 +22501,7 @@ const isSignalProfileConfigured = () => {
               title: "The Skill Builds Over Time",
               paragraphs: [
                 "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
-                "Every day after: Morning Check-in → Self Mode → Close the loop. The less you need the app, the more it's working."
+                "Every day after: a session is a rep. Each rep sharpens the next. The practice compounds."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
@@ -20766,6 +22645,160 @@ const isSignalProfileConfigured = () => {
           );
         })()}
 
+        {/* SIGNAL MAP TRANSITION — 1.5s loading moment between parts */}
+        {screen === "signalmap-transition" && (
+          <SignalMapTransition
+            phase={signalMapTransitionPhase}
+            onAdvance={() => {
+              const phase = signalMapTransitionPhase;
+              setSignalMapTransitionPhase(null);
+              if (phase === "body-to-mind") {
+                // → Part 2 (Mind): open setup screen at step 0 (How You Process).
+                setupAutoLaunchStepRef.current = null;
+                setSetupStep(0);
+                setAssessmentAnswers([]);
+                setScreen("setup");
+                return;
+              }
+              if (phase === "mind-to-triggers") {
+                // → Part 3 (Triggers): open calibration-trigger-seed.
+                setActiveTool(null);
+                setScreen("calibration-trigger-seed");
+                return;
+              }
+              if (phase === "triggers-to-map") {
+                // → Close screen.
+                setScreen("signalmap-complete");
+                return;
+              }
+              // Fallback — should not happen, but route to home defensively.
+              goHomeSafely();
+            }}
+          />
+        )}
+
+        {/* SIGNAL MAP COMPLETE — Close screen, finalizes onboarding on Enter */}
+        {screen === "signalmap-complete" && (
+          <section style={{
+            maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+            minHeight: "100vh", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            position: "relative", zIndex: 1, textAlign: "center"
+          }}>
+            <div className="t-mono-xs" style={{
+              color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
+              textTransform: "uppercase",
+              animation: "smcFadeIn 0.5s ease-out forwards", opacity: 0
+            }}>
+              Signal Map Complete
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 300,
+              lineHeight: 1.2, marginBottom: 16, color: "var(--text)",
+              animation: "smcFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+            }}>
+              Your signal map is set.
+            </h1>
+            <p className="t-body-md quiet" style={{
+              marginBottom: 8, maxWidth: 360, lineHeight: 1.7,
+              animation: "smcFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+            }}>
+              Every session now reads what you mapped here — body, mind, triggers.
+            </p>
+            <p className="t-body-md quiet" style={{
+              marginBottom: 36, maxWidth: 360, lineHeight: 1.7,
+              animation: "smcFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+            }}>
+              Practice begins. First stage: <span style={{ color: "var(--text)" }}>Noticing</span>.
+            </p>
+            <button
+              className="btn btn-primary"
+              style={{
+                padding: "14px 36px", fontSize: 15, minWidth: 200,
+                animation: "smcFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
+              }}
+              onClick={() => {
+                finalizeOnboarding();
+                goHomeSafely();
+              }}
+            >
+              Enter
+            </button>
+            <style>{`
+              @keyframes smcFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
+          </section>
+        )}
+
+        {/* SESSION TRANSITION — 1.5s loading moment between session steps.
+            Phase values: body-to-notice / notice-to-reframe / reframe-to-close.
+            Advance handler routes to next step's tool OR screen (notice is
+            screen-based; body/reframe are tool-based). */}
+        {screen === "session-transition" && (
+          <SessionTransition
+            phase={sessionTransitionPhase}
+            onAdvance={() => {
+              const phase = sessionTransitionPhase;
+              setSessionTransitionPhase(null);
+              if (phase === "reframe-to-close") {
+                setScreen("session-close");
+                return;
+              }
+              // For other transitions, route to next step. Step can be either
+              // tool-based (has toolId) or screen-based (has screenName).
+              if (activeSession) {
+                const step = activeSession.steps[activeSession.currentStep];
+                if (step?.screenName) {
+                  setScreen(step.screenName);
+                  return;
+                }
+                if (step?.toolId) {
+                  // If this step asks Breathe to use a specific pattern (e.g.
+                  // Cyclic Sighing for session body work), write the session
+                  // override so Breathe picks it up on mount.
+                  if (step.toolId === "breathe" && step.breathPattern) {
+                    try { localStorage.setItem("stillform_session_breath_override", step.breathPattern); } catch {}
+                  }
+                  const tool = TOOLS.find(t => t.id === step.toolId);
+                  if (tool) {
+                    const toolEntry = step.mode ? { ...tool, mode: step.mode } : tool;
+                    setActiveTool(toolEntry);
+                    setScreen("tool");
+                    return;
+                  }
+                }
+              }
+              // Fallback — should not happen, route home defensively
+              goHomeSafely();
+            }}
+          />
+        )}
+
+        {/* SESSION NOTICE — discrete affect-labeling step between Body and
+            Reframe. User picks a present-state chip (+ optional context),
+            taps Continue, session advances to Reframe. ~30 seconds. */}
+        {screen === "session-notice" && activeSession && (
+          <NoticeStepScreen
+            session={activeSession}
+            setInfoModal={setInfoModal}
+            onContinue={() => advanceSessionStep()}
+          />
+        )}
+
+        {/* SESSION CLOSE — terminal screen for guided sessions. Ties what
+            the user just did back to today's rep (if any), then routes home.
+            Mirrors signalmap-complete pattern but for daily practice arcs. */}
+        {/* SESSION CLOSE — multi-beat close ritual. Beat 1 outcome, Beat 2
+            substance (rep echoed), Beat 3 close button. Tap-forward reveals
+            with sharp Cormorant fade-in. Component handles rep-counted vs
+            concept-added distinction via stillform_last_rep_counted check. */}
+        {screen === "session-close" && (
+          <SessionCloseScreen
+            session={activeSession}
+            onClose={() => endGuidedSession()}
+          />
+        )}
+
         {/* CALIBRATION TRIGGER SEED — Phase 2e (post-Pattern Check, pre-home) */}
         {screen === "calibration-trigger-seed" && (() => {
           // Local state via component-scoped consts isn't possible inside an IIFE
@@ -20787,23 +22820,24 @@ const isSignalProfileConfigured = () => {
             try { window.plausible("Calibration Trigger Seed", { props: { count: labels.filter(l => (l || "").trim().length >= 2).length } }); } catch {}
             setCalibrationSeedLabels(["", ""]);
             setCalibrationSeedCategories(["other", "other"]);
-            finalizeOnboarding();
-            goHomeSafely();
+            // Triggers (Part 3) → Close. Route through transition; advance
+            // handler opens signalmap-complete close screen which finalizes
+            // onboarding on user's Enter tap.
+            setSignalMapTransitionPhase("triggers-to-map");
+            setScreen("signalmap-transition");
           };
 
           const skipAndGoHome = () => {
             try { window.plausible("Calibration Trigger Seed", { props: { count: 0, skipped: true } }); } catch {}
             setCalibrationSeedLabels(["", ""]);
             setCalibrationSeedCategories(["other", "other"]);
-            finalizeOnboarding();
-            goHomeSafely();
+            setSignalMapTransitionPhase("triggers-to-map");
+            setScreen("signalmap-transition");
           };
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                One last optional step
-              </div>
+              <SignalMapHeader part={3} />
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, lineHeight: 1.2, marginBottom: 14 }}>
                 Name what destabilizes you
               </h1>
@@ -20824,14 +22858,17 @@ const isSignalProfileConfigured = () => {
                       next[idx] = e.target.value.slice(0, 60);
                       setLabels(next);
                     }}
-                    placeholder="Name it plainly"
+                    placeholder="A specific situation or person"
                     maxLength={60}
                     style={{
                       width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
                       borderRadius: "var(--r)", padding: "12px 14px", fontSize: 14, color: "var(--text)",
-                      fontFamily: "'DM Sans', sans-serif", marginBottom: 10
+                      fontFamily: "'DM Sans', sans-serif", marginBottom: 8
                     }}
                   />
+                  <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.12em", marginBottom: 6 }}>
+                    Category
+                  </div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
                     {TRIGGER_PROFILE_CATEGORIES.map(cat => (
                       <button
@@ -20900,12 +22937,12 @@ const isSignalProfileConfigured = () => {
           if (setupBridgeStep === 0) {
             return (
               <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 1 of 2</div>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>Personalize</div>
                 <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
-                  Personalization
+                  Make it yours
                 </h1>
                 <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-                  Set up how Stillform looks and feels before you start. You can always change these in Settings.
+                  A few quick choices — theme, text size, visual grounding. Change anytime in Settings.
                 </p>
 
                 {/* Theme */}
@@ -21150,55 +23187,59 @@ const isSignalProfileConfigured = () => {
             );
           }
 
-          // Page 2 — Map your signals
+          // Page 2 — Signal Map Open
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={() => setSetupBridgeStep(0)}>← Back</button>
-              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 2 of 2</div>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
-                Map your signals.
+              <SignalMapHeader part={1} />
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 14 }}>
+                Building your signal map.
               </h1>
-              <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-                Where does intensity hit first in your body? Jaw, shoulders, chest, gut, hands, legs. This is how the app learns you.
+              <p className="t-body-md quiet" style={{ marginBottom: 16, lineHeight: 1.7 }}>
+                Three parts. Together they become the map the system reads every time you open Stillform.
               </p>
-              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 24 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-                  Signal mapping
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6, fontWeight: 500 }}>
-                  {signalMappingConfigured ? "✓ Your signals are mapped." : "Takes about 60 seconds."}
-                </div>
-                <div className="t-body-sm quiet" style={{ marginBottom: 16, lineHeight: 1.6 }}>
-                  {signalMappingConfigured
-                    ? "The app knows where to look first. You can update this anytime in Settings."
-                    : "Every session uses this to personalise your tools and AI prompts. The more accurate, the faster it works."}
-                </div>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%", fontSize: 14 }}
-                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
-                >
-                  {signalMappingConfigured ? "Update signal mapping →" : "Map signals now →"}
-                </button>
+              <div style={{ marginBottom: 32 }}>
+                {[
+                  { num: "1", part: "Body",     desc: "Where pressure shows up first — areas, sensations, what activates them." },
+                  { num: "2", part: "Mind",     desc: "How you process under load — thought-first or body-first, and the patterns that recur." },
+                  { num: "3", part: "Triggers", desc: "One or two specific situations or people that reliably pull you off-center." }
+                ].map(item => (
+                  <div key={item.num} style={{ display: "flex", gap: 14, marginBottom: 16, alignItems: "flex-start" }}>
+                    <div className="t-mono-xs" style={{
+                      color: "var(--amber)", letterSpacing: "0.1em", flexShrink: 0,
+                      fontSize: 11, marginTop: 4, minWidth: 18
+                    }}>
+                      {item.num}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500, marginBottom: 3 }}>{item.part}</div>
+                      <div className="t-body-sm quiet" style={{ lineHeight: 1.55 }}>{item.desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              {signalMappingConfigured
-                ? (
-                  <button
-                    className="btn btn-primary"
-                    style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
-                  >
-                    Continue to calibration →
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { try { sessionStorage.setItem("stillform_signals_skipped_this_session", "yes"); } catch {} beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin }); }}
-                    style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0", textDecoration: "underline" }}
-                  >
-                    Skip for now →
-                  </button>
-                )
-              }
+              <div className="t-body-sm quiet" style={{ marginBottom: 24, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 15 }}>
+                About five minutes. You can skip the optional last part if nothing comes to mind.
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                onClick={() => {
+                  // Single entry — kick off Part 1 (Body). Skip beginCalibrationFlow
+                  // (which sets screen=setup en route) to avoid a brief flash of the
+                  // setup screen before the signals tool mounts. Routing through the
+                  // setup screen happens later via the transition advance handler.
+                  const resolvedOrigin = resolveSetupBridgeOrigin(setupBridgeOrigin);
+                  setSetupBridgeOrigin(resolvedOrigin);
+                  if (!isFirstRunComplete()) setFirstRunStage("calibration");
+                  setupAutoLaunchStepRef.current = null;
+                  setSetupStep(0);
+                  setAssessmentAnswers([]);
+                  startTool({ ...TOOLS.find(t => t.id === "signals"), setupFlow: "calibration-combined" });
+                }}
+              >
+                Begin
+              </button>
             </section>
           );
         })()}
@@ -21279,23 +23320,10 @@ const isSignalProfileConfigured = () => {
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
 
-              {/* System calibration header */}
-              <div className="t-mono-xs" style={{ marginBottom: 16 }}>
-                ◎ SYSTEM CALIBRATION
-              </div>
+              {/* Signal Map · Part 2 of 3 · Mind — unified frame across How You Process + Pattern Check */}
+              <SignalMapHeader part={2} />
 
-              {/* Progress */}
-              <div style={{ display: "flex", gap: 6, marginBottom: 24 }}>
-                {setupSteps.map((_, i) => (
-                  <div key={i} style={{
-                    height: 2, flex: 1, borderRadius: 1,
-                    background: i <= setupStep ? "var(--amber)" : "var(--border)",
-                    transition: "background 0.3s"
-                  }} />
-                ))}
-              </div>
-
-              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 12 }}>
                 {current.label}
               </div>
               <h1 className="t-display-lg" style={{ marginBottom: 8, lineHeight: 1.15 }}>
@@ -21724,12 +23752,48 @@ const isSignalProfileConfigured = () => {
                 </div>
               )}
 
-              <button className="btn btn-primary" onClick={() => {
-                setPreEventBriefTarget(null);
-                goHomeSafely();
-              }} style={{ width: "100%" }}>
-                Done
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Run the rep — brainstorm #4 (May 13, 2026). Calendar event
+                    becomes the cue; a 60-second universal session arc is the
+                    rep. Gollwitzer 1999 implementation intentions made
+                    operational — the event itself is the trigger, the rep is
+                    the pre-installed move. Writes event title to
+                    stillform_practice_entry_context so Notice + Reframe both
+                    see the event context. source="pre-event" lets the banner
+                    + AI directive calibrate to "before the event" framing. */}
+                <button className="btn btn-primary" onClick={() => {
+                  try {
+                    localStorage.setItem("stillform_practice_entry_context", JSON.stringify({
+                      pattern: target.title,
+                      source: "pre-event",
+                      daysAgo: 0,
+                      eventStart: target.start || null,
+                      enteredAt: new Date().toISOString()
+                    }));
+                  } catch {}
+                  try {
+                    window.plausible?.("Pre-Event Rep Started", {
+                      props: { hasBrief: brief ? "yes" : "no" }
+                    });
+                  } catch {}
+                  setPreEventBriefTarget(null);
+                  startGuidedSession("pre-event-rep");
+                }} style={{ width: "100%" }}>
+                  Run the rep · 60 sec →
+                </button>
+                <button className="btn btn-ghost" onClick={() => {
+                  setPreEventBriefTarget(null);
+                  goHomeSafely();
+                }} style={{
+                  width: "100%",
+                  padding: "10px 24px", fontSize: 12,
+                  color: "var(--text-muted)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em", textTransform: "uppercase"
+                }}>
+                  Done · just the brief
+                </button>
+              </div>
             </div>
           );
         })()}
@@ -21943,6 +24007,15 @@ const isSignalProfileConfigured = () => {
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
+              {/* ── STAGE TRANSITION RITUAL — brainstorm #8 ──────────────
+                   One-time consolidation moment when getCurrentStage()
+                   .highestStageMet > stillform_stage_acknowledged. Self-
+                   gated render (returns null when no unacknowledged
+                   advance). Mounted on home only so it never interrupts
+                   a session. The moment is rare (max 4 lifetime
+                   crossings) and earns the interruption. */}
+              <StageRitualOverlay />
+
               {/* ── TIME-OF-DAY GREETING — terse, declarative ─────────────── */}
               {(() => {
                 const hr = new Date().getHours();
@@ -21970,6 +24043,129 @@ const isSignalProfileConfigured = () => {
                    (May 7, 2026: Arlin's call — pill at top of greeting felt too prominent
                    for a non-tappable status line. The info is now a subtle subtitle on the
                    Talk it out CTA where it's contextually useful, not standalone noise.) ─ */}
+
+              {/* ── PRACTICE SURFACE ─────────────────────────────────────────────
+                   Added May 12, 2026 per STILLFORM_FRAMING_LAW.md (May 12, 2026)
+                   on branch feat/home-wiring-surface.
+
+                   Renders the home's first substantive surface as a metacognition
+                   practice (concept library + retrieval prompt + spaced returns),
+                   not a regulation-tool dashboard. Subsequent commits will
+                   subordinate or remove the existing Mirror strip + reasoning
+                   line + hero CTA as this surface validates with real use.
+
+                   Per audit philosophy v2.0 Layer 1 (don't break existing
+                   functionality): no existing home features are removed in this
+                   commit. The Morning strip, Mirror strip, hero CTA, and "Not
+                   quite right" override all continue to render below.
+
+                   Neuroplasticity factors baked in (per framing law science spine):
+                   - Retrieval prompt (active retrieval over passive review)
+                   - Spaced re-exposure queue (spacing effect)
+                   - Library growth visible (compounding proof)
+                   - Forward prime in primary action (specific pattern + tool)
+
+                   Prediction-error surfacing ("Stillform caught a pattern: X
+                   fires after Y") is deferred — requires cross-session AI
+                   analysis pipeline that doesn't yet exist. Reserved for a
+                   future commit. */}
+              {(() => {
+                let biasProfile = null;
+                let triggerArr = [];
+                let savedReframesArr = [];
+                try { biasProfile = secureRead("stillform_bias_profile", null); } catch {}
+                try {
+                  const tp = getTriggerProfile();
+                  triggerArr = Array.isArray(tp?.triggers) ? tp.triggers : [];
+                } catch {}
+                try {
+                  const sr = secureRead("stillform_saved_reframes", []);
+                  savedReframesArr = Array.isArray(sr) ? sr : [];
+                } catch {}
+
+                // Pattern-context handoff to the practice spine.
+                //
+                // May 13, 2026 (brainstorm idea #1 spine integration): entries
+                // from PracticeSurface now route through startGuidedSession
+                // (Notice → Reframe → Close), not direct-to-Reframe. Per
+                // Arlin's directive on spine integration: "they have to be a
+                // part of the spine, so there needs to be a strong transition
+                // between these." Skipping Notice broke the spine — the user
+                // dropped straight into Reframe without the affect-labeling
+                // beat. The retrieval prompt belongs at the top of the arc,
+                // not as a side cue inside Reframe.
+                //
+                // localStorage handoff stays the same — Notice reads it
+                // non-destructively, Reframe reads + clears as before. Both
+                // steps now see the retrieval context.
+                const handleEnterPracticeFromSurface = (toolId, context) => {
+                  if (context) {
+                    try {
+                      localStorage.setItem(
+                        "stillform_practice_entry_context",
+                        JSON.stringify({ ...context, enteredAt: new Date().toISOString() })
+                      );
+                    } catch {}
+                  } else {
+                    try { localStorage.removeItem("stillform_practice_entry_context"); } catch {}
+                  }
+                  try {
+                    window.plausible?.("Practice Surface Entry", {
+                      props: {
+                        tool: toolId,
+                        source: context?.source || "empty",
+                        hasPattern: context?.pattern ? "yes" : "no"
+                      }
+                    });
+                  } catch {}
+                  // Route through the universal session arc. The entryReason
+                  // distinguishes practice-surface entries from the hero CTA
+                  // for telemetry + AI context. Each source carries a more
+                  // specific reason so the AI directive can calibrate.
+                  const entryReason =
+                    context?.source === "pre-mortem" ? "home-practice-pre-mortem"
+                    : context?.source === "open-recall" ? "home-practice-open-recall"
+                    : context?.source === "pre-sleep" ? "home-practice-pre-sleep"
+                    : context?.source === "deep-revisit" ? "home-practice-deep-revisit"
+                    : context?.source === "spaced" ? "home-practice-spaced"
+                    : context?.pattern ? "home-practice-retrieval"
+                    : "home-practice";
+                  startGuidedSession(entryReason);
+                };
+
+                return (
+                  <PracticeSurface
+                    sessions={sessions}
+                    biasProfile={biasProfile}
+                    triggers={triggerArr}
+                    savedReframes={savedReframesArr}
+                    onEnterPractice={handleEnterPracticeFromSurface}
+                    onOpenInfo={(title, body) => setInfoModal({ title, body })}
+                    showPreSleep={(() => {
+                      // Pre-sleep eligibility (brainstorm #2, May 13, 2026):
+                      // late-evening window AND at least one session today AND
+                      // EOD not yet completed today. No notification scheduling
+                      // required — opportunistic surface only.
+                      try {
+                        const now = new Date();
+                        const mins = now.getHours() * 60 + now.getMinutes();
+                        // 21:00 to 23:30 — Stickgold/Walker pre-sleep window.
+                        if (mins < 21 * 60 || mins >= 23 * 60 + 30) return false;
+                        const today = TimeKeeper.stillformDay();
+                        const sessionsToday = sessions.filter(s => {
+                          try { return TimeKeeper.stillformDayOf(s.timestamp) === today; } catch { return false; }
+                        });
+                        if (sessionsToday.length < 1) return false;
+                        const eod = (() => {
+                          try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; }
+                        })();
+                        if (eod?.date === today) return false;
+                        return true;
+                      } catch { return false; }
+                    })()}
+                  />
+                );
+              })()}
 
               {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
               {(() => {
@@ -22642,8 +24838,8 @@ const isSignalProfileConfigured = () => {
 
                 return (
                   <button
-                    onClick={() => setShowMirrorSheet(true)}
-                    aria-label={`Mirror status: Stage ${snap.currentStageId} ${snap.stage.name}. Tap to open.`}
+                    onClick={() => setScreen("roadmap")}
+                    aria-label={`Mirror: Stage ${snap.currentStageId} ${snap.stage.name}. Tap to open the Roadmap.`}
                     style={{
                       width: "100%", marginBottom: 16,
                       padding: "8px 4px",
@@ -22712,6 +24908,202 @@ const isSignalProfileConfigured = () => {
                   />
                 ) : (
                   <>
+                    {/* ── REP COUNTED BANNER — Gap 11 (May 12, 2026) ─────────────
+                        Reads stillform_last_rep_counted (written from
+                        appendSessionToStorage when a shipped marker flips
+                        unmet → met). Renders once on home; user dismisses
+                        with X to clear the key. Surfaces the capacity rep
+                        that just got counted in plain language. Hoemann
+                        2021 emotional granularity / Barrett 2017 constructed
+                        emotion: the user's library of named capacities
+                        grows; this banner makes that growth visible at the
+                        moment it happens. */}
+                    {(() => {
+                      let repCounted = null;
+                      try {
+                        const raw = localStorage.getItem("stillform_last_rep_counted");
+                        if (raw) repCounted = JSON.parse(raw);
+                      } catch {}
+                      if (!repCounted || !repCounted.markerLabel) return null;
+
+                      const dismiss = () => {
+                        try { localStorage.removeItem("stillform_last_rep_counted"); } catch {}
+                        // Force re-render via a state nudge
+                        setRepCountedTick(t => t + 1);
+                      };
+
+                      return (
+                        <div style={{
+                          marginBottom: 18,
+                          padding: "14px 14px 14px 16px",
+                          border: "0.5px solid var(--amber-dim)",
+                          borderRadius: "var(--r)",
+                          background: "var(--surface)",
+                          position: "relative"
+                        }}>
+                          <button
+                            onClick={dismiss}
+                            aria-label="Dismiss"
+                            style={{
+                              position: "absolute", top: 8, right: 10,
+                              background: "none", border: "none",
+                              color: "var(--text-muted)", fontSize: 16,
+                              cursor: "pointer", padding: 4, lineHeight: 1,
+                              WebkitTapHighlightColor: "transparent"
+                            }}
+                          >×</button>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--amber)", marginBottom: 6,
+                            letterSpacing: "0.14em"
+                          }}>
+                            ✓ REP COUNTED · STAGE {repCounted.stageId} · {repCounted.stageName}
+                          </div>
+                          <div style={{
+                            fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+                            color: "var(--text)", lineHeight: 1.5,
+                            paddingRight: 20
+                          }}>
+                            {repCounted.markerLabel}
+                          </div>
+                          {repCounted.repStatement && (
+                            <div style={{
+                              fontFamily: "'Cormorant Garamond', serif", fontSize: 13,
+                              fontStyle: "italic", color: "var(--text-cream)",
+                              lineHeight: 1.55, marginTop: 6, paddingRight: 20,
+                              letterSpacing: "0.01em"
+                            }}>
+                              {repCounted.repStatement}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
+                    {/* ── JOURNEY REP — Gap 2 + Gap 3 (May 12, 2026) ─────────────
+                        The journey rep names WHAT today's practice is (the
+                        metacognitive objective sourced from current stage's
+                        next unmet marker). The existing reasoning line + CTA
+                        below name HOW to enter that rep (modality routing
+                        from bio-filter + regType). Journey position first;
+                        modality entry second.
+
+                        This is the home becoming journey-routed at content
+                        layer while keeping the well-tested bio-filter routing
+                        intact at modality layer. Per the new lens: processing
+                        type is not the home's organizing principle — it
+                        modifies how the user enters today's journey rep.
+
+                        SCIENCE PRESERVED:
+                        - The rep statement comes directly from STAGE_REPS
+                          which is keyed to the actual shipped markers in
+                          computeStageMarkers — no new data invented, the
+                          existing capacity-tracking surface gets a user-
+                          facing voice.
+                        - Anti-gamification: no points, no levels, no
+                          progress bar inside the rep. The rep is just a
+                          named practice action. */}
+                    {(() => {
+                      const journeyRep = getTodaysJourneyRep();
+                      if (!journeyRep) return null;
+
+                      // Between-stage state: all shipped markers in current stage met.
+                      // Show gate-to-next-chapter framing instead of a specific rep.
+                      if (journeyRep.allMet) {
+                        const next = journeyRep.nextStage;
+                        return (
+                          <div style={{ marginBottom: 18, textAlign: "center" }}>
+                            <div className="t-mono-xs" style={{
+                              color: "var(--amber)", marginBottom: 8, letterSpacing: "0.14em"
+                            }}>
+                              STAGE {journeyRep.stageId} · {journeyRep.stage.name} · CHAPTER BUILT
+                            </div>
+                            <div style={{
+                              fontFamily: "'Cormorant Garamond', serif", fontSize: 15,
+                              fontStyle: "italic", color: "var(--text-cream)",
+                              lineHeight: 1.55, letterSpacing: "0.01em",
+                              padding: "0 8px"
+                            }}>
+                              {next
+                                ? `${next.name}'s gate is open — ${next.capacity}.`
+                                : "All five capacities built. Practice continues."}
+                            </div>
+                          </div>
+                        );
+                      }
+
+                      // Standard rep render — eyebrow + rep statement.
+                      return (
+                        <div style={{ marginBottom: 18, textAlign: "center" }}>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--amber)", marginBottom: 8, letterSpacing: "0.14em"
+                          }}>
+                            TODAY'S REP · STAGE {journeyRep.stageId} · {journeyRep.stage.name}
+                          </div>
+                          <div style={{
+                            fontFamily: "'DM Sans', sans-serif", fontSize: 15,
+                            fontWeight: 500, color: "var(--text)",
+                            lineHeight: 1.5, letterSpacing: "0.01em",
+                            padding: "0 8px"
+                          }}>
+                            {journeyRep.rep}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* ── ANCHOR STRIP — Gap 8 (May 12, 2026) ─────────────────
+                        Surfaces user-defined habit anchors below the journey
+                        rep on home. Each anchor is a Gollwitzer 1999
+                        implementation intention — existing life cue paired
+                        to a metacognition rep. Rendered as a quiet list,
+                        not a card. The anchors are standing intentions the
+                        user has committed to; home renders them so they're
+                        visible as the user moves through the day, not
+                        buried in Settings. Tap anchor to scroll to Settings
+                        for edits. */}
+                    {(() => {
+                      if (!anchors || anchors.length === 0) return null;
+                      // Render at most 2 anchors on home (more is visual noise).
+                      const visible = anchors.slice(0, 2);
+                      return (
+                        <div style={{ marginBottom: 20, padding: "0 4px" }}>
+                          <div className="t-mono-xs" style={{
+                            color: "var(--text-muted)", marginBottom: 8,
+                            letterSpacing: "0.14em", textAlign: "center"
+                          }}>
+                            STANDING ANCHORS
+                          </div>
+                          {visible.map((a, idx) => (
+                            <div key={a.id || idx} style={{
+                              fontSize: 12, color: "var(--text)",
+                              lineHeight: 1.55, padding: "4px 0",
+                              fontFamily: "'DM Sans', sans-serif",
+                              textAlign: "center",
+                              borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+                            }}>
+                              <span style={{ color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+                                When {a.cue}
+                              </span>
+                              <span style={{ margin: "0 6px", color: "var(--text-dim)" }}>·</span>
+                              <span style={{ fontStyle: "italic", color: "var(--text-cream)", fontFamily: "'Cormorant Garamond', serif", fontSize: 13 }}>
+                                {a.action}
+                              </span>
+                            </div>
+                          ))}
+                          {anchors.length > 2 && (
+                            <div style={{
+                              fontSize: 10, color: "var(--text-dim)",
+                              textAlign: "center", marginTop: 6,
+                              fontFamily: "'IBM Plex Mono', monospace",
+                              letterSpacing: "0.08em"
+                            }}>
+                              +{anchors.length - 2} more in Settings
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+
                     {/* Ship 2 (May 11, 2026) — Spine inversion at home entry.
                         The hero CTA was previously calibration-aware but the
                         user couldn't see WHY this tool was being proposed.
@@ -22866,71 +25258,28 @@ const isSignalProfileConfigured = () => {
                       );
                     })()}
 
-                    {/* Hero CTA — app routes directly based on calibration + bio-filter state */}
+                    {/* Hero CTA — initiates a GUIDED SESSION (Body → Reframe → Close).
+                        The session arc adapts internally to calibration + bio-filter
+                        state via startGuidedSession() helpers above. This replaces the
+                        prior single-tool routing — the hero is now a session entry,
+                        not a tool launcher. Per Stillform_Master_Todo.md Gap 2 second
+                        cut + narrative-spine work (May 13, 2026). */}
                     <button onClick={() => {
-                      const bioFilter = getActiveBioFilter();
-                      const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
-                      const hasPain = bioFilter.includes("pain");
-
-                      // Day-memory: if user already chose for this exact (date, bioFilter) combo today,
-                      // honor that choice silently. Updating bio-filter creates a new key → suggestion re-fires.
-                      const priorChoice = (() => {
-                        try {
-                          const raw = JSON.parse(localStorage.getItem("stillform_biofilter_choice") || "null");
-                          if (!raw) return null;
-                          if (raw.date !== TimeKeeper.stillformDay()) return null;
-                          if (raw.bioFilter !== bioFilter) return null;
-                          return raw.choice; // "accept" or "skip"
-                        } catch { return null; }
-                      })();
-
                       // DIAGNOSTIC LOG (temporary — remove once root cause identified)
-                      console.log("[Stillform Hero CTA]", {
-                        regType, isBodyFirst, isThoughtFirst,
-                        bioFilter, offBaseline, hasPain, priorChoice,
-                        showBioFilterSuggestion: !!showBioFilterSuggestion
-                      });
-
-                      if (isThoughtFirst) {
-                        if (offBaseline) {
-                          // Pain → Body Scan (Kabat-Zinn / Reiner / Farb). Other off-baseline → Breathe (Ochsner & Gross / Li 2023).
-                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
-                          if (priorChoice === "accept") {
-                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
-                            else startPathway("calm");
-                          } else if (priorChoice === "skip") {
-                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                          } else {
-                            setShowBioFilterSuggestion({ kind, bioFilter });
-                          }
-                        } else {
-                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                        }
-                      } else if (isBodyFirst) {
-                        if (offBaseline && shouldBodyRouteToScan(bioFilter)) {
-                          // Pain (Kabat-Zinn/Reiner/Farb) or unnamed signal (locate first) → Body Scan suggestion
-                          if (priorChoice === "accept") startTool(TOOLS.find(t => t.id === "scan"));
-                          else if (priorChoice === "skip") startPathway("calm");
-                          else setShowBioFilterSuggestion({ kind: "body-to-scan", bioFilter });
-                        }
-                        else startPathway("calm");  // Activated/Sleep/Depleted/Medicated → straight to Breathe (Ochsner & Gross 2005)
-                      } else {
-                        // Defensive fallback — regType migrates to thought-first on load (Apr 29).
-                        // This branch should be unreachable in practice; route as thought-first if hit.
-                        if (offBaseline) {
-                          const kind = hasPain ? "thought-to-scan" : "thought-to-body";
-                          if (priorChoice === "accept") {
-                            if (kind === "thought-to-scan") startTool(TOOLS.find(t => t.id === "scan"));
-                            else startPathway("calm");
-                          } else if (priorChoice === "skip") {
-                            setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                          } else {
-                            setShowBioFilterSuggestion({ kind, bioFilter });
-                          }
-                        } else {
-                          setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe"));
-                        }
-                      }
+                      try {
+                        const bioFilter = getActiveBioFilter();
+                        const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
+                        const hasPain = bioFilter.includes("pain");
+                        console.log("[Stillform Hero CTA → Session]", {
+                          regType, isBodyFirst, isThoughtFirst,
+                          bioFilter, offBaseline, hasPain
+                        });
+                      } catch {}
+                      // Start the guided session. Body step is selected internally
+                      // based on bio-filter (pain → scan, off-baseline → breathe,
+                      // thought-first baseline → sigh, body-first baseline → breathe).
+                      // Reframe step follows; close screen terminates the arc.
+                      startGuidedSession("home-hero");
                     }}
                     className="hero-cta-reflect"
                     style={{
@@ -22944,10 +25293,10 @@ const isSignalProfileConfigured = () => {
                       transition: "background-color var(--motion-default) var(--ease-prestige)"
                     }}>
                       <div className="t-display-sm" style={{ lineHeight: 1.2 }}>
-                        {isThoughtFirst ? "Talk it out" : isBodyFirst ? "Calm my body" : "Start here"}
+                        {isThoughtFirst ? "Begin session" : isBodyFirst ? "Begin session" : "Begin session"}
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)" }}>
-                        {isThoughtFirst ? "Start with what the mind is doing." : isBodyFirst ? "Start with what the body is doing." : "Start with what's loudest."}
+                        Body, then thought. {isThoughtFirst ? "~5–8 min." : isBodyFirst ? "~5–8 min." : "~5–8 min."}
                       </div>
                       {/* May 7, 2026 — last-session info folded in here from the standalone pill above.
                           Only renders when there's a recent session >2min old (avoids "just now"
@@ -23225,9 +25574,9 @@ const isSignalProfileConfigured = () => {
                         width: "100%", background: "none", border: "0.5px solid var(--border)",
                         borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 8,
                         cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif",
-                        WebkitTapHighlightColor: "transparent"
+                        WebkitTapHighlightColor: "transparent", color: "var(--text)"
                       }}>
-                        <div className="t-body-md strong">{opt.label}</div>
+                        <div className="t-body-md strong" style={{ color: "var(--text)" }}>{opt.label}</div>
                         <div className="t-body-sm faint" style={{ marginTop: 2 }}>{opt.sub}</div>
                       </button>
                     ))}
@@ -24289,6 +26638,16 @@ const isSignalProfileConfigured = () => {
             <div className="t-caption" style={{ color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
               Your data is encrypted.
             </div>
+            {/* SESSION HEADER — when user is in a guided session, surface
+                the step indicator inside each tool so the arc is visible
+                throughout, not just on transitions. Mirrors SignalMap
+                calibration-part header pattern. Suppressed during
+                calibration tools to avoid double-header overlap. */}
+            {activeSession && !activeTool?.setupFlow && (
+              <div style={{ marginBottom: 12 }}>
+                <SessionHeader session={activeSession} />
+              </div>
+            )}
             {(() => {
               const primer = getToolEntryPrimer(activeTool?.id, regType);
               if (!primer) return null;
@@ -24325,7 +26684,7 @@ const isSignalProfileConfigured = () => {
 
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
         {screen === "roadmap" && (
-          <RoadmapScreen onBack={() => goHomeSafely()} />
+          <RoadmapScreen onBack={() => goHomeSafely()} setInfoModal={setInfoModal} />
         )}
 
         {/* SCRIPTS — engagement architecture Engine 2 (Application Layer) full screen */}
@@ -24482,7 +26841,7 @@ const isSignalProfileConfigured = () => {
               </div>
             </div>
             <p style={{ textAlign: "center", marginTop: 32, fontSize: 13, color: "var(--text-dim)" }}>
-              Stillform is composure architecture, not medical treatment. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
+              Stillform is a metacognition practice, not medical treatment. By subscribing, you agree to our <button onClick={() => setScreen("privacy")} style={{ background: "none", border: "none", color: "var(--amber)", cursor: "pointer", fontSize: 13, fontFamily: "inherit" }}>Privacy & Disclaimers</button>.
             </p>
           </section>
         )}
@@ -24496,7 +26855,7 @@ const isSignalProfileConfigured = () => {
             <p style={{ marginBottom: 24 }}><a href="https://app.termly.io/policy-viewer/policy.html?policyUUID=b96f179b-d3e1-4bdb-acc8-6b656ffe0280" target="_blank" rel="noopener noreferrer" style={{ color: "var(--amber)" }}>View full Privacy Policy</a></p>
 
             <h2>What Stillform Is</h2>
-            <p>Stillform is composure architecture. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and stabilize composure.</p>
+            <p>Stillform is a metacognition practice. It provides structured breathing exercises, sensory grounding techniques, acupressure guidance, and AI-assisted cognitive reframing for users to develop awareness of their own mental and emotional patterns and build capacity over time.</p>
 
             <h2>What Stillform Is Not</h2>
             <p>Stillform is not medical treatment, therapy, counseling, or a crisis intervention service. It does not diagnose, treat, cure, or prevent any medical or psychological condition. It is not a substitute for professional medical advice, diagnosis, or treatment. If you are experiencing a medical or mental health crisis, please see our Crisis Resources page for international helplines.</p>
@@ -24539,7 +26898,7 @@ const isSignalProfileConfigured = () => {
           const FAQ_ITEMS = [
 {
                 q: "What is Stillform?",
-                a: "Stillform is composure architecture. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where regulation takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is the architecture of composure."
+                a: "Stillform is a metacognition practice. Based on proven neuroscience, we built a system that identifies how each person processes their internal state. A short calibration determines whether you are body-first or thought-first — the entry point where the practice takes hold. From there, the system routes you precisely. Body-first users settle the nervous system before the thinking can clear. Thought-first users process the cognition before the body releases. Every session trains you to notice, name, and choose your response — replacing automatic reactions with intentional clarity. That is metacognition. Composure follows."
               },
               {
                 q: "What does composure mean here?",
@@ -24547,7 +26906,7 @@ const isSignalProfileConfigured = () => {
               },
               {
                 q: "How is this different from meditation or therapy?",
-                a: "Stillform is composure architecture — structured interventions that interrupt activation and restore a functional baseline in real time. It's a daily practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. It is not a substitute for clinical care."
+                a: "Stillform is a metacognition practice — daily cognitive work that builds the concept library your brain uses to read its own internal states. It's a practice you operate, grounded in cognitive neuroscience. Where meditation builds sustained attention and therapy treats clinical conditions, Stillform builds the in-the-moment skill of catching your state before it drives the action. The practice expands cognitive capacity over time — not just regulating, building. It is not a substitute for clinical care."
               },
               {
                 q: "What is calibration?",
@@ -24614,12 +26973,12 @@ const isSignalProfileConfigured = () => {
                 a: "Every session is classified into one of three at close, based on your pre and post chip selections. Category A — regulated shift: you moved from a negative state to a positive one. Category B — persistent state: pre and post in the same quadrant. Sometimes the work is the holding, not the shifting — sustained acceptance under unresolved state IS the practice (Hayes ACT, Kabat-Zinn). Category C — concerning: post-state is Distant in a single session, OR pattern-based five-plus sustained Flat or high-arousal-negative chips in 14 days. The categories use Russell's circumplex (Russell 1980) — the dominant framework in affective neuroscience for mapping emotional states by valence and arousal. Computed on-device. Aggregate-anonymous category counts go to analytics; your specific chip values, free text, and identity never do."
               },
               {
-                q: "What is the Mirror anchor and stage system?",
-                a: "Stillform tracks five stages of mastery: Naming, Pattern recognition, Flexibility, Equanimity, Steadiness. Each stage names a learnable capacity, not a point score. Progress is observable from your practice — session count, pattern recognition events, sustained chip diversity. The Mirror anchor on home shows your current stage and percent toward the next. The Mirror sheet (tap the anchor) shows the markers you've met and the markers ahead. Grounded in metacognitive training research (Wells 2009) — capacity expands through repeated practice; the markers are observable signals of that expansion, not gates the user has to clear."
+                q: "What is the Mirror and stage system?",
+                a: "Stillform tracks five capacities of practice — what your nervous system and metacognition learn to do through repetition. Stage 1 NOTICING (catching what's happening in your body before thought — Farb 2015 interoceptive awareness, Porges polyvagal theory). Stage 2 NAMING (language for what's present, fast and accurate — Lieberman 2007 affect labeling, Barrett 2017 emotional granularity). Stage 3 ANTICIPATING (pre-loading composure for known triggers — Gollwitzer 1999 implementation intentions, Meichenbaum stress inoculation). Stage 4 RECOGNIZING (seeing your own loops as they form — Wells 2009 metacognitive therapy, Kross 2014 self-distancing). Stage 5 HOLDING (composure under maximum load — Meichenbaum stress inoculation outcomes, McEwen allostatic load, Porges vagal tone). Each capacity is observable from your real practice — bio-filter setup, body-area-specific sessions, distinct feel-state chips used, triggers named, pre-event briefs, pattern acceptance rate, sessions completed under high hardware load. The Mirror on home shows your current stage and percent toward the next. The Mirror Sheet (tap the strip) shows the markers you've met and the markers ahead. Capacity expands through repeated practice; the markers are observable signals of that expansion, not gates you have to clear."
               },
               {
                 q: "What is the Roadmap?",
-                a: "A standalone view of all five stages of mastery. Shows your current stage, the markers you've met for it, and the markers ahead for stages two through five. Each stage names what capacity it represents and how it's measured. Open from the Mirror anchor on home, or from the Mirror sheet."
+                a: "A standalone view of all five capacities of practice. Shows your current stage (NOTICING, NAMING, ANTICIPATING, RECOGNIZING, or HOLDING), the markers you've met for it, and the markers ahead for stages two through five. Each stage names what capacity it represents and how it's measured from your real practice data. Open from the Mirror on home, or from the Mirror Sheet."
               },
               {
                 q: "What is Practice Trend?",
@@ -24938,7 +27297,7 @@ const isSignalProfileConfigured = () => {
               );
             })()}
             <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-              Stillform is composure architecture, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
+              Stillform is a metacognition practice, not a crisis service. If you or someone you know is in immediate danger or experiencing a mental health crisis, please reach out to a professional.
             </p>
             {(() => {
               const crisisResources = [
@@ -25136,7 +27495,7 @@ const isSignalProfileConfigured = () => {
             Per PATTERN_DISRUPTION_SPEC.md §5: user can view what AI is watching
             for, history of patterns surfaced/accepted/dismissed, and clear
             history. The agency principle in concrete form — user signed up
-            for AI-assisted composure architecture; transparency is the deal.
+            for AI-assisted metacognition practice; transparency is the deal.
         */}
         {screen === "pattern-transparency" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
@@ -25630,7 +27989,7 @@ const isSignalProfileConfigured = () => {
                   {[
                     { id: "quick", name: "Quick Reset", use: "60 seconds. Reset and get back to it.", why: "Focused breathing slows your system. The shift starts in under a minute." },
                     { id: "deep", name: "Deep Regulate", use: "3 minutes. Deeper reset.", why: "Extended exhale cycle gives your nervous system time to fully downregulate." },
-                    { id: "cyclic_sigh", name: "Cyclic Sighing", use: "5 minutes. Two short inhales, one long exhale.", why: "Outperformed mindfulness, box breathing, and other patterns for mood and arousal reduction in a 2023 Stanford RCT (Balban et al., n=111). The most-studied breath for downregulation." }
+                    { id: "cyclic_sigh", name: "Cyclic Sighing", use: "5 minutes. Two short inhales, one long exhale.", why: "The double inhale tops off your oxygen; the long exhale empties your system completely. The deepest downshift of the three." }
                   ].map(p => {
                     const isSelected = (() => { try { return (localStorage.getItem("stillform_breath_pattern") || "quick") === p.id; } catch { return p.id === "quick"; } })();
                     return (
@@ -25923,6 +28282,307 @@ const isSignalProfileConfigured = () => {
                   </button>
                 </div>
 
+              </>)}
+            </div>
+
+            {/* HABIT ANCHORS — Gap 8 (May 12, 2026)
+                Implementation intentions (Gollwitzer 1999): pair existing
+                life cues to metacognition reps. The user defines cue → action
+                pairs in their own language. Habits become neuroplasticity in
+                motion when the rep anchors to a cue the user already
+                encounters reliably. Stillform's daily focus reads these
+                anchors and surfaces them on home (Gap 8 → Gap 2 integration). */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("anchors")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Habit anchors</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.anchors ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.anchors && (<>
+                <div style={{
+                  fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                  color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 16,
+                  letterSpacing: "0.01em"
+                }}>
+                  Pair an existing life cue to a metacognition rep. The rep becomes default behavior once the cue fires reliably. <span style={{ fontSize: 11, fontStyle: "normal", color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>Gollwitzer 1999 implementation intentions.</span>
+                </div>
+
+                {/* Existing anchors list */}
+                {anchors.length > 0 && (
+                  <div style={{ marginBottom: 16 }}>
+                    {anchors.map((a, idx) => (
+                      <div key={a.id || idx} style={{
+                        padding: "12px 14px", marginBottom: 8,
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        background: "var(--surface)",
+                        position: "relative"
+                      }}>
+                        <button
+                          onClick={() => persistAnchors(anchors.filter((_, i) => i !== idx))}
+                          aria-label="Remove anchor"
+                          style={{
+                            position: "absolute", top: 8, right: 10,
+                            background: "none", border: "none",
+                            color: "var(--text-muted)", fontSize: 16,
+                            cursor: "pointer", padding: 4, lineHeight: 1,
+                            WebkitTapHighlightColor: "transparent"
+                          }}
+                        >×</button>
+                        <div style={{
+                          fontSize: 12, color: "var(--text-muted)", marginBottom: 4,
+                          fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em",
+                          textTransform: "uppercase", paddingRight: 20
+                        }}>
+                          When {a.cue}
+                        </div>
+                        <div style={{
+                          fontSize: 14, color: "var(--text)", lineHeight: 1.5,
+                          fontFamily: "'DM Sans', sans-serif", paddingRight: 20
+                        }}>
+                          → {a.action}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Add new anchor form */}
+                {anchors.length < 5 && (
+                  <div style={{
+                    padding: "14px", marginBottom: 12,
+                    border: "0.5px dashed var(--border)",
+                    borderRadius: "var(--r)"
+                  }}>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Cue (when)</div>
+                    <input
+                      type="text"
+                      value={anchorCueDraft}
+                      onChange={(e) => setAnchorCueDraft(e.target.value)}
+                      placeholder="opening Slack / phone in hand before bed / after lunch"
+                      maxLength={120}
+                      style={{
+                        width: "100%", padding: "8px 10px", marginBottom: 12,
+                        background: "var(--surface)", color: "var(--text)",
+                        border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Action (then)</div>
+                    <input
+                      type="text"
+                      value={anchorActionDraft}
+                      onChange={(e) => setAnchorActionDraft(e.target.value)}
+                      placeholder="name your state / one body scan / sigh once before answering"
+                      maxLength={160}
+                      style={{
+                        width: "100%", padding: "8px 10px", marginBottom: 12,
+                        background: "var(--surface)", color: "var(--text)",
+                        border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        boxSizing: "border-box"
+                      }}
+                    />
+                    <button
+                      onClick={() => {
+                        const cue = anchorCueDraft.trim();
+                        const action = anchorActionDraft.trim();
+                        if (!cue || !action) return;
+                        const newAnchor = {
+                          id: `anchor_${Date.now()}`,
+                          cue, action,
+                          createdAt: new Date().toISOString()
+                        };
+                        persistAnchors([...anchors, newAnchor]);
+                        setAnchorCueDraft("");
+                        setAnchorActionDraft("");
+                        try { window.plausible?.("Anchor Added", { props: { count: anchors.length + 1 } }); } catch {}
+                      }}
+                      disabled={!anchorCueDraft.trim() || !anchorActionDraft.trim()}
+                      style={{
+                        width: "100%", padding: "10px",
+                        background: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "var(--amber-glow)" : "var(--surface)",
+                        color: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "var(--bg)" : "var(--text-muted)",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                        cursor: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? "pointer" : "not-allowed",
+                        opacity: (anchorCueDraft.trim() && anchorActionDraft.trim()) ? 1 : 0.6
+                      }}
+                    >
+                      Add anchor
+                    </button>
+                  </div>
+                )}
+
+                {/* Suggestion seeds — populated only when zero anchors set */}
+                {anchors.length === 0 && (
+                  <div style={{ marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Starter suggestions (tap to add)</div>
+                    {[
+                      { cue: "opening Slack or email", action: "Name your state in one word" },
+                      { cue: "after lunch", action: "Name one feel-state you moved through this morning" },
+                      { cue: "phone in hand before bed", action: "Open EOD check-in" },
+                      { cue: "walking from car to door", action: "Body scan — find your strongest tell" },
+                      { cue: "phone ringing", action: "One physiological sigh before answering" },
+                    ].map((s, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          const newAnchor = {
+                            id: `anchor_${Date.now()}_${idx}`,
+                            cue: s.cue,
+                            action: s.action,
+                            createdAt: new Date().toISOString()
+                          };
+                          persistAnchors([...anchors, newAnchor]);
+                          try { window.plausible?.("Anchor Added", { props: { source: "starter", count: anchors.length + 1 } }); } catch {}
+                        }}
+                        style={{
+                          width: "100%", textAlign: "left",
+                          padding: "10px 12px", marginBottom: 6,
+                          background: "var(--surface)",
+                          color: "var(--text)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                          lineHeight: 1.5, cursor: "pointer",
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >
+                        <span style={{ color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", marginRight: 8 }}>When {s.cue}</span>
+                        <br />
+                        <span>→ {s.action}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {anchors.length >= 5 && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic", padding: "8px 0" }}>
+                    Five anchors is the practical ceiling. Remove one to add another.
+                  </div>
+                )}
+              </>)}
+            </div>
+
+            {/* CAPACITY BASELINE — Gap 4 (May 12, 2026)
+                Lets the user recapture their growth baseline. Useful for
+                pre-existing users who got a retroactive seed (their baseline
+                reflects current advanced state, not day-zero) and want to
+                reset to a meaningful baseline before a fresh test or new
+                practice phase. Also useful if Arlin is testing the app
+                and wants to wipe the retroactive baseline to see a true
+                first-capture experience. */}
+            <div style={{ marginBottom: 28 }}>
+              <button onClick={() => toggleSettingsSection("baseline")} style={{
+                width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+              }}>
+                <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Capacity baseline</span>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.baseline ? "▾" : "▸"}</span>
+              </button>
+              {settingsSectionOpen.baseline && (<>
+                {(() => {
+                  let baseline = null;
+                  try {
+                    const raw = localStorage.getItem("stillform_growth_baseline");
+                    if (raw) baseline = JSON.parse(raw);
+                  } catch {}
+                  if (!baseline) {
+                    return (
+                      <div style={{
+                        fontFamily: "'DM Sans', sans-serif", fontSize: 13,
+                        color: "var(--text-muted)", lineHeight: 1.55,
+                      }}>
+                        Baseline not yet captured. It will seed on next app load.
+                      </div>
+                    );
+                  }
+                  const baselineDate = (() => {
+                    try {
+                      const d = new Date(baseline.capturedAt);
+                      return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+                    } catch { return "earlier"; }
+                  })();
+                  return (
+                    <>
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                        color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 14,
+                        letterSpacing: "0.01em"
+                      }}>
+                        {baseline.source === "retroactive-seed"
+                          ? "Baseline was seeded retroactively from your current state. Reset if you want a fresh measurement point."
+                          : "Baseline was captured at calibration. Reset only if you're starting a new practice phase."}
+                      </div>
+                      <div style={{
+                        padding: "12px 14px", marginBottom: 14,
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)",
+                        background: "var(--surface)"
+                      }}>
+                        <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.14em" }}>
+                          CURRENT BASELINE · {baselineDate.toUpperCase()}
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+                          Stage {baseline.stage} · {baseline.distinctChips ?? 0} chip{baseline.distinctChips === 1 ? "" : "s"} · {baseline.sessionsCount ?? 0} session{baseline.sessionsCount === 1 ? "" : "s"} · {baseline.biasCount ?? 0} bias{baseline.biasCount === 1 ? "" : "es"} · {baseline.signalCount ?? 0} signal{baseline.signalCount === 1 ? "" : "s"} · {baseline.triggerCount ?? 0} trigger{baseline.triggerCount === 1 ? "" : "s"}
+                        </div>
+                        <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 6, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>
+                          Source: {baseline.source}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (!window.confirm("Reset capacity baseline? Your growth data from baseline forward will lose its anchor. New baseline will capture from your current state.")) return;
+                          const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+                          const distinctChips = (() => {
+                            const set = new Set();
+                            sessions.forEach(s => {
+                              if (s.preState) set.add(s.preState);
+                              if (s.postState) set.add(s.postState);
+                              if (s.feelState) set.add(s.feelState);
+                            });
+                            return set.size;
+                          })();
+                          const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+                          const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+                          const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+                          const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+                          try {
+                            localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+                              capturedAt: new Date().toISOString(),
+                              stage: currentStageId,
+                              distinctChips,
+                              sessionsCount: sessions.length,
+                              biasCount: bias,
+                              signalCount: signal,
+                              triggerCount: triggers,
+                              source: "user-reset",
+                            }));
+                            window.plausible?.("Baseline Reset");
+                            toggleSettingsSection("baseline");
+                            toggleSettingsSection("baseline");
+                          } catch {}
+                        }}
+                        style={{
+                          width: "100%", padding: "10px",
+                          background: "var(--surface)",
+                          color: "var(--text-muted)",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)",
+                          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer", letterSpacing: "0.02em"
+                        }}
+                      >
+                        Reset baseline from current state
+                      </button>
+                    </>
+                  );
+                })()}
               </>)}
             </div>
 

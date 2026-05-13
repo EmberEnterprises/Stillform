@@ -1,5 +1,41 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (phone-test fix session)**
+**ARA Embers LLC · last updated May 13, 2026 (10 brainstorm-idea integrations shipped on `feat/home-wiring-surface` — see `STILLFORM_HANDOFF_MAY_13_2026.md` in repo root for full session-start context. Branch is 10 commits ahead of the May 12 evening state. NEW OPERATING RULE LOCKED MAY 13: Nothing is post-launch. Every promised feature ships at launch — banned framings in code, commits, and scope: "post-launch," "future commit," "later," "deferred," "next phase." If infrastructure is needed, build it OR ship via alternative path. Open from May 12 phone-test: delete-account vs delete-data split, restore-purchase path. Arlin is bringing her laptop to work these next session. Lemon Squeezy LIVE. Apple Developer purchased. DUNS confirmed. NEVER summarize remaining work as "testimonials + Reddit" — that is wrong. This file is the single source of truth — pull fresh, never from compaction summaries.)**
+
+## SPINE SHIP — May 12, 2026 (commits `e123e07` through audit-resolution commit)
+
+Nine gaps shipped first-cut in a single batch this session, then full audit run + two Layer 0.5 findings resolved before phone test. Branch `feat/home-wiring-surface` is well ahead of main, all green (build + preflight pass on every commit), zero deployed.
+
+**What the user will see after the next Netlify deploy:**
+
+1. **Home — TODAY'S REP block at top of hero.** Eyebrow names current chapter; rep statement names the metacognitive objective from `getTodaysJourneyRep()`. Bio-filter reasoning + CTA preserved below (modality entry). Anchors strip below journey rep if anchors are set.
+2. **Home — REP COUNTED banner.** When a session completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss X. Auto-clears on dismiss.
+3. **Mirror Strip → Roadmap (one tap).** Mirror Sheet retired entirely as of audit resolution. "How stages work" info button moved into Roadmap header. Trigger Profile reflection display retired (Settings has full CRUD).
+4. **My Progress — Weekly Reflection section (consolidated).** Path A Section 3 finally built: one bordered card with two sub-blocks: "The last 30 days" (synthesized insights from rolling 30-day window) + "Since you started" (capacity growth from baseline). Replaces the two separate cards that violated Path A's 4-section structure.
+5. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
+6. **Settings — Capacity Baseline section.** Shows current baseline + Reset button (lets user wipe retroactive seed for a fresh measurement point).
+7. **FAQ — Stage names and Mirror naming reconciled with code.**
+
+**What's NOT in this ship:**
+
+- Library destination (Gap 5) — rejected after review; competitor-pattern misread. Static cards retained as AI fallbacks + contextual `ScienceCard` post-session surface (existing pattern preserved).
+- Audio practice layer (Gap 7) — needs assets, deferred
+- Periodic re-assessment ritual (Gap 4 second cut) — needs UX decisions on cadence
+- Calibration-time anchor selection (Gap 8 second cut) — onboarding modification deferred
+- Personalized first-week starter sequence at calibration (Gap 3 second cut)
+- Anchor → marker auto-pairing (Gap 8 + Gap 11 integration)
+- Founder voice content pass (Gap 12 dedicated content production)
+
+**Deploy + test order (Arlin):**
+1. Trigger Netlify deploy from branch when ready.
+2. Phone walk: home → journey rep at top → tap Mirror Strip → Roadmap → back.
+3. Complete a session that might advance a marker → return home → REP COUNTED banner.
+4. Open Settings → Habit Anchors → add an anchor (or tap starter suggestion) → return home → STANDING ANCHORS strip visible.
+5. Open My Progress → see Weekly Reflection section with both sub-blocks.
+6. Open FAQ → "What is the Mirror and stage system?" → confirm stage names.
+7. Settings → Capacity Baseline → Reset baseline from current state (recommended before a fresh full app test).
+8. Tap the ⓘ icon on Roadmap → confirm "How stages work" modal renders correctly.
+
+---
 
 ---
 
@@ -54,6 +90,258 @@ Arlin walked the spine ships from the previous day's build session (commits `204
 
 ---
 
+## 🌀 JOURNEY-SPINE COMPETITIVE GAP ANALYSIS — May 12, 2026
+
+Code-verified gaps cross-referenced against Liven and Healthy Minds Program (HMP) app architecture, framed through **STILLFORM_FRAMING_LAW.md** (metacognition practice / neuroplasticity spine / capacity expansion / composure as felt outcome). This section is the implementation breakdown of the narrative-spine / connectivity-layer entry below (originally added May 8) — the diagnosis was correct; the gaps are now concrete with line numbers.
+
+**Operating principle:** Stillform's data infrastructure is stronger than either competitor (5-stage architecture with shipped markers at `src/App.jsx:4718` and `:4755`, processing-type-modulated rep delivery, bio-filter hardware-state context, Russell circumplex classifier, EOD artifact pipeline, Pattern Transparency surface, Low-Demand mode). The UI does not surface that infrastructure as a journey. **The work below is exposure, not invention.** Stillform doesn't need new mechanics — it needs the existing mechanics turned into a felt path.
+
+**What Liven and HMP have that Stillform doesn't (architecture, not features):**
+- Onboarding quiz → personalized path generated as user-facing artifact (not just AI-consumption profile)
+- Single dominant daily call-to-action on home (not a feature panel)
+- Visible path/chapter visualization with current position + next marker
+- Re-assessment ritual that shows delta from baseline
+- Library/explore surface for between-session learning
+- Framework that names "what this builds" for every action
+
+**What Stillform has that they don't (preserve when closing gaps):**
+- Processing-type-modulated rep delivery (body-first vs thought-first as somatic vs cognitive entry into the same journey content — no competitor personalizes modality this way; lives inside the rep, not at the home level)
+- In-moment AI Reframe with calm/clarity/hype routing (Liven's Livie is open-ended chat — much weaker structurally)
+- Bio-filter hardware-state context
+- Three specific breath protocols including Cyclic Sighing (Balban 2023)
+- Move card somatic redirection with AI selection from a science-fidelity library
+- Five-stage capacity ladder grounded in real markers (NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING)
+- Pre-event brief + EOD artifact pipeline
+- Pattern Transparency surface
+- Low-Demand mode for cognitive-bandwidth-limited users
+
+The fix is exposing the spine, not adopting competitor patterns wholesale.
+
+---
+
+### Gap 1 — Path visualization for the 5-stage architecture
+
+**STATUS: SHIPPED (first cut) — commit `7de3b15`, May 12, 2026.** Mirror Strip on home now opens the existing RoadmapScreen directly (one tap, was two). Roadmap renders all 5 chapters with current highlighted, past as built, future with capacity gates visible. Shipped alongside Gap 10 (designed together).
+
+**Code state:** `STAGE_DEFINITIONS` at `src/App.jsx:4718` defines five capacities with science citations. `computeStageMarkers` at `:4755` tracks real progress per stage (bio-filter setup, body-area-specific sessions, distinct chips, sustained check-in weeks, triggers named, pre-event briefs, pattern acceptance, high-load sessions, recovery trend). `getCurrentStage` at `:4822` returns current stage + percent to next. **User-visible representation: one line of 10pt monospace text at `:22790`** (Mirror Status Strip).
+
+**Competitor parallel:** Liven Journey tab — 4 chapters unlocking sequentially, current chapter highlighted. HMP My Path — self-paced lesson sequence with pillar mapping.
+
+**Gap:** The 5-chapter journey is data-modeled and UI-invisible.
+
+**Fix (new lens):** Path surface where each chapter names the metacognitive capacity it builds, current position visible, next marker named, prior stages shown as past chapters. Frame as a neuroplasticity build sequence — early chapters are simpler observation, later chapters are integrated metacognition under load. Capacities of practice, not stages of achievement. Mirror Sheet stays as the in-context status; the Path is the destination view from My Progress or a dedicated tab.
+
+**Cross-references:** Supersedes solution shape A in narrative-spine entry below. Builds on `STILLFORM_ENGAGEMENT_ARCHITECTURE.md`.
+
+---
+
+### Gap 2 — Single dominant daily focus replacing the 9-section feature panel
+
+**STATUS: SHIPPED (first cut) — commit `9f315ef`, May 12, 2026.** Hero on home now renders "TODAY'S REP · STAGE N · STAGENAME" eyebrow + rep statement above the existing bio-filter reasoning line + CTA. Journey rep names WHAT today's practice is (sourced from `getTodaysJourneyRep()` reading next unmet marker); processing type + bio-filter select HOW to enter (modality layer preserved). Between-stage state renders "CHAPTER BUILT" + gate-to-next-chapter framing. PracticeSurface and other home sections still present — the journey rep sits at the visual top of the hero block, not the entire home. Second cut would compress remaining sections if needed.
+
+**Code state:** Home render at `:21895` shows: greeting + PracticeSurface + Morning Strip + Morning Check-in form + Mirror Strip + Hero CTA + Move Card promo + Scripts promo + EOD Strip. Hero CTA at `:22881` is bio-filter-routed; reasoning line names the rule that fired (Ship 2, May 11), not the journey position. Every day reads the same structural shape.
+
+**Competitor parallel:** Liven and HMP each present ONE primary action per day at home.
+
+**Gap:** No single daily focus. User scans 9 sections to decide what to do. Decision burden every app open.
+
+**Fix (new lens):** Single hero unit names today's metacognitive rep — what capacity it builds, why this specific objective today, how it ties to the current chapter. *"Today: name three states by lunch — that's a Naming rep."* The rep itself is journey-positioned (from `getCurrentStage()` + the path generated at calibration via Gap 3). **Processing type (`regType`) and bio-filter are modality modifiers, not the home's organizing principle:** they choose HOW the user enters today's rep (somatic entry point vs cognitive entry point), not WHAT the rep is. A body-first user entering today's Naming rep starts with a body scan and names what each tell is telling them; a thought-first user opens Reframe and names three states they've moved through this morning — **same rep, different modality of entry**. Bio-filter beats processing type when current-state demands it; both live inside the rep entry, not at the home render level. The `if (!regType) return null;` at `:21899` stays as a safety net but stops gating home routing; the hero rendering at `:22881–22952` is restructured from "bio-filter-routed CTA with override" to "journey-positioned rep with modality entry chosen by bio-filter > processing type." PracticeSurface (built today) can move below or fold into this single hero.
+
+**Cross-references:** Implements solution shape B from narrative-spine entry below. The 9-section feature panel is the visible expression of Arlin's May 8 diagnosis: "a bunch of boxes with no true data system or connectivity."
+
+---
+
+### Gap 3 — Calibration outputs a starter path, not just a profile
+
+**STATUS: SHIPPED (first cut) — commit `9f315ef`, May 12, 2026.** No new persistence introduced. Instead: `STAGE_REPS` lookup at `:4807` maps every shipped marker to a one-sentence rep statement. `getTodaysJourneyRep()` returns the next unmet shipped marker as today's rep. The "starter path" is implicit in the markers themselves, surfaced in order as the user progresses. Cleaner than a separate path data structure — uses the existing capacity-tracking infrastructure as the path. Second cut could add calibration-time generation of personalized first-week sequence with cadence and modality variance.
+
+**Code state:** Calibration completion writes `stillform_signal_profile`, `stillform_bias_profile`, `stillform_regulation_type`, `stillform_breath_pattern`. Zero `stillform_path_*` keys exist in `SYNC_KEYS` (`:9567`). Profile data feeds the AI; user sees no time-sequenced journey artifact at calibration end.
+
+**Competitor parallel:** Liven 3-min quiz → personalized course unfolds with chapter structure visible immediately. HMP 3-5 min self-assessment → personalized path generated with pillar mapping shown on entry.
+
+**Gap:** Onboarding profiles the user. It does not generate their journey.
+
+**Fix (new lens):** Calibration completion also writes a 30-day starter sequence — daily metacognitive objectives mapped to Stage 1 markers (bio-filter setup, body-area specificity, active-state entry, autonomous exits). Each day's objective IS a metacognition rep. By Day 30, the user has hit enough Stage 1 markers to advance — re-calibration unlocks Chapter 2. Path is calibration-personalized: a body-first user gets somatic-led early reps; a thought-first user gets cognitive-led early reps.
+
+**Cross-references:** Relates to "Onboarding redesign" item (line ~989, sequenced last). NOT redundant — the existing onboarding redesign was about teaching what the app does. This is about generating a journey artifact at calibration end. They merge cleanly: redesigned onboarding ends in a generated path.
+
+---
+
+### Gap 4 — Re-assessment ritual that surfaces capacity expansion
+
+**STATUS: SHIPPED (first cut) — commit `111e08a`, May 12, 2026.** Capacity-growth baseline written to `stillform_growth_baseline` at calibration completion for new users (true baseline) or retroactively seeded on first app load for pre-existing users (source: `retroactive-seed`). Added to SYNC_KEYS so baseline persists across devices. "Since You Started" card in My Progress (above Roadmap surface) computes deltas from baseline → current and renders plain-language growth observations: stage advancement, chip vocabulary growth, triggers named, biases recognized, signal areas mapped, sessions logged. Empty growth state still renders the card so the surface exists from day one. Periodic re-assessment ritual (abbreviated calibration re-run) is the second cut — requires UX work on cadence (monthly/quarterly/user-triggered) and stripped calibration flow.
+
+**Code state:** Calibration runs once. Stage markers update silently in background data. `computeStageMarkers` at `:4755` returns current state; nothing compares against baseline. My Progress at `:13516` shows aggregates (avg shift, processing type, lock-in rate, day streak) but not a delta from the starting calibration.
+
+**Competitor parallel:** HMP re-runs the 4-pillar quiz periodically. Goal stated explicitly: *"increase each of the four scores from your original assessment."* Delta visible to user.
+
+**Gap:** No felt-progress moment. Markers move in the data; user never sees the movement.
+
+**Fix (new lens):** Monthly re-assessment ritual — abbreviated calibration that re-measures Signal Profile drift, Bias Profile granularity expansion, and Stage marker accumulation. Surface the delta from baseline. Frame as *"your concept library has grown"* (Hoemann 2021 emotional granularity) and *"your interoceptive vocabulary has expanded"* (Barrett 2017 constructed emotion), not *"you've achieved more composure"* (achievement framing). Re-assessment IS itself a metacognition rep — observing your own capacity change over time is meta-meta-cognition.
+
+**Cross-references:** Closes a specific slice of "My Progress redesign" (line ~917). NOT redundant: My Progress redesign is the surfacing of three-category shift data; this is the surfacing of capacity-delta data. Both should land together inside the redesigned My Progress.
+
+---
+
+### Gap 5 — Practice library as a destination, not a buried surface
+
+**STATUS: REJECTED after review — May 12, 2026 (commit reverting the ship).** The Library destination was a competitor-pattern import that doesn't fit Stillform's architecture. The 20 cards in `STATIC_SCIENCE_CARDS` are designed as (a) randomized fallbacks when the AI science card generator fails and (b) source material for the post-session `ScienceCard` surface that appears contextually after a tool run with the framing *"this is the science behind what you just did."* Exposing them as a browsable archive reads as a thin library (20 cards looks empty when the user expects depth) and violates the design pattern that surfaces science contextually rather than as a reading destination. No plan to write more cards. The competitor pattern doesn't transfer: Liven and HMP are content-delivery platforms; Stillform is a practice. Content lives in flows, not in destinations. Reverted in full — `LibraryScreen`, `LIBRARY_CATEGORIES`, `LIBRARY_CARD_TITLES`, `library` screen state, entry buttons in Roadmap + My Progress all removed. Static cards and contextual `ScienceCard` surface preserved.
+
+**Code state:** Plain-Language Neuroscience cards exist (`PLAIN_LANGUAGE_SCIENCE_CARD_SPEC.md`) but aren't surfaced as a destination tab. Science is woven in moments inside tools. There is no browsable library outside of practice flow.
+
+**Competitor parallel:** Liven Explore tab — articles, mini-courses, videos, organized for non-sequential discovery. HMP science lessons embedded inline with practices but also accessible separately.
+
+**Gap:** No destination for between-session learning. A user who's not in a tool moment has nowhere to go that pulls them back into the practice's intellectual frame.
+
+**Fix (new lens):** Library tab organized by capacity (one shelf per stage) + mechanism (interoception, granularity, MCT, neuroplasticity, constructed emotion, polyvagal theory). Each card teaches science as language, not credentialing — pulls in the framing law science spine without making the user do another tool rep. Founder writing lives here too. Answers *"what should I read between sessions?"*
+
+**Cross-references:** Adjacent to solution shape C in narrative-spine entry (the "How Stillform Works" surface). Different: this is a browsable library, not a linear walkthrough.
+
+---
+
+### Gap 6 — FAQ stage names out of sync with code
+
+**STATUS: SHIPPED — commit `e123e07`, May 12, 2026.** FAQ at `:24820` reconciled with STAGE_DEFINITIONS at `:4718`. Stage names now read NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING (was: Naming, Pattern recognition, Flexibility, Equanimity, Steadiness). Each stage description includes science citations matching STAGE_DEFINITIONS. "Stages of mastery" replaced with "capacities of practice" per framing law. Mirror naming consistency: "Mirror" (umbrella) + "Mirror Sheet" (modal). Anti-gamification stance preserved: "markers are observable signals of expansion, not gates you have to clear."
+
+**Code state:** `STAGE_DEFINITIONS` at `:4718` uses NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING. FAQ at `:24820` describes stages as *"Naming, Pattern recognition, Flexibility, Equanimity, Steadiness."* Different lists. The user-facing copy describes a deprecated stage architecture.
+
+**Gap:** Bug. Documentation drift between source-of-truth (code) and user-facing copy (FAQ).
+
+**Fix:** Reconcile FAQ to current STAGE_DEFINITIONS. Stage definitions are the spine; user-facing copy follows the spine. Same fix passes through any other surface that mentions stage names (search the codebase for the old names before shipping).
+
+**Cross-references:** Standalone — small, ship anytime.
+
+---
+
+### Gap 7 — Audio practice layer
+
+**STATUS: DEFERRED — needs external assets, May 12, 2026.** Implementation blocked on either (a) Arlin's voice recordings for high-signal surfaces (founder voice for chapter intros, monthly synthesis narration, gate explanations), (b) TTS API integration with a chosen provider, or (c) pre-recorded session audio from a contractor. Code-only ship not possible without one of these. When audio assets exist, integration is straightforward: HTML5 audio with playback controls inside Library cards + Roadmap chapter pages + tool flows for ambient guidance. Library + Body Scan are the natural first integration points.
+
+**Code state:** Body Scan, Move card, Plain-Language Neuroscience cards, Reframe — all text-only. No spoken guidance, no audio modality anywhere in the build.
+
+**Competitor parallel:** HMP's structural spine is 600 days of audio lessons + audio-guided sittings (Davidson + colleagues as recorded voices). Liven includes audio components for some content. Audio is the primary modality for both competitors' between-session learning.
+
+**Gap:** Stillform has zero spoken modality. A user who's eyes-closed, eyes-tired, walking, driving, or cognitively depleted has no entry point into the practice. Low-Demand mode partially addresses cognitive load but still requires reading.
+
+**Fix (new lens):** Voice-led versions of Body Scan + Move card + PLN cards. Not meditation-app narration — operator-voice teaching of mechanism in plain language. Founder voice for PLN cards (Arlin reading the cards she wrote — voice IS the framing law in delivery). External voice for Body Scan pacing if needed. Audio IS the eyes-closed metacognition rep — turning the practice inward without screen burden. Frame: the practice is the rep; the modality is the entry point.
+
+**Cross-references:** Standalone modality. Audio versions of PLN cards live in the Library from Gap 5. Audio Body Scan plugs into existing Body Scan flow.
+
+---
+
+### Gap 8 — Habit anchor system (cue → routine → reward formalized)
+
+**STATUS: SHIPPED (first cut) — commit `de2be7a`, May 12, 2026.** `stillform_anchors` localStorage + SYNC_KEYS entry. Settings → Habit Anchors collapsible section with add/edit/delete UI, 5-anchor practical ceiling. Starter suggestions shown when zero anchors set (Slack/email, lunch, bedtime, walking, phone ringing — each paired to a specific metacognition rep). Home renders "STANDING ANCHORS" strip below journey rep showing first 2 anchors (more counted via "+N more in Settings"). Calibration flow integration (anchor selection at calibration end with auto-pairing to Stage 1 markers) is the second cut — onboarding modification deferred to its own scoped commit. No automatic marker-pairing in first ship; user maps mentally for now.
+
+**Code state:** Day streak counter (passive), morning/EOD strips (time-of-day passive cues at `:22177` and elsewhere), notification reminders via `stillform_reminder_time`. No explicit anchor pairing of metacognition reps to existing life cues. Onboarding doesn't ask for anchors. Settings doesn't expose anchor configuration.
+
+**Competitor parallel:** Both competitors build formal habit infrastructure (Liven's daily task system with named slots; HMP's daily reminders + path pacing). The habit-formation research (Wood 2007, Lally 2010, Gollwitzer 1999, BJ Fogg) informs both products explicitly.
+
+**Gap:** Stillform has streaks but no formal anchor design. A metacognition rep that doesn't anchor to an existing life cue doesn't compound into capacity expansion — it stays "a thing the user does sometimes." Habits are how neuroplasticity becomes default behavior; without the anchor layer, the practice never crosses from intentional act to automatic capacity.
+
+**Fix (new lens):** Explicit anchor pairing introduced at calibration end and editable in Settings. *"Before opening Slack, name your state."* *"After lunch, one Naming rep."* *"Phone in hand before bed → EOD."* User picks two anchors at calibration completion; system pairs them to Stage 1 markers and surfaces them in the daily focus from Gap 2. Each anchor pair IS a Gollwitzer 1999 implementation intention. Habits ARE neuroplasticity in motion — the literature is settled. Currently absent from the build.
+
+**Cross-references:** Integrates with Gap 3 (calibration outputs starter path) — anchor selection is part of the path generation step. Integrates with Gap 2 (daily focus) — daily focus can reference the user's anchor pairing when surfacing today's rep.
+
+---
+
+### Gap 9 — Synthesized insight reports
+
+**STATUS: SHIPPED (first cut) — commit `133f6f6`, May 12, 2026.** "Last 30 Days" synthesized card at the top of My Progress (before Roadmap surface). Computes up to 6 plain-English observations from real session data over the prior 30 days: session volume, distinct chip vocabulary (granularity), pre/post delta average, top bias from profile with MCT framing, top trigger by encounter count with Gollwitzer framing, streak (only when ≥3 days, escalates language at 14+ days with Lally 2010). Empty-state handled: zero-session 30-day window → card doesn't render. When monthly re-assessment (Gap 4 second cut) ships, this synthesis becomes the artifact delivered at re-assessment time.
+
+**Code state:** Pattern Transparency surface at `:25344` shows pattern detection events as a list. EOD artifacts are per-session at `stillform_eod_artifacts`. Today's Briefs at `stillform_todays_briefs`. No periodic synthesis across sessions over a 30-day or 90-day window. Data layer is rich; synthesis layer is empty.
+
+**Competitor parallel:** Liven's Mood Tracker analyzes behavioral patterns over time and surfaces insights. HMP shows pillar-level progress reports. Both periodically deliver "here's what the data says about you" as synthesized output.
+
+**Gap:** Stillform's data layer is richer than either competitor (sessions, chips, biases, triggers, EOD artifacts, move-card history, brief outcomes, pattern detections) — and the user sees zero synthesized output across that data. Pattern Transparency surfaces individual events, not synthesized observations.
+
+**Fix (new lens):** Monthly insight report — synthesized observations across the prior 30 days. Format: 4-6 plain-English statements (*"you named jaw-tension 14 times — your top somatic tell"*; *"your most common bias was personalization; your reframe rate on it held at 78%"*; *"you initiated 6 Move card sessions without prompt — that's autonomous Stage 1 mastery"*). Meta-meta-cognition: the system observes the user's metacognitive pattern accumulation and reflects it back. Frame: granularity is the practice (Hoemann 2021); the report makes the user's granularity visible TO the user. The report itself IS a metacognition rep — reading your own patterns is the next layer of practice.
+
+**Cross-references:** Integrates with Gap 4 (re-assessment ritual) — the monthly insight report can be the artifact handed to the user at re-assessment time. Builds on Pattern Transparency surface at `:25344` — synthesis is the next layer above event listing.
+
+---
+
+## SECOND-PASS GAPS — surfaced by direct code walk May 12 (evening)
+
+Three additional gaps emerged from walking `src/App.jsx` line-by-line after the initial competitor analysis. These wouldn't surface from external Liven/HMP comparison alone — they're internal structural gaps in how the spine connects to the user's per-session and per-surface experience. Not redundant with Gaps 1-9; each occupies its own structural slot.
+
+---
+
+### Gap 10 — Capacity gates as visible thresholds (not passive markers)
+
+**STATUS: SHIPPED — commit `7de3b15`, May 12, 2026.** `STAGE_DEFINITIONS` at `:4718` extended with `gate` field for stages 2-5 (Stage 1 has no gate). Each gate has three fields: `headline` (cognitive prerequisite one-liner), `body` (what that means in user's practice), `citation` (literature source). Examples: Stage 2 NAMING gate: "You can't name what you can't feel." (Lieberman 2007 + Farb 2015). RoadmapScreen renders the gate inside each upcoming stage card above the marker list. The gate IS the science — not a point threshold. Anti-gamification stance preserved: AI leveling stays invisible; capacity gating is visible because the science is the gate.
+
+**Code state:** `STAGE_DEFINITIONS` at `:4718` defines five chapters. `computeStageMarkers` at `:4755` tracks per-stage progress. But markers update **silently in background data** — there is no user-visible threshold the user can see approaching. `STILLFORM_PROJECT_TRANSFER.md` explicitly states *"Invisible leveling — AI gets smarter silently by session count. Never announced."* That anti-gamification stance, applied to the **whole journey**, makes path mechanics invisible — the user never sees what they're working toward, only what they're doing right now.
+
+**Competitor parallel:** Liven uses numerical lesson-completion gates (points/streaks). HMP uses self-paced pillar scoring (no gates). Both are extremes; neither fits Stillform.
+
+**Gap:** No middle path between hidden leveling and gamified gates. The user can't see *what would have to be true* for them to enter the next chapter. The 5 stages have actual science-grounded prerequisites (you can't anticipate triggers — Stage 3 — without first being able to name what you're feeling — Stage 2; this is Gollwitzer 1999 + Barrett 2017 stacked) but those prerequisites are invisible.
+
+**Fix (new lens):** **Capacity-prerequisite gates** — not point thresholds. Each chapter names what cognitive prerequisite the next chapter requires, sourced from the science: *"Anticipating triggers requires being able to name your states fast and specifically — Naming chapter caps when you've used 8+ distinct chips in 30 days across at least 2 active-state sessions."* The gate is the literal cognitive requirement of the next capacity. User sees the gate from the moment Chapter 1 begins. AI leveling stays invisible per project-transfer rule; **capacity gating is visible because the science is the gate**.
+
+This is structurally different from Gap 1 (which shows the path) and Gap 3 (which generates the path at calibration). This is the **progression mechanic** — how the user moves along the path. None of the existing gaps address the mechanic, only the surfaces.
+
+**Cross-references:** Requires Gap 1 (path defined) + Gap 3 (markers serialized as user-facing prerequisites at calibration). Should be designed alongside Gap 1, not after. Anti-gamification stance preserved: gates are scientific prerequisites, not points.
+
+---
+
+### Gap 11 — Per-session "rep counted" feedback
+
+**STATUS: SHIPPED (first cut) — commit `8703cb9`, May 12, 2026.** `appendSessionToStorage` at `:2538` instrumented: snapshot pre-session marker met-state across stages 1-5, write session, recompute, find first marker where pre-state was false and current is true → write payload to `stillform_last_rep_counted`. Only first flipped marker per session surfaces (discrete feedback, not flood). Home hero render reads the key and surfaces a bordered banner above the journey rep block: "✓ REP COUNTED · STAGE N · STAGENAME" + marker label + rep statement in Cormorant italic + dismiss X. Dismiss clears the key. Plausible event "Capacity Rep Counted" fires alongside. Per-session is the temporal layer that completes the trio: per-session (this) → monthly synthesis (Gap 9) → quarterly re-assessment (Gap 4 second cut).
+
+**Code state:** Sessions write extensive data — `stillform_sessions` captures pre/post rate, delta, tools used, durationSec, exitPoint, regulationType, bioFilter, feelState, triggerId, flaggedPattern, shiftLabel, breathPattern, sessionId. Chips used populate `stillform_feelstate` history. The session completion screen at `:24459` (tool render) shows a generic completion confirmation. **The user never sees which capacity rep they just did.** A first-time use of the chip "envious" — Stage 2 NAMING progress — registers in data with zero user-visible acknowledgment. A Move card session entered during an active state — Stage 1 NOTICING progress — same. The rep counts in the data; the rep is invisible to the user.
+
+**Competitor parallel:** Liven post-session reflection prompt (*"How are you feeling now vs before this lesson?"*). HMP shows pillar-score nudges after practices. Both reflect SOMETHING back to the user at the end of a session.
+
+**Gap:** No per-session capacity-rep feedback. Without it, the user does the practice but never sees their capacity expanding — the felt-progress moment is missing at the most natural place to surface it (immediately after the rep). Gap 4 covers monthly re-assessment; Gap 9 covers monthly synthesis report. **Neither covers the per-session moment.**
+
+**Fix (new lens):** Capacity-specific micro-feedback after sessions where a meaningful marker fired. *"You named 'envious' for the first time — new language in your library."* *"You entered this session in an active state — a Stage 1 rep."* *"Your pre-to-post delta on a named trigger was +3 — that's an Anticipating rep counted."* Plain language, no badges, no points. Framed as **observation of the user's growing capacity**, not reward for behavior. Connects to Hoemann 2021 emotional granularity (the practice IS the granularity expansion; the feedback names the expansion as it happens). The feedback itself is a metacognition rep — the user sees their own pattern of capacity acquisition.
+
+This is structurally different from Gap 4 (periodic, every 30 days) and Gap 9 (synthesized, monthly insight reports). This is **per-session, in the moment, when the rep is freshest**. All three temporal layers needed: per-session (Gap 11) → monthly synthesis (Gap 9) → quarterly re-assessment (Gap 4).
+
+**Cross-references:** Requires Gap 1 (capacity vocabulary defined). Integrates with the existing Tool Debrief flow at `:25344` adjacent surfaces. Tool completion screens are where this lands — touchpoint already exists; content layer is missing.
+
+---
+
+### Gap 12 — Spine voice & content language
+
+**STATUS: PARTIAL — voice applied per-surface as each gap shipped, May 12, 2026.** Every surface shipped in Gaps 1-11 was written with framing-law voice: science as language (citations earn their space), capacity as observation not achievement ("rep counted" not "level up"), enhancement framing (the reader wants to think sharper, not get calm). No dedicated content-production pass yet — the voice is consistent across ships because the framing law was the operating reference, but a unified editorial review across all spine surfaces is the remaining work. Founder voice (Arlin) for high-signal surfaces (chapter intros, monthly synthesis prose) is the natural next pass when Arlin has bandwidth for content writing.
+
+**Code state:** The only journey-related copy currently in the codebase is `STAGE 1 · NOTICING · JAW TELL · CLIENT CALL` (Mirror Strip at `:22790`, 10pt mono) and the FAQ entry at `:24820` (which has stale stage names — Gap 6). Every other spine surface from Gaps 1-11 — chapter pages, daily focus copy, capacity gates, re-assessment artifacts, per-session capacity feedback, insight reports — currently has **no content written**. The framing law at `STILLFORM_FRAMING_LAW.md` defines principles (capacity expansion not regulation; neuroplasticity not wellness; operator precision not warmth) but no body of journey-narration copy exists that derives from those principles.
+
+**Competitor parallel:** Liven's voice is gentle wellness coach (*"Today, let's explore..."*). HMP's voice is neuroscience educator (*"This practice trains..."*). Both have substantial bodies of journey-surface content written in a unified voice.
+
+**Gap:** When the surfaces from Gaps 1-11 ship, they need to **speak**. Without a unified spine voice derived from the framing law, the surfaces default to either generic AI-cheerleader copy (banned) or bare technical labels (current Mirror Strip approach — works for a strip; not enough for a chapter page). Substantial content-production work, currently zero progress.
+
+**Fix (new lens):** Develop the Stillform spine voice as its own content track running alongside Gaps 1-11 architecture work. Voice principles derived from framing law: **operator precision** (no warmth performance), **science as language not credentialing** (mechanisms named in working English, sources cited where they earn space), **capacity as observation not achievement** (*"your library has grown"* not *"you've leveled up"*), **enhancement framing** (assume the reader wants to think sharper, not get calm). One coherent voice across chapter pages, daily focus copy, capacity gates, per-session feedback, re-assessment narration, insight reports. Founder voice (Arlin) for high-signal surfaces (chapter introductions, monthly synthesis); functional system voice for repeated surfaces (per-session feedback, gate descriptions).
+
+This is **content production**, not architecture. Distinct from every existing gap (1-11), which all describe surfaces and mechanics. This is the **language those surfaces speak**.
+
+**Cross-references:** Runs parallel to Gap 1 (chapter page copy), Gap 3 (calibration handoff narration), Gap 4 (re-assessment artifact prose), Gap 9 (insight report prose), Gap 11 (per-session feedback templates). Should NOT block Gaps 1-11 architecture work — voice can iterate after the surface ships. But shipping a chapter page with placeholder copy guarantees that copy becomes load-bearing; better to scope voice work in parallel and ship surfaces with voice already aligned to framing law from first deploy.
+
+---
+
+### Build sequencing (updated)
+
+Gap 6 is a small fix — ship immediately, alongside the wider stage-name reconciliation pass.
+Gap 1 (path visualization) is the foundation — most other gaps reference the path schema.
+Gap 10 (capacity gates) is designed alongside Gap 1 — gates are part of the path schema, not after.
+Gap 3 (calibration generates path) requires Gap 1's path schema defined.
+Gap 8 (habit anchors) lands inside Gap 3 — anchor selection is a calibration step.
+Gap 2 (daily focus) requires Gap 1 + Gap 3 + Gap 8 (the hero's journey-position needs the path AND the anchor pair).
+Gap 11 (per-session capacity feedback) requires Gap 1 — capacity vocabulary defined first.
+Gap 4 (re-assessment) requires Gap 3 (baseline recorded at calibration completion).
+Gap 9 (insight reports) lands inside Gap 4 — the synthesized report is the re-assessment artifact.
+Gap 5 (library) is independent — ship any time.
+Gap 7 (audio) is independent modality — Library + Body Scan get audio versions; ships any time.
+Gap 12 (spine voice) runs parallel to all surface work — content production track, not sequential.
+
+Build order: **Gap 6 → Gap 1 + Gap 10 (designed together) → Gap 3 → Gap 8 → Gap 2 → Gap 11 → Gap 4 → Gap 9 → Gap 5 → Gap 7.**  Gap 12 voice work runs alongside every surface.
+
+Each gap exposes more of the existing spine or adds a modality the spine already supports. None of these invents new mechanics. Data layer is already in place for every gap above; the work is surfacing what's there and adding the missing connective tissue.
+
+---
+
 ## 🗂️ AUDIT-STATE INVENTORY — May 8 late session
 
 Layer 0 verification across every audit doc in repo root. Recorded so future context-pickups don't misread stale status flags as unbuilt work (Claude made this mistake twice this session before doing the verification). **Audit doc status flags are stale by design — code state is ground truth.**
@@ -104,7 +392,7 @@ Polish + redesigns + native + launch mechanics follow. Order not yet locked at i
 
 Single largest architectural commitment of the launch sprint. Captured in full in **STILLFORM_ENGAGEMENT_ARCHITECTURE.md**. Read that doc for complete context — this is just the index entry.
 
-**The thesis:** Stillform's actual retention killer is product self-obsolescence — composure work becomes baseline by month 2-3 and the user thinks they're done. The fix is three engines running in parallel:
+**The thesis:** Stillform's actual retention killer is product self-obsolescence — the practice feels baseline by month 2-3 and the user thinks they're done. The fix is three engines running in parallel:
 
 1. **Retention engine** — Mirror (named loops at home) + Achievement (in-flow micro-credits at every close) + Roadmap (5 stages of mastery visible from day 1)
 2. **Application layer** — Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact (real-world artifacts the user takes from app to life)
@@ -366,7 +654,7 @@ Review path: `git log` or open in editor. Each item carries a "May 7, 2026" comm
 | 40 | 🧘 DisruptorTool component — 90-second somatic redirection sequence per spec §4 (locked science: attentional capture, somatic anchoring, brief duration). 8 prompts auto-advance (8-14s each, total ~82s): pressure (feet, hands), breath (nasal-mouth cycle, long exhale), temperature attention, posture (shoulders, jaw), open gaze. Pulsing focus ring CSS animation. Body-first compliant — no verbal input required (satisfies spec §2.3 Q6). Reflection screen: "That's what stepping out feels like." | src/practice-signals/DisruptorTool.jsx (new) | decision item 4 |
 | 41 | ⏰ Pattern Disruption detection useEffect — runs on mount with 24h surface throttle (`stillform_pattern_last_surfaced` localStorage key). Calls `runPatternDetection()` then `getActivePatternForSurfacing()`. If candidate found: marks surfaced, sets `surfacedPattern` state, fires Plausible "Pattern Disruption Surfaced" | src/App.jsx ~13967 | decision item 4 |
 | 42 | 🪧 Pattern prompt + disruptor overlay rendering — fixed-position modal with "I noticed something" + dimension label + count + "Step out" / "Not now" buttons. Accept → `markPatternAccepted` + `setDisruptorActive(true)`. Dismiss → `markPatternDismissed`. Disruptor active → full-screen overlay rendering DisruptorTool. onComplete → `appendDisruptorSession` + Plausible "Pattern Disruption Session" with dimension/duration/completed/pathway | src/App.jsx ~16205 | decision item 4 |
-| 43 | 🔬 Pattern Transparency screen + Settings link — `pattern-transparency` screen lists all 8 dimensions in plain language, "In flight" section showing ACTIVE + DISMISSED_ONCE detections with count, "History" section showing last 10 ACCEPTED/CLOSED detections, "Clear pattern history" button with confirmation. Spec §5 agency principle: user signed up for AI-assisted composure architecture; transparency is the deal | src/App.jsx ~19075 (new screen above practice-signals) + ~20558 (Settings link) | decision item 4 spec §5 |
+| 43 | 🔬 Pattern Transparency screen + Settings link — `pattern-transparency` screen lists all 8 dimensions in plain language, "In flight" section showing ACTIVE + DISMISSED_ONCE detections with count, "History" section showing last 10 ACCEPTED/CLOSED detections, "Clear pattern history" button with confirmation. Spec §5 agency principle: user signed up for an AI-assisted metacognition practice; transparency is the deal | src/App.jsx ~19075 (new screen above practice-signals) + ~20558 (Settings link) | decision item 4 spec §5 |
 | 44 | 🛡️ check-undefined-components.mjs upgraded — script now recognizes ESM-imported PascalCase components (default + named imports). Was emitting false positives for AffectLabelingExercise / CognitiveDefusionExercise / DisruptorTool because it only scanned for local `function`/`const`/`class` declarations. Real-bug detection still works (it's the imports that were the gap, not the JSX scan) | scripts/check-undefined-components.mjs | preventive upgrade |
 | 45 | 🔔 Pattern Disruption push notification wiring — Capacitor LocalNotifications path. New `schedulePatternDisruptionNotification(pattern)` + `cancelPatternDisruptionNotifications()` helpers. Reserved ID range 9100-9109. Native-only; web users get nothing additional. Schedule-on-surface (covers no-response close), cancel-on-accept (handled), leave-on-dismiss (the canonical 24h nudge case). On every app open, cancel any pending pattern pushes since in-app surface takes precedence. Tap listener tracks Plausible "Pattern Push Tapped" with patternId for conversion analytics. Notification copy: "A pattern is in flight" / "There's something I noticed across your recent sessions. Open when you have 90 seconds." Observation framing, no dimension telegraphed (could be stale by tap), 90-second expectation set | src/App.jsx ~1683 (helpers), ~13862 (tap listener), ~13989 (cancel on app open), ~16234 (schedule on surface), ~16249 (cancel on accept) | follow-up to decision item 4 |
 | 46 | 🧠 AI-aware pattern enrichment — new `netlify/functions/pattern-enrichment.js` (GPT-4o, max 220 tokens, temp 0.4, observation-mode persona matching Reframe voice). Layered ABOVE deterministic detection per spec §4 Q4: AI runs only after pre-filter trips. Server-side pipeline: validation → API call → JSON parse → length cap 280 chars → brand-voice post-filter (banned phrases: "you should/need/must", "always/never", "it's okay", "I care", "therapy/treatment") → confidence clamp. Heuristic fallback at every failure point (no API key, API error, parse error, shape error, brand-voice violation, exception) — AI-down backup case stays working per spec. Client-side helpers: `buildPatternEnrichmentContext(pattern)` (trims to 6 most recent sessions + signal/bias profiles), `enrichPatternWithAI(pattern)` (fire-and-forget), `updatePatternReasoning(id, enrichment)` (persists `aiReasoning` + `aiConfidence` + `aiFallback` + `aiEnrichedAt` on the detection record so re-fires use cached version without second AI call). Wired into detection useEffect with id-equality guard against race where user dismissed before AI returned. Modal copy upgrades in place when reasoning lands; falls back to count-based observation when not. Pattern Transparency screen surfaces enriched reasoning on both in-flight and history entries. Plausible event "Pattern Enrichment Returned" with dimension/fallback/confidence | src/App.jsx ~2780-2880 (helpers), ~13990 (wiring), ~16276 (modal copy), ~19170 + ~19200 (transparency surface), netlify/functions/pattern-enrichment.js (new) | follow-up to decision item 4 spec §4 Q4 |
@@ -496,7 +784,7 @@ Core architecture:
 - **Two-strikes-and-drop dismissal:** pattern offered, dismissed → re-fired once → dismissed again → pattern instance closed. Fresh accrual of three new data points opens a new instance.
 - **AI-down backup case:** AI catches up on gap-period data when service restores. No special language, no apology framing.
 - **Acceptance routes into a new disruptor tool** (~90 sec mechanic, attentional capture by novel stimulus + somatic anchoring; not EMDR, not bilateral stimulation).
-- **Transparency surface in Settings** shows what AI is watching for. No off-switch for detection itself — user opted into AI-assisted composure architecture.
+- **Transparency surface in Settings** shows what AI is watching for. No off-switch for detection itself — user opted into an AI-assisted metacognition practice.
 
 Open questions called out in spec §7 (six items, biggest is the disruptor mechanic itself).
 
@@ -928,14 +1216,16 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 - [ ] **🔥 NARRATIVE SPINE / CONNECTIVITY LAYER — the absent integrative experience (added May 8, 2026 from Arlin direction).** This is the largest UX gap the product has and is structurally distinct from the info-button pass above (which fixes WHY for individual surfaces). The connectivity layer fixes the absent CHAIN that ties everything together as one journey.
 
+  **🌀 Implementation breakdown: See "JOURNEY-SPINE COMPETITIVE GAP ANALYSIS — May 12, 2026" at top of master todo.** That section has the code-verified specific gaps with line numbers, competitor parallels (Liven, HMP), and concrete fix directions per gap, all framed through STILLFORM_FRAMING_LAW.md. The entry below is preserved as the strategic diagnosis; the May 12 section is the unit-of-work breakdown.
+
   **Arlin's exact framing (May 8):** *"Where is the connectivity of the flow for everything? It doesn't feel connected. It doesn't show hey we are using metacognition to help you be your best self by stabilizing composure so you can be successful in your day to achieve your goals and these are the steps you need to take/practice to get these. It feels like a bunch of boxes with no true data system or connectivity."*
 
   **The gap:** Stillform has features (Bio-filter, Tools, Practice Trend, Mirror anchor, Mirror sheet, My Progress, Stages, Russell classifier, Plain-Language Neuroscience cards) that the user encounters as discrete surfaces. The data layer behind them IS connected (`getCurrentStage`, `classifyShiftDirection`, `computeAchievementForX`, marker progress, three-category data feed all live in one architecture) but the connection is invisible to the user.
 
   **The missing causal chain — what the user should feel:**
-  1. **Mechanism:** *We use metacognition.* (Wells 2009 — observing the state, not solving it.)
-  2. **Outcome:** *Metacognition stabilizes composure as a learnable capacity.* (Stages of capacity, not points.)
-  3. **Life impact:** *Composure lets you operate well in your day, achieve your goals.* (The user's WHY.)
+  1. **Mechanism:** *Metacognition — observing and naming what your thinking is doing.* (Wells 2009, Flavell 1979 — observing the state, not solving it.)
+  2. **Outcome:** *The practice expands cognitive capacity — builds the concept library your brain uses to perceive its own states.* (Stages of capacity, not points. Composure follows as a felt result.)
+  3. **Life impact:** *Expanded capacity gives sharper thinking, better strategic moves, composure when it matters — in your day, your goals.* (The user's WHY.)
   4. **Practice:** *These are the specific moves that build it.* (Body Scan, Reframe, Self Mode mapped to capacities.)
   5. **Today's contribution:** *This session is rep #N of capacity X — building toward Stage Y.* (Each session ties to the larger journey.)
   6. **What's next:** *To progress from Stage 1 to Stage 2, here's what to practice.* (Action affordance, not just status.)
@@ -966,6 +1256,8 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
   **Confirmed example (Cyclic Sighing breathing pattern card, settings):** *"Outperformed mindfulness, box breathing, and other patterns for mood and arousal reduction in a 2023 Stanford RCT (Balban et al., n=111). The most-studied breath for downregulation."*
 
   **Why this is wrong tone:** It tries to convince via credentials. Prestige doesn't try. Compare to Quick Reset on the same screen: *"60 seconds. Reset and get back to it. Focused breathing slows your system. The shift starts in under a minute."* — declarative, experience-first, science woven not paraded.
+
+  **STATUS — confirmed example FIXED May 12, 2026 (audit-pass cleanup):** Cyclic Sighing settings card at `src/App.jsx:26182` rewritten to *"The double inhale tops off your oxygen; the long exhale empties your system completely. The deepest downshift of the three."* — parallel structure to Quick Reset and Deep Regulate on the same screen, mechanism-as-language, no citation in user-facing copy. Balban 2023 citation preserved in code comment (`src/App.jsx:6881`), FAQ answer (`:25159`), and static science card (`:9073`) where the citation register is appropriate. **The broader voice audit across the surface list below still pending Arlin's direction.**
 
   **Likely additional surfaces (audit needed before scoping):**
   - Plain-Language Neuroscience cards — may have the same citation-dump drift
@@ -1026,11 +1318,7 @@ Launch path: Google Play closed testing → public launch. Apple Store is the ex
 
 - [x] **FAQ completeness — SHIPPED `6f056f1` May 8 night.** 12 new entries added between 'Composure Telemetry' and 'rapid typing in Reframe' covering features that had zero FAQ presence. Each entry pulled directly from `Stillform_Science_Sheet.md` so the language is already approved (science sheet is in repo, ARA Embers branded, voice-locked). Entries: Settled chip (science sheet line 133), Cyclic Sighing (line 113, Stanford 2023 RCT n=111), three categories (lines 144-163, Russell circumplex + Hayes ACT for Category B legitimacy), Mirror anchor / stage system (Wells 2009 metacognitive training), Roadmap, Practice Trend (Heider 1958 attribution), low-demand mode, plus Engagement Architecture Engine 2 surfaces (Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact). Self Mode redesign FAQ NOT added — redesign hasn't shipped, existing entry covers current 5-step accurately. Voice rubric matches existing FAQ — short, declarative, science-grounded. **Layer 0 lesson:** science sheet should be a mandatory read on every audit; Claude had been skipping it (Arlin called this directly May 8). The FAQ build is the science-sheet-unlock that produced concrete code work.
 
-- [ ] **Language picker UI half-built (added May 8 from audit).** Verified at `src/App.jsx:8349`: `stillform_language` storage key is in SYNC_KEYS (synced to Supabase on every save) but NO language picker UI exists in Settings. Storage is wired, surface is not. Since internationalization is post-launch (line 758), this is currently dead infrastructure. Two options:
-  - Remove `stillform_language` from SYNC_KEYS until i18n actually ships (cleanest)
-  - Leave the key in place as forward-compat for the post-launch i18n work (current state)
-  
-  Either is fine; flagging because dead-code drift is worth being honest about.
+- [x] **Language picker UI dead infrastructure — RESOLVED May 12, 2026.** `stillform_language` removed from SYNC_KEYS and UNENCRYPTED_SYNC_KEYS at `src/App.jsx:9760` and `:9847`. No reader, no writer, no UI; i18n moved to post-launch (line 1363); removing prevents dead-code drift. Will re-add when i18n actually ships per the post-launch build path (i18next install → string extraction → language picker → AI prompt translation → per-language QA). Audit-pass cleanup commit, build green, preflight green.
 
 - [x] **"How much do you owe this guy?" footer text — VERIFIED NOT IN APP May 8.** Originally flagged in May 7 UI Flow Audit (#9) as "likely browser overlay, not app." Re-verified May 8: `grep -rn 'how much do you owe' .` across entire repo returns zero matches. Confirmed: this was a browser extension overlay or tracker-block message, not Stillform source. Closed.
 

@@ -1,5 +1,21 @@
 # STILLFORM PROJECT TRANSFER
-**ARA Embers LLC · April 2026 · Stillform Project**
+**ARA Embers LLC · last updated May 13, 2026 · Stillform Project**
+
+---
+
+## ⚠️ READ THIS FIRST
+
+**For current session continuity:** Read `STILLFORM_HANDOFF_MAY_13_2026.md` in the repo root before this document. That handoff contains the May 13 session work (10 brainstorm ideas integrated into the universal Notice → Reframe → Close spine), the new operating rule (nothing is post-launch), and the immediate next-task context.
+
+**For supreme framing reference:** Read `STILLFORM_FRAMING_LAW.md`. Any proposal that contradicts the Framing Law is wrong, regardless of code quality or science citations.
+
+**For audit philosophy:** Read `STILLFORM_AUDIT_PHILOSOPHY.md` (v2.0). Prime Directive (no fluff, no fabrication, no patches, no assumptions, no drift) and Standing Requirement (Framing + Science + UI Flow articulation before every recommendation).
+
+**For launch state:** Pull `Stillform_Master_Todo.md` FRESH from the repo before claiming what's left. Never summarize launch state from memory or compaction summaries — partial summaries are stale by design and confidently summarizing causes real harm.
+
+This transfer document is a layered historical record. The handoff doc is the operational starting point. The Framing Law and Audit Philosophy are the non-negotiable references. The master todo is the launch-state truth.
+
+---
 
 Paste this document into the Stillform Claude project at session start. Everything here is current. No decisions need to be relitigated.
 
@@ -100,11 +116,11 @@ Based on Barrett (2017) constructed emotion theory, Kashdan/Barrett/McKnight (20
 
 ---
 
-## 2. Current Build State — April 30, 2026
+## 2. Current Build State — May 13, 2026
 
-**Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** App.jsx currently 15,881 lines after Apr 28 morning research-driven cleanup.
+> **⚠️ For the most current state, read `STILLFORM_HANDOFF_MAY_13_2026.md` first.** It contains the May 13 session work (10 brainstorm ideas integrated), branch state, and immediate next tasks. The section below is the persistent build-architecture record; the handoff doc is the operational state.
 
-**Three Apr 28 morning commits pushed (a121a48a, ae43f4db, c86ec0ba)** — see Section 3 Open Issues for current deploy state and the active ErrorBoundary bug.
+**Live at stillformapp.com. Lemon Squeezy LIVE — paywall active.** Working branch: `feat/home-wiring-surface` (10 commits ahead of the May 12 handoff state, well ahead of `main`). Production deployed at the May 12 evening cleanup commit (`cf970eb`); the May 13 brainstorm-integration commits are pushed to GitHub but not yet deployed (Arlin triggers Netlify manually). `src/App.jsx` ~29,637 lines.
 
 ### Infrastructure
 - Hosting: Netlify Pro
@@ -556,6 +572,10 @@ The following were CRITICAL/pending in earlier versions of this doc and are now 
 - **Apr 28 operating rule:** Research-grounded changes are placement-first; gating decisions are separate. When current evidence contradicts implementation (e.g. Nook 2021 vs pre-regulation chips), fix placement first, defer optionality/gating decisions to a separate pass to avoid compounding changes.
 - **Apr 30 do-not-re-propose:** Body-first pre-rate friction is NOT an open architectural gap. The pre-regulation chip rows in BreatheGroundTool and BodyScanTool were removed Apr 28 (commit `ae43f4db`) per Nook 2021 + replications. The residual 1-5 numeric pre-rate is intentional — it captures the user's self-rated state for shift-delta tracking ("Last session: +2") and feeds the three-category data feed (Categories A/B/C). Removing the 1-5 would break the data layer. Body-first metacognition access was verified already implemented Apr 27 (master todo line 321) — body-first users go Pre-rate → Bio-filter → Breathe → Post-rate → Ground, and the grounding-complete screen has "Continue to Reframe →" as primary CTA. A spec proposing to fix this gap was drafted then retracted Apr 30 because the gap doesn't exist. If a new Claude reads the codebase from outside critique and surfaces this as a problem, point it here and to master todo lines 46, 321, and 361.
 - **May 12 framing-rebuild lock:** STILLFORM_FRAMING_LAW.md is the supreme framing reference. Audit philosophy v2.0 enforces it via Layer 0 (Framing Audit). Historical session logs in this doc (Sections 2.5, 2.6, 3) retain language from when they were written; the framing law supersedes any inconsistent framing in those sections.
+- **May 13 operating rule — Nothing is post-launch.** Every promised feature ships at launch. Launch is the moment of maximum attention; deferred features don't get the lens. Banned in code comments, commit messages, and scope: "post-launch," "future commit," "later," "deferred," "next phase." If infrastructure is needed, build it OR ship via alternative path (e.g., #2 Pre-sleep shipped May 13 as opportunistic in-app time-gated surface, not waiting on push notification scheduling). Enhancements to launch-complete features = fine. Deferring promised features = not.
+- **May 13 framing reinforcement — Composure is a felt outcome, not the product headline.** Stillform IS metacognition that expands cognitive capacity via neuroplasticity. The audience wants enhancement, not regulation. Composure can appear in marketing as something users feel — never as the product's self-name. Banned framings remain: "regulation app," "composure app," "wellness app," "tool for intense people."
+- **May 13 spine architecture lock — Universal Notice → Reframe → Close arc.** Every brainstormed practice surface routes through this arc via `stillform_practice_entry_context`. Seven source values handled (default retrieval, `spaced`, `pre-event`, `pre-mortem`, `open-recall`, `pre-sleep`, `deep-revisit`) at three places: Notice banner, Reframe useEffect, Reframe AI directive. Adding a new practice entry path that bypasses Notice is wrong. Body-tool standalone use (Breathe, Body Scan) hands off into the spine via post-completion CTAs (commit `d455de1`).
+- **May 13 onboarding hold — No copy rewrites until architecture lands.** Arlin's explicit direction: finish app architecture first, then revision pass. Onboarding rewrite (Page 3, setup-bridge, calibration handoff) HELD. Do not start rewriting before her signal — rewriting before architecture stabilizes means rewriting twice.
 
 ---
 
@@ -691,4 +711,133 @@ Hybrid intake spec landed after external AI consultation. Two-day session shippe
 
 ---
 
-*ARA Embers LLC · Stillform Project Transfer · April 28, 2026 · May 12, 2026 addendum*
+## May 12, 2026 evening — Spine Ship + audit resolution + deployment
+
+Single-session vertical slice that exposed the existing capacity-tracking infrastructure as a felt journey, plus full audit philosophy v2.0 run + two real findings resolved + small voice/infrastructure cleanup. All shipped to `feat/home-wiring-surface`. **Arlin deployed to production at session end.**
+
+### Spine Ship — 9 of 12 Journey-Spine Competitive Gaps shipped first-cut
+
+Competitor analysis (Liven, HMP) cross-referenced against Stillform's existing infrastructure produced 12 gaps. Operating principle: **the work is EXPOSURE, not invention.** Stillform's data layer is stronger than competitors; the UI doesn't surface it as a journey.
+
+| Gap | Ship | Surface |
+|---|---|---|
+| 6 | `e123e07` | FAQ stage names reconciled with `STAGE_DEFINITIONS` (NOTICING / NAMING / ANTICIPATING / RECOGNIZING / HOLDING) |
+| 1 + 10 | `7de3b15` | Mirror Strip → Roadmap direct (one tap, was two). Capacity gates visible on stages 2-5 with science citations (Lieberman 2007 + Farb 2015; Gollwitzer 1999 + Barrett 2017; Wells 2009 + Gross 1998; Meichenbaum). |
+| 2 + 3 | `9f315ef` | Home hero gets TODAY'S REP block at visual top, names current chapter + metacognitive objective from next unmet shipped marker. Processing type + bio-filter preserved as modality routing below. |
+| 11 | `8703cb9` | Per-session REP COUNTED banner — when a completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss. Auto-clears on dismiss. |
+| 8 | `de2be7a` | Settings → Habit Anchors (cue/action pairs, 5-anchor ceiling, starter suggestions). Home → STANDING ANCHORS strip below journey rep. Implementation intentions per Gollwitzer 1999. |
+| 9 | `133f6f6` | My Progress Last 30 Days synthesized observations (session volume, distinct chips, pre/post delta, top bias with MCT framing, top trigger, streak with Lally 2010). |
+| 4 | `111e08a` | Capacity-growth baseline written at calibration completion (new users) or retroactively seeded on first app load (existing users). My Progress "Since You Started" surface computes deltas baseline → current. |
+| 4 follow-up | `72929e3` | Settings → Capacity Baseline section + Reset button (lets Arlin wipe retroactive seed for fresh measurement point on phone test). |
+
+**Gap 5 REJECTED** (`9cc896b` revert) — Library destination was competitor-pattern misread. The 20 `STATIC_SCIENCE_CARDS` are designed as AI fallbacks + contextual post-session `ScienceCard` surfaces, NOT browsable content. Liven and HMP are content-delivery platforms; Stillform is a practice. Content lives in flows, not in destinations.
+
+**Gap 7 DEFERRED** — audio practice layer; needs external assets (Arlin voice / TTS / contractor).
+
+**Gap 12 PARTIAL** — voice applied per-surface during ships; dedicated content-production pass pending.
+
+### Audit resolution (`019491a`) — Two Layer 0.5 findings closed
+
+Full audit per STILLFORM_AUDIT_PHILOSOPHY.md v2.0 run after the Spine Ship. Two real findings surfaced and resolved before phone test.
+
+**Finding 1 — Mirror surface flow change.** The Mirror Strip → Roadmap direct rewire (Gap 1 ship) left Mirror Sheet with zero callers. Resolution: Mirror Sheet retired entirely (~340 lines removed). Unique content distributed:
+- "How stages work" info modal → moved to RoadmapScreen header (ⓘ button, uses `setInfoModal` prop)
+- MirrorSheetTriggers (Phase 2d.1 inline-add) → retired; Settings has full Trigger Profile CRUD as canonical surface
+- Today's Brief re-read surface → retired; post-checkin card re-reads brief on save
+- Markers + science citations → already duplicated in Roadmap via Gap 10 capacity gates
+- STILLFORM_ENGAGEMENT_ARCHITECTURE.md updated to record the change
+
+**Finding 2 — My Progress structure violated Path A.** STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 275-281 specs My Progress = 4 sections (Roadmap surface / Composure telemetry / Weekly reflection / Saved Reframes + AI notes + Shareable card). Gap 9 + Gap 4 had shipped as two separate cards, violating the 4-section structure. Consolidated into ONE "Weekly Reflection" section per Path A Section 3 — single bordered card with two sub-blocks:
+- `THE LAST 30 DAYS` — rolling 30-day window observations
+- `SINCE YOU STARTED · {BASELINE DATE}` — growth from baseline
+
+If only one sub-block has data, only that renders. If both empty, entire section returns null.
+
+### Audit-pass cleanup (`cf970eb`)
+
+**Cyclic Sighing settings card voice fix.** Voice-consistency audit named the card as the confirmed prestige-operator-tone violation. Rewritten from credentialing-paragraph to mechanism-as-language parallel to Quick Reset and Deep Regulate on the same screen: *"The double inhale tops off your oxygen; the long exhale empties your system completely. The deepest downshift of the three."* Balban 2023 citation preserved in code comment, FAQ answer, and static science card.
+
+**Language picker dead infrastructure removed.** `stillform_language` removed from SYNC_KEYS and UNENCRYPTED_SYNC_KEYS — no reader, no writer, no UI. i18n is post-launch; key will re-add when i18n actually ships.
+
+### Deployment + handoff
+
+Arlin deployed the cumulative branch state to production at session end. Phone testing in progress — screenshot-heavy findings expected. Handoff doc for next Claude: **STILLFORM_HANDOFF_MAY_12_EVENING.md** in repo root. Read it before responding to any phone-test findings.
+
+### Outstanding from this session
+
+- Phone-test follow-ups from May 12 morning (Move card better, integrations, bio-filter reinforcement) still pending Arlin's articulation
+- Broader voice consistency audit (PLN cards, info modals, Body Scan What Shifted caption) pending her direction — only Cyclic Sighing card shipped from that audit list
+- Gap 7 audio, Gap 12 voice content production
+- Spine Ship second cuts: Gap 3 first-week starter sequence, Gap 4 periodic re-assessment ritual UX, Gap 8 calibration-time anchor selection + marker auto-pairing
+- Mirror Sheet's in-tool wiring deferred — component retired entirely as of audit resolution; the Phase 2d inline-add affordance was the only unique value and it was redundant with Settings CRUD
+
+---
+
+## May 13, 2026 — 10 Brainstorm Ideas Integrated into the Spine + New Operating Rule Locked
+
+Arlin asked for a brainstorm of neuroplasticity-acceleration ideas beyond what was in the audit philosophy. 10 ideas surfaced. Arlin approved all 10 — "even the careful one." All 10 shipped this session on `feat/home-wiring-surface`. Read **STILLFORM_HANDOFF_MAY_13_2026.md** for the full session-start context; below is the persistent-record summary.
+
+### The 10 ideas + their commits
+
+| Commit | Idea | Surface |
+|---|---|---|
+| `9d01b30` | #5 Concept library visibility | YOUR LIBRARY card on My Progress (states / triggers / body signals / distortions named; bounded list, no frequencies; Bandura 1977 mastery experience) |
+| `396c9a0` | #1 Spine integration | PracticeSurface retrieval cards route through Notice → Reframe → Close. NoticeStepScreen reads `stillform_practice_entry_context` non-destructively, renders retrieval banner above chip picker. Spine arc is uniform across all entries. |
+| `67c71ea` | #8 Stage Transition Ritual | `StageRitualOverlay` self-gating modal on home when `highestStageMet > stillform_stage_acknowledged`. Max 4 lifetime fires (one per stage crossing). Operator-tier voice. |
+| `1c4ec03` | #3 Inline Granularity Gym | Optional precision-naming layer below Notice chip picker. Single-line, 60-char cap. Writes `stillform_session_precision`; Reframe consumes via `sessionPrecision` payload field (also added to `netlify/functions/reframe.js`). Hoemann 2021 mechanism as a dedicated micro-practice. |
+| `e59cdd8` | #4 Pre-event Run the rep CTA | Calendar event → "Run the rep · 60 sec →" on existing pre-event Brief screen. Gollwitzer 1999 implementation intentions with the event itself as the cue. |
+| `efeea0d` | #7 + #6 Anticipate + Open Recall | PracticeSurface ANTICIPATE card (high-encounter trigger pre-mortem, no calendar dependency) and OPEN RECALL card (free recall when no specific candidate + ≥3 sessions). |
+| `3dd2656` | #2 Pre-sleep rep | PracticeSurface PRE-SLEEP card time-gated 21:00–23:30 AND sessions today ≥1 AND EOD not done. Opportunistic in-app surface, NO push notification scheduling required. Stickgold & Walker pre-sleep memory consolidation. |
+| `b9922ed` | #10 Name the move at close | SessionCloseScreen optional "Name the move" single-line input. Writes `stillform_named_moves` (bounded array, max 50). YOUR LIBRARY card gets MOVES NAMED subsection. Different temporal slot from #3 (outcome concept, not entry-state precision). |
+| `6d2e929` | #9 Deep revisit (spaced reframe revisit) | DEEP REVISIT card on PracticeSurface, pulls saved-Reframe distortions from 7-30 day window. ONLY the distortion label surfaces — never the past Reframe content. Bounded per Wells 2009 Type 2 rumination guardrail. |
+
+### Universal architecture
+
+All 10 surfaces route through the same Notice → Reframe → Close spine via `stillform_practice_entry_context`. Seven source values now handled at three places (Notice banner copy, Reframe `useEffect` reader, Reframe AI directive payload):
+
+- (default retrieval) — pattern from 3-7 day window
+- `spaced` — pattern from 7/21/60 day windows
+- `pre-event` — calendar event title
+- `pre-mortem` — high-encounter trigger label (no calendar)
+- `open-recall` — pattern-less (user names at Notice)
+- `pre-sleep` — pattern-less (time-window surface)
+- `deep-revisit` — saved-Reframe distortion label
+
+Each source has bounded AI directives that forbid its specific failure mode (rehearsal theater for pre-event, pattern suggestion for open-recall, re-reading old content for deep-revisit, etc.).
+
+### New storage keys this session (all added to SYNC_KEYS)
+
+- `stillform_stage_acknowledged` — integer (#8)
+- `stillform_session_precision` — `{ value, day, at }` transient (#3); cleared by Reframe on read
+- `stillform_named_moves` — array of `{ value, sessionId, timestamp }`, max 50 (#10)
+
+### NEW OPERATING RULE LOCKED — Nothing is post-launch
+
+Mid-session Arlin caught me using "post-launch" framing in commit messages and scope summaries. The new rule, locked into Claude's persistent memory: **every promised feature ships at launch. Launch is the moment of maximum attention; deferred features don't get the lens.** Banned framings in code, commits, and scope: "post-launch," "future commit," "later," "deferred," "next phase." If infrastructure is needed, build it OR ship via alternative path. Example: #2 Pre-sleep ships as an opportunistic in-app time-gated surface, not waiting on push notification scheduling. Enhancements to launch-complete features = fine. Deferring promised features = not. The 10 features above are all launch-complete in their bounded forms.
+
+### Related framing principle (also locked)
+
+Composure stays as a marketable felt outcome — NOT the product headline. Stillform is metacognition that expands cognitive capacity via neuroplasticity. The audience wants enhancement, not regulation. Composure is one felt result among several that signal the practice is working. Banned framings remain: "regulation app," "composure app," "wellness app," "tool for intense people."
+
+### What's open from this session — phone-test queue for the next Claude
+
+- **Delete account vs delete data split** — currently one path; needs separation
+- **Restore-purchase path** — Lemon Squeezy restore flow for reinstalls
+- Both are listed in `PHONE_TEST_ISSUES_MAY_12_EVENING.md`; Arlin is bringing her laptop to work on these next session
+- Onboarding rewrite (Page 3 "One Practice. Three Moments." + setup-bridge + calibration handoff) HELD until app architecture lands — Arlin's explicit call; do not start rewriting before signal
+
+### Files touched this session
+
+- `src/App.jsx` (~+1000 lines net across 10 commits)
+- `src/practice-surface/PracticeSurface.jsx` (~+400 lines — three new helpers + three new render cards + props extension)
+- `netlify/functions/reframe.js` (+2 lines — `sessionPrecision` destructure + context push)
+
+### Documentation updates from this session
+
+- `STILLFORM_HANDOFF_MAY_13_2026.md` created — primary session-start handoff for next Claude
+- This transfer doc updated (this section + Section 2 header + READ THIS FIRST banner)
+- `Stillform_Master_Todo.md` header updated to point to the new handoff doc
+
+---
+
+*ARA Embers LLC · Stillform Project Transfer · April 28, 2026 · May 12, 2026 evening addendum · May 13, 2026 addendum*

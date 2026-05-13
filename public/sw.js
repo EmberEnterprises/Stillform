@@ -37,7 +37,7 @@
 // finishes its (no-op) fetch handling. Users get caching on the load after
 // the upgrade detection — typically the second pageview after deploy.
 
-const CACHE_VERSION = "stillform-v1-2026-05-07";
+const CACHE_VERSION = "stillform-v1-2026-05-12-evening";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const ASSETS_CACHE = `${CACHE_VERSION}-assets`;
 const PAGES_CACHE = `${CACHE_VERSION}-pages`;

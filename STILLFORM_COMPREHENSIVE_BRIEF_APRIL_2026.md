@@ -290,7 +290,7 @@ adb -s <watch-ip>:5555 install wear/build/outputs/apk/debug/wear-debug.apk
 - **Offline fallback:** "Connection dropped. Working through it on your own for now." — direct prompts, not a numbered worksheet.
 - **Crisis screen:** 988, Crisis Text Line, all tap-to-call/text.
 - **Privacy screen:** live at stillformapp.com/privacy.html
-- **Promo reel:** live at stillformapp.com/promo.html
+- **Promo reel:** removed May 12, 2026 (pre-research framing). New marketing surfaces built from framing law forward when shipped.
 - **FAQ:** 17+ entries covering all features including native-only integrations and tablet support.
 
 ---
