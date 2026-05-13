@@ -1237,6 +1237,7 @@ exports.handler = async function(event) {
       deferredCalibration = null,
       priorToolContext = null,
       practiceEntryContext = null,
+      sessionPrecision = null,
       bioFilter = null,
       regulationType = null,
       sessionNotes = null,
@@ -1549,6 +1550,7 @@ exports.handler = async function(event) {
     if (triggerProfile) contextParts.push(`${triggerProfile}. These are specific people, contexts, or moments the user has named as load-bearing — not categories, instances. If their current message names one of these by clear reference (the person, the meeting, the situation), recognize it directly: "This is [trigger] again." That recognition lands as continuity. Do NOT volunteer a trigger they did not raise; do NOT fabricate connections; do NOT moralize about why it shows up. The list is for orientation, not interrogation. If a high-encounter trigger has not surfaced in a while and the user seems off, you may ask gently: "Has [trigger] been quiet, or just out of frame?" Once per session, max.`);
     if (priorToolContext) contextParts.push(priorToolContext);
     if (practiceEntryContext) contextParts.push(practiceEntryContext);
+    if (sessionPrecision) contextParts.push(sessionPrecision);
     // ── REP-POSITIONED SESSION ────────────────────────────────────────
     // When the user enters Reframe as part of a guided session, the
     // session has an organizing rep — today's metacognitive objective

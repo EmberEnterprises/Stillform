@@ -9775,7 +9775,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage).
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -10942,6 +10942,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   // semantics. We do NOT want the cue firing on the next unrelated Reframe
   // open because the user navigated away with localStorage still set.
   const [practiceEntryContext, setPracticeEntryContext] = useState(null);
+  // Granularity Gym precision label (brainstorm #3, May 13, 2026). Read once
+  // on mount, cleared from localStorage immediately so it doesn't bleed
+  // across unrelated sessions. Same one-shot semantics as practiceEntryContext.
+  // Day-stamped on write (NoticeStepScreen) so a stale value from a previous
+  // day is ignored even if cleanup failed.
+  const [sessionPrecision, setSessionPrecision] = useState(null);
   useEffect(() => {
     try {
       const raw = localStorage.getItem("stillform_practice_entry_context");
@@ -10955,6 +10961,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           });
         }
         localStorage.removeItem("stillform_practice_entry_context");
+      }
+    } catch {}
+    try {
+      const raw = localStorage.getItem("stillform_session_precision");
+      if (raw) {
+        const ctx = JSON.parse(raw);
+        const today = TimeKeeper.stillformDay();
+        if (ctx && typeof ctx === "object" && ctx.value && ctx.day === today) {
+          setSessionPrecision(String(ctx.value));
+        }
+        localStorage.removeItem("stillform_session_precision");
       }
     } catch {}
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -11624,6 +11641,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               `Open by briefly acknowledging the return — for example: "You named ${pattern.toLowerCase()} ${daysPhrase}. What's it doing today?" or similar. Keep it 1 sentence, oriented to NOW. ` +
               `Let the user lead with what's actually present — do not recite the pattern as a label, do not assume the same situation applies, do not summarize what they said last time. The pattern name is shorthand for a class of experience, not a fixed event.`;
           })(),
+          // Granularity Gym precision label (brainstorm #3, May 13, 2026).
+          // When the user named with precision at the Notice step (inline
+          // Granularity Gym expansion), the label flows to the AI here. The
+          // AI uses it as the user's most precise self-description for this
+          // session — not as a label to recite back, but as a starting
+          // resolution for the conversation. Single string, max 60 chars.
+          sessionPrecision: sessionPrecision
+            ? `GRANULARITY LABEL (user's own precise word for present state, named at Notice): "${sessionPrecision}". This is the user's specificity, not yours to grade or psychoanalyze. Treat it as their working name for what's here. You may reference it once if natural; do not orbit around it.`
+            : null,
           priorModeContext: (() => {
             try {
               const otherModes = ["calm", "clarity", "hype"].filter(m => m !== effectiveMode);
@@ -14966,6 +14992,22 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
     return `${days} days ago`;
   };
 
+  // ── GRANULARITY GYM (inline) — brainstorm #3 ──────────────────────────
+  // Optional precision-naming layer below the chip picker. The chip is the
+  // broad granularity tier; the precision input is the fine tier. Together
+  // they form a Hoemann 2021 / Barrett 2017 granularity rep: name broad,
+  // then name specific. The TYPING is the rep — the act of articulating
+  // with maximum precision builds the concept.
+  //
+  // Bounded design per Wells 2009 — this is NOT open journaling. Single
+  // line, 60-character cap, no multi-line, no save-to-archive surface.
+  // The user names ONE precise word or short phrase; the act of naming is
+  // the practice. The label persists transiently to stillform_session_precision
+  // (cleared by Reframe on read) so the AI can use it for the session.
+  const [precisionOpen, setPrecisionOpen] = useState(false);
+  const [precisionText, setPrecisionText] = useState("");
+  const PRECISION_MAX = 60;
+
   const handlePick = (chipId) => {
     setPicked(chipId);
     try {
@@ -14978,15 +15020,36 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
   };
 
   const handleContinue = () => {
+    // Granularity Gym precision — write to transient storage so Reframe can
+    // consume it. Stored as { value, day } so a stale entry from a previous
+    // day doesn't bleed into a new session. Reframe clears on read.
+    const trimmedPrecision = String(precisionText || "").trim();
+    if (trimmedPrecision.length > 0) {
+      try {
+        localStorage.setItem("stillform_session_precision", JSON.stringify({
+          value: trimmedPrecision.slice(0, PRECISION_MAX),
+          day: TimeKeeper.stillformDay(),
+          at: Date.now()
+        }));
+      } catch {}
+    } else {
+      // No precision typed — make sure no stale value carries over.
+      try { localStorage.removeItem("stillform_session_precision"); } catch {}
+    }
     try {
       window.plausible("Session Notice Complete", {
-        props: { picked: picked || "skipped" }
+        props: {
+          picked: picked || "skipped",
+          precision: trimmedPrecision.length > 0 ? "yes" : "no",
+          precisionLen: trimmedPrecision.length
+        }
       });
     } catch {}
     onContinue();
   };
 
   const handleSkip = () => {
+    try { localStorage.removeItem("stillform_session_precision"); } catch {}
     try { window.plausible("Session Notice Skipped"); } catch {}
     onContinue();
   };
@@ -15062,13 +15125,128 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
       {/* Chip picker — reuses PresentStateChips component already in the build.
           The chip persists to stillform_feelstate, which Reframe reads on entry,
           so the labeled state flows through to cognitive work automatically. */}
-      <div style={{ marginBottom: 32 }}>
+      <div style={{ marginBottom: 16 }}>
         <PresentStateChips
           feelState={picked}
           setFeelState={handlePick}
           setInfoModal={setInfoModal}
         />
       </div>
+
+      {/* GRANULARITY GYM (inline) — brainstorm #3 (May 13, 2026).
+          The chip names what's present at the broad tier; this expansion lets
+          the user name with maximum specificity. Optional, not required.
+          Renders only after a chip is picked so the order is: broad → fine.
+          Hoemann 2021 / Barrett 2017 — granularity is the trainable substrate;
+          the typing is the rep. Bounded design (Wells 2009): single line,
+          60-char cap, no multi-line, no archive — naming, not journaling. */}
+      {picked && (
+        <div style={{ marginBottom: 24 }}>
+          {!precisionOpen ? (
+            <button
+              onClick={() => setPrecisionOpen(true)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                cursor: "pointer",
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: 11,
+                color: "var(--text-muted)",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                textAlign: "left",
+                width: "100%"
+              }}
+            >
+              + Name with precision · granularity gym
+            </button>
+          ) : (
+            <div style={{
+              padding: "14px 14px 12px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)",
+                letterSpacing: "0.14em",
+                marginBottom: 6
+              }}>
+                GRANULARITY GYM
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 16,
+                fontStyle: "italic",
+                color: "var(--text-cream)",
+                lineHeight: 1.4,
+                marginBottom: 10
+              }}>
+                The most precise word for what's here.
+              </div>
+              <input
+                type="text"
+                value={precisionText}
+                onChange={e => setPrecisionText(e.target.value.slice(0, PRECISION_MAX))}
+                maxLength={PRECISION_MAX}
+                placeholder="e.g. fluttered, low-grade-tight, between-things"
+                aria-label="Precision label"
+                autoFocus
+                style={{
+                  width: "100%",
+                  padding: "10px 12px",
+                  background: "var(--surface2)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  fontSize: 14,
+                  color: "var(--text)",
+                  fontFamily: "'DM Sans', sans-serif",
+                  outline: "none",
+                  boxSizing: "border-box"
+                }}
+              />
+              <div style={{
+                marginTop: 8,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                fontSize: 10,
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: "var(--text-muted)",
+                letterSpacing: "0.06em"
+              }}>
+                <span>{precisionText.length}/{PRECISION_MAX}</span>
+                <button
+                  onClick={() => { setPrecisionText(""); setPrecisionOpen(false); }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    fontSize: 10,
+                    color: "var(--text-muted)",
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    letterSpacing: "0.08em",
+                    textTransform: "uppercase"
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+              <div style={{
+                marginTop: 8,
+                fontSize: 11,
+                color: "var(--text-muted)",
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1.5
+              }}>
+                The naming is the rep. One precise word builds more concept than a paragraph of analysis (Hoemann 2021).
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Continue + Skip — Continue active when chip picked, Skip always available */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
