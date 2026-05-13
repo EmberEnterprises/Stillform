@@ -11632,6 +11632,13 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           practiceEntryContext: (() => {
             if (!practiceEntryContext) return null;
             const { pattern, source, daysAgo } = practiceEntryContext;
+            if (source === "pre-event") {
+              return `PRE-EVENT REP — READ THIS FIRST: The user just opened a pre-event Brief for an upcoming calendar event titled "${pattern}" and tapped through to run the rep BEFORE the event. ` +
+                `This is implementation intentions in real time — Gollwitzer 1999 — the calendar event is the cue, this session is the pre-installed move. ` +
+                `Open by orienting to the event as a present-tense fact, not a future-tense worry. Example: "${pattern} is on the calendar. What's already moving in you about it?" Keep it 1 sentence. ` +
+                `The job here is NOT to rehearse the event, NOT to predict scenarios, NOT to script lines. The job is to surface what's already running in the user's system about the event so they can walk in clear. ` +
+                `If they spiral into anticipatory analysis, redirect to body / present sensation. If they name the state precisely, mirror briefly and let them settle.`;
+            }
             const daysPhrase = formatDaysAgo(daysAgo);
             const sourceNote = source === "spaced"
               ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
@@ -15082,14 +15089,22 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
             letterSpacing: "0.14em",
             marginBottom: 6
           }}>
-            {retrievalContext.source === "spaced" ? "PLANNED REVISIT" : "RETURNING TO"}
+            {retrievalContext.source === "pre-event"
+              ? "BEFORE"
+              : retrievalContext.source === "spaced"
+                ? "PLANNED REVISIT"
+                : "RETURNING TO"}
           </div>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
             color: "var(--text-cream)", lineHeight: 1.4,
             letterSpacing: "0.005em"
           }}>
-            You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.
+            {retrievalContext.source === "pre-event" ? (
+              <>You're about to walk into <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern}</span>.</>
+            ) : (
+              <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.</>
+            )}
           </div>
           <div style={{
             marginTop: 4,
@@ -15098,7 +15113,9 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
             fontFamily: "'DM Sans', sans-serif",
             lineHeight: 1.55
           }}>
-            What's it doing today? Name what's present — your answer can hold the pattern or step past it.
+            {retrievalContext.source === "pre-event"
+              ? "Name what's present first. The rep before the event is the move that lands inside it."
+              : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
           </div>
         </div>
       )}
@@ -23458,12 +23475,48 @@ const isSignalProfileConfigured = () => {
                 </div>
               )}
 
-              <button className="btn btn-primary" onClick={() => {
-                setPreEventBriefTarget(null);
-                goHomeSafely();
-              }} style={{ width: "100%" }}>
-                Done
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {/* Run the rep — brainstorm #4 (May 13, 2026). Calendar event
+                    becomes the cue; a 60-second universal session arc is the
+                    rep. Gollwitzer 1999 implementation intentions made
+                    operational — the event itself is the trigger, the rep is
+                    the pre-installed move. Writes event title to
+                    stillform_practice_entry_context so Notice + Reframe both
+                    see the event context. source="pre-event" lets the banner
+                    + AI directive calibrate to "before the event" framing. */}
+                <button className="btn btn-primary" onClick={() => {
+                  try {
+                    localStorage.setItem("stillform_practice_entry_context", JSON.stringify({
+                      pattern: target.title,
+                      source: "pre-event",
+                      daysAgo: 0,
+                      eventStart: target.start || null,
+                      enteredAt: new Date().toISOString()
+                    }));
+                  } catch {}
+                  try {
+                    window.plausible?.("Pre-Event Rep Started", {
+                      props: { hasBrief: brief ? "yes" : "no" }
+                    });
+                  } catch {}
+                  setPreEventBriefTarget(null);
+                  startGuidedSession("pre-event-rep");
+                }} style={{ width: "100%" }}>
+                  Run the rep · 60 sec →
+                </button>
+                <button className="btn btn-ghost" onClick={() => {
+                  setPreEventBriefTarget(null);
+                  goHomeSafely();
+                }} style={{
+                  width: "100%",
+                  padding: "10px 24px", fontSize: 12,
+                  color: "var(--text-muted)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em", textTransform: "uppercase"
+                }}>
+                  Done · just the brief
+                </button>
+              </div>
             </div>
           );
         })()}
