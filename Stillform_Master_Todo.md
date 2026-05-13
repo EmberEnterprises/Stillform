@@ -1,20 +1,19 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 12, 2026 (Spine Ship complete: 9 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`. Gap 5 rejected after review — competitor-pattern misread. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
+**ARA Embers LLC · last updated May 12, 2026 (Spine Ship + audit resolution complete: 9 of 12 gaps shipped first-cut on branch `feat/home-wiring-surface`. Two Layer 0.5 findings from full audit resolved: Mirror Sheet retired with content distributed, My Progress consolidated to Path A 4-section structure. Gap 5 rejected after review — competitor-pattern misread. Gap 7 deferred — needs external audio assets. Gap 12 partial — voice applied per-surface. Awaiting Arlin's deploy + phone test.)**
 
-## SPINE SHIP — May 12, 2026 (commits `e123e07` through latest)
+## SPINE SHIP — May 12, 2026 (commits `e123e07` through audit-resolution commit)
 
-Nine gaps shipped first-cut in a single batch this session. Branch `feat/home-wiring-surface` is well ahead of main, all green (build + preflight pass on every commit), zero deployed.
+Nine gaps shipped first-cut in a single batch this session, then full audit run + two Layer 0.5 findings resolved before phone test. Branch `feat/home-wiring-surface` is well ahead of main, all green (build + preflight pass on every commit), zero deployed.
 
 **What the user will see after the next Netlify deploy:**
 
 1. **Home — TODAY'S REP block at top of hero.** Eyebrow names current chapter; rep statement names the metacognitive objective from `getTodaysJourneyRep()`. Bio-filter reasoning + CTA preserved below (modality entry). Anchors strip below journey rep if anchors are set.
 2. **Home — REP COUNTED banner.** When a session completion flipped a marker, banner appears above journey rep with marker label + rep statement + dismiss X. Auto-clears on dismiss.
-3. **Mirror Strip → Roadmap (one tap).** No Mirror Sheet detour. Roadmap shows all 5 chapters with current highlighted, capacity gates visible on stages 2-5, science citations per gate.
-4. **My Progress — Last 30 Days synthesis card at top.** Plain-language observations across session volume, granularity, pre/post delta, biases, triggers, streak.
-5. **My Progress — Since You Started card below.** Baseline-to-current growth across stages, chips, triggers, biases, signals, sessions. Empty growth state still renders with baseline date.
-6. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
-7. **Settings — Capacity Baseline section.** Shows current baseline + Reset button (lets user wipe retroactive seed for a fresh measurement point).
-8. **FAQ — Stage names and Mirror naming reconciled with code.**
+3. **Mirror Strip → Roadmap (one tap).** Mirror Sheet retired entirely as of audit resolution. "How stages work" info button moved into Roadmap header. Trigger Profile reflection display retired (Settings has full CRUD).
+4. **My Progress — Weekly Reflection section (consolidated).** Path A Section 3 finally built: one bordered card with two sub-blocks: "The last 30 days" (synthesized insights from rolling 30-day window) + "Since you started" (capacity growth from baseline). Replaces the two separate cards that violated Path A's 4-section structure.
+5. **Settings — Habit Anchors section.** User-defined cue/action pairs with starter suggestions, 5-anchor ceiling.
+6. **Settings — Capacity Baseline section.** Shows current baseline + Reset button (lets user wipe retroactive seed for a fresh measurement point).
+7. **FAQ — Stage names and Mirror naming reconciled with code.**
 
 **What's NOT in this ship:**
 
@@ -25,16 +24,16 @@ Nine gaps shipped first-cut in a single batch this session. Branch `feat/home-wi
 - Personalized first-week starter sequence at calibration (Gap 3 second cut)
 - Anchor → marker auto-pairing (Gap 8 + Gap 11 integration)
 - Founder voice content pass (Gap 12 dedicated content production)
-- Mirror Sheet rewiring to in-tool contexts (component remains intact but unreachable from home; designed to be wired to Reframe close / tool completion screens in a future commit)
 
 **Deploy + test order (Arlin):**
 1. Trigger Netlify deploy from branch when ready.
 2. Phone walk: home → journey rep at top → tap Mirror Strip → Roadmap → back.
 3. Complete a session that might advance a marker → return home → REP COUNTED banner.
 4. Open Settings → Habit Anchors → add an anchor (or tap starter suggestion) → return home → STANDING ANCHORS strip visible.
-5. Open My Progress → see Last 30 Days card and Since You Started card.
+5. Open My Progress → see Weekly Reflection section with both sub-blocks.
 6. Open FAQ → "What is the Mirror and stage system?" → confirm stage names.
 7. Settings → Capacity Baseline → Reset baseline from current state (recommended before a fresh full app test).
+8. Tap the ⓘ icon on Roadmap → confirm "How stages work" modal renders correctly.
 
 ---
 

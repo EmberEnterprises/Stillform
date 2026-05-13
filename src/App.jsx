@@ -16014,145 +16014,6 @@ function TriggerProfileSection({ onChange }) {
   );
 }
 
-
-// MirrorSheetTriggers — Phase 2d.1. Replaces the inline IIFE Phase 2d used
-// inside the Mirror sheet. Lifting to a component buys two things: useState
-// for the inline-add affordance the audit §3d called for, and a refresh
-// hook so a freshly-added trigger appears immediately in the list. Add
-// here is *reflection-context*, not encounter-context — calls addTrigger
-// only (no incrementTriggerEncounter), matching the Settings CRUD pattern.
-// EOD (2b) and Reframe close (2c) remain the encounter-context surfaces.
-function MirrorSheetTriggers() {
-  const [profile, setProfile] = useState(() => {
-    try { return getTriggerProfile(); } catch { return { triggers: [] }; }
-  });
-  const [adding, setAdding] = useState(false);
-
-  const refresh = () => {
-    try { setProfile(getTriggerProfile()); } catch {}
-  };
-
-  const triggers = profile?.triggers || [];
-  const sorted = [...triggers].sort((a, b) => {
-    const ec = (b.encounterCount || 0) - (a.encounterCount || 0);
-    if (ec !== 0) return ec;
-    return new Date(b.lastSeen || b.createdAt || 0).getTime() - new Date(a.lastSeen || a.createdAt || 0).getTime();
-  });
-  const top = sorted.slice(0, 3);
-  const moreCount = Math.max(0, sorted.length - 3);
-
-  const handleAdd = ({ label, category }) => {
-    try {
-      addTrigger({ label, category });
-      try { window.plausible("Trigger Added From Mirror", { props: { category } }); } catch {}
-    } catch {}
-    setAdding(false);
-    refresh();
-  };
-
-  const handleCancel = () => {
-    try { window.plausible("Trigger Prompt Skipped", { props: { surface: "mirror" } }); } catch {}
-    setAdding(false);
-  };
-
-  return (
-    <>
-      <div className="t-mono-xs" style={{
-        color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-      }}>
-        What you've named
-      </div>
-      {sorted.length === 0 && !adding && (
-        <div style={{
-          fontSize: 12, color: "var(--text-muted)", lineHeight: 1.6,
-          fontFamily: "'DM Sans', sans-serif", marginBottom: 12
-        }}>
-          No triggers named yet. Specific people, contexts, or moments where composure is hardest.
-        </div>
-      )}
-      {top.length > 0 && (
-        <div style={{ marginBottom: moreCount > 0 ? 8 : (adding ? 14 : 18) }}>
-          {top.map((t, idx) => {
-            const lastSeen = _formatTriggerLastSeen(t.lastSeen);
-            const categoryLabel = TRIGGER_CATEGORY_LABELS[t.category] || "Other";
-            const count = t.encounterCount || 0;
-            return (
-              <div key={t.id} style={{
-                padding: "10px 0",
-                borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-              }}>
-                <div style={{
-                  fontSize: 13, color: "var(--text)", lineHeight: 1.45,
-                  fontFamily: "'DM Sans', sans-serif", marginBottom: 4
-                }}>
-                  {t.label}
-                </div>
-                <div className="t-caption" style={{
-                  color: "var(--text-muted)", letterSpacing: "0.04em"
-                }}>
-                  {categoryLabel}
-                  {count > 0 && ` · ${count} encounter${count === 1 ? "" : "s"}`}
-                  {lastSeen && count > 0 && ` · last ${lastSeen}`}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-      {moreCount > 0 && (
-        <div style={{
-          fontSize: 11, color: "var(--text-muted)", fontStyle: "italic",
-          marginBottom: adding ? 14 : 18, fontFamily: "'DM Sans', sans-serif"
-        }}>
-          +{moreCount} more in Settings → Personalization → Triggers
-        </div>
-      )}
-      {adding && (
-        <div style={{
-          background: "var(--surface2)",
-          border: "0.5px solid var(--amber-dim)",
-          borderRadius: "var(--r)",
-          padding: "14px 16px",
-          marginBottom: 28
-        }}>
-          <TriggerForm
-            autoFocus
-            submitLabel="Add"
-            cancelLabel="Cancel"
-            placeholder="e.g., Mike's 1:1, Sunday family dinners"
-            onSubmit={handleAdd}
-            onCancel={handleCancel}
-          />
-        </div>
-      )}
-      {!adding && (
-        <button
-          onClick={() => {
-            setAdding(true);
-            try { window.plausible("Trigger Prompt Shown", { props: { surface: "mirror" } }); } catch {}
-          }}
-          aria-label="Add a trigger"
-          style={{
-            background: "none",
-            border: "none",
-            color: "var(--text-muted)",
-            cursor: "pointer",
-            padding: "0 0 28px 0",
-            fontSize: 12,
-            fontFamily: "'DM Sans', sans-serif",
-            letterSpacing: "0.02em",
-            textAlign: "left",
-            WebkitTapHighlightColor: "transparent"
-          }}
-        >
-          + Add a trigger
-        </button>
-      )}
-    </>
-  );
-}
-
-
 function MyProgress({ onBack }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
@@ -16593,100 +16454,213 @@ function MyProgress({ onBack }) {
         </div>
       ) : (<>
 
-        {/* ── LAST 30 DAYS — Gap 9 (May 12, 2026) ──────────────────────
-            Synthesized insight report. Plain English observations sourced
-            from the user's real data over the prior 30 days. Hoemann 2021
-            granularity surfaced as the user's emerging vocabulary; Wells
-            2009 metacognitive practice surfaced as their pattern
-            accumulation. The user sees their own capacity expansion as
-            language, not as scores. Anti-gamification preserved: no
-            badges, no progression bars in the synthesis. The data
-            observed back as the user's pattern. */}
+        {/* ── WEEKLY REFLECTION — Path A Section 3 of My Progress per
+            STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 278: "Weekly
+            reflection (narrative) — kept as-is." Consolidates Gap 9
+            (Last 30 days synthesis) + Gap 4 (Since You Started growth)
+            into one section per audit philosophy v2.0 Layer 0.5 Finding 1
+            (May 12, 2026). The two sub-blocks share temporal frames —
+            rolling 30-day window vs since-baseline arc — and render
+            inside one card to honor Path A's reduce-heaviness intent.
+
+            Block 1: Last 30 days — Hoemann 2021 granularity + Wells 2009
+            metacognitive practice surfaced as the user's current pattern
+            accumulation.
+
+            Block 2: Since you started — capacity-growth baseline. Reads
+            stillform_growth_baseline (seeded once on calibration completion
+            for new users, or retroactively on first app load for pre-
+            existing users) and compares to current state.
+
+            Anti-gamification across both: no points, no badges, no
+            completion percentages. Plain observations. */}
         {(() => {
+          // Block 1: Last 30 days insights
           const now = Date.now();
           const cutoff = now - (30 * 24 * 60 * 60 * 1000);
           const recent = sessions.filter(s => {
             try { return new Date(s.timestamp).getTime() >= cutoff; } catch { return false; }
           });
-          if (recent.length === 0) return null;
 
-          const insights = [];
-
-          // Session volume
-          insights.push({
-            headline: `${recent.length} session${recent.length === 1 ? "" : "s"} in the last 30 days.`,
-            body: recent.length >= 15
-              ? "Practice that compounds. Consistency over magnitude."
-              : recent.length >= 6
-                ? "Regular practice forming. Each rep accrues."
-                : "Practice is starting to show up. Anchor it to a cue you can't miss.",
-          });
-
-          // Distinct chips (granularity)
-          const chips = new Set();
-          recent.forEach(s => {
-            if (s.preState) chips.add(s.preState);
-            if (s.postState) chips.add(s.postState);
-            if (s.feelState) chips.add(s.feelState);
-          });
-          if (chips.size > 0) {
-            insights.push({
-              headline: `${chips.size} different feel-state chip${chips.size === 1 ? "" : "s"} used.`,
-              body: chips.size >= 8
-                ? "Your interoceptive vocabulary is broad. Granularity is the practice (Hoemann 2021)."
-                : chips.size >= 4
-                  ? "Vocabulary building. Try a chip you haven't used before next session."
-                  : "Stretching beyond your default chips expands what you can name in real time.",
+          const recentInsights = [];
+          if (recent.length > 0) {
+            recentInsights.push({
+              headline: `${recent.length} session${recent.length === 1 ? "" : "s"} in the last 30 days.`,
+              body: recent.length >= 15
+                ? "Practice that compounds. Consistency over magnitude."
+                : recent.length >= 6
+                  ? "Regular practice forming. Each rep accrues."
+                  : "Practice is starting to show up. Anchor it to a cue you can't miss.",
             });
-          }
 
-          // Pre/post delta average
-          const withDelta = recent.filter(s => typeof s.delta === "number" && !Number.isNaN(s.delta));
-          if (withDelta.length >= 3) {
-            const avgDelta = withDelta.reduce((sum, s) => sum + s.delta, 0) / withDelta.length;
-            insights.push({
-              headline: `Average shift of ${avgDelta >= 0 ? "+" : ""}${avgDelta.toFixed(1)} across ${withDelta.length} rated sessions.`,
-              body: avgDelta >= 1.5
-                ? "Reps that move state reliably. The shift is the data."
-                : avgDelta >= 0.5
-                  ? "Small shifts add up over months. Composure is built, not summoned."
-                  : "Composure isn't always shift — sometimes it's holding. Reread your sessions that didn't move; that's the practice too.",
+            const chips = new Set();
+            recent.forEach(s => {
+              if (s.preState) chips.add(s.preState);
+              if (s.postState) chips.add(s.postState);
+              if (s.feelState) chips.add(s.feelState);
             });
-          }
-
-          // Bias profile mention
-          if (biasProfile && Array.isArray(biasProfile) && biasProfile.length > 0) {
-            insights.push({
-              headline: `${biasProfile.length} cognitive distortion${biasProfile.length === 1 ? "" : "s"} on your watch list.`,
-              body: `Top: ${biasProfile[0]}. Each Reframe session is a rep against it — Wells 2009 metacognitive therapy. The distortion doesn't go away; your relationship to it changes.`,
-            });
-          }
-
-          // Trigger profile mention
-          try {
-            const profile = getTriggerProfile();
-            if (profile?.triggers?.length > 0) {
-              const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
-              if (top?.label && top?.encounterCount >= 1) {
-                insights.push({
-                  headline: `"${top.label}" has come up ${top.encounterCount} time${top.encounterCount === 1 ? "" : "s"}.`,
-                  body: "A named trigger you've encountered. Pre-event briefs sharpen with repetition — Gollwitzer 1999 implementation intentions become faster with reps.",
-                });
-              }
+            if (chips.size > 0) {
+              recentInsights.push({
+                headline: `${chips.size} different feel-state chip${chips.size === 1 ? "" : "s"} used.`,
+                body: chips.size >= 8
+                  ? "Your interoceptive vocabulary is broad. Granularity is the practice (Hoemann 2021)."
+                  : chips.size >= 4
+                    ? "Vocabulary building. Try a chip you haven't used before next session."
+                    : "Stretching beyond your default chips expands what you can name in real time.",
+              });
             }
+
+            const withDelta = recent.filter(s => typeof s.delta === "number" && !Number.isNaN(s.delta));
+            if (withDelta.length >= 3) {
+              const avgDelta = withDelta.reduce((sum, s) => sum + s.delta, 0) / withDelta.length;
+              recentInsights.push({
+                headline: `Average shift of ${avgDelta >= 0 ? "+" : ""}${avgDelta.toFixed(1)} across ${withDelta.length} rated sessions.`,
+                body: avgDelta >= 1.5
+                  ? "Reps that move state reliably. The shift is the data."
+                  : avgDelta >= 0.5
+                    ? "Small shifts add up over months. Composure is built, not summoned."
+                    : "Composure isn't always shift — sometimes it's holding. Reread your sessions that didn't move; that's the practice too.",
+              });
+            }
+
+            if (biasProfile && Array.isArray(biasProfile) && biasProfile.length > 0) {
+              recentInsights.push({
+                headline: `${biasProfile.length} cognitive distortion${biasProfile.length === 1 ? "" : "s"} on your watch list.`,
+                body: `Top: ${biasProfile[0]}. Each Reframe session is a rep against it — Wells 2009 metacognitive therapy. The distortion doesn't go away; your relationship to it changes.`,
+              });
+            }
+
+            try {
+              const profile = getTriggerProfile();
+              if (profile?.triggers?.length > 0) {
+                const top = [...profile.triggers].sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0))[0];
+                if (top?.label && top?.encounterCount >= 1) {
+                  recentInsights.push({
+                    headline: `"${top.label}" has come up ${top.encounterCount} time${top.encounterCount === 1 ? "" : "s"}.`,
+                    body: "A named trigger you've encountered. Pre-event briefs sharpen with repetition — Gollwitzer 1999 implementation intentions become faster with reps.",
+                  });
+                }
+              }
+            } catch {}
+
+            if (streak >= 3) {
+              recentInsights.push({
+                headline: `${streak}-day session streak active.`,
+                body: streak >= 14
+                  ? "Habit forming. Neuroplasticity needs repetition (Lally 2010 — habits stabilize around 66 days)."
+                  : "Consistency is the substrate. Don't break the chain on the worst days; those are the practice.",
+              });
+            }
+          }
+
+          // Block 2: Since you started growth
+          let baseline = null;
+          try {
+            const raw = localStorage.getItem("stillform_growth_baseline");
+            if (raw) baseline = JSON.parse(raw);
           } catch {}
 
-          // Streak
-          if (streak >= 3) {
-            insights.push({
-              headline: `${streak}-day session streak active.`,
-              body: streak >= 14
-                ? "Habit forming. Neuroplasticity needs repetition (Lally 2010 — habits stabilize around 66 days)."
-                : "Consistency is the substrate. Don't break the chain on the worst days; those are the practice.",
-            });
+          const growthLines = [];
+          let baselineDate = "";
+          let baselineSource = "";
+          if (baseline && baseline.capturedAt) {
+            baselineSource = baseline.source || "";
+            baselineDate = (() => {
+              try {
+                const d = new Date(baseline.capturedAt);
+                return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+              } catch { return "earlier"; }
+            })();
+
+            const currentDistinctChips = (() => {
+              const set = new Set();
+              sessions.forEach(s => {
+                if (s.preState) set.add(s.preState);
+                if (s.postState) set.add(s.postState);
+                if (s.feelState) set.add(s.feelState);
+              });
+              return set.size;
+            })();
+            const currentBias = (biasProfile && Array.isArray(biasProfile)) ? biasProfile.length : 0;
+            const currentSignal = (signalProfile && Array.isArray(signalProfile)) ? signalProfile.length : (signalProfile && typeof signalProfile === "object" ? Object.keys(signalProfile).length : 0);
+            let currentTriggers = 0;
+            try { currentTriggers = (getTriggerProfile()?.triggers?.length) || 0; } catch {}
+            let currentStageId = 1;
+            try { currentStageId = getCurrentStage()?.currentStageId || 1; } catch {}
+
+            const chipDelta = currentDistinctChips - (baseline.distinctChips || 0);
+            const biasDelta = currentBias - (baseline.biasCount || 0);
+            const signalDelta = currentSignal - (baseline.signalCount || 0);
+            const triggerDelta = currentTriggers - (baseline.triggerCount || 0);
+            const sessionDelta = sessions.length - (baseline.sessionsCount || 0);
+            const stageDelta = currentStageId - (baseline.stage || 1);
+
+            if (stageDelta > 0) {
+              growthLines.push({
+                headline: `Stage ${baseline.stage} → Stage ${currentStageId}.`,
+                body: stageDelta === 1
+                  ? "A capacity built. The chapter you started in is one you've passed through."
+                  : `${stageDelta} chapters of capacity built since baseline.`,
+              });
+            }
+            if (chipDelta > 0) {
+              growthLines.push({
+                headline: `${chipDelta} new feel-state chip${chipDelta === 1 ? "" : "s"} in your vocabulary.`,
+                body: chipDelta >= 5
+                  ? "Your interoceptive vocabulary has materially widened. Granularity is the practice (Hoemann 2021)."
+                  : "Small additions to your library of named states. The naming is the rep.",
+              });
+            }
+            if (triggerDelta > 0) {
+              growthLines.push({
+                headline: `${triggerDelta} new trigger${triggerDelta === 1 ? "" : "s"} named.`,
+                body: "Triggers you've identified since you started. Pre-event briefs sharpen with reps — Gollwitzer 1999 implementation intentions.",
+              });
+            }
+            if (biasDelta > 0) {
+              growthLines.push({
+                headline: `${biasDelta} additional cognitive distortion${biasDelta === 1 ? "" : "s"} on your watch list.`,
+                body: "Recognition of how your thinking patterns show up — Wells 2009 metacognitive therapy.",
+              });
+            }
+            if (signalDelta > 0) {
+              growthLines.push({
+                headline: `${signalDelta} additional body tell${signalDelta === 1 ? "" : "s"} mapped.`,
+                body: "Specificity of where intensity registers in your body — interoceptive precision (Critchley 2017).",
+              });
+            }
+            if (sessionDelta > 0) {
+              growthLines.push({
+                headline: `${sessionDelta} session${sessionDelta === 1 ? "" : "s"} logged since baseline.`,
+                body: "Reps that accrued. The data layer captures what the body has been practicing.",
+              });
+            }
+
+            // If nothing has grown, still show the baseline date line so
+            // the surface exists when growth starts.
+            if (growthLines.length === 0) {
+              growthLines.push({
+                headline: `Baseline captured ${baselineDate}.`,
+                body: baselineSource === "retroactive-seed"
+                  ? "This baseline was seeded from your state at this surface's first load. Growth from this point forward will surface here."
+                  : "Growth from your calibration baseline will surface here as it accrues.",
+              });
+            }
           }
 
-          if (insights.length === 0) return null;
+          // If both blocks are empty, render nothing
+          if (recentInsights.length === 0 && growthLines.length === 0) return null;
+
+          const subSectionHeaderStyle = {
+            fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
+            color: "var(--text-muted)", letterSpacing: "0.14em",
+            marginTop: 24, marginBottom: 12, paddingBottom: 8,
+            borderBottom: "0.5px solid var(--border-printed)"
+          };
+          const insightRowStyle = (idx) => ({
+            padding: "12px 0",
+            borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
+          });
 
           return (
             <div style={{
@@ -16700,191 +16674,67 @@ function MyProgress({ onBack }) {
                 color: "var(--amber)", marginBottom: 6,
                 letterSpacing: "0.14em"
               }}>
-                LAST 30 DAYS
+                WEEKLY REFLECTION
               </div>
               <div style={{
                 fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
-                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 18,
+                color: "var(--text-cream)", lineHeight: 1.55,
                 letterSpacing: "0.01em"
               }}>
-                What the data shows. Observations, not scores.
+                Where your practice stands and how far it has come.
               </div>
-              {insights.map((ins, idx) => (
-                <div key={idx} style={{
-                  padding: "12px 0",
-                  borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-                }}>
-                  <div style={{
-                    fontSize: 13, color: "var(--text)", lineHeight: 1.5,
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 500, marginBottom: 4
-                  }}>
-                    {ins.headline}
+
+              {/* Block 1: Last 30 days */}
+              {recentInsights.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    THE LAST 30 DAYS
                   </div>
-                  <div style={{
-                    fontSize: 12, color: "var(--text-muted)",
-                    lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    {ins.body}
+                  {recentInsights.map((ins, idx) => (
+                    <div key={`recent-${idx}`} style={insightRowStyle(idx)}>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 500, marginBottom: 4
+                      }}>
+                        {ins.headline}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: "var(--text-muted)",
+                        lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {ins.body}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Block 2: Since you started */}
+              {growthLines.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    SINCE YOU STARTED · {baselineDate.toUpperCase()}
                   </div>
-                </div>
-              ))}
-            </div>
-          );
-        })()}
-
-        {/* ── SINCE YOU STARTED — Gap 4 (May 12, 2026) ──────────────────
-            Capacity-growth baseline surface. Reads stillform_growth_baseline
-            (seeded once on calibration completion for new users, or
-            retroactively on first app load for pre-existing users) and
-            compares to current state. Surfaces growth in plain language:
-            stage advancement, chip vocabulary expansion, profile growth,
-            session accumulation since baseline.
-
-            This is the "your concept library has grown" surface the user
-            needs to see their own neuroplasticity over time (Hoemann 2021
-            granularity expansion is real but only visible if surfaced).
-            Different from Last 30 Days (rolling window) — this is from
-            baseline forward, the long arc.
-
-            Anti-gamification: no points, no badges, no completion
-            percentages. Plain observations: "X chips you didn't have when
-            you started." */}
-        {(() => {
-          let baseline = null;
-          try {
-            const raw = localStorage.getItem("stillform_growth_baseline");
-            if (raw) baseline = JSON.parse(raw);
-          } catch {}
-          if (!baseline || !baseline.capturedAt) return null;
-
-          // Current snapshot
-          const currentDistinctChips = (() => {
-            const set = new Set();
-            sessions.forEach(s => {
-              if (s.preState) set.add(s.preState);
-              if (s.postState) set.add(s.postState);
-              if (s.feelState) set.add(s.feelState);
-            });
-            return set.size;
-          })();
-          const currentBias = (biasProfile && Array.isArray(biasProfile)) ? biasProfile.length : 0;
-          const currentSignal = (signalProfile && Array.isArray(signalProfile)) ? signalProfile.length : (signalProfile && typeof signalProfile === "object" ? Object.keys(signalProfile).length : 0);
-          let currentTriggers = 0;
-          try { currentTriggers = (getTriggerProfile()?.triggers?.length) || 0; } catch {}
-          let currentStageId = 1;
-          try { currentStageId = getCurrentStage()?.currentStageId || 1; } catch {}
-
-          const chipDelta = currentDistinctChips - (baseline.distinctChips || 0);
-          const biasDelta = currentBias - (baseline.biasCount || 0);
-          const signalDelta = currentSignal - (baseline.signalCount || 0);
-          const triggerDelta = currentTriggers - (baseline.triggerCount || 0);
-          const sessionDelta = sessions.length - (baseline.sessionsCount || 0);
-          const stageDelta = currentStageId - (baseline.stage || 1);
-
-          const baselineDate = (() => {
-            try {
-              const d = new Date(baseline.capturedAt);
-              return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
-            } catch { return "earlier"; }
-          })();
-
-          const lines = [];
-          if (stageDelta > 0) {
-            lines.push({
-              headline: `Stage ${baseline.stage} → Stage ${currentStageId}.`,
-              body: stageDelta === 1
-                ? "A capacity built. The chapter you started in is one you've passed through."
-                : `${stageDelta} chapters of capacity built since baseline.`,
-            });
-          }
-          if (chipDelta > 0) {
-            lines.push({
-              headline: `${chipDelta} new feel-state chip${chipDelta === 1 ? "" : "s"} in your vocabulary.`,
-              body: chipDelta >= 5
-                ? "Your interoceptive vocabulary has materially widened. Granularity is the practice (Hoemann 2021)."
-                : "Small additions to your library of named states. The naming is the rep.",
-            });
-          }
-          if (triggerDelta > 0) {
-            lines.push({
-              headline: `${triggerDelta} new trigger${triggerDelta === 1 ? "" : "s"} named.`,
-              body: "Triggers you've identified since you started. Pre-event briefs sharpen with reps — Gollwitzer 1999 implementation intentions.",
-            });
-          }
-          if (biasDelta > 0) {
-            lines.push({
-              headline: `${biasDelta} additional cognitive distortion${biasDelta === 1 ? "" : "s"} on your watch list.`,
-              body: "Recognition of how your thinking patterns show up — Wells 2009 metacognitive therapy.",
-            });
-          }
-          if (signalDelta > 0) {
-            lines.push({
-              headline: `${signalDelta} additional body tell${signalDelta === 1 ? "" : "s"} mapped.`,
-              body: "Specificity of where intensity registers in your body — interoceptive precision (Critchley 2017).",
-            });
-          }
-          if (sessionDelta > 0) {
-            lines.push({
-              headline: `${sessionDelta} session${sessionDelta === 1 ? "" : "s"} logged since baseline.`,
-              body: "Reps that accrued. The data layer captures what the body has been practicing.",
-            });
-          }
-
-          // If nothing has grown, still show the card with baseline date
-          // so the surface exists when growth starts.
-          if (lines.length === 0) {
-            lines.push({
-              headline: `Baseline captured ${baselineDate}.`,
-              body: baseline.source === "retroactive-seed"
-                ? "This baseline was seeded from your state at this surface's first load. Growth from this point forward will surface here."
-                : "Growth from your calibration baseline will surface here as it accrues.",
-            });
-          }
-
-          return (
-            <div style={{
-              marginBottom: 28,
-              padding: "20px 18px",
-              border: "0.5px solid var(--border)",
-              borderRadius: "var(--r-lg)",
-              background: "var(--surface)"
-            }}>
-              <div className="t-mono-xs" style={{
-                color: "var(--amber)", marginBottom: 6,
-                letterSpacing: "0.14em"
-              }}>
-                SINCE YOU STARTED · {baselineDate.toUpperCase()}
-              </div>
-              <div style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
-                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 18,
-                letterSpacing: "0.01em"
-              }}>
-                {baseline.source === "retroactive-seed"
-                  ? "Baseline captured from your current state. Future growth measures from here."
-                  : "Growth from your calibration baseline."}
-              </div>
-              {lines.map((ln, idx) => (
-                <div key={idx} style={{
-                  padding: "12px 0",
-                  borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-                }}>
-                  <div style={{
-                    fontSize: 13, color: "var(--text)", lineHeight: 1.5,
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontWeight: 500, marginBottom: 4
-                  }}>
-                    {ln.headline}
-                  </div>
-                  <div style={{
-                    fontSize: 12, color: "var(--text-muted)",
-                    lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    {ln.body}
-                  </div>
-                </div>
-              ))}
+                  {growthLines.map((ln, idx) => (
+                    <div key={`growth-${idx}`} style={insightRowStyle(idx)}>
+                      <div style={{
+                        fontSize: 13, color: "var(--text)", lineHeight: 1.5,
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 500, marginBottom: 4
+                      }}>
+                        {ln.headline}
+                      </div>
+                      <div style={{
+                        fontSize: 12, color: "var(--text-muted)",
+                        lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif"
+                      }}>
+                        {ln.body}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           );
         })()}
@@ -17284,7 +17134,7 @@ function MyProgress({ onBack }) {
 //
 // Layer 1.1 verification (May 8): STAGE_DEFINITIONS at App.jsx:3732,
 // computeStageMarkers at :3769, getCurrentStage at :3828. All exist and stable.
-function RoadmapScreen({ onBack }) {
+function RoadmapScreen({ onBack, setInfoModal }) {
   let snap = null;
   try { snap = getCurrentStage(); } catch { return null; }
   if (!snap) return null;
@@ -17308,11 +17158,29 @@ function RoadmapScreen({ onBack }) {
     <section className="screen" style={{ paddingBottom: 60 }}>
       <div style={{ maxWidth: 540, margin: "0 auto", padding: "32px 20px 0" }}>
 
-        {/* Eyebrow */}
+        {/* Eyebrow with How stages work info button — moved here from Mirror
+            Sheet on May 12, 2026 audit (Layer 0.5 Finding 2). The Mirror Strip
+            now goes direct to Roadmap (Gap 1 ship); Mirror Sheet was dormant.
+            Preserving the "How stages work" educational content here since
+            Roadmap is now the canonical journey-overview surface. */}
         <div className="t-mono-xs" style={{
-          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em"
+          color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em",
+          display: "flex", alignItems: "center", gap: 6
         }}>
-          The Roadmap
+          <span>The Roadmap</span>
+          {setInfoModal && (
+            <button
+              aria-label="How stages work"
+              onClick={() => setInfoModal({
+                title: "How stages work",
+                body: "Composure is a learnable capacity, not a number that goes up. Stillform tracks five stages because each one names a different part of the work — not levels of skill, but distinct moves the system is building.\n\nStage 1 — Noticing. Catching what's happening in your body before thought.\nStage 2 — Naming. Language for what's present, fast and accurate.\nStage 3 — Anticipating. Pre-loading composure for known triggers.\nStage 4 — Recognizing. Seeing your own loops as they form.\nStage 5 — Holding. Composure under maximum load.\n\nHow you progress: each stage has markers — observable signals from your practice (sessions, chips selected, tools used, patterns surfaced). When the markers are met, you move forward. The markers tell you what to practice; the practice creates the data; the data moves the stage. This is what Wells 2009 calls metacognitive training — building the capacity to observe state, not just to escape it.\n\nYou won't max out a stage and stop. Stages drift if practice stops. The architecture reflects current capacity, not lifetime achievement."
+              })}
+              style={{
+                background: "none", border: "none", color: "var(--text-muted)",
+                cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1
+              }}
+            >ⓘ</button>
+          )}
         </div>
 
         {/* Title — IBM Plex Mono, prestige operator instrument-readout */}
@@ -17912,9 +17780,6 @@ function QBPill({ onPress }) {
 export default function Stillform() {
   const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
   const [infoModal, setInfoModal] = useState(null);
-  // Engagement architecture Phase 0 (May 7) — Mirror sheet visibility.
-  // Sheet renders the full stage breakdown; anchor on home opens it.
-  const [showMirrorSheet, setShowMirrorSheet] = useState(false);
   // Gap 11 (May 12, 2026) — tick state to force re-render after the
   // rep-counted banner is dismissed. The banner reads localStorage at
   // render time; bumping this tick causes a re-render that picks up
@@ -20917,352 +20782,6 @@ const isSignalProfileConfigured = () => {
         </div>
       )}
 
-      {/* ── MIRROR SHEET — engagement architecture full stage breakdown ──────
-          Opens from the home anchor. Editorial-luxury treatment per design
-          system spec: dark ground, hairline borders, mono caps for stage
-          label, Cormorant for capacity (one editorial moment), DM Sans for
-          body, accent only as a 0.5px line under the headline (5% rule).
-          Renders complete marker breakdown including deferred markers
-          flagged as "system still building" per spec §3.1 — honest
-          transparency about what's measured vs what's coming. */}
-      {showMirrorSheet && (() => {
-        let snap = null;
-        try { snap = getCurrentStage(); } catch { return null; }
-        if (!snap || !snap.stage) return null;
-        const shippedMarkers = snap.markers.filter(m => m.status === "shipped");
-        const deferredMarkers = snap.markers.filter(m => m.status === "deferred");
-        return (
-          <div onClick={() => setShowMirrorSheet(false)} style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.78)", zIndex: 9998,
-            display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "0 16px 32px",
-            overflowY: "auto"
-          }}>
-            <div onClick={e => e.stopPropagation()} style={{
-              background: "var(--ground-elev)", border: "0.5px solid var(--border)",
-              borderRadius: "var(--r-lg)", padding: "32px 24px", maxWidth: 480, width: "100%",
-              maxHeight: "86vh", overflowY: "auto", position: "relative"
-            }}>
-              {/* X close (May 12, 2026) — Arlin phone test: 'there should be an
-                  x on the upper right of the noticing pattern window to close
-                  in case it was opened by accident and this is still not clear
-                  on its purpose.' The Mirror Sheet opens from a tappable strip
-                  that's easy to brush by accident; explicit close affordance
-                  prevents the modal feeling trapping. Tap-outside still works
-                  for power-users. */}
-              <button
-                onClick={() => setShowMirrorSheet(false)}
-                aria-label="Close"
-                style={{
-                  position: "absolute", top: 12, right: 12,
-                  background: "none", border: "none",
-                  color: "var(--text-muted)", cursor: "pointer",
-                  fontSize: 20, lineHeight: 1, padding: "8px 10px",
-                  WebkitTapHighlightColor: "transparent",
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}
-              >
-                ×
-              </button>
-              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.14em", display: "flex", alignItems: "center", gap: 6 }}>
-                <span>Stage {snap.currentStageId} of 5</span>
-                {/* Master Todo line 798 — Arlin May 8: "Stage 1 on the screen? no info button.
-                    50% to naming and it says I have 5 stages but no explanation as how I do it
-                    or how I get there." Modal answers all three: WHY stages, WHAT they are, HOW
-                    you progress. Voice: prestige-operator, science as language (Wells 2009 cited
-                    as framing, not as proof). Mirror sheet header is the highest-discoverability
-                    slot — user reaches it in one tap from the Mirror anchor. */}
-                <button
-                  aria-label="How stages work"
-                  onClick={() => setInfoModal({
-                    title: "How stages work",
-                    body: "Composure is a learnable capacity, not a number that goes up. Stillform tracks five stages because each one names a different part of the work — not levels of skill, but distinct moves the system is building.\n\nStage 1 — Noticing. Catching what's happening in your body before thought.\nStage 2 — Naming. Language for what's present, fast and accurate.\nStage 3 — Anticipating. Pre-loading composure for known triggers.\nStage 4 — Recognizing. Seeing your own loops as they form.\nStage 5 — Holding. Composure under maximum load.\n\nHow you progress: each stage has markers — observable signals from your practice (sessions, chips selected, tools used, patterns surfaced). When the markers are met, you move forward. The markers tell you what to practice; the practice creates the data; the data moves the stage. This is what Wells 2009 calls metacognitive training — building the capacity to observe state, not just to escape it.\n\nYou won't max out a stage and stop. Stages drift if practice stops. The architecture reflects current capacity, not lifetime achievement."
-                  })}
-                  style={{
-                    background: "none", border: "none", color: "var(--text-muted)",
-                    cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1
-                  }}
-                >ⓘ</button>
-              </div>
-              <div style={{
-                fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, fontWeight: 500,
-                letterSpacing: "0.06em", color: "var(--text)", marginBottom: 12
-              }}>
-                {snap.stage.name}
-              </div>
-              <div style={{
-                height: "0.5px", background: "var(--amber-dim)", width: 32,
-                marginBottom: 18, opacity: 0.8
-              }} />
-              <div style={{
-                fontFamily: "'Cormorant Garamond', serif", fontSize: 17, fontStyle: "italic",
-                color: "var(--text-cream)", lineHeight: 1.5, marginBottom: 28,
-                letterSpacing: "0.01em"
-              }}>
-                {snap.stage.capacity}
-              </div>
-
-              <div className="t-mono-xs" style={{
-                color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-              }}>
-                What you're working on
-              </div>
-              <div style={{ marginBottom: 24 }}>
-                {shippedMarkers.map((m, idx) => (
-                  <div key={m.id} style={{
-                    display: "flex", justifyContent: "space-between", alignItems: "baseline",
-                    padding: "10px 0",
-                    borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none",
-                    gap: 16
-                  }}>
-                    <div style={{
-                      fontSize: 13, color: "var(--text)", lineHeight: 1.45,
-                      fontFamily: "'DM Sans', sans-serif", flex: 1
-                    }}>
-                      {m.label}
-                    </div>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 10,
-                      letterSpacing: "0.1em", textTransform: "uppercase",
-                      color: m.met ? "var(--amber)" : "var(--text-muted)",
-                      whiteSpace: "nowrap"
-                    }}>
-                      {m.met
-                        ? "Met"
-                        : (typeof m.value === "number" && typeof m.threshold === "number"
-                            ? `${m.value} / ${m.threshold}`
-                            : (m.value === false || m.value === null ? "—" : String(m.value)))}
-                    </div>
-                  </div>
-                ))}
-                {shippedMarkers.length === 0 && (
-                  <div style={{
-                    fontSize: 12, color: "var(--text-muted)", fontStyle: "italic",
-                    fontFamily: "'DM Sans', sans-serif"
-                  }}>
-                    Markers for this stage are still being instrumented.
-                  </div>
-                )}
-              </div>
-
-              {deferredMarkers.length > 0 && (
-                <>
-                  <div className="t-mono-xs" style={{
-                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-                  }}>
-                    System still building
-                  </div>
-                  <div style={{ marginBottom: 28 }}>
-                    {deferredMarkers.map((m, idx) => (
-                      <div key={m.id} style={{
-                        padding: "10px 0",
-                        borderTop: idx > 0 ? "0.5px solid var(--border-printed)" : "none"
-                      }}>
-                        <div style={{
-                          fontSize: 13, color: "var(--text-dim)", lineHeight: 1.45,
-                          fontFamily: "'DM Sans', sans-serif", marginBottom: 4
-                        }}>
-                          {m.label}
-                        </div>
-                        {m.deferReason && (
-                          <div style={{
-                            fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5,
-                            fontFamily: "'DM Sans', sans-serif"
-                          }}>
-                            {m.deferReason}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-
-              {snap.nextStage && (
-                <>
-                  <div className="t-mono-xs" style={{
-                    color: "var(--text-muted)", marginBottom: 14, letterSpacing: "0.14em"
-                  }}>
-                    Next
-                  </div>
-                  <div style={{
-                    padding: "16px 18px", marginBottom: 28,
-                    border: "0.5px solid var(--border)", borderRadius: "var(--r)",
-                    background: "transparent"
-                  }}>
-                    <div style={{
-                      fontFamily: "'IBM Plex Mono', monospace", fontSize: 13, fontWeight: 500,
-                      letterSpacing: "0.06em", color: "var(--text)", marginBottom: 6
-                    }}>
-                      {snap.nextStage.name}
-                    </div>
-                    <div style={{
-                      fontSize: 12, color: "var(--text-dim)", lineHeight: 1.55,
-                      fontFamily: "'DM Sans', sans-serif"
-                    }}>
-                      {snap.nextStage.capacity}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {/* Phase 2d / 2d.1 — Trigger Profile reflection in Mirror sheet.
-                  Per engagement architecture §3.1: "diagnostic stack (Signal
-                  Profile + Bias Profile + Trigger Profile)." Phase 2d shipped
-                  read-only display; 2d.1 lifts to a stateful component for the
-                  inline-add affordance audit §3d called for. Capture surfaces
-                  remain Settings (2a), EOD (2b), Reframe close (2c). Add here
-                  is reflection-context so no encounter increment.
-                  Signal/Bias sections in this sheet remain out of scope. */}
-              <MirrorSheetTriggers />
-
-              <div className="t-mono-xs" style={{
-                color: "var(--text-muted)", marginBottom: 12, letterSpacing: "0.14em"
-              }}>
-                The science
-              </div>
-              <div style={{
-                fontSize: 11, color: "var(--text-muted)", lineHeight: 1.7,
-                fontFamily: "'DM Sans', sans-serif", marginBottom: 28
-              }}>
-                {snap.stage.science.join(" · ")}
-              </div>
-
-              {/* Today's Brief re-read surface (3e) — per TODAYS_BRIEF_FLOW_AUDIT
-                  audit recommendation deferred 3e until after 3a-3d ran in
-                  production. Arlin override: ship now. Mirror sheet is the
-                  cleanest semantic match — opened from the Mirror anchor on
-                  any screen, surfaces today's brief alongside the journey
-                  context. Renders only if today's brief exists. */}
-              {(() => {
-                let brief = null;
-                try { brief = getTodaysBriefForToday(); } catch {}
-                if (!brief) return null;
-                let generatedTime = "";
-                if (brief.generatedAt) {
-                  try {
-                    const dt = new Date(brief.generatedAt);
-                    if (!Number.isNaN(dt.getTime())) {
-                      generatedTime = dt.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-                    }
-                  } catch {}
-                }
-                return (
-                  <div style={{
-                    background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "16px 18px", marginTop: 24, marginBottom: 16
-                  }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12, letterSpacing: "0.14em" }}>
-                      Today's Brief
-                    </div>
-
-                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Hardware</div>
-                    <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                      {brief.hardware}
-                    </div>
-
-                    {brief.risks && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Risks</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.risks}
-                      </div>
-                    </>)}
-
-                    {brief.moves && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Moves</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.moves}
-                      </div>
-                    </>)}
-
-                    {brief.recovery && (<>
-                      <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 12 }} />
-                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 4 }}>Recovery</div>
-                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                        {brief.recovery}
-                      </div>
-                    </>)}
-
-                    {generatedTime && (
-                      <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.04em", marginTop: 4, fontStyle: "italic" }}>
-                        Generated {generatedTime}
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
-
-              {/* Recent catches — surface the user's pattern self-flags back to
-                  them so the metacognitive work is visible. The Stage 4 marker
-                  counts these silently; this section makes the count and
-                  pattern names legible to the user as evidence of their own
-                  observation. Renders only if at least one self-flag exists. */}
-              {(() => {
-                let aggregated = [];
-                try {
-                  const sessions = getSessionsFromStorage();
-                  if (Array.isArray(sessions)) {
-                    const counts = {};
-                    sessions.slice(-30).forEach(s => {
-                      if (s?.flaggedPattern) counts[s.flaggedPattern] = (counts[s.flaggedPattern] || 0) + 1;
-                    });
-                    aggregated = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 4);
-                  }
-                } catch {}
-                if (!aggregated.length) return null;
-                return (
-                  <div style={{
-                    background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "16px 18px", marginBottom: 16
-                  }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, letterSpacing: "0.14em" }}>
-                      Recent catches
-                    </div>
-                    <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif", marginBottom: 12 }}>
-                      Patterns you caught yourself running, last 30 sessions:
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                      {aggregated.map(([pattern, count]) => (
-                        <div key={pattern} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: 13, color: "var(--text)", fontFamily: "'DM Sans', sans-serif" }}>
-                          <span>{pattern}</span>
-                          <span className="t-mono-xs" style={{ color: "var(--amber)", fontSize: 11 }}>{count}×</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* View full Roadmap — engagement architecture Engine 1 entry point.
-                  Per spec §3.1: "Stages of mastery shown as a path the user is
-                  currently walking. Stage 1 today, stage 5 visible at the path's
-                  end." Mirror sheet shows current stage; full Roadmap shows all 5. */}
-              <button
-                onClick={() => { setShowMirrorSheet(false); setScreen("roadmap"); }}
-                style={{
-                  background: "none", border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
-                  color: "var(--amber)", cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em",
-                  marginRight: 10
-                }}
-              >
-                View full Roadmap →
-              </button>
-
-              <button onClick={() => setShowMirrorSheet(false)} style={{
-                background: "none", border: "0.5px solid var(--border)",
-                borderRadius: "var(--r)", padding: "10px 24px", fontSize: 12,
-                color: "var(--text-muted)", cursor: "pointer",
-                fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.04em"
-              }}>
-                Close
-              </button>
-            </div>
-          </div>
-        );
-      })()}
 
       {/* SPLASH OVERLAY — fades out, never blocks hooks */}
         {(!splashDone || !screenReady || (biometric.isEnabled() && !biometricCleared)) && (
@@ -25355,7 +24874,7 @@ const isSignalProfileConfigured = () => {
 
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
         {screen === "roadmap" && (
-          <RoadmapScreen onBack={() => goHomeSafely()} />
+          <RoadmapScreen onBack={() => goHomeSafely()} setInfoModal={setInfoModal} />
         )}
 
         {/* SCRIPTS — engagement architecture Engine 2 (Application Layer) full screen */}
