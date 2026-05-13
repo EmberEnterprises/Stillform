@@ -10953,12 +10953,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       const raw = localStorage.getItem("stillform_practice_entry_context");
       if (raw) {
         const ctx = JSON.parse(raw);
-        if (ctx && typeof ctx === "object" && ctx.pattern) {
-          setPracticeEntryContext({
-            pattern: String(ctx.pattern),
-            source: ctx.source || null,
-            daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
-          });
+        if (ctx && typeof ctx === "object") {
+          // open-recall is intentionally pattern-less. All other sources need
+          // a pattern. Accept either valid shape.
+          const hasOpenRecall = ctx.source === "open-recall";
+          if (hasOpenRecall || ctx.pattern) {
+            setPracticeEntryContext({
+              pattern: ctx.pattern ? String(ctx.pattern) : "",
+              source: ctx.source || null,
+              daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
+            });
+          }
         }
         localStorage.removeItem("stillform_practice_entry_context");
       }
@@ -11638,6 +11643,18 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 `Open by orienting to the event as a present-tense fact, not a future-tense worry. Example: "${pattern} is on the calendar. What's already moving in you about it?" Keep it 1 sentence. ` +
                 `The job here is NOT to rehearse the event, NOT to predict scenarios, NOT to script lines. The job is to surface what's already running in the user's system about the event so they can walk in clear. ` +
                 `If they spiral into anticipatory analysis, redirect to body / present sensation. If they name the state precisely, mirror briefly and let them settle.`;
+            }
+            if (source === "pre-mortem") {
+              return `PRE-MORTEM REP — READ THIS FIRST: The user came in to anticipate a trigger they've encountered before: "${pattern}". No specific calendar event matches; they're running the rep on encounter pattern alone — "${pattern}" is likely to come up again today and the rep is the pre-installed move. ` +
+                `Gollwitzer 1999 implementation intentions without a calendar cue. The trigger label is the user's own naming from their trigger profile — recognize it as theirs, not as a category. ` +
+                `Open by naming what they're anticipating as a present-tense fact: "${pattern.toLowerCase()} has come up before. What does your system already know about how it lands?" Keep it 1 sentence. ` +
+                `Do NOT predict scenarios, do NOT script responses, do NOT generalize "triggers like this." The job is to surface what's already running about THIS trigger so the user has the move pre-loaded when it shows up.`;
+            }
+            if (source === "open-recall") {
+              return `OPEN-RECALL REP — READ THIS FIRST: The user came in to recall a pattern from their own memory — no pre-filled label, no specific retrieval target. ` +
+                `Roediger & Karpicke 2006 testing effect: free recall from memory is more potent for consolidation than recognition of a prompt. The user is being asked to retrieve and name a pattern they've noticed since their last session. ` +
+                `Open by holding the question simply: "What pattern have you been seeing since the last session?" Keep it 1 sentence, no scaffolding. ` +
+                `Let the user lead. Do NOT suggest a pattern, do NOT list options, do NOT prime with examples. The act of recalling is the rep. Once they name something, mirror it back precisely (their words, not yours) and continue from there.`;
             }
             const daysPhrase = formatDaysAgo(daysAgo);
             const sourceNote = source === "spaced"
@@ -14983,9 +15000,12 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
       const raw = localStorage.getItem("stillform_practice_entry_context");
       if (!raw) return null;
       const ctx = JSON.parse(raw);
-      if (!ctx || typeof ctx !== "object" || !ctx.pattern) return null;
+      if (!ctx || typeof ctx !== "object") return null;
+      // open-recall is intentionally pattern-less — the user names the pattern
+      // themselves at Notice. All other sources require a pattern label.
+      if (ctx.source !== "open-recall" && !ctx.pattern) return null;
       return {
-        pattern: String(ctx.pattern),
+        pattern: ctx.pattern ? String(ctx.pattern) : "",
         source: ctx.source || null,
         daysAgo: Number.isFinite(ctx.daysAgo) ? ctx.daysAgo : null,
       };
@@ -15091,9 +15111,13 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
           }}>
             {retrievalContext.source === "pre-event"
               ? "BEFORE"
-              : retrievalContext.source === "spaced"
-                ? "PLANNED REVISIT"
-                : "RETURNING TO"}
+              : retrievalContext.source === "pre-mortem"
+                ? "ANTICIPATE"
+                : retrievalContext.source === "open-recall"
+                  ? "OPEN RECALL"
+                  : retrievalContext.source === "spaced"
+                    ? "PLANNED REVISIT"
+                    : "RETURNING TO"}
           </div>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
@@ -15102,6 +15126,10 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
           }}>
             {retrievalContext.source === "pre-event" ? (
               <>You're about to walk into <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern}</span>.</>
+            ) : retrievalContext.source === "pre-mortem" ? (
+              <><span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> has come up before. Today might bring it again.</>
+            ) : retrievalContext.source === "open-recall" ? (
+              <>What's a pattern you've noticed since the last session?</>
             ) : (
               <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.</>
             )}
@@ -15115,7 +15143,11 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
           }}>
             {retrievalContext.source === "pre-event"
               ? "Name what's present first. The rep before the event is the move that lands inside it."
-              : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
+              : retrievalContext.source === "pre-mortem"
+                ? "Pre-installed moves fire faster than improvised ones. Name what's already moving in you before it arrives."
+                : retrievalContext.source === "open-recall"
+                  ? "Pull it from your own memory — recall is the rep (Roediger & Karpicke 2006). Name the pattern below in your own words after the chip."
+                  : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
           </div>
         </div>
       )}
@@ -23838,14 +23870,14 @@ const isSignalProfileConfigured = () => {
                   } catch {}
                   // Route through the universal session arc. The entryReason
                   // distinguishes practice-surface entries from the hero CTA
-                  // for telemetry + AI context. Retrieval-sourced entries
-                  // carry a more specific reason so the AI directive can
-                  // calibrate to "planned revisit" framing.
-                  const entryReason = context?.source === "spaced"
-                    ? "home-practice-spaced"
-                    : context?.pattern
-                      ? "home-practice-retrieval"
-                      : "home-practice";
+                  // for telemetry + AI context. Each source carries a more
+                  // specific reason so the AI directive can calibrate.
+                  const entryReason =
+                    context?.source === "pre-mortem" ? "home-practice-pre-mortem"
+                    : context?.source === "open-recall" ? "home-practice-open-recall"
+                    : context?.source === "spaced" ? "home-practice-spaced"
+                    : context?.pattern ? "home-practice-retrieval"
+                    : "home-practice";
                   startGuidedSession(entryReason);
                 };
 

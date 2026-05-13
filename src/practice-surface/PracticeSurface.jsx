@@ -175,6 +175,38 @@ export function countNewPatternsThisWeek(sessions) {
 }
 
 /**
+ * Find the trigger most likely to come up again — for the Anticipate /
+ * pre-mortem rep surface (brainstorm idea #7, May 13, 2026).
+ *
+ * Returns the trigger with the highest encounterCount, gated by minimum
+ * encounter threshold (>= 3 lifetime encounters so we don't surface
+ * one-time triggers). Returns { label, encounterCount } | null.
+ *
+ * Why this is distinct from the calendar pre-event rep (#4): #4 fires when
+ * a calendar event matches an identified trigger or is generally pressuring.
+ * #7 fires WITHOUT a calendar match — based purely on encounter pattern.
+ * The user has hit this trigger ≥3 times historically; today might bring it
+ * again. Anticipating it as a pre-installed move (Gollwitzer 1999) is the
+ * rep — even when the moment isn't on a calendar.
+ *
+ * Bounded design (Framing Law / Wells 2009): one trigger surfaced at a time,
+ * no analytics on encounter frequency shown, no "you've encountered this N
+ * times" surveillance framing. Just the name and an invitation to rep.
+ */
+export function findAnticipateCandidate(triggers = []) {
+  if (!Array.isArray(triggers) || triggers.length === 0) return null;
+  const eligible = triggers
+    .filter(t => t && t.label && Number.isFinite(t.encounterCount) && t.encounterCount >= 3)
+    .sort((a, b) => (b.encounterCount || 0) - (a.encounterCount || 0));
+  if (eligible.length === 0) return null;
+  const top = eligible[0];
+  return {
+    label: String(top.label),
+    encounterCount: top.encounterCount,
+  };
+}
+
+/**
  * Main component.
  *
  * Props:
@@ -197,6 +229,7 @@ export function PracticeSurface({
   const newThisWeek = countNewPatternsThisWeek(sessions);
   const retrieval = findRetrievalCandidate(sessions, triggers);
   const spaced = findSpacedReturns(sessions, triggers);
+  const anticipate = findAnticipateCandidate(triggers);
   const watching = Array.isArray(biasProfile) ? biasProfile.slice(0, 3) : [];
 
   // EMPTY STATE — day-1 user, nothing in library yet.
@@ -489,6 +522,152 @@ export function PracticeSurface({
               </button>
             );
           })}
+        </div>
+      )}
+
+      {/* ── ANTICIPATE — brainstorm #7 (May 13, 2026) ──────────────────────
+          Surfaces the highest-encounter trigger so the user can run a
+          pre-mortem rep BEFORE the trigger fires today. Distinct from #4
+          pre-event rep (which needs a calendar event match) — #7 fires
+          purely on encounter pattern (≥3 lifetime encounters). Gollwitzer
+          1999 implementation intentions made operational without a
+          calendar dependency. Bounded: one trigger surfaced at a time,
+          no frequency counts displayed (Type 2 rumination guardrail per
+          Wells 2009). */}
+      {anticipate && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: "10px 12px",
+            background: "var(--surface, transparent)",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--r, 8px)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.12em",
+              marginBottom: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>ANTICIPATE</span>
+            {onOpenInfo && (
+              <button
+                aria-label="About anticipate"
+                onClick={() =>
+                  onOpenInfo(
+                    "Anticipate",
+                    "A trigger you've encountered before is likely to come up again. Running a pre-mortem rep BEFORE the moment hits is implementation intentions in practice (Gollwitzer 1999) — the pre-installed move that fires automatically when the cue arrives. The rep is short. The pattern is named, the move is rehearsed, the user walks into the rest of the day with the response already loaded."
+                  )
+                }
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  fontSize: 10,
+                  padding: "0 2px",
+                  lineHeight: 1,
+                }}
+              >
+                ⓘ
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() =>
+              onEnterPractice &&
+              onEnterPractice("reframe", {
+                pattern: anticipate.label,
+                source: "pre-mortem",
+                daysAgo: 0,
+              })
+            }
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 13,
+              color: "var(--text)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              textAlign: "left",
+              width: "100%",
+            }}
+          >
+            <span style={{ color: "var(--amber)" }}>{anticipate.label.toLowerCase()}</span>
+            <span style={{ margin: "0 6px", color: "var(--text-muted)", opacity: 0.6 }}>·</span>
+            <span style={{ color: "var(--text-muted)" }}>pre-mortem rep</span>
+          </button>
+        </div>
+      )}
+
+      {/* ── OPEN RECALL — brainstorm #6 (May 13, 2026) ─────────────────────
+          When no specific retrieval target exists (no recent flagged
+          pattern in the 3-7 day window), surface an open-recall prompt.
+          Active recall from the user's own memory (Roediger & Karpicke
+          2006 testing effect) is more potent for consolidation than
+          recognition. The user names the pattern themselves at Notice
+          (no pre-fill); the AI receives source = "open-recall" and
+          opens the conversation accordingly.
+
+          Gated on: no specific retrieval candidate AND at least 3
+          sessions logged (otherwise the user has nothing to recall from).
+          Renders only when retrieval card is absent — never doubles up. */}
+      {!retrieval && sessions.length >= 3 && (
+        <div style={{ marginBottom: 20 }}>
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.14em",
+              marginBottom: 10,
+            }}
+          >
+            OPEN RECALL
+          </div>
+          <div
+            style={{
+              fontSize: 15,
+              color: "var(--text)",
+              lineHeight: 1.55,
+              marginBottom: 16,
+            }}
+          >
+            What's a pattern you've noticed since the last session?
+          </div>
+          <button
+            onClick={() =>
+              onEnterPractice &&
+              onEnterPractice("reframe", {
+                pattern: "",
+                source: "open-recall",
+                daysAgo: null,
+              })
+            }
+            style={{
+              width: "100%",
+              padding: "14px 18px",
+              background: "transparent",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r, 8px)",
+              color: "var(--text)",
+              fontSize: 14,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.04em",
+              cursor: "pointer",
+              textAlign: "center",
+            }}
+          >
+            Name it at Notice →
+          </button>
         </div>
       )}
 
