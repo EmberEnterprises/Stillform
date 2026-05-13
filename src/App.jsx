@@ -14659,7 +14659,113 @@ function FocusCheckValidation({
   );
 }
 
-function MicroBiasTool({ onComplete }) {
+// Signal Map header — shared across all three calibration parts to give the
+// user one arc-aware frame regardless of which sub-tool is currently active.
+// Body / Mind / Triggers map to Parts 1 / 2 / 3.
+//
+// Rendered at the top of: SignalProfileTool (when in setup), the setup
+// screen (How You Process), MicroBiasTool (Pattern Check), and the
+// calibration-trigger-seed screen. Sub-tool internal counters demote to
+// secondary; this is the primary frame.
+//
+// Designed to disappear after the Close screen routes user to home — never
+// shown outside calibration onboarding.
+function SignalMapHeader({ part }) {
+  const parts = [
+    { num: 1, label: "Body" },
+    { num: 2, label: "Mind" },
+    { num: 3, label: "Triggers" }
+  ];
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div className="t-mono-xs" style={{
+        color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 10,
+        textTransform: "uppercase"
+      }}>
+        Signal Map · Part {part} of 3 · {parts[part - 1].label}
+      </div>
+      {/* Three-segment progress bar — current filled, prior filled-dim, future empty */}
+      <div style={{ display: "flex", gap: 4 }}>
+        {parts.map((p) => {
+          const isCurrent = p.num === part;
+          const isPast = p.num < part;
+          return (
+            <div key={p.num} style={{
+              flex: 1, height: 2, borderRadius: 1,
+              background: isCurrent ? "var(--amber)" : (isPast ? "var(--amber-dim, rgba(184,134,43,0.4))" : "var(--border)"),
+              transition: "background 0.3s"
+            }} />
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// Signal Map transition — 1.5 second loading moment between parts. Signal-
+// architecture themed: a thin amber line drawing horizontally beneath status
+// text. Self-advances via internal setTimeout on mount; parent supplies the
+// onAdvance callback. Pure presentational once timing is handled.
+function SignalMapTransition({ phase, onAdvance }) {
+  // phase values:
+  //   "body-to-mind"     — after Part 1, before Part 2
+  //   "mind-to-triggers" — after Part 2, before Part 3
+  //   "triggers-to-map"  — after Part 3, before Close
+  const messages = {
+    "body-to-mind":     { primary: "Body mapped.",        secondary: "Reading mind patterns..." },
+    "mind-to-triggers": { primary: "Patterns captured.",  secondary: "Compiling triggers..." },
+    "triggers-to-map":  { primary: "Triggers named.",     secondary: "Compiling your signal map..." }
+  };
+  const msg = messages[phase] || { primary: "...", secondary: "" };
+
+  useEffect(() => {
+    if (typeof onAdvance !== "function") return;
+    const t = setTimeout(() => { onAdvance(); }, 1500);
+    return () => clearTimeout(t);
+  }, [phase, onAdvance]);
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+      minHeight: "100vh", display: "flex", flexDirection: "column",
+      alignItems: "center", justifyContent: "center",
+      position: "relative", zIndex: 1
+    }}>
+      <div style={{
+        fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 300,
+        color: "var(--text)", textAlign: "center", marginBottom: 12,
+        animation: "smtFadeIn 0.4s ease-out forwards", opacity: 0
+      }}>
+        {msg.primary}
+      </div>
+      <div className="t-mono-xs" style={{
+        color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 32,
+        textTransform: "uppercase",
+        animation: "smtFadeIn 0.4s ease-out 0.15s forwards", opacity: 0
+      }}>
+        {msg.secondary}
+      </div>
+      <div style={{
+        width: 200, height: 1, background: "var(--border)",
+        position: "relative", overflow: "hidden"
+      }}>
+        <div style={{
+          position: "absolute", inset: 0,
+          background: "var(--amber)",
+          transformOrigin: "left center",
+          transform: "scaleX(0)",
+          animation: "smtLineDraw 1.1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards"
+        }} />
+      </div>
+      <style>{`
+        @keyframes smtFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes smtLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+      `}</style>
+    </section>
+  );
+}
+
+function MicroBiasTool({ onComplete, calibrationPart = null }) {
   const [current, setCurrent] = useState(0);
   const [identified, setIdentified] = useState([]);
   const [done, setDone] = useState(false);
@@ -14711,63 +14817,69 @@ function MicroBiasTool({ onComplete }) {
 
   if (done) {
     return (
-      <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
-        <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
-        <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
-          Pattern baseline captured.
-        </h2>
-        <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
-          This is not a diagnosis. It is a starting map for decision patterns that can appear under load. Reframe uses this signal alongside your check-ins and language to improve pattern recognition over time.
-        </p>
-        {identified.length > 0 && (
-          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
-            <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized today</div>
-            {identified.map((b, i) => (
-              <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
-            ))}
-          </div>
-        )}
-        {identified.length === 0 && (
-          <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>No strong match right now. That is normal. Patterns can shift by context and intensity.</p>
-        )}
-        <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
+      <div style={{ maxWidth: 480, margin: "0 auto" }}>
+        {calibrationPart && <SignalMapHeader part={calibrationPart} />}
+        <div style={{ textAlign: "center", maxWidth: 380, margin: "0 auto" }}>
+          <div style={{ fontSize: 28, marginBottom: 16 }}>✦</div>
+          <h2 className="t-display-lg" style={{ marginBottom: 12 }}>
+            Pattern baseline captured.
+          </h2>
+          <p style={{ color: "var(--text-dim)", fontSize: 14, lineHeight: 1.7, marginBottom: 20 }}>
+            This is not a diagnosis. It is a starting map for decision patterns that can appear under load. Reframe uses this signal alongside your check-ins and language to improve pattern recognition over time.
+          </p>
+          {identified.length > 0 && (
+            <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", textAlign: "left", marginBottom: 24 }}>
+              <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Patterns you recognized today</div>
+              {identified.map((b, i) => (
+                <div key={i} style={{ fontSize: 13, color: "var(--text-dim)", marginBottom: 4 }}>· {b}</div>
+              ))}
+            </div>
+          )}
+          {identified.length === 0 && (
+            <p style={{ color: "var(--text-muted)", fontSize: 13, marginBottom: 24 }}>No strong match right now. That is normal. Patterns can shift by context and intensity.</p>
+          )}
+          <button className="btn btn-ghost" onClick={() => onComplete()}>Done</button>
+        </div>
       </div>
     );
   }
 
   const pattern = patterns[current];
   return (
-    <div style={{ maxWidth: 420, margin: "0 auto" }}>
-      <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 24, textAlign: "center" }}>
-        Pattern Check · {current + 1} of {patterns.length}
-      </div>
+    <div style={{ maxWidth: 480, margin: "0 auto" }}>
+      {calibrationPart && <SignalMapHeader part={calibrationPart} />}
+      <div style={{ maxWidth: 420, margin: "0 auto" }}>
+        <div style={{ fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--text-muted)", marginBottom: 24, textAlign: "center" }}>
+          Pattern Check · {current + 1} of {patterns.length}
+        </div>
 
-      <h2 className="t-display-lg" style={{ marginBottom: 16 }}>
-        {pattern.name}
-      </h2>
+        <h2 className="t-display-lg" style={{ marginBottom: 16 }}>
+          {pattern.name}
+        </h2>
 
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
-        <div className="t-body-md" style={{ marginBottom: 12 }}>{pattern.what}</div>
-        <div className="t-body-sm quiet" style={{ lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
-      </div>
+        <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", padding: "16px 20px", marginBottom: 16 }}>
+          <div className="t-body-md" style={{ marginBottom: 12 }}>{pattern.what}</div>
+          <div className="t-body-sm quiet" style={{ lineHeight: 1.6, fontStyle: "italic" }}>{pattern.example}</div>
+        </div>
 
-      <p className="t-body-md" style={{ marginBottom: 24 }}>
-        {pattern.question}
-      </p>
+        <p className="t-body-md" style={{ marginBottom: 24 }}>
+          {pattern.question}
+        </p>
 
-      <div style={{ display: "flex", gap: 10 }}>
-        <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
-          Shows up for me
-        </button>
-        <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
-          Doesn't apply
-        </button>
-      </div>
+        <div style={{ display: "flex", gap: 10 }}>
+          <button className="btn btn-primary" style={{ flex: 1 }} onClick={() => handleResponse(true)}>
+            Shows up for me
+          </button>
+          <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
+            Doesn't apply
+          </button>
+        </div>
 
-      <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
-        {patterns.map((_, i) => (
-          <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
-        ))}
+        <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 24 }}>
+          {patterns.map((_, i) => (
+            <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: i <= current ? "var(--amber)" : "var(--border)", transition: "all 0.3s" }} />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -15313,7 +15425,7 @@ function MetacognitionTool({ onComplete, onSessionComplete }) {
   );
 }
 
-function SignalMapTool({ onComplete, skipIntro = false }) {
+function SignalMapTool({ onComplete, skipIntro = false, calibrationPart = null }) {
   const [step, setStep] = useState(skipIntro ? 1 : 0);
   const [signals, setSignals] = useState(() => {
     try { return secureRead("stillform_signal_profile", null) || {}; } catch { return {}; }
@@ -15607,6 +15719,11 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
 
   return (
     <div>
+      {calibrationPart && (
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 8px" }}>
+          <SignalMapHeader part={calibrationPart} />
+        </div>
+      )}
       {steps[step]()}
     </div>
   );
@@ -18170,6 +18287,10 @@ export default function Stillform() {
 
   const [screen, setScreenRaw] = useState(null);
   const [setupBridgeStep, setSetupBridgeStep] = useState(0); // 0=personalization, 1=signal mapping — must be before screenToHash
+  // Signal Map transition phase — "body-to-mind" | "mind-to-triggers" | "triggers-to-map".
+  // Set when the user crosses between parts of calibration; the transition screen reads
+  // it to pick the right loading caption, then auto-advances to the next surface.
+  const [signalMapTransitionPhase, setSignalMapTransitionPhase] = useState(null);
 
   // Recovery hash parser — runs once on mount before any other hash-based routing.
   // Supabase appends recovery tokens to the URL hash when the user clicks the
@@ -20600,17 +20721,20 @@ const isSignalProfileConfigured = () => {
       }
       if (!redirectTo && activeTool?.setupFlow === "calibration-combined") {
         if (activeTool?.id === "signals") {
-          setActiveTool({ ...TOOLS.find(t => t.id === "bias"), setupFlow: "calibration-combined" });
-          setScreen("tool");
+          // Body (Part 1) → Mind (Part 2). Route through transition; the
+          // transition advance handler opens the setup screen at step 0
+          // (How You Process) which kicks off Part 2.
+          setActiveTool(null);
+          setSignalMapTransitionPhase("body-to-mind");
+          setScreen("signalmap-transition");
           return;
         }
         if (activeTool?.id === "bias") {
-          // Phase 2e — calibration trigger seed prompt. Single optional screen
-          // after Pattern Check, before finalizing onboarding. User can add
-          // 0-2 triggers and proceed, or skip. Either path lands them home
-          // with onboarding finalized.
+          // Mind (Part 2) → Triggers (Part 3). Route through transition;
+          // advance handler opens calibration-trigger-seed.
           setActiveTool(null);
-          setScreen("calibration-trigger-seed");
+          setSignalMapTransitionPhase("mind-to-triggers");
+          setScreen("signalmap-transition");
           return;
         }
       }
@@ -20633,9 +20757,9 @@ const isSignalProfileConfigured = () => {
       case "sigh": return <PhysiologicalSighTool {...props} />;
       case "scan": return <BodyScanTool {...props} />;
       case "reframe": return <ReframeTool {...props} mode={activeTool?.mode || (pathway === "clarity" ? "clarity" : pathway === "hype" ? "hype" : "calm")} defaultTab={activeTool?.defaultTab || "talk"} sharedText={sharedText} onSharedTextConsumed={() => setSharedText(null)} toolBackOverrideRef={toolBackOverrideRef} />;
-      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} />;
+      case "signals": return <SignalMapTool {...props} skipIntro={activeTool?.returnTo === "setup-bridge"} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 1 : null} />;
 
-      case "bias": return <MicroBiasTool {...props} />;
+      case "bias": return <MicroBiasTool {...props} calibrationPart={activeTool?.setupFlow === "calibration-combined" ? 2 : null} />;
       case "metacognition": return (
         <div style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
           <MetacognitionTool onComplete={(redirectTo) => {
@@ -21052,6 +21176,91 @@ const isSignalProfileConfigured = () => {
           );
         })()}
 
+        {/* SIGNAL MAP TRANSITION — 1.5s loading moment between parts */}
+        {screen === "signalmap-transition" && (
+          <SignalMapTransition
+            phase={signalMapTransitionPhase}
+            onAdvance={() => {
+              const phase = signalMapTransitionPhase;
+              setSignalMapTransitionPhase(null);
+              if (phase === "body-to-mind") {
+                // → Part 2 (Mind): open setup screen at step 0 (How You Process).
+                setupAutoLaunchStepRef.current = null;
+                setSetupStep(0);
+                setAssessmentAnswers([]);
+                setScreen("setup");
+                return;
+              }
+              if (phase === "mind-to-triggers") {
+                // → Part 3 (Triggers): open calibration-trigger-seed.
+                setActiveTool(null);
+                setScreen("calibration-trigger-seed");
+                return;
+              }
+              if (phase === "triggers-to-map") {
+                // → Close screen.
+                setScreen("signalmap-complete");
+                return;
+              }
+              // Fallback — should not happen, but route to home defensively.
+              goHomeSafely();
+            }}
+          />
+        )}
+
+        {/* SIGNAL MAP COMPLETE — Close screen, finalizes onboarding on Enter */}
+        {screen === "signalmap-complete" && (
+          <section style={{
+            maxWidth: 480, margin: "0 auto", padding: "48px 24px",
+            minHeight: "100vh", display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            position: "relative", zIndex: 1, textAlign: "center"
+          }}>
+            <div className="t-mono-xs" style={{
+              color: "var(--amber)", letterSpacing: "0.14em", marginBottom: 18,
+              textTransform: "uppercase",
+              animation: "smcFadeIn 0.5s ease-out forwards", opacity: 0
+            }}>
+              Signal Map Complete
+            </div>
+            <h1 style={{
+              fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 300,
+              lineHeight: 1.2, marginBottom: 16, color: "var(--text)",
+              animation: "smcFadeIn 0.5s ease-out 0.15s forwards", opacity: 0
+            }}>
+              Your signal map is set.
+            </h1>
+            <p className="t-body-md quiet" style={{
+              marginBottom: 8, maxWidth: 360, lineHeight: 1.7,
+              animation: "smcFadeIn 0.5s ease-out 0.3s forwards", opacity: 0
+            }}>
+              Every session now reads what you mapped here — body, mind, triggers.
+            </p>
+            <p className="t-body-md quiet" style={{
+              marginBottom: 36, maxWidth: 360, lineHeight: 1.7,
+              animation: "smcFadeIn 0.5s ease-out 0.45s forwards", opacity: 0
+            }}>
+              Practice begins. First stage: <span style={{ color: "var(--text)" }}>Noticing</span>.
+            </p>
+            <button
+              className="btn btn-primary"
+              style={{
+                padding: "14px 36px", fontSize: 15, minWidth: 200,
+                animation: "smcFadeIn 0.5s ease-out 0.6s forwards", opacity: 0
+              }}
+              onClick={() => {
+                finalizeOnboarding();
+                goHomeSafely();
+              }}
+            >
+              Enter
+            </button>
+            <style>{`
+              @keyframes smcFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+            `}</style>
+          </section>
+        )}
+
         {/* CALIBRATION TRIGGER SEED — Phase 2e (post-Pattern Check, pre-home) */}
         {screen === "calibration-trigger-seed" && (() => {
           // Local state via component-scoped consts isn't possible inside an IIFE
@@ -21073,23 +21282,24 @@ const isSignalProfileConfigured = () => {
             try { window.plausible("Calibration Trigger Seed", { props: { count: labels.filter(l => (l || "").trim().length >= 2).length } }); } catch {}
             setCalibrationSeedLabels(["", ""]);
             setCalibrationSeedCategories(["other", "other"]);
-            finalizeOnboarding();
-            goHomeSafely();
+            // Triggers (Part 3) → Close. Route through transition; advance
+            // handler opens signalmap-complete close screen which finalizes
+            // onboarding on user's Enter tap.
+            setSignalMapTransitionPhase("triggers-to-map");
+            setScreen("signalmap-transition");
           };
 
           const skipAndGoHome = () => {
             try { window.plausible("Calibration Trigger Seed", { props: { count: 0, skipped: true } }); } catch {}
             setCalibrationSeedLabels(["", ""]);
             setCalibrationSeedCategories(["other", "other"]);
-            finalizeOnboarding();
-            goHomeSafely();
+            setSignalMapTransitionPhase("triggers-to-map");
+            setScreen("signalmap-transition");
           };
 
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
-              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
-                One last optional step
-              </div>
+              <SignalMapHeader part={3} />
               <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 32, fontWeight: 300, lineHeight: 1.2, marginBottom: 14 }}>
                 Name what destabilizes you
               </h1>
@@ -21189,12 +21399,12 @@ const isSignalProfileConfigured = () => {
           if (setupBridgeStep === 0) {
             return (
               <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
-                <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 1 of 2</div>
+                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>Personalize</div>
                 <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
-                  Personalization
+                  Make it yours
                 </h1>
                 <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-                  Set up how Stillform looks and feels before you start. You can always change these in Settings.
+                  A few quick choices — theme, text size, visual grounding. Change anytime in Settings.
                 </p>
 
                 {/* Theme */}
@@ -21439,55 +21649,59 @@ const isSignalProfileConfigured = () => {
             );
           }
 
-          // Page 2 — Map your signals
+          // Page 2 — Signal Map Open
           return (
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", minHeight: "100vh", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={() => setSetupBridgeStep(0)}>← Back</button>
-              <div style={{ fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Step 2 of 2</div>
-              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 8 }}>
-                Map your signals.
+              <SignalMapHeader part={1} />
+              <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 38, fontWeight: 300, lineHeight: 1.12, marginBottom: 14 }}>
+                Building your signal map.
               </h1>
-              <p className="t-body-md quiet" style={{ marginBottom: 28 }}>
-                Where does intensity hit first in your body? Jaw, shoulders, chest, gut, hands, legs. This is how the app learns you.
+              <p className="t-body-md quiet" style={{ marginBottom: 16, lineHeight: 1.7 }}>
+                Three parts. Together they become the map the system reads every time you open Stillform.
               </p>
-              <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-lg)", padding: "20px", marginBottom: 24 }}>
-                <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 12 }}>
-                  Signal mapping
-                </div>
-                <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 6, fontWeight: 500 }}>
-                  {signalMappingConfigured ? "✓ Your signals are mapped." : "Takes about 60 seconds."}
-                </div>
-                <div className="t-body-sm quiet" style={{ marginBottom: 16, lineHeight: 1.6 }}>
-                  {signalMappingConfigured
-                    ? "The app knows where to look first. You can update this anytime in Settings."
-                    : "Every session uses this to personalise your tools and AI prompts. The more accurate, the faster it works."}
-                </div>
-                <button
-                  className="btn btn-primary"
-                  style={{ width: "100%", fontSize: 14 }}
-                  onClick={() => startTool({ ...TOOLS.find(t => t.id === "signals"), returnTo: "setup-bridge" })}
-                >
-                  {signalMappingConfigured ? "Update signal mapping →" : "Map signals now →"}
-                </button>
+              <div style={{ marginBottom: 32 }}>
+                {[
+                  { num: "1", part: "Body",     desc: "Where pressure shows up first — areas, sensations, what activates them." },
+                  { num: "2", part: "Mind",     desc: "How you process under load — thought-first or body-first, and the patterns that recur." },
+                  { num: "3", part: "Triggers", desc: "One or two specific situations or people that reliably pull you off-center." }
+                ].map(item => (
+                  <div key={item.num} style={{ display: "flex", gap: 14, marginBottom: 16, alignItems: "flex-start" }}>
+                    <div className="t-mono-xs" style={{
+                      color: "var(--amber)", letterSpacing: "0.1em", flexShrink: 0,
+                      fontSize: 11, marginTop: 4, minWidth: 18
+                    }}>
+                      {item.num}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 14, color: "var(--text)", fontWeight: 500, marginBottom: 3 }}>{item.part}</div>
+                      <div className="t-body-sm quiet" style={{ lineHeight: 1.55 }}>{item.desc}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              {signalMappingConfigured
-                ? (
-                  <button
-                    className="btn btn-primary"
-                    style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
-                    onClick={() => beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin })}
-                  >
-                    Continue to calibration →
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => { try { sessionStorage.setItem("stillform_signals_skipped_this_session", "yes"); } catch {} beginCalibrationFlow({ bridgeOrigin: setupBridgeOrigin }); }}
-                    style={{ width: "100%", background: "none", border: "none", color: "var(--text-muted)", fontSize: 13, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", marginTop: 8, padding: "8px 0", textDecoration: "underline" }}
-                  >
-                    Skip for now →
-                  </button>
-                )
-              }
+              <div className="t-body-sm quiet" style={{ marginBottom: 24, fontStyle: "italic", fontFamily: "'Cormorant Garamond', serif", fontSize: 15 }}>
+                About five minutes. You can skip the optional last part if nothing comes to mind.
+              </div>
+              <button
+                className="btn btn-primary"
+                style={{ padding: "16px 24px", fontSize: 15, width: "100%" }}
+                onClick={() => {
+                  // Single entry — kick off Part 1 (Body). Skip beginCalibrationFlow
+                  // (which sets screen=setup en route) to avoid a brief flash of the
+                  // setup screen before the signals tool mounts. Routing through the
+                  // setup screen happens later via the transition advance handler.
+                  const resolvedOrigin = resolveSetupBridgeOrigin(setupBridgeOrigin);
+                  setSetupBridgeOrigin(resolvedOrigin);
+                  if (!isFirstRunComplete()) setFirstRunStage("calibration");
+                  setupAutoLaunchStepRef.current = null;
+                  setSetupStep(0);
+                  setAssessmentAnswers([]);
+                  startTool({ ...TOOLS.find(t => t.id === "signals"), setupFlow: "calibration-combined" });
+                }}
+              >
+                Begin
+              </button>
             </section>
           );
         })()}
@@ -21568,23 +21782,10 @@ const isSignalProfileConfigured = () => {
             <section style={{ maxWidth: 480, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
               <button className="intervention-back" onClick={handleScreenBack}>← Back</button>
 
-              {/* System calibration header */}
-              <div className="t-mono-xs" style={{ marginBottom: 16 }}>
-                ◎ SYSTEM CALIBRATION
-              </div>
+              {/* Signal Map · Part 2 of 3 · Mind — unified frame across How You Process + Pattern Check */}
+              <SignalMapHeader part={2} />
 
-              {/* Progress */}
-              <div style={{ display: "flex", gap: 6, marginBottom: 24 }}>
-                {setupSteps.map((_, i) => (
-                  <div key={i} style={{
-                    height: 2, flex: 1, borderRadius: 1,
-                    background: i <= setupStep ? "var(--amber)" : "var(--border)",
-                    transition: "background 0.3s"
-                  }} />
-                ))}
-              </div>
-
-              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 12 }}>
+              <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 12 }}>
                 {current.label}
               </div>
               <h1 className="t-display-lg" style={{ marginBottom: 8, lineHeight: 1.15 }}>
