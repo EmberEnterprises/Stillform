@@ -9775,7 +9775,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read).
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision","stillform_named_moves"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read). May 13 (brainstorm idea #10): added stillform_named_moves for close-time externalization (array of { value, sessionId, timestamp }; bounded externalized concept naming at session close).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -15359,6 +15359,45 @@ function SessionCloseScreen({ session, onClose }) {
   const secs = durationSec % 60;
   const durationLabel = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
+  // Close-time externalization — brainstorm #10 (May 13, 2026). Optional.
+  // The user names "the move" in their own words at session close. The
+  // typed label persists to stillform_named_moves and shows up in YOUR
+  // LIBRARY as a MOVES NAMED subsection. Different temporal slot from #3
+  // Granularity Gym (which captures the entry-state precision at Notice).
+  // #10 captures the OUTCOME concept — what the user just DID, not what
+  // they noticed.
+  //
+  // Bounded design (Wells 2009): single line, 60-char cap, no archive
+  // browse from the close screen (only the LIBRARY surface displays the
+  // list). One save per session — once saved, the input collapses to a
+  // confirmation. Cannot save empty.
+  const [moveOpen, setMoveOpen] = useState(false);
+  const [moveText, setMoveText] = useState("");
+  const [moveSaved, setMoveSaved] = useState(false);
+  const MOVE_MAX = 60;
+
+  const handleSaveMove = () => {
+    const trimmed = String(moveText || "").trim();
+    if (trimmed.length === 0) return;
+    try {
+      const raw = localStorage.getItem("stillform_named_moves");
+      const existing = raw ? JSON.parse(raw) : [];
+      const list = Array.isArray(existing) ? existing : [];
+      list.push({
+        value: trimmed.slice(0, MOVE_MAX),
+        sessionId: session?.id || null,
+        timestamp: new Date().toISOString(),
+      });
+      // Bounded — keep last 50.
+      const trimmedList = list.slice(-50);
+      localStorage.setItem("stillform_named_moves", JSON.stringify(trimmedList));
+    } catch {}
+    try {
+      window.plausible?.("Named Move Saved", { props: { length: trimmed.length } });
+    } catch {}
+    setMoveSaved(true);
+  };
+
   // Did a capacity rep get counted during THIS session? Read
   // stillform_last_rep_counted (written by appendSessionToStorage when
   // a marker flipped on save) and check timestamp vs session.startedAt.
@@ -15435,6 +15474,151 @@ function SessionCloseScreen({ session, onClose }) {
         }}>
           The arc compounds with practice.
         </p>
+      )}
+
+      {/* NAME THE MOVE — brainstorm #10 (May 13, 2026). Optional close-time
+          externalization. User types one short label for what they just did;
+          it joins their library as a MOVES NAMED concept. Different from #3
+          Granularity Gym (entry-state precision) — this captures the OUTCOME
+          concept at the moment it was made. */}
+      {!moveOpen && !moveSaved && (
+        <button
+          onClick={() => setMoveOpen(true)}
+          style={{
+            background: "none",
+            border: "none",
+            padding: "0 0 24px",
+            cursor: "pointer",
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: 11,
+            color: "var(--text-muted)",
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            animation: "scnFadeIn 0.5s ease-out 0.55s forwards", opacity: 0
+          }}
+        >
+          + Name the move
+        </button>
+      )}
+      {moveOpen && !moveSaved && (
+        <div style={{
+          width: "100%", maxWidth: 380,
+          padding: "14px 14px 12px",
+          border: "0.5px solid var(--amber-dim)",
+          borderRadius: "var(--r-lg)",
+          background: "var(--surface)",
+          marginBottom: 24,
+          textAlign: "left",
+          animation: "scnFadeIn 0.5s ease-out 0.55s forwards", opacity: 0
+        }}>
+          <div className="t-mono-xs" style={{
+            color: "var(--amber)",
+            letterSpacing: "0.14em",
+            marginBottom: 6
+          }}>
+            NAME THE MOVE
+          </div>
+          <div style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 16,
+            fontStyle: "italic",
+            color: "var(--text-cream)",
+            lineHeight: 1.4,
+            marginBottom: 10
+          }}>
+            In your own words, what did you just do?
+          </div>
+          <input
+            type="text"
+            value={moveText}
+            onChange={e => setMoveText(e.target.value.slice(0, MOVE_MAX))}
+            maxLength={MOVE_MAX}
+            placeholder="e.g. caught-it-before-it-spiraled, stayed-with-the-edge"
+            aria-label="Name the move"
+            autoFocus
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              background: "var(--surface2)",
+              border: "0.5px solid var(--border)",
+              borderRadius: "var(--r)",
+              fontSize: 14,
+              color: "var(--text)",
+              fontFamily: "'DM Sans', sans-serif",
+              outline: "none",
+              boxSizing: "border-box"
+            }}
+          />
+          <div style={{
+            marginTop: 8,
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 10,
+            fontFamily: "'IBM Plex Mono', monospace",
+            color: "var(--text-muted)",
+            letterSpacing: "0.06em"
+          }}>
+            <span>{moveText.length}/{MOVE_MAX}</span>
+            <div style={{ display: "flex", gap: 12 }}>
+              <button
+                onClick={() => { setMoveText(""); setMoveOpen(false); }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontSize: 10,
+                  color: "var(--text-muted)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase"
+                }}
+              >
+                Skip
+              </button>
+              <button
+                onClick={handleSaveMove}
+                disabled={moveText.trim().length === 0}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: moveText.trim().length === 0 ? "not-allowed" : "pointer",
+                  fontSize: 10,
+                  color: moveText.trim().length === 0 ? "var(--text-muted)" : "var(--amber)",
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  opacity: moveText.trim().length === 0 ? 0.5 : 1
+                }}
+              >
+                Save to library →
+              </button>
+            </div>
+          </div>
+          <div style={{
+            marginTop: 8,
+            fontSize: 11,
+            color: "var(--text-muted)",
+            fontFamily: "'DM Sans', sans-serif",
+            lineHeight: 1.5
+          }}>
+            Concrete naming consolidates the concept. The move you can name is one you can repeat.
+          </div>
+        </div>
+      )}
+      {moveSaved && (
+        <div style={{
+          marginBottom: 24,
+          fontSize: 12,
+          color: "var(--amber)",
+          fontFamily: "'IBM Plex Mono', monospace",
+          letterSpacing: "0.06em",
+          animation: "scnFadeIn 0.3s ease-out forwards"
+        }}>
+          ✓ Added to your library
+        </div>
       )}
 
       <button
@@ -17620,8 +17804,29 @@ function MyProgress({ onBack }) {
             ? biasProfile.filter(Boolean).sort()
             : [];
 
+          // Named moves — brainstorm #10 close-time externalization (May 13,
+          // 2026). Read stillform_named_moves; surface labels only, no
+          // timestamps or per-session attribution shown.
+          let movesList = [];
+          try {
+            const raw = localStorage.getItem("stillform_named_moves");
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                // Dedupe by value, preserve most recent occurrence, then sort.
+                const seen = new Map();
+                for (const m of parsed) {
+                  if (m && typeof m.value === "string" && m.value.trim()) {
+                    seen.set(m.value.trim(), true);
+                  }
+                }
+                movesList = Array.from(seen.keys()).sort();
+              }
+            }
+          } catch {}
+
           // Hide whole card if library is empty
-          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length;
+          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length + movesList.length;
           if (totalConcepts === 0) return null;
 
           const subSectionHeaderStyle = {
@@ -17715,6 +17920,20 @@ function MyProgress({ onBack }) {
                   </div>
                   <div style={subSectionBodyStyle}>
                     Cognitive patterns you've recognized in your own thinking. Each Reframe session is a rep against them — the distortion doesn't disappear; your relationship to it changes (Wells 2009 metacognitive therapy).
+                  </div>
+                </>
+              )}
+
+              {movesList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    MOVES NAMED · {movesList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {movesList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    What you've done in session, named in your own words at close. The move you can name is one you can repeat — concrete labels for procedural concepts (Anderson 2007 procedural knowledge).
                   </div>
                 </>
               )}
