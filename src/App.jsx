@@ -21068,54 +21068,36 @@ const isSignalProfileConfigured = () => {
   };
 
   // ── GUIDED SESSION HELPERS ────────────────────────────────────────────
-  // The session orchestrates Body → Notice → Reframe → Close. Body step
-  // is CONDITIONAL on user state — body-before-cognition is the
-  // neuroscience when the body is LOUD (off-baseline/pain), not a
-  // universal mandate. Thought-first baseline users skip the body step
-  // entirely (their calibration is the entry point). When body work IS
-  // the right entry, it's Cyclic Sighing (Balban 2023, ~5 min) via the
-  // Breathe tool with session override — not the 10-min Body Scan.
-  // Body Scan stays as the body tool only when pain is the bio-filter
-  // (locating the signal IS the move, distinct from regulation).
+  // Calibration is sovereign. The user already made the entry decision
+  // during onboarding (body-first or thought-first) — the science is
+  // built into THAT choice. The session honors it. Bio-filter is AI
+  // CONTEXT (passed to Reframe so the AI knows the user's state); it is
+  // NOT a session-structure router.
+  //
+  // Body-first calibration  → Body (Breathe, user's saved pattern) → Notice → Reframe → Close
+  // Thought-first calibration → Notice → Reframe → Close
+  //
+  // Body Scan is a standalone destination tool the user opts into from
+  // the tools surface. It is never a forced session step.
   const startGuidedSession = (entryReason = "home-cta", overrideMode = null) => {
     const bioFilter = getActiveBioFilter();
-    const offBaseline = ["activated","depleted","pain","sleep","medicated","off-baseline","something"].some(s => bioFilter.includes(s));
-    const hasPain = bioFilter.includes("pain");
-    const isThoughtFirstUser = regType === "thought-first";
     const isBodyFirstUser = regType === "body-first";
 
-    // Body step selection — CONDITIONAL on actual need, not universal.
-    let bodyStep = null;
-    if (hasPain) {
-      // Pain bio-filter: Body Scan stays. Locating the signal IS the
-      // move (interoception), distinct from breath regulation.
-      bodyStep = { id: "body", label: "Body", toolId: "scan" };
-    } else if (offBaseline) {
-      // Off-baseline (activated/depleted/sleep/medicated/something-off):
-      // body is loud, cuts the channel. Cyclic Sighing — Balban 2023
-      // RCT showed greater mood improvement than mindfulness, box
-      // breathing, and hyperventilation. ~5 min via Breathe tool with
-      // session override on the pattern.
-      bodyStep = { id: "body", label: "Body", toolId: "breathe", breathPattern: "cyclic_sigh" };
-    } else if (isBodyFirstUser) {
-      // Body-first baseline: calibration preference is body entry.
-      // Brief Cyclic Sighing respects the calibration without forcing
-      // the 10-min scan.
-      bodyStep = { id: "body", label: "Body", toolId: "breathe", breathPattern: "cyclic_sigh" };
-    }
-    // else: thought-first baseline → NO body step. Their calibration IS
-    // cognitive entry; forcing body work here adds friction the science
-    // doesn't require. Notice + Reframe directly.
+    // Body step — ONLY for body-first calibration. Uses the Breathe tool
+    // with the user's saved pattern preference (stillform_breath_pattern).
+    // No session-level pattern override; no bio-filter override.
+    const bodyStep = isBodyFirstUser
+      ? { id: "body", label: "Body", toolId: "breathe" }
+      : null;
 
     // Reframe step — mode determined by override or default calm.
     const reframeMode = overrideMode || "calm";
     const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
 
-    // Notice step — discrete affect-labeling beat. Universal (granularity
-    // applies regardless of entry modality).
+    // Notice step — discrete affect-labeling beat. Universal.
     const noticeStep = { id: "notice", label: "Notice", screenName: "session-notice" };
 
-    // Steps array — body is conditional, notice + reframe always.
+    // Steps: body-first gets 3, thought-first gets 2.
     const steps = bodyStep ? [bodyStep, noticeStep, reframeStep] : [noticeStep, reframeStep];
 
     const session = {
