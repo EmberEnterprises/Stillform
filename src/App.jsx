@@ -14816,10 +14816,9 @@ function SessionHeader({ session }) {
 // internal setTimeout on mount; parent supplies onAdvance.
 function SessionTransition({ phase, onAdvance }) {
   const messages = {
-    "body-to-reframe":   { primary: "Body settled.",       secondary: "Moving to reframe..." },
-    "reframe-to-close":  { primary: "Reframe complete.",   secondary: "Closing the session..." },
-    "scan-to-reframe":   { primary: "Signal located.",     secondary: "Moving to reframe..." },
-    "sigh-to-reframe":   { primary: "System reset.",       secondary: "Moving to reframe..." }
+    "body-to-notice":     { primary: "Body settled.",        secondary: "Naming what's present..." },
+    "notice-to-reframe":  { primary: "Named.",               secondary: "Moving to reframe..." },
+    "reframe-to-close":   { primary: "Reframe complete.",    secondary: "Closing the session..." }
   };
   const msg = messages[phase] || { primary: "...", secondary: "" };
 
@@ -14866,6 +14865,118 @@ function SessionTransition({ phase, onAdvance }) {
         @keyframes stnFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes stnLineDraw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
       `}</style>
+    </section>
+  );
+}
+
+// --------------------------------------------------------------------
+// NOTICE STEP — discrete affect-labeling beat between Body and Reframe.
+// Body regulates physiology. Reframe does cognitive work. Notice is the
+// labeling moment in between — Lieberman 2007's amygdala downregulation
+// through naming, made into its own beat instead of an implicit detail
+// inside Reframe's open.
+//
+// User picks a present-state chip (and optionally one line of context).
+// The chip writes to stillform_feelstate, which Reframe reads on entry.
+// ~30 seconds. Pure session-internal screen, not a top-level tool.
+// --------------------------------------------------------------------
+function NoticeStepScreen({ session, onContinue, setInfoModal }) {
+  const [picked, setPicked] = useState(() => {
+    try {
+      const fs = secureRead("stillform_feelstate", null);
+      if (fs && fs.day === TimeKeeper.stillformDay()) return fs.value;
+    } catch {}
+    return null;
+  });
+
+  const handlePick = (chipId) => {
+    setPicked(chipId);
+    try {
+      if (chipId) {
+        secureWrite("stillform_feelstate", { value: chipId, day: TimeKeeper.stillformDay() });
+      } else {
+        secureDelete("stillform_feelstate");
+      }
+    } catch {}
+  };
+
+  const handleContinue = () => {
+    try {
+      window.plausible("Session Notice Complete", {
+        props: { picked: picked || "skipped" }
+      });
+    } catch {}
+    onContinue();
+  };
+
+  const handleSkip = () => {
+    try { window.plausible("Session Notice Skipped"); } catch {}
+    onContinue();
+  };
+
+  return (
+    <section style={{
+      maxWidth: 480, margin: "0 auto", padding: "32px 24px",
+      minHeight: "100vh", position: "relative", zIndex: 1
+    }}>
+      {/* Session header so user sees the arc position */}
+      <SessionHeader session={session} />
+
+      {/* Prompt — Cormorant primary, mono subcaption.
+          Lieberman 2007 affect labeling: amygdala downregulation through naming. */}
+      <div style={{ marginBottom: 24, textAlign: "center" }}>
+        <h1 style={{
+          fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 300,
+          color: "var(--text)", lineHeight: 1.25, marginBottom: 8,
+          letterSpacing: "0.005em"
+        }}>
+          Name what's present.
+        </h1>
+        <div className="t-mono-xs" style={{
+          color: "var(--text-muted)", letterSpacing: "0.12em", textTransform: "uppercase"
+        }}>
+          Labeling reduces amplitude.
+        </div>
+      </div>
+
+      {/* Chip picker — reuses PresentStateChips component already in the build.
+          The chip persists to stillform_feelstate, which Reframe reads on entry,
+          so the labeled state flows through to cognitive work automatically. */}
+      <div style={{ marginBottom: 32 }}>
+        <PresentStateChips
+          feelState={picked}
+          setFeelState={handlePick}
+          setInfoModal={setInfoModal}
+        />
+      </div>
+
+      {/* Continue + Skip — Continue active when chip picked, Skip always available */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <button
+          className="btn btn-primary"
+          onClick={handleContinue}
+          disabled={!picked}
+          style={{
+            padding: "14px 24px", fontSize: 15,
+            opacity: picked ? 1 : 0.5,
+            cursor: picked ? "pointer" : "not-allowed"
+          }}
+        >
+          Continue
+        </button>
+        <button
+          className="btn btn-ghost"
+          onClick={handleSkip}
+          style={{
+            padding: "10px 24px", fontSize: 12,
+            color: "var(--text-muted)",
+            fontFamily: "'IBM Plex Mono', monospace",
+            letterSpacing: "0.08em", textTransform: "uppercase"
+          }}
+        >
+          Skip · move to reframe
+        </button>
+      </div>
     </section>
   );
 }
@@ -20828,8 +20939,12 @@ const isSignalProfileConfigured = () => {
     const reframeMode = overrideMode || "calm";
     const reframeStep = { id: "reframe", label: "Reframe", toolId: "reframe", mode: reframeMode };
 
-    // Steps array. Close is NOT a step (it's a terminal screen).
-    const steps = [bodyStep, reframeStep];
+    // Notice step — discrete affect-labeling beat between Body and Reframe.
+    // Screen-based, not tool-based. Sits between bodyStep and reframeStep.
+    const noticeStep = { id: "notice", label: "Notice", screenName: "session-notice" };
+
+    // Steps array — three-step arc. Close is NOT a step (terminal screen).
+    const steps = [bodyStep, noticeStep, reframeStep];
 
     const session = {
       id: `s-${Date.now()}`,
@@ -20887,11 +21002,12 @@ const isSignalProfileConfigured = () => {
     const nextStep = activeSession.steps[nextIndex];
     // Update session state to next step
     setActiveSession({ ...activeSession, currentStep: nextIndex });
-    // Route through transition first — natural beat between tools
+    // Route through transition first — natural beat between tools/screens.
+    // Phase names are step-id based (body-to-notice, notice-to-reframe,
+    // reframe-to-close). Tool-variant-specific phases dropped — all body
+    // tools flow to notice the same way.
     setActiveTool(null);
-    const phase = `${fromStep.id === "body" ? fromStep.toolId : fromStep.id}-to-${nextStep.id}`;
-    // Phase names accepted by SessionTransition: body-to-reframe, scan-to-reframe,
-    // sigh-to-reframe, reframe-to-close. Default fallback above-mapped.
+    const phase = `${fromStep.id}-to-${nextStep.id}`;
     setSessionTransitionPhase(phase);
     setScreen("session-transition");
   };
@@ -21526,8 +21642,9 @@ const isSignalProfileConfigured = () => {
         )}
 
         {/* SESSION TRANSITION — 1.5s loading moment between session steps.
-            Phase values: body-to-reframe / scan-to-reframe / sigh-to-reframe
-            / reframe-to-close. Advance handler routes to next tool or close. */}
+            Phase values: body-to-notice / notice-to-reframe / reframe-to-close.
+            Advance handler routes to next step's tool OR screen (notice is
+            screen-based; body/reframe are tool-based). */}
         {screen === "session-transition" && (
           <SessionTransition
             phase={sessionTransitionPhase}
@@ -21538,22 +21655,38 @@ const isSignalProfileConfigured = () => {
                 setScreen("session-close");
                 return;
               }
-              // Body-to-reframe (and variants) → route to reframe tool with
-              // the mode the session locked in. Pathway already set at session
-              // start; reframe step's mode lives in steps[currentStep].
+              // For other transitions, route to next step. Step can be either
+              // tool-based (has toolId) or screen-based (has screenName).
               if (activeSession) {
                 const step = activeSession.steps[activeSession.currentStep];
-                const tool = TOOLS.find(t => t.id === step.toolId);
-                if (tool) {
-                  const toolEntry = step.mode ? { ...tool, mode: step.mode } : tool;
-                  setActiveTool(toolEntry);
-                  setScreen("tool");
+                if (step?.screenName) {
+                  setScreen(step.screenName);
                   return;
+                }
+                if (step?.toolId) {
+                  const tool = TOOLS.find(t => t.id === step.toolId);
+                  if (tool) {
+                    const toolEntry = step.mode ? { ...tool, mode: step.mode } : tool;
+                    setActiveTool(toolEntry);
+                    setScreen("tool");
+                    return;
+                  }
                 }
               }
               // Fallback — should not happen, route home defensively
               goHomeSafely();
             }}
+          />
+        )}
+
+        {/* SESSION NOTICE — discrete affect-labeling step between Body and
+            Reframe. User picks a present-state chip (+ optional context),
+            taps Continue, session advances to Reframe. ~30 seconds. */}
+        {screen === "session-notice" && activeSession && (
+          <NoticeStepScreen
+            session={activeSession}
+            setInfoModal={setInfoModal}
+            onContinue={() => advanceSessionStep()}
           />
         )}
 
