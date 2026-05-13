@@ -20752,6 +20752,12 @@ const isSignalProfileConfigured = () => {
       toolBackOverrideRef.current = null;
       return;
     }
+    // If a guided session is active, back = abandon session cleanly (tracks
+    // drop-off telemetry, clears session state, routes home).
+    if (activeSession) {
+      abandonGuidedSession("tool-back");
+      return;
+    }
     if (activeTool?.returnTo) {
       const returnScreen = activeTool.returnTo;
       setActiveTool(null);
@@ -25369,6 +25375,16 @@ const isSignalProfileConfigured = () => {
             <div className="t-caption" style={{ color: "var(--text-muted)", textAlign: "center", marginBottom: 12 }}>
               Your data is encrypted.
             </div>
+            {/* SESSION HEADER — when user is in a guided session, surface
+                the step indicator inside each tool so the arc is visible
+                throughout, not just on transitions. Mirrors SignalMap
+                calibration-part header pattern. Suppressed during
+                calibration tools to avoid double-header overlap. */}
+            {activeSession && !activeTool?.setupFlow && (
+              <div style={{ marginBottom: 12 }}>
+                <SessionHeader session={activeSession} />
+              </div>
+            )}
             {(() => {
               const primer = getToolEntryPrimer(activeTool?.id, regType);
               if (!primer) return null;
