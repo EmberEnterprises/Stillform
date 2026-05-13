@@ -11662,6 +11662,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 `This is a SHORT session. The user is winding down, not opening up. Match that energy: terse, present-tense, no follow-up cascade. ` +
                 `Once they name something, mirror briefly (one short reflection, not analysis), then move toward close. The job is to surface the day's residue, not to process it deeply. If they go deep, follow once; if they're brief, accept the brevity. Sleep is the next step, not more reframing.`;
             }
+            if (source === "deep-revisit") {
+              return `DEEP REVISIT — READ THIS FIRST: The user named "${pattern}" in a saved Reframe ${formatDaysAgo(daysAgo)} — work they explicitly chose to save. They've come back to revisit the distortion itself, not the past conversation. ` +
+                `Roediger & Karpicke 2006 testing effect: spaced retrieval of named concepts at increasing intervals strengthens the trace. Wells 2009 metacognitive therapy: re-engaging with the distortion (recognizing it again, in new context) is the consolidation rep; re-reading the original Reframe is the rumination failure mode. ` +
+                `Open by acknowledging the distortion as a named concept they're carrying forward: "${pattern.toLowerCase()} again — recognized. What does it look like today?" Keep it 1 sentence. ` +
+                `Do NOT reference what they said in the past Reframe (you don't have access and shouldn't pretend to). Do NOT ask them to recap what they wrote then. The job is present-tense recognition: does the pattern look the same, different, weaker, sharper? Let the user lead with current observation.`;
+            }
             const daysPhrase = formatDaysAgo(daysAgo);
             const sourceNote = source === "spaced"
               ? "Spaced-return surface — planned revisit interval, not a fresh complaint."
@@ -15125,9 +15131,11 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
                   ? "OPEN RECALL"
                   : retrievalContext.source === "pre-sleep"
                     ? "PRE-SLEEP"
-                    : retrievalContext.source === "spaced"
-                      ? "PLANNED REVISIT"
-                      : "RETURNING TO"}
+                    : retrievalContext.source === "deep-revisit"
+                      ? "DEEP REVISIT"
+                      : retrievalContext.source === "spaced"
+                        ? "PLANNED REVISIT"
+                        : "RETURNING TO"}
           </div>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
@@ -15142,6 +15150,8 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
               <>What's a pattern you've noticed since the last session?</>
             ) : retrievalContext.source === "pre-sleep" ? (
               <>One short rep before sleep cements the day.</>
+            ) : retrievalContext.source === "deep-revisit" ? (
+              <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)} and chose to save it.</>
             ) : (
               <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.</>
             )}
@@ -15161,7 +15171,9 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
                   ? "Pull it from your own memory — recall is the rep (Roediger & Karpicke 2006). Name the pattern below in your own words after the chip."
                   : retrievalContext.source === "pre-sleep"
                     ? "Sleep encodes the day's learning into long-term structure (Stickgold & Walker). Name what's most present, then close it down."
-                    : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
+                    : retrievalContext.source === "deep-revisit"
+                      ? "The work you marked worth keeping. Re-engaging with the pattern strengthens the trace — re-reading the past Reframe doesn't (Wells 2009). Name what's present now."
+                      : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
           </div>
         </div>
       )}
@@ -24060,10 +24072,15 @@ const isSignalProfileConfigured = () => {
               {(() => {
                 let biasProfile = null;
                 let triggerArr = [];
+                let savedReframesArr = [];
                 try { biasProfile = secureRead("stillform_bias_profile", null); } catch {}
                 try {
                   const tp = getTriggerProfile();
                   triggerArr = Array.isArray(tp?.triggers) ? tp.triggers : [];
+                } catch {}
+                try {
+                  const sr = secureRead("stillform_saved_reframes", []);
+                  savedReframesArr = Array.isArray(sr) ? sr : [];
                 } catch {}
 
                 // Pattern-context handoff to the practice spine.
@@ -24109,6 +24126,7 @@ const isSignalProfileConfigured = () => {
                     context?.source === "pre-mortem" ? "home-practice-pre-mortem"
                     : context?.source === "open-recall" ? "home-practice-open-recall"
                     : context?.source === "pre-sleep" ? "home-practice-pre-sleep"
+                    : context?.source === "deep-revisit" ? "home-practice-deep-revisit"
                     : context?.source === "spaced" ? "home-practice-spaced"
                     : context?.pattern ? "home-practice-retrieval"
                     : "home-practice";
@@ -24120,6 +24138,7 @@ const isSignalProfileConfigured = () => {
                     sessions={sessions}
                     biasProfile={biasProfile}
                     triggers={triggerArr}
+                    savedReframes={savedReframesArr}
                     onEnterPractice={handleEnterPracticeFromSurface}
                     onOpenInfo={(title, body) => setInfoModal({ title, body })}
                     showPreSleep={(() => {

@@ -207,12 +207,54 @@ export function findAnticipateCandidate(triggers = []) {
 }
 
 /**
+ * Find a saved Reframe from 7-30 days ago for the Deep Revisit surface —
+ * brainstorm #9 (May 13, 2026). Distinct from #1 retrieval because #9
+ * surfaces work the user EXPLICITLY chose to save (a curation signal that
+ * "this one mattered"). #1 surfaces any flagged pattern from any session.
+ *
+ * Returns { distortion, daysAgo } | null. Only the distortion label is
+ * surfaced — NOT the full saved Reframe text. Per Framing Law / Wells 2009:
+ * re-reading old Reframe content can train Type 2 rumination. Re-engaging
+ * with the named distortion is the bounded rep; re-reading the conversation
+ * is the failure mode this guards against.
+ *
+ * Selection: oldest saved Reframe within the 7-30 day window with a
+ * non-empty distortion field. Stable selection across renders. The user
+ * may see the same distortion across multiple days — that's the spaced
+ * retrieval mechanism (Roediger & Karpicke 2006); multiple retrievals
+ * strengthen the trace.
+ */
+export function findDeepRevisitCandidate(savedReframes = []) {
+  if (!Array.isArray(savedReframes) || savedReframes.length === 0) return null;
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const minDays = 7;
+  const maxDays = 30;
+  const eligible = savedReframes
+    .filter(r => r && r.distortion && r.timestamp)
+    .map(r => {
+      const t = new Date(r.timestamp).getTime();
+      if (!Number.isFinite(t)) return null;
+      const daysAgo = Math.floor((now - t) / dayMs);
+      if (daysAgo < minDays || daysAgo > maxDays) return null;
+      return { distortion: String(r.distortion).trim(), daysAgo, ts: t };
+    })
+    .filter(Boolean);
+  if (eligible.length === 0) return null;
+  // Oldest first within the window (stable selection).
+  eligible.sort((a, b) => a.ts - b.ts);
+  const top = eligible[0];
+  return { distortion: top.distortion, daysAgo: top.daysAgo };
+}
+
+/**
  * Main component.
  *
  * Props:
  *   sessions         — array (from getSessionsFromStorage())
  *   biasProfile      — array of pattern names (from secureRead("stillform_bias_profile"))
  *   triggers         — array (from getTriggerProfile().triggers)
+ *   savedReframes    — array (from secureRead("stillform_saved_reframes")) — for #9 deep revisit
  *   onEnterPractice  — function(toolId, context) called when primary action tapped
  *                      context = { pattern, source, daysAgo } | null
  *   onOpenInfo       — function(title, body) to open the info modal (for ⓘ buttons)
@@ -222,6 +264,7 @@ export function PracticeSurface({
   sessions = [],
   biasProfile = null,
   triggers = [],
+  savedReframes = [],
   onEnterPractice,
   onOpenInfo,
   showPreSleep = false,
@@ -232,6 +275,7 @@ export function PracticeSurface({
   const retrieval = findRetrievalCandidate(sessions, triggers);
   const spaced = findSpacedReturns(sessions, triggers);
   const anticipate = findAnticipateCandidate(triggers);
+  const deepRevisit = findDeepRevisitCandidate(savedReframes);
   const watching = Array.isArray(biasProfile) ? biasProfile.slice(0, 3) : [];
 
   // EMPTY STATE — day-1 user, nothing in library yet.
@@ -704,6 +748,88 @@ export function PracticeSurface({
             <span style={{ color: "var(--amber)" }}>{anticipate.label.toLowerCase()}</span>
             <span style={{ margin: "0 6px", color: "var(--text-muted)", opacity: 0.6 }}>·</span>
             <span style={{ color: "var(--text-muted)" }}>pre-mortem rep</span>
+          </button>
+        </div>
+      )}
+
+      {/* ── DEEP REVISIT — brainstorm #9 (May 13, 2026) ────────────────────
+          Surfaces a distortion from a saved Reframe in the 7-30 day window.
+          Distinct from #1 retrieval (which surfaces any flagged pattern)
+          because #9 surfaces work the user EXPLICITLY chose to save — a
+          curation signal that "this one mattered." The distortion label is
+          the ONLY surfaced artifact; the full Reframe text is never re-
+          displayed (Wells 2009 Type 2 rumination guardrail). The rep is to
+          re-engage with the pattern, not to re-read the past conversation. */}
+      {deepRevisit && (
+        <div
+          style={{
+            marginBottom: 16,
+            padding: "10px 12px",
+            background: "var(--surface, transparent)",
+            border: "0.5px solid var(--border)",
+            borderRadius: "var(--r, 8px)",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--text-muted)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.12em",
+              marginBottom: 4,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>DEEP REVISIT</span>
+            {onOpenInfo && (
+              <button
+                aria-label="About deep revisit"
+                onClick={() =>
+                  onOpenInfo(
+                    "Deep revisit",
+                    "You saved a Reframe with this distortion before. Spaced retrieval of named distortions at increasing intervals consolidates the metacognitive recognition (Roediger & Karpicke 2006). The rep is to re-engage with the pattern itself — not to re-read your past Reframe. The naming you did then is still in your library; today's question is whether the pattern has shifted."
+                  )
+                }
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--text-muted)",
+                  cursor: "pointer",
+                  fontSize: 10,
+                  padding: "0 2px",
+                  lineHeight: 1,
+                }}
+              >
+                ⓘ
+              </button>
+            )}
+          </div>
+          <button
+            onClick={() =>
+              onEnterPractice &&
+              onEnterPractice("reframe", {
+                pattern: deepRevisit.distortion,
+                source: "deep-revisit",
+                daysAgo: deepRevisit.daysAgo,
+              })
+            }
+            style={{
+              background: "none",
+              border: "none",
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 13,
+              color: "var(--text)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              textAlign: "left",
+              width: "100%",
+            }}
+          >
+            <span style={{ color: "var(--amber)" }}>{deepRevisit.distortion.toLowerCase()}</span>
+            <span style={{ margin: "0 6px", color: "var(--text-muted)", opacity: 0.6 }}>·</span>
+            <span style={{ color: "var(--text-muted)" }}>has the pattern shifted?</span>
           </button>
         </div>
       )}
