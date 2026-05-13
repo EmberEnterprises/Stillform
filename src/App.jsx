@@ -9775,7 +9775,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships.
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -18519,6 +18519,174 @@ function QBPill({ onPress }) {
   );
 }
 
+// --------------------------------------------------------------------
+// STAGE TRANSITION RITUAL — brainstorm idea #8 (May 13, 2026)
+// --------------------------------------------------------------------
+// Surfaces a one-time consolidation moment when the user crosses a stage
+// in the Roadmap. Detection: read getCurrentStage().highestStageMet on
+// mount; compare to stillform_stage_acknowledged. If higher, render
+// modal overlay. On Continue, persist the new acknowledged stage so the
+// ritual fires once per crossing — never twice.
+//
+// FRAMING — Stage advancement is a real neuroplastic moment: capacity
+// the user did not have before is now load-bearing. Per Bandura 1977
+// mastery experience: making the moment visible strengthens the self-
+// efficacy that supports the next stage's reps. Per Roediger & Karpicke
+// 2006: the ritual is itself a retrieval — the user articulates (by
+// reading) what they built, which consolidates the concept. Per
+// Gollwitzer 1999 implementation intentions: the NEXT-stage prime sets
+// up the next chapter's work as a pre-installed direction.
+//
+// BOUNDED DESIGN per Framing Law / audit philosophy
+// - No "Congratulations" / "Achievement Unlocked" / exclamation points
+// - No badges, points, dopamine count-up — operator-tier voice
+// - Single dismiss button, no second pass, no "share" affordance
+// - Modal is interruptive ON PURPOSE — the moment is rare (max 4 times
+//   in a user's lifetime: crossing stages 1→2, 2→3, 3→4, 4→5). The
+//   user has earned an interruption. This is not a routine nudge.
+// - Renders only on home (gating via parent JSX). Never interrupts
+//   mid-session.
+function StageRitualOverlay() {
+  const [data] = useState(() => {
+    try {
+      const snap = getCurrentStage();
+      if (!snap || !Number.isFinite(snap.highestStageMet)) return null;
+      if (snap.highestStageMet < 1) return null;
+      let acknowledged = 0;
+      try {
+        const raw = localStorage.getItem("stillform_stage_acknowledged");
+        if (raw) acknowledged = Number(raw) || 0;
+      } catch {}
+      if (snap.highestStageMet <= acknowledged) return null;
+      const stage = STAGE_DEFINITIONS[snap.highestStageMet];
+      const nextStage = STAGE_DEFINITIONS[snap.highestStageMet + 1] || null;
+      if (!stage) return null;
+      return {
+        stageId: snap.highestStageMet,
+        stage,
+        nextStage,
+      };
+    } catch { return null; }
+  });
+
+  const [visible, setVisible] = useState(!!data);
+
+  if (!data || !visible) return null;
+
+  const handleAcknowledge = () => {
+    try {
+      localStorage.setItem("stillform_stage_acknowledged", String(data.stageId));
+    } catch {}
+    try {
+      window.plausible?.("Stage Ritual Acknowledged", {
+        props: { stageId: data.stageId, stageName: data.stage?.name || "" }
+      });
+    } catch {}
+    setVisible(false);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="stage-ritual-title"
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 9999,
+        background: "rgba(0, 0, 0, 0.78)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px"
+      }}
+    >
+      <div style={{
+        maxWidth: 440,
+        width: "100%",
+        background: "var(--bg)",
+        border: "0.5px solid var(--amber)",
+        borderRadius: "var(--r-lg)",
+        padding: "32px 26px"
+      }}>
+        <div className="t-mono-xs" style={{
+          color: "var(--amber)",
+          letterSpacing: "0.16em",
+          marginBottom: 22
+        }}>
+          STAGE {data.stageId} CROSSED
+        </div>
+        <h2 id="stage-ritual-title" style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 34,
+          fontWeight: 300,
+          color: "var(--text)",
+          lineHeight: 1.15,
+          marginBottom: 8,
+          letterSpacing: "0.005em"
+        }}>
+          {data.stage.name}
+        </h2>
+        <div style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 17,
+          fontStyle: "italic",
+          color: "var(--text-cream)",
+          lineHeight: 1.45,
+          letterSpacing: "0.005em",
+          marginBottom: 26
+        }}>
+          {data.stage.capacity}.
+        </div>
+        <div style={{
+          fontSize: 13,
+          color: "var(--text)",
+          fontFamily: "'DM Sans', sans-serif",
+          lineHeight: 1.65,
+          marginBottom: data.nextStage ? 22 : 28
+        }}>
+          A capacity built. What you can do now, you couldn't before — the reps that brought you here are concepts named into your library. Neuroplastic change is the substrate of the shift (Davidson &amp; McEwen 2012).
+        </div>
+        {data.nextStage && (
+          <>
+            <div className="t-mono-xs" style={{
+              color: "var(--text-muted)",
+              letterSpacing: "0.14em",
+              marginTop: 20,
+              marginBottom: 6,
+              paddingTop: 18,
+              borderTop: "0.5px solid var(--border-printed)"
+            }}>
+              NEXT · {data.nextStage.name}
+            </div>
+            <div style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 15,
+              fontStyle: "italic",
+              color: "var(--text)",
+              lineHeight: 1.45,
+              marginBottom: 26
+            }}>
+              {data.nextStage.capacity}.
+            </div>
+          </>
+        )}
+        <button
+          className="btn btn-primary"
+          onClick={handleAcknowledge}
+          style={{
+            width: "100%",
+            padding: "14px 24px",
+            fontSize: 15
+          }}
+        >
+          Continue
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function Stillform() {
   const FIRST_RUN_STAGE_KEY = "stillform_first_run_stage";
   const [infoModal, setInfoModal] = useState(null);
@@ -23330,6 +23498,15 @@ const isSignalProfileConfigured = () => {
 
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
+
+              {/* ── STAGE TRANSITION RITUAL — brainstorm #8 ──────────────
+                   One-time consolidation moment when getCurrentStage()
+                   .highestStageMet > stillform_stage_acknowledged. Self-
+                   gated render (returns null when no unacknowledged
+                   advance). Mounted on home only so it never interrupts
+                   a session. The moment is rare (max 4 lifetime
+                   crossings) and earns the interruption. */}
+              <StageRitualOverlay />
 
               {/* ── TIME-OF-DAY GREETING — terse, declarative ─────────────── */}
               {(() => {
