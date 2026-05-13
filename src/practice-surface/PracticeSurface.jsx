@@ -216,6 +216,7 @@ export function findAnticipateCandidate(triggers = []) {
  *   onEnterPractice  — function(toolId, context) called when primary action tapped
  *                      context = { pattern, source, daysAgo } | null
  *   onOpenInfo       — function(title, body) to open the info modal (for ⓘ buttons)
+ *   showPreSleep     — boolean (parent computes time-of-day + sessions-today + EOD-done gating)
  */
 export function PracticeSurface({
   sessions = [],
@@ -223,6 +224,7 @@ export function PracticeSurface({
   triggers = [],
   onEnterPractice,
   onOpenInfo,
+  showPreSleep = false,
 }) {
   const patternsNamed = countPatternsNamed(sessions, biasProfile);
   const triggersMapped = Array.isArray(triggers) ? triggers.length : 0;
@@ -296,6 +298,104 @@ export function PracticeSurface({
   // BUILT-LIBRARY STATE — user has session history; show patterns + retrieval prompt + spaced returns.
   return (
     <div style={{ marginBottom: 28 }}>
+      {/* ── PRE-SLEEP — brainstorm #2 (May 13, 2026) ───────────────────────
+          Opportunistic surface — visible only when the parent passes
+          showPreSleep=true (late-evening time window AND user has practiced
+          today AND EOD not yet completed). Stickgold/Walker memory-
+          consolidation literature: practice within the sleep-window
+          encoding band has stronger consolidation than mid-day practice.
+          One bounded rep before sleep cements the day's concept gains.
+
+          Bounded design: appears at most once per day (gated by EOD-done
+          flag in parent), opportunistic surface only (no notification
+          scheduling — that's post-launch infra). The user opens the app
+          in the evening and the rep is there; they don't open the app
+          and the rep doesn't fire. Aligned with Framing Law principle:
+          bounded engagement, not unbounded notification noise. */}
+      {showPreSleep && (
+        <div
+          style={{
+            marginBottom: 18,
+            padding: "12px 14px",
+            border: "0.5px solid var(--amber-dim)",
+            borderRadius: "var(--r-lg, 12px)",
+            background: "var(--amber-glow, rgba(255,180,80,0.05))",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 10,
+              color: "var(--amber)",
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.14em",
+              marginBottom: 6,
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+            }}
+          >
+            <span>PRE-SLEEP</span>
+            {onOpenInfo && (
+              <button
+                aria-label="About pre-sleep rep"
+                onClick={() =>
+                  onOpenInfo(
+                    "Pre-sleep rep",
+                    "A short rep before sleep consolidates the day's concept gains. Sleep is when the brain encodes what it learned that day into long-term structure (Stickgold & Walker). A 2-3 minute rep in the late-evening window cements naming you've done across the day. Bounded: one rep, then close the day."
+                  )
+                }
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "var(--amber)",
+                  cursor: "pointer",
+                  fontSize: 10,
+                  padding: "0 2px",
+                  lineHeight: 1,
+                }}
+              >
+                ⓘ
+              </button>
+            )}
+          </div>
+          <div
+            style={{
+              fontSize: 14,
+              color: "var(--text)",
+              lineHeight: 1.5,
+              marginBottom: 10,
+            }}
+          >
+            One short rep before sleep cements the day.
+          </div>
+          <button
+            onClick={() =>
+              onEnterPractice &&
+              onEnterPractice("reframe", {
+                pattern: "",
+                source: "pre-sleep",
+                daysAgo: null,
+              })
+            }
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              background: "var(--surface)",
+              border: "0.5px solid var(--amber)",
+              borderRadius: "var(--r, 8px)",
+              color: "var(--amber)",
+              fontSize: 13,
+              fontFamily: "'IBM Plex Mono', monospace",
+              letterSpacing: "0.06em",
+              cursor: "pointer",
+              textAlign: "center",
+            }}
+          >
+            Close the day · 2 min →
+          </button>
+        </div>
+      )}
+
       {/* ── PATTERNS — library state at a glance ─────────────────────────── */}
       <div
         style={{

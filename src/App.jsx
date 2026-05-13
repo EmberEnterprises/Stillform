@@ -10954,10 +10954,10 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       if (raw) {
         const ctx = JSON.parse(raw);
         if (ctx && typeof ctx === "object") {
-          // open-recall is intentionally pattern-less. All other sources need
-          // a pattern. Accept either valid shape.
-          const hasOpenRecall = ctx.source === "open-recall";
-          if (hasOpenRecall || ctx.pattern) {
+          // open-recall and pre-sleep are intentionally pattern-less. All
+          // other sources need a pattern. Accept either valid shape.
+          const isPatternLess = ctx.source === "open-recall" || ctx.source === "pre-sleep";
+          if (isPatternLess || ctx.pattern) {
             setPracticeEntryContext({
               pattern: ctx.pattern ? String(ctx.pattern) : "",
               source: ctx.source || null,
@@ -11655,6 +11655,12 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 `Roediger & Karpicke 2006 testing effect: free recall from memory is more potent for consolidation than recognition of a prompt. The user is being asked to retrieve and name a pattern they've noticed since their last session. ` +
                 `Open by holding the question simply: "What pattern have you been seeing since the last session?" Keep it 1 sentence, no scaffolding. ` +
                 `Let the user lead. Do NOT suggest a pattern, do NOT list options, do NOT prime with examples. The act of recalling is the rep. Once they name something, mirror it back precisely (their words, not yours) and continue from there.`;
+            }
+            if (source === "pre-sleep") {
+              return `PRE-SLEEP REP — READ THIS FIRST: The user came in for a short rep before sleep. Late-evening window. Stickgold & Walker memory-consolidation literature: practice within the pre-sleep window has stronger consolidation than mid-day practice — sleep encodes the day's learning into long-term structure. ` +
+                `Open with brevity. Example: "Last thing — what's most present from the day?" Keep it 1 sentence. ` +
+                `This is a SHORT session. The user is winding down, not opening up. Match that energy: terse, present-tense, no follow-up cascade. ` +
+                `Once they name something, mirror briefly (one short reflection, not analysis), then move toward close. The job is to surface the day's residue, not to process it deeply. If they go deep, follow once; if they're brief, accept the brevity. Sleep is the next step, not more reframing.`;
             }
             const daysPhrase = formatDaysAgo(daysAgo);
             const sourceNote = source === "spaced"
@@ -15001,9 +15007,11 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
       if (!raw) return null;
       const ctx = JSON.parse(raw);
       if (!ctx || typeof ctx !== "object") return null;
-      // open-recall is intentionally pattern-less — the user names the pattern
-      // themselves at Notice. All other sources require a pattern label.
-      if (ctx.source !== "open-recall" && !ctx.pattern) return null;
+      // open-recall and pre-sleep are intentionally pattern-less — the user
+      // names the pattern themselves at Notice. All other sources require a
+      // pattern label.
+      const isPatternLess = ctx.source === "open-recall" || ctx.source === "pre-sleep";
+      if (!isPatternLess && !ctx.pattern) return null;
       return {
         pattern: ctx.pattern ? String(ctx.pattern) : "",
         source: ctx.source || null,
@@ -15115,9 +15123,11 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
                 ? "ANTICIPATE"
                 : retrievalContext.source === "open-recall"
                   ? "OPEN RECALL"
-                  : retrievalContext.source === "spaced"
-                    ? "PLANNED REVISIT"
-                    : "RETURNING TO"}
+                  : retrievalContext.source === "pre-sleep"
+                    ? "PRE-SLEEP"
+                    : retrievalContext.source === "spaced"
+                      ? "PLANNED REVISIT"
+                      : "RETURNING TO"}
           </div>
           <div style={{
             fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontStyle: "italic",
@@ -15130,6 +15140,8 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
               <><span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> has come up before. Today might bring it again.</>
             ) : retrievalContext.source === "open-recall" ? (
               <>What's a pattern you've noticed since the last session?</>
+            ) : retrievalContext.source === "pre-sleep" ? (
+              <>One short rep before sleep cements the day.</>
             ) : (
               <>You named <span style={{ color: "var(--amber)", fontStyle: "normal" }}>{retrievalContext.pattern.toLowerCase()}</span> {formatDaysAgo(retrievalContext.daysAgo)}.</>
             )}
@@ -15147,7 +15159,9 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
                 ? "Pre-installed moves fire faster than improvised ones. Name what's already moving in you before it arrives."
                 : retrievalContext.source === "open-recall"
                   ? "Pull it from your own memory — recall is the rep (Roediger & Karpicke 2006). Name the pattern below in your own words after the chip."
-                  : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
+                  : retrievalContext.source === "pre-sleep"
+                    ? "Sleep encodes the day's learning into long-term structure (Stickgold & Walker). Name what's most present, then close it down."
+                    : "What's it doing today? Name what's present — your answer can hold the pattern or step past it."}
           </div>
         </div>
       )}
@@ -23875,6 +23889,7 @@ const isSignalProfileConfigured = () => {
                   const entryReason =
                     context?.source === "pre-mortem" ? "home-practice-pre-mortem"
                     : context?.source === "open-recall" ? "home-practice-open-recall"
+                    : context?.source === "pre-sleep" ? "home-practice-pre-sleep"
                     : context?.source === "spaced" ? "home-practice-spaced"
                     : context?.pattern ? "home-practice-retrieval"
                     : "home-practice";
@@ -23888,6 +23903,28 @@ const isSignalProfileConfigured = () => {
                     triggers={triggerArr}
                     onEnterPractice={handleEnterPracticeFromSurface}
                     onOpenInfo={(title, body) => setInfoModal({ title, body })}
+                    showPreSleep={(() => {
+                      // Pre-sleep eligibility (brainstorm #2, May 13, 2026):
+                      // late-evening window AND at least one session today AND
+                      // EOD not yet completed today. No notification scheduling
+                      // required — opportunistic surface only.
+                      try {
+                        const now = new Date();
+                        const mins = now.getHours() * 60 + now.getMinutes();
+                        // 21:00 to 23:30 — Stickgold/Walker pre-sleep window.
+                        if (mins < 21 * 60 || mins >= 23 * 60 + 30) return false;
+                        const today = TimeKeeper.stillformDay();
+                        const sessionsToday = sessions.filter(s => {
+                          try { return TimeKeeper.stillformDayOf(s.timestamp) === today; } catch { return false; }
+                        });
+                        if (sessionsToday.length < 1) return false;
+                        const eod = (() => {
+                          try { return JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); } catch { return null; }
+                        })();
+                        if (eod?.date === today) return false;
+                        return true;
+                      } catch { return false; }
+                    })()}
                   />
                 );
               })()}
