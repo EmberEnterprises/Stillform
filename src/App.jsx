@@ -25566,6 +25566,8 @@ const isSignalProfileConfigured = () => {
                       { label: "Breathe", sub: "Settle the system. 60 seconds.", action: () => { setShowSupportSheet(false); startPathway("calm"); } },
                       { label: "Reframe", sub: "Talk through what's happening.", action: () => { setShowSupportSheet(false); setPathway("calm"); startTool(TOOLS.find(t => t.id === "reframe")); } },
                       { label: "Body Scan", sub: "Find where the signal lives.", action: () => { setShowSupportSheet(false); startTool(TOOLS.find(t => t.id === "scan")); } },
+                      { label: "Move", sub: "90 seconds body-led. Disrupt the loop.", action: () => { setShowSupportSheet(false); setSurfacedPattern(null); setDisruptorActive(true); try { window.plausible?.("Move Card Tapped", { props: { source: "support-sheet" } }); } catch {} } },
+                      { label: "Scripts", sub: "One deployable line for the hard conversation.", action: () => { setShowSupportSheet(false); setScreen("scripts"); try { window.plausible?.("Scripts Card Tapped", { props: { source: "support-sheet" } }); } catch {} } },
                     ].map(opt => (
                       <button key={opt.label} onClick={opt.action} style={{
                         width: "100%", background: "none", border: "0.5px solid var(--border)",
@@ -25592,153 +25594,24 @@ const isSignalProfileConfigured = () => {
                 />
               )}
 
-              {/* ── MOVE CARD — engagement architecture Engine 2 (Application Layer), surface 1.
-                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 132-134:
-                  "Single 30-90-second somatic move generated for the user's current
-                  state, available anywhere (bathroom at work, car, between calls).
-                  Disruptor tool concept as a takeaway, not just at pattern-detection
-                  time."
+              {/* ── MOVE + SCRIPTS — REMOVED FROM HOME May 13, 2026.
+                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2: Move card and
+                  Scripts are Engine 2 (Application Layer) artifacts — takeaways
+                  the user produces FROM session work and carries INTO life. They
+                  are not parallel entry points to the practice. The May 13 phone
+                  test caught this: rendering them as parallel home cards alongside
+                  Begin session created a menu where there should be a spine.
 
-                  Mechanism: launches existing DisruptorTool (src/disruptor/DisruptorTool.jsx)
-                  with patternId=null + dimension=null. The null patternId is the signal
-                  that this is self-initiated, which is also what the S4 Stage marker
-                  "self-initiated-disruptor" tracks (master todo, line 3802 helper).
+                  Access now lives in the Support Sheet (opened from "Not quite
+                  right →" intake → "Show all tools →"). Both routes preserved
+                  intact — setDisruptorActive(true) for Move, setScreen("scripts")
+                  for Scripts.
 
-                  Voice: prestige-operator. Declarative. Experience first. Science is the
-                  language not the authority. Mirrors the Quick Reset breathing card style.
-
-                  Placement decision: between Mirror anchor (status) and Main Hero (pathway
-                  selection). The user reads: where am I (Mirror) → if I just need to move
-                  right now (Move card) → otherwise pick a pathway (Hero). */}
-              <button
-                onClick={() => {
-                  setSurfacedPattern(null);
-                  setDisruptorActive(true);
-                  try { window.plausible?.("Move Card Tapped", { props: { source: "home" } }); } catch {}
-                }}
-                aria-label="Move now — 90-second body-led disruption"
-                style={{
-                  width: "100%", marginBottom: 24,
-                  padding: "16px 18px",
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r-lg)",
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  textAlign: "left",
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                  WebkitTapHighlightColor: "transparent",
-                  transition: "border-color var(--motion-default) var(--ease-prestige)"
-                }}
-              >
-                <div>
-                  <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: "var(--amber)",
-                    marginBottom: 6
-                  }}>
-                    Move
-                  </div>
-                  <div style={{
-                    fontSize: 15,
-                    color: "var(--text)",
-                    lineHeight: 1.35,
-                    marginBottom: 4,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontStyle: "italic",
-                    letterSpacing: "0.01em"
-                  }}>
-                    Disrupt the loop.
-                  </div>
-                  <div style={{
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                    lineHeight: 1.5
-                  }}>
-                    90 seconds, body-led. What thinking can't reach, the body can.
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}>
-                  →
-                </div>
-              </button>
-
-
-              {/* ── SCRIPTS CARD — engagement architecture Engine 2 (Application Layer), surface 2.
-                  Per STILLFORM_ENGAGEMENT_ARCHITECTURE.md §3.2 lines 136-138:
-                  "Scripts: Extension of State to Statement. Given a situation,
-                  generate verbatim language for the hard conversation. Either
-                  ready-to-send or starting point."
-
-                  Mechanism: opens ScriptsTool screen (defined at App.jsx ~line 15101).
-                  Calls /.netlify/functions/scripts which returns a single deployable
-                  message + tone label + optional context note.
-
-                  Voice: prestige-operator, mirrors Move card style. Same eyebrow +
-                  Cormorant italic headline + DM Sans subtitle pattern. */}
-              <button
-                onClick={() => {
-                  setScreen("scripts");
-                  try { window.plausible?.("Scripts Card Tapped", { props: { source: "home" } }); } catch {}
-                }}
-                aria-label="Scripts — generate the hard line you need to send or say"
-                style={{
-                  width: "100%", marginBottom: 24,
-                  padding: "16px 18px",
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--amber-dim)",
-                  borderRadius: "var(--r-lg)",
-                  cursor: "pointer",
-                  fontFamily: "'DM Sans', sans-serif",
-                  textAlign: "left",
-                  display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
-                  WebkitTapHighlightColor: "transparent",
-                  transition: "border-color var(--motion-default) var(--ease-prestige)"
-                }}
-              >
-                <div>
-                  <div style={{
-                    fontFamily: "'IBM Plex Mono', monospace",
-                    fontSize: 9,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: "var(--amber)",
-                    marginBottom: 6
-                  }}>
-                    Scripts
-                  </div>
-                  <div style={{
-                    fontSize: 15,
-                    color: "var(--text)",
-                    lineHeight: 1.35,
-                    marginBottom: 4,
-                    fontFamily: "'Cormorant Garamond', serif",
-                    fontStyle: "italic",
-                    letterSpacing: "0.01em"
-                  }}>
-                    Make the hard line land.
-                  </div>
-                  <div style={{
-                    fontSize: 12,
-                    color: "var(--text-muted)",
-                    lineHeight: 1.5
-                  }}>
-                    Tell the system the situation. Get one deployable line back.
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: 14, color: "var(--amber)", opacity: 0.7,
-                  fontFamily: "'IBM Plex Mono', monospace"
-                }}>
-                  →
-                </div>
-              </button>
+                  Out of scope for this commit but flagged: at session-close,
+                  offer "Generate move →" / "Get a script →" as optional output
+                  affordances. That's the proper integration per Engine 2 — the
+                  artifact is generated FROM the work the user just did, with full
+                  session context, instead of being requested in isolation. */}
 
 
 
