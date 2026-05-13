@@ -14760,7 +14760,7 @@ function MicroBiasTool({ onComplete }) {
           Shows up for me
         </button>
         <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => handleResponse(false)}>
-          Not today
+          Doesn't apply
         </button>
       </div>
 
@@ -15532,9 +15532,10 @@ function SignalMapTool({ onComplete, skipIntro = false }) {
               <div key={group.id} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)", overflow: "hidden" }}>
                 <button onClick={() => toggleTriggerGroup(group.id)} style={{
                   width: "100%", background: "none", border: "none", padding: "10px 12px",
-                  cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center"
+                  cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center",
+                  color: "var(--text)"
                 }}>
-                  <span className="t-body-sm">{group.label}</span>
+                  <span className="t-body-sm" style={{ color: "var(--text)" }}>{group.label}</span>
                   <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
                     {selectedInGroup > 0 ? `${selectedInGroup} selected` : ""} {openTriggerGroups[group.id] ? "▾" : "▸"}
                   </span>
@@ -23774,9 +23775,9 @@ const isSignalProfileConfigured = () => {
                         width: "100%", background: "none", border: "0.5px solid var(--border)",
                         borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 8,
                         cursor: "pointer", textAlign: "left", fontFamily: "'DM Sans', sans-serif",
-                        WebkitTapHighlightColor: "transparent"
+                        WebkitTapHighlightColor: "transparent", color: "var(--text)"
                       }}>
-                        <div className="t-body-md strong">{opt.label}</div>
+                        <div className="t-body-md strong" style={{ color: "var(--text)" }}>{opt.label}</div>
                         <div className="t-body-sm faint" style={{ marginTop: 2 }}>{opt.sub}</div>
                       </button>
                     ))}
