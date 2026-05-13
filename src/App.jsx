@@ -21595,7 +21595,7 @@ const isSignalProfileConfigured = () => {
             },
             {
               kicker: "Tutorial · 2 of 4",
-              title: "Composure Check — Time to First Value",
+              title: "Cognitive Baseline — Your First Read",
               focusCheckTTFV: true,
               paragraphs: [
                 "Run a 30-second Go/No-Go check first. It gives you immediate signal on attention stability, inhibition control, and response tempo.",
@@ -21615,7 +21615,7 @@ const isSignalProfileConfigured = () => {
               title: "The Skill Builds Over Time",
               paragraphs: [
                 "First-time setup: How You Process → Signal Profile → Pattern Check. One time. The system learns you.",
-                "Every day after: Morning Check-in → Self Mode → Close the loop. The less you need the app, the more it's working."
+                "Every day after: a session is a rep. Each rep sharpens the next. The practice compounds."
               ],
               footer: "If you want to know more about the app, please go to our FAQ page."
             }
