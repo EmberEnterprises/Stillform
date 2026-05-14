@@ -15708,7 +15708,7 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
                 width: "100%"
               }}
             >
-              + Name with precision · granularity gym
+              + Say it more precisely
             </button>
           ) : (
             <div style={{
@@ -15717,13 +15717,6 @@ function NoticeStepScreen({ session, onContinue, setInfoModal }) {
               borderRadius: "var(--r-lg)",
               background: "var(--surface)"
             }}>
-              <div className="t-mono-xs" style={{
-                color: "var(--amber)",
-                letterSpacing: "0.14em",
-                marginBottom: 6
-              }}>
-                GRANULARITY GYM
-              </div>
               <div style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: 16,
