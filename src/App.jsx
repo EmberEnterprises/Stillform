@@ -10427,6 +10427,37 @@ const sbOrgBillingCheckout = (orgId, cadence = "annual") => sbOrgPost("organizat
   redirect_url: `${window.location.origin}/?subscribed=true&org_id=${encodeURIComponent(orgId)}`
 });
 const sbOrgBillingPortal = (orgId) => sbOrgPost("organization-billing-portal", { org_id: orgId });
+
+// Calendar screenshot extraction — POST to vision endpoint, get structured events.
+// Reuses the same authenticated POST pattern as org endpoints.
+const sbExtractCalendarScreenshot = async ({ imageData, imageMime, tzOffsetMinutes, referenceDate }) => {
+  const session = sbGetSession();
+  if (!session?.access_token) return { ok: false, error: "Not signed in" };
+  try {
+    const url = (typeof window !== "undefined" && window.location?.hostname === "stillformapp.com")
+      ? "https://stillformapp.com/.netlify/functions/calendar-screenshot-extract"
+      : "/.netlify/functions/calendar-screenshot-extract";
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        image_data: imageData,
+        image_mime: imageMime,
+        tz_offset_minutes: tzOffsetMinutes,
+        reference_date: referenceDate
+      })
+    });
+    const data = await res.json().catch(() => ({ error: "Bad response" }));
+    if (!res.ok) return { ok: false, error: data?.error || `HTTP ${res.status}` };
+    return data;
+  } catch (err) {
+    return { ok: false, error: err?.message || "Network error" };
+  }
+};
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
@@ -19780,6 +19811,13 @@ export default function Stillform() {
   const [orgSsoBusy, setOrgSsoBusy] = useState(false);
   const [orgSsoError, setOrgSsoError] = useState(null);
   const [orgSsoSaved, setOrgSsoSaved] = useState(false);
+
+  // Calendar-import-from-screenshot state (sequence step E).
+  // Screen flow: upload image → extract events → preview/edit → ICS download.
+  const [calImportBusy, setCalImportBusy] = useState(false);
+  const [calImportError, setCalImportError] = useState(null);
+  const [calImportEvents, setCalImportEvents] = useState([]); // [{ title, start, end, all_day, selected }]
+  const [calImportPreviewUrl, setCalImportPreviewUrl] = useState(null);
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   // Pull-to-refresh state — drives the visual indicator and refresh trigger
   // on home screen. Threshold: 80px of pull to trigger refresh.
@@ -29240,6 +29278,204 @@ const isSignalProfileConfigured = () => {
           );
         })()}
 
+        {/* IMPORT CALENDAR FROM SCREENSHOT (sequence step E) */}
+        {screen === "import-calendar" && (() => {
+          const fileToBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => {
+              const result = String(reader.result || "");
+              const comma = result.indexOf(",");
+              if (comma < 0) return reject(new Error("Bad file data"));
+              resolve({ data: result.slice(comma + 1), mime: file.type || "image/png" });
+            };
+            reader.onerror = () => reject(new Error("Could not read file"));
+            reader.readAsDataURL(file);
+          });
+
+          const handleFile = async (file) => {
+            if (!file) return;
+            // 11MB raw → ~15MB base64. We cap at 10MB raw to leave headroom.
+            if (file.size > 10 * 1024 * 1024) {
+              setCalImportError("Image too large (max 10MB). Try a tighter screenshot or compress it.");
+              return;
+            }
+            setCalImportError(null);
+            setCalImportEvents([]);
+            setCalImportBusy(true);
+            try {
+              if (calImportPreviewUrl) URL.revokeObjectURL(calImportPreviewUrl);
+              const previewUrl = URL.createObjectURL(file);
+              setCalImportPreviewUrl(previewUrl);
+              const { data, mime } = await fileToBase64(file);
+              const tzOffset = new Date().getTimezoneOffset();
+              const refDate = TimeKeeper.clockDay();
+              const result = await sbExtractCalendarScreenshot({
+                imageData: data,
+                imageMime: mime,
+                tzOffsetMinutes: tzOffset,
+                referenceDate: refDate
+              });
+              if (result?.ok && Array.isArray(result.events)) {
+                setCalImportEvents(result.events.map((ev) => ({ ...ev, selected: true })));
+                if (result.events.length === 0) {
+                  setCalImportError("No events visible in this screenshot. Try a clearer image.");
+                }
+                try {
+                  window.plausible?.("Calendar Screenshot Extracted", {
+                    props: { event_count: result.events.length }
+                  });
+                } catch {}
+              } else {
+                setCalImportError(result?.error || "Extraction failed");
+              }
+            } catch (err) {
+              setCalImportError(err?.message || "Could not process image");
+            }
+            setCalImportBusy(false);
+          };
+
+          const addSelectedToCalendar = () => {
+            const selected = calImportEvents.filter((ev) => ev.selected);
+            if (selected.length === 0) return;
+            const icsEvents = selected.map((ev) => {
+              const start = new Date(ev.start);
+              if (Number.isNaN(start.getTime())) return null;
+              let end = ev.end ? new Date(ev.end) : null;
+              if (!end || Number.isNaN(end.getTime())) {
+                end = new Date(start.getTime() + 60 * 60 * 1000);
+              }
+              return {
+                summary: ev.title || "Event",
+                dtstart: start,
+                dtend: end,
+                description: "Imported via Stillform calendar screenshot import."
+              };
+            }).filter(Boolean);
+            const ics = buildIcsCalendar(icsEvents);
+            const ok = downloadIcsFile(ics, `stillform-imported-${Date.now()}.ics`);
+            try {
+              window.plausible?.("Calendar Screenshot Imported", {
+                props: { event_count: selected.length, success: ok ? "yes" : "no" }
+              });
+            } catch {}
+          };
+
+          const muted = "var(--text-muted)";
+          const selectedCount = calImportEvents.filter((ev) => ev.selected).length;
+
+          return (
+            <section style={{ maxWidth: 520, margin: "0 auto", padding: "32px 24px" }}>
+              <button onClick={() => setScreen("settings")} style={{
+                background: "none", border: "none", color: muted, fontSize: 12,
+                cursor: "pointer", marginBottom: 16, padding: "8px 0"
+              }}>← Back</button>
+              <h1 className="t-display-lg" style={{ marginBottom: 8 }}>Import calendar</h1>
+              <div style={{ fontSize: 13, color: muted, lineHeight: 1.55, marginBottom: 24 }}>
+                Take a screenshot of your week in any calendar app, upload it here, and Stillform will extract the events. Useful when you can't OAuth-connect your work calendar.
+              </div>
+
+              <div style={{
+                padding: "10px 12px", background: "var(--surface)",
+                border: "1px solid var(--border)", borderRadius: "var(--r-md)",
+                fontSize: 11, color: muted, lineHeight: 1.55, marginBottom: 16
+              }}>
+                <strong style={{ color: "var(--text)" }}>Privacy:</strong> the screenshot is sent to our vision endpoint, extracted, and discarded. Nothing about the screenshot is stored on our servers. The extracted events live only on this device until you choose to add them to your calendar.
+              </div>
+
+              <label className="btn btn-primary" style={{
+                width: "100%", padding: "14px 18px", display: "block", textAlign: "center",
+                cursor: calImportBusy ? "not-allowed" : "pointer", marginBottom: 12
+              }}>
+                {calImportBusy ? "Extracting…" : (calImportEvents.length > 0 ? "Choose a different screenshot" : "Choose screenshot →")}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  disabled={calImportBusy}
+                  onChange={(e) => handleFile(e.target.files?.[0])}
+                  style={{ display: "none" }}
+                />
+              </label>
+
+              {calImportPreviewUrl && (
+                <div style={{ marginBottom: 16 }}>
+                  <img src={calImportPreviewUrl} alt="Screenshot preview" style={{
+                    width: "100%", borderRadius: "var(--r-md)", border: "1px solid var(--border)"
+                  }} />
+                </div>
+              )}
+
+              {calImportError && (
+                <div style={{ fontSize: 12, color: muted, marginBottom: 12 }}>{calImportError}</div>
+              )}
+
+              {calImportEvents.length > 0 && (
+                <>
+                  <div style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "baseline",
+                    marginBottom: 10
+                  }}>
+                    <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>
+                      Extracted events
+                    </span>
+                    <span style={{ fontSize: 11, color: muted }}>
+                      {selectedCount} of {calImportEvents.length} selected
+                    </span>
+                  </div>
+                  <div style={{ marginBottom: 16 }}>
+                    {calImportEvents.map((ev, idx) => {
+                      const startDate = ev.start ? new Date(ev.start) : null;
+                      const startStr = startDate && !Number.isNaN(startDate.getTime())
+                        ? startDate.toLocaleString(undefined, {
+                            weekday: "short", month: "short", day: "numeric",
+                            hour: ev.all_day ? undefined : "numeric",
+                            minute: ev.all_day ? undefined : "2-digit"
+                          })
+                        : ev.start;
+                      return (
+                        <label key={idx} style={{
+                          display: "flex", alignItems: "flex-start", gap: 12,
+                          padding: "10px 12px", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", marginBottom: 6,
+                          background: ev.selected ? "var(--surface)" : "transparent",
+                          cursor: "pointer"
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={ev.selected}
+                            onChange={(e) => {
+                              const next = calImportEvents.slice();
+                              next[idx] = { ...next[idx], selected: e.target.checked };
+                              setCalImportEvents(next);
+                            }}
+                            style={{ marginTop: 2 }}
+                          />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontSize: 14, color: "var(--text)", marginBottom: 2 }}>{ev.title}</div>
+                            <div style={{ fontSize: 11, color: muted, fontFamily: "'IBM Plex Mono', monospace" }}>
+                              {startStr}{ev.all_day ? " · all day" : ""}
+                            </div>
+                          </div>
+                        </label>
+                      );
+                    })}
+                  </div>
+                  <button
+                    onClick={addSelectedToCalendar}
+                    className="btn btn-primary"
+                    style={{ width: "100%", padding: "14px 18px" }}
+                    disabled={selectedCount === 0}
+                  >
+                    Add {selectedCount} event{selectedCount === 1 ? "" : "s"} to calendar →
+                  </button>
+                  <div style={{ fontSize: 11, color: muted, marginTop: 8, lineHeight: 1.55, textAlign: "center" }}>
+                    Downloads a .ics file. Your calendar app opens it for review.
+                  </div>
+                </>
+              )}
+            </section>
+          );
+        })()}
+
         {/* ORG AUDIT LOG */}
         {screen === "org-audit-log" && (() => {
           const adminMembership = orgStatus.memberships.find(
@@ -30922,6 +31158,24 @@ const isSignalProfileConfigured = () => {
                 {integrationContext.calendarConsent === "revoked" && <div style={{ marginBottom: 10, fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5 }}>Calendar access is revoked. Re-enable to let Stillform use upcoming schedule context.</div>}
                 {integrationContext.calendarError && <div style={{ marginBottom: 10, fontSize: 11, color: "#c05040", lineHeight: 1.5 }}>Calendar error: {integrationContext.calendarError}</div>}
                 {integrationContext.calendarLastRetryAt && <div style={{ marginBottom: 10, fontSize: 10, color: "var(--text-muted)" }}>Calendar retry queued: {new Date(integrationContext.calendarLastRetryAt).toLocaleString()}</div>}
+                <button
+                  onClick={() => {
+                    setCalImportError(null);
+                    setCalImportEvents([]);
+                    if (calImportPreviewUrl) {
+                      try { URL.revokeObjectURL(calImportPreviewUrl); } catch {}
+                      setCalImportPreviewUrl(null);
+                    }
+                    setScreen("import-calendar");
+                  }}
+                  className="btn btn-ghost"
+                  style={{ width: "100%", padding: "10px 14px", marginBottom: 10, fontSize: 13 }}
+                >
+                  Import calendar from screenshot →
+                </button>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5, marginBottom: 12 }}>
+                  Upload a screenshot of your week from any calendar app. We extract events with vision AI and hand you a .ics import. Useful when corporate IT blocks OAuth calendar connections.
+                </div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <div style={{ fontSize: 13, color: "var(--text)" }}>Health context</div>
                   <div className="t-mono-xs" style={{ letterSpacing: "0.1em", color: integrationSignalColor("health", !!integrationContext.health) }}>
