@@ -10098,6 +10098,170 @@ const getOrCreateInstallId = () => {
     return null;
   }
 };
+
+// ─────────────────────────────────────────────────────────────────────────
+// ICS calendar export — for adding pre-event reminders + post-event
+// decompression blocks to the user's calendar without requiring native
+// Capacitor EventKit/Calendar Provider integration.
+//
+// Universal alternative path: the user downloads an .ics file, their OS
+// opens the default calendar app, and import is a tap. Works on iOS,
+// Android, macOS, Windows, Linux, and every PWA install path. Native
+// EventKit integration may follow as an upgrade for in-app one-tap add.
+// ─────────────────────────────────────────────────────────────────────────
+
+const formatIcsDate = (date) => {
+  // RFC 5545 DATE-TIME in UTC: YYYYMMDDTHHMMSSZ
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return null;
+  const pad = (n) => String(n).padStart(2, "0");
+  return (
+    d.getUTCFullYear() +
+    pad(d.getUTCMonth() + 1) +
+    pad(d.getUTCDate()) + "T" +
+    pad(d.getUTCHours()) +
+    pad(d.getUTCMinutes()) +
+    pad(d.getUTCSeconds()) + "Z"
+  );
+};
+
+const escapeIcsText = (value) =>
+  String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/\n/g, "\\n")
+    .replace(/,/g, "\\,")
+    .replace(/;/g, "\\;");
+
+const generateIcsUid = () => {
+  const rand = (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function")
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${rand}@stillformapp.com`;
+};
+
+/**
+ * Build an .ics file body containing one or more VEVENTs.
+ * Returns a string ready for download as text/calendar.
+ *
+ * events: [{ summary, description?, dtstart, dtend, alarmsMinutes?: number[] }]
+ *   - dtstart / dtend: Date object or ISO string in any timezone
+ *   - alarmsMinutes: optional array of "minutes before start" reminders
+ */
+const buildIcsCalendar = (events) => {
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//ARA Embers//Stillform//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH"
+  ];
+  const stamp = formatIcsDate(new Date());
+  for (const event of events || []) {
+    const dtStart = formatIcsDate(event.dtstart);
+    const dtEnd = formatIcsDate(event.dtend);
+    if (!dtStart || !dtEnd) continue;
+    lines.push("BEGIN:VEVENT");
+    lines.push(`UID:${generateIcsUid()}`);
+    lines.push(`DTSTAMP:${stamp}`);
+    lines.push(`DTSTART:${dtStart}`);
+    lines.push(`DTEND:${dtEnd}`);
+    lines.push(`SUMMARY:${escapeIcsText(event.summary || "Stillform")}`);
+    if (event.description) {
+      lines.push(`DESCRIPTION:${escapeIcsText(event.description)}`);
+    }
+    if (Array.isArray(event.alarmsMinutes)) {
+      for (const minutes of event.alarmsMinutes) {
+        const m = Math.max(0, Math.floor(Number(minutes) || 0));
+        lines.push("BEGIN:VALARM");
+        lines.push("ACTION:DISPLAY");
+        lines.push(`DESCRIPTION:${escapeIcsText(event.summary || "Stillform reminder")}`);
+        lines.push(`TRIGGER:-PT${m}M`);
+        lines.push("END:VALARM");
+      }
+    }
+    lines.push("END:VEVENT");
+  }
+  lines.push("END:VCALENDAR");
+  // RFC 5545 requires CRLF line endings.
+  return lines.join("\r\n") + "\r\n";
+};
+
+/**
+ * Build a pre-event brief reminder + post-event decompression block for a
+ * specific meeting. Returns an .ics string with two VEVENTs.
+ *
+ * eventTitle: the user's meeting title (we don't mention it in calendar
+ *   text to avoid leaking sensitive meeting names; we say "before this
+ *   meeting" / "after this meeting")
+ * eventStart: ISO or Date
+ * eventDurationMinutes: meeting length (default 60)
+ * decompressionMinutes: how long the decompression block is (default 15)
+ * preBriefMinutes: how far before the meeting the brief reminder fires
+ *   (default 30; the reminder is a 5-minute event ending at the meeting
+ *   start to give the user a visible block to use)
+ */
+const buildPreMeetingAndDecompressionIcs = ({
+  eventStart,
+  eventDurationMinutes = 60,
+  decompressionMinutes = 15,
+  preBriefMinutes = 30
+}) => {
+  const start = new Date(eventStart);
+  if (Number.isNaN(start.getTime())) return null;
+
+  const briefStart = new Date(start.getTime() - preBriefMinutes * 60 * 1000);
+  const briefEnd = new Date(start.getTime() - (preBriefMinutes - 5) * 60 * 1000);
+  // 5-minute brief block ending at meeting-start-minus-(preBriefMinutes-5).
+
+  const meetingEnd = new Date(start.getTime() + eventDurationMinutes * 60 * 1000);
+  const decompStart = new Date(meetingEnd.getTime());
+  const decompEnd = new Date(meetingEnd.getTime() + decompressionMinutes * 60 * 1000);
+
+  return buildIcsCalendar([
+    {
+      summary: "Pre-meeting reset · Stillform",
+      description:
+        "Five minutes to set tone before the next meeting. Open Stillform for the pre-event brief.\n\nAdded by Stillform — your practice content stays private.",
+      dtstart: briefStart,
+      dtend: briefEnd,
+      alarmsMinutes: [0]
+    },
+    {
+      summary: "Decompression · Stillform",
+      description:
+        `${decompressionMinutes} minutes to clear the last meeting before the next thing. Open Stillform for a quick reset.\n\nAdded by Stillform — your practice content stays private.`,
+      dtstart: decompStart,
+      dtend: decompEnd,
+      alarmsMinutes: [0]
+    }
+  ]);
+};
+
+/**
+ * Download an .ics string as a file. The browser hands the file to the
+ * OS, which opens the user's default calendar app for import. No native
+ * code required; works on every PWA install path and on desktop browsers.
+ */
+const downloadIcsFile = (icsContent, filename = "stillform-event.ics") => {
+  if (typeof window === "undefined" || !icsContent) return false;
+  try {
+    const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.style.display = "none";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Revoke the blob URL after a short delay so the download completes.
+    setTimeout(() => { try { URL.revokeObjectURL(url); } catch {} }, 5000);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 // Device locale capture (Apr 27 2026). Captured once per install for demand-data only.
 // Tells us which languages users' devices are set to so translation prioritization can be
 // data-driven rather than guesswork. Stored locally; surfaced in Settings UI under Language
@@ -24225,6 +24389,32 @@ const isSignalProfileConfigured = () => {
                   startGuidedSession("pre-event-rep");
                 }} style={{ width: "100%" }}>
                   Run the rep · 60 sec →
+                </button>
+                <button className="btn btn-ghost" onClick={() => {
+                  // Build ICS with the pre-event brief reminder + post-event
+                  // decompression block. Universal path — works on every
+                  // platform without native Capacitor integration.
+                  const ics = buildPreMeetingAndDecompressionIcs({
+                    eventStart: target.start,
+                    eventDurationMinutes: 60,
+                    decompressionMinutes: 15,
+                    preBriefMinutes: 30
+                  });
+                  if (!ics) return;
+                  const filename = `stillform-${(target.title || "meeting").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}.ics`;
+                  const ok = downloadIcsFile(ics, filename);
+                  try {
+                    window.plausible?.("Decompression Added To Calendar", {
+                      props: { success: ok ? "yes" : "no" }
+                    });
+                  } catch {}
+                }} style={{
+                  width: "100%",
+                  padding: "10px 24px",
+                  marginTop: 8,
+                  fontSize: 13
+                }}>
+                  Add 15-min decompression to calendar →
                 </button>
                 <button className="btn btn-ghost" onClick={() => {
                   setPreEventBriefTarget(null);
