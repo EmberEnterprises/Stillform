@@ -291,6 +291,7 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 - `B2B_PRIVACY_POLICY_ADDENDUM.md` — privacy policy addendum text for organization-purchased seats (draft pending legal review)
 - `B2B_DPA_TEMPLATE.md` — Data Processing Agreement template covering GDPR Article 28 + CCPA processor obligations (draft pending legal review)
 - `B2B_IT_DEPLOYMENT_GUIDE.md` — for IT admins rolling out via MDM (Intune / Jamf / Workspace ONE); covers network, app distribution, SSO posture, sub-processors, security controls
+- `B2B_SSO_INTEGRATION.md` — SSO architecture; three implementation paths (Supabase Auth SSO / samlify / WorkOS) with decision criteria; configuration UI status; auth-flow walkthrough; JIT provisioning rules
 - `SOC2_TYPE_1_READINESS.md` — internal SOC 2 readiness inventory mapped to Trust Service Criteria; starting point for audit firm engagement
 - `STILLFORM_HANDOFF_MAY_13_2026.md` — May 13 session-specific handoff (superseded by future handoffs)
 - `STILLFORM_PROJECT_TRANSFER.md` — April 2026 historical project state (largely superseded by this doc and Master_Todo)

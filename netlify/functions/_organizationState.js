@@ -266,6 +266,8 @@ export const buildOrgStatusForUser = async (userId) => {
       org_status: org.status,
       subscription_status: org.subscription_status || null,
       has_active_subscription: Boolean(org.lemon_subscription_id) && org.status === "active",
+      sso_provider: org.sso_provider || null,
+      auto_join_domain: org.auto_join_domain || null,
       plan_tier: org.plan_tier,
       role: membership.role,
       status: membership.status,
