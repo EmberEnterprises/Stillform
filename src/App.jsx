@@ -19831,6 +19831,14 @@ export default function Stillform() {
   const [ciTension, setCiTension] = useState({});
   const [ciOffBaselineOpen, setCiOffBaselineOpen] = useState(false); // "something's off" branch
   const [ciSaved, setCiSaved] = useState(false);
+  // May 14, 2026 — "What's on the table today?" closed-set chip row. Captures
+  // the user's anticipated load for the day (hard conversation / decision /
+  // recovery / excitement / known trigger / nothing specific). Single-select,
+  // optional. Feeds Today's Brief AI as structured input — no open-text AI
+  // misread risk (the failure mode Arlin diagnosed for one-shot inputs).
+  // Pattern: chips for daily ritual capture, open text only inside Reframe's
+  // conversational turn-taking where the user can correct AI on the next turn.
+  const [ciOnTheTable, setCiOnTheTable] = useState(null);
   // Phase 3d — Today's Brief poll tick. Forces a re-render after generation
   // completes so the inline display in the post-checkin card picks up the
   // newly-persisted brief without requiring user interaction. Incremented by
@@ -24437,7 +24445,8 @@ const isSignalProfileConfigured = () => {
                       date: today, energy: ciEnergy || "steady",
                       mood: ciMood || null, // May 7, 2026 — morning emotional state, restored after broken-contract fix
                       bio: bioArray.length > 0 ? bioArray : ["clear"],
-                      tension: Object.keys(ciTension).length > 0 ? ciTension : null
+                      tension: Object.keys(ciTension).length > 0 ? ciTension : null,
+                      onTheTable: ciOnTheTable || null // May 14, 2026 — anticipated day load (closed-set)
                     }));
                     trackMorningComplete({
                       date: today,
@@ -24473,7 +24482,8 @@ const isSignalProfileConfigured = () => {
                       energy: ciEnergy || "steady",
                       mood: ciMood || null,
                       bio: bioArray.length > 0 ? bioArray : ["clear"],
-                      tension: Object.keys(ciTension).length > 0 ? ciTension : null
+                      tension: Object.keys(ciTension).length > 0 ? ciTension : null,
+                      onTheTable: ciOnTheTable || null // May 14, 2026 — captivated morning, anticipated day load
                     };
                     generateTodaysBrief(checkinSnapshot).catch(() => {});
                     try { window.plausible("Today's Brief Generated", { props: { surface: "morning-checkin" } }); } catch {}
@@ -24520,7 +24530,7 @@ const isSignalProfileConfigured = () => {
                             source: "update"
                           });
                         } catch {}
-                        setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
+                        setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false); setCiOnTheTable(null);
                       }} style={{
                         width: "100%", background: "transparent",
                         borderTop: "0.5px solid var(--border-printed)",
@@ -24553,10 +24563,18 @@ const isSignalProfileConfigured = () => {
                           borderBottom: "0.5px solid var(--border-printed)",
                           padding: "20px 4px", marginBottom: 20
                         }}>
+                          {/* May 14, 2026 — captivated morning: progressive brief reveal.
+                              Each section of Today's Brief fades in with a cascading delay
+                              after the brief loads. Hardware first (the read of the user),
+                              then Risks (where Reframe routes), then Moves (where Move card
+                              routes), then Recovery (where Body Scan routes). Reads like a
+                              letter being written for the user, not a wall arriving. */}
+                          <style>{`@keyframes morningFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
                           <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.14em" }}>
                             Today's Brief
                           </div>
 
+                          <div style={{ opacity: 0, animation: "morningFadeIn 700ms 100ms ease-out forwards" }}>
                           <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em", marginBottom: 6 }}>
                             Hardware
                           </div>
@@ -24566,9 +24584,10 @@ const isSignalProfileConfigured = () => {
                           }}>
                             {todaysBrief.hardware}
                           </div>
+                          </div>
 
                           {todaysBrief.risks && (
-                            <>
+                            <div style={{ opacity: 0, animation: "morningFadeIn 700ms 600ms ease-out forwards" }}>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
                               <button
                                 onClick={() => {
@@ -24605,11 +24624,11 @@ const isSignalProfileConfigured = () => {
                                   {todaysBrief.risks}
                                 </div>
                               </button>
-                            </>
+                            </div>
                           )}
 
                           {todaysBrief.moves && (
-                            <>
+                            <div style={{ opacity: 0, animation: "morningFadeIn 700ms 1100ms ease-out forwards" }}>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
                               <button
                                 onClick={() => {
@@ -24642,11 +24661,11 @@ const isSignalProfileConfigured = () => {
                                   {todaysBrief.moves}
                                 </div>
                               </button>
-                            </>
+                            </div>
                           )}
 
                           {todaysBrief.recovery && (
-                            <>
+                            <div style={{ opacity: 0, animation: "morningFadeIn 700ms 1600ms ease-out forwards" }}>
                               <div style={{ height: "0.5px", background: "var(--border-printed)", marginBottom: 14 }} />
                               <button
                                 onClick={() => {
@@ -24682,7 +24701,7 @@ const isSignalProfileConfigured = () => {
                                   {todaysBrief.recovery}
                                 </div>
                               </button>
-                            </>
+                            </div>
                           )}
 
                           {generatedTime && (
@@ -24721,7 +24740,34 @@ const isSignalProfileConfigured = () => {
 
                 return (
                   <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>Morning Check-in</div>
+                    {/* May 14, 2026 — captivated morning. Five moves: opening anchor (this),
+                        cascade reveal (animation delays on each section), mirror beat (serif
+                        echo after energy+arriving), "what's on the table" closed-set chip row,
+                        calendar events as weighted moments. The chips stay underneath — what
+                        changes is the pacing and the spaces between them. Captivation lives in
+                        tempo, reveal, mirror, typography. Not features. */}
+                    <style>{`@keyframes morningFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                    {/* Opening anchor — threshold beat. The user is entering something, not filling a form. */}
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 24,
+                      fontWeight: 300,
+                      color: "var(--text-cream)",
+                      textAlign: "center",
+                      marginBottom: 4,
+                      letterSpacing: "0.01em",
+                      opacity: 0,
+                      animation: "morningFadeIn 600ms ease-out forwards"
+                    }}>
+                      {new Date().toLocaleDateString("en-US", { weekday: "long" })}.
+                    </div>
+                    <div className="t-mono-xs" style={{
+                      color: "var(--text-muted)", marginBottom: 18, textAlign: "center",
+                      letterSpacing: "0.16em",
+                      opacity: 0, animation: "morningFadeIn 600ms 250ms ease-out forwards"
+                    }}>
+                      MORNING CHECK-IN
+                    </div>
                     {(() => {
                       const breathCueOn = (() => { try { return localStorage.getItem("stillform_morning_breath_cue") === "on"; } catch { return false; } })();
                       if (!breathCueOn) return null;
@@ -24740,6 +24786,7 @@ const isSignalProfileConfigured = () => {
                       </div>
                     )}
 
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 500ms ease-out forwards" }}>
                     <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How's your energy?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Low", "Steady", "High", "Ready", "On fire", "Wired"].map(e => (
@@ -24752,18 +24799,9 @@ const isSignalProfileConfigured = () => {
                         }}>{e}</button>
                       ))}
                     </div>
+                    </div>
 
-                    {/* Emotional state chip row — May 7, 2026 addition. Captures morning emotional
-                        anchor so PresentStateChips' checkinMood reader at Reframe entry surfaces
-                        it in "From this morning". Also seeds stillform_feelstate so the AI has
-                        emotional context for the first session of the day without the user having
-                        to re-pick at Reframe entry. Reuses the 9 feel-chips from PresentStateChips
-                        for consistency (Russell circumplex grouping). Single-select, optional.
-
-                        May 12, 2026 — Info button consolidated. Previously each chip had its own
-                        ⓘ button (9 buttons cluttering the row). Replaced with a single ⓘ next to
-                        the question header that opens a modal showing all 9 definitions in a
-                        structured list. Same chip data (CHIP_DEFINITIONS); cleaner visual. */}
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 700ms ease-out forwards" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 4, marginBottom: 10 }}>
                       <div className="t-body-sm quiet">How are you arriving? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span></div>
                       <button
@@ -24798,7 +24836,29 @@ const isSignalProfileConfigured = () => {
                         }}>{m.label}</button>
                       ))}
                     </div>
+                    </div>
 
+                    {/* Mirror beat — May 14, 2026. When both energy and arriving are named,
+                        the system reads them back in serif. Affect labeling made visible:
+                        the user feels seen, not processed. Lieberman 2007 (affect labeling
+                        does regulation work) made into a typographic moment. Quiet, italic,
+                        muted color — not a celebration, a recognition. */}
+                    {ciEnergy && ciMood && (
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 18,
+                        fontStyle: "italic",
+                        color: "var(--text-muted)",
+                        textAlign: "center",
+                        margin: "4px 0 22px 0",
+                        opacity: 0,
+                        animation: "morningFadeIn 800ms ease-out forwards"
+                      }}>
+                        {ciEnergy.charAt(0).toUpperCase() + ciEnergy.slice(1)}. {ciMood.charAt(0).toUpperCase() + ciMood.slice(1)}.
+                      </div>
+                    )}
+
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 900ms ease-out forwards" }}>
                     <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Hardware check</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {[
@@ -24883,7 +24943,9 @@ const isSignalProfileConfigured = () => {
                         </div>
                       </div>
                     )}
+                    </div>
 
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 1100ms ease-out forwards" }}>
                     <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Where are you holding tension?</div>
                     <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
                       {["Jaw","Shoulders","Chest","Gut","Hands","Legs"].map(area => {
@@ -24904,7 +24966,42 @@ const isSignalProfileConfigured = () => {
                       })}
                     </div>
                     <div style={{ fontSize: 10, color: "var(--text-muted)", marginBottom: 16, fontStyle: "italic" }}>Tap once = mild · twice = high</div>
+                    </div>
 
+                    {/* What's on the table today — May 14, 2026. Closed-set chip row for
+                        anticipated day load. Captures external pressure the user is bringing
+                        into the day, feeding Today's Brief AI with structured input (no
+                        open-text misread risk). Six options cover the full range without
+                        becoming a survey. Single-select, optional — user taps to set, taps
+                        again to clear. Per Arlin's diagnosis: open text + AI on one-shot
+                        input creates the misread-conflict failure mode (same pattern as
+                        the communication problems she experiences). Chips for daily ritual;
+                        open text only inside conversational turn-taking. */}
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 1300ms ease-out forwards" }}>
+                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>
+                      What's on the table today? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                      {[
+                        { id: "hard-convo", label: "Hard convo" },
+                        { id: "decision", label: "Decision" },
+                        { id: "recovery", label: "Recovery" },
+                        { id: "excitement", label: "Excitement" },
+                        { id: "trigger", label: "Trigger" },
+                        { id: "open", label: "Open day" }
+                      ].map(t => (
+                        <button key={t.id} onClick={() => setCiOnTheTable(ciOnTheTable === t.id ? null : t.id)} style={{
+                          background: ciOnTheTable === t.id ? "var(--amber-glow)" : "transparent",
+                          border: `1px solid ${ciOnTheTable === t.id ? "var(--amber-dim)" : "var(--border)"}`,
+                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                          color: ciOnTheTable === t.id ? "var(--amber)" : "var(--text-muted)",
+                          fontFamily: "'DM Sans', sans-serif"
+                        }}>{t.label}</button>
+                      ))}
+                    </div>
+                    </div>
+
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 1500ms ease-out forwards" }}>
                     <div className="t-body-sm quiet" style={{ marginBottom: 4 }}>
                       What do you want today?
                       <button aria-label="Why choose your outcome?" onClick={() => setInfoModal({ title: "Why choose your outcome?", body: "Naming what you want today before the day hits is implementation intention formation (Gollwitzer 1999). Morning intention-setting bypasses decision paralysis when stress arrives later — the if-then plan is already in place. Mental Contrasting (Oettingen) extends this: identifying a desired outcome alongside today's actual state creates cognitive readiness that makes regulation more automatic. Stillform uses your morning outcome to recommend the right starting protocol for your day." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
@@ -24928,7 +25025,77 @@ const isSignalProfileConfigured = () => {
                         );
                       })}
                     </div>
+                    </div>
 
+                    {/* Today — calendar events as weighted moments. May 14, 2026.
+                        Each event renders as its own beat with time + name + Prep brief
+                        tap. Tapping invokes the existing Pre-event Brief flow (Engine 2
+                        Build #7c+7d shipped) — sets target event + navigates to brief
+                        screen, which reads cached or fires generation. No native calendar
+                        write yet (that's a separate ship). The visual treatment is
+                        Arlin's "weighted moments" call: not a bullet list, each event
+                        gets a hairline-bound row with its own typography weight. Hidden
+                        when no events for today (silent absence beats wellness-app
+                        prompt). */}
+                    {(() => {
+                      let todayEvents = [];
+                      try {
+                        const stillformToday = TimeKeeper.stillformDay();
+                        const ev = JSON.parse(localStorage.getItem("stillform_calendar_events") || "[]");
+                        if (Array.isArray(ev)) {
+                          todayEvents = ev.filter(e => {
+                            if (!e?.title) return false;
+                            try { return TimeKeeper.stillformDayOf(e.start) === stillformToday; }
+                            catch { return false; }
+                          }).sort((a, b) => new Date(a.start || 0) - new Date(b.start || 0));
+                        }
+                      } catch {}
+                      if (todayEvents.length === 0) return null;
+                      return (
+                        <div style={{ marginBottom: 20, opacity: 0, animation: "morningFadeIn 600ms 1700ms ease-out forwards" }}>
+                          <div className="t-body-sm quiet" style={{ marginBottom: 12 }}>Today</div>
+                          <div style={{ display: "flex", flexDirection: "column" }}>
+                            {todayEvents.slice(0, 5).map((event, idx) => {
+                              const eventDate = new Date(event.start);
+                              const timeStr = isNaN(eventDate.getTime())
+                                ? ""
+                                : eventDate.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                              return (
+                                <div key={`${event.title}-${event.start}-${idx}`} style={{
+                                  display: "flex", justifyContent: "space-between", alignItems: "center",
+                                  padding: "12px 0",
+                                  borderTop: idx === 0 ? "0.5px solid var(--border-printed)" : "none",
+                                  borderBottom: "0.5px solid var(--border-printed)"
+                                }}>
+                                  <div style={{ flex: 1, minWidth: 0, paddingRight: 12 }}>
+                                    {timeStr && (
+                                      <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 2, letterSpacing: "0.06em" }}>{timeStr}</div>
+                                    )}
+                                    <div className="t-body-sm" style={{ color: "var(--text-cream)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{event.title}</div>
+                                  </div>
+                                  <button onClick={() => {
+                                    try {
+                                      setPreEventBriefTarget({ title: String(event.title), start: String(event.start || "") });
+                                      setScreen("pre-event-brief");
+                                      try { window.plausible?.("Pre-Event Brief Tapped", { props: { surface: "morning-checkin-events" } }); } catch {}
+                                    } catch {}
+                                  }} style={{
+                                    background: "transparent",
+                                    border: "0.5px solid var(--border)",
+                                    borderRadius: 16, padding: "6px 12px", fontSize: 11,
+                                    color: "var(--text-muted)", cursor: "pointer",
+                                    fontFamily: "'DM Sans', sans-serif",
+                                    whiteSpace: "nowrap", flexShrink: 0
+                                  }}>Prep brief →</button>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    <div style={{ opacity: 0, animation: "morningFadeIn 600ms 1900ms ease-out forwards" }}>
                     <button onClick={saveCheckin} style={{
                       width: "100%", background: "var(--surface)", color: "var(--amber)",
                       border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
@@ -24938,6 +25105,7 @@ const isSignalProfileConfigured = () => {
                     }}>
                       Done. Start the day. →
                     </button>
+                    </div>
                   </div>
                 );
               
