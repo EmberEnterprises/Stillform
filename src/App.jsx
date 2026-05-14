@@ -3588,6 +3588,11 @@ const buildEodArtifactPayload = (eodToday) => {
     eodComposure: eodToday?.composure || "",
     eodWord: eodToday?.word || "",
     morningEnergy: eodToday?.morningEnergy || "",
+    // May 14, 2026 — captivated EOD passes the anticipated tomorrow load
+    // chip selection through to the AI so the artifact can close the loop
+    // forward-looking when it's set. Backend (eod-artifact.js) can use or
+    // ignore this field; client always sends it for forward compatibility.
+    onTheTableTomorrow: eodToday?.onTheTableTomorrow || "",
     sessionsToday: sessionsToday.length,
     toolsUsed,
     feelStatesToday,
@@ -3719,6 +3724,17 @@ const getTodaysBriefForToday = () => {
   try {
     const today = TimeKeeper.stillformDay();
     return getTodaysBriefs().find(r => r.date === today) || null;
+  } catch { return null; }
+};
+
+// May 14, 2026 — captivated EOD parallel to Today's Brief. Reads today's
+// EOD artifact for inline display in the saved-state branch + open form
+// once generation lands. Same shape as getTodaysBriefForToday — returns
+// the artifact record { date, artifact, generatedAt } or null.
+const getEodArtifactForToday = () => {
+  try {
+    const today = TimeKeeper.stillformDay();
+    return getEodArtifacts().find(r => r.date === today) || null;
   } catch { return null; }
 };
 
@@ -19858,6 +19874,21 @@ export default function Stillform() {
   const [eodComposure, setEodComposure] = useState(null);
   const [eodWord, setEodWord] = useState(null);
   const [eodSaved, setEodSaved] = useState(false);
+  // May 14, 2026 — captivated EOD. New chip row "What stays on the table
+  // for tomorrow?" — closed-set, single-select (parallels morning's
+  // ciOnTheTable). Feeds the EOD artifact AI for tomorrow-aware close
+  // language and informs the morning brief generation the next day.
+  const [eodOnTheTableTomorrow, setEodOnTheTableTomorrow] = useState(null);
+  // May 14, 2026 — EOD artifact poll tick. Parallels todaysBriefPollTick.
+  // Generation fires fire-and-forget from saveEod; the artifact lands in
+  // storage 3-12s later. Increment every 1.5s after eodSaved flips true
+  // so the inline reveal re-reads getEodArtifactForToday() and renders
+  // the artifact once it arrives.
+  const [eodArtifactPollTick, setEodArtifactPollTick] = useState(0);
+  // May 14, 2026 — Bedtime surface dismissed flag. Component-local only,
+  // resets on next mount (which is fine: each evening is a new bedtime
+  // window). Lets user dismiss the wind-down surface without re-firing.
+  const [bedtimeDismissed, setBedtimeDismissed] = useState(false);
   // Phase 2b — Trigger Profile EOD post-save prompt. Transient state: set
   // true by saveEod immediately after persistence; flipped false by the
   // prompt's submit or skip handlers. Component-local only (no persistence)
@@ -20571,6 +20602,40 @@ export default function Stillform() {
       clearInterval(interval);
     };
   }, [preEventBriefTarget]);
+
+  // May 14, 2026 — EOD artifact poll. Parallels Today's Brief 3d. After
+  // eodSaved becomes true, generateEodArtifact (called inside saveEod)
+  // fires async. Poll every 1.5s up to 8 ticks (12s) so the saved-state
+  // branch picks up the artifact via getEodArtifactForToday() and reveals
+  // it inline. Stops early on artifact present. Cleanup on unmount per
+  // audit philosophy timer-leak guard. Same operational pattern as the
+  // morning brief — Layer 6.4 diff anomaly avoided by mirroring the
+  // working pattern verbatim (only the storage key and read function
+  // differ between the two surfaces).
+  useEffect(() => {
+    if (!eodSaved) return;
+    let cancelled = false;
+    let ticks = 0;
+    setEodArtifactPollTick(0);
+    const interval = setInterval(() => {
+      if (cancelled) return;
+      ticks += 1;
+      try {
+        const present = getEodArtifactForToday();
+        if (present) {
+          clearInterval(interval);
+          setEodArtifactPollTick(t => t + 1);
+          return;
+        }
+      } catch {}
+      setEodArtifactPollTick(t => t + 1);
+      if (ticks >= 8) clearInterval(interval);
+    }, 1500);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [eodSaved]);
   const [activeTool, setActiveTool] = useState(null);
   const [pathway, setPathway] = useState(null);
   const [sharedText, setSharedText] = useState(null);
@@ -25993,6 +26058,10 @@ const isSignalProfileConfigured = () => {
                       if (saved.energy) setEodEnergy(saved.energy);
                       if (saved.composure) setEodComposure(saved.composure);
                       if (saved.word) setEodWord(saved.word);
+                      // May 14, 2026 — captivated EOD adds onTheTableTomorrow chip row.
+                      // Load saved value on update so user can adjust the single chip
+                      // rather than re-pick. Same pattern as the other ci/eod fields.
+                      if (saved.onTheTableTomorrow) setEodOnTheTableTomorrow(saved.onTheTableTomorrow);
                     }
                   } catch {}
                 };
@@ -26123,7 +26192,12 @@ const isSignalProfileConfigured = () => {
                       energy: eodEnergy || "same",
                       composure: eodComposure || "mostly",
                       word: eodWord || null,
-                      morningEnergy: morningData?.energy || null
+                      morningEnergy: morningData?.energy || null,
+                      // May 14, 2026 — captivated EOD adds anticipated-tomorrow load.
+                      // Closed-set chip; null when not selected. Feeds the EOD artifact
+                      // AI for tomorrow-aware close language AND seeds tomorrow's brief
+                      // generation with carried context.
+                      onTheTableTomorrow: eodOnTheTableTomorrow || null
                     };
                     localStorage.setItem("stillform_eod_today", JSON.stringify(eodSnapshot));
                     trackEodComplete({
@@ -26173,56 +26247,410 @@ const isSignalProfileConfigured = () => {
                 );
 
                 return (
-                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
-                    <div className="t-mono-xs" style={{ marginBottom: 14 }}>Close the loop</div>
-
-                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Where's your energy landing?</div>
-                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Full", "Steady", "Low", "Empty"].map(e => (
-                        <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
-                          background: eodEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
-                          border: `1px solid ${eodEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
-                          color: eodEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
-                          fontFamily: "'DM Sans', sans-serif"
-                        }}>{e}</button>
-                      ))}
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
+                    {/* May 14, 2026 — captivated EOD. Same five-move grammar as
+                        captivated morning (PR #64): opening anchor (Cormorant
+                        day-of-week), cascade reveal (animation delays per section),
+                        mirror beat (italic serif echo after composure + energy),
+                        day surfaced (sessions count from existing data), new
+                        "what stays on the table for tomorrow" closed-set chip row.
+                        Captivation lives in tempo, reveal, mirror, typography —
+                        not features. The chips stay underneath; what changes is
+                        the pacing and the spaces between them.
+                        
+                        Science: pre-sleep cognitive consolidation (Walker, Stickgold)
+                        — this is the mentally-active review window per CANON v1.2
+                        surface-to-cognitive-state matching. Bedtime wind-down is
+                        a separate, quieter surface (see Bedtime IIFE below). */}
+                    <style>{`@keyframes eodFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+                    
+                    {/* Opening anchor — threshold beat into close-of-day. */}
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 24, fontWeight: 300,
+                      color: "var(--text-cream)",
+                      textAlign: "center",
+                      marginBottom: 4,
+                      letterSpacing: "0.01em",
+                      opacity: 0,
+                      animation: "eodFadeIn 600ms ease-out forwards"
+                    }}>
+                      End of {new Date().toLocaleDateString("en-US", { weekday: "long" })}.
+                    </div>
+                    <div className="t-mono-xs" style={{
+                      color: "var(--text-muted)", marginBottom: 18, textAlign: "center",
+                      letterSpacing: "0.16em",
+                      opacity: 0, animation: "eodFadeIn 600ms 250ms ease-out forwards"
+                    }}>
+                      CLOSE THE LOOP
                     </div>
 
-                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How much did you catch before it ran you?</div>
-                    <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Solid", "Mixed", "Rough"].map(e => (
-                        <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
-                          background: eodComposure === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
-                          border: `1px solid ${eodComposure === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
-                          color: eodComposure === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
-                          fontFamily: "'DM Sans', sans-serif"
-                        }}>{e}</button>
-                      ))}
+                    {/* Section 1: Energy */}
+                    <div style={{ opacity: 0, animation: "eodFadeIn 600ms 500ms ease-out forwards" }}>
+                      <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>Where's your energy landing?</div>
+                      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                        {["Full", "Steady", "Low", "Empty"].map(e => (
+                          <button key={e} onClick={() => setEodEnergy(e.toLowerCase())} style={{
+                            background: eodEnergy === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${eodEnergy === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                            color: eodEnergy === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{e}</button>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>One word that names what today taught you</div>
-                    <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
-                      {["Anchored", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
-                        <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
-                          background: eodWord === w.toLowerCase() ? "var(--amber-glow)" : "transparent",
-                          border: `1px solid ${eodWord === w.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
-                          borderRadius: 20, padding: "10px 14px", fontSize: 11, cursor: "pointer",
-                          color: eodWord === w.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
-                          fontFamily: "'DM Sans', sans-serif"
-                        }}>{w}</button>
-                      ))}
+                    {/* Section 2: Composure */}
+                    <div style={{ opacity: 0, animation: "eodFadeIn 600ms 700ms ease-out forwards" }}>
+                      <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>How much did you catch before it ran you?</div>
+                      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                        {["Solid", "Mixed", "Rough"].map(e => (
+                          <button key={e} onClick={() => setEodComposure(e.toLowerCase())} style={{
+                            background: eodComposure === e.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${eodComposure === e.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                            color: eodComposure === e.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{e}</button>
+                        ))}
+                      </div>
                     </div>
 
-                    <button onClick={saveEod} style={{
-                      width: "100%", background: "var(--surface)", color: "var(--amber)", border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
-                      borderRadius: "var(--r)", padding: "12px", fontSize: 13, fontWeight: 500,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif"
-                    }}>Close the loop →</button>
+                    {/* Mirror beat — May 14, 2026. Appears when both energy + composure
+                        are named. Lieberman 2007 affect labeling made visible — system
+                        reads their state back in serif italic. Recognition, not
+                        celebration. Same treatment as captivated morning's mirror beat. */}
+                    {eodEnergy && eodComposure && (
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 18, fontStyle: "italic",
+                        color: "var(--text-muted)", textAlign: "center",
+                        margin: "4px 0 22px 0",
+                        opacity: 0,
+                        animation: "eodFadeIn 800ms ease-out forwards"
+                      }}>
+                        {eodComposure.charAt(0).toUpperCase() + eodComposure.slice(1)}. {eodEnergy.charAt(0).toUpperCase() + eodEnergy.slice(1)}.
+                      </div>
+                    )}
+
+                    {/* Section 3: Word */}
+                    <div style={{ opacity: 0, animation: "eodFadeIn 600ms 900ms ease-out forwards" }}>
+                      <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>One word that names what today taught you</div>
+                      <div style={{ display: "flex", gap: 5, marginBottom: 16, flexWrap: "wrap" }}>
+                        {["Anchored", "Heavy", "Sharp", "Scattered", "Quiet", "Grateful", "Drained", "Proud"].map(w => (
+                          <button key={w} onClick={() => setEodWord(w.toLowerCase())} style={{
+                            background: eodWord === w.toLowerCase() ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${eodWord === w.toLowerCase() ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "10px 14px", fontSize: 11, cursor: "pointer",
+                            color: eodWord === w.toLowerCase() ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{w}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 4: What stays on the table for tomorrow — NEW chip row.
+                        Closed-set, single-select. Parallels morning's "what's on the
+                        table today" but forward-pointing. Optional. Feeds the EOD
+                        artifact AI for tomorrow-aware close language AND seeds
+                        tomorrow's morning brief generation with carried context.
+                        Per CANON v1.2: closed-set capture only, no open text in
+                        daily ritual. */}
+                    <div style={{ opacity: 0, animation: "eodFadeIn 600ms 1100ms ease-out forwards" }}>
+                      <div className="t-body-sm quiet" style={{ marginBottom: 10 }}>
+                        What stays on the table for tomorrow? <span style={{ fontSize: 11, color: "var(--text-muted)", letterSpacing: "0.04em" }}>(optional)</span>
+                      </div>
+                      <div style={{ display: "flex", gap: 6, marginBottom: 16, flexWrap: "wrap" }}>
+                        {[
+                          { id: "unfinished", label: "Unfinished" },
+                          { id: "decision", label: "Decision" },
+                          { id: "recovery", label: "Recovery" },
+                          { id: "heavy", label: "Something heavy" },
+                          { id: "open", label: "Open day" },
+                          { id: "nothing", label: "Nothing" }
+                        ].map(t => (
+                          <button key={t.id} onClick={() => setEodOnTheTableTomorrow(eodOnTheTableTomorrow === t.id ? null : t.id)} style={{
+                            background: eodOnTheTableTomorrow === t.id ? "var(--amber-glow)" : "transparent",
+                            border: `1px solid ${eodOnTheTableTomorrow === t.id ? "var(--amber-dim)" : "var(--border)"}`,
+                            borderRadius: 20, padding: "10px 14px", fontSize: 12, cursor: "pointer",
+                            color: eodOnTheTableTomorrow === t.id ? "var(--amber)" : "var(--text-muted)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}>{t.label}</button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Section 5: Day surfaced — quiet microtype line summarizing what
+                        happened today from existing data (stillform_sessions). Returns
+                        null when no sessions today (silent absence). V1 keeps it
+                        simple: sessions count + up to 3 distinct tools used. Future
+                        enrichment can add trigger matches, calendar events that fired,
+                        morning prediction vs actual delta. */}
+                    {(() => {
+                      let sessionsCount = 0;
+                      let toolsLabel = "";
+                      try {
+                        const all = secureRead("stillform_sessions", []);
+                        const sessionsToday = (Array.isArray(all) ? all : []).filter(s => {
+                          try { return TimeKeeper.stillformDayOf(s.timestamp) === today; }
+                          catch { return false; }
+                        });
+                        sessionsCount = sessionsToday.length;
+                        const toolSet = new Set(sessionsToday.flatMap(s => Array.isArray(s.tools) ? s.tools : []).filter(Boolean));
+                        toolsLabel = Array.from(toolSet).slice(0, 3).join(" · ");
+                      } catch {}
+                      if (sessionsCount === 0) return null;
+                      return (
+                        <div style={{ opacity: 0, animation: "eodFadeIn 600ms 1300ms ease-out forwards", marginBottom: 16 }}>
+                          <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.10em" }}>
+                            Today: {sessionsCount} {sessionsCount === 1 ? "session" : "sessions"}{toolsLabel ? ` · ${toolsLabel}` : ""}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* CTA — "Done. Wind down. →" sets eodSaved, which lets bedtime
+                        surface render in the bedtime window (per CANON v1.2 cognitive-
+                        state matching: review content lives here, wind-down is its
+                        own separate surface below). */}
+                    <div style={{ opacity: 0, animation: "eodFadeIn 600ms 1500ms ease-out forwards" }}>
+                      <button onClick={saveEod} style={{
+                        width: "100%", background: "var(--surface)", color: "var(--amber)",
+                        border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                        borderRadius: "var(--r-lg)", padding: "12px", fontSize: 14, fontWeight: 400,
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        transition: "border-color var(--motion-default) var(--ease-prestige)"
+                      }}>
+                        Done. Wind down. →
+                      </button>
+                    </div>
                   </div>
                 );
               })()}
+
+              {/* EOD ARTIFACT REVEAL — May 14, 2026. Engine 2 Build #10 (EOD
+                  artifact AI) generates a 1-3 sentence reflection on save.
+                  Pre this commit the artifact was generated and persisted but
+                  never displayed — same Layer 6.4 reachability pattern as
+                  Today's Brief before PR #62. Caught and fixed in same session.
+
+                  Artifact appears as a quiet beat in serif italic — single
+                  reflection line bounded by hairlines, generated-time micro-
+                  attribution. Visible only in EOD window post-save, suppressed
+                  when workspace open or trigger prompt taking priority. Polled
+                  via eodArtifactPollTick (1.5s ticks, max 8) so the surface
+                  re-renders as the artifact arrives. */}
+              {(() => {
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                const morningCap = 240;
+                const inEodWindow = currentMinutes >= eveningStart || currentMinutes < morningCap;
+                if (!inEodWindow) return null;
+                const today = TimeKeeper.stillformDayOf(now);
+                const eodDoneArt = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
+                if (!eodDoneArt) return null;
+                if (eodOpen) return null;
+                if (eodTriggerPromptOpen) return null;
+
+                // Touch poll tick so re-renders pick up artifact arrivals.
+                // eslint-disable-next-line no-unused-vars
+                const _tick = eodArtifactPollTick;
+                const artifact = getEodArtifactForToday();
+                const isInFlight = eodSaved && !artifact;
+
+                if (isInFlight) {
+                  return (
+                    <div style={{
+                      marginBottom: 20,
+                      borderTop: "0.5px solid var(--border-printed)",
+                      borderBottom: "0.5px solid var(--border-printed)",
+                      padding: "18px 4px",
+                      opacity: 0,
+                      animation: "eodFadeIn 600ms 400ms ease-out forwards"
+                    }}>
+                      <div className="t-mono-xs" style={{ color: "var(--text-muted)", letterSpacing: "0.14em" }}>
+                        Reading you...
+                      </div>
+                    </div>
+                  );
+                }
+
+                if (!artifact?.artifact) return null;
+
+                const generatedTime = (() => {
+                  try {
+                    const d = new Date(artifact.generatedAt);
+                    if (isNaN(d.getTime())) return "";
+                    return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                  } catch { return ""; }
+                })();
+
+                return (
+                  <div style={{
+                    marginBottom: 20,
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    padding: "18px 4px",
+                    opacity: 0,
+                    animation: "eodFadeIn 700ms 300ms ease-out forwards"
+                  }}>
+                    <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 12, letterSpacing: "0.14em" }}>
+                      Today's close
+                    </div>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 18, fontWeight: 300, fontStyle: "italic",
+                      color: "var(--text-cream)", lineHeight: 1.55,
+                      marginBottom: generatedTime ? 8 : 0
+                    }}>
+                      {artifact.artifact}
+                    </div>
+                    {generatedTime && (
+                      <div className="t-caption" style={{
+                        color: "var(--text-muted)", letterSpacing: "0.04em",
+                        fontStyle: "italic"
+                      }}>
+                        Generated {generatedTime}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
+              {/* BEDTIME SURFACE — May 14, 2026. CANON v1.2 surface-to-cognitive-
+                  state matching: NO review content within ~2 hours of sleep.
+                  Pre-sleep cognitive consolidation (Walker, Stickgold) — content
+                  processed near sleep affects memory + emotional regulation.
+
+                  This is the parasympathetic landing — opening anchor, quiet
+                  line, optional wind-down CTAs (cyclic sighing, body scan),
+                  phone-down ritual placeholder (Screen Time API integration
+                  ships in later sequence step), and "Rest." close. No chips,
+                  no review, no rep counting. Quiet rhythm only.
+
+                  Window: defaults to 9 PM — 11:59 PM (pre-WeatherKit/sleep-data
+                  heuristic). Later becomes sunset-aware + typical-sleep-time-
+                  aware once those integrations ship. Renders only when in
+                  window AND EOD done AND not dismissed in this session. EOD
+                  undone in bedtime window means the EOD IIFE above takes
+                  priority (review content lives in mentally-active window). */}
+              {(() => {
+                if (bedtimeDismissed) return null;
+                const now = new Date();
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const bedtimeStart = 1260; // 9:00 PM
+                const bedtimeEnd = 1439;   // 11:59 PM
+                if (currentMinutes < bedtimeStart || currentMinutes > bedtimeEnd) return null;
+                const today = TimeKeeper.stillformDayOf(now);
+                const eodDoneBed = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today; } catch { return false; } })();
+                if (!eodDoneBed) return null;
+                if (eodOpen) return null;
+
+                return (
+                  <div style={{ marginBottom: 24 }}>
+                    <style>{`@keyframes bedtimeFadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 24, fontWeight: 300,
+                      color: "var(--text-cream)",
+                      textAlign: "center",
+                      marginBottom: 6,
+                      letterSpacing: "0.01em",
+                      opacity: 0,
+                      animation: "bedtimeFadeIn 700ms ease-out forwards"
+                    }}>
+                      Almost done.
+                    </div>
+
+                    <div className="t-body-sm quiet" style={{
+                      textAlign: "center", marginBottom: 22, fontStyle: "italic",
+                      opacity: 0, animation: "bedtimeFadeIn 700ms 300ms ease-out forwards",
+                      lineHeight: 1.6
+                    }}>
+                      Carry only what serves you.
+                    </div>
+
+                    <div style={{
+                      display: "flex", flexDirection: "column", gap: 8, marginBottom: 16,
+                      opacity: 0, animation: "bedtimeFadeIn 700ms 600ms ease-out forwards"
+                    }}>
+                      <button onClick={() => {
+                        try {
+                          const breatheTool = TOOLS.find(t => t.id === "breathe");
+                          if (breatheTool) {
+                            setActiveTool({ ...breatheTool, mode: "cyclic-sighing" });
+                            setScreen("tool");
+                          }
+                          try { window.plausible("Bedtime CTA Tapped", { props: { action: "cyclic-sighing" } }); } catch {}
+                        } catch {}
+                      }} style={{
+                        width: "100%", background: "transparent",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "12px",
+                        fontSize: 13, color: "var(--text-muted)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        textAlign: "left",
+                        transition: "border-color var(--motion-default) var(--ease-prestige)"
+                      }}>
+                        Cyclic sighing · 30s →
+                      </button>
+                      <button onClick={() => {
+                        try {
+                          const scanTool = TOOLS.find(t => t.id === "scan");
+                          if (scanTool) {
+                            setActiveTool(scanTool);
+                            setScreen("tool");
+                          }
+                          try { window.plausible("Bedtime CTA Tapped", { props: { action: "body-scan" } }); } catch {}
+                        } catch {}
+                      }} style={{
+                        width: "100%", background: "transparent",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "12px",
+                        fontSize: 13, color: "var(--text-muted)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        textAlign: "left",
+                        transition: "border-color var(--motion-default) var(--ease-prestige)"
+                      }}>
+                        Body scan →
+                      </button>
+                      <button onClick={() => {
+                        try { window.plausible("Bedtime CTA Tapped", { props: { action: "phone-down-placeholder" } }); } catch {}
+                      }} style={{
+                        width: "100%", background: "transparent",
+                        border: "0.5px solid var(--border)",
+                        borderRadius: "var(--r)", padding: "12px",
+                        fontSize: 13, color: "var(--text-muted)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        textAlign: "left", opacity: 0.6,
+                        transition: "border-color var(--motion-default) var(--ease-prestige)"
+                      }}>
+                        Phone down for 90 min · coming soon
+                      </button>
+                    </div>
+
+                    <button onClick={() => {
+                      setBedtimeDismissed(true);
+                      try { window.plausible("Bedtime Closed"); } catch {}
+                    }} style={{
+                      width: "100%", background: "transparent",
+                      border: "none",
+                      padding: "10px",
+                      fontSize: 13, color: "var(--amber)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                      opacity: 0, animation: "bedtimeFadeIn 700ms 900ms ease-out forwards",
+                      textAlign: "center",
+                      letterSpacing: "0.04em"
+                    }}>
+                      Rest. →
+                    </button>
+                  </div>
+                );
+              })()}
+
 
               
 
