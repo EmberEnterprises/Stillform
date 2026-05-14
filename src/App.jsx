@@ -10257,6 +10257,12 @@ const sbRevokeOrgInvite = (orgId, inviteId) => sbOrgPost("organization-invite", 
 const sbAcceptOrgInvite = (token) => sbOrgPost("organization-accept-invite", { invite_token: token });
 const sbRemoveOrgMember = (orgId, targetUserId) => sbOrgPost("organization-remove-member", { org_id: orgId, target_user_id: targetUserId });
 const sbReadOrgAuditLog = (orgId, opts = {}) => sbOrgGet("organization-audit-log", { org_id: orgId, limit: opts.limit, before_id: opts.beforeId, action: opts.action });
+const sbOrgBillingCheckout = (orgId, cadence = "annual") => sbOrgPost("organization-billing-checkout", {
+  org_id: orgId,
+  plan_cadence: cadence,
+  redirect_url: `${window.location.origin}/?subscribed=true&org_id=${encodeURIComponent(orgId)}`
+});
+const sbOrgBillingPortal = (orgId) => sbOrgPost("organization-billing-portal", { org_id: orgId });
 // ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
@@ -19552,9 +19558,12 @@ export default function Stillform() {
   // Subscription & trial tracking
   const [isSubscribed, setIsSubscribed] = useState(() => { 
     try { 
-      // Check URL params synchronously on mount — catches return from Lemon Squeezy
+      // Check URL params synchronously on mount — catches return from Lemon Squeezy.
+      // If org_id is present, this is an org-billing redirect, not a personal
+      // subscription, so we don't flip personal `isSubscribed`.
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("subscribed") === "true" || urlParams.get("checkout") === "success") {
+      const hasOrgRedirect = !!urlParams.get("org_id");
+      if (!hasOrgRedirect && (urlParams.get("subscribed") === "true" || urlParams.get("checkout") === "success")) {
         localStorage.setItem("stillform_subscribed", "yes");
         return true;
       }
@@ -19668,10 +19677,24 @@ export default function Stillform() {
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get("subscribed") === "true" || params.get("checkout") === "success") {
-        localStorage.setItem("stillform_subscribed", "yes");
-        markSubscribePending();
-        setIsSubscribed(true);
-        setSubscriptionCheckTick(n => n + 1);
+        const orgIdFromRedirect = params.get("org_id");
+        if (orgIdFromRedirect) {
+          // Org subscription redirect — refresh org status (webhook will
+          // catch up org row asynchronously; we trigger a refetch so the
+          // admin UI updates as soon as it lands). Do NOT mark the user's
+          // personal subscription active.
+          try { window.plausible?.("Org Billing Checkout Returned", {}); } catch {}
+          refreshOrgStatus();
+          // Re-fetch a few times to catch the webhook landing (LS webhooks
+          // typically deliver within seconds).
+          setTimeout(refreshOrgStatus, 3000);
+          setTimeout(refreshOrgStatus, 10000);
+        } else {
+          localStorage.setItem("stillform_subscribed", "yes");
+          markSubscribePending();
+          setIsSubscribed(true);
+          setSubscriptionCheckTick(n => n + 1);
+        }
         window.history.replaceState({}, "", "/");
       }
     } catch {}
@@ -28461,6 +28484,87 @@ const isSignalProfileConfigured = () => {
                 marginBottom: 24
               }}>
                 <strong>Privacy wall:</strong> you can manage seats, billing, and members here. You cannot see anything members do inside Stillform — sessions, journal entries, reframes, biometrics, or any other practice content. This is by architectural design, not a setting.
+              </div>
+
+              {/* BILLING SECTION */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Billing</span>
+                  {(() => {
+                    const ss = adminMembership.subscription_status;
+                    if (!ss) return <span style={{ fontSize: 11, color: "var(--text-muted)" }}>Not yet set up</span>;
+                    const pillColor =
+                      ss === "active" || ss === "on_trial" ? "var(--amber)" :
+                      ss === "past_due" || ss === "unpaid" || ss === "paused" ? "var(--text)" :
+                      "var(--text-muted)";
+                    return <span style={{ fontSize: 11, color: pillColor, textTransform: "capitalize" }}>{ss.replace(/_/g, " ")}</span>;
+                  })()}
+                </div>
+                {!adminMembership.has_active_subscription && (
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 10 }}>
+                    Set up billing to cover your team's seats. Members get full Stillform access on the org plan — their practice content stays private from you, as always.
+                  </div>
+                )}
+                {adminMembership.has_active_subscription && (
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 10 }}>
+                    Subscription active. Use the customer portal to update payment method, change plan, or cancel.
+                  </div>
+                )}
+                <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  {!adminMembership.has_active_subscription && (
+                    <>
+                      <button
+                        onClick={async () => {
+                          const result = await sbOrgBillingCheckout(orgId, "annual");
+                          if (result?.ok && result.checkout_url) {
+                            try { window.plausible?.("Org Billing Checkout Opened", { props: { cadence: "annual" } }); } catch {}
+                            window.location.href = result.checkout_url;
+                          } else {
+                            setOrgSettingsError(result?.error || "Could not open checkout");
+                          }
+                        }}
+                        className="btn btn-primary"
+                        style={{ width: "100%", padding: "12px 16px" }}
+                      >Set up billing (annual)</button>
+                      <button
+                        onClick={async () => {
+                          const result = await sbOrgBillingCheckout(orgId, "monthly");
+                          if (result?.ok && result.checkout_url) {
+                            try { window.plausible?.("Org Billing Checkout Opened", { props: { cadence: "monthly" } }); } catch {}
+                            window.location.href = result.checkout_url;
+                          } else {
+                            setOrgSettingsError(result?.error || "Could not open checkout");
+                          }
+                        }}
+                        className="btn btn-ghost"
+                        style={{ width: "100%", padding: "10px 14px" }}
+                      >Set up billing (monthly)</button>
+                    </>
+                  )}
+                  {adminMembership.has_active_subscription && (
+                    <button
+                      onClick={async () => {
+                        const result = await sbOrgBillingPortal(orgId);
+                        if (result?.ok && result.portal_url) {
+                          window.open(result.portal_url, "_blank", "noopener,noreferrer");
+                        } else {
+                          setOrgSettingsError(result?.error || "Could not open billing portal");
+                        }
+                      }}
+                      className="btn btn-ghost"
+                      style={{ width: "100%", padding: "10px 14px" }}
+                    >Open billing portal →</button>
+                  )}
+                </div>
+                {(adminMembership.subscription_status === "past_due" || adminMembership.subscription_status === "unpaid") && (
+                  <div style={{
+                    marginTop: 10, padding: "10px 12px",
+                    background: "var(--surface)", border: "1px solid var(--border)",
+                    borderRadius: "var(--r-md)", fontSize: 11, color: "var(--text-muted)", lineHeight: 1.5
+                  }}>
+                    Payment failed. Members' seats stay covered for now, but Stillform will suspend the org if billing isn't restored. Use the portal to update your card.
+                  </div>
+                )}
               </div>
 
               {/* MEMBERS SECTION */}

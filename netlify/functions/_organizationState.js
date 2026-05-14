@@ -54,6 +54,12 @@ export const AUDIT_ACTIONS = Object.freeze([
   "org_auto_join_domain_set",
   "org_suspended",
   "org_cancelled",
+  "org_billing_created",
+  "org_billing_updated",
+  "org_billing_payment_failed",
+  "org_billing_recovered",
+  "org_billing_cancelled",
+  "org_billing_expired",
   "invite_sent",
   "invite_resent",
   "invite_revoked",
@@ -258,6 +264,8 @@ export const buildOrgStatusForUser = async (userId) => {
       org_id: org.id,
       org_name: org.name,
       org_status: org.status,
+      subscription_status: org.subscription_status || null,
+      has_active_subscription: Boolean(org.lemon_subscription_id) && org.status === "active",
       plan_tier: org.plan_tier,
       role: membership.role,
       status: membership.status,
@@ -915,4 +923,134 @@ export const readAuditLog = async ({ orgId, limit = 50, beforeId = null, action 
   const nextCursor =
     entries.length === safeLimit ? entries[entries.length - 1].id : null;
   return { entries, next_cursor: nextCursor };
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// Billing helpers (Lemon Squeezy webhook integration).
+//
+// The org webhook path lives inside subscription-webhook.js. When an LS
+// event arrives with custom_data.org_id set, the webhook calls
+// upsertOrgBilling instead of upsertSubscriptionByLemonId.
+//
+// Mapping LS billing state → org.status:
+//   subscription_created  / active  / on_trial / resumed / recovered → active
+//   payment_failed / past_due / unpaid                               → suspended
+//   subscription_cancelled / expired                                 → cancelled
+//
+// Separately, org.subscription_status carries the LS-level state verbatim
+// so the admin UI can surface "past due — update payment method," etc.
+// ─────────────────────────────────────────────────────────────────────────
+
+const BILLING_AUDIT_ACTIONS = Object.freeze([
+  "org_billing_created",
+  "org_billing_updated",
+  "org_billing_payment_failed",
+  "org_billing_recovered",
+  "org_billing_cancelled",
+  "org_billing_expired"
+]);
+
+const mapLemonStatusToOrgStatus = (lemonStatus, eventName) => {
+  const ls = String(lemonStatus || "").toLowerCase();
+  const ev = String(eventName || "").toLowerCase();
+  if (ev === "subscription_expired" || ev === "subscription_cancelled") return "cancelled";
+  if (ev === "subscription_payment_failed") return "suspended";
+  if (ev === "subscription_payment_recovered" || ev === "subscription_resumed" || ev === "subscription_unpaused") return "active";
+  if (ls === "cancelled" || ls === "expired") return "cancelled";
+  if (ls === "past_due" || ls === "unpaid" || ls === "paused") return "suspended";
+  if (ls === "active" || ls === "on_trial") return "active";
+  return "active";
+};
+
+const pickBillingAuditAction = (eventName, prevStatus, nextStatus) => {
+  const ev = String(eventName || "").toLowerCase();
+  if (ev === "subscription_created") return "org_billing_created";
+  if (ev === "subscription_payment_failed") return "org_billing_payment_failed";
+  if (ev === "subscription_payment_recovered" || ev === "subscription_resumed" || ev === "subscription_unpaused") return "org_billing_recovered";
+  if (ev === "subscription_cancelled") return "org_billing_cancelled";
+  if (ev === "subscription_expired") return "org_billing_expired";
+  if (prevStatus !== nextStatus) return "org_billing_updated";
+  return "org_billing_updated";
+};
+
+/**
+ * Upsert org billing state from a Lemon Squeezy webhook event.
+ *
+ * No-op safe: if the org doesn't exist (org_id passed in custom_data was
+ * stale or invalid), this returns null without throwing — the webhook can
+ * acknowledge the event without retry.
+ *
+ * Writes:
+ *   - stillform_organizations: lemon_subscription_id, lemon_customer_id,
+ *     lemon_variant_id, subscription_status, status (mapped), updated_at
+ *   - stillform_org_audit_log: one entry with actor=owner_user_id (the
+ *     webhook isn't a user, so we attribute to the org owner)
+ *
+ * NEVER touches user_data, backups, or user_profiles — the billing
+ * surface remains architecturally walled off from practice data.
+ */
+export const upsertOrgBilling = async ({
+  orgId,
+  lemonSubscriptionId,
+  lemonCustomerId,
+  lemonVariantId,
+  lemonStatus,
+  eventName
+}) => {
+  if (!orgId) throw new Error("upsertOrgBilling: orgId required");
+
+  const existing = await getOrgById(orgId);
+  if (!existing) return null; // stale custom_data — ignore safely
+
+  const nextOrgStatus = mapLemonStatusToOrgStatus(lemonStatus, eventName);
+  const auditAction = pickBillingAuditAction(eventName, existing.status, nextOrgStatus);
+
+  const patch = {
+    subscription_status: lemonStatus || null,
+    status: nextOrgStatus,
+    updated_at: nowIso()
+  };
+  if (lemonSubscriptionId) patch.lemon_subscription_id = String(lemonSubscriptionId);
+  if (lemonCustomerId) patch.lemon_customer_id = String(lemonCustomerId);
+  if (lemonVariantId) patch.lemon_variant_id = String(lemonVariantId);
+
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORGANIZATIONS_TABLE}?id=eq.${encodeURIComponent(orgId)}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(patch)
+    }
+  );
+  const updated = Array.isArray(rows) && rows[0] ? rows[0] : null;
+
+  // Write audit entry. Webhook is not a user; attribute to the org owner
+  // so the chain has a real actor_user_id. Metadata carries the LS event
+  // name and the status transition so admins can see "what just happened
+  // to billing" in the audit log.
+  try {
+    await sbAdminFetch(`/rest/v1/${ORG_AUDIT_LOG_TABLE}`, {
+      method: "POST",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        org_id: orgId,
+        actor_user_id: existing.owner_user_id,
+        action: BILLING_AUDIT_ACTIONS.includes(auditAction) ? auditAction : "org_billing_updated",
+        metadata: {
+          event_name: eventName || null,
+          lemon_status: lemonStatus || null,
+          previous_org_status: existing.status,
+          next_org_status: nextOrgStatus,
+          lemon_subscription_id: lemonSubscriptionId || null,
+          source: "lemon_squeezy_webhook"
+        },
+        created_at: nowIso()
+      })
+    });
+  } catch (err) {
+    // Audit log failure doesn't fail the billing update — log to stderr.
+    console.error("upsertOrgBilling: audit log write failed", err?.message || err);
+  }
+
+  return updated;
 };

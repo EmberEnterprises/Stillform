@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { upsertSubscriptionByLemonId } from "./_subscriptionState.js";
+import { upsertOrgBilling } from "./_organizationState.js";
 
 const responseHeaders = { "Content-Type": "application/json" };
 const MAX_BODY_CHARS = 200000;
@@ -57,10 +58,12 @@ export const handler = async function(event) {
 
     const installId = custom.install_id || null;
     const userIdFromCustom = custom.user_id || null;
+    const orgIdFromCustom = custom.org_id || null;
     const lemonCustomerId = attrs.customer_id ? String(attrs.customer_id) : null;
     const lemonSubscriptionId = payload?.data?.id ? String(payload.data.id) : null;
     const userEmail = attrs.user_email || null;
     const variantName = attrs.variant_name || null;
+    const variantId = attrs.variant_id ? String(attrs.variant_id) : null;
     const productName = attrs.product_name || null;
     const testMode = attrs.test_mode === true;
 
@@ -75,6 +78,25 @@ export const handler = async function(event) {
     // subscriptions), we cannot write a row.
     if (!lemonSubscriptionId) {
       return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, ignored: "no_subscription_id" }) };
+    }
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Org subscription route. When the checkout was started by an org admin,
+    // custom_data carries org_id. We route the event to upsertOrgBilling,
+    // which updates the org row's lemon_subscription_id + subscription_status
+    // + mapped org.status (active/suspended/cancelled). The privacy wall
+    // stands: this code path never touches user_data / backups / user_profiles.
+    // ─────────────────────────────────────────────────────────────────────
+    if (orgIdFromCustom) {
+      await upsertOrgBilling({
+        orgId: orgIdFromCustom,
+        lemonSubscriptionId,
+        lemonCustomerId,
+        lemonVariantId: variantId,
+        lemonStatus: attrs.status || null,
+        eventName
+      });
+      return { statusCode: 200, headers: responseHeaders, body: JSON.stringify({ ok: true, route: "org" }) };
     }
 
     const effectiveStatus = normalizeStatus(eventName, attrs.status, attrs.cancelled);
