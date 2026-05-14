@@ -571,11 +571,114 @@ Stage definitions → Trigger Profile → Today's Brief → Mirror surface → A
 
 **Award-winning angle:** Stillform has better attribution data than Calm or Headspace — pre/post rates per session, function-level Practice Signals trends, Pattern Disruption catch timing, Body Scan tension trends per area, composure across bio-filter states. Whoop did this for physical recovery. Strava did it for running. Nobody has done it for nervous system regulation at this granularity. That's the differentiator, presented as proof of work, not gamification.
 
-**Anti-patterns explicitly out of scope:** streaks, badges, dopamine, productivity-task framing, bias-reduction claims, 90-day retrospective surfaces, therapy-coded language, "you missed X today" failure framing. See spec §2 for full list.
+---
+
+## 🗂️ MASTER TODO AUDIT-PASS — May 14 evening DELTA
+
+**Baseline:** Master Todo at commit `9783d94` (May 14, 11:26 UTC — Arlin-prompted verification-against-code update). The full re-classification (Buckets A–F) lives at lines 456–528 above; this is the DELTA: **17 PRs shipped between `9783d94` and HEAD `86d2a22`** that aren't reflected in the file's classifications above.
+
+**Method:** Walk each post-`9783d94` PR, identify which Master Todo items it addressed, classify remaining open queue against current HEAD.
+
+**Layer 2.37 discipline:** every PR number / commit SHA / line citation below was verified via `git log` and `git show` during this audit pass.
+
+### Ships since 9783d94 (chronological)
+
+| PR | SHA | Title | Maps to Master Todo |
+|----|-----|-------|---------------------|
+| #62 | `4a5d432` | fix · today's brief reachability | Engagement Architecture (line 391) — Today's Brief Build #3 surface defect; Layer 6.4 audit catch |
+| #63 | `8828221` | copy · splash + tutorial · Self Architecture | Bucket C copy/voice item closed — splash flash frame + tutorial close rephrased away from clinical-citation voice (per Arlin May 14 phone-test note) |
+| #64 | `a11b4ca` | feat · captivated morning · five moves | Engagement Architecture morning surface — captivated-loop sequence step A; addresses Arlin phone-test note "chips feel like a chore" |
+| #65 | `5274afc` | canon · v1.1 · two operating rules for integration era | CANON doc — locks ops rules as integration scope expands |
+| #66 | `fe37e70` | canon · v1.2 · concierge pillar + three-layer framework + silent-data filter | CANON doc — concierge as third pillar alongside metacognition + composure architecture |
+| #67 | `d1167fc` | feat · captivated EOD + bedtime wind-down | Engagement Architecture EOD surface — captivated-loop sequence step B |
+| #68 | `c25cd04` | feat · **B2B foundation · privacy wall** | NEW workstream — not in May 8 audit. B2B for launch (sequence step 1 of 3 foundation) |
+| #69 | `f8bcc66` | feat · B2B write endpoints · admin actions · audit chain | NEW — B2B foundation step 2 |
+| #70 | `dfb03dd` | feat · B2B admin UI + member affiliation + paywall bypass | NEW — B2B foundation step 3 |
+| #71 | `7cf3851` | feat · B2B Lemon Squeezy billing · webhook routing · admin billing UI | NEW — B2B billing wired |
+| #72 | `eb60cc3` | feat · B2B invite email delivery · Resend integration | NEW — B2B invite emails live |
+| #73 | `8a247a1` | docs · B2B procurement bundle · privacy addendum + DPA + IT guide + SOC 2 readiness | NEW — B2B procurement docs (4-doc bundle for enterprise buyers) |
+| #74 | `78f09eb` | feat · B2B SSO scaffolding · admin config UI + architecture doc | NEW — B2B SSO scaffold (full integration deferred to SOC 2 Type 2 per CANON) |
+| #75 | `d85fcf3` | feat · sequence step C · calendar decompression via ICS | NEW concierge workstream — calendar decompression universal path |
+| #76 | `8e7143e` | feat · sequence step E · calendar screenshot import via GPT-4o vision | NEW concierge workstream — calendar screenshot import |
+| #77 | `e36ed56` | audit · 19-scenario static refresh against HEAD 8e7143e · May 14 | AI stress testing protocol (line 931) — pre-deploy gate doc refreshed; 13 PASS / 6 UNCERTAIN → 16 PASS / 3 UNCERTAIN |
+| #78 | `86d2a22` | move card · library expanded to 22 sequences · pair-author DRAFT | Engagement Architecture Build #8 Phase 8a follow-up — starter library 10 → 22 sequences, within audit's 25–30 target band |
+
+### Net effect on bucket classification
+
+**Bucket A items added (already shipped, master todo flag may be stale):**
+- Engagement Architecture Build #3 (Today's Brief) surface reachability — defect closed by PR #62
+- Tutorial / splash voice drift — closed by PR #63 (Self Architecture rename)
+- Move card library expansion path — PR #78 brings it within audit-target band as DRAFT
+- AI regression static audit refresh — PR #77 closes May 8 concerns 1, 2, 3
+
+**Bucket B (autonomous build queue) — STILL CLOSED as of May 8 verdict:**
+The May 8 audit-pass concluded "The autonomous build queue is closed." Today's two Claude-led ships (PR #77 + PR #78) fit a narrower autonomous lane: **audit + draft-for-review work** that doesn't activate without Arlin's explicit go.
+- PR #77 is doc-only (audit refresh) — activates immediately on merge, no user-visible behavior change
+- PR #78 is DRAFT library expansion — same Phase 8a deploy gate, doesn't activate until Arlin reviews
+- Nothing else in the existing master todo open list moved into Bucket B since `9783d94`. The autonomous-build queue stays closed.
+
+**Bucket C (needs Arlin's design call) — UNCHANGED count, two items refined:**
+- "Voice consistency audit" (line 485, May 8) — partially actioned by PR #63 splash/tutorial rename. Full audit still pending.
+- "FAQ completeness" (line 491, May 8) — May 8 audit-pass noted FAQ shipped via `6f056f1` (12 new entries from science sheet). Stays closed.
+
+**New workstreams added since May 8 (not previously in any bucket):**
+
+1. **B2B at launch (PRs #68–#74).** 5 paths shipped per CANON: foundation + write endpoints + admin UI + Lemon Squeezy billing + invite email + SSO scaffold + procurement docs. Per memory: SOC 2 Type 2 is the launch gate ceiling for all 5 B2B paths.
+2. **Concierge / calendar integration (PRs #75–#76).** Step C (ICS decompression universal path) + Step E (screenshot import). New CANON v1.2 concierge pillar work. Steps A, B were the captivated-loop ships (#64, #67); step D is unshipped; step E shipped. Sequence does not appear to be alphabetical-strict but rather priority-ordered per Arlin's direction.
+3. **CANON consolidation (PRs #65–#66).** Two-rule update (v1.1) + concierge-pillar update (v1.2). Doc-only; locks operating rules for the integration era.
+
+### What's now reasonably close to deploy-ready
+
+The May 8 audit framed "deploy queue" — 15+ unshipped commits awaiting Arlin's Netlify deploy trigger. Since May 8, those have shipped to main (auto-merged on PR approval). Current deploy queue: **all post-`9783d94` PRs (#62–#78), 17 in total.** Same Netlify manual-trigger rule applies — Arlin's call.
+
+Specific deploy-ready surfaces awaiting her trigger:
+- Captivated morning + EOD + bedtime (PRs #62, #64, #67) — full engagement-loop sequence A→B
+- B2B foundation full stack (PRs #68–#74) — five paths plus procurement docs
+- Calendar decompression + screenshot import (PRs #75, #76)
+- Reframe AI prompt refinements (within `8e7143e` HEAD per PR #77 audit findings)
+- Move card library expansion (PR #78) — STAYS GATED on her library review, not deploy-ready
+
+### Items that have NOT moved since May 8 (still open in their stated buckets)
+
+Per spot-check of the May 8 Bucket C list (lines 481–493) against current HEAD:
+- **My Progress redesign** (line 482) — partial ship (Path A 4-section consolidation still not shipped per 9783d94 note); home-side dissolved into mono microtype line; screen-side redesign open
+- **Self Mode redesign** (line 483) — MetacognitionTool still 5-step at `src/App.jsx:16255`; pending Arlin spec sign-off
+- **Narrative spine connectivity layer** (line 484) — May 12 Spine Ship addressed Gaps 1–12 first cuts; second-cut depth work remains
+- **Voice consistency audit** (line 485) — partially actioned (PR #63), full audit still pending
+- **Onboarding redesign** (line 486) — sequenced last per Arlin direction; not started
+- **Low-Demand Phase 3 Reframe** (line 487) — 9783d94 noted "AI SIDE SHIPPED; UI strip still open." That partial-ship update stands at HEAD
+- **Premium sound packs** (line 488) — monetization pricing decision needed
+- **Cognitive Function Measurement** (line 489) — Phase 0 shipped; Phase 1 BLOCKED on 4 decisions in `COGNITIVE_FUNCTION_MEASUREMENT_PHASE_1_AUDIT.md`
+- **Tutorial completeness** (line 490) — addressed in part by PR #63; design call for completeness scope still pending
+- **Language picker** (line 492) — i18n is post-launch; conflicts with new "Nothing is post-launch" CANON rule. **Decision flag for Arlin:** does the i18n deferral need re-litigation under the new CANON rule, or is this a documented exception?
+- **Contextual push notification logic** (line 493) — gate-dependency open question remains
+
+Per 9783d94 + the May 8 audit's "autonomous build queue is closed" verdict, **no new Bucket B candidates are unblocked.** Every Bucket C item remains gated on Arlin's design call / voice approval / spec sign-off.
+
+### Items the recent work surfaces as NEW concerns
+
+- **Concern 5 from PR #77** — Test 5 (composure when winning, stacking commitments) has bio-filter activation handling but no dedicated MCT move in HYPE_SYSTEM. Candidate move drafted in `AI_REGRESSION_STATIC_AUDIT_19.md`. Decision belongs to Arlin.
+- **Concerns 4 from PR #77** — mind-reading + manipulation-planning MCT moves still undrafted. Same posture.
+- **B2B paths require SOC 2 Type 2 launch gate** per CANON. SOC 2 Type 1 readiness shipped in PR #73 docs bundle. Type 2 is multi-month observation window and lives outside autonomous scope.
+- **Concierge sequence has unshipped step D.** Steps A, B, C, E shipped. Step D not yet started. Inventory check would surface what D was scoped as — flag for Arlin.
+- **Library i18n vs "nothing is post-launch" CANON rule.** Conflict surfaced above; needs Arlin's resolution.
+
+### Conclusion
+
+The May 8 audit-pass verdict ("autonomous build queue is closed") holds at HEAD. 17 PRs have shipped since `9783d94` covering three workstreams (engagement / captivated-loop, B2B foundation, concierge integration) plus AI-prompt refinement + Move card library expansion. None of those PRs unblock new Bucket B items.
+
+The autonomous lane remaining is **audit + draft-for-review** work, exemplified by today's PR #77 (audit doc refresh) and PR #78 (library DRAFT expansion). Anything beyond that requires either (a) Arlin's call on a Bucket C item, (b) phone-test findings from Bucket D, (c) account/device action from Bucket E, or (d) accepting the May 8 audit's defer recommendations.
+
+**Decisions for Arlin coming out of this delta:**
+1. Trigger Netlify deploy for queued PRs #62–#76 when ready (#77 is doc-only, no deploy needed; #78 stays gated)
+2. Review PR #78 library expansion against PATTERN_DISRUPTION_SPEC §4.2; accept/reject the 3 stretch sequences
+3. Address PR #77 open concerns 4 and 5 (mind-reading / manipulation-planning / stacking-commitments MCT moves) — voice decision
+4. Resolve i18n deferral vs "nothing is post-launch" CANON rule
+5. Inventory unshipped concierge sequence step D — what was it scoped as?
 
 ---
 
-## ⚠️ May 7 Build Batch — PRACTICE SIGNALS REVERTED (rest verified)
+
 
 **Practice Signals revert (May 7, late session):** Builds #31, #32, #33, #34, #35, #36, #37, #46 (cognitive-defusion-score Netlify function only — pattern-enrichment.js stays for Pattern Disruption) **REVERTED.** Reason: AffectLabelingExercise rendered unconditionally on every screen (orphaned `)}` JSX text node visible on screen, "Done" button non-functional because state changes had no effect on a non-conditionally-rendered component, 9-chip vocabulary identical to existing app feel-state chips, stimuli asked user to label hypothetical scenarios which is not what affect labeling research measures, "0/12 — counted as not matched" hostile UX on skip-all path). All 35 pre-commit audits passed; none of them were behavior-level. The revert is documented in detail in this section.
 
