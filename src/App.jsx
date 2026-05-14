@@ -24784,6 +24784,15 @@ const isSignalProfileConfigured = () => {
                    analysis pipeline that doesn't yet exist. Reserved for a
                    future commit. */}
               {(() => {
+                // ── PRACTICE SURFACE — REMOVED FROM HOME May 14, 2026 evening,
+                // per Arlin direction (complete restructure: ONE current-beat
+                // surface per home view, not panels stacked). The patterns
+                // surface may return as its own dedicated beat in the journey
+                // once that architecture is specified. IIFE preserved below
+                // (returns null) so the helper computations can be revived for
+                // a future patterns beat without re-deriving them.
+                return null;
+                // eslint-disable-next-line no-unreachable
                 let biasProfile = null;
                 let triggerArr = [];
                 let savedReframesArr = [];
@@ -25690,6 +25699,15 @@ const isSignalProfileConfigured = () => {
                   the full Mirror sheet for detail. The hero CTA is now the
                   unambiguous centerpiece. */}
               {(() => {
+                // ── MIRROR STATUS STRIP — REMOVED FROM HOME May 14, 2026 evening,
+                // per Arlin direction (complete restructure: ONE current-beat
+                // surface per home view, not panels stacked). Mirror diagnostic
+                // data still computed and stored — the strip element is what's
+                // removed from home rendering. May return as part of a beat
+                // surface (e.g., inside the main rep beat's context line) once
+                // that architecture is specified.
+                return null;
+                // eslint-disable-next-line no-unreachable
                 let snap = null;
                 try { snap = getCurrentStage(); } catch { return null; }
                 if (!snap || !snap.stage) return null;
@@ -25839,6 +25857,16 @@ const isSignalProfileConfigured = () => {
                         grows; this banner makes that growth visible at the
                         moment it happens. */}
                     {(() => {
+                      // ── REP COUNTED BANNER — REMOVED FROM HOME May 14, 2026
+                      // evening, per Arlin direction (main hero collapsed to ONE
+                      // composed element, not stacked sub-panels). The rep
+                      // counting LOGIC stays (stillform_last_rep_counted still
+                      // written from appendSessionToStorage); only the home-side
+                      // banner is removed. May return as a celebration moment
+                      // inside the session close flow once that architecture is
+                      // specified.
+                      return null;
+                      // eslint-disable-next-line no-unreachable
                       let repCounted = null;
                       try {
                         const raw = localStorage.getItem("stillform_last_rep_counted");
@@ -25923,6 +25951,16 @@ const isSignalProfileConfigured = () => {
                           progress bar inside the rep. The rep is just a
                           named practice action. */}
                     {(() => {
+                      // ── JOURNEY REP — REMOVED FROM HOME May 14, 2026 evening,
+                      // per Arlin direction (main hero collapsed to ONE composed
+                      // element). The rep computation logic stays
+                      // (getTodaysJourneyRep, STAGE_REPS, computeStageMarkers all
+                      // intact); only the home-side rep prompt panel is removed.
+                      // The rep label can be absorbed into the hero CTA card's
+                      // composition in a follow-up, OR may move into the spine
+                      // session itself as the Notice beat's opener.
+                      return null;
+                      // eslint-disable-next-line no-unreachable
                       const journeyRep = getTodaysJourneyRep();
                       if (!journeyRep) return null;
 
@@ -25989,6 +26027,16 @@ const isSignalProfileConfigured = () => {
                         buried in Settings. Tap anchor to scroll to Settings
                         for edits. */}
                     {(() => {
+                      // ── ANCHOR STRIP — REMOVED FROM HOME May 14, 2026 evening,
+                      // per Arlin direction (main hero collapsed to ONE composed
+                      // element). Anchors as Gollwitzer 1999 implementation
+                      // intentions are still stored and editable in Settings;
+                      // only the home-side rendering of the standing anchors
+                      // list is removed. May return inside Settings, the spine
+                      // close ritual, or a dedicated noticing-patterns beat
+                      // once that architecture is specified.
+                      return null;
+                      // eslint-disable-next-line no-unreachable
                       if (!anchors || anchors.length === 0) return null;
                       // Render at most 2 anchors on home (more is visual noise).
                       const visible = anchors.slice(0, 2);
@@ -27170,6 +27218,61 @@ const isSignalProfileConfigured = () => {
                   preserves Hoemann 2021 / Barrett 2017 concept-library
                   reflection (the user's own data named back to them). */}
               {(() => {
+                // ── MY PROGRESS HOME SURFACE — REPLACED WITH SECONDARY LINK
+                // May 14, 2026 evening, per Arlin direction. The home is now
+                // a continuous-journey landing page with TWO purposes:
+                //   (1) begin / continue today's journey — handled by the
+                //       current-beat surface above (morning strip / main hero /
+                //       EOD strip)
+                //   (2) review your progress — handled by THIS link, which
+                //       opens the full My Progress screen at line ~17456
+                // The previous home-side surface (3 stat cells + observational
+                // cue) was itself a stacked panel competing with the beat. By
+                // contrast, this small secondary entry preserves home-side
+                // access to the science-based progress view without re-creating
+                // the panel-stack pattern. The full progress screen (with all
+                // stat cells, weekly reflection, roadmap, signal log, etc.)
+                // remains intact and is opened by this entry.
+                return (
+                  <button
+                    onClick={() => setScreen("progress")}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      borderTop: "0.5px solid var(--border-printed)",
+                      padding: "20px 4px",
+                      width: "100%",
+                      textAlign: "left",
+                      cursor: "pointer",
+                      WebkitTapHighlightColor: "transparent",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginTop: 32,
+                      marginBottom: 20
+                    }}
+                    aria-label="Review your progress"
+                  >
+                    <span style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize: 18,
+                      fontWeight: 300,
+                      color: "var(--text)"
+                    }}>
+                      Review your progress
+                    </span>
+                    <span style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 10,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: "var(--amber)"
+                    }}>
+                      Open →
+                    </span>
+                  </button>
+                );
+                // eslint-disable-next-line no-unreachable
                 const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
                 let streakCount = 0;
                 for (let i = 0; i < 365; i++) {
