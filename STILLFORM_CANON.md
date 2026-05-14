@@ -190,6 +190,8 @@ No recommendation without all three. The standing requirement runs in parallel w
 - **Pull `Stillform_Master_Todo.md` fresh from the repo before claiming launch state or remaining scope.** Compaction summaries are stale by design. Repo docs are truth.
 - **Comms on overrides:** if Claude needs to override a setting/decision/rule, Claude ASKS first. Arlin does the override; Claude flags.
 - **Single consolidated sign-off per change.** Don't fragment into micro-asks. One plan, one yes/no, one execution.
+- **Integrations protect the practice. They are not the practice.** Calendar, health data, voice, focus modes, smart event detection, screenshot import, watch biometrics — these clear noise so the metacognition work can land. They are protective infrastructure. Stillform is never positioned as a personal assistant, a productivity tool, or a wellness service. Every integration must answer: does this remove friction that prevents the practice, or does it become the product? If the latter, redesign.
+- **Reduce cognitive load on everything that is not the practice.** Fewer meta-decisions = more capacity for the work itself. Even 30 seconds of friction removed is 30 seconds the user can spend on themselves (Arlin's framing, May 14, 2026). Filter every feature through: does this subtract decisions the user otherwise has to make? Anything that ADDS meta-decisions to non-practice surfaces fails the filter. The voice is red-carpet/prestige/concierge — the system handles logistics so the user does the practice; never buddy-buddy or wellness-coach.
 
 ---
 
@@ -288,10 +290,16 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 
 ## VERSIONING
 
+**v1.1 — May 14, 2026.** Added two operating rules to Section 10:
+- "Integrations protect the practice. They are not the practice." — locked the integrations-as-protective-infrastructure principle. Prevents drift toward personal-assistant / productivity-tool / wellness-service framing as integration scope expands (calendar writes, health data, focus modes, voice capture, watch biometrics, screenshot import, smart event detection).
+- "Reduce cognitive load on everything that is not the practice." — locked the cognitive-load-as-design-filter principle. Arlin's frame: "30 seconds of friction removed is 30 seconds the user can spend on themselves." Voice register set: red-carpet / prestige / concierge — never buddy-buddy or wellness-coach.
+
+Both principles act as filters for the captivated-loop work (morning + EOD + integrations sequence) and all future feature decisions.
+
 **v1.0 — May 13, 2026.** Consolidated from FRAMING_LAW v1.0, AUDIT_PHILOSOPHY v2.0, ENGAGEMENT_ARCHITECTURE (May 7), and HANDOFF_MAY_13. Added Section 4 (Emotional Honesty) reflecting the May 13 framing addition.
 
 Future versions update this doc when framing or operating rules evolve. Cosmetic edits don't require a version bump; substantive changes do.
 
 ---
 
-*ARA Embers LLC · Stillform Canon · May 13, 2026*
+*ARA Embers LLC · Stillform Canon · May 14, 2026*
