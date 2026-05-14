@@ -27,6 +27,8 @@
 //
 // ─────────────────────────────────────────────────────────────────────────
 
+import { randomBytes } from "node:crypto";
+
 const SUPABASE_URL = process.env.SUPABASE_URL || "https://pxrewildfnbxlygjofpx.supabase.co";
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -266,4 +268,650 @@ export const buildOrgStatusForUser = async (userId) => {
         "or any other practice content. Ever."
     }))
   };
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// Write helpers (used by admin-only and invite-accept endpoints).
+//
+// Every write that mutates an org table also writes a row to
+// stillform_org_audit_log via logOrgAudit. This is non-negotiable — SOC 2
+// evidence chain for B2B controls is the auditable trail of admin actions.
+// ─────────────────────────────────────────────────────────────────────────
+
+const INVITE_EXPIRY_DAYS = 7;
+
+const generateInviteToken = () => {
+  // 32 bytes → base64url (~43 chars). Cryptographically random.
+  return randomBytes(32)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+};
+
+const computeInviteExpiry = () => {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() + INVITE_EXPIRY_DAYS);
+  return d.toISOString();
+};
+
+/**
+ * Extract request metadata for audit logging. Falls back gracefully when
+ * fields are absent.
+ */
+export const extractRequestMeta = (event) => {
+  const headers = event?.headers || {};
+  const forwarded =
+    headers["x-forwarded-for"] ||
+    headers["X-Forwarded-For"] ||
+    headers["x-nf-client-connection-ip"] ||
+    headers["X-NF-Client-Connection-IP"] ||
+    null;
+  const ipAddress = forwarded ? String(forwarded).split(",")[0].trim() : null;
+  const userAgent = headers["user-agent"] || headers["User-Agent"] || null;
+  return { ipAddress, userAgent };
+};
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const isValidEmail = (value) => {
+  const normalized = normalizeEmail(value);
+  if (!normalized) return false;
+  return EMAIL_RE.test(normalized) && normalized.length <= 320;
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// createOrgWithAdmin
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Creates an organization plus the owner's admin membership in a single
+// logical operation. Two table writes plus an audit entry; we accept a
+// small window of inconsistency on partial failure (rare for normal
+// service_role traffic) and fix forward if it happens.
+//
+// Caller is responsible for ensuring the authenticated user is the
+// ownerUserId (verified in the endpoint via getUserFromToken).
+
+export const createOrgWithAdmin = async ({
+  name,
+  billingEmail,
+  planTier = "small_team",
+  seatLimit = 1,
+  ownerUserId,
+  ownerEmail,
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!ownerUserId) throw new Error("createOrgWithAdmin: ownerUserId required");
+  if (!name || typeof name !== "string") throw new Error("createOrgWithAdmin: name required");
+  if (!isValidEmail(billingEmail)) throw new Error("createOrgWithAdmin: valid billingEmail required");
+  if (!isValidEmail(ownerEmail)) throw new Error("createOrgWithAdmin: valid ownerEmail required");
+  if (!PLAN_TIERS.includes(planTier)) {
+    throw new Error(`createOrgWithAdmin: planTier must be one of ${PLAN_TIERS.join(",")}`);
+  }
+  const limit = Math.max(1, Math.floor(Number(seatLimit) || 1));
+
+  const orgRow = {
+    name: String(name).trim().slice(0, 200),
+    billing_email: normalizeEmail(billingEmail),
+    owner_user_id: ownerUserId,
+    plan_tier: planTier,
+    seat_limit: limit,
+    status: "active",
+    created_at: nowIso(),
+    updated_at: nowIso()
+  };
+  const orgs = await sbAdminFetch(`/rest/v1/${ORGANIZATIONS_TABLE}`, {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(orgRow)
+  });
+  const org = Array.isArray(orgs) && orgs[0] ? orgs[0] : null;
+  if (!org) throw new Error("createOrgWithAdmin: org insert returned no row");
+
+  const memberRow = {
+    org_id: org.id,
+    user_id: ownerUserId,
+    email: normalizeEmail(ownerEmail),
+    role: "admin",
+    status: "active",
+    joined_at: nowIso(),
+    created_at: nowIso(),
+    updated_at: nowIso()
+  };
+  const members = await sbAdminFetch(`/rest/v1/${ORG_MEMBERS_TABLE}`, {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(memberRow)
+  });
+  const membership = Array.isArray(members) && members[0] ? members[0] : null;
+
+  await logOrgAudit({
+    orgId: org.id,
+    actorUserId: ownerUserId,
+    action: "org_created",
+    metadata: {
+      plan_tier: planTier,
+      seat_limit: limit,
+      name: orgRow.name
+    },
+    ipAddress,
+    userAgent
+  });
+
+  return { org, membership };
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// updateOrg
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Updates whitelisted fields and writes one audit entry per
+// changed field with the canonical action name and { old, new } metadata.
+//
+// Caller must call requireOrgAdmin({ orgId, userId: actorUserId }) first.
+
+const FIELD_TO_AUDIT_ACTION = Object.freeze({
+  name: "org_renamed",
+  plan_tier: "org_plan_changed",
+  seat_limit: "org_seat_limit_changed",
+  sso_provider: "org_sso_configured",
+  sso_metadata: "org_sso_configured",
+  auto_join_domain: "org_auto_join_domain_set",
+  status: null // status changes use specific actions below
+});
+
+export const updateOrg = async ({
+  orgId,
+  actorUserId,
+  updates,
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!orgId) throw new Error("updateOrg: orgId required");
+  if (!actorUserId) throw new Error("updateOrg: actorUserId required");
+  if (!updates || typeof updates !== "object") throw new Error("updateOrg: updates required");
+
+  const existing = await getOrgById(orgId);
+  if (!existing) throw new Error("updateOrg: org not found");
+
+  const patch = {};
+  const audits = [];
+
+  // Whitelist of mutable fields.
+  for (const field of ["name", "plan_tier", "seat_limit", "sso_provider", "sso_metadata", "auto_join_domain", "status"]) {
+    if (!(field in updates)) continue;
+    const next = updates[field];
+    const prev = existing[field];
+
+    // Per-field validation.
+    if (field === "name") {
+      if (!next || typeof next !== "string") continue;
+      patch.name = String(next).trim().slice(0, 200);
+    } else if (field === "plan_tier") {
+      if (!PLAN_TIERS.includes(next)) throw new Error(`updateOrg: invalid plan_tier "${next}"`);
+      patch.plan_tier = next;
+    } else if (field === "seat_limit") {
+      const limit = Math.max(1, Math.floor(Number(next) || 0));
+      const active = await countActiveMembers(orgId);
+      if (limit < active) {
+        throw new Error(`updateOrg: seat_limit ${limit} below current active member count ${active}`);
+      }
+      patch.seat_limit = limit;
+    } else if (field === "sso_provider") {
+      if (next !== null && !["okta", "azure_ad", "google_workspace"].includes(next)) {
+        throw new Error(`updateOrg: invalid sso_provider "${next}"`);
+      }
+      patch.sso_provider = next || null;
+    } else if (field === "sso_metadata") {
+      patch.sso_metadata = next && typeof next === "object" ? next : null;
+    } else if (field === "auto_join_domain") {
+      patch.auto_join_domain = next ? String(next).trim().toLowerCase().slice(0, 253) : null;
+    } else if (field === "status") {
+      if (!["active", "suspended", "cancelled"].includes(next)) {
+        throw new Error(`updateOrg: invalid status "${next}"`);
+      }
+      patch.status = next;
+    }
+
+    const auditAction = FIELD_TO_AUDIT_ACTION[field];
+    if (auditAction) {
+      audits.push({ action: auditAction, metadata: { field, old: prev, new: patch[field] } });
+    } else if (field === "status") {
+      if (next === "suspended") audits.push({ action: "org_suspended", metadata: { old: prev } });
+      if (next === "cancelled") audits.push({ action: "org_cancelled", metadata: { old: prev } });
+    }
+  }
+
+  if (Object.keys(patch).length === 0) {
+    return { org: existing, changed: [] };
+  }
+
+  patch.updated_at = nowIso();
+
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORGANIZATIONS_TABLE}?id=eq.${encodeURIComponent(orgId)}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify(patch)
+    }
+  );
+  const updated = Array.isArray(rows) && rows[0] ? rows[0] : null;
+
+  for (const entry of audits) {
+    await logOrgAudit({
+      orgId,
+      actorUserId,
+      action: entry.action,
+      metadata: entry.metadata,
+      ipAddress,
+      userAgent
+    });
+  }
+
+  return { org: updated, changed: audits.map((a) => a.action) };
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// listOrgMembers
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Returns the management view of an org's members: email,
+// role, status, transition dates. NEVER includes anything inferable from
+// practice — by construction this query selects only from the org_members
+// table.
+
+export const listOrgMembers = async (orgId, { includeRemoved = false } = {}) => {
+  if (!orgId) return [];
+  const statusFilter = includeRemoved ? "" : "&status=neq.removed";
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}${statusFilter}` +
+    `&select=id,user_id,email,role,status,invited_at,joined_at,removed_at` +
+    `&order=joined_at.asc.nullsfirst,invited_at.asc.nullsfirst`
+  );
+  return Array.isArray(rows) ? rows : [];
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// listPendingInvites
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Returns invites that are neither accepted nor revoked and
+// have not expired. Excludes the invite_token itself from the response;
+// admins don't need it (they re-send by email).
+
+export const listPendingInvites = async (orgId) => {
+  if (!orgId) return [];
+  const nowIsoNow = nowIso();
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}` +
+    `&accepted_at=is.null&revoked_at=is.null` +
+    `&expires_at=gt.${encodeURIComponent(nowIsoNow)}` +
+    `&select=id,email,role,invited_by_user_id,created_at,expires_at` +
+    `&order=created_at.desc`
+  );
+  return Array.isArray(rows) ? rows : [];
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// createInvite
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Generates a crypto-random invite token, inserts the invite
+// row, and writes an audit entry. Enforces:
+//   - Valid email format
+//   - Role is admin or member
+//   - Target email is not already an active member
+//   - No existing pending invite for the same email (revoke first if so)
+//   - Org has seat capacity (active + pending invites < seat_limit)
+
+export const createInvite = async ({
+  orgId,
+  actorUserId,
+  email,
+  role = "member",
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!orgId) throw new Error("createInvite: orgId required");
+  if (!actorUserId) throw new Error("createInvite: actorUserId required");
+  if (!isValidEmail(email)) throw new Error("createInvite: valid email required");
+  if (!MEMBER_ROLES.includes(role)) throw new Error(`createInvite: invalid role "${role}"`);
+
+  const org = await getOrgById(orgId);
+  if (!org) throw new Error("createInvite: org not found");
+  if (org.status !== "active") throw new Error("createInvite: org is not active");
+
+  const normalizedEmail = normalizeEmail(email);
+
+  // Already an active member?
+  const existingMember = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}` +
+    `&email=eq.${encodeURIComponent(normalizedEmail)}` +
+    `&status=eq.active&select=id&limit=1`
+  );
+  if (Array.isArray(existingMember) && existingMember.length > 0) {
+    throw new Error("createInvite: email is already an active member");
+  }
+
+  // Existing unaccepted/unrevoked/unexpired invite?
+  const existingInvite = await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}` +
+    `&email=eq.${encodeURIComponent(normalizedEmail)}` +
+    `&accepted_at=is.null&revoked_at=is.null` +
+    `&expires_at=gt.${encodeURIComponent(nowIso())}` +
+    `&select=id&limit=1`
+  );
+  if (Array.isArray(existingInvite) && existingInvite.length > 0) {
+    throw new Error("createInvite: pending invite already exists for this email");
+  }
+
+  // Seat capacity check: active members + pending invites must be below seat_limit.
+  const activeCount = await countActiveMembers(orgId);
+  const pendingInvites = await listPendingInvites(orgId);
+  if (activeCount + pendingInvites.length >= org.seat_limit) {
+    throw new Error(
+      `createInvite: at seat limit (${org.seat_limit}); upgrade plan or remove members first`
+    );
+  }
+
+  const inviteRow = {
+    org_id: orgId,
+    email: normalizedEmail,
+    role,
+    invite_token: generateInviteToken(),
+    invited_by_user_id: actorUserId,
+    created_at: nowIso(),
+    expires_at: computeInviteExpiry()
+  };
+  const rows = await sbAdminFetch(`/rest/v1/${ORG_INVITES_TABLE}`, {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(inviteRow)
+  });
+  const invite = Array.isArray(rows) && rows[0] ? rows[0] : null;
+  if (!invite) throw new Error("createInvite: insert returned no row");
+
+  await logOrgAudit({
+    orgId,
+    actorUserId,
+    action: "invite_sent",
+    targetEmail: normalizedEmail,
+    metadata: { role, expires_at: invite.expires_at },
+    ipAddress,
+    userAgent
+  });
+
+  return invite;
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// acceptInvite
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Called by an authenticated user with the invite token. Enforces:
+//   - Token exists and is unaccepted, unrevoked, unexpired
+//   - Accepting user's email matches the invited email (case insensitive)
+//   - Org still has seat capacity at the moment of accept
+//   - User isn't already an active member of the org
+// Side effects:
+//   - Insert active member row
+//   - Mark invite accepted_at + accepted_by_user_id
+//   - Audit log: invite_accepted
+
+export const acceptInvite = async ({
+  inviteToken,
+  acceptingUserId,
+  acceptingEmail,
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!inviteToken) throw new Error("acceptInvite: inviteToken required");
+  if (!acceptingUserId) throw new Error("acceptInvite: acceptingUserId required");
+  if (!isValidEmail(acceptingEmail)) throw new Error("acceptInvite: valid acceptingEmail required");
+
+  const inviteRows = await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}` +
+    `?invite_token=eq.${encodeURIComponent(inviteToken)}` +
+    `&select=*&limit=1`
+  );
+  const invite = Array.isArray(inviteRows) && inviteRows[0] ? inviteRows[0] : null;
+  if (!invite) throw new Error("acceptInvite: invite not found");
+  if (invite.accepted_at) throw new Error("acceptInvite: invite already accepted");
+  if (invite.revoked_at) throw new Error("acceptInvite: invite revoked");
+  if (new Date(invite.expires_at).getTime() < Date.now()) {
+    throw new Error("acceptInvite: invite expired");
+  }
+
+  const normalizedEmail = normalizeEmail(acceptingEmail);
+  if (normalizedEmail !== invite.email) {
+    throw new Error("acceptInvite: signed-in email does not match invited email");
+  }
+
+  const org = await getOrgById(invite.org_id);
+  if (!org) throw new Error("acceptInvite: org not found");
+  if (org.status !== "active") throw new Error("acceptInvite: org is not active");
+
+  // Already a member?
+  const existingMember = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(invite.org_id)}` +
+    `&user_id=eq.${encodeURIComponent(acceptingUserId)}` +
+    `&status=eq.active&select=*&limit=1`
+  );
+  if (Array.isArray(existingMember) && existingMember[0]) {
+    // Already an active member — mark the invite accepted but return existing membership.
+    await sbAdminFetch(
+      `/rest/v1/${ORG_INVITES_TABLE}?id=eq.${encodeURIComponent(invite.id)}`,
+      {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          accepted_at: nowIso(),
+          accepted_by_user_id: acceptingUserId
+        })
+      }
+    );
+    return { org, membership: existingMember[0], alreadyMember: true };
+  }
+
+  // Seat capacity at moment of accept.
+  const activeCount = await countActiveMembers(invite.org_id);
+  if (activeCount >= org.seat_limit) {
+    throw new Error("acceptInvite: org is at seat limit; ask admin to upgrade or free a seat");
+  }
+
+  // Insert membership.
+  const memberRow = {
+    org_id: invite.org_id,
+    user_id: acceptingUserId,
+    email: normalizedEmail,
+    role: invite.role,
+    status: "active",
+    invited_at: invite.created_at,
+    joined_at: nowIso(),
+    created_at: nowIso(),
+    updated_at: nowIso()
+  };
+  const newMembers = await sbAdminFetch(`/rest/v1/${ORG_MEMBERS_TABLE}`, {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify(memberRow)
+  });
+  const membership = Array.isArray(newMembers) && newMembers[0] ? newMembers[0] : null;
+
+  // Mark invite accepted.
+  await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}?id=eq.${encodeURIComponent(invite.id)}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({
+        accepted_at: nowIso(),
+        accepted_by_user_id: acceptingUserId
+      })
+    }
+  );
+
+  await logOrgAudit({
+    orgId: invite.org_id,
+    actorUserId: acceptingUserId,
+    action: "invite_accepted",
+    targetUserId: acceptingUserId,
+    targetEmail: normalizedEmail,
+    metadata: { role: invite.role, invite_id: invite.id },
+    ipAddress,
+    userAgent
+  });
+
+  return { org, membership, alreadyMember: false };
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// revokeInvite
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Marks an unaccepted invite as revoked.
+
+export const revokeInvite = async ({
+  inviteId,
+  actorUserId,
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!inviteId) throw new Error("revokeInvite: inviteId required");
+  if (!actorUserId) throw new Error("revokeInvite: actorUserId required");
+
+  const inviteRows = await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}?id=eq.${encodeURIComponent(inviteId)}&select=*&limit=1`
+  );
+  const invite = Array.isArray(inviteRows) && inviteRows[0] ? inviteRows[0] : null;
+  if (!invite) throw new Error("revokeInvite: invite not found");
+  if (invite.accepted_at) throw new Error("revokeInvite: invite already accepted");
+  if (invite.revoked_at) return invite;
+
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_INVITES_TABLE}?id=eq.${encodeURIComponent(inviteId)}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        revoked_at: nowIso(),
+        revoked_by_user_id: actorUserId
+      })
+    }
+  );
+  const updated = Array.isArray(rows) && rows[0] ? rows[0] : null;
+
+  await logOrgAudit({
+    orgId: invite.org_id,
+    actorUserId,
+    action: "invite_revoked",
+    targetEmail: invite.email,
+    metadata: { invite_id: invite.id },
+    ipAddress,
+    userAgent
+  });
+
+  return updated;
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// removeMember
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Sets membership status='removed' and records removed_at.
+// Refuses to remove the last admin of an org.
+
+const countActiveAdmins = async (orgId) => {
+  if (!orgId) return 0;
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}` +
+    `&role=eq.admin&status=eq.active&select=id`
+  );
+  return Array.isArray(rows) ? rows.length : 0;
+};
+
+export const removeMember = async ({
+  orgId,
+  actorUserId,
+  targetUserId,
+  ipAddress = null,
+  userAgent = null
+}) => {
+  if (!orgId) throw new Error("removeMember: orgId required");
+  if (!actorUserId) throw new Error("removeMember: actorUserId required");
+  if (!targetUserId) throw new Error("removeMember: targetUserId required");
+
+  const memberRows = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}` +
+    `&user_id=eq.${encodeURIComponent(targetUserId)}` +
+    `&status=eq.active&select=*&limit=1`
+  );
+  const member = Array.isArray(memberRows) && memberRows[0] ? memberRows[0] : null;
+  if (!member) throw new Error("removeMember: active membership not found");
+
+  if (member.role === "admin") {
+    const adminCount = await countActiveAdmins(orgId);
+    if (adminCount <= 1) {
+      throw new Error("removeMember: cannot remove the last admin; promote another member to admin first");
+    }
+  }
+
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_MEMBERS_TABLE}?id=eq.${member.id}`,
+    {
+      method: "PATCH",
+      headers: { Prefer: "return=representation" },
+      body: JSON.stringify({
+        status: "removed",
+        removed_at: nowIso(),
+        updated_at: nowIso()
+      })
+    }
+  );
+  const updated = Array.isArray(rows) && rows[0] ? rows[0] : null;
+
+  await logOrgAudit({
+    orgId,
+    actorUserId,
+    action: "member_removed",
+    targetUserId,
+    targetEmail: member.email,
+    metadata: { role: member.role, self_removal: actorUserId === targetUserId },
+    ipAddress,
+    userAgent
+  });
+
+  return updated;
+};
+
+// ─────────────────────────────────────────────────────────────────────────
+// readAuditLog
+// ─────────────────────────────────────────────────────────────────────────
+//
+// Admin-only. Returns audit log entries for an org, paginated by cursor
+// (entry id, descending). Optional action filter.
+
+export const readAuditLog = async ({ orgId, limit = 50, beforeId = null, action = null } = {}) => {
+  if (!orgId) return { entries: [], next_cursor: null };
+  const safeLimit = Math.min(200, Math.max(1, Math.floor(Number(limit) || 50)));
+  const beforeClause = beforeId ? `&id=lt.${encodeURIComponent(beforeId)}` : "";
+  const actionClause = action ? `&action=eq.${encodeURIComponent(action)}` : "";
+  const rows = await sbAdminFetch(
+    `/rest/v1/${ORG_AUDIT_LOG_TABLE}` +
+    `?org_id=eq.${encodeURIComponent(orgId)}${beforeClause}${actionClause}` +
+    `&select=*&order=id.desc&limit=${safeLimit}`
+  );
+  const entries = Array.isArray(rows) ? rows : [];
+  const nextCursor =
+    entries.length === safeLimit ? entries[entries.length - 1].id : null;
+  return { entries, next_cursor: nextCursor };
 };
