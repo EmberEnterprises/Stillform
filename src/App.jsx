@@ -23039,10 +23039,14 @@ const isSignalProfileConfigured = () => {
               color: "var(--text)", letterSpacing: "0.04em", marginBottom: 8,
               opacity: 0, animation: "splashIn 1.2s ease-out 0.3s forwards"
             }}>Still<span style={{ color: "var(--amber)" }}>form</span></div>
-            <div style={{
-              fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
-              opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Self Architecture</div>
+            {/* TAGLINE REMOVED May 14, 2026 evening per Arlin direction.
+                "Self Architecture" violated CANON framing — Stillform is
+                metacognition practice for self-mastery, not an "architecture."
+                Same problem as the prior "Composure Architecture" candidate
+                (composure is FELT outcome, never product framing). The bare
+                wordmark holds the moment. Operator-tier silence beats a wrong
+                word. If a tagline returns, it goes through the same framing
+                law audit as any other user-facing copy. */}
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
@@ -23110,8 +23114,10 @@ const isSignalProfileConfigured = () => {
               openingLines: [
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
                 "Stillform trains you to catch it earlier — before your state drives the outcome. That's the practice. And it builds.",
-                "This is instrumentation for metacognition. A practice you operate.",
-                "Stillform. Self Architecture."
+                "This is instrumentation for metacognition. A practice you operate."
+                // Closer line "Stillform. Self Architecture." removed May 14,
+                // 2026 evening per Arlin direction (same call as splash tagline:
+                // "Self Architecture" violates CANON framing).
               ]
             },
             {
