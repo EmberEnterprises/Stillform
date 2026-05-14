@@ -24330,16 +24330,18 @@ const isSignalProfileConfigured = () => {
                 return (
                   <div onClick={() => setCiOpen(true)} style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
-                    padding: "12px 16px", marginBottom: 12,
-                    background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", cursor: "pointer", WebkitTapHighlightColor: "transparent"
+                    padding: "16px 4px", marginBottom: 18,
+                    background: "transparent",
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    cursor: "pointer", WebkitTapHighlightColor: "transparent"
                   }}>
                     <div>
-                      <div className="t-mono-xs" style={{ marginBottom: 3 }}>
-                        Morning Check-in
+                      <div className="t-mono-xs" style={{ marginBottom: 4, color: _ms_done ? "var(--amber)" : "var(--text-muted)" }}>
+                        {_ms_done ? "✓ Morning Check-in" : "Morning Check-in"}
                       </div>
                       <div className="t-body-sm quiet">
-                        {_ms_done ? "✓ Done · tap to update" : "What might drive you today if you don't notice it early?"}
+                        {_ms_done ? "Tap to update" : "What might drive you today if you don't notice it early?"}
                       </div>
                     </div>
                     <span style={{ color: "var(--text-muted)", fontSize: 14 }}>↓</span>
@@ -25084,18 +25086,18 @@ const isSignalProfileConfigured = () => {
 
                       return (
                         <div style={{
-                          marginBottom: 18,
-                          padding: "14px 14px 14px 16px",
-                          border: "0.5px solid var(--amber-dim)",
-                          borderRadius: "var(--r)",
-                          background: "var(--surface)",
+                          marginBottom: 20,
+                          padding: "14px 4px 14px 4px",
+                          background: "transparent",
+                          borderTop: "0.5px solid var(--amber-dim)",
+                          borderBottom: "0.5px solid var(--amber-dim)",
                           position: "relative"
                         }}>
                           <button
                             onClick={dismiss}
                             aria-label="Dismiss"
                             style={{
-                              position: "absolute", top: 8, right: 10,
+                              position: "absolute", top: 8, right: 4,
                               background: "none", border: "none",
                               color: "var(--text-muted)", fontSize: 16,
                               cursor: "pointer", padding: 4, lineHeight: 1,
@@ -25182,17 +25184,24 @@ const isSignalProfileConfigured = () => {
                       }
 
                       // Standard rep render — eyebrow + rep statement.
+                      // Rep statement is now the ONE Cormorant typographic
+                      // event on home (parallel to Reframe's lead-sentence
+                      // event). Per the integration framing locked May 13:
+                      // home becomes one reading composition where the rep
+                      // is the focal statement and Begin session is the
+                      // action affordance below it. The eyebrow stays
+                      // mono microtype to recede behind the statement.
                       return (
-                        <div style={{ marginBottom: 18, textAlign: "center" }}>
+                        <div style={{ marginBottom: 24, textAlign: "center" }}>
                           <div className="t-mono-xs" style={{
-                            color: "var(--amber)", marginBottom: 8, letterSpacing: "0.14em"
+                            color: "var(--amber)", marginBottom: 12, letterSpacing: "0.14em"
                           }}>
                             TODAY'S REP · STAGE {journeyRep.stageId} · {journeyRep.stage.name}
                           </div>
                           <div style={{
-                            fontFamily: "'DM Sans', sans-serif", fontSize: 15,
-                            fontWeight: 500, color: "var(--text)",
-                            lineHeight: 1.5, letterSpacing: "0.01em",
+                            fontFamily: "'Cormorant Garamond', serif", fontSize: 24,
+                            fontWeight: 400, color: "var(--text-cream)",
+                            lineHeight: 1.35, letterSpacing: "0.01em",
                             padding: "0 8px"
                           }}>
                             {journeyRep.rep}
@@ -25847,11 +25856,14 @@ const isSignalProfileConfigured = () => {
                     loadEodForUpdate();
                     setEodSaved(false); setEodOpen(true); setEodPromptDismissed(false);
                   }} style={{
-                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    width: "100%", background: "transparent",
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    borderLeft: "none", borderRight: "none",
+                    padding: "16px 4px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div className="t-mono-xs">Close the loop</div>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>✓ Close the loop</div>
                     {/* Build #5 Phase 4 — EOD close composure-frequency claim.
                         Renders only on the just-saved state (eodSaved branch) and only
                         when the saved composure is solid/mixed AND has occurred 2+ days
@@ -25882,7 +25894,7 @@ const isSignalProfileConfigured = () => {
                         );
                       } catch { return null; }
                     })()}
-                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>Closed · tap to update</div>
                   </button>
                 );
                 if (eodDone && !eodOpen) return (
@@ -25897,12 +25909,15 @@ const isSignalProfileConfigured = () => {
                     loadEodForUpdate();
                     setEodOpen(true);
                   }} style={{
-                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    width: "100%", background: "transparent",
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    borderLeft: "none", borderRight: "none",
+                    padding: "16px 4px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div className="t-mono-xs">Close the loop</div>
-                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Closed · tap to update</div>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>✓ Close the loop</div>
+                    <div className="t-body-sm quiet" style={{ marginTop: 4 }}>Closed · tap to update</div>
                   </button>
                 );
 
@@ -25953,11 +25968,14 @@ const isSignalProfileConfigured = () => {
                     } catch {}
                     setEodOpen(true);
                   }} style={{
-                    width: "100%", background: "var(--surface)", border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20, cursor: "pointer",
+                    width: "100%", background: "transparent",
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    borderLeft: "none", borderRight: "none",
+                    padding: "16px 4px", marginBottom: 20, cursor: "pointer",
                     textAlign: "left", WebkitTapHighlightColor: "transparent"
                   }}>
-                    <div className="t-mono-xs">Before you close out</div>
+                    <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Before you close out</div>
                     <div className="t-body-sm quiet" style={{ marginTop: 4 }}>What did you catch today? What got past you?</div>
                   </button>
                 );
@@ -26017,7 +26035,18 @@ const isSignalProfileConfigured = () => {
               
 
 
-              {/* MY PROGRESS — evidence layer, secondary to shell */}
+              {/* MY PROGRESS — integration framing locked May 13, 2026.
+                  Per CANON §7 Engine 1 (in-flow retention): sessions count,
+                  day streak, and most-used tool are reward feedback the user
+                  encounters every time home opens — that IS the retention
+                  mechanism. The collapsible card + stat tile structure
+                  competed with the rep statement and CTA. Integration move:
+                  data stays present (and more visible — no expand required),
+                  visual weight drops to a single mono microtype line bounded
+                  by hairlines. Tap opens full My Progress screen for charts,
+                  timeline, roadmap. Quiet observational cue below the line
+                  preserves Hoemann 2021 / Barrett 2017 concept-library
+                  reflection (the user's own data named back to them). */}
               {(() => {
                 const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
                 let streakCount = 0;
@@ -26045,14 +26074,12 @@ const isSignalProfileConfigured = () => {
                   panic: "Panic",
                   sigh: "Sigh"
                 };
-                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : "N/A";
-                // Processing cue bank removed — replaced with evidence-based data
-                const showHomeProgressDetails = homeProgressPinned || homeProgressExpanded;
+                const mostUsedLabel = topToolEntry ? (topToolMap[topToolEntry[0]] || topToolEntry[0]) : null;
                 const signalDivergence = getSignalDivergence();
                 return (
-                  <div style={{ marginBottom: 16 }}>
+                  <div style={{ marginBottom: 20 }}>
                     {signalDivergence && (
-                      <div style={{ marginBottom: 8, padding: "10px 12px", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ marginBottom: 12, padding: "10px 12px", background: "var(--amber-glow)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                         <div>
                           <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
                             Signal shift detected
@@ -26070,53 +26097,62 @@ const isSignalProfileConfigured = () => {
                     )}
 
                     <button
-                      onClick={() => {
-                        if (homeProgressPinned) {
-                          setHomeProgressExpanded(true);
-                          return;
-                        }
-                        setHomeProgressExpanded((prev) => !prev);
-                      }}
+                      onClick={() => setScreen("progress")}
                       style={{
                         width: "100%",
                         textAlign: "left",
-                        background: "var(--surface)",
-                        border: "0.5px solid var(--border)",
-                        borderRadius: "var(--r)",
-                        padding: "16px 18px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        cursor: "pointer"
+                        background: "transparent",
+                        borderTop: "0.5px solid var(--border-printed)",
+                        borderBottom: "0.5px solid var(--border-printed)",
+                        borderLeft: "none", borderRight: "none",
+                        padding: "16px 4px",
+                        cursor: "pointer",
+                        WebkitTapHighlightColor: "transparent",
+                        display: "flex", alignItems: "center", justifyContent: "space-between"
                       }}
+                      aria-label="Open My Progress"
                     >
-                      <div>
-                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 400, color: "var(--text)" }}>My Progress</div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontFamily: "'IBM Plex Mono', monospace",
+                          fontSize: 10, letterSpacing: "0.12em",
+                          textTransform: "uppercase", color: "var(--text-muted)",
+                          lineHeight: 1.5
+                        }}>
+                          <span style={{ color: "var(--amber)" }}>{sessionCount}</span>
+                          <span style={{ margin: "0 4px" }}> sessions</span>
+                          <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
+                          <span style={{ color: "var(--amber)" }}>{streakCount}</span>
+                          <span style={{ margin: "0 4px" }}> day streak</span>
+                          {mostUsedLabel && (
+                            <>
+                              <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
+                              <span style={{ color: "var(--text)" }}>{mostUsedLabel}</span>
+                            </>
+                          )}
+                        </div>
                         {(() => {
-                          // Show one data-backed cue at rest — priority order per spec
-                          // READ PATH (audit philosophy v1.3 Layer 2.36, alignment May 8 2026):
-                          // stillform_sessions is written via raw localStorage in
-                          // setSessionsInStorage (line 2478). secureRead returns
-                          // Layer 2.39 Path A — getSessionsFromStorage now reads via
-                          // secureRead (write path is secureWrite). Encrypted at rest.
+                          // Quiet observational cue — data-backed, retained per
+                          // Hoemann 2021 / Barrett 2017 (concept library reflected
+                          // back reinforces granularity). Same priority order as
+                          // prior collapsible: autonomous exits > duration trend.
+                          // READ PATH: stillform_sessions via secureRead (encrypted at rest).
                           try {
-                            const sessions = getSessionsFromStorage();
-                            if (!Array.isArray(sessions) || sessions.length < 3) return null;
-                            // 1. Signal Awareness — autonomous exits
-                            const autoExits = sessions.filter(s => s.autonomousExit).length;
+                            const allSessions = getSessionsFromStorage();
+                            if (!Array.isArray(allSessions) || allSessions.length < 3) return null;
+                            const autoExits = allSessions.filter(s => s.autonomousExit).length;
                             if (autoExits > 0) return (
-                              <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                              <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6, fontStyle: "italic", lineHeight: 1.45 }}>
                                 {autoExits === 1 ? "1 time you caught it before it ran." : `${autoExits} times you caught it before it ran.`}
                               </div>
                             );
-                            // 2. Session duration trend
-                            const recent = sessions.slice(-5).filter(s => s.duration);
-                            const early = sessions.slice(0, 5).filter(s => s.duration);
+                            const recent = allSessions.slice(-5).filter(s => s.duration);
+                            const early = allSessions.slice(0, 5).filter(s => s.duration);
                             if (recent.length >= 3 && early.length >= 3) {
                               const recentAvg = recent.reduce((a, s) => a + s.duration, 0) / recent.length;
                               const earlyAvg = early.reduce((a, s) => a + s.duration, 0) / early.length;
                               if (recentAvg < earlyAvg - 0.5) return (
-                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 3, fontStyle: "italic" }}>
+                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6, fontStyle: "italic", lineHeight: 1.45 }}>
                                   Sessions are getting shorter. The observer is faster.
                                 </div>
                               );
@@ -26124,102 +26160,28 @@ const isSignalProfileConfigured = () => {
                             return null;
                           } catch { return null; }
                         })()}
-
                       </div>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                        <button
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            setHomeProgressPinned((current) => {
-                              const next = !current;
-                              if (next) {
-                                setHomeProgressExpanded(true);
-                              } else {
-                                setHomeProgressExpanded(false);
-                              }
-                              return next;
-                            });
-                          }}
-                          aria-label={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress"}
-                          title={homeProgressPinned ? "Unpin My Progress" : "Pin My Progress"}
-                          style={{
-                            border: "0.5px solid var(--amber-dim)",
-                            background: homeProgressPinned ? "var(--amber-glow)" : "transparent",
-                            color: "var(--amber)",
-                            width: 28,
-                            height: 28,
-                            borderRadius: "50%",
-                            cursor: "pointer",
-                            fontSize: 14,
-                            lineHeight: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            padding: 0
-                          }}
-                        >
-                          <svg
-                            aria-hidden="true"
-                            viewBox="0 0 24 24"
-                            width="14"
-                            height="14"
-                            style={{ display: "block" }}
-                          >
-                            <path
-                              fill="currentColor"
-                              d="M14.2 3c.9 0 1.7.8 1.7 1.7v2l2.4 2.4c.5.5.1 1.4-.6 1.4H13v5.4l1.1 3.2c.2.7-.6 1.3-1.2.8L12 18.8l-1 1.1c-.6.5-1.4-.1-1.2-.8l1.1-3.2v-5.4H6.3c-.8 0-1.2-1-.6-1.4L8.1 6.7v-2C8.1 3.8 8.8 3 9.8 3h4.4Z"
-                            />
-                          </svg>
-                        </button>
-                        <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 18, color: "var(--amber)", lineHeight: 1, opacity: homeProgressPinned ? 0.45 : 1 }}>
-                          {showHomeProgressDetails ? "−" : "+"}
-                        </div>
-                      </div>
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: 10, letterSpacing: "0.1em",
+                        textTransform: "uppercase", color: "var(--amber)",
+                        marginLeft: 12, flexShrink: 0
+                      }}>
+                        Open →
+                      </span>
                     </button>
-                    {showHomeProgressDetails && (
-                      <div style={{ marginTop: 8, background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: 12 }}>
-                        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 10 }}>
-                          <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
-                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{sessionCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Sessions</span> <button aria-label="Sessions" onClick={() => setInfoModal({ title: "Sessions", body: "Total completed sessions. Each session is one rep of regulation practice. The literature on repeated practice and autonomic flexibility (Lehrer 2020, Thayer & Lane 2000) is the mechanism Stillform draws from — frequency is what the research links to durable change. Stillform tracks self-reported state shift per session today; direct biometric measurement arrives with watch integration." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
-                          </div>
-                          <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
-                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, color: "var(--amber)", lineHeight: 1 }}>{streakCount}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Day streak</span> <button aria-label="Day Streak" onClick={() => setInfoModal({ title: "Day Streak", body: "Consecutive days with at least one session. Stress inoculation research shows that practicing regulation when calm builds the capacity that deploys automatically under pressure. Consistency compounds." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
-                          </div>
-                          <div style={{ gridColumn: "1 / -1", background: "var(--surface2)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", padding: "10px 8px", textAlign: "center" }}>
-                            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, color: "var(--amber)", lineHeight: 1.2 }}>{mostUsedLabel}</div>
-                            <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--text-muted)", marginTop: 4 }}><span>Most used</span> <button aria-label="Most Used" onClick={() => setInfoModal({ title: "Most Used", body: "The tool your system defaults to most. Over time this should align with your calibration tendency. A persistent mismatch may indicate your default routing has shifted and recalibration is worth considering." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 11, padding: "0 2px", lineHeight: 1 }}>ⓘ</button></div>
-                          </div>
-
-                        </div>
-                        <button
-                          onClick={() => setScreen("progress")}
-                          style={{
-                            width: "100%",
-                            background: "none",
-                            border: "0.5px solid var(--amber-dim)",
-                            borderRadius: "var(--r-sm)",
-                            color: "var(--amber)",
-                            fontFamily: "'IBM Plex Mono', monospace",
-                            fontSize: 10,
-                            letterSpacing: "0.1em",
-                            textTransform: "uppercase",
-                            padding: "10px 12px",
-                            cursor: "pointer"
-                          }}
-                        >
-                          Open full My Progress →
-                        </button>
-                      </div>
-                    )}
                   </div>
                 );
               })()}
 
               {/* ABSENCE DETECTION — operator tone, no guilt */}
               {isAbsent && (
-                <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)" }}>
+                <div style={{
+                  marginBottom: 24, padding: "16px 4px",
+                  background: "transparent",
+                  borderTop: "0.5px solid var(--border-printed)",
+                  borderBottom: "0.5px solid var(--border-printed)"
+                }}>
                   <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8 }}>System idle · {daysSinceLastSession} days</div>
                   <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>Resuming. Anything shift in your environment since last check-in?</div>
                 </div>
@@ -26236,7 +26198,12 @@ const isSignalProfileConfigured = () => {
                 const mismatch = (regType === "body-first" && reframeRatio > 0.7) ||
                                  (regType === "thought-first" && reframeRatio < 0.3);
                 return (
-                  <div style={{ marginBottom: 24, padding: "16px 20px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                  <div style={{
+                    marginBottom: 24, padding: "16px 4px",
+                    background: "transparent",
+                    borderTop: "0.5px solid var(--amber-dim)",
+                    borderBottom: "0.5px solid var(--amber-dim)"
+                  }}>
                     <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10 }}>
                       {hasStreak ? "7 days straight" : "7 sessions"}
                     </div>
@@ -26280,7 +26247,12 @@ const isSignalProfileConfigured = () => {
 
               {/* LOOP INTERVENTION NUDGE — shown only when drop-off risk is meaningful */}
               {showLoopNudge && (
-                <div style={{ marginBottom: 20, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)" }}>
+                <div style={{
+                  marginBottom: 20, padding: "14px 4px",
+                  background: "transparent",
+                  borderTop: "0.5px solid var(--amber-dim)",
+                  borderBottom: "0.5px solid var(--amber-dim)"
+                }}>
                   <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 8 }}>
                     Loop reliability nudge
                   </div>
