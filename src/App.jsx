@@ -13465,7 +13465,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               onClick={toggleStateToStatementExpanded}
               style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 12, cursor: "pointer", fontFamily: "'DM Sans', sans-serif", padding: 0, letterSpacing: "0.03em" }}
             >
-              {stateToStatementExpanded ? "▾ Hide" : "▸ What shifted? (optional)"}
+              {stateToStatementExpanded ? "▾ What shifted? (optional)" : "▸ What shifted? (optional)"}
             </button>
             <button aria-label="Why one line?"
               onClick={(e) => {
@@ -14099,6 +14099,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
               onClick={() => setOverflowOpen(true)}
               aria-label="More options"
             >
+              <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", marginRight: 6, fontFamily: "'IBM Plex Mono', monospace" }}>More</span>
               ···
             </button>
           </div>
@@ -16507,6 +16508,8 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
           {[
             // Russell circumplex grouping: HAP → LAP → HAN → cognitive-span → LAN
             // Settled added Apr 30 — closes low-arousal-positive coverage gap
+            // Unsure added May 14 evening (Arlin testing): parity with post-state
+            // picker. Entry-state Unsure is just as legitimate as post-state Unsure.
             { id: "excited", label: "Excited" },
             { id: "focused", label: "Focused" },
             { id: "settled", label: "Settled" },
@@ -16515,7 +16518,8 @@ function PresentStateChips({ feelState, setFeelState, setInfoModal, compact = fa
             { id: "stuck", label: "Stuck" },
             { id: "mixed", label: "Mixed" },
             { id: "flat", label: "Flat" },
-            { id: "distant", label: "Distant" }
+            { id: "distant", label: "Distant" },
+            { id: "unsure", label: "Unsure" }
           ].map(f => (
             <button key={f.id} onClick={() => { haptic.tick(); setFeelState(feelState === f.id ? null : f.id); }} style={{
               background: feelState === f.id ? "var(--amber-glow)" : "transparent",
@@ -25392,7 +25396,8 @@ const isSignalProfileConfigured = () => {
                         { id: "stuck", label: "Stuck" },
                         { id: "mixed", label: "Mixed" },
                         { id: "flat", label: "Flat" },
-                        { id: "distant", label: "Distant" }
+                        { id: "distant", label: "Distant" },
+                        { id: "unsure", label: "Unsure" }
                       ].map(m => (
                         <button key={m.id} onClick={() => setCiMood(ciMood === m.id ? null : m.id)} style={{
                           background: ciMood === m.id ? "var(--amber-glow)" : "transparent",
@@ -27901,9 +27906,6 @@ const isSignalProfileConfigured = () => {
                     padding: "10px 12px"
                   }}
                 >
-                  <div style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 8, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 4 }}>
-                    Processing primer
-                  </div>
                   <div className="t-body-sm quiet" style={{ lineHeight: 1.6 }}>
                     {primer}
                   </div>
