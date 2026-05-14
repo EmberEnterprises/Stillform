@@ -105,7 +105,28 @@ const checks = [
   // adds a typo'd key — the build, lint, and runtime all silently pass; only sync silently
   // fails for that key (data missing on tablet for the user). Verifies every SYNC_KEYS
   // entry has at least one quoted reference elsewhere in src/App.jsx or netlify/functions/reframe.js.
-  { label: "SYNC_KEYS entries reference real storage keys", cmd: "node", args: ["scripts/check-sync-keys.mjs"], type: "must-match" }
+  { label: "SYNC_KEYS entries reference real storage keys", cmd: "node", args: ["scripts/check-sync-keys.mjs"], type: "must-match" },
+  // B2B privacy wall guard (May 14, 2026; CANON v1.3). Catches the case where any file
+  // in the org surface starts querying practice tables. Locks the architectural invariant
+  // that admin-reachable code never bridges into user_data / backups / user_profiles.
+  // Pattern matches actual API access ("/rest/v1/<table>") and SQL foreign keys
+  // ("references public.<table>") — linguistic mentions in docstrings are not caught,
+  // which is intentional: documenting the rule is fine, executing against the table is not.
+  // If this check fires, the fix is to remove the bridge, not to broaden the regex.
+  { label: "B2B privacy wall — org code never accesses practice tables", cmd: "rg", args: [
+    "-n",
+    "(rest/v1/|references public\\.|references )(user_data|backups|user_profiles)",
+    "netlify/functions/organization-status.js",
+    "netlify/functions/organization-create.js",
+    "netlify/functions/organization-update.js",
+    "netlify/functions/organization-list-members.js",
+    "netlify/functions/organization-invite.js",
+    "netlify/functions/organization-accept-invite.js",
+    "netlify/functions/organization-remove-member.js",
+    "netlify/functions/organization-audit-log.js",
+    "netlify/functions/_organizationState.js",
+    "netlify/functions/_organizationSetup.sql"
+  ], type: "must-not-match" }
 ];
 
 let failed = false;
