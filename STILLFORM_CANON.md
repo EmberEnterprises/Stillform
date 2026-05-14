@@ -288,6 +288,10 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 - `STILLFORM_AUDIT_PHILOSOPHY.md` — full nine-layer audit with 35+ specific questions, evidence requirements, war stories (Practice Signals failure, Trigger Profile flow assumption, Body Scan field-name bugs)
 - `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` — full three-engine architecture, Path A consolidation map, retention research
 - `STILLFORM_B2B_PRIVACY_ARCHITECTURE.md` — authoritative source for the B2B privacy wall: what admins can/cannot see, three-layer enforcement (schema / function / audit), consequences for product decisions
+- `B2B_PRIVACY_POLICY_ADDENDUM.md` — privacy policy addendum text for organization-purchased seats (draft pending legal review)
+- `B2B_DPA_TEMPLATE.md` — Data Processing Agreement template covering GDPR Article 28 + CCPA processor obligations (draft pending legal review)
+- `B2B_IT_DEPLOYMENT_GUIDE.md` — for IT admins rolling out via MDM (Intune / Jamf / Workspace ONE); covers network, app distribution, SSO posture, sub-processors, security controls
+- `SOC2_TYPE_1_READINESS.md` — internal SOC 2 readiness inventory mapped to Trust Service Criteria; starting point for audit firm engagement
 - `STILLFORM_HANDOFF_MAY_13_2026.md` — May 13 session-specific handoff (superseded by future handoffs)
 - `STILLFORM_PROJECT_TRANSFER.md` — April 2026 historical project state (largely superseded by this doc and Master_Todo)
 
