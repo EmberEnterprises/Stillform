@@ -19605,6 +19605,17 @@ export default function Stillform() {
   const [orgSettingsError, setOrgSettingsError] = useState(null);
   const [orgSettingsName, setOrgSettingsName] = useState("");
   const [orgSettingsSeatLimit, setOrgSettingsSeatLimit] = useState(1);
+  // SSO + auto-join admin form state. Write-only — admin pastes IdP details
+  // and saves; existing config surfaces as a status line above the form,
+  // not pre-populated into the inputs.
+  const [orgSsoProvider, setOrgSsoProvider] = useState("");
+  const [orgSsoEntityId, setOrgSsoEntityId] = useState("");
+  const [orgSsoUrl, setOrgSsoUrl] = useState("");
+  const [orgSsoCert, setOrgSsoCert] = useState("");
+  const [orgAutoJoinDomain, setOrgAutoJoinDomain] = useState("");
+  const [orgSsoBusy, setOrgSsoBusy] = useState(false);
+  const [orgSsoError, setOrgSsoError] = useState(null);
+  const [orgSsoSaved, setOrgSsoSaved] = useState(false);
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   // Pull-to-refresh state — drives the visual indicator and refresh trigger
   // on home screen. Threshold: 80px of pull to trigger refresh.
@@ -28858,6 +28869,167 @@ const isSignalProfileConfigured = () => {
                   className="btn btn-primary"
                   style={{ width: "100%", padding: "12px 16px" }}
                 >{orgSettingsBusy ? "Saving…" : "Save changes"}</button>
+              </div>
+
+              {/* SSO + AUTO-JOIN */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>SSO &amp; Auto-Join</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    {adminMembership.sso_provider
+                      ? `Configured · ${String(adminMembership.sso_provider).replace(/_/g, " ")}`
+                      : "Not configured"}
+                  </span>
+                </div>
+                <div style={{
+                  padding: "10px 12px", background: "var(--surface)",
+                  border: "1px solid var(--border)", borderRadius: "var(--r-md)",
+                  fontSize: 11, color: "var(--text-muted)", lineHeight: 1.55, marginBottom: 12
+                }}>
+                  <strong style={{ color: "var(--text)" }}>Status:</strong> configuration UI is live; the actual SSO sign-in flow requires backend wire-up in a follow-up deployment. See <code style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 10 }}>B2B_SSO_INTEGRATION.md</code> in the repository for the three implementation paths (Supabase Auth SSO, samlify, WorkOS) and the chosen-path decision criteria. Configuration you save here persists and will be honored when SSO ships.
+                </div>
+                {adminMembership.auto_join_domain && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+                    Current auto-join domain: <strong style={{ color: "var(--text)" }}>{adminMembership.auto_join_domain}</strong>
+                  </div>
+                )}
+
+                <div style={{ marginBottom: 8 }}>
+                  <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>SSO provider</label>
+                  <select
+                    value={orgSsoProvider}
+                    onChange={(e) => setOrgSsoProvider(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)"
+                    }}
+                  >
+                    <option value="">— Select —</option>
+                    <option value="okta">Okta</option>
+                    <option value="azure_ad">Azure AD (Microsoft Entra ID)</option>
+                    <option value="google_workspace">Google Workspace</option>
+                  </select>
+                </div>
+
+                {orgSsoProvider && (
+                  <>
+                    <div style={{ marginBottom: 8 }}>
+                      <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>IdP Entity ID</label>
+                      <input
+                        type="text"
+                        placeholder="https://sso.example.com/saml/idp"
+                        value={orgSsoEntityId}
+                        onChange={(e) => setOrgSsoEntityId(e.target.value)}
+                        style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                          fontFamily: "'IBM Plex Mono', monospace"
+                        }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: 8 }}>
+                      <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>IdP SSO URL</label>
+                      <input
+                        type="text"
+                        placeholder="https://sso.example.com/saml/sso"
+                        value={orgSsoUrl}
+                        onChange={(e) => setOrgSsoUrl(e.target.value)}
+                        style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                          fontFamily: "'IBM Plex Mono', monospace"
+                        }}
+                      />
+                    </div>
+                    <div style={{ marginBottom: 10 }}>
+                      <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>IdP x509 Certificate (PEM)</label>
+                      <textarea
+                        rows={5}
+                        placeholder={"-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----"}
+                        value={orgSsoCert}
+                        onChange={(e) => setOrgSsoCert(e.target.value)}
+                        style={{
+                          width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 11, color: "var(--text)",
+                          fontFamily: "'IBM Plex Mono', monospace", resize: "vertical"
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Auto-join email domain (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="acme.com"
+                    value={orgAutoJoinDomain}
+                    onChange={(e) => setOrgAutoJoinDomain(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                      fontFamily: "'IBM Plex Mono', monospace"
+                    }}
+                  />
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4, lineHeight: 1.5 }}>
+                    Members signing up with this domain will auto-enroll (when SSO + JIT provisioning ship). Subject to seat capacity.
+                  </div>
+                </div>
+
+                {orgSsoError && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>{orgSsoError}</div>
+                )}
+                {orgSsoSaved && (
+                  <div style={{
+                    padding: "8px 12px", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                    borderRadius: "var(--r-md)", fontSize: 12, color: "var(--text)", marginBottom: 8
+                  }}>
+                    SSO configuration saved.
+                  </div>
+                )}
+                <button
+                  disabled={orgSsoBusy}
+                  onClick={async () => {
+                    setOrgSsoBusy(true);
+                    setOrgSsoError(null);
+                    setOrgSsoSaved(false);
+                    const updates = {};
+                    if (orgSsoProvider) {
+                      updates.sso_provider = orgSsoProvider;
+                      updates.sso_metadata = {
+                        idp_entity_id: orgSsoEntityId.trim() || null,
+                        idp_sso_url: orgSsoUrl.trim() || null,
+                        idp_x509_cert: orgSsoCert.trim() || null,
+                        configured_at: new Date().toISOString()
+                      };
+                    }
+                    const nextDomain = (orgAutoJoinDomain || "").trim().toLowerCase();
+                    if (nextDomain !== (adminMembership.auto_join_domain || "")) {
+                      updates.auto_join_domain = nextDomain || null;
+                    }
+                    if (Object.keys(updates).length === 0) {
+                      setOrgSsoError("No changes to save.");
+                      setOrgSsoBusy(false);
+                      return;
+                    }
+                    const result = await sbUpdateOrg(orgId, updates);
+                    if (result?.ok) {
+                      setOrgSsoSaved(true);
+                      // Clear write-only inputs after save — admin can re-paste for further edits.
+                      setOrgSsoProvider("");
+                      setOrgSsoEntityId("");
+                      setOrgSsoUrl("");
+                      setOrgSsoCert("");
+                      refreshOrgStatus();
+                      try { window.plausible?.("Org SSO Configured", { props: { provider: updates.sso_provider || "domain_only" } }); } catch {}
+                    } else {
+                      setOrgSsoError(result?.error || "Could not save SSO configuration");
+                    }
+                    setOrgSsoBusy(false);
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: "100%", padding: "12px 16px" }}
+                >{orgSsoBusy ? "Saving…" : "Save SSO configuration"}</button>
               </div>
 
               {/* AUDIT LOG ENTRY POINT */}
