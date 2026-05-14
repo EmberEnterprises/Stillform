@@ -25817,7 +25817,7 @@ const isSignalProfileConfigured = () => {
                     body/thought-first" rationale lives in the FAQ and the
                     Mirror sheet. CTA subtitle is now the sole action prompt. */}
 
-                {showBioFilterSuggestion ? (
+                {showBioFilterSuggestion && false /* HIDDEN ON HOME May 14, 2026 evening per Arlin direction. The BioFilterSuggestion routing card violated one-element-per-beat — it competed with the Hero CTA as a second card on home. Routing logic (depleted/pain/sleep → body-first) needs to fire INSIDE the spine when "Begin session" is tapped, not as a home-side pre-session gate. Logic preserved (showBioFilterSuggestion state + BioFilterSuggestion component intact); only the home render is gated off. */ ? (
                   /* Bio-filter override — suggestive, with skip back to normal pathway.
                      Choice persists per (date, bioFilter snapshot) so re-prompts only fire when state changes. */
                   <BioFilterSuggestion
@@ -26304,7 +26304,17 @@ const isSignalProfileConfigured = () => {
                         proposes one action with reasoning; if the read was
                         wrong, the user names which type of state they're in,
                         and the spine re-routes. Support Sheet remains
-                        accessible from inside the intake modal. */}
+                        accessible from inside the intake modal.
+                        REMOVED FROM HOME May 14, 2026 evening per Arlin
+                        direction. The "Not quite right →" link was a second
+                        element below the Hero CTA, violating one-element-
+                        per-beat. The correction pathway needs to relocate
+                        INSIDE the spine session — when the user taps Begin
+                        session and the AI proposes a routing, the correction
+                        affordance lives inside that session flow, not on
+                        home. State + modal component preserved for future
+                        relocation. */}
+                    {false && (
                     <button
                       onClick={() => setShowSpineIntake(true)}
                       style={{
@@ -26325,6 +26335,7 @@ const isSignalProfileConfigured = () => {
                     >
                       Not quite right →
                     </button>
+                    )}
 
                   </>
                 )}

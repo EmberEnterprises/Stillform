@@ -340,4 +340,109 @@ Total estimated scope: 12-18 builds. Multi-session work but each build is indepe
 
 ---
 
+## 12. Substance critique — the AI's job is differentiation, not empathy (added May 14, 2026 evening)
+
+This section captures the substance critique surfaced during Arlin's late-evening testing of the deployed Reframe flow. It is the single biggest realization from that session and is upstream of everything else in this document — every engine in §3 assumes the in-flow tools are doing real concept-building work. If the tools themselves are hollow, the engines retain a user inside a generic experience.
+
+### 12.1 The critique, in Arlin's words
+
+> "the app is a great idea but we don't have a lot working for us right now the tools feel so generic press this button press that button like where's the actual work"
+>
+> — Arlin, May 14, 2026 evening, testing the deployed Reframe Step 2
+
+### 12.2 What's actually shipped vs what the framing law requires
+
+The framing law (`STILLFORM_FRAMING_LAW.md` §WHAT THE PRACTICE LOOKS LIKE) says the work is **naming with specificity** — the user leaves a session with more precision than they entered. Concept-building (Hoemann 2021 / Barrett 2017 — emotional granularity is the trainable substrate). Bounded engagements with start, scope, and close. Generative, not circular.
+
+What's actually shipped in Reframe (verified May 14 evening by Arlin's screenshots of the deployed flow):
+
+1. User types a paragraph naming their situation (e.g., "I'm in a Lyme rage. I've done everything spiritual I can from uncrossing kits, fiery wall protection, going to church, manifesting, taking the wheel but I am constantly met with chaos, stagnation, stress, anxiety, and health issues")
+2. AI returns empathy + textbook reflection ("The chaos and stagnation you're feeling sound overwhelming…")
+3. User picks a coarse chip ("Flat" / "Anxious" / etc.) — one of 10 broad Russell-circumplex states
+4. User picks one of 4 hardcoded Next Move actions (Send a message / Hold a boundary / Delay your response / Let it go) — generic regardless of situation
+5. User taps Lock In
+
+Nowhere in that flow does precision get pushed. The session does not produce a precise named thing the user couldn't have written on a napkin alone. The user enters with "Lyme rage" and exits with "Lyme rage" — same coarse name. No concept added to the library. No granularity built. No generative output.
+
+### 12.3 The Lyme rage example as concrete illustration
+
+The session SHOULD have ended with the user knowing what's underneath "Lyme rage":
+- Grief about the body's betrayal
+- Anger at the medical system continuing to fail
+- Fear that the stagnation continues forever
+- Frustration at the gap between spiritual effort and physical outcome
+- Or something none of those four names
+
+Each is a real, specific, nameable thing. Each is a different concept the user could carry forward as a building block of their library. The actual session named none of them. The AI's response opened with validation ("sound overwhelming") — not differentiation.
+
+### 12.4 Why the current Granularity Gym is not enough
+
+The Granularity Gym (the inline "Say it more precisely" affordance below the chip pick, renamed from jargon in PR #83) is the seed of real work. The precision label does flow to the AI when present (`reframe.js` reads `stillform_session_precision`). But:
+
+- The gym is **optional** — the session completes without it
+- It is **hidden until tapped** — most users never see it
+- It is **disconnected from the spine of the session** — the user types a precise word, but the next surface (chip pick, Next Move chips, Lock In) doesn't reorganize around that precision
+- The AI doesn't **push** the user toward producing precision — the AI validates first, doesn't probe for the underneath thing
+
+Result: the most important act of the practice — producing a precise name — sits as a decorative side affordance instead of being the thing the whole flow drives toward.
+
+### 12.5 The direction (the change of role)
+
+Three load-bearing shifts together:
+
+#### 12.5.1 AI's job becomes differentiation, not empathy
+
+The AI's opening move on receiving a vague entry: surface candidate underlying names and force a pick. Example: "You said *Lyme rage*. Underneath that is grief about the body's betrayal, anger at the medical system, fear of stagnation continuing forever, frustration at the gap between spiritual effort and physical outcome, or something I haven't named — which is it actually?" Then it probes until the precise thing is pinned down. No textbook paragraphs. No "that sounds hard." No "I hear you." Real analytical pressure toward specificity. Empathy is not the work; pinning down the underneath thing IS the work.
+
+This is consistent with the framing law's `WHAT IS NOT` list:
+- NOT looping on already-built concepts (validation circles a concept; differentiation builds new ones)
+- NOT self-judgment dressed as analysis (probing for precision is curious, not judgy)
+- NOT unbounded introspection (the question is bounded: "which is it actually?")
+
+#### 12.5.2 Every Reframe session produces a precise NAMED THING added to the user's library
+
+The session has an artifact. Not text the user reads. Not a paragraph the AI wrote. A specific name the user **produced through the session** that they didn't have before they started. Stored in the user's concept library (`stillform_named_moves` or a new `stillform_named_concepts` table — to be specified). Each named thing is a building block of the user's granularity. Visible in My Progress as the library grows. Referenced by future sessions ("you've named this before — is this the same thing or a new variant?").
+
+This is the **measurable output** of the practice. The user can point to a list of precise names they have produced. Each one is a real concept-library addition (Hoemann 2021). The library grows over time and the user perceives their internal states with more nuance because of it.
+
+#### 12.5.3 Step 2's sub-beats compose around producing that name
+
+The Reframe Step 2 architecture decision from this same evening (one-element-per-sub-beat, sequential transitions) was correct as structure, but the substance work above is what gives each sub-beat real work to do. The sub-beats reorganize as:
+
+1. **Read the AI's differentiation prompt** — the candidates the AI surfaced based on what the user wrote
+2. **Pick / type the precise name** — the granularity production moment (the gym becomes the spine here)
+3. **Pick where you are now** — the chip pick, now ANCHORED to the precise name (not floating)
+4. **Pick a next move** — proposed by the AI based on the precise name (not hardcoded 4 actions)
+5. **Lock in with closure** — "Today you named *grief about the body's betrayal*. Added to your library." The artifact is the closure.
+
+Each sub-beat does real conceptual work. None of them are "press this button press that button." The user produces something specific by the end.
+
+### 12.6 Implications for the rest of this document
+
+§3.2 Application Layer (Today's Brief, Pre-event Brief, Move card, Scripts, EOD artifact) — most assume the in-flow sessions are producing real named concepts that the application layer can carry into life. The substance critique makes this explicit: the in-flow session's artifact (the precise named thing) is the input the application layer needs. Without it, the application layer has nothing to carry.
+
+§3.1 Engine 1 Retention (Mirror, Achievement, Roadmap) — the Achievement layer counts shipped reps. Once the substance work lands, a "rep" is no longer "completed a session" but "produced a precise named thing." Higher signal, harder to fake, real concept-library growth.
+
+§3.3 Engine 3 Trigger Profile — the trigger profile becomes richer when each session's named thing flows into it (precise names are better triggers than coarse states).
+
+### 12.7 What needs to happen before this ships
+
+1. **Read current `netlify/functions/reframe.js`** end-to-end and map the existing system prompts (CALM, CLARITY, HYPE, QUALITY_RETRY). Identify where validation lives, where empathy phrases are anchored, where the AI's role is set.
+2. **Rewrite system prompts** to encode differentiation-first behavior. The AI's job description in the prompt becomes: "Your role is to help the user produce a more precise name for what they're experiencing than the one they started with. Surface 3-4 candidate underlying names based on what they wrote. Ask which one is actually it. Probe until the precise thing is pinned down. Do not validate. Do not paragraph."
+3. **Add structured output** for the AI: a list of candidate underlying names returned alongside the response text. The UI surfaces these as chips the user can tap, or the user can type their own.
+4. **Storage schema** for the named-thing-library: `stillform_named_concepts` array entries `{ name, sessionId, timestamp, sourceState, sourceText }`. May extend `stillform_named_moves` (brainstorm #10) or be a new key.
+5. **Step 2 sub-beat restructure** wired around the named-thing production.
+6. **My Progress surface update** — the named-concept library is the most important surface (the user's actual produced output).
+7. **AI regression test refresh** — the audit (PR #77 baseline) must include a "differentiation, not validation" check across the corpus.
+
+This is multi-build work. The estimate from §10 (12-18 builds for the original engagement architecture) was scoped before this critique was articulated; the substance work adds approximately 4-6 builds and is upstream of build #1 (Stage definitions) because the named-thing-library is what the stages count.
+
+### 12.8 The standing question
+
+Arlin's call: "Say go on the substance direction and I'll start by reading the current reframe.js prompts to map exactly what changes."
+
+When Arlin says go, the first build is the `reframe.js` prompt-mapping audit. Everything else queues behind that.
+
+---
+
 This document is the source of truth for the engagement architecture work. Updates flow through here first, then into Master Todo as build items.
