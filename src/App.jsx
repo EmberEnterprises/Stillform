@@ -24326,7 +24326,14 @@ const isSignalProfileConfigured = () => {
                 if (_ms_mins < _ms_start || _ms_mins >= _ms_end) return null;
                 const _ms_today = TimeKeeper.stillformDay();
                 const _ms_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _ms_today; } catch { return false; } })();
-                if (ciOpen) return null;
+                // May 14, 2026 — return null when checked in (defer to Full Flow IIFE
+                // saved-state branch, which renders the same "✓ Morning Check-in / Tap
+                // to update" line PLUS the Today's Brief surface below it). Without this
+                // dedupe, fixing the Full Flow reachability bug would result in two
+                // saved-state lines stacked. Same dissolved styling lives in both
+                // surfaces (PR #59 / #60); Full Flow's is the one that ships now that
+                // it's reachable.
+                if (ciOpen || _ms_done) return null;
                 return (
                   <div onClick={() => setCiOpen(true)} style={{
                     display: "flex", justifyContent: "space-between", alignItems: "center",
@@ -24359,7 +24366,6 @@ const isSignalProfileConfigured = () => {
                 const eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
                 const morningEnd = 1050;
                 if (currentMinutes < morningStart || currentMinutes >= morningEnd) return null;
-                if (!ciOpen) return null;
                 const today = TimeKeeper.stillformDayOf(now);
                 // EOD done suppresses morning check-in only if EOD was completed TODAY
                 const eodDoneToday = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === today && now.getHours() < 4; } catch { return false; } })();
@@ -24367,6 +24373,17 @@ const isSignalProfileConfigured = () => {
 
                 const checkedIn = (() => { try { const c = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return c?.date === today; } catch { return false; } })();
                 const isCheckedIn = ciSaved || checkedIn;
+                // May 14, 2026 — reachability fix. The prior guard `if (!ciOpen) return null;`
+                // (added April 23 in commit efabf8c7 "Home restructure") made the saved-state
+                // branch + Today's Brief surface (line 24470+) dead code. Engine 2 Build #3
+                // shipped backend + generation + persistence + polling but the display
+                // branch was unreachable because saveCheckin sets ciOpen=false → next
+                // render hits the guard and returns null before reaching the brief.
+                // Audit Layer 6.4 (diff anomaly) caught it on the May 14 home composition
+                // walkthrough. Fix: continue when isCheckedIn so the saved-state branch
+                // becomes reachable. The Morning Strip IIFE above now returns null when
+                // _ms_done so the saved-state line isn't rendered twice.
+                if (!ciOpen && !isCheckedIn) return null;
 
                 const protocols = [
                   {
