@@ -292,7 +292,8 @@ The originals are preserved for when more detail is needed. Read CANON first; de
 
 - `STILLFORM_FRAMING_LAW.md` — full framing law text, version history, edge cases, full failure modes section
 - `STILLFORM_AUDIT_PHILOSOPHY.md` — full nine-layer audit with 35+ specific questions, evidence requirements, war stories (Practice Signals failure, Trigger Profile flow assumption, Body Scan field-name bugs)
-- `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` — full three-engine architecture, Path A consolidation map, retention research
+- `STILLFORM_ENGAGEMENT_ARCHITECTURE.md` — full three-engine architecture, Path A consolidation map, retention research, §12 substance critique (the AI's job is differentiation, not empathy)
+- `STILLFORM_INTEGRATIONS_AND_CONCIERGE.md` — consolidated reference for all integration sources (calendar, HRV, sleep, watch, voice, weather, screenshot, focus modes), the concierge behaviors per surface (morning / in-the-moment / EOD / bedtime / integration handling), and the B2B setup beyond privacy (five revenue paths, build sequence, gaps that still need Arlin's fill-in pass). Read this when working on any integration or concierge surface; the compressed CANON Operating Rules in Section 10 expand into specifics here.
 - `STILLFORM_B2B_PRIVACY_ARCHITECTURE.md` — authoritative source for the B2B privacy wall: what admins can/cannot see, three-layer enforcement (schema / function / audit), consequences for product decisions
 - `B2B_PRIVACY_POLICY_ADDENDUM.md` — privacy policy addendum text for organization-purchased seats (draft pending legal review)
 - `B2B_DPA_TEMPLATE.md` — Data Processing Agreement template covering GDPR Article 28 + CCPA processor obligations (draft pending legal review)
