@@ -22548,7 +22548,7 @@ const isSignalProfileConfigured = () => {
             <div style={{
               fontSize: 11, color: "rgba(255,255,255,0.4)", letterSpacing: "0.12em", textTransform: "uppercase",
               opacity: 0, animation: "splashIn 1.2s ease-out 0.8s forwards"
-            }}>Metacognition practice</div>
+            }}>Self Architecture</div>
             <style>{`@keyframes splashIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
           </div>
         )}
@@ -22617,7 +22617,7 @@ const isSignalProfileConfigured = () => {
                 "Most people don't catch themselves until after the moment has passed. After the text they shouldn't have sent. After the decision they regret. After the reaction that cost them.",
                 "Stillform trains you to catch it earlier — before your state drives the outcome. That's the practice. And it builds.",
                 "This is instrumentation for metacognition. A practice you operate.",
-                "Stillform. Metacognition Practice."
+                "Stillform. Self Architecture."
               ]
             },
             {
