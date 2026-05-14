@@ -38,7 +38,7 @@ const checks = [
   { label: "Focus check not standalone tool", cmd: "rg", args: ["-n", "id: \"focus-check\"|id: \"gonogo\"", "src/App.jsx"], type: "must-not-match" },
   { label: "Focus check home and more entrypoints", cmd: "rg", args: ["-n", "Quick Check|Run Focus Check \\(30s\\)|screen === \"focus-check\"", "src/App.jsx"], type: "must-match" },
   { label: "Contextual first-time tips", cmd: "rg", args: ["-n", "showHomeContextTip|stillform_tooltip_home_seen", "src/App.jsx"], type: "must-match" },
-  { label: "Tutorial opening lock copy", cmd: "rg", args: ["-n", "Stillform\\. Metacognition Practice\\.", "src/App.jsx"], type: "must-match" },
+  { label: "Tutorial opening lock copy", cmd: "rg", args: ["-n", "Stillform\\. Self Architecture\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ guidance sentence", cmd: "rg", args: ["-n", "If you want to know more about the app, please go to our FAQ page\\.", "src/App.jsx"], type: "must-match" },
   { label: "Tutorial FAQ button removed", cmd: "rg", args: ["-n", "openFaq\\(\"tutorial\"\\)", "src/App.jsx"], type: "must-not-match" },
   { label: "Combined setup profile flow", cmd: "rg", args: ["-n", "Signal Profile \\+ Pattern Check|setupFlow: \"calibration-combined\"", "src/App.jsx"], type: "must-match" },
