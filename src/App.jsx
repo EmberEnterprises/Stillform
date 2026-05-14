@@ -25779,7 +25779,18 @@ const isSignalProfileConfigured = () => {
 
 
 
-              {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
+              {/* ── 2. MAIN HERO ─── beat-gated for continuous journey
+                   (May 14, 2026 evening, per Arlin direction). Renders during
+                   main beat only (post-checkin / midday / afternoon). Hidden
+                   during morning beat (morning strip dominates) and EOD beat
+                   (EOD strip dominates). The journey shows ONE hero card per
+                   beat; each beat owns its surface. Branches inside the
+                   spine are OPTIONAL alt-type transitions surfaced by the
+                   existing state-routing (alt processing type is already
+                   determined to be optional in shipped architecture) — not
+                   home-side navigation, not flat menus, not picker
+                   surfaces. */}
+              {currentBeat === "main" && (
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
                 {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
@@ -26272,6 +26283,7 @@ const isSignalProfileConfigured = () => {
                   </>
                 )}
               </div>
+              )}
 
               {/* Ship 4 (May 11, 2026) — 2-tap spine intake modal.
                   Opens from "Not quite right →" below the hero CTA.
@@ -26428,26 +26440,16 @@ const isSignalProfileConfigured = () => {
                       </button>
                     ))}
 
-                    <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "center" }}>
-                      <button
-                        onClick={() => {
-                          try {
-                            window.plausible("Spine Intake", { props: { choice: "show-all-tools" } });
-                          } catch {}
-                          setShowSpineIntake(false);
-                          setShowSupportSheet(true);
-                        }}
-                        style={{
-                          background: "none", border: "none",
-                          color: "var(--text-muted)", fontSize: 11,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          letterSpacing: "0.08em", cursor: "pointer",
-                          padding: "8px 0",
-                          WebkitTapHighlightColor: "transparent"
-                        }}
-                      >
-                        Show all tools →
-                      </button>
+                    {/* "Show all tools →" link REMOVED May 14, 2026 evening per
+                        Arlin direction — no flat-picker menus on home. The spine
+                        intake modal stays as a state-routing correction (Mind
+                        crowded / Body charged → re-routes the spine), but the
+                        menu escape to Support Sheet is gone. Branches inside
+                        the spine are handled by the existing alt-processing-type
+                        state-routing (already shipped as optional transitions),
+                        not by a tool-picker. justifyContent updated from
+                        "space-between" to "center" since Cancel is now alone. */}
+                    <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center" }}>
                       <button
                         onClick={() => setShowSpineIntake(false)}
                         style={{
