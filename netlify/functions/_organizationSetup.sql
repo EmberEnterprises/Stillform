@@ -185,6 +185,12 @@ create table if not exists public.stillform_org_audit_log (
 --   org_auto_join_domain_set
 --   org_suspended
 --   org_cancelled
+--   org_billing_created          -- LS webhook: subscription_created
+--   org_billing_updated          -- LS webhook: catch-all change event
+--   org_billing_payment_failed   -- LS webhook: subscription_payment_failed
+--   org_billing_recovered        -- LS webhook: payment_recovered / resumed
+--   org_billing_cancelled        -- LS webhook: subscription_cancelled
+--   org_billing_expired          -- LS webhook: subscription_expired
 --   invite_sent
 --   invite_resent
 --   invite_revoked

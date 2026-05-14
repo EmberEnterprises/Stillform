@@ -124,8 +124,11 @@ const checks = [
     "netlify/functions/organization-accept-invite.js",
     "netlify/functions/organization-remove-member.js",
     "netlify/functions/organization-audit-log.js",
+    "netlify/functions/organization-billing-checkout.js",
+    "netlify/functions/organization-billing-portal.js",
     "netlify/functions/_organizationState.js",
-    "netlify/functions/_organizationSetup.sql"
+    "netlify/functions/_organizationSetup.sql",
+    "netlify/functions/_organizationBillingMigration.sql"
   ], type: "must-not-match" }
 ];
 
