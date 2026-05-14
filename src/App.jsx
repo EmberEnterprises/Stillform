@@ -24677,6 +24677,47 @@ const isSignalProfileConfigured = () => {
             setScreen("crisis");
           };
 
+          // ── CONTINUOUS JOURNEY BEAT — single-beat dominance per Arlin
+          // direction (May 14, 2026 evening). The home renders ONE primary beat
+          // at a time — morning check-in, main rep, or end-of-day close — so
+          // the day reads as a continuous journey, not a panel-of-tools stack.
+          // Spine architecture per STILLFORM_CANON.md §7 (Notice → Reframe →
+          // Close). Persistent across beats: greeting, Practice Surface
+          // (patterns), Mirror status strip, Quick Breathe pill (safety
+          // valve), My Progress entry (review surface), Support Sheet
+          // (branches for in-the-moment nuances — Reframe, Move card,
+          // Scripts).
+          //
+          // Beat states:
+          //   "morning"   — before noon, check-in not yet done; morning
+          //                 surface dominates so the day opens with the
+          //                 anchor practice, uncompeted.
+          //   "main"      — midday / post-checkin / main rep window; the
+          //                 default beat covering most active hours.
+          //   "eod"       — 7pm onwards, EOD not done; end-of-day surface
+          //                 dominates.
+          //   "wind-down" — after 10pm with EOD done; bedtime surface.
+          //
+          // Tonight's first cut wraps MORNING STRIP only — the panel Arlin
+          // flagged as competing in afternoon screenshots. MAIN HERO remains
+          // always-visible (it is the journey's in-the-moment rep entry and
+          // its hiding would also remove access to the spine intake modal
+          // and Support Sheet, which are siblings of main hero in the DOM
+          // and depend on the "Not quite right →" trigger inside it).
+          // Subsequent passes (per Arlin's review) can extend beat-wrapping
+          // to additional surfaces once branch access has its own route.
+          const currentBeat = (() => {
+            const _b_now = new Date();
+            const _b_hour = _b_now.getHours();
+            const _b_today = TimeKeeper.stillformDay();
+            const _b_checkinDone = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _b_today; } catch { return false; } })();
+            const _b_eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === _b_today; } catch { return false; } })();
+            if (_b_hour < 12 && !_b_checkinDone) return "morning";
+            if (_b_hour >= 19 && !_b_eodDone) return "eod";
+            if (_b_hour >= 22 && _b_eodDone) return "wind-down";
+            return "main";
+          })();
+
           return (
             <section style={{ maxWidth: 420, margin: "0 auto", padding: "40px 24px 80px", position: "relative", zIndex: 1 }}>
 
@@ -24840,8 +24881,17 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* ── 1. MORNING STRIP ─────────────────────────────────────────── */}
-              {(() => {
+              {/* ── 1. MORNING STRIP ─── beat-gated for continuous journey
+                   (May 14, 2026 evening, per Arlin direction). Only renders
+                   during morning beat (before noon, check-in not done). At
+                   noon, the journey transitions out of morning beat and the
+                   teaser disappears from home — afternoon screen no longer
+                   shows a competing "Morning Check-In" panel. FULL FLOW
+                   below has its own ciOpen/isCheckedIn gating and is NOT
+                   beat-wrapped: saved-state confirmation + Today's Brief
+                   continue rendering during main beat after check-in is
+                   saved. */}
+              {currentBeat === "morning" && (() => {
                 const _ms_now = new Date();
                 const _ms_mins = _ms_now.getHours() * 60 + _ms_now.getMinutes();
                 const _ms_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
@@ -25729,7 +25779,18 @@ const isSignalProfileConfigured = () => {
 
 
 
-              {/* ── 2. MAIN HERO ──────────────────────────────────────────────── */}
+              {/* ── 2. MAIN HERO ─── beat-gated for continuous journey
+                   (May 14, 2026 evening, per Arlin direction). Renders during
+                   main beat only (post-checkin / midday / afternoon). Hidden
+                   during morning beat (morning strip dominates) and EOD beat
+                   (EOD strip dominates). The journey shows ONE hero card per
+                   beat; each beat owns its surface. Branches inside the
+                   spine are OPTIONAL alt-type transitions surfaced by the
+                   existing state-routing (alt processing type is already
+                   determined to be optional in shipped architecture) — not
+                   home-side navigation, not flat menus, not picker
+                   surfaces. */}
+              {currentBeat === "main" && (
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
                 {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
@@ -26222,6 +26283,7 @@ const isSignalProfileConfigured = () => {
                   </>
                 )}
               </div>
+              )}
 
               {/* Ship 4 (May 11, 2026) — 2-tap spine intake modal.
                   Opens from "Not quite right →" below the hero CTA.
@@ -26378,26 +26440,16 @@ const isSignalProfileConfigured = () => {
                       </button>
                     ))}
 
-                    <div style={{ display: "flex", gap: 8, justifyContent: "space-between", alignItems: "center" }}>
-                      <button
-                        onClick={() => {
-                          try {
-                            window.plausible("Spine Intake", { props: { choice: "show-all-tools" } });
-                          } catch {}
-                          setShowSpineIntake(false);
-                          setShowSupportSheet(true);
-                        }}
-                        style={{
-                          background: "none", border: "none",
-                          color: "var(--text-muted)", fontSize: 11,
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          letterSpacing: "0.08em", cursor: "pointer",
-                          padding: "8px 0",
-                          WebkitTapHighlightColor: "transparent"
-                        }}
-                      >
-                        Show all tools →
-                      </button>
+                    {/* "Show all tools →" link REMOVED May 14, 2026 evening per
+                        Arlin direction — no flat-picker menus on home. The spine
+                        intake modal stays as a state-routing correction (Mind
+                        crowded / Body charged → re-routes the spine), but the
+                        menu escape to Support Sheet is gone. Branches inside
+                        the spine are handled by the existing alt-processing-type
+                        state-routing (already shipped as optional transitions),
+                        not by a tool-picker. justifyContent updated from
+                        "space-between" to "center" since Cancel is now alone. */}
+                    <div style={{ display: "flex", gap: 8, justifyContent: "center", alignItems: "center" }}>
                       <button
                         onClick={() => setShowSpineIntake(false)}
                         style={{
@@ -27183,24 +27235,48 @@ const isSignalProfileConfigured = () => {
                       aria-label="Open My Progress"
                     >
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{
-                          fontFamily: "'IBM Plex Mono', monospace",
-                          fontSize: 10, letterSpacing: "0.12em",
-                          textTransform: "uppercase", color: "var(--text-muted)",
-                          lineHeight: 1.5
-                        }}>
-                          <span style={{ color: "var(--amber)" }}>{sessionCount}</span>
-                          <span style={{ margin: "0 4px" }}> sessions</span>
-                          <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
-                          <span style={{ color: "var(--amber)" }}>{streakCount}</span>
-                          <span style={{ margin: "0 4px" }}> day streak</span>
-                          {mostUsedLabel && (
-                            <>
-                              <span style={{ margin: "0 8px", opacity: 0.4 }}>·</span>
-                              <span style={{ color: "var(--text)" }}>{mostUsedLabel}</span>
-                            </>
-                          )}
+                        {/* MY PROGRESS HOME SURFACE — restored from mono microline
+                            to real surface (May 14, 2026 evening, per Arlin direction).
+                            PR #59's "dissolved to mono line" treatment was reverted
+                            because it functionally removed home-side access to
+                            science-based progress data. Three stat cells (sessions,
+                            day streak, average shift) plus most-used tool sub-line
+                            plus observational cue. Header in Cormorant Garamond
+                            mirrors the My Progress screen header (line ~17887).
+                            The button shell + arrow + onClick navigation to the
+                            full screen are preserved verbatim. */}
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 18, fontWeight: 300, color: "var(--text)", marginBottom: 12 }}>
+                          My Progress
                         </div>
+                        <div style={{ display: "flex", gap: 24, marginBottom: 6, flexWrap: "wrap" }}>
+                          <div>
+                            <div style={{ fontSize: 22, fontWeight: 400, color: "var(--amber)", lineHeight: 1, fontFamily: "'DM Sans', sans-serif" }}>{sessionCount}</div>
+                            <div className="t-mono-xs quiet" style={{ marginTop: 4 }}>sessions</div>
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 22, fontWeight: 400, color: "var(--amber)", lineHeight: 1, fontFamily: "'DM Sans', sans-serif" }}>{streakCount}</div>
+                            <div className="t-mono-xs quiet" style={{ marginTop: 4 }}>day streak</div>
+                          </div>
+                          {(() => {
+                            try {
+                              const allSessions = getSessionsFromStorage();
+                              const rated = allSessions.filter(s => s.preRating && s.postRating);
+                              if (rated.length < 3) return null;
+                              const avg = rated.reduce((a, s) => a + (s.delta || 0), 0) / rated.length;
+                              return (
+                                <div>
+                                  <div style={{ fontSize: 22, fontWeight: 400, color: "var(--amber)", lineHeight: 1, fontFamily: "'DM Sans', sans-serif" }}>{avg >= 0 ? "+" : ""}{avg.toFixed(1)}</div>
+                                  <div className="t-mono-xs quiet" style={{ marginTop: 4 }}>avg shift</div>
+                                </div>
+                              );
+                            } catch { return null; }
+                          })()}
+                        </div>
+                        {mostUsedLabel && (
+                          <div className="t-mono-xs quiet" style={{ marginTop: 10, lineHeight: 1.5 }}>
+                            Most used · <span style={{ color: "var(--text)" }}>{mostUsedLabel}</span>
+                          </div>
+                        )}
                         {(() => {
                           // Quiet observational cue — data-backed, retained per
                           // Hoemann 2021 / Barrett 2017 (concept library reflected
@@ -27212,7 +27288,7 @@ const isSignalProfileConfigured = () => {
                             if (!Array.isArray(allSessions) || allSessions.length < 3) return null;
                             const autoExits = allSessions.filter(s => s.autonomousExit).length;
                             if (autoExits > 0) return (
-                              <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6, fontStyle: "italic", lineHeight: 1.45 }}>
+                              <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 10, fontStyle: "italic", lineHeight: 1.45 }}>
                                 {autoExits === 1 ? "1 time you caught it before it ran." : `${autoExits} times you caught it before it ran.`}
                               </div>
                             );
@@ -27222,7 +27298,7 @@ const isSignalProfileConfigured = () => {
                               const recentAvg = recent.reduce((a, s) => a + s.duration, 0) / recent.length;
                               const earlyAvg = early.reduce((a, s) => a + s.duration, 0) / early.length;
                               if (recentAvg < earlyAvg - 0.5) return (
-                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 6, fontStyle: "italic", lineHeight: 1.45 }}>
+                                <div className="t-caption" style={{ color: "var(--text-muted)", marginTop: 10, fontStyle: "italic", lineHeight: 1.45 }}>
                                   Sessions are getting shorter. The observer is faster.
                                 </div>
                               );
