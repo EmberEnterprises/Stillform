@@ -897,40 +897,114 @@ const styles = `
   }
 
   .message {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
+    /* May 13, 2026 — Reframe UI foundation: chrome reduction. Cards around
+       messages stripped (was the wellness-app signature). Vertical rhythm via
+       padding + hairline rule replaces container framing. */
+    display: block;
+    padding: 24px 0;
+    border-bottom: 1px solid var(--border-printed);
   }
-
-  .message.user { flex-direction: row-reverse; }
+  .message:last-child { border-bottom: none; }
 
   .message-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: var(--amber-glow);
-    border: 1px solid var(--amber-dim);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    flex-shrink: 0;
-  }
-
-  .message.user .message-avatar {
-    background: var(--surface2);
-    border-color: var(--border);
+    /* Hidden as of May 13, 2026 — typography carries voice (Move 4: mono for
+       user, serif for AI). CSS retained for potential future use. */
+    display: none;
   }
 
   .message-bubble {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    font-size: 14px;
-    line-height: 1.7;
-    max-width: 80%;
+    /* May 13, 2026 — container stripped. Text floats on the page bg. Mode
+       color signal moved to AI lead-sentence color (Move 2) and distortion
+       label (unchanged). Inline style overrides in JSX also removed. */
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0;
+    max-width: 100%;
     color: var(--text);
+  }
+
+  /* REPLY PILL — May 13, 2026, Commit 2 Move 3.
+     Collapsed: thin mono pill at bottom of screen. Expanded: slides up into
+     the full input row (textarea + paperclip + mic + Send). State driven by
+     replyExpanded; auto-collapse on AI response render, auto-expand on fresh
+     session (messages.length === 0). */
+  .reply-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 44px;
+    background: var(--surface);
+    border: 1px solid var(--amber-dim);
+    border-radius: var(--r-lg);
+    color: var(--text-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: border-color var(--motion-quick) var(--ease-prestige), background var(--motion-quick) var(--ease-prestige);
+  }
+  .reply-pill:hover { border-color: var(--amber); background: var(--surface2); }
+  .reply-pill .arrow { margin-left: 8px; color: var(--amber); }
+
+  /* OVERFLOW TRIGGER — top-right of Reframe screen.
+     Opens the overflow sheet containing Done for now / Start new / I want a
+     different response / Crisis resources / Back. */
+  .overflow-trigger {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 20px;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    transition: color var(--motion-quick) var(--ease-prestige);
+  }
+  .overflow-trigger:hover { color: var(--text); }
+
+  /* OVERFLOW SHEET — slides down from top. Listed actions, hairline separated. */
+  .overflow-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(0,0,0,0.4);
+    animation: overflow-fade-in 240ms var(--ease-prestige);
+  }
+  .overflow-sheet {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 81;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0 12px;
+    animation: overflow-slide-down 280ms var(--ease-prestige);
+  }
+  .overflow-sheet-row {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-top: 1px solid var(--border-printed);
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    padding: 14px 24px;
+    cursor: pointer;
+    transition: background var(--motion-quick) var(--ease-prestige), color var(--motion-quick) var(--ease-prestige);
+  }
+  .overflow-sheet-row:first-child { border-top: none; }
+  .overflow-sheet-row:hover { background: var(--surface2); color: var(--text); }
+  @keyframes overflow-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes overflow-slide-down {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
   }
 
   .message.user .message-bubble {
@@ -10915,6 +10989,15 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
+  // May 13, 2026 Commit 2 Move 3 — Reply pill + overflow sheet.
+  // replyExpanded: false = thin Reply pill at bottom; true = full input row
+  // (textarea + paperclip + mic + Send). Starts true on fresh session so the
+  // user can type immediately; auto-collapses after first AI response renders.
+  // overflowOpen: false = closed sheet; true = top-down menu sheet showing
+  // Done for now / Start new / I want a different response / Crisis / Back.
+  const [replyExpanded, setReplyExpanded] = useState(true);
+  const [overflowOpen, setOverflowOpen] = useState(false);
+
   // PracticeSurface → Reframe context handoff (May 12, 2026).
   // PracticeSurface writes stillform_practice_entry_context to localStorage
   // when the user taps a pattern tile from the home (today retrieval or
@@ -11286,6 +11369,19 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       }
     }, 100);
     return () => clearTimeout(t);
+  }, [messages]);
+
+  // May 13, 2026 Commit 2 Move 3 — Reply pill auto-collapse on AI response.
+  // When the latest message becomes an AI response, collapse the input so the
+  // user can read the full response without competing chrome. User taps the
+  // Reply pill to expand when ready to respond. Doesn't collapse while user
+  // has text in the input (they're in the middle of composing).
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg?.role === "ai" && !input.trim()) {
+      setReplyExpanded(false);
+    }
   }, [messages]);
 
   const [lastInput, setLastInput] = useState("");
@@ -13701,6 +13797,70 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
 
       {/* AI MODE */}
       <div className="ai-container" style={{ display: activeReframeTab === "ai" ? "flex" : "none", flexDirection: "column" }}>
+        {/* May 13, 2026 Commit 2 Move 3 — Overflow trigger row.
+            Renders when there's session activity (messages > 0). Opens the
+            overflow sheet which contains Done for now / Start new / I want a
+            different response / Crisis resources. The reduction from ten
+            visible affordances to one + a discoverable menu lets the user
+            receive the AI's response without parsing chrome. */}
+        {messages.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 4, marginTop: -8 }}>
+            <button
+              className="overflow-trigger"
+              onClick={() => setOverflowOpen(true)}
+              aria-label="More options"
+            >
+              ···
+            </button>
+          </div>
+        )}
+        {overflowOpen && (
+          <>
+            <div className="overflow-backdrop" onClick={() => setOverflowOpen(false)} aria-hidden="true" />
+            <div className="overflow-sheet" role="menu" aria-label="More options">
+              {messages.length > 1 && (
+                <button
+                  className="overflow-sheet-row"
+                  onClick={() => { setOverflowOpen(false); handleDoneForNow(); }}
+                  role="menuitem"
+                >
+                  Done for now
+                </button>
+              )}
+              <button
+                className="overflow-sheet-row"
+                onClick={() => { setOverflowOpen(false); setShowStartNewConfirm(true); }}
+                role="menuitem"
+              >
+                Start new
+              </button>
+              {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
+                <button
+                  className="overflow-sheet-row"
+                  onClick={() => { setOverflowOpen(false); requestDifferentResponse(); }}
+                  role="menuitem"
+                >
+                  I want a different response
+                </button>
+              )}
+              <button
+                className="overflow-sheet-row"
+                onClick={() => { setOverflowOpen(false); onComplete("crisis"); }}
+                role="menuitem"
+              >
+                Crisis resources
+              </button>
+              <button
+                className="overflow-sheet-row"
+                onClick={() => setOverflowOpen(false)}
+                role="menuitem"
+                style={{ color: "var(--text-muted)", fontSize: 13 }}
+              >
+                Close
+              </button>
+            </div>
+          </>
+        )}
         <div className="ai-messages">
           {messages.length === 0 && (
             <>
@@ -13770,23 +13930,59 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             return (
             <div key={i} className={`message ${msg.role}`} ref={isLastAi ? lastAiRef : null}>
               <div className="message-avatar" style={msg.role === "ai" ? { color: mc.color } : {}}>{msg.role === "ai" ? mc.icon : "●"}</div>
-              <div className="message-bubble" style={msg.role === "ai" ? { background: mc.aiBubble, borderColor: mc.border } : {}}>
+              <div className="message-bubble">
                 {msg.distortion && msg.distortion !== "NULL" && msg.distortion !== "null" && (
-                  <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: mc.color, marginBottom: 8 }}>
+                  <div style={{ fontSize: 10, letterSpacing: "0.12em", textTransform: "uppercase", color: mc.color, marginBottom: 10 }}>
                     {msg.distortion}
                   </div>
                 )}
-                {msg.role === "ai" ? (
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 16, fontWeight: 300, lineHeight: 1.65, letterSpacing: "0.01em" }}>
-                    {msg.text.split(/(\*[^*]+\*)/).map((part, j) =>
-                      part.startsWith("*") && part.endsWith("*")
-                        ? <em key={j} style={{ fontStyle: "italic", color: mc.color }}>{part.slice(1, -1)}</em>
-                        : <span key={j}>{part}</span>
-                    )}
-                  </div>
-                ) : (
+                {msg.role === "ai" ? (() => {
+                  // May 13, 2026 Commit 2 Move 2 — First sentence as typographic event.
+                  // Split on first ". " — the lead sentence renders at 22px Cormorant
+                  // weight 400 in mode color (the recognition lands first visually);
+                  // body continues at 16px weight 300 text color (the unfolding).
+                  // If no period found, the whole response renders at lead size.
+                  const periodIdx = msg.text.indexOf(". ");
+                  const hasLead = periodIdx > 0 && periodIdx < msg.text.length - 2;
+                  const lead = hasLead ? msg.text.slice(0, periodIdx + 1) : msg.text;
+                  const body = hasLead ? msg.text.slice(periodIdx + 2) : "";
+                  const renderText = (text) => text.split(/(\*[^*]+\*)/).map((part, j) =>
+                    part.startsWith("*") && part.endsWith("*")
+                      ? <em key={j} style={{ fontStyle: "italic", color: mc.color }}>{part.slice(1, -1)}</em>
+                      : <span key={j}>{part}</span>
+                  );
+                  return (
+                    <>
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 22, fontWeight: 400, lineHeight: 1.4,
+                        color: mc.color, marginBottom: body ? 12 : 0
+                      }}>
+                        {renderText(lead)}
+                      </div>
+                      {body && (
+                        <div style={{
+                          fontFamily: "'Cormorant Garamond', serif",
+                          fontSize: 16, fontWeight: 300, lineHeight: 1.65,
+                          letterSpacing: "0.01em", color: "var(--text)"
+                        }}>
+                          {renderText(body)}
+                        </div>
+                      )}
+                    </>
+                  );
+                })() : (
                   <div>
-                    <div>{msg.text}</div>
+                    {/* May 13, 2026 Commit 2 Move 4 — Mono for user input.
+                        IBM Plex Mono renders the user as command-line / operator;
+                        AI serif renders as reflection. Voice separation in the thread. */}
+                    <div style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: 14, fontWeight: 400, lineHeight: 1.6,
+                      letterSpacing: "0.02em", color: "var(--text-dim)"
+                    }}>
+                      {msg.text}
+                    </div>
                     {msg.imageCount > 0 && (
                       <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.06em" }}>
                         📎 {msg.imageCount} image{msg.imageCount > 1 ? "s" : ""} attached
@@ -13796,7 +13992,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 )}
                 {msg.role === "ai" && (
                   <button onClick={() => saveReframe(msg, i)} style={{
-                    display: "block", marginTop: 8, background: "none", border: "none",
+                    display: "block", marginTop: 12, background: "none", border: "none",
                     fontSize: 11, color: savedIds.has(i) ? "var(--green)" : "var(--text-muted)",
                     cursor: savedIds.has(i) ? "default" : "pointer", padding: 0,
                     fontFamily: "'DM Sans', sans-serif"
@@ -13808,36 +14004,32 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </div>
             );
           })}
-          {/* Escape route — shows after AI response, not during loading */}
-          {messages.length > 0 && messages[messages.length - 1]?.role === "ai" && !loading && (
-            <div style={{ padding: "8px 0 4px 44px" }}>
-              <button
-                onClick={requestDifferentResponse}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: 12,
-                  color: "var(--text-muted)",
-                  cursor: "pointer",
-                  padding: "4px 0",
-                  fontFamily: "'DM Sans', sans-serif",
-                  transition: "color 0.2s"
-                }}
-              >
-                I want a different response
-              </button>
-            </div>
-          )}
+          {/* Escape route — moved to overflow sheet (May 13, 2026 Commit 2 Move 3) */}
           {loading && (
             <div className="message ai">
               <div className="message-avatar" style={{ color: mc.color }}>{mc.icon}</div>
-              <div className="message-bubble" style={{ background: mc.aiBubble, borderColor: mc.border, color: "var(--text-dim)" }}>
+              <div className="message-bubble" style={{ color: "var(--text-dim)" }}>
                 <span style={{ letterSpacing: "0.2em", animation: "pulse 1.5s ease-in-out infinite" }}>···</span>
               </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
+        {/* May 13, 2026 Commit 2 Move 3 — Reply pill / input collapse.
+            When replyExpanded is true, the full input row + somatic nudge +
+            Skip-for-now render here. When false, a thin Reply pill renders
+            instead so the AI response gets full screen real estate without
+            chrome competing for attention. pendingImages indicator folds in
+            above the input (relocated from the now-removed action row). */}
+        {replyExpanded ? (
+        <>
+        {pendingImages.length > 0 && (
+          <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
+            letterSpacing: "0.06em", padding: "10px 12px", background: "var(--amber-glow)",
+            borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
+            {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
+          </div>
+        )}
         {somaticNudge && (
           <div style={{
             fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: "var(--amber)",
@@ -13971,53 +14163,17 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
             </button>
           </div>
         )}
+        </>
+        ) : (
+          <button
+            className="reply-pill"
+            onClick={() => setReplyExpanded(true)}
+            aria-label="Reply to the AI"
+          >
+            Reply <span className="arrow">↑</span>
+          </button>
+        )}
       </div>
-      {messages.length > 0 && (
-        <div style={{ marginTop: 16 }}>
-          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 8 }}>
-            {pendingImages.length > 0 && (
-              <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace",
-                letterSpacing: "0.06em", padding: "10px 12px", background: "var(--amber-glow)",
-                borderRadius: "var(--r)", border: "0.5px solid var(--amber-dim)", marginBottom: 6, textAlign: "center" }}>
-                {pendingImages.length} screenshot{pendingImages.length > 1 ? "s" : ""} attached ◎
-              </div>
-            )}
-            {messages.length > 1 && (
-              <button
-                onClick={handleDoneForNow}
-                style={{
-                  background: "var(--surface)",
-                  border: "0.5px solid var(--border)",
-                  borderRadius: "var(--r)",
-                  color: "var(--text-dim)",
-                  fontSize: 13,
-                  cursor: "pointer",
-                  padding: "8px 14px",
-                  fontFamily: "'DM Sans', sans-serif"
-                }}
-              >
-                Done for now
-              </button>
-            )}
-            <button
-              onClick={() => setShowStartNewConfirm(true)}
-              style={{
-                background: "var(--surface)",
-                border: "0.5px solid var(--border)",
-                borderRadius: "var(--r)",
-                color: "var(--text-dim)",
-                fontSize: 13,
-                cursor: "pointer",
-                padding: "8px 14px",
-                fontFamily: "'DM Sans', sans-serif"
-              }}
-            >
-              Start new
-            </button>
-          </div>
-          
-        </div>
-      )}
       {showStartNewConfirm && (
         <div style={{
           position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)",
@@ -14102,10 +14258,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           Reset
         </button>
       )}
-      {/* Crisis resources disclaimer — below input area, accessible without crowding header */}
-      <div style={{ marginTop: 16, fontSize: 11, color: "var(--text-muted)", textAlign: "center" }}>
-        <button onClick={() => onComplete("crisis")} style={{ background: "none", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", fontFamily: "inherit", textDecoration: "underline" }}>Crisis resources</button>
-      </div>
+      {/* Crisis resources moved to overflow sheet (May 13, 2026 Commit 2 Move 3) */}
       </>
     </div>
   );
