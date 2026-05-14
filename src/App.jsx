@@ -10186,6 +10186,78 @@ const hasFreshSubscribePending = (windowMs) => {
 };
 const SUBSCRIPTION_PENDING_GRACE_MS = 20 * 60 * 1000;
 // ─────────────────────────────────────────────────────────────────────────────
+// ─── B2B ORGANIZATION CLIENT HELPERS ─────────────────────────────────────────
+// Thin wrappers around the /netlify/functions/organization-* endpoints. Every
+// call attaches the Supabase access_token as Bearer auth. All practice data is
+// architecturally walled off from these endpoints (see
+// STILLFORM_B2B_PRIVACY_ARCHITECTURE.md). No org call ever exchanges anything
+// derived from sessions, journal, reframes, or any other practice content.
+const PENDING_INVITE_TOKEN_KEY = "stillform_pending_invite_token";
+const sbFetchOrgStatus = async () => {
+  const token = sbGetSession()?.access_token;
+  const url = `${NETLIFY_BASE}/.netlify/functions/organization-status`;
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) }
+    });
+    if (!res.ok) return { ok: false, in_org: false, memberships: [] };
+    return await res.json().catch(() => ({ ok: false, in_org: false, memberships: [] }));
+  } catch {
+    return { ok: false, in_org: false, memberships: [] };
+  }
+};
+const sbOrgPost = async (endpoint, body) => {
+  const token = sbGetSession()?.access_token;
+  if (!token) return { ok: false, error: "not_signed_in" };
+  const url = `${NETLIFY_BASE}/.netlify/functions/${endpoint}`;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body || {})
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      return { ok: false, error: data?.error || `http_${res.status}`, status: res.status };
+    }
+    return data || { ok: true };
+  } catch (err) {
+    return { ok: false, error: "network_error", message: err?.message || "unknown" };
+  }
+};
+const sbOrgGet = async (endpoint, params = {}) => {
+  const token = sbGetSession()?.access_token;
+  if (!token) return { ok: false, error: "not_signed_in" };
+  const search = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== "") search.set(k, String(v));
+  }
+  const qs = search.toString();
+  const url = `${NETLIFY_BASE}/.netlify/functions/${endpoint}${qs ? `?${qs}` : ""}`;
+  try {
+    const res = await fetch(url, {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      return { ok: false, error: data?.error || `http_${res.status}`, status: res.status };
+    }
+    return data || { ok: true };
+  } catch (err) {
+    return { ok: false, error: "network_error", message: err?.message || "unknown" };
+  }
+};
+const sbCreateOrg = (payload) => sbOrgPost("organization-create", payload);
+const sbUpdateOrg = (orgId, updates) => sbOrgPost("organization-update", { org_id: orgId, updates });
+const sbListOrgMembers = (orgId, opts = {}) => sbOrgGet("organization-list-members", { org_id: orgId, include_removed: opts.includeRemoved ? "1" : undefined });
+const sbInviteOrg = (orgId, email, role = "member") => sbOrgPost("organization-invite", { action: "create", org_id: orgId, email, role });
+const sbRevokeOrgInvite = (orgId, inviteId) => sbOrgPost("organization-invite", { action: "revoke", org_id: orgId, invite_id: inviteId });
+const sbAcceptOrgInvite = (token) => sbOrgPost("organization-accept-invite", { invite_token: token });
+const sbRemoveOrgMember = (orgId, targetUserId) => sbOrgPost("organization-remove-member", { org_id: orgId, target_user_id: targetUserId });
+const sbReadOrgAuditLog = (orgId, opts = {}) => sbOrgGet("organization-audit-log", { org_id: orgId, limit: opts.limit, before_id: opts.beforeId, action: opts.action });
+// ─────────────────────────────────────────────────────────────────────────────
 // ─── ENCRYPTION UTILITY ──────────────────────────────────────────────────────
 // Device-local AES-GCM encryption for sensitive conversation data.
 // Key is generated once per device and stored in IndexedDB.
@@ -19490,6 +19562,40 @@ export default function Stillform() {
     } catch { return false; } 
   });
   const [syncSignedIn, setSyncSignedIn] = useState(() => sbIsSignedIn());
+  // B2B organization membership. Loaded from organization-status whenever
+  // auth state changes; refreshed after create/invite/leave actions.
+  // Shape: { in_org: boolean, memberships: [{ org_id, org_name, plan_tier,
+  // role, status, joined_at, privacy_guarantee }] }. Contains zero practice
+  // data by architectural commitment (CANON v1.3 + B2B privacy wall doc).
+  const [orgStatus, setOrgStatus] = useState({ in_org: false, memberships: [] });
+  const [orgStatusLoaded, setOrgStatusLoaded] = useState(false);
+  const [orgStatusTick, setOrgStatusTick] = useState(0);
+  const refreshOrgStatus = () => setOrgStatusTick((t) => t + 1);
+  // Org UI form state (Settings → Organization + the org-admin screen).
+  const [orgCreateName, setOrgCreateName] = useState("");
+  const [orgCreatePlanTier, setOrgCreatePlanTier] = useState("small_team");
+  const [orgCreateSeatLimit, setOrgCreateSeatLimit] = useState(5);
+  const [orgCreateBusy, setOrgCreateBusy] = useState(false);
+  const [orgCreateError, setOrgCreateError] = useState(null);
+  const [orgLeaveConfirming, setOrgLeaveConfirming] = useState(false);
+  const [orgLeaveBusy, setOrgLeaveBusy] = useState(false);
+  const [orgLeaveError, setOrgLeaveError] = useState(null);
+  // Admin screen state (members + invites + audit log).
+  const [orgAdminContextId, setOrgAdminContextId] = useState(null); // which org the admin screen is acting on
+  const [orgMembersData, setOrgMembersData] = useState({ members: [], pending_invites: [], loaded: false });
+  const [orgInviteEmail, setOrgInviteEmail] = useState("");
+  const [orgInviteRole, setOrgInviteRole] = useState("member");
+  const [orgInviteBusy, setOrgInviteBusy] = useState(false);
+  const [orgInviteResult, setOrgInviteResult] = useState(null);
+  const [orgInviteError, setOrgInviteError] = useState(null);
+  const [orgMemberActionBusy, setOrgMemberActionBusy] = useState({}); // map user_id → busy
+  const [orgMemberActionError, setOrgMemberActionError] = useState(null);
+  const [orgAuditEntries, setOrgAuditEntries] = useState({ entries: [], next_cursor: null, loaded: false });
+  const [orgAuditBusy, setOrgAuditBusy] = useState(false);
+  const [orgSettingsBusy, setOrgSettingsBusy] = useState(false);
+  const [orgSettingsError, setOrgSettingsError] = useState(null);
+  const [orgSettingsName, setOrgSettingsName] = useState("");
+  const [orgSettingsSeatLimit, setOrgSettingsSeatLimit] = useState(1);
   const [subscriptionCheckTick, setSubscriptionCheckTick] = useState(0);
   // Pull-to-refresh state — drives the visual indicator and refresh trigger
   // on home screen. Threshold: 80px of pull to trigger refresh.
@@ -19547,7 +19653,15 @@ export default function Stillform() {
   const uatLaunchTargetLabel = uatTrialFreezeUntilMs > 0
     ? new Date(uatTrialFreezeUntilMs).toLocaleDateString("en-US", { month: "short", day: "numeric" })
     : "launch";
-  const trialExpired = trialDaysLeft <= 0 && !isSubscribed && !uatTrialFreezeActive;
+  // B2B paywall bypass. When the user is an active member of an active org,
+  // the org covers their seat — no individual paywall applies. The privacy
+  // wall remains: the org never sees what the user does inside Stillform.
+  // See STILLFORM_B2B_PRIVACY_ARCHITECTURE.md for the architectural contract.
+  const orgMemberActive = orgStatus.in_org && orgStatus.memberships.some(
+    (m) => m && m.status === "active" && (m.org_status === undefined || m.org_status === "active")
+  );
+  const subscriptionUnlocked = isSubscribed || orgMemberActive;
+  const trialExpired = trialDaysLeft <= 0 && !subscriptionUnlocked && !uatTrialFreezeActive;
 
   // Check for subscription confirmation from Lemon Squeezy redirect
   useEffect(() => {
@@ -19592,6 +19706,79 @@ export default function Stillform() {
     syncSubscriptionTruth();
     return () => { cancelled = true; };
   }, [syncSignedIn, subscriptionCheckTick]);
+
+  // B2B org status load. Fires on sign-in/sign-out and after any org action
+  // (create, invite-accept, leave). Silent on failure — UI falls back to
+  // "no org" state, which matches the unauthenticated default.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!syncSignedIn) {
+        if (!cancelled) {
+          setOrgStatus({ in_org: false, memberships: [] });
+          setOrgStatusLoaded(true);
+        }
+        return;
+      }
+      try {
+        const status = await sbFetchOrgStatus();
+        if (cancelled) return;
+        setOrgStatus({
+          in_org: Boolean(status?.in_org),
+          memberships: Array.isArray(status?.memberships) ? status.memberships : []
+        });
+        setOrgStatusLoaded(true);
+      } catch {
+        if (!cancelled) {
+          setOrgStatusLoaded(true);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [syncSignedIn, orgStatusTick]);
+
+  // Invite-accept URL handler. When the app loads with ?invite=<token> in the
+  // URL, we either accept it immediately (if signed in) or stash it for after
+  // sign-in. The token is removed from the visible URL once captured so it
+  // doesn't survive in browser history or get shared inadvertently.
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get("invite");
+      if (!token) return;
+      // Stash for post-sign-in flow.
+      try { localStorage.setItem(PENDING_INVITE_TOKEN_KEY, token); } catch {}
+      // Clean URL.
+      params.delete("invite");
+      const next = params.toString();
+      window.history.replaceState({}, "", next ? `?${next}` : window.location.pathname);
+    } catch {}
+  }, []);
+
+  // Auto-redeem pending invite token once the user is signed in. The acceptance
+  // call enforces email match server-side; on success we refresh org status so
+  // the affiliation surface appears immediately. On failure (token expired,
+  // email mismatch, etc.) we clear the pending token and surface a notice.
+  const [pendingInviteResult, setPendingInviteResult] = useState(null);
+  useEffect(() => {
+    if (!syncSignedIn) return;
+    let cancelled = false;
+    (async () => {
+      let token = null;
+      try { token = localStorage.getItem(PENDING_INVITE_TOKEN_KEY); } catch {}
+      if (!token) return;
+      const result = await sbAcceptOrgInvite(token);
+      if (cancelled) return;
+      try { localStorage.removeItem(PENDING_INVITE_TOKEN_KEY); } catch {}
+      if (result?.ok) {
+        setPendingInviteResult({ ok: true, org_name: result?.org?.name || null });
+        refreshOrgStatus();
+      } else {
+        setPendingInviteResult({ ok: false, error: result?.error || "Could not accept invite" });
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [syncSignedIn]);
 
   // Launch sync — auto-pulls cloud user data when the user opens the app while
   // signed in. Added May 7, 2026 to close the bug Arlin surfaced in phone testing:
@@ -20999,6 +21186,7 @@ export default function Stillform() {
     anchors: false,
     baseline: false,
     account: false,
+    organization: false,
     integrations: false,
     data: false,
     more: false,
@@ -28219,6 +28407,445 @@ const isSignalProfileConfigured = () => {
           </section>
         )}
 
+        {/* ORG ADMIN — admin-only management surface for an organization */}
+        {screen === "org-admin" && (() => {
+          // Resolve which org we're managing. Default to the first admin
+          // membership the user has if the explicit context was lost (back
+          // navigation). Returns to settings if there is no admin org.
+          const adminMembership = (() => {
+            if (orgAdminContextId) {
+              const match = orgStatus.memberships.find(
+                (m) => m && m.org_id === orgAdminContextId && m.role === "admin" && m.status === "active"
+              );
+              if (match) return match;
+            }
+            return orgStatus.memberships.find(
+              (m) => m && m.role === "admin" && m.status === "active"
+            ) || null;
+          })();
+          if (!adminMembership) {
+            return (
+              <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
+                <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+                <h1 className="t-display-lg" style={{ marginBottom: 16 }}>Organization</h1>
+                <div style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.6 }}>
+                  You are not an admin of any organization. Open Settings → Organization to create one or to manage your membership.
+                </div>
+              </section>
+            );
+          }
+          const orgId = adminMembership.org_id;
+          const seatsUsed = Array.isArray(orgMembersData.members)
+            ? orgMembersData.members.filter((m) => m.status === "active").length
+            : 0;
+          const pendingCount = Array.isArray(orgMembersData.pending_invites)
+            ? orgMembersData.pending_invites.length
+            : 0;
+          return (
+            <section style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px" }}>
+              <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+              <h1 className="t-display-lg" style={{ marginBottom: 6 }}>Organization</h1>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 28 }}>
+                {adminMembership.org_name} · {adminMembership.plan_tier ? adminMembership.plan_tier.replace(/_/g, " ") : "—"}
+              </div>
+
+              {/* Privacy guarantee — reminder visible on every admin visit. */}
+              <div style={{
+                padding: "12px 14px",
+                background: "var(--amber-glow)",
+                border: "1px solid var(--amber-dim)",
+                borderRadius: "var(--r-md)",
+                fontSize: 12,
+                color: "var(--text)",
+                lineHeight: 1.55,
+                marginBottom: 24
+              }}>
+                <strong>Privacy wall:</strong> you can manage seats, billing, and members here. You cannot see anything members do inside Stillform — sessions, journal entries, reframes, biometrics, or any other practice content. This is by architectural design, not a setting.
+              </div>
+
+              {/* MEMBERS SECTION */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Members</span>
+                  <span style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    {orgMembersData.loaded ? `${seatsUsed} active · ${pendingCount} pending` : "—"}
+                  </span>
+                </div>
+                {!orgMembersData.loaded && (
+                  <button
+                    onClick={async () => {
+                      setOrgMembersData((s) => ({ ...s, loaded: false }));
+                      const result = await sbListOrgMembers(orgId);
+                      if (result?.ok) {
+                        setOrgMembersData({
+                          members: result.members || [],
+                          pending_invites: result.pending_invites || [],
+                          loaded: true
+                        });
+                      } else {
+                        setOrgMembersData({ members: [], pending_invites: [], loaded: true });
+                      }
+                    }}
+                    className="btn btn-ghost"
+                    style={{ width: "100%", padding: "10px 14px" }}
+                  >Load members</button>
+                )}
+                {orgMembersData.loaded && orgMembersData.members.map((m) => (
+                  <div key={m.id} style={{
+                    padding: "10px 12px",
+                    background: "var(--surface)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "var(--r-md)",
+                    marginBottom: 6,
+                    display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8
+                  }}>
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{m.email}</div>
+                      <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>
+                        {m.role} · {m.status}
+                      </div>
+                    </div>
+                    {m.status === "active" && (
+                      <button
+                        disabled={Boolean(orgMemberActionBusy[m.user_id])}
+                        onClick={async () => {
+                          if (!window.confirm(`Remove ${m.email} from the organization?`)) return;
+                          setOrgMemberActionBusy((s) => ({ ...s, [m.user_id]: true }));
+                          setOrgMemberActionError(null);
+                          const result = await sbRemoveOrgMember(orgId, m.user_id);
+                          setOrgMemberActionBusy((s) => ({ ...s, [m.user_id]: false }));
+                          if (!result?.ok) {
+                            setOrgMemberActionError(result?.error || "Could not remove member");
+                          } else {
+                            const refreshed = await sbListOrgMembers(orgId);
+                            if (refreshed?.ok) {
+                              setOrgMembersData({
+                                members: refreshed.members || [],
+                                pending_invites: refreshed.pending_invites || [],
+                                loaded: true
+                              });
+                            }
+                          }
+                        }}
+                        style={{
+                          background: "none", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", padding: "4px 10px",
+                          fontSize: 11, color: "var(--text-muted)", cursor: "pointer", flexShrink: 0
+                        }}
+                      >Remove</button>
+                    )}
+                  </div>
+                ))}
+                {orgMembersData.loaded && orgMembersData.members.length === 0 && (
+                  <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 0" }}>No active members yet.</div>
+                )}
+                {orgMemberActionError && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6 }}>{orgMemberActionError}</div>
+                )}
+              </div>
+
+              {/* PENDING INVITES */}
+              {orgMembersData.loaded && orgMembersData.pending_invites.length > 0 && (
+                <div style={{ marginBottom: 28 }}>
+                  <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Pending invites</div>
+                  {orgMembersData.pending_invites.map((inv) => (
+                    <div key={inv.id} style={{
+                      padding: "10px 12px", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", marginBottom: 6,
+                      display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8
+                    }}>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ fontSize: 13, color: "var(--text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{inv.email}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginTop: 2 }}>
+                          {inv.role} · expires {new Date(inv.expires_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          if (!window.confirm(`Revoke the invite to ${inv.email}?`)) return;
+                          const result = await sbRevokeOrgInvite(orgId, inv.id);
+                          if (result?.ok) {
+                            const refreshed = await sbListOrgMembers(orgId);
+                            if (refreshed?.ok) {
+                              setOrgMembersData({
+                                members: refreshed.members || [],
+                                pending_invites: refreshed.pending_invites || [],
+                                loaded: true
+                              });
+                            }
+                          } else {
+                            setOrgMemberActionError(result?.error || "Could not revoke invite");
+                          }
+                        }}
+                        style={{
+                          background: "none", border: "1px solid var(--border)",
+                          borderRadius: "var(--r-md)", padding: "4px 10px",
+                          fontSize: 11, color: "var(--text-muted)", cursor: "pointer", flexShrink: 0
+                        }}
+                      >Revoke</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* INVITE NEW MEMBER */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Invite a member</div>
+                <div style={{ marginBottom: 8 }}>
+                  <input
+                    type="email"
+                    placeholder="email@company.com"
+                    value={orgInviteEmail}
+                    onChange={(e) => setOrgInviteEmail(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}
+                  />
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <select
+                    value={orgInviteRole}
+                    onChange={(e) => setOrgInviteRole(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                      fontFamily: "'DM Sans', sans-serif"
+                    }}
+                  >
+                    <option value="member">Member</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+                {orgInviteError && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>{orgInviteError}</div>
+                )}
+                {orgInviteResult && (
+                  <div style={{
+                    padding: "10px 12px", background: "var(--amber-glow)", border: "1px solid var(--amber-dim)",
+                    borderRadius: "var(--r-md)", marginBottom: 10
+                  }}>
+                    <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 6 }}>
+                      Invite created for <strong>{orgInviteResult.email}</strong>. Share this link with them:
+                    </div>
+                    <div style={{
+                      fontSize: 10, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace",
+                      wordBreak: "break-all", padding: "8px", background: "var(--surface)", borderRadius: "var(--r-sm)",
+                      marginBottom: 6
+                    }}>
+                      {`${window.location.origin}/?invite=${orgInviteResult.invite_token}`}
+                    </div>
+                    <button
+                      onClick={() => {
+                        const url = `${window.location.origin}/?invite=${orgInviteResult.invite_token}`;
+                        try { navigator.clipboard?.writeText(url); } catch {}
+                      }}
+                      className="btn btn-ghost"
+                      style={{ width: "100%", padding: "6px 10px", fontSize: 12 }}
+                    >Copy link</button>
+                  </div>
+                )}
+                <button
+                  disabled={orgInviteBusy || !orgInviteEmail.trim()}
+                  onClick={async () => {
+                    setOrgInviteBusy(true);
+                    setOrgInviteError(null);
+                    setOrgInviteResult(null);
+                    const result = await sbInviteOrg(orgId, orgInviteEmail.trim(), orgInviteRole);
+                    if (result?.ok) {
+                      setOrgInviteResult({
+                        email: result.invite.email,
+                        invite_token: result.invite.invite_token
+                      });
+                      setOrgInviteEmail("");
+                      const refreshed = await sbListOrgMembers(orgId);
+                      if (refreshed?.ok) {
+                        setOrgMembersData({
+                          members: refreshed.members || [],
+                          pending_invites: refreshed.pending_invites || [],
+                          loaded: true
+                        });
+                      }
+                      try { window.plausible?.("Org Invite Sent", { props: { role: orgInviteRole } }); } catch {}
+                    } else {
+                      setOrgInviteError(result?.error || "Could not create invite");
+                    }
+                    setOrgInviteBusy(false);
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: "100%", padding: "12px 16px" }}
+                >
+                  {orgInviteBusy ? "Sending…" : "Create invite"}
+                </button>
+              </div>
+
+              {/* ORG SETTINGS */}
+              <div style={{ marginBottom: 28 }}>
+                <div style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)", marginBottom: 10 }}>Organization settings</div>
+                <div style={{ marginBottom: 8 }}>
+                  <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Name</label>
+                  <input
+                    type="text"
+                    value={orgSettingsName || adminMembership.org_name || ""}
+                    onChange={(e) => setOrgSettingsName(e.target.value)}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)"
+                    }}
+                  />
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Seat limit</label>
+                  <input
+                    type="number"
+                    min={Math.max(1, seatsUsed)}
+                    value={orgSettingsSeatLimit || 1}
+                    onChange={(e) => setOrgSettingsSeatLimit(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                    style={{
+                      width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                      borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)"
+                    }}
+                  />
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                    Cannot drop below {seatsUsed} (current active members).
+                  </div>
+                </div>
+                {orgSettingsError && (
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>{orgSettingsError}</div>
+                )}
+                <button
+                  disabled={orgSettingsBusy}
+                  onClick={async () => {
+                    setOrgSettingsBusy(true);
+                    setOrgSettingsError(null);
+                    const updates = {};
+                    const nextName = (orgSettingsName || "").trim();
+                    if (nextName && nextName !== adminMembership.org_name) updates.name = nextName;
+                    if (orgSettingsSeatLimit && orgSettingsSeatLimit !== undefined) updates.seat_limit = orgSettingsSeatLimit;
+                    if (Object.keys(updates).length === 0) {
+                      setOrgSettingsError("No changes to save.");
+                      setOrgSettingsBusy(false);
+                      return;
+                    }
+                    const result = await sbUpdateOrg(orgId, updates);
+                    if (result?.ok) {
+                      refreshOrgStatus();
+                      try { window.plausible?.("Org Settings Updated", { props: { fields: Object.keys(updates).join(",") } }); } catch {}
+                    } else {
+                      setOrgSettingsError(result?.error || "Could not save settings");
+                    }
+                    setOrgSettingsBusy(false);
+                  }}
+                  className="btn btn-primary"
+                  style={{ width: "100%", padding: "12px 16px" }}
+                >{orgSettingsBusy ? "Saving…" : "Save changes"}</button>
+              </div>
+
+              {/* AUDIT LOG ENTRY POINT */}
+              <div style={{ marginBottom: 32 }}>
+                <button
+                  onClick={() => {
+                    setOrgAuditEntries({ entries: [], next_cursor: null, loaded: false });
+                    setScreen("org-audit-log");
+                  }}
+                  className="btn btn-ghost"
+                  style={{ width: "100%", padding: "12px 16px" }}
+                >View audit log →</button>
+                <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 6, lineHeight: 1.5 }}>
+                  Records every admin action (invites, removals, settings changes). Read-only. SOC 2 evidence chain.
+                </div>
+              </div>
+            </section>
+          );
+        })()}
+
+        {/* ORG AUDIT LOG */}
+        {screen === "org-audit-log" && (() => {
+          const adminMembership = orgStatus.memberships.find(
+            (m) => m && m.org_id === orgAdminContextId && m.role === "admin" && m.status === "active"
+          ) || orgStatus.memberships.find(
+            (m) => m && m.role === "admin" && m.status === "active"
+          );
+          if (!adminMembership) {
+            return (
+              <section style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px" }}>
+                <button className="intervention-back" onClick={() => setScreen("settings")}>← Back</button>
+                <h1 className="t-display-lg">Audit log</h1>
+                <div style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 16 }}>You are not an admin of any organization.</div>
+              </section>
+            );
+          }
+          const orgId = adminMembership.org_id;
+          const fmtAction = (a) => String(a || "").replace(/_/g, " ");
+          return (
+            <section style={{ maxWidth: 520, margin: "0 auto", padding: "48px 24px" }}>
+              <button className="intervention-back" onClick={() => setScreen("org-admin")}>← Back</button>
+              <h1 className="t-display-lg" style={{ marginBottom: 6 }}>Audit log</h1>
+              <div style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 24 }}>{adminMembership.org_name}</div>
+
+              {!orgAuditEntries.loaded && (
+                <button
+                  disabled={orgAuditBusy}
+                  onClick={async () => {
+                    setOrgAuditBusy(true);
+                    const result = await sbReadOrgAuditLog(orgId, { limit: 50 });
+                    if (result?.ok) {
+                      setOrgAuditEntries({
+                        entries: result.entries || [],
+                        next_cursor: result.next_cursor,
+                        loaded: true
+                      });
+                    } else {
+                      setOrgAuditEntries({ entries: [], next_cursor: null, loaded: true });
+                    }
+                    setOrgAuditBusy(false);
+                  }}
+                  className="btn btn-ghost"
+                  style={{ width: "100%", padding: "10px 14px" }}
+                >{orgAuditBusy ? "Loading…" : "Load audit log"}</button>
+              )}
+
+              {orgAuditEntries.loaded && orgAuditEntries.entries.length === 0 && (
+                <div style={{ fontSize: 13, color: "var(--text-muted)" }}>No entries yet.</div>
+              )}
+
+              {orgAuditEntries.loaded && orgAuditEntries.entries.map((e) => (
+                <div key={e.id} style={{
+                  padding: "10px 12px", background: "var(--surface)", border: "1px solid var(--border)",
+                  borderRadius: "var(--r-md)", marginBottom: 6
+                }}>
+                  <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 2 }}>{fmtAction(e.action)}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
+                    {new Date(e.created_at).toLocaleString()}
+                    {e.target_email ? ` · ${e.target_email}` : ""}
+                  </div>
+                </div>
+              ))}
+
+              {orgAuditEntries.loaded && orgAuditEntries.next_cursor && (
+                <button
+                  disabled={orgAuditBusy}
+                  onClick={async () => {
+                    setOrgAuditBusy(true);
+                    const result = await sbReadOrgAuditLog(orgId, { limit: 50, beforeId: orgAuditEntries.next_cursor });
+                    if (result?.ok) {
+                      setOrgAuditEntries((prev) => ({
+                        entries: [...prev.entries, ...(result.entries || [])],
+                        next_cursor: result.next_cursor,
+                        loaded: true
+                      }));
+                    }
+                    setOrgAuditBusy(false);
+                  }}
+                  className="btn btn-ghost"
+                  style={{ width: "100%", padding: "10px 14px", marginTop: 8 }}
+                >{orgAuditBusy ? "Loading…" : "Load more"}</button>
+              )}
+            </section>
+          );
+        })()}
+
         {/* SETTINGS */}
         {screen === "settings" && (
           <section style={{ maxWidth: 480, margin: "0 auto", padding: "48px 24px" }}>
@@ -29548,6 +30175,238 @@ const isSignalProfileConfigured = () => {
               </>)}
             </div>
 
+            {/* ORGANIZATION (B2B) — only visible when signed in. */}
+            {syncSignedIn && (
+              <div style={{ marginBottom: 28 }}>
+                <button onClick={() => toggleSettingsSection("organization")} style={{
+                  width: "100%", background: "none", border: "none", padding: "0 0 10px",
+                  display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer"
+                }}>
+                  <span style={{ fontSize: 11, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--amber)" }}>Organization</span>
+                  <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{settingsSectionOpen.organization ? "▾" : "▸"}</span>
+                </button>
+                {settingsSectionOpen.organization && (<>
+                  {/* Pending invite result banner — shows once after auto-accept on sign-in. */}
+                  {pendingInviteResult && (
+                    <div style={{
+                      padding: "12px 14px",
+                      borderRadius: "var(--r-md)",
+                      border: `1px solid ${pendingInviteResult.ok ? "var(--amber-dim)" : "var(--border)"}`,
+                      background: pendingInviteResult.ok ? "var(--amber-glow)" : "var(--surface)",
+                      marginBottom: 14
+                    }}>
+                      <div style={{ fontSize: 13, color: "var(--text)", marginBottom: 4 }}>
+                        {pendingInviteResult.ok
+                          ? `You've joined ${pendingInviteResult.org_name || "the organization"}.`
+                          : "Couldn't accept your invite."}
+                      </div>
+                      {!pendingInviteResult.ok && (
+                        <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{pendingInviteResult.error}</div>
+                      )}
+                      <button onClick={() => setPendingInviteResult(null)} style={{
+                        marginTop: 6, background: "none", border: "none", padding: 0,
+                        fontSize: 11, color: "var(--text-muted)", cursor: "pointer"
+                      }}>Dismiss</button>
+                    </div>
+                  )}
+
+                  {!orgStatusLoaded && (
+                    <div style={{ fontSize: 12, color: "var(--text-muted)", padding: "8px 0" }}>Checking…</div>
+                  )}
+
+                  {/* NOT IN AN ORG — create-org inline form. */}
+                  {orgStatusLoaded && !orgStatus.in_org && (
+                    <>
+                      <div style={{ fontSize: 13, color: "var(--text)", lineHeight: 1.55, marginBottom: 12 }}>
+                        Create an organization to cover seats for your team. Your team's practice content stays private — admins manage seats and billing only, never sessions or journal data.
+                      </div>
+                      <div style={{ marginBottom: 10 }}>
+                        <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Organization name</label>
+                        <input
+                          type="text"
+                          value={orgCreateName}
+                          onChange={(e) => setOrgCreateName(e.target.value)}
+                          placeholder="Acme, Inc."
+                          maxLength={200}
+                          style={{
+                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                            borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        />
+                      </div>
+                      <div style={{ marginBottom: 10 }}>
+                        <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Plan tier</label>
+                        <select
+                          value={orgCreatePlanTier}
+                          onChange={(e) => setOrgCreatePlanTier(e.target.value)}
+                          style={{
+                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                            borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          <option value="small_team">Small team (under 50 seats)</option>
+                          <option value="mid_market">Mid-market (50 – 500 seats)</option>
+                          <option value="enterprise">Enterprise (500+ seats)</option>
+                        </select>
+                      </div>
+                      <div style={{ marginBottom: 12 }}>
+                        <label style={{ fontSize: 11, color: "var(--text-muted)", display: "block", marginBottom: 4 }}>Initial seat limit</label>
+                        <input
+                          type="number"
+                          min={1}
+                          max={10000}
+                          value={orgCreateSeatLimit}
+                          onChange={(e) => setOrgCreateSeatLimit(Math.max(1, Math.floor(Number(e.target.value) || 1)))}
+                          style={{
+                            width: "100%", background: "var(--surface)", border: "1px solid var(--border)",
+                            borderRadius: "var(--r-md)", padding: "10px 12px", fontSize: 14, color: "var(--text)",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        />
+                        <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 4 }}>
+                          You can adjust this anytime in admin settings.
+                        </div>
+                      </div>
+                      {orgCreateError && (
+                        <div style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>{orgCreateError}</div>
+                      )}
+                      <button
+                        disabled={orgCreateBusy || !orgCreateName.trim()}
+                        onClick={async () => {
+                          setOrgCreateBusy(true);
+                          setOrgCreateError(null);
+                          try {
+                            const result = await sbCreateOrg({
+                              name: orgCreateName.trim(),
+                              plan_tier: orgCreatePlanTier,
+                              seat_limit: orgCreateSeatLimit
+                            });
+                            if (!result?.ok) {
+                              setOrgCreateError(result?.error || "Could not create organization");
+                            } else {
+                              setOrgCreateName("");
+                              refreshOrgStatus();
+                              try { window.plausible?.("Org Created", { props: { plan_tier: orgCreatePlanTier } }); } catch {}
+                            }
+                          } catch (err) {
+                            setOrgCreateError(err?.message || "Could not create organization");
+                          } finally {
+                            setOrgCreateBusy(false);
+                          }
+                        }}
+                        className="btn btn-primary"
+                        style={{ width: "100%", padding: "12px 16px" }}
+                      >
+                        {orgCreateBusy ? "Creating…" : "Create organization"}
+                      </button>
+                    </>
+                  )}
+
+                  {/* IN AN ORG — affiliation surface for each membership. */}
+                  {orgStatusLoaded && orgStatus.in_org && orgStatus.memberships.map((m) => (
+                    <div key={m.org_id} style={{
+                      padding: "14px 14px 12px",
+                      background: "var(--surface)",
+                      border: "1px solid var(--border)",
+                      borderRadius: "var(--r-lg)",
+                      marginBottom: 12
+                    }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                        <div style={{ fontSize: 15, color: "var(--text)", fontWeight: 500 }}>{m.org_name}</div>
+                        <div style={{ fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                          {m.role}
+                        </div>
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10 }}>
+                        Plan: {m.plan_tier ? m.plan_tier.replace(/_/g, " ") : "—"} · Joined {m.joined_at ? new Date(m.joined_at).toLocaleDateString() : "—"}
+                      </div>
+                      {/* Privacy guarantee — surfaced inline with affiliation, every time. */}
+                      <div style={{
+                        padding: "10px 12px",
+                        background: "var(--amber-glow)",
+                        border: "1px solid var(--amber-dim)",
+                        borderRadius: "var(--r-md)",
+                        fontSize: 12,
+                        color: "var(--text)",
+                        lineHeight: 1.5,
+                        marginBottom: 10
+                      }}>
+                        {m.privacy_guarantee || "Your organization pays for this seat. They cannot see anything you do inside Stillform — not your sessions, journal, reframes, or any other practice content. Ever."}
+                      </div>
+                      {m.role === "admin" && (
+                        <button
+                          onClick={() => { setOrgAdminContextId(m.org_id); setScreen("org-admin"); }}
+                          className="btn btn-ghost"
+                          style={{ width: "100%", padding: "10px 14px", marginBottom: 6 }}
+                        >
+                          Manage organization →
+                        </button>
+                      )}
+                      {!orgLeaveConfirming ? (
+                        <button
+                          onClick={() => { setOrgLeaveConfirming(true); setOrgLeaveError(null); }}
+                          style={{
+                            width: "100%", background: "none", border: "none", padding: "8px",
+                            fontSize: 12, color: "var(--text-muted)", cursor: "pointer"
+                          }}
+                        >
+                          Leave organization
+                        </button>
+                      ) : (
+                        <div style={{
+                          padding: "10px 12px", background: "var(--surface-elevated)",
+                          border: "1px solid var(--border)", borderRadius: "var(--r-md)", marginTop: 6
+                        }}>
+                          <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 8 }}>
+                            Leaving means your seat is freed and your practice continues on your own — billing reverts to individual.
+                          </div>
+                          {orgLeaveError && (
+                            <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>{orgLeaveError}</div>
+                          )}
+                          <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                              onClick={() => { setOrgLeaveConfirming(false); setOrgLeaveError(null); }}
+                              className="btn btn-ghost"
+                              style={{ flex: 1, padding: "8px 12px", fontSize: 13 }}
+                            >Cancel</button>
+                            <button
+                              disabled={orgLeaveBusy}
+                              onClick={async () => {
+                                setOrgLeaveBusy(true);
+                                setOrgLeaveError(null);
+                                try {
+                                  const me = sbGetSession()?.user?.id;
+                                  if (!me) throw new Error("Not signed in");
+                                  const result = await sbRemoveOrgMember(m.org_id, me);
+                                  if (!result?.ok) {
+                                    setOrgLeaveError(result?.error || "Could not leave organization");
+                                  } else {
+                                    setOrgLeaveConfirming(false);
+                                    refreshOrgStatus();
+                                    try { window.plausible?.("Org Left", {}); } catch {}
+                                  }
+                                } catch (err) {
+                                  setOrgLeaveError(err?.message || "Could not leave organization");
+                                } finally {
+                                  setOrgLeaveBusy(false);
+                                }
+                              }}
+                              className="btn btn-primary"
+                              style={{ flex: 1, padding: "8px 12px", fontSize: 13 }}
+                            >
+                              {orgLeaveBusy ? "Leaving…" : "Confirm leave"}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>)}
+              </div>
+            )}
+
             {/* INTEGRATIONS */}
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("integrations")} style={{
@@ -30138,7 +30997,7 @@ const isSignalProfileConfigured = () => {
               onKeyDown={(e) => { if (screen !== "home" && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); goHomeSafely(); } }}
             >Stillform</div>
             <div className="footer-links">
-              {screen !== "pricing" && screen !== "home" && !isSubscribed && (
+              {screen !== "pricing" && screen !== "home" && !subscriptionUnlocked && (
                 <button onClick={() => setScreen("pricing")}>{syncSignedIn ? "Subscribe" : "Sign In"}</button>
               )}
               {screen !== "settings" && (
