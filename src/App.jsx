@@ -24505,18 +24505,23 @@ const isSignalProfileConfigured = () => {
                         } catch {}
                         setCiSaved(false); setCiOpen(true); setCiTension({}); setCiEnergy(null); setCiMood(null); setCiBio(new Set()); setCiOffBaselineOpen(false);
                       }} style={{
-                        width: "100%", background: "var(--surface)", border: "0.5px solid var(--amber-dim)",
-                        borderRadius: "var(--r)", padding: "14px 18px", marginBottom: todaysBrief || inFlight ? 12 : 20, cursor: "pointer",
+                        width: "100%", background: "transparent",
+                        borderTop: "0.5px solid var(--border-printed)",
+                        borderBottom: "0.5px solid var(--border-printed)",
+                        borderLeft: "none", borderRight: "none",
+                        padding: "16px 4px", marginBottom: todaysBrief || inFlight ? 12 : 20, cursor: "pointer",
                         textAlign: "left", WebkitTapHighlightColor: "transparent"
                       }}>
-                        <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Morning Check-in</div>
-                        <div className="t-body-sm quiet" style={{ marginTop: 4 }}>✓ Done · tap to update</div>
+                        <div className="t-mono-xs" style={{ color: "var(--amber)" }}>✓ Morning Check-in</div>
+                        <div className="t-body-sm quiet" style={{ marginTop: 4 }}>Tap to update</div>
                       </button>
 
                       {inFlight && (
                         <div style={{
-                          background: "var(--surface)", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "14px 18px", marginBottom: 20
+                          background: "transparent",
+                          borderTop: "0.5px solid var(--border-printed)",
+                          borderBottom: "0.5px solid var(--border-printed)",
+                          padding: "16px 4px", marginBottom: 20
                         }}>
                           <div className="t-caption" style={{ color: "var(--text-muted)", letterSpacing: "0.08em" }}>
                             Brief generating…
@@ -24526,8 +24531,10 @@ const isSignalProfileConfigured = () => {
 
                       {todaysBrief && (
                         <div style={{
-                          background: "var(--surface)", border: "0.5px solid var(--border)",
-                          borderRadius: "var(--r)", padding: "20px 18px", marginBottom: 20
+                          background: "transparent",
+                          borderTop: "0.5px solid var(--border-printed)",
+                          borderBottom: "0.5px solid var(--border-printed)",
+                          padding: "20px 4px", marginBottom: 20
                         }}>
                           <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 16, letterSpacing: "0.14em" }}>
                             Today's Brief
@@ -25812,10 +25819,10 @@ const isSignalProfileConfigured = () => {
                 // so a dismissed prompt does not re-fire on app reopen.
                 if (eodTriggerPromptOpen) return (
                   <div style={{
-                    background: "var(--surface)",
-                    border: "0.5px solid var(--border)",
-                    borderRadius: "var(--r)",
-                    padding: "16px 18px",
+                    background: "transparent",
+                    borderTop: "0.5px solid var(--border-printed)",
+                    borderBottom: "0.5px solid var(--border-printed)",
+                    padding: "18px 4px",
                     marginBottom: 20
                   }}>
                     <div className="t-mono-xs" style={{ marginBottom: 8 }}>One more</div>
