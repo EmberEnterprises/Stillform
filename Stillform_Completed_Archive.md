@@ -4,6 +4,68 @@ Items removed from `Stillform_Master_Todo.md` during the May 6, 2026 refactor an
 
 ---
 
+## Completed — May 14, 2026 (evening session)
+
+### Shipped this session (PRs merged into main, deploy when Arlin triggers Netlify)
+
+- **PR #82 — Home complete restructure.** Six panels removed from home rendering (each preserved with early `return null` so helpers stay available for future use as their own beats):
+  1. PRACTICE SURFACE (Patterns mono microline at top)
+  2. MIRROR STATUS STRIP ("STAGE 1 · NOTICING · FAST CONCLUSIONS" line)
+  3. REP COUNTED BANNER (inside main hero)
+  4. JOURNEY REP prompt (inside main hero — "Set your hardware state...")
+  5. ANCHOR STRIP (inside main hero — "Bio-filter clear · calibration thought-first")
+  6. MY PROGRESS stat panel — replaced with small secondary "Review your progress →" link
+  
+  What remains on home: greeting + ONE current-beat surface (morning strip OR main hero OR EOD strip per `currentBeat`) + persistent Quick Breathe pill (the explicit stabilization exception, rendered outside the home component) + secondary My Progress link + rare overlays (Stage Transition Ritual, Absence Detection, Spine Intake Modal).
+
+- **PR #83 — Granularity Gym → plain English.** Trigger button "+ Name with precision · granularity gym" → "+ Say it more precisely." Mono caption "GRANULARITY GYM" inside expanded box removed (italic instruction "The most precise word for what's here." was already self-explanatory). Internal feature name preserved in code comments + storage key (`stillform_session_precision`).
+
+- **PR #84 — Reframe Step 2 four quick fixes.**
+  1. "PROCESSING PRIMER" jargon label removed; primer line stands alone
+  2. WHAT SHIFTED toggle: heading persists when expanded (`▾ What shifted? (optional)` instead of `▾ Hide`)
+  3. Unsure chip added to entry-state pickers (Reframe Step 1 entry feel-state + morning check-in mood) — was 9 chips, now 10, parity with post-state picker
+  4. `···` overflow trigger gets visible "More" label so it reads as a menu affordance
+
+- **Bio-filter + Not quite right home cleanup (this commit, in this PR).** `BioFilterSuggestion` routing card and "Not quite right →" override hidden from main beat (one-element-per-beat). Logic + state + components preserved for future relocation inside the spine session (when AI proposes a routing, correction affordance lives there, not on home).
+
+### Doc updates this session (this PR, in addition to home cleanup)
+
+- **STILLFORM_CANON.md v1.4** — four new operating rules added to Section 10:
+  - One element per beat. Sequential transitions, not stacked panels. (Recursive: applies inside the spine session, not just home. Reframe Step 2's seven stacked surfaces collapse to five sub-beat transitions in same pattern.)
+  - Surface gets the practice action; the science name stays in code and docs.
+  - Substance before structure. Polish on a hollow flow is worse than no polish.
+  - Pointer to ENGAGEMENT_ARCHITECTURE §12 for the substance critique itself.
+
+- **STILLFORM_ENGAGEMENT_ARCHITECTURE.md** — new §12 added: "Substance critique — the AI's job is differentiation, not empathy." Captures the May 14 evening realization that's upstream of every engagement engine. Includes Arlin's words verbatim, the gap between shipped reality and what the framing law requires, the Lyme rage example as concrete illustration, why the current Granularity Gym is not enough, the direction of the change (differentiation not empathy + per-session NAMED THING artifact + sub-beats compose around precision production), and the seven items that need to happen before the substance work ships (read current `reframe.js`, rewrite system prompts, add structured AI output, storage schema for named-thing-library, sub-beat restructure, My Progress library surface, AI regression test refresh).
+
+### Pending — needs Arlin's go before build (in priority order)
+
+- **[BLOCKER for everything else] Substance work — `reframe.js` prompt rewrite for differentiation, not empathy.** First build: read current `netlify/functions/reframe.js` end-to-end (CALM + CLARITY + HYPE + QUALITY_RETRY system prompts) and map exactly where validation lives, where empathy phrases are anchored, where the AI's role is set. Then propose the rewrite. Arlin needs to say go. See ENGAGEMENT_ARCHITECTURE §12.7 for the full seven-step plan and §12.8 for the standing question.
+
+- **Settings → My Progress relocation (Trigger Profile + Habit anchors + Capacity baseline).** Locked May 14, 2026 evening (CANON Operating Rule: "Settings is for preferences. Practice content lives in My Progress / library surfaces.") Currently all three render as Settings collapsibles; should render inside My Progress alongside the existing STATES NAMED / TRIGGERS IDENTIFIED / MOVES NAMED library section. **Why not shipped May 14 evening:** ~300 lines of JSX with state-ref dependencies into the Settings parent component; rushing the relocation at 11pm risks breaking access to data the user has invested in. Clean execution wants daylight focus. **Spec for execution:**
+  1. **Trigger Profile** — the easiest. `TriggerProfileSection` is already a reusable component (`src/App.jsx:17051+`). Render it inside My Progress (`MyProgress` function at `src/App.jsx:17453`) immediately AFTER the "YOUR LIBRARY" section (relative line 726, absolute ~18179) as its own collapsible section titled "Triggers you've named." Pass the same state references the current Settings invocation passes. Then hide the Settings Personalization → Trigger Profile invocation with `{false && ...}` preserving code.
+  2. **Habit anchors** — inline JSX in Settings (line ~30430-30615, ~185 lines). Two clean paths: (a) extract into a new `HabitAnchorsSection` component and render in My Progress, OR (b) move the JSX wholesale into My Progress. Path (a) is correct architecturally; path (b) is faster. Either way, the `anchors` state and `setAnchors` setter need to be visible to My Progress — they're already top-level so should be accessible.
+  3. **Capacity baseline** — line ~30615-30735, ~120 lines. Same pattern as Habit anchors. The baseline reset confirm flow uses `window.confirm` so no extra modal infrastructure needed. Render in My Progress just before the Roadmap section (it's a growth-tracking anchor; natural placement alongside Roadmap).
+  4. **Settings cleanup** — hide the three sections with `{false && ...}` wrappers (don't delete the code; preserve for emergency rollback). Update `settingsSectionOpen` state to remove `anchors`, `baseline`, and Trigger Profile keys after relocation verified working.
+  5. **Verification gates:** Layer 5 phone test — open My Progress, see all three sections rendered correctly; edit a trigger, anchor, baseline; confirm data persists; open Settings, verify those three sections are no longer visible; verify no other Settings sections broke.
+  6. **One PR, four commits** (one per section + cleanup commit). Doc updates: CANON Section 11 (CURRENT STATE) updates with relocation note; INTEGRATIONS_AND_CONCIERGE doc gets a note in §3 if relevant. Estimated scope: 1 focused session, ~400 lines net change.
+
+- **Step 2 sub-beat restructure.** Architecture call locked May 14 evening: (1) Read AI reflection, (2) Pick where you are now, (3) Name what shifted, (4) Pick a next move, (5) Lock in. One element per sub-beat, tap to advance. **Holds until substance work lands** — substance before structure (CANON Operating Rule). Without the substance fix, sub-beats just put generic content in a prettier flow.
+
+- **Spine intake modal correction pathway relocation.** The "Not quite right →" override was hidden from home; the modal is now unreachable. State + component preserved. Pathway needs to relocate INSIDE the spine session — when the AI proposes a routing, the correction affordance lives within that session flow.
+
+- **Science card replacement.** Currently a static textbook paragraph ("You practiced cognitive reappraisal — the shift from reactive interpretation to deliberate framing. It's a measurable skill that strengthens prefrontal-amygdala regulation") rendered identically every session regardless of what the user did. Arlin called it "super weak." Three options laid out May 14 evening: (a) kill it, (b) AI-generated session-specific one-liner, (c) named-move card — "Move named: [the precise thing the user produced]." Claude leans (c) — operator-tier, names what the user actually did, falls out naturally from the substance work above.
+
+- **Next Move chips ingenuity.** Currently hardcoded 4 generic options (Send a message / Hold a boundary / Delay your response / Let it go) regardless of situation — fails the Lyme rage example where none of those four are the right move. Three options: (a) AI-proposed moves specific to the user's input, (b) open textarea, kill the chips, (c) wider hardcoded chip taxonomy. Claude leans (a). Falls out from the substance work above (the AI already has the user's precise named thing — propose moves from there).
+
+### Operating rules reinforced this session
+
+- **Make architectural calls; don't defer to Arlin on every detail.** "I don't understand why it's so difficult for you to decide" — when a principle exists (one-element-per-beat), apply it consistently across surfaces. Stop asking which panels are essential when the principle answers that.
+- **Apply principles recursively.** Same one-element-per-beat that drives the home journey applies inside the spine session sub-beats. Same surface/science separation that drove the Granularity Gym fix drove the Processing Primer fix.
+- **Docs are the durable record.** "I am concerned all the ideas I generated and brought back to the front might disappear like they have in the past" — compaction summaries are stale by design. Repo docs survive. Update CANON + ENGAGEMENT_ARCHITECTURE + Master Todo before context burns away.
+
+---
+
 ## Completed — May 6, 2026
 
 ### ✅ Low-demand mode — ALL PHASES SHIPPED + trigger broadened May 6, 2026
