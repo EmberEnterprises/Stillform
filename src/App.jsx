@@ -5,6 +5,7 @@ import { DisruptorTool } from "./disruptor/DisruptorTool";
 import { MoveCardTool } from "./move-card/MoveCardTool.jsx";
 import { MoveCardPill } from "./move-card/MoveCardPill.jsx";
 import { PracticeSurface } from "./practice-surface/PracticeSurface.jsx";
+import { PracticeEvidenceRatification } from "./practice-evidence/PracticeEvidenceRatification.jsx";
 
 class ErrorBoundary extends Component {
   constructor(props) { super(props); this.state = { error: null }; }
@@ -31796,6 +31797,20 @@ const isSignalProfileConfigured = () => {
                   <span style={{ fontSize: 13, color: "var(--text)" }}>Replay tutorial</span>
                   <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
                 </button>
+                {/* Practice Evidence Stimulus Library Review (May 14 2026) — internal Arlin tool.
+                    Sprint 1 deliverable for the moonshot. 60 affect-labeling scenarios + 30
+                    cognitive-defusion thoughts, phone-friendly ratification flow. */}
+                <button onClick={() => setScreen("practice-evidence-ratification")} style={{
+                  background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--r-lg)",
+                  padding: "12px 16px", cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                  display: "flex", justifyContent: "space-between", alignItems: "center"
+                }}>
+                  <span>
+                    <span style={{ fontSize: 13, color: "var(--text)" }}>Stimulus Library Review</span>
+                    <span style={{ fontSize: 10, color: "var(--text-muted)", marginLeft: 8, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.1em", textTransform: "uppercase" }}>· internal</span>
+                  </span>
+                  <span style={{ color: "var(--amber)", fontSize: 12 }}>→</span>
+                </button>
                 {/* Focus Check (May 12, 2026): renamed to "Composure Check" so
                     the Settings label matches the home surface name. Color
                     explicitly set on the inner divs — previous version had no
@@ -31842,6 +31857,11 @@ const isSignalProfileConfigured = () => {
               Build {APP_PACKAGE_VERSION} · {new Date(APP_BUILD_TIME).toISOString().slice(0, 16).replace("T", " ")} UTC
             </div>
           </section>
+        )}
+
+        {/* PRACTICE EVIDENCE RATIFICATION — internal stimulus library review (Sprint 1 deliverable, May 14 2026) */}
+        {screen === "practice-evidence-ratification" && (
+          <PracticeEvidenceRatification onClose={() => setScreen("settings")} />
         )}
 
         {/* PULL-TO-REFRESH INDICATOR — only visible when pulling or refreshing on home */}
