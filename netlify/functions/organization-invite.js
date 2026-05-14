@@ -2,8 +2,10 @@ import {
   requireOrgAdmin,
   createInvite,
   revokeInvite,
-  extractRequestMeta
+  extractRequestMeta,
+  getOrgById
 } from "./_organizationState.js";
+import { sendEmail, buildOrgInviteEmail } from "./_emailDelivery.js";
 import {
   jsonResponse,
   parseBearer,
@@ -62,7 +64,43 @@ export async function handler(event) {
         ipAddress,
         userAgent
       });
-      return jsonResponse(event, 200, { ok: true, invite }, CORS_OPTIONS);
+
+      // Fire-and-forget email delivery. If RESEND_API_KEY is not set, this
+      // returns { sent: false, skipped: "not_configured" } silently — the
+      // admin still has the copyable link in the UI as a backup path, and
+      // the response below carries the invite_token so the link works.
+      let emailResult = { sent: false, skipped: "not_attempted" };
+      try {
+        const org = await getOrgById(org_id);
+        const inviteOrigin =
+          body.invite_origin ||
+          event.headers?.origin ||
+          event.headers?.Origin ||
+          "https://stillformapp.com";
+        const inviteUrl = `${inviteOrigin.replace(/\/$/, "")}/?invite=${encodeURIComponent(invite.invite_token)}`;
+        const tpl = buildOrgInviteEmail({
+          orgName: org?.name || "Your organization",
+          inviterEmail: user.email || null,
+          role: invite.role,
+          inviteUrl,
+          expiresAt: invite.expires_at
+        });
+        emailResult = await sendEmail({
+          to: invite.email,
+          subject: tpl.subject,
+          html: tpl.html,
+          text: tpl.text
+        });
+      } catch (err) {
+        emailResult = { sent: false, error: err?.message || "email_threw" };
+        console.error("organization-invite-email-failed", { message: emailResult.error });
+      }
+
+      return jsonResponse(event, 200, {
+        ok: true,
+        invite,
+        email_delivery: emailResult
+      }, CORS_OPTIONS);
     }
 
     // action === "revoke"

@@ -128,7 +128,8 @@ const checks = [
     "netlify/functions/organization-billing-portal.js",
     "netlify/functions/_organizationState.js",
     "netlify/functions/_organizationSetup.sql",
-    "netlify/functions/_organizationBillingMigration.sql"
+    "netlify/functions/_organizationBillingMigration.sql",
+    "netlify/functions/_emailDelivery.js"
   ], type: "must-not-match" }
 ];
 

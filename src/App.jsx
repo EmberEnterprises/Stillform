@@ -28731,7 +28731,13 @@ const isSignalProfileConfigured = () => {
                     borderRadius: "var(--r-md)", marginBottom: 10
                   }}>
                     <div style={{ fontSize: 12, color: "var(--text)", marginBottom: 6 }}>
-                      Invite created for <strong>{orgInviteResult.email}</strong>. Share this link with them:
+                      {(() => {
+                        const d = orgInviteResult.email_delivery;
+                        if (d?.sent) return <>Invite emailed to <strong>{orgInviteResult.email}</strong>.</>;
+                        if (d?.skipped === "not_configured") return <>Invite created for <strong>{orgInviteResult.email}</strong>. Email delivery is not yet configured — share this link with them directly:</>;
+                        if (d && !d.sent) return <>Invite created for <strong>{orgInviteResult.email}</strong>. Email delivery failed — share this link manually:</>;
+                        return <>Invite created for <strong>{orgInviteResult.email}</strong>. Share this link with them:</>;
+                      })()}
                     </div>
                     <div style={{
                       fontSize: 10, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace",
@@ -28760,7 +28766,8 @@ const isSignalProfileConfigured = () => {
                     if (result?.ok) {
                       setOrgInviteResult({
                         email: result.invite.email,
-                        invite_token: result.invite.invite_token
+                        invite_token: result.invite.invite_token,
+                        email_delivery: result.email_delivery || null
                       });
                       setOrgInviteEmail("");
                       const refreshed = await sbListOrgMembers(orgId);
@@ -28771,7 +28778,14 @@ const isSignalProfileConfigured = () => {
                           loaded: true
                         });
                       }
-                      try { window.plausible?.("Org Invite Sent", { props: { role: orgInviteRole } }); } catch {}
+                      try {
+                        window.plausible?.("Org Invite Sent", {
+                          props: {
+                            role: orgInviteRole,
+                            email_delivered: result.email_delivery?.sent ? "yes" : "no"
+                          }
+                        });
+                      } catch {}
                     } else {
                       setOrgInviteError(result?.error || "Could not create invite");
                     }
