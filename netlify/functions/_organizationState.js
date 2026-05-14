@@ -257,6 +257,7 @@ export const buildOrgStatusForUser = async (userId) => {
     memberships: memberships.map(({ org, membership }) => ({
       org_id: org.id,
       org_name: org.name,
+      org_status: org.status,
       plan_tier: org.plan_tier,
       role: membership.role,
       status: membership.status,
