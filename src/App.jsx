@@ -26627,17 +26627,15 @@ const isSignalProfileConfigured = () => {
               {/* ── 2. MAIN HERO — Journey card per Arlin direction May 15, 2026.
                    The Journey is ONE continuous transitional surface; morning,
                    EOD, and wind-down beats are WITHIN the main card, not
-                   adjacent. Phase 1 (this commit): morning check-in teaser
-                   embedded inside this card at the top — when present, it
-                   transitions visibly into the Begin session CTA below. The
-                   prior "swap card based on ciOpen state" gating (PR #93) is
-                   retired. EOD + wind-down beat integration follow in Phase
-                   2 + 3.
-
-                   Gate widened from (main || morning && !ciOpen) to
-                   (main || morning) — the card is always present during
-                   active hours; internal content adapts to current beat. */}
-              {(currentBeat === "main" || currentBeat === "morning") && (
+                   adjacent. Phase 1 (commit 0f511d9): morning check-in teaser
+                   embedded. Phase 2 (this commit): EOD teaser embedded; hero
+                   gate extended to include "eod" beat. EOD full form + saved-
+                   state continue to render in the standalone strip below
+                   (mirrors morning's Full Flow pattern where the expansion
+                   stays outside the hero card). Phase 3 will integrate
+                   wind-down with the CANON §10 "no review content within
+                   2h of sleep" constraint respected. */}
+              {(currentBeat === "main" || currentBeat === "morning" || currentBeat === "eod") && (
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
                 {/* ── MORNING CHECK-IN TEASER — embedded at the top of the Journey
@@ -26674,6 +26672,49 @@ const isSignalProfileConfigured = () => {
                       </div>
                       <span style={{ color: "var(--text-muted)", fontSize: 14 }}>↓</span>
                     </div>
+                  );
+                })()}
+
+                {/* ── EOD TEASER — embedded at the top of the Journey card during
+                     EOD beat (Phase 2, May 15, 2026). Tappable to open the full
+                     EOD form (which renders in the standalone strip below via
+                     its own eodOpen-gated IIFE). Hidden when eodOpen=true (form
+                     is expanded) and when EOD already saved today (the strip's
+                     saved-state branches handle the "✓ Closed / Tap to update"
+                     lines). Mirrors the morning teaser pattern from Phase 1.
+                     CANON §10: this is the mentally-active review window;
+                     wind-down content (no review) stays separate per Phase 3. */}
+                {currentBeat === "eod" && (() => {
+                  const _et_now = new Date();
+                  const _et_mins = _et_now.getHours() * 60 + _et_now.getMinutes();
+                  const _et_eveningStart = (() => { try { const v = localStorage.getItem("stillform_evening_start"); return v ? parseInt(v) : 1080; } catch { return 1080; } })();
+                  const _et_morningCap = 240;
+                  const _et_inWindow = _et_mins >= _et_eveningStart || _et_mins < _et_morningCap;
+                  if (!_et_inWindow) return null;
+                  const _et_today = TimeKeeper.stillformDayOf(_et_now);
+                  const _et_done = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === _et_today; } catch { return false; } })();
+                  if (eodOpen || _et_done) return null;
+                  return (
+                    <button onClick={() => {
+                      try {
+                        trackEodStart({
+                          date: _et_today,
+                          timestamp: new Date().toISOString(),
+                          source: "open"
+                        });
+                      } catch {}
+                      setEodOpen(true);
+                    }} style={{
+                      width: "100%", background: "transparent",
+                      borderTop: "0.5px solid var(--border-printed)",
+                      borderBottom: "0.5px solid var(--border-printed)",
+                      borderLeft: "none", borderRight: "none",
+                      padding: "12px 4px", marginBottom: 20, cursor: "pointer",
+                      textAlign: "left", WebkitTapHighlightColor: "transparent"
+                    }}>
+                      <div className="t-mono-xs" style={{ color: "var(--amber)" }}>Before you close out</div>
+                      <div className="t-body-sm quiet" style={{ marginTop: 4 }}>What did you catch today? What got past you?</div>
+                    </button>
                   );
                 })()}
 
@@ -27650,7 +27691,13 @@ const isSignalProfileConfigured = () => {
                   try { window.plausible("Trigger Prompt Shown", { props: { surface: "eod" } }); } catch {}
                 };
 
-                if (!eodOpen && !eodDone) return (
+                // Phase 2 (May 15, 2026) — EOD teaser relocated INSIDE main hero
+                // card per Arlin direction (morning/EOD/wind-down beats are WITHIN
+                // the main beat). Condition forced false so this branch no longer
+                // renders here; teaser content moved verbatim into the hero card.
+                // Saved-state, eodSaved, trigger-prompt, and form branches
+                // remain active and gate as before.
+                if (false && !eodOpen && !eodDone) return (
                   <button onClick={() => {
                     try {
                       trackEodStart({
