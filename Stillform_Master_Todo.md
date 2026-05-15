@@ -13,7 +13,26 @@ Real conversion-killer. Note for now, not focus — Arlin flagged this is a note
 
 ---
 
-## 🛠️ NEEDS REVISIT — Home architecture (May 14, 2026 late evening, Arlin direction)
+## ✅ ADDRESSED — Home architecture Journey enrichment (May 15, 2026)
+
+PR #93 had shipped a Skip ↑ pattern that inverted the architecture (morning check-in as a parallel surface to a separate "real" hero card). The May 15 Journey enrichment sequence rebuilt this as ONE continuous transitional surface:
+
+- **Phase 1 (PR #102)** — Morning check-in teaser embedded INSIDE the main hero card; gate extended to include "morning" beat.
+- **Phase 2 (PR #103)** — EOD teaser embedded INSIDE the main hero card; gate extended to include "eod" beat.
+- **Phase 3 (PR #105 + #108 hotfix)** — Wind-down beat moved INSIDE the main hero card (was previously a separate standalone Bedtime IIFE below). Wind-down threshold shifted from 22:00 to 21:00 to align with bedtime window. Hotfix #108 gated Begin session ternary so it doesn't render alongside bedtime content. CANON §10 (no review content within ~2h sleep) honored. Original standalone Bedtime IIFE wrapped `{false &&}` for rollback.
+- **Phase 4 (PR #106)** — Current-state artifacts (anchors / triggers watched / capacity baseline) surfaced as quiet rows on the hero card during morning/main/EOD beats. Read-only display; user can have multiple anchors/triggers but the journey surfaces a compact summary. Empty state = block doesn't render. NOTE: PR #100 placed Trigger Profile + Habit Anchors + Capacity Baseline EDITORS in My Progress. Those edit surfaces stay temporarily as edit access until Phase 6 supersedes them with AI-mediated proposals.
+- **Phase 5 (PR #107)** — Since-baseline cumulative-sessions sparkline added inside the Phase 4 block, under the "Stage N · grown M" row. Inline SVG, 200x40. Gated on baseline existence + ≥3 days elapsed + non-zero growth. Custom date scoping + 30-day attribution overlay deferred to future iterations.
+
+**The journey is now ONE continuous surface that transitions between beats.** Morning, EOD, wind-down all render WITHIN the main hero card. Surfaces no longer compete on home.
+
+What's still pending in this architecture arc:
+- **Phase 6 — AI mediation system** (deferred pending scope decision May 15 — see flag in chat). Backend AI proposal generation + frontend approval queue + storage schema for update history + transparency reasoning + guardrails for unnamed-trigger surfacing + graduation-from-baseline proposals. Realistically 3 PRs done well. Decision needed: ship minimal foundation (schema + empty UI shell) before testing vs defer entirely until after testing.
+- **Methods + side panel** — user-AI co-authored protocols for classes of situation (project, relationship, etc.); plus side panel for granular named-things list + Methods entry. Location TBD.
+- **Library** (external curated knowledge — human behavior, neuroscience, ethics, etc.) — content sourcing is substantial separate workstream.
+
+---
+
+## 🛠️ ARCHIVED — Original NEEDS REVISIT note (May 14, 2026 late evening, superseded May 15)
 
 PR #93 shipped a `Skip ↑` button on the morning check-in that collapses it back to the strip teaser, AND made the main hero card render alongside the collapsed check-in. **This inverts the actual architecture.** The morning check-in is *part of* the main card / journey arc — it's the morning beat of the spine, not a parallel surface the user dismisses to reveal a separate "real" hero.
 
