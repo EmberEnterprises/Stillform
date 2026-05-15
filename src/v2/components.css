@@ -194,6 +194,53 @@
 }
 
 /* ---------------------------------------------------------------------
+ * THREAD — the day's accumulating named vocabulary on the Today card.
+ *
+ * Two-column journal log layout: monospace time on the left (44px fixed),
+ * serif named precision on the right. Faint cream — accumulated content,
+ * not focal action.
+ *
+ * Reads like a notebook entry: "7:34   tired but settled" — time gives
+ * structure, named thing carries the substance. The day's stitches.
+ *
+ * Long named precisions wrap; the time stays aligned with the first line
+ * and wrapped text indents to the text column (flex alignment + baseline).
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-thread-line {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: var(--sf-space-8) 0;
+}
+
+.sf-v2 .sf-thread-time {
+  flex-shrink: 0;
+  width: 44px;
+  font-family: var(--sf-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--sf-text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.sf-v2 .sf-thread-text {
+  font-family: var(--sf-font-serif);
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--sf-text-quiet);
+  font-weight: 400;
+  font-style: italic;
+}
+
+.sf-v2 .sf-thread-divider {
+  width: 32px;
+  height: 0.5px;
+  background: var(--sf-border-hairline);
+  margin: var(--sf-space-32) 0 var(--sf-space-24);
+}
+
+/* ---------------------------------------------------------------------
  * AI THINKING — restrained pulse rather than spinner. Three small dots.
  * Per design system: "minimal — a single small mono label with a single
  * dot animation, not a spinner."
