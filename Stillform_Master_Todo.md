@@ -1,5 +1,25 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 14, 2026 late evening (transfer prompt written; long-session Claude called done)**
+**ARA Embers LLC · last updated May 15, 2026 late afternoon (Phase 6 mediation pipeline shipped end-to-end)**
+
+---
+
+## 📍 CURRENT STATE — May 15, 2026
+
+**Where the build is right now.** Read this section first before assuming anything from compaction summaries or memory — those go stale.
+
+**Shipped in last 24 hours (PRs #102–117, May 14–15):**
+- Journey enrichment Phases 1–5 — morning, EOD, and wind-down beats embedded INSIDE the main hero card; current-state artifacts surfaced; since-baseline sparkline.
+- Journey Phase 6 (a–f) — full AI-mediated artifact lifecycle: storage foundation → backend `propose_update` mode + client transport + post-EOD trigger + approval UI → hero card discovery notification → audit history viewer → manual edit audit hooks across all three artifacts (trigger profile / anchors / growth baseline).
+
+**End state of the artifact lifecycle:** every mutation across the app — manual edit, calibration seed, retroactive seed, AI-mediated proposal approval — records an audit entry. AI proposals carry reasoning verbatim + evidence references. Approval queue lives in My Progress; change history viewer below it. Discovery notification surfaces pending proposals on the journey hero card.
+
+**Testing readiness (next-week target):** Phases 1–6 are testing-ready. To see proposal generation, a tester must complete ≥3 reframes and ≥2 EODs (insufficient-signal guardrail). Proposals fire fire-and-forget after EOD save. No manual on-demand refresh (deliberately — keeps the rhythm aligned with the natural review moment).
+
+**Known limitations carrying into testing (not blocking):**
+- Subscription page lacks framing — UAT feedback from Arlin's father-in-law (see section below). Note for later, not focus.
+- Methods + side panel + Library content — these are entire workstreams not yet started. Architecture conversation captured them; build pending.
+
+**Operating rule:** Netlify deploys are MANUAL. Arlin triggers from the Netlify UI; Claude does not push to deploy. Phone-gate after deploy.
 
 ---
 
@@ -22,22 +42,23 @@ PR #93 had shipped a Skip ↑ pattern that inverted the architecture (morning ch
 - **Phase 1 (PR #102)** — Morning check-in teaser embedded INSIDE the main hero card; gate extended to include "morning" beat.
 - **Phase 2 (PR #103)** — EOD teaser embedded INSIDE the main hero card; gate extended to include "eod" beat.
 - **Phase 3 (PR #105 + #108 hotfix)** — Wind-down beat moved INSIDE the main hero card (was previously a separate standalone Bedtime IIFE below). Wind-down threshold shifted from 22:00 to 21:00 to align with bedtime window. Hotfix #108 gated Begin session ternary so it doesn't render alongside bedtime content. CANON §10 (no review content within ~2h sleep) honored. Original standalone Bedtime IIFE wrapped `{false &&}` for rollback.
-- **Phase 4 (PR #106)** — Current-state artifacts (anchors / triggers watched / capacity baseline) surfaced as quiet rows on the hero card during morning/main/EOD beats. Read-only display; user can have multiple anchors/triggers but the journey surfaces a compact summary. Empty state = block doesn't render. NOTE: PR #100 placed Trigger Profile + Habit Anchors + Capacity Baseline EDITORS in My Progress. Those edit surfaces stay temporarily as edit access until Phase 6 supersedes them with AI-mediated proposals.
+- **Phase 4 (PR #106)** — Current-state artifacts (anchors / triggers watched / capacity baseline) surfaced as quiet rows on the hero card during morning/main/EOD beats. Read-only display; user can have multiple anchors/triggers but the journey surfaces a compact summary. Empty state = block doesn't render. NOTE: PR #100 placed Trigger Profile + Habit Anchors + Capacity Baseline EDITORS in My Progress; those edit surfaces now coexist with the AI-mediation flow (Phase 6) as dual-access during testing. Decision on whether to remove the editor surfaces deferred until tester signal arrives.
 - **Phase 5 (PR #107)** — Since-baseline cumulative-sessions sparkline added inside the Phase 4 block, under the "Stage N · grown M" row. Inline SVG, 200x40. Gated on baseline existence + ≥3 days elapsed + non-zero growth. Custom date scoping + 30-day attribution overlay deferred to future iterations.
 - **Phase 6a (PR #111)** — AI mediation **storage foundation**. New helpers (`getProposals`, `addProposal`, `approveProposal`, `rejectProposal`, `getArtifactHistory`, `appendArtifactHistoryEntry`). 4 new keys registered (SYNC + SECURE + keysToRemove): `stillform_ai_proposals`, `stillform_trigger_profile_history`, `stillform_anchors_history`, `stillform_growth_baseline_history`. Caps: decided proposals bounded to 50, per-artifact history bounded to 100.
 - **Phase 6b (PR #112)** — AI mediation **pipeline end-to-end**. Backend `propose_update` mode in `reframe.js` (gpt-4o, 0-3 proposals per call, reasoning + evidence verbatim). Hard guardrails: `queue_full` (5+ pending) and `insufficient_signal` (<3 reframes + 2 EODs) both return empty arrays. Client `requestAIProposals()` helper gathers context + posts + calls `addProposal` for each. Wired to fire fire-and-forget post-EOD in saveEod. Approval UI section at top of My Progress: per-pending card with operation/target/preview/reasoning/evidence/approve+reject, optional rejection-reason input, recent decisions collapsible below. Approval routes to artifact helpers + records audit history with proposal lineage.
 - **Phase 6c (PR #113)** — AI proposals **discovery notification** on the Journey hero card. Standalone tappable row above the Phase 4 artifact block. Renders only when pending proposals exist; tap navigates to My Progress. Standalone because proposals can predate confirmed artifacts. Skipped during wind-down beat per CANON §10. Closes the discovery gap — without this row, the pipeline would be functionally invisible (proposals would generate post-EOD with no surfacing on home).
+- **Phase 6d (PR #115)** — **Artifact change history viewer** in My Progress. Reads `getArtifactHistory` across all three targets, merges chronologically newest-first, surfaces AI reasoning verbatim per change. Collapsible; renders only when ≥1 entry exists; shows 30 most recent. Closes the "why does my profile say this?" gap.
+- **Phase 6e (PR #116)** — **Trigger profile manual edits now record audit.** Extended `addTrigger` / `updateTrigger` / `deleteTrigger` with optional `historyMeta` parameter — helpers now ALWAYS record audit (manual default; AI-proposal lineage when meta passed). Added no-op guard on update.
+- **Phase 6f (PR #117)** — **Anchors + baseline manual audit gap closed.** New `saveGrowthBaseline` module helper records audit on every write; 5 baseline call sites refactored. Extended `persistAnchors` with diff-based audit recording (compares prev/next arrays by id). Fixed latent bug: AI-mediated anchor changes previously left React state stale (localStorage updated but `anchors` array in `habitAnchorsState` wasn't refreshed until next mount). All three target helpers now self-record audit; explicit `appendArtifactHistoryEntry` calls in `applyApprovedProposal` removed (would double-record).
 
-**The journey is now ONE continuous surface that transitions between beats.** Morning, EOD, wind-down all render WITHIN the main hero card. Surfaces no longer compete on home. Phase 6 closes the artifact-lifecycle loop: AI proposes based on real evidence, user approves with full reasoning shown, change applies via existing artifact helpers, audit trail records the lineage.
+**The journey is now ONE continuous surface that transitions between beats.** Morning, EOD, wind-down all render WITHIN the main hero card. Surfaces no longer compete on home. Phase 6 closes the artifact-lifecycle loop end-to-end: AI proposes based on real evidence → user approves with full reasoning shown → change applies via existing artifact helpers → audit trail records the lineage. Every artifact mutation across the app — manual or AI-mediated — appears in the change history viewer.
 
 What's still pending in this architecture arc:
-- **AI mediation polish (deferred — not testing-blocking).** Honest flags from Phase 6 build:
+- **AI mediation polish (deferred — not testing-blocking).** Honest flags carrying into testing:
   - Proposal trigger fires only after EOD save. Testers who don't complete EODs won't see any proposals. Test plan should ensure 2+ EODs.
-  - Insufficient-signal guardrail requires 3+ reframes AND 2+ EODs before any proposal generates. New testers won't see proposals until day 2-3 of real use.
-  - No manual "refresh AI insights" trigger — testers can't generate proposals on demand. May or may not matter for the testing round.
-  - Audit history entries are stored but no UI surfaces them yet. Users can see proposals approved but not "why my Trigger Profile says what it says." Polish item; not testing-blocking.
-- **PR #100 editor surfaces in My Progress.** Trigger Profile + Habit Anchors + Capacity Baseline edit UIs were placed in My Progress per the now-superseded architecture. They remain as manual edit access while the AI-mediation flow proves itself in testing. Decision on whether to remove them or keep dual-edit access can wait for tester signal.
-- **Methods + side panel** — user-AI co-authored protocols for classes of situation (project, relationship, etc.); plus side panel for granular named-things list + Methods entry. Location TBD.
+  - Insufficient-signal guardrail requires 3+ reframes AND 2+ EODs before any proposal generates. New testers won't see proposals until day 2–3 of real use.
+  - No manual "refresh AI insights" trigger — testers can't generate proposals on demand. Deliberate: the post-EOD trigger keeps rhythm aligned with the natural review moment.
+- **Methods + side panel** — user-AI co-authored protocols for classes of situation (project, relationship, etc.); plus side panel for granular named-things list + Methods entry. Location TBD. Substantial separate workstream.
 - **Library** (external curated knowledge — human behavior, neuroscience, ethics, etc.) — content sourcing is substantial separate workstream.
 
 ---
