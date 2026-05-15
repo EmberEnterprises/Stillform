@@ -25707,17 +25707,15 @@ const isSignalProfileConfigured = () => {
                 );
               })()}
 
-              {/* ── 1. MORNING STRIP ─── beat-gated for continuous journey
-                   (May 14, 2026 evening, per Arlin direction). Only renders
-                   during morning beat (before noon, check-in not done). At
-                   noon, the journey transitions out of morning beat and the
-                   teaser disappears from home — afternoon screen no longer
-                   shows a competing "Morning Check-In" panel. FULL FLOW
-                   below has its own ciOpen/isCheckedIn gating and is NOT
-                   beat-wrapped: saved-state confirmation + Today's Brief
-                   continue rendering during main beat after check-in is
-                   saved. */}
-              {currentBeat === "morning" && (() => {
+              {/* ── 1. MORNING STRIP — RELOCATED INSIDE MAIN HERO CARD (May 15, 2026)
+                   Per Arlin direction: morning/EOD/wind-down are beats WITHIN
+                   the main beat, not adjacent surfaces. The morning teaser
+                   now renders at the top of the main hero card (see below)
+                   so the Journey reads as one continuous transitional surface,
+                   not two competing panels. This block wrapped with {false}
+                   for emergency rollback only — the in-hero teaser is the
+                   shipping version. */}
+              {false && currentBeat === "morning" && (() => {
                 const _ms_now = new Date();
                 const _ms_mins = _ms_now.getHours() * 60 + _ms_now.getMinutes();
                 const _ms_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
@@ -25725,13 +25723,6 @@ const isSignalProfileConfigured = () => {
                 if (_ms_mins < _ms_start || _ms_mins >= _ms_end) return null;
                 const _ms_today = TimeKeeper.stillformDay();
                 const _ms_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _ms_today; } catch { return false; } })();
-                // May 14, 2026 — return null when checked in (defer to Full Flow IIFE
-                // saved-state branch, which renders the same "✓ Morning Check-in / Tap
-                // to update" line PLUS the Today's Brief surface below it). Without this
-                // dedupe, fixing the Full Flow reachability bug would result in two
-                // saved-state lines stacked. Same dissolved styling lives in both
-                // surfaces (PR #59 / #60); Full Flow's is the one that ships now that
-                // it's reachable.
                 if (ciOpen || _ms_done) return null;
                 return (
                   <div onClick={() => setCiOpen(true)} style={{
@@ -26633,20 +26624,58 @@ const isSignalProfileConfigured = () => {
 
 
 
-              {/* ── 2. MAIN HERO ─── beat-gated for continuous journey
-                   (May 14, 2026 evening, per Arlin direction). Renders during
-                   main beat (post-checkin / midday / afternoon) AND during
-                   morning beat when the user has collapsed the check-in
-                   (ciOpen=false). Hidden during EOD beat (EOD strip dominates)
-                   and during active morning check-in flow (ciOpen=true).
+              {/* ── 2. MAIN HERO — Journey card per Arlin direction May 15, 2026.
+                   The Journey is ONE continuous transitional surface; morning,
+                   EOD, and wind-down beats are WITHIN the main card, not
+                   adjacent. Phase 1 (this commit): morning check-in teaser
+                   embedded inside this card at the top — when present, it
+                   transitions visibly into the Begin session CTA below. The
+                   prior "swap card based on ciOpen state" gating (PR #93) is
+                   retired. EOD + wind-down beat integration follow in Phase
+                   2 + 3.
 
-                   May 14 late: gate widened to include morning&&!ciOpen per
-                   Arlin's direction that main hero card should be present on
-                   home, not gone. The "one element per beat" rule was too
-                   strict — when the user has skipped the morning check-in,
-                   they should see the session entry. */}
-              {(currentBeat === "main" || (currentBeat === "morning" && !ciOpen)) && (
+                   Gate widened from (main || morning && !ciOpen) to
+                   (main || morning) — the card is always present during
+                   active hours; internal content adapts to current beat. */}
+              {(currentBeat === "main" || currentBeat === "morning") && (
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
+
+                {/* ── MORNING CHECK-IN TEASER — embedded at the top of the Journey
+                     card during morning beat (May 15, 2026). Tappable to open the
+                     full check-in flow (which still renders below the card via
+                     its own ciOpen-gated IIFE). Hidden when ciOpen=true (full flow
+                     is open) and when check-in already saved today (the Full Flow
+                     saved-state branch handles the "Tap to update" line). */}
+                {currentBeat === "morning" && (() => {
+                  const _mt_now = new Date();
+                  const _mt_mins = _mt_now.getHours() * 60 + _mt_now.getMinutes();
+                  const _mt_start = (() => { try { const v = localStorage.getItem("stillform_morning_start"); return v ? parseInt(v) : 270; } catch { return 270; } })();
+                  const _mt_end = 1050;
+                  if (_mt_mins < _mt_start || _mt_mins >= _mt_end) return null;
+                  const _mt_today = TimeKeeper.stillformDay();
+                  const _mt_done = (() => { try { const ci = JSON.parse(localStorage.getItem("stillform_checkin_today") || "null"); return ci?.date === _mt_today; } catch { return false; } })();
+                  if (ciOpen || _mt_done) return null;
+                  return (
+                    <div onClick={() => setCiOpen(true)} style={{
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                      padding: "12px 4px", marginBottom: 20,
+                      background: "transparent",
+                      borderTop: "0.5px solid var(--border-printed)",
+                      borderBottom: "0.5px solid var(--border-printed)",
+                      cursor: "pointer", WebkitTapHighlightColor: "transparent"
+                    }}>
+                      <div>
+                        <div className="t-mono-xs" style={{ marginBottom: 4, color: "var(--text-muted)" }}>
+                          Morning Check-in
+                        </div>
+                        <div className="t-body-sm quiet">
+                          What might drive you today if you don't notice it early?
+                        </div>
+                      </div>
+                      <span style={{ color: "var(--text-muted)", fontSize: 14 }}>↓</span>
+                    </div>
+                  );
+                })()}
 
                 {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
                     italic line above the CTA echoing the same operating principle
