@@ -5815,6 +5815,12 @@ const saveSessionNextMove = (sessionTimestamp, nextMove) => {
     const label = String(nextMove.label || (actionId === "custom" ? customText : fallbackLabel)).trim() || fallbackLabel;
     const createdAt = String(nextMove.createdAt || new Date().toISOString());
     const dueAt = String(nextMove?.followUp?.dueAt || new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString());
+    // §12.5.3 sub-beat 4 — AI-generated moves carry their own lock-in
+    // statement (the static LOCK_IN_STATEMENTS map doesn't have a key for them).
+    // Persisted only when present so legacy entries stay shape-compatible.
+    const lockInStatement = typeof nextMove.lockInStatement === "string" && nextMove.lockInStatement.trim()
+      ? nextMove.lockInStatement.trim().slice(0, 280)
+      : null;
     return {
       ...session,
       nextMove: {
@@ -5822,6 +5828,7 @@ const saveSessionNextMove = (sessionTimestamp, nextMove) => {
         actionId,
         label,
         customText: actionId === "custom" ? customText : null,
+        ...(lockInStatement ? { lockInStatement } : {}),
         createdAt,
         followUp: {
           status: "pending",
@@ -11415,7 +11422,7 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     if (!persisted) return;
     setMessages(prev => prev.map((m, idx) =>
       idx === messageIndex
-        ? { ...m, pickedName: persisted.value, pickedFromCandidates }
+        ? { ...m, pickedName: persisted.value, pickedFromCandidates, nextMoveLoading: true }
         : m
     ));
     setCandidateCustomOpen(false);
@@ -11429,6 +11436,63 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
         }
       });
     } catch {}
+
+    // §12.5.3 sub-beat 4 — fire mode=next_move call so AI-generated options
+    // are ready by the time the user reaches the Next Move surface at close.
+    // Fire-and-forget. On failure the close screen falls back to the
+    // hardcoded NEXT_MOVE_ACTION_OPTIONS. AI options stored on the message
+    // so the close-screen render can find them via messages traversal.
+    (async () => {
+      const nmController = new AbortController();
+      const nmTimeout = setTimeout(() => nmController.abort(), 14000);
+      try {
+        const regulationType = (() => {
+          try { return localStorage.getItem("stillform_regulation_type") || null; } catch { return null; }
+        })();
+        const response = await fetch(REFRAME_API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: nmController.signal,
+          body: JSON.stringify({
+            mode: "next_move",
+            preciseName: persisted.value,
+            sourceText: msg.sourceText || "",
+            sourceMode: msg.mode || "calm",
+            sourceState: msg.sourceState || null,
+            regulationType,
+            install_id: getOrCreateInstallId(),
+            user_id: sbGetUser()?.id || null,
+          })
+        });
+        if (!response.ok) throw new Error(`status ${response.status}`);
+        const data = await response.json();
+        const opts = Array.isArray(data?.next_move_options) ? data.next_move_options : null;
+        if (opts && opts.length >= 3) {
+          setMessages(prev => prev.map((m, idx) =>
+            idx === messageIndex
+              ? { ...m, nextMoveOptions: opts, nextMoveLoading: false }
+              : m
+          ));
+          try {
+            window.plausible?.("Next Move Options Generated", {
+              props: { count: opts.length, mode: msg.mode || "calm" }
+            });
+          } catch {}
+        } else {
+          throw new Error("invalid shape");
+        }
+      } catch (err) {
+        // Silent fallback — clear loading flag so the close screen renders
+        // the hardcoded 4 instead of waiting on a never-arriving AI call.
+        setMessages(prev => prev.map((m, idx) =>
+          idx === messageIndex
+            ? { ...m, nextMoveLoading: false, nextMoveError: true }
+            : m
+        ));
+      } finally {
+        clearTimeout(nmTimeout);
+      }
+    })();
   };
 
   // May 13, 2026 Commit 2 Move 3 — Reply pill + overflow sheet.
@@ -12599,11 +12663,30 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     const hadInlineNextMove = !!postNextMoveId;
     if (postNextMoveId && saved?.timestamp) {
       try {
+        // §12.5.3 sub-beat 4 — resolve label + lockInStatement from AI options
+        // when the active id is ai-N. Otherwise fall back to hardcoded map.
+        let resolvedLabel = NEXT_MOVE_ACTION_LABELS[postNextMoveId] || postNextMoveId;
+        let lockInStatement = null;
+        if (typeof postNextMoveId === "string" && postNextMoveId.startsWith("ai-")) {
+          const aiIdx = Number(postNextMoveId.slice(3));
+          const pickedMsg = (() => {
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i]?.role === "ai" && messages[i]?.pickedName) return messages[i];
+            }
+            return null;
+          })();
+          const opt = Array.isArray(pickedMsg?.nextMoveOptions) ? pickedMsg.nextMoveOptions[aiIdx] : null;
+          if (opt && typeof opt.label === "string") {
+            resolvedLabel = opt.label;
+            lockInStatement = typeof opt.lock_in_statement === "string" ? opt.lock_in_statement : null;
+          }
+        }
         saveSessionNextMove(saved.timestamp, {
           id: `nextmove_${Date.now()}_${Math.random().toString(36).slice(2,8)}`,
           actionId: postNextMoveId,
-          label: NEXT_MOVE_ACTION_LABELS[postNextMoveId] || postNextMoveId,
+          label: resolvedLabel,
           customText: null,
+          lockInStatement,
           createdAt: new Date().toISOString(),
           followUp: { dueAt: new Date(Date.now() + NEXT_MOVE_FOLLOW_UP_DELAY_MS).toISOString() }
         });
@@ -13549,76 +13632,117 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
           </div>
         )}
 
-        {/* NEXT MOVE — 4 buttons + lock-in */}
-        <div style={{ marginBottom: 24 }}>
-          <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
-            Next Move
-            <button aria-label="Why Next Move?" onClick={() => setInfoModal({ title: "Why Next Move?", body: "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from this state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
-          </div>
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: postNextMoveId && !lockInConfirmed ? 16 : 0 }}>
-            {NEXT_MOVE_ACTION_OPTIONS.map(opt => {
-              const active = postNextMoveId === opt.id;
-              return (
-                <button aria-pressed={active} key={opt.id} onClick={() => {
-                  setPostNextMoveId(active ? null : opt.id);
-                  setShowLockIn(false);
-                  setLockInConfirmed(false);
-                  setLockInCountdown(20);
-                }} style={{
-                  background: active ? "var(--amber-glow)" : "transparent",
-                  border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
-                  borderRadius: 20, padding: "8px 16px", fontSize: 13,
-                  color: active ? "var(--amber)" : "var(--text-muted)",
-                  cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s"
-                }}>
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-          {postNextMoveId && !lockInConfirmed && (() => {
-            const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || "thought-first"; } catch { return "thought-first"; } })();
-            const statement = (LOCK_IN_STATEMENTS[postNextMoveId] || {})[regType] || (LOCK_IN_STATEMENTS[postNextMoveId] || {})["thought-first"] || "";
-            return (
-              <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
-                <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
-                  Lock in
-                  <button aria-label="Lock in" onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of practice-based learning. The 20-second pause is intentional: it prevents rushed exit from this state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
-                </div>
-                <div className="t-body-md" style={{ marginBottom: 16, fontStyle: "italic" }}>
-                  {statement}
-                </div>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
-                    {(() => {
-                      if (!showLockIn) {
-                        setTimeout(() => setShowLockIn(true), 20000);
-                        return "Take a moment with this.";
-                      }
-                      return null;
-                    })()}
-                  </div>
-                  {showLockIn && (
-                    <button onClick={() => { haptic.heavy(); setLockInConfirmed(true); }} style={{
-                      background: "var(--surface)", color: "var(--amber)",
-                      border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
-                      borderRadius: "var(--r-lg)", padding: "8px 20px", fontSize: 12,
-                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 400,
-                      transition: "border-color var(--motion-default) var(--ease-prestige)"
-                    }}>
-                      Locked in
-                    </button>
-                  )}
-                </div>
+        {/* NEXT MOVE — AI-generated chips when a precise name exists; 4 hardcoded fallbacks otherwise */}
+        {(() => {
+          // §12.5.3 sub-beat 4 — find the picked-name message and its AI options.
+          // Search from latest backward; in practice there's at most one picked
+          // message per session because ReframeTool resets per-mount.
+          const lastPickedMsg = (() => {
+            for (let i = messages.length - 1; i >= 0; i--) {
+              if (messages[i]?.role === "ai" && messages[i]?.pickedName) return messages[i];
+            }
+            return null;
+          })();
+          const aiOpts = Array.isArray(lastPickedMsg?.nextMoveOptions) && lastPickedMsg.nextMoveOptions.length >= 3
+            ? lastPickedMsg.nextMoveOptions
+            : null;
+          const aiLoading = lastPickedMsg?.nextMoveLoading === true;
+          const useAi = !!aiOpts;
+
+          // Build a unified option list with id, label, and per-option lockIn.
+          // For AI options: id = "ai-N", lockIn = opt.lock_in_statement.
+          // For hardcoded: id = opt.id, lockIn = LOCK_IN_STATEMENTS[id][regType].
+          const regType = (() => { try { return localStorage.getItem("stillform_regulation_type") || "thought-first"; } catch { return "thought-first"; } })();
+          const options = useAi
+            ? aiOpts.map((opt, idx) => ({
+                id: `ai-${idx}`,
+                label: opt.label,
+                lockIn: opt.lock_in_statement,
+                isAi: true,
+              }))
+            : NEXT_MOVE_ACTION_OPTIONS.map(opt => ({
+                id: opt.id,
+                label: opt.label,
+                lockIn: (LOCK_IN_STATEMENTS[opt.id] || {})[regType] || (LOCK_IN_STATEMENTS[opt.id] || {})["thought-first"] || "",
+                isAi: false,
+              }));
+
+          const activeOption = options.find(o => o.id === postNextMoveId) || null;
+
+          return (
+            <div style={{ marginBottom: 24 }}>
+              <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                Next Move{useAi ? " · for what you named" : ""}
+                <button aria-label="Why Next Move?" onClick={() => setInfoModal({ title: "Why Next Move?", body: useAi ? `These options are anchored to "${lastPickedMsg?.pickedName}" — the precise name you produced in this session. Forming a specific behavioral intention at the moment of clarity significantly increases follow-through (Gollwitzer 1999 implementation intentions).` : "Forming a specific behavioral intention at the moment of clarity significantly increases follow-through. This is not a to-do list — it is a concrete action taken from this state before the window closes." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
               </div>
-            );
-          })()}
-          {lockInConfirmed && (
-            <div style={{ marginTop: 8, fontSize: 12, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
-              ✓ Locked in
+              {aiLoading && !useAi && (
+                <div style={{ fontSize: 12, color: "var(--text-muted)", fontStyle: "italic", marginBottom: 10, fontFamily: "'DM Sans', sans-serif" }}>
+                  Tuning moves to what you named…
+                </div>
+              )}
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: postNextMoveId && !lockInConfirmed ? 16 : 0 }}>
+                {options.map(opt => {
+                  const active = postNextMoveId === opt.id;
+                  return (
+                    <button aria-pressed={active} key={opt.id} onClick={() => {
+                      setPostNextMoveId(active ? null : opt.id);
+                      setShowLockIn(false);
+                      setLockInConfirmed(false);
+                      setLockInCountdown(20);
+                    }} style={{
+                      background: active ? "var(--amber-glow)" : "transparent",
+                      border: `1px solid ${active ? "var(--amber-dim)" : "var(--border)"}`,
+                      borderRadius: 20, padding: "8px 16px", fontSize: 13,
+                      color: active ? "var(--amber)" : "var(--text-muted)",
+                      cursor: "pointer", fontFamily: "'DM Sans', sans-serif", transition: "all 0.15s",
+                      textAlign: "left"
+                    }}>
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              {postNextMoveId && !lockInConfirmed && activeOption && (
+                <div style={{ marginTop: 12, padding: "14px 16px", background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)" }}>
+                  <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 10, display: "flex", alignItems: "center", gap: 6 }}>
+                    Lock in
+                    <button aria-label="Lock in" onClick={() => setInfoModal({ title: "Lock in", body: "Naming the processing move that produced your decision consolidates the insight and makes it repeatable. Schön (1983) calls this reflection-on-action — the most durable form of practice-based learning. The 20-second pause is intentional: it prevents rushed exit from this state." })} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 13, padding: "0 4px", lineHeight: 1 }}>ⓘ</button>
+                  </div>
+                  <div className="t-body-md" style={{ marginBottom: 16, fontStyle: "italic" }}>
+                    {activeOption.lockIn}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'IBM Plex Mono', monospace" }}>
+                      {(() => {
+                        if (!showLockIn) {
+                          setTimeout(() => setShowLockIn(true), 20000);
+                          return "Take a moment with this.";
+                        }
+                        return null;
+                      })()}
+                    </div>
+                    {showLockIn && (
+                      <button onClick={() => { haptic.heavy(); setLockInConfirmed(true); }} style={{
+                        background: "var(--surface)", color: "var(--amber)",
+                        border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                        borderRadius: "var(--r-lg)", padding: "8px 20px", fontSize: 12,
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif", fontWeight: 400,
+                        transition: "border-color var(--motion-default) var(--ease-prestige)"
+                      }}>
+                        Locked in
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+              {lockInConfirmed && (
+                <div style={{ marginTop: 8, fontSize: 12, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                  ✓ Locked in
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()}
 
         {/* WHAT SHIFTED — optional, expanded by default */}
         <div style={{ marginBottom: 24 }}>
