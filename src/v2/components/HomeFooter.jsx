@@ -16,6 +16,7 @@ export default function HomeFooter({ onNavigate }) {
   const items = [
     { id: "progress", label: "Progress" },
     { id: "library", label: "Library" },
+    { id: "faq", label: "FAQ" },
     { id: "settings", label: "Settings" },
   ];
 
