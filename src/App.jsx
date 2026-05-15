@@ -25531,7 +25531,13 @@ const isSignalProfileConfigured = () => {
             const _b_eodDone = (() => { try { const e = JSON.parse(localStorage.getItem("stillform_eod_today") || "null"); return e?.date === _b_today; } catch { return false; } })();
             if (_b_hour < 12 && !_b_checkinDone) return "morning";
             if (_b_hour >= 19 && !_b_eodDone) return "eod";
-            if (_b_hour >= 22 && _b_eodDone) return "wind-down";
+            // Phase 3 (May 15, 2026) — wind-down threshold shifted from 22 to 21
+            // to align with bedtime surface window (21:00 = 9 PM start). Previously
+            // between 21:00-22:00 with EOD done, currentBeat was "main" which
+            // rendered the Begin session CTA + bedtime surface below as adjacent
+            // panels. Now wind-down beat covers the full bedtime window enabling
+            // the single-surface Journey card to transform to bedtime content.
+            if (_b_hour >= 21 && _b_eodDone) return "wind-down";
             return "main";
           })();
 
@@ -26627,16 +26633,133 @@ const isSignalProfileConfigured = () => {
               {/* ── 2. MAIN HERO — Journey card per Arlin direction May 15, 2026.
                    The Journey is ONE continuous transitional surface; morning,
                    EOD, and wind-down beats are WITHIN the main card, not
-                   adjacent. Phase 1 (commit 0f511d9): morning check-in teaser
-                   embedded. Phase 2 (this commit): EOD teaser embedded; hero
-                   gate extended to include "eod" beat. EOD full form + saved-
-                   state continue to render in the standalone strip below
-                   (mirrors morning's Full Flow pattern where the expansion
-                   stays outside the hero card). Phase 3 will integrate
-                   wind-down with the CANON §10 "no review content within
-                   2h of sleep" constraint respected. */}
-              {(currentBeat === "main" || currentBeat === "morning" || currentBeat === "eod") && (
-              <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
+                   adjacent. Phase 1 (commit 0f511d9): morning teaser embedded.
+                   Phase 2 (commit c7b6902): EOD teaser embedded. Phase 3 (this
+                   commit): wind-down content embedded; hero gate extended to
+                   include "wind-down" beat (gated by !bedtimeDismissed). Per
+                   CANON §10 "no review content within ~2h of sleep" — during
+                   wind-down, the card transforms entirely: no Begin session
+                   CTA, no morning/EOD teasers, no entrain glow animation.
+                   Just bedtime consolidation content. */}
+              {(currentBeat === "main" || currentBeat === "morning" || currentBeat === "eod" || (currentBeat === "wind-down" && !bedtimeDismissed)) && (
+              <div style={{
+                marginBottom: 32,
+                // Animation disabled during wind-down — entrain60glow is
+                // breath-sync activating, wrong for parasympathetic landing.
+                animation: currentBeat === "wind-down" ? "none" : "entrain60glow 1s ease-in-out infinite",
+                position: "relative"
+              }}>
+
+                {/* ── BEDTIME / WIND-DOWN CONTENT — Phase 3 (May 15, 2026)
+                     Embedded inside Journey card during wind-down beat. Replaces
+                     the standalone Bedtime IIFE further below (wrapped {false &&}
+                     for rollback). Same CANON v1.2 surface-to-cognitive-state
+                     matching: NO review content, NO session entry, NO activating
+                     copy. Pre-sleep cognitive consolidation (Walker, Stickgold).
+                     Quiet rhythm only. */}
+                {currentBeat === "wind-down" && (() => {
+                  return (
+                    <div>
+                      <style>{`@keyframes bedtimeFadeIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+
+                      <div style={{
+                        fontFamily: "'Cormorant Garamond', serif",
+                        fontSize: 24, fontWeight: 300,
+                        color: "var(--text-cream)",
+                        textAlign: "center",
+                        marginBottom: 6,
+                        letterSpacing: "0.01em",
+                        opacity: 0,
+                        animation: "bedtimeFadeIn 700ms ease-out forwards"
+                      }}>
+                        Almost done.
+                      </div>
+
+                      <div className="t-body-sm quiet" style={{
+                        textAlign: "center", marginBottom: 22, fontStyle: "italic",
+                        opacity: 0, animation: "bedtimeFadeIn 700ms 300ms ease-out forwards",
+                        lineHeight: 1.6
+                      }}>
+                        Carry only what serves you.
+                      </div>
+
+                      <div style={{
+                        display: "flex", flexDirection: "column", gap: 8, marginBottom: 16,
+                        opacity: 0, animation: "bedtimeFadeIn 700ms 600ms ease-out forwards"
+                      }}>
+                        <button onClick={() => {
+                          try {
+                            const breatheTool = TOOLS.find(t => t.id === "breathe");
+                            if (breatheTool) {
+                              setActiveTool({ ...breatheTool, mode: "cyclic-sighing" });
+                              setScreen("tool");
+                            }
+                            try { window.plausible("Bedtime CTA Tapped", { props: { action: "cyclic-sighing" } }); } catch {}
+                          } catch {}
+                        }} style={{
+                          width: "100%", background: "transparent",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "12px",
+                          fontSize: 13, color: "var(--text-muted)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          textAlign: "left",
+                          transition: "border-color var(--motion-default) var(--ease-prestige)"
+                        }}>
+                          Cyclic sighing · 30s →
+                        </button>
+                        <button onClick={() => {
+                          try {
+                            const scanTool = TOOLS.find(t => t.id === "scan");
+                            if (scanTool) {
+                              setActiveTool(scanTool);
+                              setScreen("tool");
+                            }
+                            try { window.plausible("Bedtime CTA Tapped", { props: { action: "body-scan" } }); } catch {}
+                          } catch {}
+                        }} style={{
+                          width: "100%", background: "transparent",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "12px",
+                          fontSize: 13, color: "var(--text-muted)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          textAlign: "left",
+                          transition: "border-color var(--motion-default) var(--ease-prestige)"
+                        }}>
+                          Body scan →
+                        </button>
+                        <button onClick={() => {
+                          try { window.plausible("Bedtime CTA Tapped", { props: { action: "phone-down-placeholder" } }); } catch {}
+                        }} style={{
+                          width: "100%", background: "transparent",
+                          border: "0.5px solid var(--border)",
+                          borderRadius: "var(--r)", padding: "12px",
+                          fontSize: 13, color: "var(--text-muted)",
+                          cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                          textAlign: "left", opacity: 0.6,
+                          transition: "border-color var(--motion-default) var(--ease-prestige)"
+                        }}>
+                          Phone down for 90 min · coming soon
+                        </button>
+                      </div>
+
+                      <button onClick={() => {
+                        setBedtimeDismissed(true);
+                        try { window.plausible("Bedtime Closed"); } catch {}
+                      }} style={{
+                        width: "100%", background: "transparent",
+                        border: "none",
+                        padding: "10px",
+                        fontSize: 13, color: "var(--amber)",
+                        cursor: "pointer", fontFamily: "'DM Sans', sans-serif",
+                        opacity: 0, animation: "bedtimeFadeIn 700ms 900ms ease-out forwards",
+                        textAlign: "center",
+                        letterSpacing: "0.04em"
+                      }}>
+                        Rest. →
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 {/* ── MORNING CHECK-IN TEASER — embedded at the top of the Journey
                      card during morning beat (May 15, 2026). Tappable to open the
@@ -28009,8 +28132,16 @@ const isSignalProfileConfigured = () => {
                   aware once those integrations ship. Renders only when in
                   window AND EOD done AND not dismissed in this session. EOD
                   undone in bedtime window means the EOD IIFE above takes
-                  priority (review content lives in mentally-active window). */}
-              {(() => {
+                  priority (review content lives in mentally-active window).
+
+                  Phase 3 (May 15, 2026): DISABLED — wrapped {false && ...} so
+                  this block never renders. The wind-down content was moved
+                  INSIDE the Journey hero card to honor "one continuous
+                  transitional surface" (morning/EOD/wind-down beats live WITHIN
+                  the main card, not adjacent). Original block kept gated for
+                  rollback; cleanup can delete later once integrated version
+                  is verified in testing. */}
+              {false && (() => {
                 if (bedtimeDismissed) return null;
                 const now = new Date();
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
