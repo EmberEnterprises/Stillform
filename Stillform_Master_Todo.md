@@ -1,5 +1,43 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 14, 2026 evening (substance critique surfaced + four PRs shipped + home cleanup + CANON v1.4 + ENGAGEMENT_ARCHITECTURE §12)**
+**ARA Embers LLC · last updated May 14, 2026 late evening (transfer prompt written; long-session Claude called done)**
+
+---
+
+## 🛠️ NEEDS REVISIT — Home architecture (May 14, 2026 late evening, Arlin direction)
+
+PR #93 shipped a `Skip ↑` button on the morning check-in that collapses it back to the strip teaser, AND made the main hero card render alongside the collapsed check-in. **This inverts the actual architecture.** The morning check-in is *part of* the main card / journey arc — it's the morning beat of the spine, not a parallel surface the user dismisses to reveal a separate "real" hero.
+
+Per Arlin's late-evening correction: the journey is *one continuous transitional surface* with beats (morning check-in → main rep → EOD wrap → wind-down). The home should render the *current beat* as the focal surface, with the check-in integrated INTO the main card, not adjacent to it.
+
+What stays from PR #93:
+- The `Skip ↑` collapse affordance itself is fine — a user with limited time can skip the morning beat. The bug is what renders next.
+- My Progress stat panel restored to home: stays. That's correct per earlier direction.
+
+What needs redoing:
+- The widened main-hero gate (`currentBeat === 'main' || (currentBeat === 'morning' && !ciOpen)`) — revert or reconceive. Skipped check-in shouldn't auto-reveal a different hero card; it should leave the morning beat's surface present (perhaps in a minimal state, or transitioning toward the main beat's content as part of the same arc).
+- The relationship between morning beat and main beat needs to be ONE arc, not two surfaces to choose between.
+
+This is the kind of integration work Arlin has been pushing for since the May 14 home conversations: surfaces don't compete on home; the journey transitions between beats. PR #93 violated that.
+
+---
+
+## 🟡 PENDING — Practice Evidence Sprint 1 follow-up
+
+PR #91 shipped the Sprint 1 deliverable for the Cognitive Function Measurement moonshot:
+- Stimulus library v2 draft (`src/practice-evidence/STIMULI_DRAFT.md`, 60 affect-labeling + 30 defusion entries with cultural inclusion + moral/ethical/cultural-difference triggers).
+- Runtime data file (`src/practice-evidence/stimuli.js`).
+- Phone-batched ratification UI accessible from Settings → More → Stimulus Library Review.
+
+**Awaits Arlin's content-review pass.** Each entry has ✅ keep / ✏️ edit / ❌ drop / ↔ change-chip affordances. Output is copyable JSON that gets pasted back to commit as the validated set.
+
+Open question flagged in the file: second-rater plan. Audit recommended Arlin + Bobby; Bobby is paper-only. Five options proposed. Arlin's call.
+
+Remaining Sprint 1 items unblocked by tonight's decisions but not yet built:
+- `PracticeEvidenceScreen` end-user shell (separate from the internal ratification UI)
+- `shouldOfferFunctionCheck()` helper (5+ sessions OR 7+ days, weekly cap)
+- Spine end-of-session offer card that surfaces the function check at the right moment
+
+Sprint 2 = the actual measurement modules (affect-labeling timed exercise, defusion frame generation + AI rubric scoring). Both wait on Sprint 1 ratification + the substance work in `ENGAGEMENT_ARCHITECTURE.md §12`.
 
 ---
 
