@@ -1,12 +1,15 @@
 import React from "react";
 
 /**
- * HomeFooter — three quiet links to the other home surfaces.
+ * HomeFooter — three quiet links to the other home surfaces, plus a
+ * sub-footer for Crisis Resources.
  *
  * Per STILLFORM_CANON.md: home stands on three surfaces — Journey (the
  * current beat, rendered above), My Progress (data + practice library),
- * and Library (external knowledge). Settings is a fourth quiet entry for
- * preferences only.
+ * and Library (external knowledge). FAQ and Settings are quiet preference
+ * entries. Crisis Resources is a safety affordance — present and accessible,
+ * but visually subordinate to the practice nav so it does not signal
+ * "this is a crisis tool" (canon framing law).
  *
  * Phase 1: text links only, no icons, no nav bar. mono-xs tracked,
  * faint by default. Tapping is a no-op for now — destination surfaces
@@ -20,6 +23,10 @@ export default function HomeFooter({ onNavigate }) {
     { id: "settings", label: "Settings" },
   ];
 
+  const handleNavigate = (id) => {
+    if (typeof onNavigate === "function") onNavigate(id);
+  };
+
   return (
     <nav
       aria-label="Stillform navigation"
@@ -27,23 +34,61 @@ export default function HomeFooter({ onNavigate }) {
         padding: "var(--sf-space-48) var(--sf-space-24) var(--sf-space-32)",
         maxWidth: "640px",
         margin: "0 auto",
-        display: "flex",
-        gap: "var(--sf-space-24)",
-        justifyContent: "center",
       }}
     >
-      {items.map((item) => (
+      <div
+        style={{
+          display: "flex",
+          gap: "var(--sf-space-24)",
+          justifyContent: "center",
+          flexWrap: "wrap",
+        }}
+      >
+        {items.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => handleNavigate(item.id)}
+            className="sf-btn-ghost"
+            style={{
+              background: "transparent",
+              border: "none",
+              padding: "var(--sf-space-8) var(--sf-space-4)",
+              cursor: "pointer",
+              color: "var(--sf-text-faint)",
+              fontFamily: "var(--sf-font-mono)",
+              fontSize: "9px",
+              letterSpacing: "0.16em",
+              textTransform: "uppercase",
+              WebkitTapHighlightColor: "transparent",
+              transition: "color var(--sf-motion-default) var(--sf-ease-prestige)",
+            }}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Sub-footer — Crisis Resources sits quietly below the practice nav.
+          Present + accessible, but visually subordinate so it doesn't signal
+          "this is a crisis tool." */}
+      <div
+        style={{
+          marginTop: "var(--sf-space-16)",
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
         <button
-          key={item.id}
           type="button"
-          onClick={() => typeof onNavigate === "function" && onNavigate(item.id)}
-          className="sf-btn-ghost sf-mono-xs"
+          onClick={() => handleNavigate("crisis-resources")}
+          className="sf-btn-ghost"
           style={{
             background: "transparent",
             border: "none",
-            padding: "var(--sf-space-8) var(--sf-space-4)",
+            padding: "var(--sf-space-4)",
             cursor: "pointer",
-            color: "var(--sf-text-faint)",
+            color: "rgba(232, 234, 240, 0.32)",
             fontFamily: "var(--sf-font-mono)",
             fontSize: "9px",
             letterSpacing: "0.16em",
@@ -52,9 +97,9 @@ export default function HomeFooter({ onNavigate }) {
             transition: "color var(--sf-motion-default) var(--sf-ease-prestige)",
           }}
         >
-          {item.label}
+          Crisis Resources
         </button>
-      ))}
+      </div>
     </nav>
   );
 }
