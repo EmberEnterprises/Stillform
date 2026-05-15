@@ -11386,6 +11386,51 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
+  // §12 candidate-name chip surface (May 15, 2026 — sub-beat 1 activation).
+  // When the AI returns candidate_names on the first input of a session, the
+  // chips render below the AI reflection. User taps a chip OR expands the
+  // "Type your own" field to type a custom precise name. On pick, the entry
+  // persists to stillform_named_moves with kind="underneath" via
+  // appendNamedMove, and the AI message gets mutated with .pickedName so the
+  // chips no longer render. Component-local state — resets between sessions
+  // naturally because each session is a fresh ReframeTool mount.
+  const [candidateCustomOpen, setCandidateCustomOpen] = useState(false);
+  const [candidateCustomText, setCandidateCustomText] = useState("");
+
+  const handlePickCandidate = (messageIndex, value, pickedFromCandidates) => {
+    const trimmed = String(value || "").trim();
+    if (!trimmed) return;
+    const msg = messages[messageIndex];
+    if (!msg || msg.role !== "ai") return;
+    const persisted = appendNamedMove({
+      value: trimmed,
+      sessionId: null, // Reframe doesn't carry a session ID at this layer
+      kind: "underneath",
+      mode: msg.mode || null,
+      sourceText: msg.sourceText || null,
+      sourceState: msg.sourceState || null,
+      sourceCandidates: msg.candidate_names || null,
+      pickedFromCandidates,
+    });
+    if (!persisted) return;
+    setMessages(prev => prev.map((m, idx) =>
+      idx === messageIndex
+        ? { ...m, pickedName: persisted.value, pickedFromCandidates }
+        : m
+    ));
+    setCandidateCustomOpen(false);
+    setCandidateCustomText("");
+    try {
+      window.plausible?.("Named Concept Saved", {
+        props: {
+          kind: "underneath",
+          picked: pickedFromCandidates ? "chip" : "typed",
+          mode: msg.mode || "calm",
+        }
+      });
+    } catch {}
+  };
+
   // May 13, 2026 Commit 2 Move 3 — Reply pill + overflow sheet.
   // replyExpanded: false = thin Reply pill at bottom; true = full input row
   // (textarea + paperclip + mic + Send). Starts true on fresh session so the
@@ -12355,7 +12400,16 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
       setMessages(prev => [...prev, {
         role: "ai",
         text: parsed.reframe,
-        distortion: parsed.distortion
+        distortion: parsed.distortion,
+        // §12 differentiation — store the candidates the AI surfaced + the
+        // source context so a chip pick can persist a richer underneath entry
+        // (see appendNamedMove with kind="underneath").
+        candidate_names: Array.isArray(parsed.candidate_names)
+          ? parsed.candidate_names.filter(c => typeof c === "string" && c.trim())
+          : null,
+        mode: effectiveMode,
+        sourceText: textToSend,
+        sourceState: feelState || null,
       }]);
       // AI succeeded — reset the failure counter and dismiss the offer card.
       // Don't clear selfModeEntryReason here: that gets cleared when the user actually
@@ -14386,6 +14440,101 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                         📎 {msg.imageCount} image{msg.imageCount > 1 ? "s" : ""} attached
                       </div>
                     )}
+                  </div>
+                )}
+                {msg.role === "ai" && isLastAi && Array.isArray(msg.candidate_names) && msg.candidate_names.length > 0 && !msg.pickedName && (
+                  <div style={{ marginTop: 16, paddingTop: 14, borderTop: "0.5px solid var(--border-printed)" }}>
+                    <div className="t-mono-xs" style={{
+                      color: "var(--text-muted)", letterSpacing: "0.14em",
+                      marginBottom: 10
+                    }}>
+                      WHICH IS IT
+                    </div>
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 10 }}>
+                      {msg.candidate_names.map((cand, ci) => (
+                        <button
+                          key={ci}
+                          onClick={() => handlePickCandidate(i, cand, true)}
+                          style={{
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: 13, lineHeight: 1.4,
+                            padding: "8px 12px",
+                            background: "var(--surface)",
+                            color: "var(--text)",
+                            border: `0.5px solid ${mc.color}`,
+                            borderRadius: 999,
+                            cursor: "pointer",
+                            textAlign: "left",
+                          }}
+                        >
+                          {cand}
+                        </button>
+                      ))}
+                    </div>
+                    {!candidateCustomOpen ? (
+                      <button
+                        onClick={() => setCandidateCustomOpen(true)}
+                        style={{
+                          background: "none", border: "none", padding: 0,
+                          color: "var(--text-muted)", fontSize: 12,
+                          fontFamily: "'DM Sans', sans-serif",
+                          cursor: "pointer", fontStyle: "italic"
+                        }}
+                      >
+                        Or type your own
+                      </button>
+                    ) : (
+                      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                        <input
+                          type="text"
+                          autoFocus
+                          value={candidateCustomText}
+                          onChange={(e) => setCandidateCustomText(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              handlePickCandidate(i, candidateCustomText, false);
+                            }
+                          }}
+                          placeholder="The precise word for it"
+                          maxLength={120}
+                          style={{
+                            flex: 1, fontSize: 13, padding: "6px 10px",
+                            background: "var(--surface)", color: "var(--text)",
+                            border: "0.5px solid var(--border)",
+                            borderRadius: 6, outline: "none",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        />
+                        <button
+                          onClick={() => handlePickCandidate(i, candidateCustomText, false)}
+                          disabled={!candidateCustomText.trim()}
+                          style={{
+                            fontSize: 12, padding: "6px 10px",
+                            background: candidateCustomText.trim() ? mc.color : "transparent",
+                            color: candidateCustomText.trim() ? "#000" : "var(--text-muted)",
+                            border: `0.5px solid ${candidateCustomText.trim() ? mc.color : "var(--border)"}`,
+                            borderRadius: 6,
+                            cursor: candidateCustomText.trim() ? "pointer" : "default",
+                            fontFamily: "'DM Sans', sans-serif"
+                          }}
+                        >
+                          Save
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {msg.role === "ai" && msg.pickedName && (
+                  <div style={{
+                    marginTop: 14, paddingTop: 12,
+                    borderTop: "0.5px solid var(--border-printed)",
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontStyle: "italic", fontSize: 14,
+                    color: "var(--text-cream)", lineHeight: 1.5,
+                    letterSpacing: "0.01em"
+                  }}>
+                    Named <em style={{ fontStyle: "italic", color: mc.color }}>{msg.pickedName}</em>. Added to your library.
                   </div>
                 )}
                 {msg.role === "ai" && (
