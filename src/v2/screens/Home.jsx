@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import AppHeader from "../components/AppHeader.jsx";
 import QuickBreathe from "../components/QuickBreathe.jsx";
 import HomeFooter from "../components/HomeFooter.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
 import Today from "./Today.jsx";
+import BreatheOverlay from "./BreatheOverlay.jsx";
 
 /**
  * Home — the page shell of the v2 home route.
@@ -18,6 +19,10 @@ import Today from "./Today.jsx";
  * Plus the crisis sub-footer (App Store / safety baseline) under the
  * nav row, visually subordinate so it doesn't signal crisis-tool framing.
  *
+ * Quick Breathe wiring: the pill opens BreatheOverlay (the actual breath
+ * pacer surface). Bounded six-cycle box-breathing pass per canon framing
+ * law (breath is a tool, not the product).
+ *
  * The journey content lives in Today.jsx. Home is just the page-level
  * composition — the shell that contains it.
  *
@@ -25,6 +30,8 @@ import Today from "./Today.jsx";
  *   Today card's Begin button is tapped.
  */
 export default function Home({ onBeginSession }) {
+  const [breatheOpen, setBreatheOpen] = useState(false);
+
   return (
     <>
       <AppHeader />
@@ -35,7 +42,9 @@ export default function Home({ onBeginSession }) {
         <HomeFooter onNavigate={() => { /* Phase 3+ */ }} />
       </div>
 
-      <QuickBreathe onTap={() => { /* Phase 2.5 wires the actual breath tool */ }} />
+      <QuickBreathe onTap={() => setBreatheOpen(true)} />
+
+      <BreatheOverlay open={breatheOpen} onClose={() => setBreatheOpen(false)} />
 
       {/* Phase indicator — removed when all surfaces are fully functional. */}
       <div

@@ -78,8 +78,42 @@ export default function InfoModal({ open, title, body, onClose }) {
           border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
           // Subtle depth — the card lifts off the page.
           boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
+          // Needed for the absolute-positioned corner X button.
+          position: "relative",
         }}
       >
+        {/*
+          Corner X — backup close affordance with a generous 44pt tap target.
+          The bottom Close button is still the primary dismissal, but on a
+          phone screen a tiny text-only close is easy to miss; the corner X
+          gives the user a second clearly-tappable surface.
+        */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close info"
+          style={{
+            position: "absolute",
+            top: "8px",
+            right: "8px",
+            width: "44px",
+            height: "44px",
+            background: "transparent",
+            border: "none",
+            color: "var(--sf-text-quiet, rgba(255,255,255,0.55))",
+            fontSize: "24px",
+            lineHeight: 1,
+            cursor: "pointer",
+            padding: 0,
+            WebkitTapHighlightColor: "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          ×
+        </button>
+
         {title ? (
           <header style={{ marginBottom: "var(--sf-space-16)" }}>
             <MonoLabel size="xs">{title}</MonoLabel>
@@ -100,21 +134,27 @@ export default function InfoModal({ open, title, body, onClose }) {
           {body}
         </p>
 
-        <div style={{ marginTop: "var(--sf-space-32)" }}>
+        <div style={{ marginTop: "var(--sf-space-32, 32px)" }}>
           <button
             type="button"
-            className="sf-btn-ghost"
             onClick={onClose}
+            aria-label="Close info"
             style={{
+              // Bordered + padded so the button has a clear hit area, was
+              // previously padding:0 / font-size:11px which produced a
+              // ~30px×14px tap target — well below the iOS 44pt minimum
+              // and easy to miss on a phone.
               background: "transparent",
-              border: "none",
-              color: "var(--sf-accent)",
-              fontFamily: "var(--sf-font-mono)",
-              fontSize: "11px",
-              letterSpacing: "0.14em",
+              border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
+              color: "var(--sf-accent, #B8862B)",
+              fontFamily: "var(--sf-font-mono, monospace)",
+              fontSize: "12px",
+              letterSpacing: "0.18em",
               textTransform: "uppercase",
-              padding: 0,
+              padding: "14px 24px",
+              minHeight: "44px",
               cursor: "pointer",
+              WebkitTapHighlightColor: "transparent",
             }}
           >
             Close
