@@ -95,7 +95,22 @@
 /* ---------------------------------------------------------------------
  * V2 SCOPE — every v2 surface lives inside .sf-v2 root.
  * The body of the existing app is untouched.
+ *
+ * The :has() selectors below scope a reset + ground background to the
+ * html/body elements ONLY when a .sf-v2 wrapper is actually mounted in
+ * the page. v1 routes never see these styles. This avoids the default
+ * 8px body margin showing as a visible border around the v2 canvas, and
+ * ensures the ground extends edge-to-edge on every viewport.
  * ------------------------------------------------------------------ */
+html:has(.sf-v2),
+body:has(.sf-v2) {
+  margin: 0;
+  padding: 0;
+  background: var(--sf-ground-deep);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
 .sf-v2 {
   background:
     radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.018) 0%, transparent 60%),
@@ -106,6 +121,7 @@
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   min-height: 100dvh;
+  width: 100%;
 }
 
 /* ---------------------------------------------------------------------
