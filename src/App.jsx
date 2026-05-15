@@ -24504,8 +24504,55 @@ const isSignalProfileConfigured = () => {
         {screen === "home" && (() => {
           const sessionCount = getSessionCountFromStorage();
 
-          // regType guaranteed by startup routing — this is a safety net only
-          if (!regType) return null;
+          // regType is required by all downstream home content (journey rep,
+          // hero CTA, reasoning line — all read isThoughtFirst / isBodyFirst).
+          // Normally finalizeOnboarding() guarantees regType is set before the
+          // user can reach home. But edge cases exist: Re-do Calibration in
+          // Settings sets regType=null then routes to setup (if the user backs
+          // out before completing, regType stays null on next home visit);
+          // partial cloud sync from another device may bring stillform_onboarded
+          // but not stillform_regulation_type; direct URL access to #home with
+          // stale storage. Prior behavior was `return null` — home would render
+          // empty, no recovery affordance, user stranded. May 14, 2026 evening:
+          // render a clear "Complete setup →" CTA instead. Root cause of the
+          // null state still wants tracing separately.
+          if (!regType) {
+            return (
+              <section style={{ maxWidth: 420, margin: "0 auto", padding: "80px 24px 80px", textAlign: "center", position: "relative", zIndex: 1 }}>
+                <div style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 26, fontWeight: 300,
+                  color: "var(--text-cream)",
+                  marginBottom: 14, letterSpacing: "0.01em", lineHeight: 1.3
+                }}>
+                  One step to finish.
+                </div>
+                <div style={{
+                  fontSize: 13, color: "var(--text-muted)",
+                  lineHeight: 1.6, marginBottom: 32, fontFamily: "'DM Sans', sans-serif"
+                }}>
+                  Your practice needs a quick calibration before it can route you.
+                </div>
+                <button
+                  onClick={() => { try { setSetupStep(0); } catch {} setScreen("setup"); }}
+                  className="hero-cta-reflect"
+                  style={{
+                    width: "100%", background: "var(--surface)", color: "var(--amber)",
+                    border: "0.5px solid color-mix(in srgb, var(--amber) 50%, transparent)",
+                    borderRadius: "var(--r-lg)", padding: "22px 24px",
+                    fontSize: 16, fontWeight: 400, cursor: "pointer",
+                    fontFamily: "'DM Sans', sans-serif",
+                    transition: "background-color var(--motion-default) var(--ease-prestige)",
+                    WebkitTapHighlightColor: "transparent"
+                  }}>
+                  <div className="t-display-sm" style={{ lineHeight: 1.2 }}>Complete setup</div>
+                  <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.7, color: "var(--text-dim)", marginTop: 6 }}>
+                    Calibration · 1–2 min
+                  </div>
+                </button>
+              </section>
+            );
+          }
 
                     const isThoughtFirst = regType === "thought-first";
           const isBodyFirst = regType === "body-first";
