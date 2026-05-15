@@ -18784,6 +18784,112 @@ function MyProgress({ onBack, habitAnchorsState }) {
           </div>
         )}
 
+        {/* ── ARTIFACT CHANGE HISTORY — Phase 6 audit viewer (May 15, 2026).
+            Reads getArtifactHistory for all three targets (trigger_profile,
+            anchors, growth_baseline), merges chronologically newest first,
+            shows the audit trail of every change with proposal lineage.
+            Renders only when ≥1 audit entry exists across any target —
+            empty state hidden entirely (no "nothing yet" nag).
+
+            Currently captures AI-mediated changes (via applyApprovedProposal).
+            Manual edits via PR #100 editor surfaces do NOT yet record audit
+            entries; that hook is a future polish item. The viewer shows only
+            what was actually recorded.
+
+            Closes the loop on Phase 6: users can now see WHY their profile
+            says what it says — the reasoning the AI gave at the time of each
+            proposal is preserved verbatim. */}
+        {(() => {
+          const _h_trigger = getArtifactHistory("trigger_profile").map(e => ({ ...e, target: "trigger_profile" }));
+          const _h_anchors = getArtifactHistory("anchors").map(e => ({ ...e, target: "anchors" }));
+          const _h_baseline = getArtifactHistory("growth_baseline").map(e => ({ ...e, target: "growth_baseline" }));
+          const _h_all = [..._h_trigger, ..._h_anchors, ..._h_baseline]
+            .sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
+          if (_h_all.length === 0) return null;
+          const _h_recent = _h_all.slice(0, 30);
+          return (
+            <div style={{ marginBottom: 24 }}>
+              <button onClick={() => toggle("changeHistory")} style={rowStyle}>
+                <div>
+                  <div className="t-body-md strong">Change history</div>
+                  <div className="t-caption" style={{ marginTop: 2 }}>
+                    {_h_all.length} entr{_h_all.length === 1 ? "y" : "ies"} — what changed and why
+                  </div>
+                </div>
+                <span style={{ color: "var(--text-muted)", fontSize: 12 }}>{openSections.changeHistory ? "▾" : "▸"}</span>
+              </button>
+              {openSections.changeHistory && (
+                <div style={{ background: "var(--surface2)", border: "0.5px solid var(--border)", borderTop: "none", borderRadius: "0 0 var(--r-lg) var(--r-lg)", padding: "12px 14px 10px" }}>
+                  {_h_recent.map((e, idx) => {
+                    const targetLabel = e.target === "trigger_profile" ? "Trigger Profile"
+                      : e.target === "anchors" ? "Habit Anchors"
+                      : e.target === "growth_baseline" ? "Capacity Baseline" : e.target;
+                    const opLabel = e.change?.type === "add" ? "Added"
+                      : e.change?.type === "update" ? "Updated"
+                      : e.change?.type === "retire" ? "Retired"
+                      : e.change?.type === "graduate" ? "Graduated"
+                      : (e.change?.type || "Changed");
+                    const when = (() => {
+                      try {
+                        const d = new Date(e.timestamp);
+                        return d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " · " + d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                      } catch { return ""; }
+                    })();
+                    const subjectPreview = (() => {
+                      const a = e.change?.after;
+                      const b = e.change?.before;
+                      if (a && typeof a === "object") {
+                        if (a.label) return `"${a.label}"`;
+                        if (a.cue && a.action) return `${a.cue} → ${a.action}`;
+                        if (a.newBaselineLabel) return `"${a.newBaselineLabel}"`;
+                      }
+                      if (b && typeof b === "object") {
+                        if (b.id) return `id: ${b.id}`;
+                      }
+                      return "";
+                    })();
+                    const sourceLabel = e.source === "ai_proposal" ? "AI proposal" : "manual edit";
+                    return (
+                      <div key={idx} style={{
+                        padding: "10px 0",
+                        borderBottom: idx < _h_recent.length - 1 ? "0.5px solid var(--border)" : "none"
+                      }}>
+                        <div className="t-mono-xs quiet" style={{ marginBottom: 3 }}>
+                          {when} · {sourceLabel}
+                        </div>
+                        <div className="t-body-sm" style={{ marginBottom: subjectPreview ? 4 : 0, color: "var(--text)" }}>
+                          <span style={{ color: "var(--amber)" }}>{opLabel}</span>
+                          {" "}{targetLabel}
+                          {subjectPreview ? <span className="quiet"> · {subjectPreview}</span> : null}
+                        </div>
+                        {e.reasoning && (
+                          <div className="t-body-sm quiet" style={{
+                            marginTop: 4, lineHeight: 1.55,
+                            borderLeft: "2px solid var(--amber-dim)",
+                            paddingLeft: 10, fontSize: 12.5
+                          }}>
+                            {e.reasoning}
+                          </div>
+                        )}
+                        {e.decisionReasoning && (
+                          <div className="t-caption" style={{ marginTop: 6, color: "var(--text-muted)", fontStyle: "italic" }}>
+                            Your note: {e.decisionReasoning}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                  {_h_all.length > 30 && (
+                    <div className="t-caption quiet" style={{ marginTop: 8, paddingTop: 8, borderTop: "0.5px solid var(--border)" }}>
+                      Showing 30 most recent of {_h_all.length} total entries.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
         {/* ── WEEKLY REFLECTION — Path A Section 3 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 278: "Weekly
             reflection (narrative) — kept as-is." Consolidates Gap 9
