@@ -82,7 +82,11 @@ export default function Today({ onBeginSession }) {
       >
         {/* Card label — the editorial title of the surface. */}
         <header style={{ marginBottom: "var(--sf-space-32)" }}>
-          <MonoLabel size="xs">Today</MonoLabel>
+          <MonoLabel
+            size="xs"
+            infoTitle="Today"
+            infoBody="Each rep adds a precise name to your library. The thread above is today's named work — accumulating evidence the practice is building your cognitive vocabulary. Over weeks the library compounds into sharper differentiation, better strategic moves, expanded cognitive flexibility. Hoemann 2021 (granular naming improves emotion differentiation), Barrett 2017 (constructed emotion theory), Wells 2009 (metacognitive capacity)."
+          >Today</MonoLabel>
         </header>
 
         {/* Thread — the day's accumulating named vocabulary. Hidden when

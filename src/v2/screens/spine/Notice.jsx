@@ -78,6 +78,11 @@ export default function Notice({ onContinue, onExit }) {
     onContinue(text.trim(), selectedChip);
   };
 
+  const handleSelfLed = () => {
+    if (!canContinue) return;
+    onContinue(text.trim(), selectedChip, { selfMode: true });
+  };
+
   return (
     <main className="sf-page sf-page--hero">
       <div className="sf-fade-enter">
@@ -86,6 +91,8 @@ export default function Notice({ onContinue, onExit }) {
           headline="Name what's present."
           headlineSize="lg"
           body="As precisely as you can."
+          labelInfoTitle="Notice"
+          labelInfoBody="Naming precisely is the practice. A vague feeling is a starting point; a specific name is built mental real estate. The brain encodes what gets named in detail. Granular naming compounds over time into a sharper cognitive vocabulary. Hoemann 2021, Barrett 2017 (constructed emotion theory)."
         />
       </div>
 
@@ -146,6 +153,25 @@ export default function Notice({ onContinue, onExit }) {
         <Button variant="ghost" onClick={onExit}>
           Back
         </Button>
+      </div>
+
+      {/* Self-led link — quiet, opt-in path that routes through SelfReframe
+          instead of the AI Reframe. Same practice, you write it yourself.
+          Tucked below the primary action so it doesn't compete; visible
+          enough that users who prefer silence can find it without hunting. */}
+      <div
+        className="sf-fade-enter sf-fade-enter--delay-3"
+        style={{ marginTop: "var(--sf-space-24)" }}
+      >
+        <button
+          type="button"
+          onClick={handleSelfLed}
+          disabled={!canContinue}
+          aria-disabled={!canContinue}
+          className="sf-link-quiet"
+        >
+          Or self-led ›
+        </button>
       </div>
     </main>
   );

@@ -20,6 +20,8 @@ import HairlineDivider from "./HairlineDivider.jsx";
  * @param {React.Node} body - optional body text
  * @param {boolean} rule - render 24px hairline beneath, default false
  * @param {"start"|"center"} align - default "start"
+ * @param {string} [labelInfoTitle] - title for the info modal on the label
+ * @param {string} [labelInfoBody]  - body for the info modal on the label
  */
 export default function EditorialBlock({
   label,
@@ -31,6 +33,8 @@ export default function EditorialBlock({
   className = "",
   style,
   children,
+  labelInfoTitle,
+  labelInfoBody,
   ...rest
 }) {
   const headlineClass =
@@ -49,7 +53,12 @@ export default function EditorialBlock({
       {...rest}
     >
       {label ? (
-        <MonoLabel size="xs" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
+        <MonoLabel
+          size="xs"
+          style={{ display: "block", marginBottom: "var(--sf-space-16)" }}
+          infoTitle={labelInfoTitle}
+          infoBody={labelInfoBody}
+        >
           {label}
         </MonoLabel>
       ) : null}

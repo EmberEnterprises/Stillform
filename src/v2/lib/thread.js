@@ -78,30 +78,30 @@ const MOCK_THREADS = {
 const PROMPTS = {
   morning: {
     headline: "Open the day.",
-    body: "A short check-in to set today's shape.",
+    body: "A short check-in to set today's reps.",
     actionLabel: "Begin",
   },
   // Main has two variants depending on whether the thread has entries —
   // the user reads them differently when the day is fresh vs. underway.
   main_fresh: {
-    headline: "Begin a session.",
+    headline: "Run today's first rep.",
     body: "Notice what's present. Build a precise name for it.",
     actionLabel: "Begin",
   },
   main_underway: {
-    headline: "Notice what's present.",
-    body: "When something's up. Or run a rep on what you named earlier.",
+    headline: "Run the next rep.",
+    body: "When something's up. Or deepen a name from earlier.",
     actionLabel: "Begin",
   },
   eod: {
     headline: "Close the day.",
-    body: "Two sentences. What stayed with you.",
+    body: "Two sentences. What stayed.",
     actionLabel: "Begin",
   },
   // Wind-down: no action. The directive IS the practice.
   "wind-down": {
     headline: "Phone down.",
-    body: "Nothing more tonight. Tomorrow begins where today ends.",
+    body: "Nothing more tonight. Tomorrow's reps begin where today's ended.",
     actionLabel: null,
   },
 };

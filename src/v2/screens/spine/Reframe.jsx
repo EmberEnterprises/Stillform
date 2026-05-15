@@ -27,9 +27,10 @@ import { sendReframeMessage } from "../../lib/reframeApi.js";
  * @param {string} precisionName  what the user named in Notice
  * @param {string|null} selectedChip  feel-state hint (or null)
  * @param {function(object): void} onContinue  Called with final state {history, takeaway}
+ * @param {function(): void} onSwitchToSelfMode  switch to SelfReframe (offered on API error)
  * @param {function(): void} onExit
  */
-export default function Reframe({ precisionName, selectedChip, onContinue, onExit }) {
+export default function Reframe({ precisionName, selectedChip, onContinue, onSwitchToSelfMode, onExit }) {
   // history is the wire-shape sent to the backend: [{role, text}]
   const [history, setHistory] = useState([]);
   const [draft, setDraft] = useState("");
@@ -122,7 +123,12 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onExi
   return (
     <main className="sf-page">
       <div className="sf-fade-enter" style={{ marginBottom: "var(--sf-space-32)" }}>
-        <MonoLabel size="xs" tone="faint">Reframe</MonoLabel>
+        <MonoLabel
+          size="xs"
+          tone="faint"
+          infoTitle="Reframe"
+          infoBody="Active retrieval and assumption check. The AI helps you examine what's underneath what you named, find what's actually true, and identify the next move. Active recall strengthens metacognitive capacity over time (Roediger & Karpicke 2006). Wells 2009 metacognitive therapy framework."
+        >Reframe</MonoLabel>
       </div>
 
       {/* Conversation turns. Editorial layout: serif body-lg for AI,
@@ -142,10 +148,44 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onExi
         ) : null}
 
         {error ? (
-          <div style={{ padding: "var(--sf-space-16) 0" }}>
-            <MonoLabel size="sm" tone="faint">
+          <div style={{ padding: "var(--sf-space-24) 0" }}>
+            <MonoLabel size="sm" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-16)" }}>
               {error}
             </MonoLabel>
+            {/*
+              When the AI errors, the user shouldn't be stranded. Self-led
+              practice is the same Notice → Reframe → Close practice, the
+              user writes it themselves. Offer it prominently. If the
+              parent passes onSwitchToSelfMode, the user can switch on the
+              spot without losing the named precision.
+            */}
+            {typeof onSwitchToSelfMode === "function" ? (
+              <p
+                style={{
+                  margin: 0,
+                  color: "var(--sf-text-quiet)",
+                  fontFamily: "var(--sf-font-sans)",
+                  fontSize: "15px",
+                  lineHeight: 1.55,
+                  fontWeight: 300,
+                  marginBottom: "var(--sf-space-16)",
+                }}
+              >
+                The AI's not responding. Switch to self-led — same practice, you write it.
+              </p>
+            ) : null}
+            <div style={{ display: "flex", gap: "var(--sf-space-12)", flexWrap: "wrap" }}>
+              {typeof onSwitchToSelfMode === "function" ? (
+                <button
+                  type="button"
+                  onClick={onSwitchToSelfMode}
+                  className="sf-link-quiet"
+                  style={{ color: "var(--sf-accent)" }}
+                >
+                  Switch to self-led ›
+                </button>
+              ) : null}
+            </div>
           </div>
         ) : null}
 

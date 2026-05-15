@@ -194,6 +194,76 @@
 }
 
 /* ---------------------------------------------------------------------
+ * INFO BUTTON — inline ⓘ next to a label. Restrained, quiet affordance
+ * for science-grounded info modals. Sized to match the label's mono-xs
+ * tracking, slightly larger glyph for tap target.
+ *
+ * Was a prominent v1 affordance (PRE-SLEEP, granularity gym, etc.) —
+ * restored here as a built-in to MonoLabel rather than scattered ad-hoc.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  color: var(--sf-text-faint);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  transition: color var(--sf-motion-default) var(--sf-ease-prestige);
+}
+
+.sf-v2 .sf-info-btn:hover,
+.sf-v2 .sf-info-btn:focus-visible {
+  color: var(--sf-accent);
+  outline: none;
+}
+
+/* ---------------------------------------------------------------------
+ * QUIET LINK — mono-xs underlined link for opt-in paths.
+ * Examples: "Or self-led ›" below Continue on Notice, "Switch to self-led ›"
+ * in Reframe's error state.
+ *
+ * Quieter than Button, more interactive than plain text. The chevron
+ * (›) signals movement; the mono treatment signals it's a meta action,
+ * not the primary path.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-link-quiet {
+  background: transparent;
+  border: none;
+  padding: 8px 0;
+  font-family: var(--sf-font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--sf-text-quiet);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  transition: color var(--sf-motion-default) var(--sf-ease-prestige);
+}
+
+.sf-v2 .sf-link-quiet:hover,
+.sf-v2 .sf-link-quiet:focus-visible {
+  color: var(--sf-accent);
+  outline: none;
+}
+
+.sf-v2 .sf-link-quiet:disabled,
+.sf-v2 .sf-link-quiet[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------
  * THREAD — the day's accumulating named vocabulary on the Today card.
  *
  * Two-column journal log layout: monospace time on the left (44px fixed),

@@ -31,6 +31,8 @@ export default function Close({ takeaway, onReturnHome }) {
           headline="Session ends here."
           headlineSize="lg"
           body="The work compounds. What you named is now part of your library."
+          labelInfoTitle="Close"
+          labelInfoBody="Closing the rep matters. The brain encodes what you ended on, not what you spent most time on. A clean close cements what was built and prevents the work from looping into rumination. Stickgold & Walker on consolidation windows; Wells 2009 on rumination guardrails."
         />
       </div>
 
