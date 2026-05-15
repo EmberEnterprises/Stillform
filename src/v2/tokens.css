@@ -1,0 +1,264 @@
+/*
+ * STILLFORM v2 — Design Tokens
+ *
+ * Source of truth: STILLFORM_DESIGN_SYSTEM.md (April 30, 2026)
+ * Anchor references: Aesop · MUBI · Cartier · Hermès · Linear · Leica · Espresso
+ *
+ * Every visual token in v2 lives here. No magic numbers in components.
+ * If a value doesn't appear in this file, it shouldn't appear in v2 code.
+ */
+
+:root {
+  /* ---------------------------------------------------------------------
+   * GROUNDS — cinematic depth, true black with cool undertone
+   * ------------------------------------------------------------------ */
+  --sf-ground-deep:    #08080A;
+  --sf-ground-elev:    #111114;
+  --sf-ground-elev-2:  #16161A;
+
+  /* ---------------------------------------------------------------------
+   * BORDERS — printed not drawn. All borders rendered at 0.5px.
+   * ------------------------------------------------------------------ */
+  --sf-border-hairline:  rgba(255, 255, 255, 0.06);
+  --sf-border-emphasis:  rgba(255, 255, 255, 0.10);
+  --sf-border-printed:   rgba(255, 255, 255, 0.04);
+
+  /* ---------------------------------------------------------------------
+   * ACCENT — antiqued metallic, NOT wellness amber.
+   * Discipline: maximum 5% of any screen. Never as button fill.
+   * Used as hairlines, single-character emphasis, small status dots.
+   * ------------------------------------------------------------------ */
+  --sf-accent:        #B8862B;
+  --sf-accent-deep:   #8C6420;
+  --sf-accent-glow:   rgba(184, 134, 43, 0.06);
+  --sf-accent-line:   rgba(184, 134, 43, 0.35);
+
+  /* ---------------------------------------------------------------------
+   * TYPOGRAPHY COLORS — cream-on-black is the editorial moment.
+   * Pure white on near-black reads as system UI; we don't want that.
+   * ------------------------------------------------------------------ */
+  --sf-text-primary:  #E8EAF0;
+  --sf-text-quiet:    rgba(232, 234, 240, 0.62);
+  --sf-text-faint:    rgba(232, 234, 240, 0.40);
+  --sf-text-cream:    #EDE8DC;
+
+  /* ---------------------------------------------------------------------
+   * STATE — used only for tonal direction. Never as fills.
+   * ------------------------------------------------------------------ */
+  --sf-state-positive:  #8FA88A;   /* sage */
+  --sf-state-negative:  #B47A6A;   /* terracotta */
+  --sf-state-neutral:   #A8A29A;   /* warm gray */
+
+  /* ---------------------------------------------------------------------
+   * RADIUS — calibrated tight. Avoid 8px+ entirely (reads as SaaS).
+   * ------------------------------------------------------------------ */
+  --sf-r-tight:    2px;
+  --sf-r-default:  4px;
+  --sf-r-large:    6px;
+
+  /* ---------------------------------------------------------------------
+   * MOTION — slower, custom-eased, feels physical. Default iOS spring
+   * read as app-default; prestige uses weighted curves.
+   * ------------------------------------------------------------------ */
+  --sf-motion-quick:    180ms;
+  --sf-motion-default:  300ms;
+  --sf-motion-weighted: 480ms;
+  --sf-motion-slow:     650ms;
+
+  --sf-ease-prestige:   cubic-bezier(0.22, 0.61, 0.36, 1);    /* default — decelerates heavily at end */
+  --sf-ease-page-turn:  cubic-bezier(0.32, 0.08, 0.24, 1);    /* weighted — for navigation (Hermès) */
+  --sf-ease-shutter:    cubic-bezier(0.55, 0.06, 0.68, 0.19); /* mechanical — for actions (Leica) */
+
+  /* ---------------------------------------------------------------------
+   * SPACING — fixed scale, no arbitrary values.
+   * ------------------------------------------------------------------ */
+  --sf-space-2:    2px;
+  --sf-space-4:    4px;
+  --sf-space-8:    8px;
+  --sf-space-12:   12px;
+  --sf-space-16:   16px;
+  --sf-space-24:   24px;
+  --sf-space-32:   32px;
+  --sf-space-48:   48px;
+  --sf-space-64:   64px;
+  --sf-space-80:   80px;
+
+  /* ---------------------------------------------------------------------
+   * TYPOGRAPHY FAMILIES — already loaded via index.html.
+   * Cormorant Garamond (serif), DM Sans (sans), IBM Plex Mono (mono).
+   * ------------------------------------------------------------------ */
+  --sf-font-serif:  "Cormorant Garamond", "EB Garamond", Georgia, serif;
+  --sf-font-sans:   "DM Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --sf-font-mono:   "IBM Plex Mono", "JetBrains Mono", "Menlo", monospace;
+}
+
+/* ---------------------------------------------------------------------
+ * V2 SCOPE — every v2 surface lives inside .sf-v2 root.
+ * The body of the existing app is untouched.
+ * ------------------------------------------------------------------ */
+.sf-v2 {
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.018) 0%, transparent 60%),
+    var(--sf-ground-deep);
+  color: var(--sf-text-primary);
+  font-family: var(--sf-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* ---------------------------------------------------------------------
+ * TYPOGRAPHY UTILITIES — the scale. Use these classes, not arbitrary
+ * font sizes in components. Mono utilities include the uppercase +
+ * tracking that gives them the "engraved" feel.
+ * ------------------------------------------------------------------ */
+
+.sf-display-xl {
+  font-family: var(--sf-font-serif);
+  font-weight: 300;
+  font-size: 48px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--sf-text-cream);
+}
+
+.sf-display-lg {
+  font-family: var(--sf-font-serif);
+  font-weight: 300;
+  font-size: 36px;
+  line-height: 1.20;
+  letter-spacing: -0.005em;
+  color: var(--sf-text-cream);
+}
+
+.sf-display-md {
+  font-family: var(--sf-font-serif);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1.30;
+  letter-spacing: 0;
+  color: var(--sf-text-cream);
+}
+
+.sf-display-sm {
+  font-family: var(--sf-font-serif);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--sf-text-cream);
+}
+
+.sf-body-lg {
+  font-family: var(--sf-font-sans);
+  font-weight: 400;
+  font-size: 17px;
+  line-height: 1.65;
+  letter-spacing: 0;
+  color: var(--sf-text-primary);
+}
+
+.sf-body-md {
+  font-family: var(--sf-font-sans);
+  font-weight: 400;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: 0;
+  color: var(--sf-text-primary);
+}
+
+.sf-body-sm {
+  font-family: var(--sf-font-sans);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.50;
+  letter-spacing: 0;
+  color: var(--sf-text-primary);
+}
+
+.sf-caption {
+  font-family: var(--sf-font-sans);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  color: var(--sf-text-quiet);
+}
+
+.sf-mono-md {
+  font-family: var(--sf-font-mono);
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 1.40;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--sf-text-quiet);
+}
+
+.sf-mono-sm {
+  font-family: var(--sf-font-mono);
+  font-weight: 400;
+  font-size: 10px;
+  line-height: 1.30;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sf-text-quiet);
+}
+
+.sf-mono-xs {
+  font-family: var(--sf-font-mono);
+  font-weight: 400;
+  font-size: 9px;
+  line-height: 1.20;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sf-text-faint);
+}
+
+/* ---------------------------------------------------------------------
+ * READING RHYTHM — page-level layout primitives. Editorial discipline:
+ * 24px between paragraphs, 40px between sections, 64-80px between
+ * major content blocks, 48-64px top breathing room.
+ * ------------------------------------------------------------------ */
+
+.sf-page {
+  padding: var(--sf-space-48) var(--sf-space-24) var(--sf-space-80);
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.sf-page--hero {
+  /* Surfaces that lead with a hero get extra top breathing room */
+  padding-top: var(--sf-space-64);
+}
+
+.sf-stack-paragraph > * + * {
+  margin-top: var(--sf-space-24);
+}
+
+.sf-stack-section > * + * {
+  margin-top: var(--sf-space-48);
+}
+
+.sf-stack-block > * + * {
+  margin-top: var(--sf-space-64);
+}
+
+/* ---------------------------------------------------------------------
+ * SELECTION + FOCUS — restrained, no aggressive system defaults.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 ::selection {
+  background: var(--sf-accent-glow);
+  color: var(--sf-text-cream);
+}
+
+.sf-v2 :focus-visible {
+  outline: 0.5px solid var(--sf-accent-line);
+  outline-offset: 2px;
+}
+
+.sf-v2 :focus:not(:focus-visible) {
+  outline: none;
+}

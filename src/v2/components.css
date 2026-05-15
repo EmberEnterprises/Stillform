@@ -1,0 +1,118 @@
+/*
+ * STILLFORM v2 — Component CSS
+ *
+ * Pseudo-class states (hover, active, etc.) that inline component styles
+ * can't express. Loaded after tokens.css. Scoped under .sf-v2 so it never
+ * affects the existing app.
+ *
+ * Anchor: STILLFORM_DESIGN_SYSTEM.md §components, §motion
+ */
+
+/* ---------------------------------------------------------------------
+ * BUTTONS — hover / active states. Motion is weighted.
+ *
+ * Hermès convention: action is dignified, not loud. Borders + text shift
+ * on hover; no background fills appear.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-btn-primary:hover,
+.sf-v2 .sf-btn-primary:focus-visible {
+  border-color: var(--sf-accent);
+  color: var(--sf-text-cream);
+}
+
+.sf-v2 .sf-btn-primary:active {
+  transform: scale(0.98);
+  transition-duration: var(--sf-motion-quick);
+  transition-timing-function: var(--sf-ease-shutter);
+}
+
+.sf-v2 .sf-btn-secondary:hover,
+.sf-v2 .sf-btn-secondary:focus-visible {
+  border-color: var(--sf-accent-line);
+  color: var(--sf-accent);
+}
+
+.sf-v2 .sf-btn-secondary:active {
+  transform: scale(0.98);
+  transition-duration: var(--sf-motion-quick);
+  transition-timing-function: var(--sf-ease-shutter);
+}
+
+.sf-v2 .sf-btn-ghost:hover,
+.sf-v2 .sf-btn-ghost:focus-visible {
+  color: var(--sf-accent);
+}
+
+.sf-v2 .sf-btn-ghost:active {
+  opacity: 0.85;
+  transition-duration: var(--sf-motion-quick);
+}
+
+/* ---------------------------------------------------------------------
+ * INSTRUMENT CARD — top inset highlight gives subtle material depth.
+ * Pseudo-element so inline styles don't need to fake it.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-instrument-card {
+  position: relative;
+}
+
+.sf-v2 .sf-instrument-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.5px;
+  background: rgba(255, 255, 255, 0.025);
+  pointer-events: none;
+}
+
+/* ---------------------------------------------------------------------
+ * PAGE ENTRANCE — fade-in from black, sequential timing.
+ * Reference: Cartier reveal, MUBI crossfade. Hero appears first, then
+ * labels at +200ms, body at +350ms.
+ * ------------------------------------------------------------------ */
+
+@keyframes sfFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sf-v2 .sf-fade-enter {
+  animation: sfFadeUp var(--sf-motion-slow) var(--sf-ease-prestige) both;
+}
+
+.sf-v2 .sf-fade-enter--delay-1 {
+  animation-delay: 200ms;
+}
+
+.sf-v2 .sf-fade-enter--delay-2 {
+  animation-delay: 350ms;
+}
+
+.sf-v2 .sf-fade-enter--delay-3 {
+  animation-delay: 500ms;
+}
+
+/* Respect user preference for reduced motion. */
+@media (prefers-reduced-motion: reduce) {
+  .sf-v2 .sf-fade-enter,
+  .sf-v2 .sf-fade-enter--delay-1,
+  .sf-v2 .sf-fade-enter--delay-2,
+  .sf-v2 .sf-fade-enter--delay-3 {
+    animation: none;
+  }
+
+  .sf-v2 .sf-btn-primary:active,
+  .sf-v2 .sf-btn-secondary:active {
+    transform: none;
+  }
+}
