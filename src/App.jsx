@@ -5901,6 +5901,123 @@ const appendArtifactHistoryEntry = (target, entry) => {
   } catch { return null; }
 };
 
+// Client-side helper to request AI-generated proposals from the backend.
+// Fire-and-forget posture — silent on failure, telemetry both ways. Gathers
+// the user's current artifacts + recent evidence, calls the propose_update
+// mode of the Reframe endpoint, validates the response, and inserts each
+// returned proposal via addProposal (which dedupes naturally).
+//
+// Called from points in the app that represent natural "review moments" —
+// after EOD wrap is the primary trigger. Throttled implicitly by the
+// existing-pending-targets guardrail on the backend (won't propose if user
+// already has 5+ pending decisions).
+const requestAIProposals = async (extraContext = {}) => {
+  try {
+    const triggerProfile = getTriggerProfile();
+    let anchors = [];
+    try {
+      const raw = localStorage.getItem("stillform_anchors");
+      anchors = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(anchors)) anchors = [];
+    } catch { anchors = []; }
+    let growthBaseline = null;
+    try {
+      const raw = localStorage.getItem("stillform_growth_baseline");
+      growthBaseline = raw ? JSON.parse(raw) : null;
+    } catch { growthBaseline = null; }
+
+    // Recent reframes — pull from saved_reframes (named-moves) + reframe history.
+    let recentReframes = [];
+    try {
+      const named = secureRead("stillform_named_moves", []);
+      if (Array.isArray(named)) {
+        recentReframes = named.slice(-10).map(n => ({
+          timestamp: n.timestamp || null,
+          named_thing: n.value || null,
+          mode: null
+        }));
+      }
+    } catch {}
+
+    // Recent EODs — pull from eod_history.
+    let recentEod = [];
+    try {
+      const eodHistory = secureRead("stillform_eod_history", []);
+      if (Array.isArray(eodHistory)) {
+        recentEod = eodHistory.slice(-10).map(e => ({
+          timestamp: e.timestamp || e.date || null,
+          composure: e.composure || null,
+          note: e.word || null
+        }));
+      }
+    } catch {}
+
+    // Recent check-ins
+    let recentCheckins = [];
+    try {
+      const checkinHistory = secureRead("stillform_checkin_history", []);
+      if (Array.isArray(checkinHistory)) {
+        recentCheckins = checkinHistory.slice(-10).map(c => ({
+          timestamp: c.timestamp || c.date || null,
+          sleep: c.sleep ?? null,
+          energy: c.energy ?? null,
+          mood: c.mood ?? null
+        }));
+      }
+    } catch {}
+
+    let sessionCount = 0;
+    try {
+      const sessions = secureRead("stillform_sessions", []);
+      sessionCount = Array.isArray(sessions) ? sessions.length : 0;
+    } catch {}
+
+    const existingPendingTargets = getPendingProposals().map(p => p.target);
+
+    const payload = {
+      mode: "propose_update",
+      triggerProfile,
+      anchors,
+      growthBaseline,
+      recentReframes,
+      recentEod,
+      recentCheckins,
+      sessionCount,
+      existingPendingTargets,
+      ...extraContext
+    };
+
+    const response = await fetch(REFRAME_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      try { window.plausible?.("AI Proposal Generation Failed", { props: { reason: `http-${response.status}` } }); } catch {}
+      return { added: 0, reason: `http-${response.status}` };
+    }
+
+    const data = await response.json();
+    if (data.reason === "queue_full" || data.reason === "insufficient_signal") {
+      try { window.plausible?.("AI Proposal Skipped", { props: { reason: data.reason } }); } catch {}
+      return { added: 0, reason: data.reason };
+    }
+
+    const proposals = Array.isArray(data.proposals) ? data.proposals : [];
+    let added = 0;
+    for (const p of proposals) {
+      const persisted = addProposal(p);
+      if (persisted && !persisted.duplicate) added += 1;
+    }
+    try { window.plausible?.("AI Proposals Generated", { props: { count: String(added) } }); } catch {}
+    return { added };
+  } catch (err) {
+    try { window.plausible?.("AI Proposal Generation Failed", { props: { reason: err?.name === "AbortError" ? "timeout" : "network" } }); } catch {}
+    return { added: 0, reason: "error" };
+  }
+};
+
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
 // Phase 2 of encryption extension. These read/write from the encrypted store
 // (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
@@ -18036,6 +18153,99 @@ function MyProgress({ onBack, habitAnchorsState }) {
   const [journalEntries, setJournalEntries] = useState(() => {
     try { return secureRead("stillform_journal", []); } catch { return []; }
   });
+
+  // Phase 6 — AI proposal state. Tracks pending + recently-decided proposals
+  // for the approval queue. refreshProposals re-reads after each decision so
+  // the UI updates without a full screen remount.
+  const [proposalState, setProposalState] = useState(() => getProposals());
+  const refreshProposals = () => setProposalState(getProposals());
+  const [proposalRejectReason, setProposalRejectReason] = useState({}); // { [proposalId]: string }
+  const [proposalRejectOpen, setProposalRejectOpen] = useState({}); // { [proposalId]: bool }
+
+  // Applies an approved proposal's payload via the appropriate artifact
+  // helper, records an audit-trail entry, and moves the proposal to decided.
+  // All paths defensive — applied=false is acceptable (proposal still gets
+  // marked approved so it leaves the pending queue; user can re-propose).
+  const applyApprovedProposal = (proposal, decisionReasoning) => {
+    let changeRecord = { type: proposal.operation };
+    let applied = false;
+    try {
+      if (proposal.target === "trigger_profile") {
+        if (proposal.operation === "add") {
+          const result = addTrigger({ label: proposal.proposed.label, category: proposal.proposed.category });
+          if (result) { changeRecord.after = result; applied = true; }
+        } else if (proposal.operation === "update") {
+          const result = updateTrigger(proposal.proposed.id, { label: proposal.proposed.label, category: proposal.proposed.category });
+          if (result) { changeRecord.after = result; applied = true; }
+        } else if (proposal.operation === "retire") {
+          const ok = deleteTrigger(proposal.proposed.id);
+          if (ok) { changeRecord.before = { id: proposal.proposed.id }; applied = true; }
+        }
+      } else if (proposal.target === "anchors") {
+        const raw = localStorage.getItem("stillform_anchors");
+        const current = raw ? JSON.parse(raw) : [];
+        const arr = Array.isArray(current) ? current : [];
+        if (proposal.operation === "add") {
+          const newAnchor = {
+            id: `anchor_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+            cue: proposal.proposed.cue,
+            action: proposal.proposed.action,
+            createdAt: new Date().toISOString()
+          };
+          const next = [...arr, newAnchor];
+          localStorage.setItem("stillform_anchors", JSON.stringify(next));
+          changeRecord.after = newAnchor;
+          applied = true;
+        } else if (proposal.operation === "retire") {
+          const next = arr.filter(a => a.id !== proposal.proposed.id);
+          if (next.length !== arr.length) {
+            localStorage.setItem("stillform_anchors", JSON.stringify(next));
+            changeRecord.before = { id: proposal.proposed.id };
+            applied = true;
+          }
+        }
+      } else if (proposal.target === "growth_baseline") {
+        if (proposal.operation === "graduate") {
+          const raw = localStorage.getItem("stillform_growth_baseline");
+          const current = raw ? JSON.parse(raw) : null;
+          const next = {
+            ...(current || {}),
+            previousBaseline: current,
+            newBaselineLabel: proposal.proposed.newBaselineLabel,
+            graduatedAt: new Date().toISOString(),
+            evidenceSummary: proposal.proposed.evidence_summary
+          };
+          localStorage.setItem("stillform_growth_baseline", JSON.stringify(next));
+          changeRecord.before = current;
+          changeRecord.after = next;
+          applied = true;
+        }
+      }
+    } catch (err) {
+      // Apply failed; we still mark approved (user's decision is recorded)
+      // but no audit entry is appended for the artifact change. The audit
+      // trail intentionally only records ACTUAL changes.
+      applied = false;
+    }
+    if (applied) {
+      appendArtifactHistoryEntry(proposal.target, {
+        change: changeRecord,
+        proposalId: proposal.id,
+        reasoning: proposal.reasoning,
+        decisionReasoning,
+        source: "ai_proposal"
+      });
+    }
+    approveProposal(proposal.id, decisionReasoning);
+    try { window.plausible?.("AI Proposal Approved", { props: { target: proposal.target, operation: proposal.operation, applied: String(applied) } }); } catch {}
+    refreshProposals();
+  };
+
+  const handleRejectProposal = (proposal, decisionReasoning) => {
+    rejectProposal(proposal.id, decisionReasoning);
+    try { window.plausible?.("AI Proposal Rejected", { props: { target: proposal.target, operation: proposal.operation } }); } catch {}
+    refreshProposals();
+  };
   const latestFocusHistory = getFocusCheckHistoryFromStorage();
   const focusCheckSummary = latestFocusHistory.length ? latestFocusHistory[latestFocusHistory.length - 1] : null;
   const previousFocusSummary = latestFocusHistory.length > 1 ? latestFocusHistory[latestFocusHistory.length - 2] : null;
@@ -18467,6 +18677,112 @@ function MyProgress({ onBack, habitAnchorsState }) {
           Your data builds here as you use the practice.
         </div>
       ) : (<>
+
+        {/* ── AI PROPOSALS — Phase 6 approval queue ───────────────────────
+            AI-generated proposals to update Trigger Profile, Habit Anchors,
+            or Capacity Baseline. Each proposal shows the AI's reasoning
+            verbatim and the evidence it drew from. User approves or rejects
+            each one; approval applies the change via the artifact helper
+            AND records an audit-trail entry on the sibling history key.
+            Renders only when pending proposals exist — empty state hidden
+            entirely (no "you have no proposals" noise). */}
+        {proposalState.pending.length > 0 && (
+          <div style={{ marginBottom: 24, background: "var(--surface2)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r-lg)", padding: "16px 16px 12px" }}>
+            <div className="t-mono-xs" style={{ color: "var(--amber)", marginBottom: 6 }}>
+              AI Proposals · {proposalState.pending.length} pending
+            </div>
+            <div className="t-caption" style={{ marginBottom: 14, lineHeight: 1.5 }}>
+              The AI has reviewed your recent practice and is proposing updates to your profile. Each one shows its reasoning — read it, then approve or reject.
+            </div>
+            {proposalState.pending.map(p => {
+              const targetLabel = p.target === "trigger_profile" ? "Trigger Profile"
+                : p.target === "anchors" ? "Habit Anchors"
+                : p.target === "growth_baseline" ? "Capacity Baseline"
+                : p.target;
+              const opLabel = p.operation === "add" ? "Add" : p.operation === "update" ? "Update" : p.operation === "retire" ? "Retire" : p.operation === "graduate" ? "Graduate" : p.operation;
+              const proposedPreview = (() => {
+                if (p.target === "trigger_profile") {
+                  if (p.operation === "add" || p.operation === "update") return `"${p.proposed.label || ""}"${p.proposed.category ? ` [${p.proposed.category}]` : ""}`;
+                  if (p.operation === "retire") return `id: ${p.proposed.id}`;
+                }
+                if (p.target === "anchors") {
+                  if (p.operation === "add") return `When: ${p.proposed.cue || ""} → Then: ${p.proposed.action || ""}`;
+                  if (p.operation === "retire") return `id: ${p.proposed.id}`;
+                }
+                if (p.target === "growth_baseline" && p.operation === "graduate") return `"${p.proposed.newBaselineLabel || ""}"`;
+                return JSON.stringify(p.proposed).slice(0, 120);
+              })();
+              return (
+                <div key={p.id} style={{ background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r)", padding: "12px 12px 10px", marginBottom: 10 }}>
+                  <div className="t-mono-xs quiet" style={{ marginBottom: 4 }}>
+                    {opLabel} · {targetLabel}
+                  </div>
+                  <div className="t-body-sm" style={{ color: "var(--text)", marginBottom: 8, fontStyle: "italic" }}>
+                    {proposedPreview}
+                  </div>
+                  <div className="t-body-sm quiet" style={{ marginBottom: 8, lineHeight: 1.55, borderLeft: "2px solid var(--amber-dim)", paddingLeft: 10 }}>
+                    {p.reasoning}
+                  </div>
+                  {Array.isArray(p.evidence) && p.evidence.length > 0 && (
+                    <div className="t-caption quiet" style={{ marginBottom: 10 }}>
+                      Evidence: {p.evidence.length} reference{p.evidence.length === 1 ? "" : "s"} from recent practice
+                    </div>
+                  )}
+                  {proposalRejectOpen[p.id] ? (
+                    <div style={{ marginTop: 4 }}>
+                      <input
+                        type="text"
+                        value={proposalRejectReason[p.id] || ""}
+                        onChange={(e) => setProposalRejectReason(prev => ({ ...prev, [p.id]: e.target.value }))}
+                        placeholder="Optional — why? (helps the AI calibrate)"
+                        maxLength={200}
+                        style={{ width: "100%", padding: "8px 10px", background: "var(--surface)", border: "0.5px solid var(--border)", borderRadius: "var(--r-sm)", color: "var(--text)", fontSize: 13, marginBottom: 8 }}
+                      />
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button onClick={() => { handleRejectProposal(p, proposalRejectReason[p.id] || null); setProposalRejectOpen(prev => ({ ...prev, [p.id]: false })); setProposalRejectReason(prev => ({ ...prev, [p.id]: "" })); }} style={{ flex: 1, padding: "8px 12px", background: "transparent", border: "0.5px solid var(--text-muted)", color: "var(--text-muted)", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer" }}>
+                          Reject
+                        </button>
+                        <button onClick={() => { setProposalRejectOpen(prev => ({ ...prev, [p.id]: false })); setProposalRejectReason(prev => ({ ...prev, [p.id]: "" })); }} style={{ flex: 1, padding: "8px 12px", background: "transparent", border: "0.5px solid var(--border)", color: "var(--text-muted)", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer" }}>
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                      <button onClick={() => applyApprovedProposal(p, null)} style={{ flex: 1, padding: "8px 12px", background: "var(--amber)", border: "none", color: "var(--bg)", borderRadius: "var(--r-sm)", fontSize: 12, fontWeight: 500, cursor: "pointer" }}>
+                        Approve
+                      </button>
+                      <button onClick={() => setProposalRejectOpen(prev => ({ ...prev, [p.id]: true }))} style={{ flex: 1, padding: "8px 12px", background: "transparent", border: "0.5px solid var(--border)", color: "var(--text-muted)", borderRadius: "var(--r-sm)", fontSize: 12, cursor: "pointer" }}>
+                        Reject
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+            {proposalState.decided.length > 0 && (
+              <button onClick={() => toggle("proposalsHistory")} style={{ width: "100%", marginTop: 4, padding: "8px 0", background: "transparent", border: "none", color: "var(--text-muted)", fontSize: 11, cursor: "pointer", textAlign: "left" }}>
+                {openSections.proposalsHistory ? "▾" : "▸"} Recent decisions ({proposalState.decided.length})
+              </button>
+            )}
+            {openSections.proposalsHistory && proposalState.decided.length > 0 && (
+              <div style={{ marginTop: 6, borderTop: "0.5px solid var(--border)", paddingTop: 8 }}>
+                {[...proposalState.decided].reverse().slice(0, 15).map(d => {
+                  const targetLabel = d.target === "trigger_profile" ? "Trigger Profile"
+                    : d.target === "anchors" ? "Anchors"
+                    : d.target === "growth_baseline" ? "Baseline" : d.target;
+                  const when = (() => { try { return new Date(d.decidedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }); } catch { return ""; } })();
+                  return (
+                    <div key={d.id} className="t-caption" style={{ marginBottom: 6, color: "var(--text-muted)" }}>
+                      <span style={{ color: d.status === "approved" ? "var(--amber)" : "var(--text-muted)" }}>{d.status === "approved" ? "✓" : "✕"}</span>
+                      {" "}{d.operation} · {targetLabel} · {when}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ── WEEKLY REFLECTION — Path A Section 3 of My Progress per
             STILLFORM_ENGAGEMENT_ARCHITECTURE.md §8 line 278: "Weekly
@@ -28203,6 +28519,15 @@ const isSignalProfileConfigured = () => {
                   if (eodSnapshot) {
                     try { generateEodArtifact(eodSnapshot).catch(() => {}); } catch {}
                   }
+                  // Phase 6b — AI proposal generation. After EOD wrap, the user
+                  // has reflected on the day; the AI now reviews accumulated
+                  // signal across recent Reframes + EODs + check-ins and may
+                  // propose updates to Trigger Profile, Habit Anchors, or
+                  // Capacity Baseline. Fire-and-forget, silent on failure;
+                  // backend guardrails handle insufficient-signal + queue-full
+                  // cases. Generated proposals land in stillform_ai_proposals
+                  // for user review in the approval queue.
+                  try { requestAIProposals().catch(() => {}); } catch {}
                   try { window.plausible("End of Day Check-In", { props: { composure: eodComposure || "mostly" } }); } catch {}
                   setEodSaved(true);
                   setEodPromptDismissed(false);

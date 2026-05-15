@@ -1558,6 +1558,215 @@ ${sourceState ? `Feel state at session start: ${sourceState}\n` : ""}${sourceTex
     // END NEXT MOVE MODE
     // --------------------------------------------------------------------
 
+    // --------------------------------------------------------------------
+    // PROPOSE_UPDATE MODE (Phase 6b — AI mediation pipeline)
+    // --------------------------------------------------------------------
+    // AI generates structured proposals to update the user's artifacts.
+    // Each proposal includes operation, target, payload, reasoning shown
+    // verbatim to the user, and evidence references back to the sessions
+    // that informed it. Client side stores them via addProposal and
+    // surfaces them in the approval queue.
+    // --------------------------------------------------------------------
+    if (mode === "propose_update") {
+      const ctx = (() => {
+        try { return JSON.parse(event.body); } catch { return {}; }
+      })();
+
+      const triggerProfile = ctx.triggerProfile && typeof ctx.triggerProfile === "object"
+        ? ctx.triggerProfile : { triggers: [] };
+      const anchors = Array.isArray(ctx.anchors) ? ctx.anchors : [];
+      const growthBaseline = ctx.growthBaseline && typeof ctx.growthBaseline === "object"
+        ? ctx.growthBaseline : null;
+      const recentReframes = Array.isArray(ctx.recentReframes)
+        ? ctx.recentReframes.slice(-10) : [];
+      const recentCheckins = Array.isArray(ctx.recentCheckins)
+        ? ctx.recentCheckins.slice(-10) : [];
+      const recentEod = Array.isArray(ctx.recentEod)
+        ? ctx.recentEod.slice(-10) : [];
+      const sessionCount = Number.isFinite(ctx.sessionCount) ? ctx.sessionCount : 0;
+      const existingPendingTargets = Array.isArray(ctx.existingPendingTargets)
+        ? ctx.existingPendingTargets : [];
+
+      // Don't pile up proposals — if the user already has 5+ pending, hold off.
+      if (existingPendingTargets.length >= 5) {
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({ proposals: [], reason: "queue_full", source: "guardrail" })
+        };
+      }
+
+      // Don't propose anything until the user has enough signal — fewer than
+      // 3 reframes + 2 EODs means we don't have evidence to ground proposals.
+      if (recentReframes.length < 3 && recentEod.length < 2) {
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({ proposals: [], reason: "insufficient_signal", source: "guardrail" })
+        };
+      }
+
+      const proposeSystemPrompt = `You are the AI inside Stillform's mediation layer. The user has been using the app and producing real signal — Reframe sessions, EOD wraps, check-ins. Your job is to propose updates to their artifacts (Trigger Profile, Habit Anchors, Capacity Baseline) based on patterns you actually see in the evidence.
+
+CORE PRINCIPLES:
+- Propose ONLY when there is real evidence. No speculation. If you can't point to specific sessions/EODs that justify a proposal, do not make it.
+- The user reviews and approves every proposal. Show your reasoning verbatim — they will read it. Reasoning must reference the actual evidence (which sessions, which patterns, what frequency).
+- Quality over quantity. 0-3 proposals total. An empty array is the correct answer when nothing strong is showing.
+- Do not propose obvious things the user has already done. Do not propose duplicate triggers, duplicate anchors, or repeated graduations.
+
+TARGETS YOU CAN PROPOSE FOR:
+
+1. trigger_profile — operation: "add" | "update" | "retire"
+   - "add": user keeps surfacing a theme in Reframes that isn't yet in their trigger profile. Propose adding it.
+     proposed: { label: string (4-40 chars), category: "work" | "relationship" | "health" | "self" | "environment" | "other" }
+   - "update": an existing trigger needs its label refined (user produced a more precise name in recent Reframes).
+     proposed: { id: existing trigger id, label: new label, category: optional }
+   - "retire": a trigger hasn't been encountered in 30+ days AND user's recent EODs show stability around it.
+     proposed: { id: existing trigger id }
+
+2. anchors — operation: "add" | "retire"
+   - "add": user's pattern across EODs suggests a clear cue → action pairing they're already half-doing.
+     proposed: { cue: string (4-40 chars), action: string (4-60 chars) }
+   - "retire": an anchor hasn't been referenced or used in 21+ days.
+     proposed: { id: existing anchor id }
+
+3. growth_baseline — operation: "graduate"
+   - User shows sustained capacity growth (consistent EODs, low spiral frequency, named-thing precision improving). Propose moving baseline forward.
+     proposed: { newBaselineLabel: string, evidence_summary: string (under 200 chars) }
+   - Only propose graduation if there are at least 14 days of evidence and clear directional movement.
+
+EVIDENCE REFERENCES:
+Each proposal must include an evidence array — IDs or short refs to the specific reframes/eods/checkins that informed it. The user sees these so they can verify your reasoning.
+
+OUTPUT CONTRACT — HARD REQUIREMENT:
+Return ONLY valid JSON:
+{
+  "proposals": [
+    {
+      "target": "trigger_profile" | "anchors" | "growth_baseline",
+      "operation": "add" | "update" | "retire" | "graduate",
+      "targetItemId": string or null,
+      "proposed": { /* payload matching target+operation */ },
+      "reasoning": string (60-400 chars, shown verbatim to user, must reference specific evidence),
+      "evidence": [ string refs to sessions/eods, 1-5 entries ]
+    }
+  ]
+}
+0-3 proposals. Empty array if nothing strong is showing. No markdown. JSON only.`;
+
+      // Compact the context payload for the AI. Strip anything that isn't
+      // signal-bearing for proposal generation.
+      const compactReframes = recentReframes.map((r, i) => ({
+        ref: `reframe_${i}`,
+        ts: r.timestamp || r.ts || null,
+        mode: r.mode || null,
+        named: r.named_thing || r.preciseName || null,
+        themeHint: typeof r.input === "string" ? r.input.slice(0, 200) : null
+      }));
+      const compactEod = recentEod.map((e, i) => ({
+        ref: `eod_${i}`,
+        ts: e.timestamp || e.ts || null,
+        composure: e.composure || null,
+        note: typeof e.note === "string" ? e.note.slice(0, 200) : null
+      }));
+      const compactCheckins = recentCheckins.map((c, i) => ({
+        ref: `checkin_${i}`,
+        ts: c.timestamp || c.ts || null,
+        sleep: c.sleep ?? null,
+        energy: c.energy ?? null,
+        mood: c.mood ?? null
+      }));
+
+      const userMessage = `CURRENT ARTIFACTS:
+Trigger profile: ${JSON.stringify(triggerProfile.triggers || [])}
+Anchors: ${JSON.stringify(anchors)}
+Growth baseline: ${JSON.stringify(growthBaseline)}
+
+RECENT EVIDENCE:
+Reframes (${compactReframes.length}): ${JSON.stringify(compactReframes)}
+EODs (${compactEod.length}): ${JSON.stringify(compactEod)}
+Check-ins (${compactCheckins.length}): ${JSON.stringify(compactCheckins)}
+
+SESSION COUNT: ${sessionCount}
+ALREADY PENDING TARGETS (avoid duplicates): ${JSON.stringify(existingPendingTargets)}
+
+Propose 0-3 updates. Empty array is correct when evidence is thin.`;
+
+      const ppController = new AbortController();
+      const ppTimeout = setTimeout(() => ppController.abort(), 20000);
+      try {
+        const ppResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          signal: ppController.signal,
+          body: JSON.stringify({
+            model: "gpt-4o",
+            max_tokens: 1200,
+            temperature: 0.3,
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: proposeSystemPrompt },
+              { role: "user", content: userMessage }
+            ]
+          })
+        });
+        const ppData = await ppResponse.json();
+        if (!ppResponse.ok) {
+          console.error("Propose-update API error:", JSON.stringify(ppData));
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Proposal generation failed.", fallback: true }) };
+        }
+
+        const rawText = ppData.choices?.[0]?.message?.content || "";
+        let parsedPp;
+        try {
+          parsedPp = JSON.parse(rawText.replace(/^```json\s*|\s*```$/g, "").trim());
+        } catch (e) {
+          console.error("Propose-update JSON parse failed:", rawText);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Proposal parse failed.", fallback: true }) };
+        }
+
+        const proposalsRaw = Array.isArray(parsedPp.proposals) ? parsedPp.proposals : [];
+        const ALLOWED_TARGETS = ["trigger_profile", "anchors", "growth_baseline"];
+        const ALLOWED_OPS = ["add", "update", "retire", "graduate"];
+        const validated = proposalsRaw
+          .slice(0, 3)
+          .map(p => {
+            if (!p || typeof p !== "object") return null;
+            if (!ALLOWED_TARGETS.includes(p.target)) return null;
+            if (!ALLOWED_OPS.includes(p.operation)) return null;
+            if (!p.proposed || typeof p.proposed !== "object") return null;
+            if (typeof p.reasoning !== "string" || p.reasoning.trim().length < 30) return null;
+            const reasoning = p.reasoning.trim().slice(0, 600);
+            const evidence = Array.isArray(p.evidence) ? p.evidence.filter(e => typeof e === "string").slice(0, 5) : [];
+            const targetItemId = typeof p.targetItemId === "string" ? p.targetItemId : null;
+            return {
+              target: p.target,
+              operation: p.operation,
+              targetItemId,
+              proposed: p.proposed,
+              reasoning,
+              evidence,
+              sourceContext: { sessionCount, model: "gpt-4o" }
+            };
+          })
+          .filter(Boolean);
+
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({ proposals: validated, source: "ai" })
+        };
+      } catch (err) {
+        console.error("Propose-update error:", err.message);
+        return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Proposal generation failed.", fallback: true }) };
+      } finally {
+        clearTimeout(ppTimeout);
+      }
+    }
+    // --------------------------------------------------------------------
+    // END PROPOSE_UPDATE MODE
+    // --------------------------------------------------------------------
+
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "No input provided." }) };
