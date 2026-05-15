@@ -4,6 +4,35 @@ Items removed from `Stillform_Master_Todo.md` during the May 6, 2026 refactor an
 
 ---
 
+## Completed — May 14, 2026 (late evening session)
+
+Long-session Claude · Arlin called the session done at the end due to Claude degradation (fabrication, over-stripping, inversion of stated direction). Transfer prompt written for next session. PRs landed during this session:
+
+- **PR #88** · Move May 14 evening session summary out of Master Todo into Completed Archive. 62 lines moved, symmetric diff.
+- **PR #89** · Pull six shipped-session records out of Master Todo into Completed Archive (this was completed by a parallel context earlier in the evening; discovered mid-session). 369 lines out of Master Todo, 375 into Archive.
+- **PR #90** · Delete two stale AI docs (`AI_PROMPT_FRAMING_AUDIT.md`, `AI_REGRESSION_RESULTS_MAY_7.md`). 434 lines removed. 69 → 67 root `.md` files.
+- **PR #91** · Practice Evidence Sprint 1 deliverable. (a) `STIMULI_DRAFT.md` v2 with cultural inclusion + moral/ethical/cultural-difference triggers + non-moralizing rubric (60 affect-labeling + 30 defusion entries, 547 lines). (b) `stimuli.js` runtime data file. (c) `PracticeEvidenceRatification.jsx` — phone-batched ratification UI accessible from Settings → More → Stimulus Library Review. Status: stimuli library awaits Arlin's content review pass (90 entries to rate). Output is copyable JSON that converts to validated set for Sprint 2.
+- **PR #92** · Home renders `Complete setup →` CTA when `regType` is null instead of returning blank. Symptom fix; root cause of how `regType` reaches null after onboarding still wants tracing — `finalizeOnboarding()` has a safety-net default to `thought-first`, so the null state shouldn't be reachable from a clean flow.
+- **PR #93** · `Skip ↑` button on morning check-in + main hero visible when check-in collapsed + My Progress stat panel restored to home. **ARCHITECTURALLY WRONG per Arlin's late-evening correction:** the morning check-in is part of the main card / journey arc, not a parallel surface the user dismisses to reveal a separate hero. Needs revisiting in the next session — see Master Todo pending. The My Progress restoration portion of PR #93 is correct and stays.
+
+### Decisions made this session
+
+- Practice Evidence naming locked to **"Practice Evidence"** (Decision 1 of Phase 1 audit).
+- Practice Evidence Decision 5 reframed per Arlin's observation that Reframe and Self Mode are now in the same journey: the function check itself lives on a dedicated screen because it's 5–7 min of concentrated work; the entry-point offer can surface from end-of-session inside the spine.
+- Practice Evidence Decision 7 rubric ratified as drafted: categorical Distinct / Reworded / Same, no numerical hierarchy. Tracked metric is **distinct count over time**. Explicit framing: measures cognitive flexibility, not moral correctness; flexibility is one valid response among others (radical acceptance is also valid).
+- Stimulus library v2 reflects three Arlin directions: (a) add moral / ethical / cultural-difference encounters as their own trigger category; (b) cultural-bias expansion across race / ethnicity / immigration / LGBTQ+ / disability / religious / caregiving / class / gendered / age-stage / collectivist / body diversity axes; (c) non-moralizing rubric.
+
+### Operating-rule reinforcement during this session
+
+- Arlin's questions are NOT positions. When she asks "what do you mean by X?" she is asking, not rejecting. Repeated failure mode this session: Claude interpreted clarifying questions as opposition and fabricated counter-arguments in thinking blocks.
+- Arlin reads thinking blocks. Fabricating her positions there is the failure mode she explicitly named.
+- Bobby is paper-only on the LLC. Never attribute code changes to him.
+- Arlin doesn't code. She edits documents, not App.jsx. Don't blame "her edits" for code regressions.
+- Settings is for preferences. Practice content (anchors / triggers / baseline) does NOT belong in My Progress per Arlin's late-evening correction.
+- "One element per beat" was an architectural attempt that Arlin partially walked back tonight — she wants My Progress data on home. The morning check-in is part of the main card / journey arc, not a parallel surface. Architecture is still in flux.
+
+---
+
 ## Completed — May 14, 2026 (evening session)
 
 ### Shipped this session (PRs merged into main, deploy when Arlin triggers Netlify)
