@@ -22,18 +22,20 @@ import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
  * Persistent across beats:
  *   - Stillform wordmark (AppHeader, top)
  *   - Quick Breathe pill (bottom-right — stabilization safety valve, ONE exception)
- *   - Quiet Progress / Library / Settings links (HomeFooter, bottom)
+ *   - Quiet Progress / Library / FAQ / Settings links (HomeFooter, bottom)
  *
  * Copy follows canon's "surface gets practice action, science name stays
  * in code" rule. No "Composure is the foundation." No "you are the
  * architect." No wellness greeting. No status strips.
  *
- * Phase 1 scope: visual + structural only. Button onClick is a no-op —
- * the Notice → Reframe → Close spine routes in Phase 2.
+ * Phase 2: main beat 'Begin' now wires to the spine (Notice → Reframe →
+ * Close). Morning check-in and EOD wrap remain no-ops until Phase 2.5.
  *
  * Debug: ?beat=morning|main|eod|wind-down forces a specific beat for audit.
+ *
+ * @param {function(): void} onBeginSession — enters the spine for a main session.
  */
-export default function Home() {
+export default function Home({ onBeginSession }) {
   // Re-detect beat on mount + when localStorage signals change. For Phase 1
   // a single read on mount is sufficient for the visual audit; production
   // will likely subscribe to a TimeKeeper tick or visibility change.
@@ -56,8 +58,8 @@ export default function Home() {
 
       <main className="sf-page sf-page--hero">
         <div className="sf-fade-enter">
-          {beat === "morning" ? <MorningBeat /> : null}
-          {beat === "main" ? <MainBeat /> : null}
+          {beat === "morning" ? <MorningBeat onBegin={onBeginSession} /> : null}
+          {beat === "main" ? <MainBeat onBegin={onBeginSession} /> : null}
           {beat === "eod" ? <EodBeat /> : null}
           {beat === "wind-down" ? <WindDownBeat /> : null}
         </div>
@@ -67,9 +69,9 @@ export default function Home() {
         <HomeFooter onNavigate={() => { /* Phase 3+ */ }} />
       </div>
 
-      <QuickBreathe onTap={() => { /* Phase 2 wires the actual breath tool */ }} />
+      <QuickBreathe onTap={() => { /* Phase 2.5 wires the actual breath tool */ }} />
 
-      {/* Phase 1 audit indicator — removed when surfaces become functional in Phase 2. */}
+      {/* Phase 2 audit indicator — removed when all surfaces become functional. */}
       <div
         style={{
           position: "fixed",
@@ -80,7 +82,7 @@ export default function Home() {
         }}
       >
         <MonoLabel size="xs" tone="faint">
-          v2 · phase 1 · visual audit
+          v2 · phase 2 · main spine
         </MonoLabel>
       </div>
     </>
@@ -93,26 +95,31 @@ export default function Home() {
  * Each beat is its own component so the file structure mirrors the canon:
  * one element per beat, sequential. Adding a beat means adding a component,
  * not adding panels to an existing surface.
+ *
+ * Phase 2: main beat is wired to the spine. Morning and EOD wire in Phase 2.5
+ * once check-in and EOD flows are spec'd against current data shapes.
  * -------------------------------------------------------------------- */
 
-function MorningBeat() {
+function MorningBeat({ onBegin }) {
   return (
     <BeatLayout
       label="Today · morning"
       headline="Open the day."
       body="Three minutes to name where you start, so the day has a shape."
       actionLabel="Begin check-in"
+      onAction={onBegin}
     />
   );
 }
 
-function MainBeat() {
+function MainBeat({ onBegin }) {
   return (
     <BeatLayout
       label="Today"
       headline="Begin a session."
       body="Notice what's present. Build a precise name for it. Add it to your library."
       actionLabel="Begin"
+      onAction={onBegin}
     />
   );
 }
@@ -147,9 +154,9 @@ function WindDownBeat() {
 /**
  * BeatLayout — internal layout primitive shared by all four beats.
  * Keeps spacing rhythm and action treatment consistent across beats.
- * If a beat has no action, action area is omitted entirely.
+ * If a beat has no action OR no handler, action area is omitted entirely.
  */
-function BeatLayout({ label, headline, body, actionLabel }) {
+function BeatLayout({ label, headline, body, actionLabel, onAction }) {
   return (
     <div>
       <EditorialBlock
@@ -161,7 +168,10 @@ function BeatLayout({ label, headline, body, actionLabel }) {
 
       {actionLabel ? (
         <div style={{ marginTop: "var(--sf-space-48)" }}>
-          <Button variant="primary" onClick={() => { /* Phase 2 wires the spine */ }}>
+          <Button
+            variant="primary"
+            onClick={() => typeof onAction === "function" && onAction()}
+          >
             {actionLabel}
           </Button>
         </div>

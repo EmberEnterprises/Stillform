@@ -27,6 +27,12 @@
   transition-timing-function: var(--sf-ease-shutter);
 }
 
+.sf-v2 .sf-btn-primary:disabled,
+.sf-v2 .sf-btn-primary[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
 .sf-v2 .sf-btn-secondary:hover,
 .sf-v2 .sf-btn-secondary:focus-visible {
   border-color: var(--sf-accent-line);
@@ -37,6 +43,12 @@
   transform: scale(0.98);
   transition-duration: var(--sf-motion-quick);
   transition-timing-function: var(--sf-ease-shutter);
+}
+
+.sf-v2 .sf-btn-secondary:disabled,
+.sf-v2 .sf-btn-secondary[aria-disabled="true"] {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .sf-v2 .sf-btn-ghost:hover,
@@ -51,7 +63,6 @@
 
 /* ---------------------------------------------------------------------
  * INSTRUMENT CARD — top inset highlight gives subtle material depth.
- * Pseudo-element so inline styles don't need to fake it.
  * ------------------------------------------------------------------ */
 
 .sf-v2 .sf-instrument-card {
@@ -70,9 +81,89 @@
 }
 
 /* ---------------------------------------------------------------------
+ * EDITORIAL INPUT — textarea / input treated as writing surface, not form.
+ *
+ * No background, no thick border, no rounded corners. A single 0.5px
+ * hairline underneath that brightens to accent on focus. The user is
+ * writing on a notepad, not filling out a form.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-input,
+.sf-v2 .sf-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 0.5px solid var(--sf-border-hairline);
+  color: var(--sf-text-primary);
+  font-family: var(--sf-font-sans);
+  font-size: 17px;
+  line-height: 1.65;
+  letter-spacing: 0;
+  padding: var(--sf-space-12) 0;
+  resize: none;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  box-shadow: none;
+  transition: border-color var(--sf-motion-default) var(--sf-ease-prestige);
+}
+
+.sf-v2 .sf-input::placeholder,
+.sf-v2 .sf-textarea::placeholder {
+  color: var(--sf-text-faint);
+  font-family: var(--sf-font-sans);
+  font-style: italic;
+  font-weight: 300;
+}
+
+.sf-v2 .sf-input:focus,
+.sf-v2 .sf-textarea:focus {
+  border-bottom-color: var(--sf-accent-line);
+  outline: none;
+}
+
+/* ---------------------------------------------------------------------
+ * SCAFFOLDING CHIP — small, mono-styled, faint. NOT the primary action.
+ *
+ * Per canon framing law: free-text precision is the practice; chips are
+ * scaffolding for users who freeze. They visually subordinate to the
+ * textarea above them.
+ * ------------------------------------------------------------------ */
+
+.sf-v2 .sf-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: transparent;
+  border: 0.5px solid var(--sf-border-hairline);
+  border-radius: 999px;
+  color: var(--sf-text-faint);
+  font-family: var(--sf-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  transition:
+    border-color var(--sf-motion-default) var(--sf-ease-prestige),
+    color var(--sf-motion-default) var(--sf-ease-prestige);
+}
+
+.sf-v2 .sf-chip:hover,
+.sf-v2 .sf-chip:focus-visible {
+  border-color: var(--sf-border-emphasis);
+  color: var(--sf-text-quiet);
+}
+
+.sf-v2 .sf-chip[aria-selected="true"] {
+  border-color: var(--sf-accent-line);
+  color: var(--sf-accent);
+}
+
+/* ---------------------------------------------------------------------
  * PAGE ENTRANCE — fade-in from black, sequential timing.
- * Reference: Cartier reveal, MUBI crossfade. Hero appears first, then
- * labels at +200ms, body at +350ms.
  * ------------------------------------------------------------------ */
 
 @keyframes sfFadeUp {
@@ -102,6 +193,34 @@
   animation-delay: 500ms;
 }
 
+/* ---------------------------------------------------------------------
+ * AI THINKING — restrained pulse rather than spinner. Three small dots.
+ * Per design system: "minimal — a single small mono label with a single
+ * dot animation, not a spinner."
+ * ------------------------------------------------------------------ */
+
+@keyframes sfDotPulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.sf-v2 .sf-thinking-dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--sf-accent);
+  margin: 0 2px;
+  animation: sfDotPulse 1.6s var(--sf-ease-prestige) infinite;
+}
+
+.sf-v2 .sf-thinking-dot:nth-child(2) {
+  animation-delay: 0.25s;
+}
+.sf-v2 .sf-thinking-dot:nth-child(3) {
+  animation-delay: 0.5s;
+}
+
 /* Respect user preference for reduced motion. */
 @media (prefers-reduced-motion: reduce) {
   .sf-v2 .sf-fade-enter,
@@ -114,5 +233,10 @@
   .sf-v2 .sf-btn-primary:active,
   .sf-v2 .sf-btn-secondary:active {
     transform: none;
+  }
+
+  .sf-v2 .sf-thinking-dot {
+    animation: none;
+    opacity: 0.6;
   }
 }
