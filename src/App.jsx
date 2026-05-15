@@ -27064,6 +27064,16 @@ const isSignalProfileConfigured = () => {
                     body/thought-first" rationale lives in the FAQ and the
                     Mirror sheet. CTA subtitle is now the sole action prompt. */}
 
+                {/* Phase 3 hotfix (May 15, 2026) — gate the entire showBio-
+                    FilterSuggestion ternary (which renders the Begin session
+                    CTA, rep counter, hero button, last-session info) on
+                    !wind-down. Phase 3 added bedtime content at the top of
+                    the hero card but neglected to hide this Begin-session
+                    block during wind-down; without this gate both surfaces
+                    would render together, violating CANON §10 (no activation
+                    in parasympathetic landing). */}
+                {currentBeat !== "wind-down" && (
+                <>
                 {showBioFilterSuggestion && false /* HIDDEN ON HOME May 14, 2026 evening per Arlin direction. The BioFilterSuggestion routing card violated one-element-per-beat — it competed with the Hero CTA as a second card on home. Routing logic (depleted/pain/sleep → body-first) needs to fire INSIDE the spine when "Begin session" is tapped, not as a home-side pre-session gate. Logic preserved (showBioFilterSuggestion state + BioFilterSuggestion component intact); only the home render is gated off. */ ? (
                   /* Bio-filter override — suggestive, with skip back to normal pathway.
                      Choice persists per (date, bioFilter snapshot) so re-prompts only fire when state changes. */
@@ -27586,6 +27596,8 @@ const isSignalProfileConfigured = () => {
 
                   </>
                 )}
+                </>
+                )}{/* end Phase 3 hotfix wind-down gate on Begin session content */}
               </div>
               )}
 
