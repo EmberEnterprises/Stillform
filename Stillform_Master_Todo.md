@@ -3,6 +3,16 @@
 
 ---
 
+## 🟠 UAT FEEDBACK — Subscription page lacks framing (May 15, 2026, Arlin's father-in-law)
+
+Tester completed Introduction + Calibration, then landed on the subscription page. His reaction: felt like a **money grab** / almost like a **scam**. The subscription page does not explain what Stillform IS or why he should invest. There is no value framing between completing calibration and being asked to pay.
+
+Tester's suggestion: cover sheet or description before the paywall.
+
+Real conversion-killer. Note for now, not focus — Arlin flagged this is a note, not the current build priority. Surface when subscription page work comes up.
+
+---
+
 ## 🛠️ NEEDS REVISIT — Home architecture (May 14, 2026 late evening, Arlin direction)
 
 PR #93 shipped a `Skip ↑` button on the morning check-in that collapses it back to the strip teaser, AND made the main hero card render alongside the collapsed check-in. **This inverts the actual architecture.** The morning check-in is *part of* the main card / journey arc — it's the morning beat of the spine, not a parallel surface the user dismisses to reveal a separate "real" hero.
