@@ -5633,7 +5633,7 @@ const saveTriggerProfile = (profile) => {
   } catch { return null; }
 };
 
-const addTrigger = ({ label, category }) => {
+const addTrigger = ({ label, category }, historyMeta = null) => {
   const trimmed = typeof label === "string" ? label.trim() : "";
   if (!trimmed) return null;
   const validCategory = TRIGGER_PROFILE_CATEGORIES.includes(category) ? category : "other";
@@ -5654,10 +5654,20 @@ const addTrigger = ({ label, category }) => {
   };
   profile.triggers.push(newTrigger);
   saveTriggerProfile(profile);
+  // Phase 6e — audit trail for every trigger mutation. historyMeta passed
+  // from applyApprovedProposal carries proposal lineage; manual edits pass
+  // null and get source: "manual".
+  appendArtifactHistoryEntry("trigger_profile", {
+    change: { type: "add", after: newTrigger },
+    proposalId: historyMeta?.proposalId || null,
+    reasoning: historyMeta?.reasoning || null,
+    decisionReasoning: historyMeta?.decisionReasoning || null,
+    source: historyMeta ? (historyMeta.source || "ai_proposal") : "manual"
+  });
   return newTrigger;
 };
 
-const updateTrigger = (id, updates) => {
+const updateTrigger = (id, updates, historyMeta = null) => {
   if (!id || !updates || typeof updates !== "object") return null;
   const profile = getTriggerProfile();
   const idx = profile.triggers.findIndex(t => t.id === id);
@@ -5672,19 +5682,38 @@ const updateTrigger = (id, updates) => {
   if (TRIGGER_PROFILE_CATEGORIES.includes(updates.category)) {
     allowed.category = updates.category;
   }
+  // No-op guard: if nothing actually changed, skip the write + audit entry.
+  // Prevents noise in change history from re-saves that don't change state.
+  const hasChange = Object.keys(allowed).some(k => allowed[k] !== existing[k]);
+  if (!hasChange) return existing;
   const updated = { ...existing, ...allowed };
   profile.triggers[idx] = updated;
   saveTriggerProfile(profile);
+  appendArtifactHistoryEntry("trigger_profile", {
+    change: { type: "update", before: existing, after: updated },
+    proposalId: historyMeta?.proposalId || null,
+    reasoning: historyMeta?.reasoning || null,
+    decisionReasoning: historyMeta?.decisionReasoning || null,
+    source: historyMeta ? (historyMeta.source || "ai_proposal") : "manual"
+  });
   return updated;
 };
 
-const deleteTrigger = (id) => {
+const deleteTrigger = (id, historyMeta = null) => {
   if (!id) return false;
   const profile = getTriggerProfile();
+  const removed = profile.triggers.find(t => t.id === id);
   const next = profile.triggers.filter(t => t.id !== id);
   if (next.length === profile.triggers.length) return false;
   profile.triggers = next;
   saveTriggerProfile(profile);
+  appendArtifactHistoryEntry("trigger_profile", {
+    change: { type: "retire", before: removed || { id } },
+    proposalId: historyMeta?.proposalId || null,
+    reasoning: historyMeta?.reasoning || null,
+    decisionReasoning: historyMeta?.decisionReasoning || null,
+    source: historyMeta ? (historyMeta.source || "ai_proposal") : "manual"
+  });
   return true;
 };
 
@@ -18166,19 +18195,32 @@ function MyProgress({ onBack, habitAnchorsState }) {
   // helper, records an audit-trail entry, and moves the proposal to decided.
   // All paths defensive — applied=false is acceptable (proposal still gets
   // marked approved so it leaves the pending queue; user can re-propose).
+  //
+  // Audit recording (Phase 6e refactor): trigger_profile helpers now handle
+  // their own audit-entry append (they take historyMeta to preserve proposal
+  // lineage when called from here). Anchors + growth_baseline still record
+  // via the explicit appendArtifactHistoryEntry call below since they don't
+  // have module helpers. Double-recording is prevented by skipping the
+  // explicit call when target is trigger_profile.
   const applyApprovedProposal = (proposal, decisionReasoning) => {
     let changeRecord = { type: proposal.operation };
     let applied = false;
+    const historyMeta = {
+      proposalId: proposal.id,
+      reasoning: proposal.reasoning,
+      decisionReasoning: decisionReasoning || null,
+      source: "ai_proposal"
+    };
     try {
       if (proposal.target === "trigger_profile") {
         if (proposal.operation === "add") {
-          const result = addTrigger({ label: proposal.proposed.label, category: proposal.proposed.category });
+          const result = addTrigger({ label: proposal.proposed.label, category: proposal.proposed.category }, historyMeta);
           if (result) { changeRecord.after = result; applied = true; }
         } else if (proposal.operation === "update") {
-          const result = updateTrigger(proposal.proposed.id, { label: proposal.proposed.label, category: proposal.proposed.category });
+          const result = updateTrigger(proposal.proposed.id, { label: proposal.proposed.label, category: proposal.proposed.category }, historyMeta);
           if (result) { changeRecord.after = result; applied = true; }
         } else if (proposal.operation === "retire") {
-          const ok = deleteTrigger(proposal.proposed.id);
+          const ok = deleteTrigger(proposal.proposed.id, historyMeta);
           if (ok) { changeRecord.before = { id: proposal.proposed.id }; applied = true; }
         }
       } else if (proposal.target === "anchors") {
@@ -18227,7 +18269,10 @@ function MyProgress({ onBack, habitAnchorsState }) {
       // trail intentionally only records ACTUAL changes.
       applied = false;
     }
-    if (applied) {
+    // Skip explicit audit append for trigger_profile (helpers already recorded
+    // it with full proposal lineage). Anchors + growth_baseline still need
+    // explicit record since they don't go through module helpers.
+    if (applied && proposal.target !== "trigger_profile") {
       appendArtifactHistoryEntry(proposal.target, {
         change: changeRecord,
         proposalId: proposal.id,
