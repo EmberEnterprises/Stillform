@@ -26841,6 +26841,115 @@ const isSignalProfileConfigured = () => {
                   );
                 })()}
 
+                {/* ── PHASE 4: WHAT YOU CARRY — current-state artifacts
+                     surfaced on the Journey card per Arlin direction May 15,
+                     2026. The Journey "carries" anchors / triggers watched /
+                     capacity baseline with the user — context they bring to
+                     every session. Read-only display in Phase 4. Phase 6 will
+                     add AI-mediated update proposals + reasoning + user
+                     approval for these artifacts.
+
+                     PR #100 placed Trigger Profile + Habit Anchors + Capacity
+                     Baseline EDITORS in My Progress (wrong per architecture
+                     reshape — those surfaces belong in the Journey context).
+                     This Phase 4 surface is the CURRENT-STATE display; the
+                     PR #100 editors stay temporarily in My Progress as
+                     edit access until Phase 6 supersedes user-edit flows
+                     with AI-mediated proposals.
+
+                     Skipped during wind-down beat (parasympathetic landing;
+                     no cognitive content per CANON §10). Skipped entirely
+                     if no artifacts exist — empty state = block doesn't
+                     render, no "you have nothing" nag. */}
+                {currentBeat !== "wind-down" && (() => {
+                  const _p4_anchors = (() => {
+                    try {
+                      const r = localStorage.getItem("stillform_anchors");
+                      const a = r ? JSON.parse(r) : [];
+                      return Array.isArray(a) ? a : [];
+                    } catch { return []; }
+                  })();
+                  const _p4_triggerProfile = (() => {
+                    try { return getTriggerProfile(); } catch { return { triggers: [] }; }
+                  })();
+                  const _p4_baseline = (() => {
+                    try {
+                      const r = localStorage.getItem("stillform_growth_baseline");
+                      return r ? JSON.parse(r) : null;
+                    } catch { return null; }
+                  })();
+                  const _p4_currentStage = (() => {
+                    try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; }
+                  })();
+
+                  const _p4_hasAnchors = _p4_anchors.length > 0;
+                  const _p4_hasTriggers = (_p4_triggerProfile?.triggers || []).length > 0;
+                  const _p4_hasBaseline = _p4_baseline && typeof _p4_baseline.stage === "number";
+
+                  if (!_p4_hasAnchors && !_p4_hasTriggers && !_p4_hasBaseline) return null;
+
+                  // Most-recent anchor surfaces (user can have multiple;
+                  // Phase 6 AI mediation will refine relevance).
+                  const _p4_topAnchor = _p4_hasAnchors ? _p4_anchors[_p4_anchors.length - 1] : null;
+
+                  // Top 3 triggers by recency to keep the line scannable.
+                  const _p4_topTriggers = _p4_hasTriggers
+                    ? (_p4_triggerProfile.triggers || [])
+                        .slice()
+                        .sort((a, b) => {
+                          const aL = a.lastSeen || a.createdAt || "";
+                          const bL = b.lastSeen || b.createdAt || "";
+                          return bL.localeCompare(aL);
+                        })
+                        .slice(0, 3)
+                        .map(t => t.label)
+                        .filter(Boolean)
+                    : [];
+
+                  // Growth delta: current stage minus baseline stage. Both
+                  // default to 1 so delta defaults to 0 when no real data
+                  // (no spurious "+1 from baseline" for fresh users).
+                  const _p4_baselineStage = _p4_baseline?.stage || 1;
+                  const _p4_growthDelta = _p4_currentStage - _p4_baselineStage;
+
+                  return (
+                    <div style={{
+                      marginBottom: 20,
+                      padding: "12px 0",
+                      borderTop: "0.5px solid var(--border-printed)",
+                      borderBottom: "0.5px solid var(--border-printed)",
+                      display: "flex", flexDirection: "column", gap: 6
+                    }}>
+                      {_p4_topAnchor && (
+                        <div className="t-body-sm quiet" style={{
+                          fontSize: 13, color: "var(--text-muted)",
+                          letterSpacing: "0.01em", lineHeight: 1.5
+                        }}>
+                          {_p4_topAnchor.cue}
+                          {_p4_topAnchor.action ? ` → ${_p4_topAnchor.action}` : ""}
+                        </div>
+                      )}
+                      {_p4_topTriggers.length > 0 && (
+                        <div className="t-body-sm quiet" style={{
+                          fontSize: 13, color: "var(--text-muted)",
+                          letterSpacing: "0.01em", lineHeight: 1.5
+                        }}>
+                          Watching: {_p4_topTriggers.join(", ")}
+                        </div>
+                      )}
+                      {_p4_hasBaseline && (
+                        <div className="t-body-sm quiet" style={{
+                          fontSize: 13, color: "var(--text-muted)",
+                          letterSpacing: "0.01em", lineHeight: 1.5
+                        }}>
+                          Stage {_p4_currentStage}
+                          {_p4_growthDelta > 0 ? ` · grown ${_p4_growthDelta} since starting` : ""}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
                     italic line above the CTA echoing the same operating principle
                     as the CTA subtitle ("Start with what the mind is doing") —
