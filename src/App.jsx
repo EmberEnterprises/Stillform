@@ -26946,6 +26946,112 @@ const isSignalProfileConfigured = () => {
                           {_p4_growthDelta > 0 ? ` · grown ${_p4_growthDelta} since starting` : ""}
                         </div>
                       )}
+
+                      {/* ── PHASE 5: SINCE-BASELINE SPARKLINE (May 15, 2026).
+                           Compact cumulative-sessions sparkline from baseline
+                           capture date to today. Inline SVG, no chart lib.
+                           Renders only when baseline exists AND at least 3
+                           days have passed since capture (below threshold =
+                           text row alone, no premature line viz).
+
+                           Future iterations (post-launch or follow-up phase):
+                           30-day attribution overlay, custom date scoping
+                           UI. For now the sparkline tells the since-baseline
+                           story with no scoping controls — keeps the journey
+                           card quiet. */}
+                      {_p4_hasBaseline && (() => {
+                        const _p5_baselineDate = (() => {
+                          try { return new Date(_p4_baseline.capturedAt); }
+                          catch { return null; }
+                        })();
+                        if (!_p5_baselineDate || isNaN(_p5_baselineDate.getTime())) return null;
+
+                        const _p5_dayMs = 24 * 60 * 60 * 1000;
+                        const _p5_today = new Date();
+                        const _p5_startDay = Math.floor(_p5_baselineDate.getTime() / _p5_dayMs);
+                        const _p5_todayDay = Math.floor(_p5_today.getTime() / _p5_dayMs);
+                        const _p5_totalDays = _p5_todayDay - _p5_startDay + 1;
+
+                        // Threshold — need at least 3 days of practice history
+                        // to make a meaningful line. Below that, no viz.
+                        if (_p5_totalDays < 3) return null;
+
+                        const _p5_sessions = (() => {
+                          try { return getSessionsFromStorage(); } catch { return []; }
+                        })();
+
+                        // Per-day session-count buckets, then cumulative roll.
+                        // Sessions before baseline contribute to the starting
+                        // floor (baseline.sessionsCount) so the line opens
+                        // at the captured baseline level rather than zero.
+                        const _p5_perDay = new Array(_p5_totalDays).fill(0);
+                        for (const _p5_s of _p5_sessions) {
+                          try {
+                            const _p5_ts = _p5_s?.timestamp;
+                            if (!_p5_ts) continue;
+                            const _p5_sd = Math.floor(new Date(_p5_ts).getTime() / _p5_dayMs);
+                            if (_p5_sd < _p5_startDay || _p5_sd > _p5_todayDay) continue;
+                            const _p5_idx = _p5_sd - _p5_startDay;
+                            _p5_perDay[_p5_idx]++;
+                          } catch {}
+                        }
+                        const _p5_baselineFloor = Math.max(0, _p4_baseline?.sessionsCount || 0);
+                        const _p5_cumulative = [];
+                        let _p5_running = _p5_baselineFloor;
+                        for (let _p5_i = 0; _p5_i < _p5_totalDays; _p5_i++) {
+                          _p5_running += _p5_perDay[_p5_i];
+                          _p5_cumulative.push(_p5_running);
+                        }
+
+                        const _p5_min = _p5_baselineFloor;
+                        const _p5_max = _p5_cumulative[_p5_cumulative.length - 1];
+                        // If no growth, no line to draw — show nothing.
+                        if (_p5_max <= _p5_min) return null;
+
+                        // SVG geometry — 200 wide, 40 tall, 4px padding all sides
+                        const _p5_w = 200, _p5_h = 40, _p5_pad = 4;
+                        const _p5_plotW = _p5_w - 2 * _p5_pad;
+                        const _p5_plotH = _p5_h - 2 * _p5_pad;
+                        const _p5_pointX = (_p5_i) =>
+                          _p5_pad + (_p5_totalDays === 1 ? 0 : (_p5_i / (_p5_totalDays - 1)) * _p5_plotW);
+                        const _p5_pointY = (_p5_v) =>
+                          _p5_pad + _p5_plotH - ((_p5_v - _p5_min) / (_p5_max - _p5_min)) * _p5_plotH;
+
+                        const _p5_linePath = _p5_cumulative
+                          .map((_p5_v, _p5_i) =>
+                            `${_p5_i === 0 ? "M" : "L"} ${_p5_pointX(_p5_i).toFixed(2)},${_p5_pointY(_p5_v).toFixed(2)}`)
+                          .join(" ");
+                        const _p5_areaPath =
+                          `M ${_p5_pointX(0).toFixed(2)},${(_p5_h - _p5_pad).toFixed(2)} ` +
+                          _p5_cumulative
+                            .map((_p5_v, _p5_i) =>
+                              `L ${_p5_pointX(_p5_i).toFixed(2)},${_p5_pointY(_p5_v).toFixed(2)}`)
+                            .join(" ") +
+                          ` L ${_p5_pointX(_p5_totalDays - 1).toFixed(2)},${(_p5_h - _p5_pad).toFixed(2)} Z`;
+
+                        return (
+                          <div style={{
+                            marginTop: 4,
+                            display: "flex", flexDirection: "column",
+                            alignItems: "flex-start", gap: 2
+                          }}>
+                            <svg width={_p5_w} height={_p5_h} viewBox={`0 0 ${_p5_w} ${_p5_h}`}
+                                 aria-label="Cumulative sessions since baseline"
+                                 role="img"
+                                 style={{ display: "block" }}>
+                              <path d={_p5_areaPath} fill="var(--amber)" opacity="0.08" />
+                              <path d={_p5_linePath} fill="none" stroke="var(--text-cream)"
+                                    strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <div style={{
+                              fontSize: 11, color: "var(--text-muted)", opacity: 0.7,
+                              letterSpacing: "0.04em"
+                            }}>
+                              {_p5_min} → {_p5_max} sessions · {_p5_totalDays} days
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })()}
