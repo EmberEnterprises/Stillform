@@ -5733,6 +5733,39 @@ const incrementTriggerEncounter = (id) => {
   return updated;
 };
 
+// Phase 6f — growth baseline module helper with audit recording.
+// Previously, baseline writes happened inline at 5 call sites (calibration
+// seed, retroactive seed, two user-reset surfaces, and applyApprovedProposal
+// graduate branch). Each used localStorage.setItem directly. Centralizing
+// here means every baseline mutation records an audit entry — manual edits
+// + AI-mediated graduations both have complete trail with reasoning when
+// available.
+const saveGrowthBaseline = (next, historyMeta = null) => {
+  if (!next || typeof next !== "object") return null;
+  let previous = null;
+  try {
+    const raw = localStorage.getItem("stillform_growth_baseline");
+    previous = raw ? JSON.parse(raw) : null;
+  } catch { previous = null; }
+  try {
+    localStorage.setItem("stillform_growth_baseline", JSON.stringify(next));
+  } catch { return null; }
+  // Audit: classify the change. First-ever baseline → "add". Subsequent
+  // writes that change the stage or label → "update" / "graduate" per
+  // operation hint in historyMeta. Default (any other write) → "update".
+  const changeType = !previous
+    ? "add"
+    : (historyMeta?.operation === "graduate" ? "graduate" : "update");
+  appendArtifactHistoryEntry("growth_baseline", {
+    change: { type: changeType, before: previous, after: next },
+    proposalId: historyMeta?.proposalId || null,
+    reasoning: historyMeta?.reasoning || null,
+    decisionReasoning: historyMeta?.decisionReasoning || null,
+    source: historyMeta ? (historyMeta.source || "ai_proposal") : "manual"
+  });
+  return next;
+};
+
 // AI context formatter for Reframe API integration.
 // Returns null when no triggers (so Reframe context block can omit cleanly).
 // Otherwise returns a string formatted for AI consumption — top N triggers
@@ -18224,26 +18257,30 @@ function MyProgress({ onBack, habitAnchorsState }) {
           if (ok) { changeRecord.before = { id: proposal.proposed.id }; applied = true; }
         }
       } else if (proposal.target === "anchors") {
-        const raw = localStorage.getItem("stillform_anchors");
-        const current = raw ? JSON.parse(raw) : [];
-        const arr = Array.isArray(current) ? current : [];
-        if (proposal.operation === "add") {
-          const newAnchor = {
-            id: `anchor_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
-            cue: proposal.proposed.cue,
-            action: proposal.proposed.action,
-            createdAt: new Date().toISOString()
-          };
-          const next = [...arr, newAnchor];
-          localStorage.setItem("stillform_anchors", JSON.stringify(next));
-          changeRecord.after = newAnchor;
-          applied = true;
-        } else if (proposal.operation === "retire") {
-          const next = arr.filter(a => a.id !== proposal.proposed.id);
-          if (next.length !== arr.length) {
-            localStorage.setItem("stillform_anchors", JSON.stringify(next));
-            changeRecord.before = { id: proposal.proposed.id };
+        // Phase 6f — anchors now use persistAnchors (from habitAnchorsState
+        // prop), which updates React state, writes storage, AND records
+        // audit via diff. Fixes a latent bug where Phase 6b's direct
+        // localStorage write left React state stale until next mount.
+        const persistFn = habitAnchorsState?.persistAnchors;
+        const currentAnchors = Array.isArray(habitAnchorsState?.anchors) ? habitAnchorsState.anchors : [];
+        if (typeof persistFn === "function") {
+          if (proposal.operation === "add") {
+            const newAnchor = {
+              id: `anchor_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 6)}`,
+              cue: proposal.proposed.cue,
+              action: proposal.proposed.action,
+              createdAt: new Date().toISOString()
+            };
+            persistFn([...currentAnchors, newAnchor], historyMeta);
+            changeRecord.after = newAnchor;
             applied = true;
+          } else if (proposal.operation === "retire") {
+            const filtered = currentAnchors.filter(a => a.id !== proposal.proposed.id);
+            if (filtered.length !== currentAnchors.length) {
+              persistFn(filtered, historyMeta);
+              changeRecord.before = { id: proposal.proposed.id };
+              applied = true;
+            }
           }
         }
       } else if (proposal.target === "growth_baseline") {
@@ -18257,10 +18294,12 @@ function MyProgress({ onBack, habitAnchorsState }) {
             graduatedAt: new Date().toISOString(),
             evidenceSummary: proposal.proposed.evidence_summary
           };
-          localStorage.setItem("stillform_growth_baseline", JSON.stringify(next));
-          changeRecord.before = current;
-          changeRecord.after = next;
-          applied = true;
+          const saved = saveGrowthBaseline(next, { ...historyMeta, operation: "graduate" });
+          if (saved) {
+            changeRecord.before = current;
+            changeRecord.after = next;
+            applied = true;
+          }
         }
       }
     } catch (err) {
@@ -18269,18 +18308,11 @@ function MyProgress({ onBack, habitAnchorsState }) {
       // trail intentionally only records ACTUAL changes.
       applied = false;
     }
-    // Skip explicit audit append for trigger_profile (helpers already recorded
-    // it with full proposal lineage). Anchors + growth_baseline still need
-    // explicit record since they don't go through module helpers.
-    if (applied && proposal.target !== "trigger_profile") {
-      appendArtifactHistoryEntry(proposal.target, {
-        change: changeRecord,
-        proposalId: proposal.id,
-        reasoning: proposal.reasoning,
-        decisionReasoning,
-        source: "ai_proposal"
-      });
-    }
+    // Phase 6f — all three target helpers now record audit entries with
+    // proposal lineage (addTrigger/updateTrigger/deleteTrigger via
+    // historyMeta, persistAnchors via diff + historyMeta, saveGrowthBaseline
+    // unconditionally with historyMeta). No explicit append needed here —
+    // would double-record.
     approveProposal(proposal.id, decisionReasoning);
     try { window.plausible?.("AI Proposal Approved", { props: { target: proposal.target, operation: proposal.operation, applied: String(applied) } }); } catch {}
     refreshProposals();
@@ -19756,7 +19788,7 @@ function MyProgress({ onBack, habitAnchorsState }) {
                   const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
                   const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
                   try {
-                    localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+                    saveGrowthBaseline({
                       capturedAt: new Date().toISOString(),
                       stage: currentStageId,
                       distinctChips,
@@ -19765,7 +19797,7 @@ function MyProgress({ onBack, habitAnchorsState }) {
                       signalCount: signal,
                       triggerCount: triggers,
                       source: "user-reset",
-                    }));
+                    });
                     window.plausible?.("Baseline Reset");
                     // Force re-read on next render — simplest way is reload the MyProgress screen.
                     // The user is already here; the IIFE will re-evaluate on next state change.
@@ -21070,7 +21102,7 @@ export default function Stillform() {
           triggerCount: triggers,
           source: "retroactive-seed",
         };
-        localStorage.setItem("stillform_growth_baseline", JSON.stringify(baseline));
+        saveGrowthBaseline(baseline);
       }
     } catch {}
 
@@ -22846,9 +22878,42 @@ export default function Stillform() {
       return raw ? JSON.parse(raw) : [];
     } catch { return []; }
   });
-  const persistAnchors = (next) => {
-    setAnchorsState(next);
-    try { localStorage.setItem("stillform_anchors", JSON.stringify(next)); } catch {}
+  const persistAnchors = (next, historyMeta = null) => {
+    // Phase 6f — audit recording via diff. Compare current state vs next
+    // array. Items in next with new ids = additions. Items in prev no
+    // longer in next = retirements. Items without id (legacy pre-Phase 6
+    // entries) skip audit cleanly. AI-mediated changes via approval pass
+    // historyMeta to preserve proposal lineage; manual edits default to
+    // source: "manual".
+    const prev = Array.isArray(anchors) ? anchors : [];
+    const nextArr = Array.isArray(next) ? next : [];
+    setAnchorsState(nextArr);
+    try { localStorage.setItem("stillform_anchors", JSON.stringify(nextArr)); } catch {}
+    try {
+      const prevIds = new Set(prev.map(a => a && a.id).filter(Boolean));
+      const nextIds = new Set(nextArr.map(a => a && a.id).filter(Boolean));
+      const added = nextArr.filter(a => a && a.id && !prevIds.has(a.id));
+      const removed = prev.filter(a => a && a.id && !nextIds.has(a.id));
+      const source = historyMeta ? (historyMeta.source || "ai_proposal") : "manual";
+      for (const a of added) {
+        appendArtifactHistoryEntry("anchors", {
+          change: { type: "add", after: a },
+          proposalId: historyMeta?.proposalId || null,
+          reasoning: historyMeta?.reasoning || null,
+          decisionReasoning: historyMeta?.decisionReasoning || null,
+          source
+        });
+      }
+      for (const a of removed) {
+        appendArtifactHistoryEntry("anchors", {
+          change: { type: "retire", before: a },
+          proposalId: historyMeta?.proposalId || null,
+          reasoning: historyMeta?.reasoning || null,
+          decisionReasoning: historyMeta?.decisionReasoning || null,
+          source
+        });
+      }
+    } catch {}
   };
   const [anchorCueDraft, setAnchorCueDraft] = useState("");
   const [anchorActionDraft, setAnchorActionDraft] = useState("");
@@ -23915,7 +23980,7 @@ const isSignalProfileConfigured = () => {
         const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
         const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
         const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
-        localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+        saveGrowthBaseline({
           capturedAt: new Date().toISOString(),
           stage: currentStageId,
           distinctChips,
@@ -23924,7 +23989,7 @@ const isSignalProfileConfigured = () => {
           signalCount: signal,
           triggerCount: triggers,
           source: "calibration-completion",
-        }));
+        });
       }
     } catch {}
 
@@ -32648,7 +32713,7 @@ const isSignalProfileConfigured = () => {
                           const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
                           const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
                           try {
-                            localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+                            saveGrowthBaseline({
                               capturedAt: new Date().toISOString(),
                               stage: currentStageId,
                               distinctChips,
@@ -32657,7 +32722,7 @@ const isSignalProfileConfigured = () => {
                               signalCount: signal,
                               triggerCount: triggers,
                               source: "user-reset",
-                            }));
+                            });
                             window.plausible?.("Baseline Reset");
                             toggleSettingsSection("baseline");
                             toggleSettingsSection("baseline");
