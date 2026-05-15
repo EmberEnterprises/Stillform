@@ -9,6 +9,8 @@ Tester completed Introduction + Calibration, then landed on the subscription pag
 
 Tester's suggestion: cover sheet or description before the paywall.
 
+**Arlin's additional thought (May 15):** the timing itself may be wrong. The paywall lands before the user has actually played with the app. Could trigger after **3 days / 3 sessions** of real use instead of immediately post-calibration. That changes the problem entirely — not just "add framing to a paywall that shows up too early" but "show the paywall later, after the user has experienced what they'd be paying for." Two distinct solution paths to weigh when this surfaces.
+
 Real conversion-killer. Note for now, not focus — Arlin flagged this is a note, not the current build priority. Surface when subscription page work comes up.
 
 ---
