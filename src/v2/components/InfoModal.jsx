@@ -48,23 +48,36 @@ export default function InfoModal({ open, title, body, onClose }) {
         position: "fixed",
         inset: 0,
         zIndex: 200,
-        background: "rgba(0, 0, 0, 0.72)",
-        backdropFilter: "blur(8px)",
-        WebkitBackdropFilter: "blur(8px)",
+        // Heavier scrim than the prior 0.72 — that wasn't dark enough to
+        // visually separate the modal from page content underneath.
+        background: "rgba(0, 0, 0, 0.92)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        padding: "var(--sf-space-24)",
-        animation: "sfFadeUp 320ms var(--sf-ease-prestige) both",
+        padding: "var(--sf-space-24, 24px)",
+        animation: "sfFadeUp 320ms var(--sf-ease-prestige, ease-out) both",
       }}
     >
       <div
         style={{
           maxWidth: "440px",
           width: "100%",
-          padding: "var(--sf-space-32)",
-          background: "var(--sf-ground)",
-          border: "0.5px solid var(--sf-border-emphasis)",
+          // Cap height + scroll so long info bodies don't escape the viewport
+          // on small screens. The card scrolls internally if content overflows.
+          maxHeight: "80vh",
+          overflowY: "auto",
+          padding: "var(--sf-space-32, 32px)",
+          // Was var(--sf-ground) — that variable doesn't exist, so background
+          // fell back to transparent and the page bled through. The actual
+          // defined variables are --sf-ground-deep / --sf-ground-elev / --sf-ground-elev-2.
+          // Using ground-elev (#111114) so the card sits visually ABOVE the
+          // page ground (#08080A) — proper elevation, the way a card should read.
+          background: "var(--sf-ground-elev, #111114)",
+          border: "0.5px solid var(--sf-border-emphasis, rgba(255,255,255,0.10))",
+          // Subtle depth — the card lifts off the page.
+          boxShadow: "0 24px 60px rgba(0, 0, 0, 0.5)",
         }}
       >
         {title ? (
