@@ -1433,6 +1433,131 @@ exports.handler = async function(event) {
     // END SCIENCE CARD MODE
     // --------------------------------------------------------------------
 
+    // --------------------------------------------------------------------
+    // NEXT MOVE MODE — early return before the reframe machinery.
+    // Generates 3-4 candidate next moves anchored to the precise name
+    // the user produced in the differentiation flow (§12.5.3 sub-beat 4).
+    // Replaces the hardcoded 4 (Send a message / Hold a boundary / Delay
+    // your response / Let it go) for users who picked a precise name.
+    // Each move includes a brief lock-in statement (replaces the static
+    // LOCK_IN_STATEMENTS map per option).
+    // --------------------------------------------------------------------
+    if (mode === "next_move") {
+      const ctx = (() => {
+        try { return JSON.parse(event.body); } catch { return {}; }
+      })();
+      const preciseName = typeof ctx.preciseName === "string" ? ctx.preciseName.trim().slice(0, 200) : "";
+      const sourceText = typeof ctx.sourceText === "string" ? ctx.sourceText.trim().slice(0, 1000) : "";
+      const sourceMode = ["calm", "clarity", "hype"].includes(ctx.sourceMode) ? ctx.sourceMode : "calm";
+      const sourceState = typeof ctx.sourceState === "string" ? ctx.sourceState.trim().slice(0, 32) : null;
+      const regTypeRaw = typeof ctx.regulationType === "string" ? ctx.regulationType : null;
+      const regTypeNormalized = ["thought-first", "body-first", "balanced"].includes(regTypeRaw) ? regTypeRaw : "thought-first";
+
+      if (!preciseName) {
+        return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "preciseName required for next_move mode." }) };
+      }
+
+      const nextMoveSystemPrompt = `You are the AI inside Stillform's Reframe. The user just produced a precise name for what was actually under their coarse word — that named thing is the artifact of this session's analytical work (Hoemann 2021; Barrett 2017 constructed emotion). Your job now is to propose 3-4 candidate next moves anchored to that precise name and the situation they brought.
+
+VOICE:
+Operator-tier. Direct. Concrete. Each move is something the user can do — a specific action, a specific sentence, a specific check, a specific noticing — not a generic "hold a boundary" or "let it go." If a move could apply to anyone with the same coarse name, it is too generic. The precise name was earned by the user; the moves should fit the precise name, not the coarse one.
+
+CONSTRAINTS:
+- 3-4 moves. Each label 4-10 words. Concrete and executable in the user's actual situation.
+- No therapy jargon ("sit with that," "honor your feelings," "process this," "create space"). No motivational poster lines. No "be kind to yourself."
+- No medical, legal, or financial advice. If the precise name implicates one of these domains, the moves help the user prepare to talk to a specialist or get clear before deciding — never specific medication, dosage, legal action, or financial product.
+- Each move comes with a brief lock_in_statement (1-2 sentences, 30-160 chars) that names what choosing this move actually does — the cognitive or behavioral mechanism. Schön (1983) reflection-on-action — the lock-in consolidates the move into a repeatable concept.
+
+REGULATION TYPE: ${regTypeNormalized}. ${regTypeNormalized === "body-first" ? "Lock-in statements should reference how the body's read informed the choice." : regTypeNormalized === "balanced" ? "Lock-in statements may reference either body or thought as the lead — match what fits the move." : "Lock-in statements should reference how the cognitive work informed the choice."}
+
+SOURCE MODE: ${sourceMode}. ${sourceMode === "hype" ? "User is pre-event. Moves should be carry-in actions (what they hold walking in), not post-event processing." : sourceMode === "clarity" ? "User came in spinning. Moves should produce traction, not more analysis." : "User came in with a state that's loud. Moves can be internal or external."}
+
+OUTPUT CONTRACT — HARD REQUIREMENT:
+Return ONLY valid JSON with this exact shape:
+{
+  "next_move_options": [
+    { "label": "string, 4-10 words", "lock_in_statement": "string, 30-160 chars" },
+    { "label": "...", "lock_in_statement": "..." },
+    { "label": "...", "lock_in_statement": "..." }
+  ]
+}
+3-4 entries. No markdown fences. JSON only.`;
+
+      const userMessage = `PRECISE NAME the user produced: "${preciseName}"
+${sourceState ? `Feel state at session start: ${sourceState}\n` : ""}${sourceText ? `Original situation they brought:\n${sourceText}` : ""}`;
+
+      const nmController = new AbortController();
+      const nmTimeout = setTimeout(() => nmController.abort(), 12000);
+      try {
+        const nmResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+          signal: nmController.signal,
+          body: JSON.stringify({
+            model: "gpt-4o",
+            max_tokens: 400,
+            temperature: 0.5,
+            response_format: { type: "json_object" },
+            messages: [
+              { role: "system", content: nextMoveSystemPrompt },
+              { role: "user", content: userMessage }
+            ]
+          })
+        });
+        const nmData = await nmResponse.json();
+        if (!nmResponse.ok) {
+          console.error("Next-move API error:", JSON.stringify(nmData));
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Next-move generation failed.", fallback: true }) };
+        }
+
+        const rawText = nmData.choices?.[0]?.message?.content || "";
+        let parsedNm;
+        try {
+          parsedNm = JSON.parse(rawText.replace(/^```json\s*|\s*```$/g, "").trim());
+        } catch (e) {
+          console.error("Next-move JSON parse failed:", rawText);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Next-move parse failed.", fallback: true }) };
+        }
+
+        // Schema validation
+        if (!Array.isArray(parsedNm.next_move_options) || parsedNm.next_move_options.length < 3 || parsedNm.next_move_options.length > 4) {
+          console.error("Next-move shape invalid — expected 3-4 options:", parsedNm);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Next-move count out of range.", fallback: true }) };
+        }
+        const validated = parsedNm.next_move_options
+          .map(opt => {
+            if (!opt || typeof opt.label !== "string" || typeof opt.lock_in_statement !== "string") return null;
+            const label = opt.label.trim();
+            const lockIn = opt.lock_in_statement.trim();
+            if (!label || label.length > 80 || !lockIn || lockIn.length > 240) return null;
+            return { label, lock_in_statement: lockIn };
+          })
+          .filter(Boolean);
+
+        if (validated.length < 3) {
+          console.error("Next-move validation dropped too many options:", parsedNm.next_move_options);
+          return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Next-move options failed validation.", fallback: true }) };
+        }
+
+        return {
+          statusCode: 200,
+          headers: { ...createCorsHeaders(event), "Content-Type": "application/json" },
+          body: JSON.stringify({
+            next_move_options: validated,
+            source: "ai"
+          })
+        };
+      } catch (err) {
+        console.error("Next-move error:", err.message);
+        return { statusCode: 502, headers: createCorsHeaders(event), body: JSON.stringify({ error: "Next-move generation failed.", fallback: true }) };
+      } finally {
+        clearTimeout(nmTimeout);
+      }
+    }
+    // --------------------------------------------------------------------
+    // END NEXT MOVE MODE
+    // --------------------------------------------------------------------
+
     // Input validation
     if (!input || typeof input !== "string" || input.trim().length === 0) {
       return { statusCode: 400, headers: createCorsHeaders(event), body: JSON.stringify({ error: "No input provided." }) };
