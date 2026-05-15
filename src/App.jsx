@@ -17855,7 +17855,7 @@ function TriggerProfileSection({ onChange }) {
   );
 }
 
-function MyProgress({ onBack }) {
+function MyProgress({ onBack, habitAnchorsState }) {
   const [openSections, setOpenSections] = useState({});
   const toggle = (key) => setOpenSections(prev => ({ ...prev, [key]: !prev[key] }));
   const [shareCardStatus, setShareCardStatus] = useState("");
@@ -18804,6 +18804,350 @@ function MyProgress({ onBack }) {
                   </div>
                 </>
               )}
+            </div>
+          );
+        })()}
+
+        {/* ── TRIGGERS YOU'VE NAMED (CRUD) ──────────────────────────────
+            CANON Operating Rule (May 14, 2026 evening): "Settings is for
+            preferences. Practice content lives in My Progress / library
+            surfaces." Trigger Profile is practice content — the user's
+            named recurring situations. CRUD interface lives here alongside
+            the read-only TRIGGERS IDENTIFIED display in YOUR LIBRARY.
+            Settings invocation hidden with {false && ...} to preserve
+            code for emergency rollback. */}
+        {(() => {
+          let triggerProfileSnapshot = null;
+          try { triggerProfileSnapshot = getTriggerProfile(); } catch { triggerProfileSnapshot = null; }
+          // Render the section even when empty — the CRUD's purpose is
+          // adding the first trigger, so emptiness shouldn't hide the door.
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                TRIGGERS YOU'VE NAMED
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55,
+                letterSpacing: "0.01em",
+                marginBottom: 12
+              }}>
+                The specific situations, people, or moments you've identified as load-bearing.
+              </div>
+              <TriggerProfileSection />
+            </div>
+          );
+        })()}
+
+        {/* ── HABIT ANCHORS ─────────────────────────────────────────────
+            Relocated May 15, 2026 from Settings to My Progress per CANON
+            Operating Rule: "Settings is for preferences. Practice content
+            lives in My Progress / library surfaces." Implementation
+            intentions (Gollwitzer 1999): pair existing life cues to
+            metacognition reps. State managed in Stillform top-level
+            (home consumer at L~26513 reads parent state); passed here
+            via habitAnchorsState prop bundle. */}
+        {habitAnchorsState && (() => {
+          const { anchors, persistAnchors, cueDraft, setCueDraft, actionDraft, setActionDraft } = habitAnchorsState;
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                HABIT ANCHORS
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 16,
+                letterSpacing: "0.01em"
+              }}>
+                Pair an existing life cue to a metacognition rep. The rep becomes default behavior once the cue fires reliably. <span style={{ fontSize: 11, fontStyle: "normal", color: "var(--text-dim)", fontFamily: "'DM Sans', sans-serif" }}>Gollwitzer 1999 implementation intentions.</span>
+              </div>
+
+              {/* Existing anchors list */}
+              {anchors.length > 0 && (
+                <div style={{ marginBottom: 16 }}>
+                  {anchors.map((a, idx) => (
+                    <div key={a.id || idx} style={{
+                      padding: "12px 14px", marginBottom: 8,
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      background: "var(--surface2)",
+                      position: "relative"
+                    }}>
+                      <button
+                        onClick={() => persistAnchors(anchors.filter((_, i) => i !== idx))}
+                        aria-label="Remove anchor"
+                        style={{
+                          position: "absolute", top: 8, right: 10,
+                          background: "none", border: "none",
+                          color: "var(--text-muted)", fontSize: 16,
+                          cursor: "pointer", padding: 4, lineHeight: 1,
+                          WebkitTapHighlightColor: "transparent"
+                        }}
+                      >×</button>
+                      <div style={{
+                        fontSize: 12, color: "var(--text-muted)", marginBottom: 4,
+                        fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em",
+                        textTransform: "uppercase", paddingRight: 20
+                      }}>
+                        When {a.cue}
+                      </div>
+                      <div style={{
+                        fontSize: 14, color: "var(--text)", lineHeight: 1.5,
+                        fontFamily: "'DM Sans', sans-serif", paddingRight: 20
+                      }}>
+                        → {a.action}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new anchor form */}
+              {anchors.length < 5 && (
+                <div style={{
+                  padding: "14px", marginBottom: 12,
+                  border: "0.5px dashed var(--border)",
+                  borderRadius: "var(--r)"
+                }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Cue (when)</div>
+                  <input
+                    type="text"
+                    value={cueDraft}
+                    onChange={(e) => setCueDraft(e.target.value)}
+                    placeholder="opening Slack / phone in hand before bed / after lunch"
+                    maxLength={120}
+                    style={{
+                      width: "100%", padding: "8px 10px", marginBottom: 12,
+                      background: "var(--surface2)", color: "var(--text)",
+                      border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                      fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Action (then)</div>
+                  <input
+                    type="text"
+                    value={actionDraft}
+                    onChange={(e) => setActionDraft(e.target.value)}
+                    placeholder="name your state / one body scan / sigh once before answering"
+                    maxLength={160}
+                    style={{
+                      width: "100%", padding: "8px 10px", marginBottom: 12,
+                      background: "var(--surface2)", color: "var(--text)",
+                      border: "0.5px solid var(--border)", borderRadius: "var(--r)",
+                      fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                  <button
+                    onClick={() => {
+                      const cue = cueDraft.trim();
+                      const action = actionDraft.trim();
+                      if (!cue || !action) return;
+                      const newAnchor = {
+                        id: `anchor_${Date.now()}`,
+                        cue, action,
+                        createdAt: new Date().toISOString()
+                      };
+                      persistAnchors([...anchors, newAnchor]);
+                      setCueDraft("");
+                      setActionDraft("");
+                      try { window.plausible?.("Anchor Added", { props: { count: anchors.length + 1 } }); } catch {}
+                    }}
+                    disabled={!cueDraft.trim() || !actionDraft.trim()}
+                    style={{
+                      width: "100%", padding: "10px",
+                      background: (cueDraft.trim() && actionDraft.trim()) ? "var(--amber-glow)" : "var(--surface2)",
+                      color: (cueDraft.trim() && actionDraft.trim()) ? "var(--bg)" : "var(--text-muted)",
+                      border: "0.5px solid var(--border)",
+                      borderRadius: "var(--r)",
+                      fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                      cursor: (cueDraft.trim() && actionDraft.trim()) ? "pointer" : "not-allowed",
+                      opacity: (cueDraft.trim() && actionDraft.trim()) ? 1 : 0.6
+                    }}
+                  >
+                    Add anchor
+                  </button>
+                </div>
+              )}
+
+              {/* Suggestion seeds — populated only when zero anchors set */}
+              {anchors.length === 0 && (
+                <div style={{ marginBottom: 8 }}>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 10, letterSpacing: "0.08em", textTransform: "uppercase", fontFamily: "'IBM Plex Mono', monospace" }}>Starter suggestions (tap to add)</div>
+                  {[
+                    { cue: "opening Slack or email", action: "Name your state in one word" },
+                    { cue: "after lunch", action: "Name one feel-state you moved through this morning" },
+                    { cue: "phone in hand before bed", action: "Open EOD check-in" },
+                    { cue: "walking from car to door", action: "Body scan — find your strongest tell" },
+                    { cue: "phone ringing", action: "One physiological sigh before answering" },
+                  ].map((s, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        const newAnchor = {
+                          id: `anchor_${Date.now()}_${idx}`,
+                          cue: s.cue,
+                          action: s.action,
+                          createdAt: new Date().toISOString()
+                        };
+                        persistAnchors([...anchors, newAnchor]);
+                        try { window.plausible?.("Anchor Added", { props: { count: anchors.length + 1, source: "suggestion" } }); } catch {}
+                      }}
+                      style={{
+                        width: "100%", padding: "10px 12px", marginBottom: 6,
+                        background: "var(--surface2)", color: "var(--text-muted)",
+                        border: "0.5px dashed var(--border)", borderRadius: "var(--r)",
+                        textAlign: "left", cursor: "pointer",
+                        fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                        lineHeight: 1.5
+                      }}
+                    >
+                      <span style={{ color: "var(--text-dim)" }}>When </span>
+                      <span style={{ color: "var(--text)" }}>{s.cue}</span>
+                      <span style={{ color: "var(--text-dim)" }}> → </span>
+                      <span style={{ color: "var(--text)" }}>{s.action}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {anchors.length >= 5 && (
+                <div style={{ fontSize: 11, color: "var(--text-muted)", fontStyle: "italic", padding: "8px 0" }}>
+                  Five anchors is the practical ceiling. Remove one to add another.
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* ── CAPACITY BASELINE ─────────────────────────────────────────
+            Relocated May 15, 2026 from Settings to My Progress per CANON
+            Operating Rule. Self-contained — reads stillform_growth_baseline
+            inline, no parent state needed. Lets the user recapture their
+            growth baseline (Gap 4, May 12, 2026). */}
+        {(() => {
+          let baseline = null;
+          try {
+            const raw = localStorage.getItem("stillform_growth_baseline");
+            if (raw) baseline = JSON.parse(raw);
+          } catch {}
+          // Hide entirely until baseline exists — the section's only purpose
+          // is recapturing an existing baseline. Seeding happens elsewhere.
+          if (!baseline) return null;
+          const baselineDate = (() => {
+            try {
+              const d = new Date(baseline.capturedAt);
+              return d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+            } catch { return "earlier"; }
+          })();
+          return (
+            <div style={{
+              marginBottom: 28,
+              padding: "20px 18px",
+              border: "0.5px solid var(--amber-dim)",
+              borderRadius: "var(--r-lg)",
+              background: "var(--surface)"
+            }}>
+              <div className="t-mono-xs" style={{
+                color: "var(--amber)", marginBottom: 6,
+                letterSpacing: "0.14em"
+              }}>
+                CAPACITY BASELINE
+              </div>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif", fontSize: 14, fontStyle: "italic",
+                color: "var(--text-cream)", lineHeight: 1.55, marginBottom: 14,
+                letterSpacing: "0.01em"
+              }}>
+                {baseline.source === "retroactive-seed"
+                  ? "Baseline was seeded retroactively from your current state. Reset if you want a fresh measurement point."
+                  : "Baseline was captured at calibration. Reset only if you're starting a new practice phase."}
+              </div>
+              <div style={{
+                padding: "12px 14px", marginBottom: 14,
+                border: "0.5px solid var(--border)",
+                borderRadius: "var(--r)",
+                background: "var(--surface2)"
+              }}>
+                <div className="t-mono-xs" style={{ color: "var(--text-muted)", marginBottom: 6, letterSpacing: "0.14em" }}>
+                  CURRENT BASELINE · {baselineDate.toUpperCase()}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text)", lineHeight: 1.7, fontFamily: "'DM Sans', sans-serif" }}>
+                  Stage {baseline.stage} · {baseline.distinctChips ?? 0} chip{baseline.distinctChips === 1 ? "" : "s"} · {baseline.sessionsCount ?? 0} session{baseline.sessionsCount === 1 ? "" : "s"} · {baseline.biasCount ?? 0} bias{baseline.biasCount === 1 ? "" : "es"} · {baseline.signalCount ?? 0} signal{baseline.signalCount === 1 ? "" : "s"} · {baseline.triggerCount ?? 0} trigger{baseline.triggerCount === 1 ? "" : "s"}
+                </div>
+                <div style={{ fontSize: 10, color: "var(--text-dim)", marginTop: 6, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.02em" }}>
+                  Source: {baseline.source}
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (!window.confirm("Reset capacity baseline? Your growth data from baseline forward will lose its anchor. New baseline will capture from your current state.")) return;
+                  const sessions = (() => { try { return getSessionsFromStorage(); } catch { return []; } })();
+                  const distinctChips = (() => {
+                    const set = new Set();
+                    sessions.forEach(s => {
+                      if (s.preState) set.add(s.preState);
+                      if (s.postState) set.add(s.postState);
+                      if (s.feelState) set.add(s.feelState);
+                    });
+                    return set.size;
+                  })();
+                  const bias = (() => { try { const v = secureRead("stillform_bias_profile", null); return Array.isArray(v) ? v.length : 0; } catch { return 0; } })();
+                  const signal = (() => { try { const v = secureRead("stillform_signal_profile", null); return Array.isArray(v) ? v.length : (v && typeof v === "object" ? Object.keys(v).length : 0); } catch { return 0; } })();
+                  const triggers = (() => { try { const p = getTriggerProfile(); return p?.triggers?.length || 0; } catch { return 0; } })();
+                  const currentStageId = (() => { try { return getCurrentStage()?.currentStageId || 1; } catch { return 1; } })();
+                  try {
+                    localStorage.setItem("stillform_growth_baseline", JSON.stringify({
+                      capturedAt: new Date().toISOString(),
+                      stage: currentStageId,
+                      distinctChips,
+                      sessionsCount: sessions.length,
+                      biasCount: bias,
+                      signalCount: signal,
+                      triggerCount: triggers,
+                      source: "user-reset",
+                    }));
+                    window.plausible?.("Baseline Reset");
+                    // Force re-read on next render — simplest way is reload the MyProgress screen.
+                    // The user is already here; the IIFE will re-evaluate on next state change.
+                    // If immediate visual update is needed, the user can scroll/tap; otherwise
+                    // it updates on next mount.
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new Event("stillform:baselineUpdated"));
+                    }
+                  } catch {}
+                }}
+                style={{
+                  width: "100%", padding: "10px",
+                  background: "var(--surface2)",
+                  color: "var(--text-muted)",
+                  border: "0.5px solid var(--border)",
+                  borderRadius: "var(--r)",
+                  fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+                  cursor: "pointer", letterSpacing: "0.02em"
+                }}
+              >
+                Reset baseline from current state
+              </button>
             </div>
           );
         })()}
@@ -28394,7 +28738,17 @@ const isSignalProfileConfigured = () => {
 
         {/* MY PROGRESS */}
         {screen === "progress" && (
-          <MyProgress onBack={() => goHomeSafely()} />
+          <MyProgress
+            onBack={() => goHomeSafely()}
+            habitAnchorsState={{
+              anchors,
+              persistAnchors,
+              cueDraft: anchorCueDraft,
+              setCueDraft: setAnchorCueDraft,
+              actionDraft: anchorActionDraft,
+              setActionDraft: setAnchorActionDraft,
+            }}
+          />
         )}
 
         {/* ROADMAP — engagement architecture Engine 1 (Retention engine) full screen */}
@@ -30687,7 +31041,12 @@ const isSignalProfileConfigured = () => {
                     </div>
                   )}
                 </div>
-                                {/* Triggers — collapsible (Engagement Architecture Build #2 Phase 2a) */}
+                                {/* Triggers — relocated May 15, 2026 to MyProgress as
+                                    "TRIGGERS YOU'VE NAMED" per CANON Operating Rule:
+                                    "Settings is for preferences. Practice content lives in
+                                    My Progress / library surfaces." Code preserved with
+                                    {false && ...} wrap for emergency rollback. */}
+                {false && (
                 <div style={{ marginBottom: 10 }}>
                   <button onClick={() => toggleSubOpen("triggers")} style={{
                     width: "100%", background: "none", border: "none", padding: "8px 0",
@@ -30703,6 +31062,7 @@ const isSignalProfileConfigured = () => {
                     </div>
                   )}
                 </div>
+                )}
                                 {/* Schedule & Notifications — collapsible */}
                 <div style={{ marginBottom: 10 }}>
                   <button onClick={() => toggleSubOpen("scheduleNotif")} style={{
@@ -30893,13 +31253,14 @@ const isSignalProfileConfigured = () => {
               </>)}
             </div>
 
-            {/* HABIT ANCHORS — Gap 8 (May 12, 2026)
-                Implementation intentions (Gollwitzer 1999): pair existing
-                life cues to metacognition reps. The user defines cue → action
-                pairs in their own language. Habits become neuroplasticity in
-                motion when the rep anchors to a cue the user already
-                encounters reliably. Stillform's daily focus reads these
-                anchors and surfaces them on home (Gap 8 → Gap 2 integration). */}
+            {/* HABIT ANCHORS — relocated May 15, 2026 to MyProgress per CANON
+                Operating Rule: "Settings is for preferences. Practice content
+                lives in My Progress / library surfaces." Code preserved with
+                {false && ...} wrap for emergency rollback. The state still
+                lives in Stillform top-level so the home consumer at L~26513
+                keeps reading parent state; MyProgress receives it via the
+                habitAnchorsState prop bundle. */}
+            {false && (
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("anchors")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
@@ -31076,15 +31437,12 @@ const isSignalProfileConfigured = () => {
                 )}
               </>)}
             </div>
+            )}
 
-            {/* CAPACITY BASELINE — Gap 4 (May 12, 2026)
-                Lets the user recapture their growth baseline. Useful for
-                pre-existing users who got a retroactive seed (their baseline
-                reflects current advanced state, not day-zero) and want to
-                reset to a meaningful baseline before a fresh test or new
-                practice phase. Also useful if Arlin is testing the app
-                and wants to wipe the retroactive baseline to see a true
-                first-capture experience. */}
+            {/* CAPACITY BASELINE — relocated May 15, 2026 to MyProgress per
+                CANON Operating Rule. Code preserved with {false && ...} for
+                emergency rollback. */}
+            {false && (
             <div style={{ marginBottom: 28 }}>
               <button onClick={() => toggleSettingsSection("baseline")} style={{
                 width: "100%", background: "none", border: "none", padding: "0 0 10px",
@@ -31193,6 +31551,7 @@ const isSignalProfileConfigured = () => {
                 })()}
               </>)}
             </div>
+            )}
 
             {/* ACCOUNT */}
             <div style={{ marginBottom: 28 }}>
