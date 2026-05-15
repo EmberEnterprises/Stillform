@@ -4274,6 +4274,113 @@ const getRecentMoveCardIds = (limit = 5) => {
   } catch { return []; }
 };
 
+// ─── NAMED MOVES / NAMED CONCEPTS LIBRARY HELPERS ─────────────────────────
+// Storage key `stillform_named_moves` originally added May 13, 2026 (brainstorm
+// idea #10) for close-time externalization — user types "what the move was"
+// at session close, persists as { value, sessionId, timestamp }.
+//
+// Extended May 15, 2026 (ENGAGEMENT_ARCHITECTURE §12.5.2 / §12.7 step 4) to
+// host the per-Reframe-session NAMED THING artifact produced by the
+// differentiation flow — the precise underneath name the user picks or types
+// when the AI surfaces candidate_names. Same key reused (per §12.7 step 4
+// permission to extend) instead of standing up a parallel stillform_named_
+// concepts storage; the library surface is one cohesive read.
+//
+// Entry shape (all NEW fields optional for backward compat with brainstorm #10
+// entries already in users' localStorage):
+//   {
+//     value: string,                  // the precise named thing
+//     sessionId: string | null,
+//     timestamp: ISO datetime,
+//     kind?: "move" | "underneath",   // default "move" for legacy
+//     mode?: "calm" | "clarity" | "hype",
+//     sourceText?: string,            // user's original Reframe input
+//     sourceState?: string,           // feel-state at session start
+//     sourceCandidates?: string[],    // candidates the AI surfaced
+//     pickedFromCandidates?: boolean  // did they tap or type
+//   }
+//
+// kind="move"     — close-time externalization (brainstorm #10). What the
+//                   user just DID, named in their own words. Library
+//                   sub-section: MOVES NAMED.
+// kind="underneath" — sub-beat 2 of Reframe Step 2 (§12.5.3). The precise
+//                   name the user produced for what was actually under the
+//                   coarse word they brought. Library sub-section:
+//                   NAMES YOU PRODUCED.
+//
+// Storage is currently plaintext (matches the May 13 precedent for this
+// key). The richer §12 entries contain sourceText (the user's actual words),
+// which is more sensitive than a bare label — encryption migration tracked
+// as a follow-up; not gated on this build.
+
+const NAMED_MOVES_STORAGE_KEY = "stillform_named_moves";
+const NAMED_MOVES_MAX_ITEMS = 50;
+const NAMED_MOVES_VALUE_MAX = 120;       // upper bound; UI may enforce tighter
+const NAMED_MOVES_SOURCE_TEXT_MAX = 600; // bounded — not a full transcript
+
+const getNamedMoves = () => {
+  try {
+    const raw = localStorage.getItem(NAMED_MOVES_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch { return []; }
+};
+
+// Filter by kind. Legacy entries (no kind field) treated as "move".
+const getNamedMovesByKind = (kind) => {
+  const list = getNamedMoves();
+  return list.filter(entry => {
+    if (!entry || typeof entry.value !== "string") return false;
+    const entryKind = entry.kind || "move";
+    return entryKind === kind;
+  });
+};
+
+// Append a new entry. Validates shape, enforces caps, persists with
+// FIFO trim at NAMED_MOVES_MAX_ITEMS. Returns the persisted record or null.
+const appendNamedMove = (entry) => {
+  if (!entry || typeof entry.value !== "string") return null;
+  const trimmedValue = entry.value.trim();
+  if (!trimmedValue) return null;
+  try {
+    const existing = getNamedMoves();
+    const persisted = {
+      value: trimmedValue.slice(0, NAMED_MOVES_VALUE_MAX),
+      sessionId: entry.sessionId || null,
+      timestamp: entry.timestamp || new Date().toISOString(),
+      kind: entry.kind === "underneath" ? "underneath" : "move",
+    };
+    // §12 underneath entries get the richer source fields when supplied.
+    if (persisted.kind === "underneath") {
+      if (entry.mode && ["calm", "clarity", "hype"].includes(entry.mode)) {
+        persisted.mode = entry.mode;
+      }
+      if (typeof entry.sourceText === "string" && entry.sourceText.trim()) {
+        persisted.sourceText = entry.sourceText.trim().slice(0, NAMED_MOVES_SOURCE_TEXT_MAX);
+      }
+      if (typeof entry.sourceState === "string" && entry.sourceState.trim()) {
+        persisted.sourceState = entry.sourceState.trim().slice(0, 32);
+      }
+      if (Array.isArray(entry.sourceCandidates)) {
+        persisted.sourceCandidates = entry.sourceCandidates
+          .filter(c => typeof c === "string" && c.trim())
+          .map(c => c.trim().slice(0, NAMED_MOVES_VALUE_MAX))
+          .slice(0, 6);
+      }
+      if (typeof entry.pickedFromCandidates === "boolean") {
+        persisted.pickedFromCandidates = entry.pickedFromCandidates;
+      }
+    }
+    const next = [...existing, persisted];
+    const trimmed = next.length > NAMED_MOVES_MAX_ITEMS
+      ? next.slice(next.length - NAMED_MOVES_MAX_ITEMS)
+      : next;
+    localStorage.setItem(NAMED_MOVES_STORAGE_KEY, JSON.stringify(trimmed));
+    return persisted;
+  } catch { return null; }
+};
+
 // ─── SAVED REFRAMES INVENTORY HELPERS — Phase 0 for My Progress redesign ───
 // Saved reframes record: { text, distortion, timestamp, mode } where mode is
 // "calm" | "clarity" | "hype". Stored in stillform_saved_reframes (encrypted).
@@ -15865,23 +15972,15 @@ function SessionCloseScreen({ session, onClose }) {
   const handleSaveMove = () => {
     const trimmed = String(moveText || "").trim();
     if (trimmed.length === 0) return;
-    try {
-      const raw = localStorage.getItem("stillform_named_moves");
-      const existing = raw ? JSON.parse(raw) : [];
-      const list = Array.isArray(existing) ? existing : [];
-      list.push({
-        value: trimmed.slice(0, MOVE_MAX),
-        sessionId: session?.id || null,
-        timestamp: new Date().toISOString(),
-      });
-      // Bounded — keep last 50.
-      const trimmedList = list.slice(-50);
-      localStorage.setItem("stillform_named_moves", JSON.stringify(trimmedList));
-    } catch {}
+    const persisted = appendNamedMove({
+      value: trimmed.slice(0, MOVE_MAX),
+      sessionId: session?.id || null,
+      kind: "move",
+    });
     try {
       window.plausible?.("Named Move Saved", { props: { length: trimmed.length } });
     } catch {}
-    setMoveSaved(true);
+    if (persisted) setMoveSaved(true);
   };
 
   // Did a capacity rep get counted during THIS session? Read
@@ -18250,28 +18349,32 @@ function MyProgress({ onBack }) {
             : [];
 
           // Named moves — brainstorm #10 close-time externalization (May 13,
-          // 2026). Read stillform_named_moves; surface labels only, no
-          // timestamps or per-session attribution shown.
-          let movesList = [];
-          try {
-            const raw = localStorage.getItem("stillform_named_moves");
-            if (raw) {
-              const parsed = JSON.parse(raw);
-              if (Array.isArray(parsed)) {
-                // Dedupe by value, preserve most recent occurrence, then sort.
-                const seen = new Map();
-                for (const m of parsed) {
-                  if (m && typeof m.value === "string" && m.value.trim()) {
-                    seen.set(m.value.trim(), true);
-                  }
-                }
-                movesList = Array.from(seen.keys()).sort();
+          // 2026). Extended May 15, 2026 (§12.5.2): stillform_named_moves now
+          // hosts two kinds of entries — kind="move" (brainstorm #10, what
+          // the user just DID at close) and kind="underneath" (§12.5.3 Reframe
+          // differentiation, the precise name the user produced for what was
+          // actually under their coarse word). Library splits the two into
+          // separate sub-sections. Legacy entries (no kind) treated as "move".
+          const splitNamedMoves = (() => {
+            const movesByKind = { move: new Map(), underneath: new Map() };
+            try {
+              const raw = getNamedMoves();
+              for (const m of raw) {
+                if (!m || typeof m.value !== "string" || !m.value.trim()) continue;
+                const kind = m.kind === "underneath" ? "underneath" : "move";
+                // Dedupe by value within each kind, preserve most recent.
+                movesByKind[kind].set(m.value.trim(), true);
               }
-            }
-          } catch {}
+            } catch {}
+            return {
+              movesList: Array.from(movesByKind.move.keys()).sort(),
+              underneathList: Array.from(movesByKind.underneath.keys()).sort(),
+            };
+          })();
+          const { movesList, underneathList } = splitNamedMoves;
 
           // Hide whole card if library is empty
-          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length + movesList.length;
+          const totalConcepts = stateList.length + triggerList.length + bodyList.length + biasList.length + movesList.length + underneathList.length;
           if (totalConcepts === 0) return null;
 
           const subSectionHeaderStyle = {
@@ -18379,6 +18482,20 @@ function MyProgress({ onBack }) {
                   </div>
                   <div style={subSectionBodyStyle}>
                     What you've done in session, named in your own words at close. The move you can name is one you can repeat — concrete labels for procedural concepts (Anderson 2007 procedural knowledge).
+                  </div>
+                </>
+              )}
+
+              {underneathList.length > 0 && (
+                <>
+                  <div style={subSectionHeaderStyle}>
+                    NAMES YOU PRODUCED · {underneathList.length}
+                  </div>
+                  <div style={labelListStyle}>
+                    {underneathList.join(" · ")}
+                  </div>
+                  <div style={subSectionBodyStyle}>
+                    What was actually under the coarse word you brought into Reframe. Each one is a granular concept the brain can use to perceive itself with more nuance (Hoemann 2021 granularity; Barrett 2017 constructed emotion).
                   </div>
                 </>
               )}
