@@ -13571,12 +13571,28 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
     // Normal close (existing flow): full chip picker + physiology naming + insight + Next Move + Lock-in + State-to-Statement + Self Mode nudge + finish
     // Load insight once when screen appears
     const insight = (() => { try { return getLatestUserFacingInsight(); } catch { return null; } })();
+    // §12.5.3 sub-beats 3 + 5 — derive the precise name once. Both the state
+    // picker label (sub-beat 3) and the lock-in closure (sub-beat 5) anchor
+    // to this. Null when the user didn't go through the differentiation flow
+    // (legacy sessions); both surfaces fall back to existing copy.
+    const closePickedName = (() => {
+      for (let i = messages.length - 1; i >= 0; i--) {
+        if (messages[i]?.role === "ai" && messages[i]?.pickedName) return messages[i].pickedName;
+      }
+      return null;
+    })();
     return (
       <div style={{ padding: "40px 0 8px" }}>
         {/* FEEL CHIPS */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
           <div className="t-mono-xs" style={{ marginBottom: 20, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-            <span>Where are you now?</span>
+            <span>
+              {closePickedName ? (
+                <>Where are you with <em style={{ fontStyle: "italic", color: "var(--amber)", textTransform: "none", letterSpacing: 0 }}>{closePickedName}</em>?</>
+              ) : (
+                "Where are you now?"
+              )}
+            </span>
             {setInfoModal && (
               <button
                 onClick={() => setInfoModal({
@@ -13736,9 +13752,25 @@ function ReframeTool({ onComplete, mode = "calm", defaultTab = "talk", sharedTex
                 </div>
               )}
               {lockInConfirmed && (
-                <div style={{ marginTop: 8, fontSize: 12, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
-                  ✓ Locked in
-                </div>
+                closePickedName ? (
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "0.5px solid var(--border-printed)" }}>
+                    <div style={{ fontSize: 11, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em", marginBottom: 8 }}>
+                      ✓ Locked in
+                    </div>
+                    <div style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontStyle: "italic", fontSize: 15,
+                      color: "var(--text-cream)", lineHeight: 1.55,
+                      letterSpacing: "0.01em"
+                    }}>
+                      Today you named <em style={{ fontStyle: "italic", color: "var(--amber)" }}>{closePickedName}</em>. Added to your library.
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ marginTop: 8, fontSize: 12, color: "var(--amber)", fontFamily: "'IBM Plex Mono', monospace", letterSpacing: "0.08em" }}>
+                    ✓ Locked in
+                  </div>
+                )
               )}
             </div>
           );
