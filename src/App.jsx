@@ -27330,6 +27330,52 @@ const isSignalProfileConfigured = () => {
                   );
                 })()}
 
+                {/* ── PHASE 6c: AI PROPOSALS NOTIFICATION (May 15, 2026).
+                     Standalone row above the Phase 4 artifact block. Renders
+                     only when pending proposals exist. Tap navigates to My
+                     Progress where the full approval queue lives with
+                     reasoning + evidence + approve/reject. Standalone
+                     (not inside Phase 4 conditional) because proposals can
+                     accumulate before any artifacts have been confirmed —
+                     the notification must surface independently of the
+                     carry-on display. Skipped during wind-down beat (no
+                     cognitive content per CANON §10). */}
+                {currentBeat !== "wind-down" && (() => {
+                  let _p6c_pending = 0;
+                  try { _p6c_pending = getPendingProposals().length; } catch {}
+                  if (_p6c_pending === 0) return null;
+                  return (
+                    <button
+                      onClick={() => setScreen("progress")}
+                      style={{
+                        width: "100%",
+                        background: "transparent",
+                        border: "0.5px solid var(--amber-dim)",
+                        borderRadius: "var(--r-sm)",
+                        padding: "10px 12px",
+                        marginBottom: 16,
+                        cursor: "pointer",
+                        textAlign: "left",
+                        WebkitTapHighlightColor: "transparent",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12
+                      }}
+                    >
+                      <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                        <div className="t-mono-xs" style={{ color: "var(--amber)" }}>
+                          AI Proposals · {_p6c_pending} pending
+                        </div>
+                        <div className="t-caption quiet" style={{ lineHeight: 1.4 }}>
+                          Updates the AI sees in your practice — review when you have a moment.
+                        </div>
+                      </div>
+                      <div style={{ color: "var(--amber)", fontSize: 14, flexShrink: 0 }}>→</div>
+                    </button>
+                  );
+                })()}
+
                 {/* ── PHASE 4: WHAT YOU CARRY — current-state artifacts
                      surfaced on the Journey card per Arlin direction May 15,
                      2026. The Journey "carries" anchors / triggers watched /
