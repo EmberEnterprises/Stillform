@@ -308,6 +308,8 @@ That's it. Four sections instead of eight. The Mastery story is told in one plac
 
 9. **Self Mode interaction.** When AI is down, what version of these surfaces still works? Mirror is OK (deterministic data). Achievement is OK (deterministic). Roadmap is OK (cached). Today's Brief loses AI personalization — falls back to template? Or skips?
 
+10. **Accountability and integrity in the training (added May 15, 2026).** *(open — not yet spec'd)* The practice — the ongoing reps over days and weeks — needs a mechanism that pushes the user toward honest engagement and away from going through the motions. Stillform should not be tap-tap-tappable for streak credit. What this could touch (none committed): AI calling out vague or generic input rather than accepting it; self-attestation prompts on locked-in next moves ("did you actually do the X you locked in?"); session-quality signals visible in My Progress (depth, not just count); guardrails that prevent ghost-mode chip-tapping. Open question: what does "integrity" mean in measurable form — the user is honest with themselves, the AI calls out drift, the streak only counts real reps? Likely some combination. Needs Arlin's framing before any build. *Read of "the training": the user's cumulative metacognition practice, not AI model training or onboarding. Correct me if wrong.*
+
 ---
 
 ## 10. Shipping order (load-bearing first)
