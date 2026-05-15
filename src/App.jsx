@@ -5732,6 +5732,175 @@ const formatTriggerProfileForAI = (limit = 8) => {
   } catch { return null; }
 };
 
+// ─── Phase 6: AI mediation proposal queue + artifact audit history ────────────
+// AI-generated proposals to update the user's artifacts (Trigger Profile, Habit
+// Anchors, Capacity Baseline). Each proposal carries the AI's full reasoning,
+// the evidence it drew from, and the operation it proposes. Users review
+// proposals in the approval queue and approve or reject each one. Approved
+// proposals apply the change via the existing artifact helpers AND record an
+// audit-trail entry on a sibling history key so the lineage of every change is
+// preserved.
+//
+// This file owns the STORAGE layer only. Backend AI generation (Phase 6b) and
+// approval UI (Phase 6c) ship in later PRs. Helpers are defensive — every read
+// returns a safe default on malformed data; every write validates inputs.
+//
+// Storage keys (all SECURE_KEYS + SYNC_KEYS):
+//   stillform_ai_proposals                   → { pending: [...], decided: [...] }
+//   stillform_trigger_profile_history        → audit trail array
+//   stillform_anchors_history                → audit trail array
+//   stillform_growth_baseline_history        → audit trail array
+
+const AI_PROPOSALS_KEY = "stillform_ai_proposals";
+const TRIGGER_PROFILE_HISTORY_KEY = "stillform_trigger_profile_history";
+const ANCHORS_HISTORY_KEY = "stillform_anchors_history";
+const GROWTH_BASELINE_HISTORY_KEY = "stillform_growth_baseline_history";
+
+const AI_PROPOSAL_TARGETS = ["trigger_profile", "anchors", "growth_baseline"];
+const AI_PROPOSAL_OPERATIONS = ["add", "update", "retire", "graduate"];
+const AI_PROPOSAL_DECIDED_CAP = 50;
+const ARTIFACT_HISTORY_CAP = 100;
+
+const _generateProposalId = () =>
+  `prop_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+
+const _emptyProposalsStore = () => ({ pending: [], decided: [] });
+
+const getProposals = () => {
+  try {
+    const raw = secureRead(AI_PROPOSALS_KEY, null);
+    if (!raw || typeof raw !== "object") return _emptyProposalsStore();
+    return {
+      pending: Array.isArray(raw.pending) ? raw.pending : [],
+      decided: Array.isArray(raw.decided) ? raw.decided : []
+    };
+  } catch { return _emptyProposalsStore(); }
+};
+
+const _saveProposals = (store) => {
+  try {
+    const safe = {
+      pending: Array.isArray(store?.pending) ? store.pending : [],
+      decided: Array.isArray(store?.decided)
+        ? store.decided.slice(-AI_PROPOSAL_DECIDED_CAP)
+        : []
+    };
+    secureWrite(AI_PROPOSALS_KEY, safe);
+    return safe;
+  } catch { return null; }
+};
+
+const getPendingProposals = () => getProposals().pending;
+const getRecentDecisions = () => getProposals().decided;
+
+// Add a new proposal to the pending queue. Returns the persisted proposal on
+// success, or the existing duplicate (if a matching pending proposal exists),
+// or null on validation failure. Dedupe signature: target + operation +
+// proposed payload. This protects against the same proposal being inserted
+// twice if the backend retries.
+const addProposal = (spec) => {
+  if (!spec || typeof spec !== "object") return null;
+  const { target, operation, proposed, reasoning } = spec;
+  if (!AI_PROPOSAL_TARGETS.includes(target)) return null;
+  if (!AI_PROPOSAL_OPERATIONS.includes(operation)) return null;
+  if (!proposed || typeof proposed !== "object") return null;
+  if (typeof reasoning !== "string" || !reasoning.trim()) return null;
+  const store = getProposals();
+  const sig = `${target}::${operation}::${JSON.stringify(proposed)}`;
+  const dupe = store.pending.find(
+    p => `${p.target}::${p.operation}::${JSON.stringify(p.proposed)}` === sig
+  );
+  if (dupe) return dupe;
+  const proposal = {
+    id: _generateProposalId(),
+    createdAt: new Date().toISOString(),
+    target,
+    targetItemId: spec.targetItemId || null,
+    operation,
+    proposed,
+    reasoning: reasoning.trim(),
+    evidence: Array.isArray(spec.evidence) ? spec.evidence : [],
+    sourceContext: spec.sourceContext && typeof spec.sourceContext === "object"
+      ? spec.sourceContext
+      : {}
+  };
+  store.pending.push(proposal);
+  _saveProposals(store);
+  return proposal;
+};
+
+const _moveProposalToDecided = (id, status, decisionReasoning) => {
+  if (!id || !["approved", "rejected"].includes(status)) return null;
+  const store = getProposals();
+  const idx = store.pending.findIndex(p => p.id === id);
+  if (idx === -1) return null;
+  const proposal = store.pending[idx];
+  const decided = {
+    ...proposal,
+    status,
+    decidedAt: new Date().toISOString(),
+    decisionReasoning: typeof decisionReasoning === "string"
+      ? decisionReasoning.trim() || null
+      : null
+  };
+  store.pending.splice(idx, 1);
+  store.decided.push(decided);
+  _saveProposals(store);
+  return decided;
+};
+
+const approveProposal = (id, decisionReasoning) =>
+  _moveProposalToDecided(id, "approved", decisionReasoning);
+
+const rejectProposal = (id, decisionReasoning) =>
+  _moveProposalToDecided(id, "rejected", decisionReasoning);
+
+// Artifact audit-trail history. Each artifact gets a sibling history key
+// holding an array of change entries. Every change — whether from an approved
+// AI proposal or a manual edit — appends one entry so the lineage of every
+// artifact is preserved and surfaceable to the user.
+
+const _artifactHistoryKey = (target) => {
+  switch (target) {
+    case "trigger_profile":  return TRIGGER_PROFILE_HISTORY_KEY;
+    case "anchors":          return ANCHORS_HISTORY_KEY;
+    case "growth_baseline":  return GROWTH_BASELINE_HISTORY_KEY;
+    default: return null;
+  }
+};
+
+const getArtifactHistory = (target) => {
+  const key = _artifactHistoryKey(target);
+  if (!key) return [];
+  try {
+    const raw = secureRead(key, null);
+    return Array.isArray(raw) ? raw : [];
+  } catch { return []; }
+};
+
+const appendArtifactHistoryEntry = (target, entry) => {
+  const key = _artifactHistoryKey(target);
+  if (!key) return null;
+  if (!entry || typeof entry !== "object") return null;
+  try {
+    const history = getArtifactHistory(target);
+    const safeEntry = {
+      timestamp: new Date().toISOString(),
+      change: entry.change && typeof entry.change === "object" ? entry.change : {},
+      proposalId: entry.proposalId || null,
+      reasoning: typeof entry.reasoning === "string" ? entry.reasoning : null,
+      decisionReasoning: typeof entry.decisionReasoning === "string"
+        ? entry.decisionReasoning
+        : null,
+      source: entry.source || (entry.proposalId ? "ai_proposal" : "manual")
+    };
+    history.push(safeEntry);
+    const trimmed = history.slice(-ARTIFACT_HISTORY_CAP);
+    secureWrite(key, trimmed);
+    return safeEntry;
+  } catch { return null; }
+};
+
 // ─── Async storage helpers — encrypted siblings of the sync helpers above ─────
 // Phase 2 of encryption extension. These read/write from the encrypted store
 // (secureSet/secureGet via readJSON/writeJSON). Call sites are converted from
@@ -9980,7 +10149,7 @@ const LEGAL_VERSION = "2026-05-04";
 const LEGAL_VERSION_KEY = "stillform_legal_version_accepted";
 const APP_PACKAGE_VERSION = __APP_PACKAGE_VERSION__;
 const APP_BUILD_TIME = __APP_BUILD_TIME__;
-const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision","stillform_named_moves"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read). May 13 (brainstorm idea #10): added stillform_named_moves for close-time externalization (array of { value, sessionId, timestamp }; bounded externalized concept naming at session close).
+const SYNC_KEYS = ["stillform_sessions","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_signal_profile","stillform_bias_profile","stillform_trigger_profile","stillform_saved_reframes","stillform_ai_session_notes","stillform_regulation_type","stillform_breath_pattern","stillform_onboarded","stillform_reminder","stillform_reminder_time","stillform_audio","stillform_scan_pace","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_morning_breath_cue","stillform_subscribed","stillform_trial_start","stillform_qb_position","stillform_mc_position","stillform_checkin_today","stillform_bio_filter","stillform_feelstate","stillform_eod_today","stillform_outcome_focus","stillform_grounding_data","stillform_calibration_deferred","stillform_pattern_detections","stillform_disruptor_sessions","stillform_pattern_push_enabled","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_theme","stillform_high_contrast","stillform_text_scale","stillform_ai_tone","stillform_ai_tone_mode","stillform_biometric_enabled","stillform_anchors","stillform_growth_baseline","stillform_stage_acknowledged","stillform_session_precision","stillform_named_moves","stillform_ai_proposals","stillform_trigger_profile_history","stillform_anchors_history","stillform_growth_baseline_history"]; // May 7, 2026 (revert): removed stillform_function_checks — Practice Signals reverted entirely. May 7 (later): added stillform_trigger_profile for engagement architecture Build #2 Phase 1. May 12: added stillform_anchors for Gap 8 habit anchors; added stillform_growth_baseline for Gap 4 capacity-growth baseline. May 12 (audit-pass cleanup): removed stillform_language — no reader, no writer, no UI; i18n is post-launch per master todo line 1363; will re-add when i18n actually ships. May 13 (brainstorm idea #8): added stillform_stage_acknowledged for Stage Transition Ritual (one-time consolidation moment when user crosses a stage; integer tracking highest acknowledged stage). May 13 (brainstorm idea #3): added stillform_session_precision for inline Granularity Gym (transient precision label captured at Notice; cleared by Reframe on read). May 13 (brainstorm idea #10): added stillform_named_moves for close-time externalization (array of { value, sessionId, timestamp }; bounded externalized concept naming at session close).
 const sbFetch = async (path, opts = {}) => {
   const s = (() => { try { return JSON.parse(localStorage.getItem("stillform_sb_session")||"null"); } catch { return null; } })();
   const res = await fetch(SUPABASE_URL + path, { ...opts, headers: { "Content-Type":"application/json", apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${s?.access_token||SUPABASE_ANON_KEY}`, ...(opts.headers||{}) } });
@@ -10876,7 +11045,11 @@ const SECURE_KEYS = [
   "stillform_grounding_data",
   "stillform_bio_filter",
   "stillform_session_entry_context",
-  "stillform_loop_nudge_events"
+  "stillform_loop_nudge_events",
+  "stillform_ai_proposals",
+  "stillform_trigger_profile_history",
+  "stillform_anchors_history",
+  "stillform_growth_baseline_history"
 ];
 
 // Prime the SecureCache at app boot. Returns a Promise that resolves when
@@ -32972,7 +33145,7 @@ const isSignalProfileConfigured = () => {
                     try { await sbSignOut().catch(() => {}); } catch {}
                     try { sbClearSession(); } catch {}
                     setSyncSignedIn(false); setSyncSuccess(null); setSyncError(null);
-                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
+                    const keysToRemove = ["stillform_sessions","stillform_signal_profile","stillform_saved_reframes","stillform_reframe_session_calm","stillform_reframe_session_clarity","stillform_reframe_session_hype","stillform_reframe_last_mode","stillform_reframe_entry_mode","stillform_reframe_entry_protocol","stillform_reframe_prefill","stillform_journal","stillform_focus_check_history","stillform_communication_events","stillform_tool_debriefs","stillform_ai_session_notes","stillform_bias_profile","stillform_regulation_type","stillform_breath_pattern","stillform_ai_tone","stillform_ai_tone_mode","stillform_theme","stillform_scan_pace","stillform_audio","stillform_sound_type","stillform_screenlight","stillform_reducedmotion","stillform_visual_grounding","stillform_grounding_data","stillform_bio_filter","stillform_morning_start","stillform_evening_start","stillform_reminder","stillform_reminder_time","stillform_tooltip_home_seen","stillform_tooltips_reframe_seen","stillform_outcome_focus","stillform_session_entry_context","stillform_checkout_after_login","stillform_sb_sync_version","stillform_qb_position","stillform_mc_position","stillform_milestone_7_seen","stillform_trial_start","stillform_subscribed","stillform_checkin_today","stillform_checkin_open_history","stillform_checkin_history","stillform_eod_open_history","stillform_eod_history","stillform_eod_today","stillform_eod_artifacts","stillform_todays_briefs","stillform_pre_event_briefs","stillform_move_card_history","stillform_loop_nudge_events","stillform_loop_nudge_dismissed_day","stillform_loop_nudge_dismiss_streak","stillform_category_c_nudge_dismissed_day","stillform_category_c_nudge_dismiss_streak","stillform_ai_proposals","stillform_trigger_profile_history","stillform_anchors_history","stillform_growth_baseline_history",METRICS_OPT_IN_KEY,METRICS_LAST_SENT_DAY_KEY,METRICS_LAST_SENT_AT_KEY,"stillform_onboarded",FIRST_RUN_STAGE_KEY,"stillform_sb_session","stillform_app_version","stillform_install_id"];
                     keysToRemove.forEach(key => localStorage.removeItem(key));
                     Object.keys(localStorage).forEach((key) => { if (key.startsWith("stillform_")) localStorage.removeItem(key); });
                     // May 7, 2026: forensic deletion completeness — also drop the IndexedDB
