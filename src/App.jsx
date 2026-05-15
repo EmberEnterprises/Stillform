@@ -25364,7 +25364,25 @@ const isSignalProfileConfigured = () => {
                 );
 
                 return (
-                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20 }}>
+                  <div style={{ background: "var(--surface)", border: "0.5px solid var(--amber-dim)", borderRadius: "var(--r)", padding: "18px", marginBottom: 20, position: "relative" }}>
+                    {/* Skip / collapse affordance — May 14, 2026 fix. Previously the full
+                        check-in card had no way to close without saving. Users with limited
+                        time were stuck staring at a form they couldn't dismiss. Tap collapses
+                        back to the Morning Strip teaser; re-tap the strip to reopen. State
+                        is ciOpen (per-session, not per-day) so draft selections persist if
+                        the user reopens before saving. */}
+                    <button onClick={() => setCiOpen(false)} style={{
+                      position: "absolute", top: 10, right: 12,
+                      background: "none", border: "none",
+                      color: "var(--text-muted)", fontSize: 10,
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      letterSpacing: "0.12em", textTransform: "uppercase",
+                      cursor: "pointer", padding: "6px 8px",
+                      WebkitTapHighlightColor: "transparent",
+                      zIndex: 2
+                    }} aria-label="Collapse morning check-in">
+                      Skip ↑
+                    </button>
                     {/* May 14, 2026 — captivated morning. Five moves: opening anchor (this),
                         cascade reveal (animation delays on each section), mirror beat (serif
                         echo after energy+arriving), "what's on the table" closed-set chip row,
@@ -25851,16 +25869,17 @@ const isSignalProfileConfigured = () => {
 
               {/* ── 2. MAIN HERO ─── beat-gated for continuous journey
                    (May 14, 2026 evening, per Arlin direction). Renders during
-                   main beat only (post-checkin / midday / afternoon). Hidden
-                   during morning beat (morning strip dominates) and EOD beat
-                   (EOD strip dominates). The journey shows ONE hero card per
-                   beat; each beat owns its surface. Branches inside the
-                   spine are OPTIONAL alt-type transitions surfaced by the
-                   existing state-routing (alt processing type is already
-                   determined to be optional in shipped architecture) — not
-                   home-side navigation, not flat menus, not picker
-                   surfaces. */}
-              {currentBeat === "main" && (
+                   main beat (post-checkin / midday / afternoon) AND during
+                   morning beat when the user has collapsed the check-in
+                   (ciOpen=false). Hidden during EOD beat (EOD strip dominates)
+                   and during active morning check-in flow (ciOpen=true).
+
+                   May 14 late: gate widened to include morning&&!ciOpen per
+                   Arlin's direction that main hero card should be present on
+                   home, not gone. The "one element per beat" rule was too
+                   strict — when the user has skipped the morning check-in,
+                   they should see the session entry. */}
+              {(currentBeat === "main" || (currentBeat === "morning" && !ciOpen)) && (
               <div style={{ marginBottom: 32, animation: "entrain60glow 1s ease-in-out infinite", position: "relative" }}>
 
                 {/* Somatic nudge REMOVED May 9, 2026 (home cleanup). Was a small
@@ -27296,46 +27315,16 @@ const isSignalProfileConfigured = () => {
                 // the panel-stack pattern. The full progress screen (with all
                 // stat cells, weekly reflection, roadmap, signal log, etc.)
                 // remains intact and is opened by this entry.
-                return (
-                  <button
-                    onClick={() => setScreen("progress")}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      borderTop: "0.5px solid var(--border-printed)",
-                      padding: "20px 4px",
-                      width: "100%",
-                      textAlign: "left",
-                      cursor: "pointer",
-                      WebkitTapHighlightColor: "transparent",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 32,
-                      marginBottom: 20
-                    }}
-                    aria-label="Review your progress"
-                  >
-                    <span style={{
-                      fontFamily: "'Cormorant Garamond', serif",
-                      fontSize: 18,
-                      fontWeight: 300,
-                      color: "var(--text)"
-                    }}>
-                      Review your progress
-                    </span>
-                    <span style={{
-                      fontFamily: "'IBM Plex Mono', monospace",
-                      fontSize: 10,
-                      letterSpacing: "0.14em",
-                      textTransform: "uppercase",
-                      color: "var(--amber)"
-                    }}>
-                      Open →
-                    </span>
-                  </button>
-                );
-                // eslint-disable-next-line no-unreachable
+                // MY PROGRESS HOME SURFACE — RESTORED May 14, 2026 late evening,
+                // per Arlin direction: "My Progress is data only, on home page
+                // where it was originally with most pertinent science-based info.
+                // NOT a separate screen accessed via small link." The PR #82
+                // dissolution to a "Review your progress →" link was wrong; this
+                // commit reverts that specific removal and restores the full
+                // stat panel (three cells + most-used tool + observational cue).
+                // Click target preserved (still opens the full progress screen).
+                // Other PR #82 removals (rep counted banner, journey rep prompt,
+                // anchor strip, etc.) remain removed pending separate direction.
                 const daySet = new Set(sessions.map(s => TimeKeeper.stillformDayOf(s.timestamp)).filter(Boolean));
                 let streakCount = 0;
                 for (let i = 0; i < 365; i++) {
