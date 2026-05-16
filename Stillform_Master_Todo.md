@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 scope fully locked — beat variants + 5 added cross-cutting gaps + dopamine awareness flagged across Phase 5/6)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 4 #1 shipped — variant config infrastructure; beats wired into Notice next)**
 
 ---
 
@@ -226,7 +226,7 @@ This works because the user was always the one doing the practice — AI absence
 
   **Sub-item commit order (each follows operating rule: lock scope → commit doc → start code → commit code → update doc):**
 
-  1. Variant config infrastructure (`beatConfig.js`) — foundation
+  1. ✅ shipped `b199c71` — Variant config infrastructure (`beatConfig.js`). Pure module: `getBeatConfig(beat)` returns config object with notice/reframe/close shape per beat. AI prompts stay server-side (Phase 4 #3/#4); config carries shape, copy, chips, completion flags only. Four beats registered: main (full vocab, no breathing offer, no completion flag), morning (7 forward-leaning chips, Box breathing, `stillform_checkin_today`), EOD (8 retrospective chips, Deep Regulate, `stillform_eod_today`, `includeTodayThread` context extra), wind-down (minimal shape, no chips, no Reframe, Deep Regulate, `stillform_winddown_today`). Defensive fallback to main on unknown beat. Chip vocabulary single-sourced from 10-chip canon per `CHIP_DEFINITIONS_DRAFT.md`.
   2. Notice.jsx accepts config props (decouple from hardcoded "Name what's present"); active prompt fallback copy refresh
   3. Morning variant — config + AI prompt addition (`BEAT_ADDITIONS.morning` in reframe.js) + completion flag write + Plausible event
   4. EOD variant — config + AI prompt addition + thread context wiring + completion flag write + Plausible event
