@@ -3,6 +3,7 @@ import Notice from "./spine/Notice.jsx";
 import Reframe from "./spine/Reframe.jsx";
 import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
+import WindDown from "./spine/WindDown.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
@@ -182,6 +183,92 @@ export default function Spine({ onExit }) {
     // Stay on "reframe" step; the conditional render below will swap
     // from Reframe to SelfReframe.
   };
+
+  // Phase 4 #5 (May 16, 2026): wind-down handler. Wind-down bypasses
+  // the Notice → Reframe → Close spine entirely — it has its own
+  // minimal flow (tomorrow-anchor → Deep Regulate → close) in
+  // WindDown.jsx. Persistence pattern matches Phase 3.5 #2: nothing
+  // saves until the user reaches close. WindDown invokes
+  // onReturnHome with the captured payload; this handler persists
+  // (a) the tomorrow anchor for next morning's concierge surface,
+  // (b) the completion flag via config.completionFlag, (c) a
+  // minimal session record so wind-down completions show up in
+  // session history, and (d) Plausible telemetry.
+  const handleWindDownReturn = (payload) => {
+    const anchorTrimmed = (payload && typeof payload.anchorText === "string")
+      ? payload.anchorText.trim()
+      : "";
+
+    // (a) Tomorrow anchor — surfaces next morning per the concierge
+    // architecture (Pillar 3 — "things easier than they should be").
+    if (anchorTrimmed) {
+      try {
+        localStorage.setItem("stillform_tomorrow_anchor", JSON.stringify({
+          date: localDateKey(),
+          anchor: anchorTrimmed,
+          source: "v2-spine",
+        }));
+      } catch { /* non-fatal */ }
+    }
+
+    // (b) Completion flag via config (stillform_winddown_today).
+    if (config.completionFlag) {
+      try {
+        localStorage.setItem(config.completionFlag, JSON.stringify({
+          date: localDateKey(),
+          anchor: anchorTrimmed || null,
+          breathingResult: payload?.breathingResult || null,
+          source: "v2-spine",
+          beat,
+        }));
+      } catch { /* non-fatal */ }
+    }
+
+    // (c) Session record for history / future pattern detection.
+    // precisionName = tomorrow anchor, mode = self (no AI involved),
+    // selfMode = true. surfacedFrame + takeaway are null because the
+    // wind-down flow doesn't have those steps.
+    saveSession({
+      precisionName: anchorTrimmed,
+      selectedChip: null,
+      takeaway: null,
+      surfacedFrame: null,
+      mode: "self",
+      selfMode: true,
+      conversationLength: 0,
+      beat,
+    });
+
+    // (d) Plausible telemetry — Beat Completed (parallel to the
+    // Reframe-spine path) plus Tomorrow Anchor Set with a hasAnchor
+    // prop for downstream correlation.
+    try {
+      window.plausible?.("Beat Completed", {
+        props: {
+          beat,
+          mode: "self",
+          self_mode: "yes",
+          conversation_length: 0,
+        }
+      });
+      window.plausible?.("Tomorrow Anchor Set", {
+        props: {
+          beat,
+          has_anchor: anchorTrimmed ? "yes" : "no",
+          anchor_length: anchorTrimmed.length,
+          breathing_status: payload?.breathingResult?.status || "none",
+        }
+      });
+    } catch { /* non-fatal */ }
+
+    onExit();
+  };
+
+  // Phase 4 #5: route wind-down to its dedicated screen BEFORE the
+  // standard spine. Wind-down doesn't use Notice / Reframe / Close.
+  if (beat === "wind-down") {
+    return <WindDown onReturnHome={handleWindDownReturn} />;
+  }
 
   if (step === "notice") {
     // Phase 4 #2: pass the variant config down. Notice resolves its
