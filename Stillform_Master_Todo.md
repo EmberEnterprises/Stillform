@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3 shipped; Phase 3.5 scope locked after live audit)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 item #1 shipped — derived thread name)**
 
 ---
 
@@ -84,7 +84,7 @@ This works because the user was always the one doing the practice — AI absence
 
   2. **Spine: user reply required before Close is reachable.** At least one user reply in Reframe after the AI's first response. Cannot close after a single AI turn. Prevents the discrimination-skip pattern observed in audit.
 
-  3. **Thread: derived precision name for free-typed sessions.** Free-typed Notice input currently appears verbatim in TODAY thread (entire paragraph). Needs derivation: first clause / first sentence / AI-extracted theme. Thread becomes unreadable as days accumulate without this. Chip-only sessions already render correctly (chip name only).
+  3. **Thread: derived precision name for free-typed sessions.** ✅ shipped `8156761` — Free-typed Notice input was appearing verbatim in TODAY thread (entire paragraph, 177 chars in audit case). New util `src/v2/lib/threadEntry.js` exports `deriveThreadName(precision, chip)`. Deterministic, zero AI dependency. Logic: ≤50c return as-is; clause-break (`,.;:—`) on first segment if 4–50c; otherwise first N words within 49c + ellipsis; hard truncate single huge word. Wired into Spine.jsx; FULL precisionName preserved on session record (downstream surfaces still see full input). Verified against 7 test cases including the May 16 audit case. Chip-only sessions already worked correctly.
 
   4. **Reframe AI: structured metacognitive arc, not reflective mirror.** System prompt rebuild + conversational arc over 2–4 turns minimum. The arc runs the techniques the spine has been claiming all along:
      - **Probe deeper** — ask what user hasn't asked themselves; don't restate what they said
