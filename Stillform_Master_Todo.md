@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 item #1 shipped — derived thread name)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1 + #2 shipped — thread name + Close takeaway)**
 
 ---
 
@@ -80,7 +80,7 @@ This works because the user was always the one doing the practice — AI absence
 
   **Scope (locked):**
 
-  1. **Close: user-takeaway input required.** Close screen prompts *"What landed for you?"* before Return becomes available. Free-text input from user. Optional "Keep AI's frame" affordance for anchoring on something AI said in the conversation. The user names what landed — not the AI. Naturally forces user reply because Close is the only exit.
+  1. **Close: user-takeaway input required.** ✅ shipped `686b7d0` — Close was previously a passive display showing the AI's final reframe verbatim as "What landed", auto-crediting AI text as the user's takeaway (Pillar A violation). Rebuilt as active step: headline *"Name what landed."*, textarea, Return home disabled until ≥4 chars trimmed. Optional "↩ Anchor on what surfaced" mono link seeds textarea with the AI/SelfReframe frame for users who want to anchor — they can edit or keep. Persistence relocated: saveSession + appendTodayEntry moved from reframe→close transition into the close→home handler. If user abandons Close, no session record written. Schema: new `surfacedFrame` field preserves what was surfaced (Mirror / Library / Pattern Disruption use it downstream); `takeaway` field now semantic = USER's named takeaway.
 
   2. **Spine: user reply required before Close is reachable.** At least one user reply in Reframe after the AI's first response. Cannot close after a single AI turn. Prevents the discrimination-skip pattern observed in audit.
 
