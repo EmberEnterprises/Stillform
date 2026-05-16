@@ -35,6 +35,21 @@
 
 **Architectural integrity principle (locked):** Stillform PRESENTS the science (via Library — external curated knowledge users encounter) AND faithfully executes the metacognitive steps from it (via spine + surfaces). Practice doesn't lecture; Library does. Both layers respect the same scientific integrity.
 
+**User–AI relationship (locked, paired principles):**
+
+**A. AI as through-line guide.** AI is the continuous guide across all surfaces — operational embodiment of Pillar 3 (concierge). But the practice is always user-led. Metacognition is the user observing their own thinking, the user naming what's present, the user reframing, the user closing. AI provides the architecture: context-aware prompts, routing suggestions, observation reflections, intervention proposals. AI never does the metacognitive work for the user — only structures the space where the user does their own work.
+
+This refines how every surface talks:
+- **Mirror strip** reflects what the USER has produced through their practice, not what the AI thinks about the user's life. Good: *"Seven variants of criticism spiraling named over three weeks. Body always: shoulders, jaw."* (system reflects user's naming back). Bad: *"You seem stressed about criticism lately."* (AI interpreting user's life — intrusive, not Stillform).
+- **Active prompt** invites user action, never directs. Good: *"Heavy day held. Begin when ready."* (observation + invitation). Bad: *"Let's begin your morning check-in now."* (AI-led command).
+- **Reframe** AI is interlocutor, not therapist or judge — surfaces the user's own naming and asks them to extend.
+- **Pre-event Brief** offers context the user uses to prepare; doesn't tell them what to do.
+- **EOD artifact** reflects user's day back from their own entries; doesn't impose a narrative.
+
+**B. Self Mode as architecture.** Every AI-driven surface has a defined fallback for AI unavailability. Fallback is either (a) a structured non-AI alternative (Self Mode metacognitive sequence for Reframe), (b) a static-but-functional default in confidant voice (per-beat copy for Active prompt), or (c) honest absence with cached fallback (Mirror shows last cached observation if exists, hidden otherwise — never fake). Failures never block practice. The user can always engage the spine even with no AI. Self Mode generalized: not just a Reframe feature, but a platform-wide architectural principle.
+
+This works because the user was always the one doing the practice — AI absence is a degraded guide, not a broken experience.
+
 **How the practice produces the outcome** (internal description, not customer-facing): Users arrive with cognitive frameworks built from inherited information — cultural assumptions, parental scripts, professional conditioning, generational misinformation. The practice gives them tools to (1) see what they're running on — metacognition surfaces the operating system; (2) distinguish inherited from chosen — Library provides the science to check against; (3) rebuild deliberately — practice creates capacity to integrate corrections. The felt result is stabilized composure (customer-facing term) / sovereignty (internal note).
 
 **v1 doctrine carried unchanged:** Product definition ("metacognition for self-mastery via cognitive expansion / neuroplasticity"). Three pillars (metacognition / emotional honesty / **concierge as Pillar 3** — distributed across surfaces, never a surface itself). Banned framings (regulation app / composure app / wellness app / crisis tool / intensity audience / gamified achievement). B2B privacy wall (three-layer architectural enforcement, no SSO exception, license-only relationship). Diagnostic stack inputs (Signal / Bias / Trigger Profiles + Bio-filter). See CANON for full.
@@ -52,6 +67,11 @@
 - **2.5** ⏳ — Quick Breathe pill rebuild to Cyclic Sighing protocol; AI pattern-routing groundwork for Reframe close; morning + EOD + wind-down spine variants pending
 
 - **3** — Smart Screen home + session persistence
+  - Active prompt section: AI-generated state-aware copy with confidant-voice static fallback when AI unavailable
+  - Mirror strip section: renders cached AI observations; hidden when no cache (never faked)
+  - Trajectory section: mechanical stats line, renders at ≥3 sessions
+  - Session persistence: `stillform_v2_sessions` storage key; saves after Reframe Close
+  - Builds with Self Mode fallback architecture from day one
 
 - **4** — Morning + EOD + wind-down spine variants
   - Today's Brief generation (morning)
@@ -110,7 +130,7 @@
 
 **Cross-cutting concern — Smart Prompt Mechanism:** Signal-watching + intervention proposal (e.g., HRV elevated → "Quick Breathe? Or Reframe?"; pre-event detected → notification with watch/phone choice). Concierge philosophy embodied. Lives in Phase 5 (AI Mediation reads signals) + surfaces via Phase 9 (Watch / widget notifications) + smart-screen Mirror strip (Phase 3). Not a separate phase; cross-cuts existing architecture.
 
-**Item count:** ~45 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements and additions).
+**Item count:** ~47 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements + 2 paired user-AI relationship principles added in patch on `0d673d0`).
 
 ---
 
