@@ -18,19 +18,27 @@ import { routeMode } from "../lib/reframeApi.js";
  * State machine:
  *   notice → user names what's present (free-text + optional chip)
  *   reframe → AI metacognition partner (or SelfReframe if self mode)
- *   close → takeaway display, session ends
+ *   close → user names what landed; session persists ON RETURN HOME, not before
  *
  * Self Mode: routes to SelfReframe instead of Reframe. Triggered by:
  *   1. User taps "Or self-led ›" link on Notice
  *   2. Reframe surface auto-fallback when reframe.js errors persistently
  *      (Reframe calls onSwitchToSelfMode when the user accepts the offer)
  *
- * Phase 3 session persistence: on transition from reframe → close, the
- * full session writes to stillform_v2_sessions (via sessions.js) AND
- * the named precision appends to today's thread (via thread.js). The
- * persistence path has no AI dependency — sessions are written from
- * local Spine state, so they persist even when AI is unavailable
- * (per locked Self Mode as architecture principle).
+ * Phase 3 session persistence: completed session writes to
+ * stillform_v2_sessions (via sessions.js) AND the named precision appends
+ * to today's thread (via thread.js). The persistence path has no AI
+ * dependency — sessions are written from local Spine state, so they
+ * persist even when AI is unavailable (per locked Self Mode as
+ * architecture principle).
+ *
+ * Phase 3.5 #2 (locked May 16, 2026): persistence moved from the
+ * reframe→close transition to the close→home transition. The session
+ * doesn't count until the user names what landed in Close. If the user
+ * abandons before Close completes, nothing persists — quitting is not
+ * a session. This enforces the user-led principle architecturally:
+ * the AI's frame alone doesn't compound; only the user's named takeaway
+ * does. See CANON §7.1.
  *
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
@@ -39,7 +47,10 @@ export default function Spine({ onExit }) {
   const [precisionName, setPrecisionName] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
   const [selfMode, setSelfMode] = useState(false);
-  const [takeaway, setTakeaway] = useState(null);
+  // surfacedFrame = the frame from Reframe (AI's last reply OR SelfReframe's
+  // last user answer). Passed to Close where the user can anchor on it,
+  // edit it, or write something entirely their own. Not the user's takeaway.
+  const [surfacedFrame, setSurfacedFrame] = useState(null);
   const [conversationLength, setConversationLength] = useState(0);
 
   const handleNoticeContinue = (text, chip, opts = {}) => {
@@ -49,23 +60,35 @@ export default function Spine({ onExit }) {
     setStep("reframe");
   };
 
+  // Phase 3.5 #2: ReframeContinue no longer persists. It only captures
+  // the surfaced frame and conversation length, then transitions to Close.
+  // The save happens in handleCloseReturn after the user names their own
+  // takeaway.
   const handleReframeContinue = ({ takeaway: t, history }) => {
-    setTakeaway(t);
+    setSurfacedFrame(t);
     const turnCount = Array.isArray(history) ? history.length : 0;
     setConversationLength(turnCount);
+    setStep("close");
+  };
 
-    // Persist the completed session. Failure is silent — the user's
-    // close-the-rep moment isn't interrupted by storage issues.
+  // Phase 3.5 #2: persistence point. Called when the user has named what
+  // landed in Close and tapped Return home. Persists session + thread,
+  // then exits the spine.
+  const handleCloseReturn = (userTakeaway) => {
     const beat = getBeatOverride() || getCurrentBeat();
     const mode = selfMode ? "self" : routeMode(selectedChip, precisionName);
 
+    // The session is now committed. takeaway = USER's named takeaway;
+    // surfacedFrame = what was surfaced during reframe (preserved for
+    // downstream Mirror / Library / Pattern Disruption surfaces).
     saveSession({
       precisionName,
       selectedChip,
-      takeaway: t,
+      takeaway: userTakeaway,
+      surfacedFrame,
       mode,
       selfMode,
-      conversationLength: turnCount,
+      conversationLength,
       beat,
     });
 
@@ -73,17 +96,14 @@ export default function Spine({ onExit }) {
     // immediately on return. Thread is the visible-on-home compounding;
     // the session record is the deeper data layer behind it.
     //
-    // Phase 3.5 item #1: pass the precision through deriveThreadName() so
-    // long free-typed input renders as a glanceable short name in the
-    // thread, while the FULL precisionName is preserved on the session
-    // record (sessions.js) for downstream surfaces.
+    // Phase 3.5 #1: deriveThreadName() shortens long free-typed input.
     const threadSource = beat === "eod" ? "eod" : (beat === "morning" ? "morning" : "main");
     const threadText = deriveThreadName(precisionName, selectedChip);
     if (threadText) {
       appendTodayEntry({ text: threadText, source: threadSource });
     }
 
-    setStep("close");
+    onExit();
   };
 
   const handleSwitchToSelfMode = () => {
@@ -118,5 +138,5 @@ export default function Spine({ onExit }) {
   }
 
   // step === "close"
-  return <Close takeaway={takeaway} onReturnHome={onExit} />;
+  return <Close surfacedFrame={surfacedFrame} onReturnHome={handleCloseReturn} />;
 }

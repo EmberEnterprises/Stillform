@@ -19,7 +19,8 @@
  *     dateKey:           string,    // "YYYY-M-D" local
  *     precisionName:     string,    // user's named precision from Notice
  *     selectedChip:      string|null,  // optional chip from Notice
- *     takeaway:          string|null,  // final AI reframe (or self-reframe summary)
+ *     takeaway:          string|null,  // USER'S named takeaway from Close (Phase 3.5 #2 — formerly the AI's final reframe; now the user's own naming)
+ *     surfacedFrame:     string|null,  // what was surfaced before Close (AI's last reply OR SelfReframe's last answer). Preserved for Mirror / Library / Pattern Disruption downstream surfaces. (Phase 3.5 #2)
  *     mode:              "calm"|"clarity"|"hype"|"self",
  *     selfMode:          boolean,
  *     conversationLength: number,   // turns in the Reframe step
@@ -76,6 +77,7 @@ export function saveSession(session) {
       precisionName: typeof session.precisionName === "string" ? session.precisionName.trim() : "",
       selectedChip: typeof session.selectedChip === "string" ? session.selectedChip : null,
       takeaway: typeof session.takeaway === "string" ? session.takeaway.trim() : null,
+      surfacedFrame: typeof session.surfacedFrame === "string" ? session.surfacedFrame.trim() : null,
       mode: typeof session.mode === "string" ? session.mode : "calm",
       selfMode: !!session.selfMode,
       conversationLength: typeof session.conversationLength === "number" ? session.conversationLength : 0,
