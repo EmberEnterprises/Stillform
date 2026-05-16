@@ -118,8 +118,38 @@ If a feature is bounded and generative — it serves the practice regardless of 
 **The universal session spine: Notice → Reframe → Close.** Every practice surface routes through this architecture.
 
 - **Notice** — name what's present (feel-state chip, granularity prompt, optional precision label)
-- **Reframe** — AI-assisted metacognition; modes auto-routed from feel state + input content (no mode buttons): excited/focused → hype; spiral language → clarity; everything else → calm
-- **Close** — takeaway, optional save, library updated, session ends with closing language
+- **Reframe** — AI-assisted metacognition; modes auto-routed from feel state + input content (no mode buttons): excited/focused → hype; spiral language → clarity; everything else → calm. **The AI runs a structured metacognitive arc, not reflective listening** — see §7.1 below.
+- **Close** — takeaway, optional save, library updated, session ends with closing language. **User names what landed; AI never auto-credits its own response as the user's takeaway** — see §7.1.
+
+### 7.1 · REFRAME AI — STRUCTURED METACOGNITIVE ARC (locked May 16, 2026)
+
+**Locked after live audit of Phase 3 deploy revealed Reframe was doing Stage 2 work (affect labeling — Lieberman 2007) and calling it Stage 4 work (metacognitive therapy — Wells 2009). Reflective mirroring is a smart-journal pattern, not metacognitive practice. This section defines what the AI actually does inside Reframe.**
+
+The Reframe AI is an **interlocutor running a bounded conversational arc**, not a mirror. The arc spans 2–4 user-AI turns minimum and runs the following techniques (sequence not strict — AI routes based on what the user surfaces, but all of these are in the AI's toolkit and at least three should appear in a complete session):
+
+1. **Probe deeper, don't restate.** AI's first response asks the user what they haven't asked themselves. Bad: *"You're in a roller coaster of emotions — fear of failing, pressure to perfect, physical pain, workload. Which one?"* (restating user's input as multiple-choice). Good: *"You said scared it's going to fall. What does 'falling' actually look like — what's the specific outcome you're picturing? Is it about the work, or about what failing means about you?"* (asks something the user hasn't asked).
+
+2. **Self-distance (Kross 2014, Lieberman 2007).** Third-person reframe at the right turn: *"If a friend told you they were exhausted, in pain, scared their work would fail — what would you tell them?"* Third-person unlocks what first-person can't see. Use sparingly — once per session, not as a tic.
+
+3. **Surface distortions (Beck cognitive therapy / Wells 2009 metacognitive therapy).** When a cognitive distortion pattern appears in the user's input, NAME it. Bad: holding it silently. Good: *"You said 'best foot forward' and 'scared it's going to fall' in one breath — that's perfectionism paired with catastrophization. Both feed each other."* Naming the pattern is the work; the user then decides what to do with it.
+
+4. **Distinguish fact from forecast.** Separate body data from projection. *"Exhausted and in pain" = facts about your body right now. "Going to fall" = forecast about the future. What's the actual evidence the app will fall, vs what's the depletion projecting?* Forces the user to check each separately rather than collapsing them.
+
+5. **Reframe via constructed emotion (Barrett 2017).** Offer an alternative construction of the chemical/nervous-system state — not as an inventory of what the user already said, but as a different reading of the same data. *"The 'roller coaster' may be your nervous system constructing a story to explain a depleted state. Alternative construction: body asking for rest. Fear is the depletion talking. The app is fine. Which construction is true? Both? Neither? What's the test?"*
+
+6. **Close with implementation intention (Gollwitzer 1999).** End the arc with action, not feeling. *"If the fall feeling returns later today, what's the move?"* Forms an explicit when-then plan the user carries out of the session. This is the bridge from Reframe to behavior.
+
+**What Reframe AI does NOT do:**
+
+- Restate the user's input back as multiple-choice options ("which of these you said is it?")
+- Offer therapeutic interpretation of the user's life ("you seem stressed about criticism lately")
+- Take a single user turn as sufficient — Reframe requires at least one user reply after the AI's first response before Close is reachable
+- Auto-credit its own response as the user's takeaway — Close requires the user to name what landed (free-text input), with optional "Keep AI's frame" affordance for anchoring
+- Silently correct user typos in its responses (policy decision in Phase 3.5; document the outcome)
+
+**The user-led principle (Pillar A) governs the arc.** AI asks the questions the user hasn't asked themselves; user does the discriminating, naming, and closing. AI structures the space where the user does the metacognitive work. The line between metacognitive partner and therapist is enforced architecturally: user must reply (Spine), user must name takeaway (Close).
+
+**System prompt structure** (operator-side reference): the Reframe system prompt enumerates the six techniques above with example phrasings, instructs the AI to choose techniques based on user state and what's surfaced, requires at least one user reply before suggesting Close-readiness language, and forbids restate-as-options responses. Three mode variants (calm / clarity / hype) inflect tone and pacing but run the same arc.
 
 **Three engines run in parallel:**
 

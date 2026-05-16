@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (v2 rebuild truth locked + Phase 6 mediation pipeline shipped end-to-end)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3 shipped; Phase 3.5 scope locked after live audit)**
 
 ---
 
@@ -7,7 +7,7 @@
 
 **v2 lives under `?v=2`. v1 frontend stays live until v2 reaches parity. Backend untouched — v2 reads the same backend (Supabase, 28 Netlify functions, LemonSqueezy).**
 
-**Build state:** Phases 0–2 ✅ shipped (design tokens, atomic components, Notice → Reframe → Close spine). Phase 2.5 ⏳ — Quick Breathe pill (`f096a7a`) + Self Mode (`5c8a2db`) shipped; pill rebuild to Cyclic Sighing pending; morning + EOD + wind-down spine variants pending. Phase 3 NEXT.
+**Build state:** Phases 0–2 ✅ shipped (design tokens, atomic components, Notice → Reframe → Close spine). Phase 2.5 ⏳ — Quick Breathe pill (`f096a7a`) + Self Mode (`5c8a2db`) shipped; pill rebuild to Cyclic Sighing pending; morning + EOD + wind-down spine variants pending. Phase 3 ✅ shipped (`a2ca390`) — Smart Screen home + session persistence wired end-to-end. **Phase 3.5 NEXT** — Reframe quality elevation + spine integrity (scope locked from May 16 live audit). Phase 4+ unchanged below.
 
 **Smart-screen pivot (May 15):** Home is not a notebook. User goes from AUTHOR (writing into blank) to SUBJECT (system observes, reports back). AI talks, user mostly reads. Editorial composition by phase. Aesthetic: Bloomberg terminal redesigned by Hermès.
 
@@ -66,12 +66,52 @@ This works because the user was always the one doing the practice — AI absence
 
 - **2.5** ⏳ — Quick Breathe pill rebuild to Cyclic Sighing protocol; AI pattern-routing groundwork for Reframe close; morning + EOD + wind-down spine variants pending
 
-- **3** — Smart Screen home + session persistence
+- **3** ✅ shipped `a2ca390` — Smart Screen home + session persistence
   - Active prompt section: AI-generated state-aware copy with confidant-voice static fallback when AI unavailable
   - Mirror strip section: renders cached AI observations; hidden when no cache (never faked)
   - Trajectory section: mechanical stats line, renders at ≥3 sessions
   - Session persistence: `stillform_v2_sessions` storage key; saves after Reframe Close
   - Builds with Self Mode fallback architecture from day one
+  - **Live audit May 16:** persistence verified end-to-end (both test sessions threaded correctly into TODAY). Four issues surfaced → moved to Phase 3.5.
+
+- **3.5** ⏳ NEXT — Reframe quality elevation + spine integrity (locked May 16 from live audit)
+
+  **Why this exists:** Live audit of Phase 3 deploy surfaced that Reframe currently does Stage 2 work (affect labeling — Lieberman 2007) and calls it Stage 4 work (metacognitive therapy — Wells 2009). The AI mirrors what the user said and offers what they already said back as multiple-choice options. Result: Reframe feels like a smart journal, not metacognitive practice. Spine architecture also allows a user to close after a single AI turn with the AI's own response auto-credited as their "takeaway" — meaning the metacognitive work never has to happen. Both problems violate the user-led principle (Pillar A) and the practice-grade integrity the spine claims.
+
+  **Scope (locked):**
+
+  1. **Close: user-takeaway input required.** Close screen prompts *"What landed for you?"* before Return becomes available. Free-text input from user. Optional "Keep AI's frame" affordance for anchoring on something AI said in the conversation. The user names what landed — not the AI. Naturally forces user reply because Close is the only exit.
+
+  2. **Spine: user reply required before Close is reachable.** At least one user reply in Reframe after the AI's first response. Cannot close after a single AI turn. Prevents the discrimination-skip pattern observed in audit.
+
+  3. **Thread: derived precision name for free-typed sessions.** Free-typed Notice input currently appears verbatim in TODAY thread (entire paragraph). Needs derivation: first clause / first sentence / AI-extracted theme. Thread becomes unreadable as days accumulate without this. Chip-only sessions already render correctly (chip name only).
+
+  4. **Reframe AI: structured metacognitive arc, not reflective mirror.** System prompt rebuild + conversational arc over 2–4 turns minimum. The arc runs the techniques the spine has been claiming all along:
+     - **Probe deeper** — ask what user hasn't asked themselves; don't restate what they said
+     - **Self-distance** (Kross 2014) — third-person reframe: *"If a friend told you this, what would you tell them?"*
+     - **Surface distortions** (Beck / Wells 2009) — NAME the cognitive pattern when present (perfectionism + catastrophization, all-or-nothing, mind-reading, etc.); don't just hold it
+     - **Fact vs forecast** — separate body data ("exhausted, in pain") from forecast ("going to fall") and have the user check evidence on each
+     - **Reframe via constructed emotion** (Barrett 2017) — offer an alternative construction of the chemical/nervous-system state, not just an inventory of what the user said
+     - **Implementation intention** (Gollwitzer 1999) — close the arc with action, not feeling: *"If X comes back, what's the move?"*
+
+  5. **AI typo correction policy decision.** Current AI silently normalizes user typos in its responses (e.g. "motions" → "emotions"). Decide: keep (clarity) or preserve user voice (authenticity). Document the decision either way.
+
+  **User-led principle held throughout:** AI asks the questions the user hasn't asked themselves; user does the discriminating, naming, and closing. AI doesn't TELL the user what they're feeling — it structures the space where the user does the metacognitive work. Line between metacognitive partner and therapist enforced via #1 (user names the takeaway) and #2 (user must reply before close).
+
+  **Files affected:**
+  - `src/v2/screens/spine/Close.jsx` — takeaway input
+  - `src/v2/screens/Spine.jsx` — reply-required gating
+  - `src/v2/lib/sessions.js` — precision-name derivation utility
+  - `src/v2/screens/spine/Reframe.jsx` — pass conversation arc state to API
+  - `netlify/functions/reframe.js` — system prompt rebuild + arc instructions
+  - `src/v2/lib/threadEntry.js` (new) — derived precision name helper
+
+  **Verification on completion:**
+  - Run real session free-typed input → confirm thread shows derived name, not paragraph
+  - Try to close after one AI turn → blocked
+  - Complete session → Close shows "What landed for you?" input → user must type → Return enables
+  - Reframe conversation runs 2–4 turn arc: each turn does different metacognitive work, no repetition of user input as options
+  - Test typo case → matches decided policy
 
 - **4** — Morning + EOD + wind-down spine variants
   - Today's Brief generation (morning)
