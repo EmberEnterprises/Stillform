@@ -22,11 +22,43 @@ import MonoLabel from "../../components/MonoLabel.jsx";
  *     interaction. Tapping a chip puts that word in the textarea so the
  *     user can extend it into something specific.
  *
- * @param {function(string, string|null): void} onContinue
- *   Called with (precisionName, selectedChip|null) when user advances.
+ * Phase 4 #2 (locked May 16, 2026): Notice now accepts an optional
+ * `config` prop (from beatConfig.getBeatConfig(beat)). When provided,
+ * headline / body / placeholder / chips render from the config's notice
+ * section, letting morning ("Anchor today.") and EOD ("Close the day.")
+ * variants drive their own copy + chip subsets without forking this
+ * component. When config is omitted, Notice falls back to the main-beat
+ * defaults — backward-compatible with any caller that hasn't been
+ * updated yet.
+ *
+ * Wind-down does NOT use this component — wind-down's minimal shape
+ * has its own WindDown.jsx screen (Phase 4 #5).
+ *
+ * @param {object} [config]  optional beatConfig object. If present,
+ *   uses config.notice.{headline, body, placeholder, chips}.
+ * @param {function(string, string|null, object?): void} onContinue
+ *   Called with (precisionName, selectedChip|null, opts?) when user
+ *   advances. opts.selfMode === true if user picked self-led path.
  * @param {function(): void} onExit  Called when user exits the spine.
  */
-export default function Notice({ onContinue, onExit }) {
+export default function Notice({ config, onContinue, onExit }) {
+  // Resolve render values from config when present; fall back to main-
+  // beat defaults otherwise. Backward-compatible — existing callers that
+  // don't pass config get the same surface they always did.
+  const headline = config?.notice?.headline ?? "Name what's present.";
+  // Body is intentionally allowed to be null (suppresses the secondary
+  // line) — wind-down doesn't use this component, but morning's body
+  // ("Name what today needs from you.") and main's ("As precisely as
+  // you can.") both render. Use ?? so null in config is respected, not
+  // treated as missing.
+  const body = config?.notice?.body !== undefined
+    ? config.notice.body
+    : "As precisely as you can.";
+  const placeholder = config?.notice?.placeholder ??
+    "Specifics — what it feels like, where, when, what triggered it…";
+  // Per-beat chip subset, or the full default if no config.
+  const chips = config?.notice?.chips ?? DEFAULT_SCAFFOLDING_CHIPS;
+
   const [text, setText] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
   const textareaRef = useRef(null);
@@ -53,11 +85,12 @@ export default function Notice({ onContinue, onExit }) {
     }
 
     setSelectedChip(chipId);
-    // If the textarea is empty (or only contains a prior chip word),
-    // replace contents with the new chip word as a starting point.
+    // If the textarea is empty (or only contains a prior chip word from
+    // the CURRENT beat's chip set), replace contents with the new chip
+    // word as a starting point.
     const isTextEmpty = text.trim().length === 0;
     const isOnlyPriorChipWord =
-      SCAFFOLDING_CHIPS.some((c) => text.trim().toLowerCase() === c.label.toLowerCase());
+      chips.some((c) => text.trim().toLowerCase() === c.label.toLowerCase());
     if (isTextEmpty || isOnlyPriorChipWord) {
       setText(chipLabel + " — ");
       // Re-focus + move cursor to end so the user keeps writing immediately.
@@ -88,9 +121,9 @@ export default function Notice({ onContinue, onExit }) {
       <div className="sf-fade-enter">
         <EditorialBlock
           label="Notice"
-          headline="Name what's present."
+          headline={headline}
           headlineSize="lg"
-          body="As precisely as you can."
+          body={body}
           labelInfoTitle="Notice"
           labelInfoBody="Naming precisely is the practice. A vague feeling is a starting point; a specific name is built mental real estate. The brain encodes what gets named in detail. Granular naming compounds over time into a sharper cognitive vocabulary. Hoemann 2021, Barrett 2017 (constructed emotion theory)."
         />
@@ -105,33 +138,35 @@ export default function Notice({ onContinue, onExit }) {
           className="sf-textarea"
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Specifics — what it feels like, where, when, what triggered it…"
+          placeholder={placeholder}
           rows={4}
           aria-label="Name what is present"
         />
       </div>
 
-      <div
-        className="sf-fade-enter sf-fade-enter--delay-2"
-        style={{ marginTop: "var(--sf-space-32)" }}
-      >
-        <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
-          Start here if you're stuck
-        </MonoLabel>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
-          {SCAFFOLDING_CHIPS.map((chip) => (
-            <button
-              key={chip.id}
-              type="button"
-              className="sf-chip"
-              aria-selected={selectedChip === chip.id ? "true" : "false"}
-              onClick={() => handleChipTap(chip.id, chip.label)}
-            >
-              {chip.label}
-            </button>
-          ))}
+      {chips.length > 0 ? (
+        <div
+          className="sf-fade-enter sf-fade-enter--delay-2"
+          style={{ marginTop: "var(--sf-space-32)" }}
+        >
+          <MonoLabel size="xs" tone="faint" style={{ display: "block", marginBottom: "var(--sf-space-12)" }}>
+            Start here if you're stuck
+          </MonoLabel>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--sf-space-8)" }}>
+            {chips.map((chip) => (
+              <button
+                key={chip.id}
+                type="button"
+                className="sf-chip"
+                aria-selected={selectedChip === chip.id ? "true" : "false"}
+                onClick={() => handleChipTap(chip.id, chip.label)}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      ) : null}
 
       <div
         className="sf-fade-enter sf-fade-enter--delay-3"
@@ -178,18 +213,17 @@ export default function Notice({ onContinue, onExit }) {
 }
 
 /* -----------------------------------------------------------------------
- * SCAFFOLDING CHIPS — starting points for users who freeze.
+ * DEFAULT_SCAFFOLDING_CHIPS — main-beat chip set when no variant config
+ * is passed (backward compatibility for callers that haven't been
+ * updated). Should stay in sync with beatConfig.js's main config.
  *
- * These are NOT the primary action. They appear below the textarea, in
- * smaller faint mono treatment, with a label that says "start here if
- * you're stuck." Tapping a chip seeds the textarea with the chip word
- * so the user can extend it into something specific.
- *
- * Selecting a chip also passes a feel-state hint to the backend for
- * client-side AI mode routing (excited/focused → hype, stuck → clarity,
- * everything else → calm — per canon §7 and reframeApi.js routeMode).
+ * Tapping a chip seeds the textarea with the chip word so the user can
+ * extend it into something specific. Selecting a chip also passes a
+ * feel-state hint to the backend for AI mode routing (excited/focused
+ * → hype, stuck → clarity, everything else → calm — per canon §7 and
+ * reframeApi.js routeMode).
  * -------------------------------------------------------------------- */
-const SCAFFOLDING_CHIPS = [
+const DEFAULT_SCAFFOLDING_CHIPS = [
   { id: "excited",  label: "Excited" },
   { id: "focused",  label: "Focused" },
   { id: "settled",  label: "Settled" },

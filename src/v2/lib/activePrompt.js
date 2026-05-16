@@ -42,19 +42,32 @@ const CACHE_TTL_MS = 10 * 60 * 1000; // 10 min
  *
  * Each variant: { headline, body, actionLabel }
  *
- * Two main variants (fresh vs underway) for the main beat — fresh
- * morning open reads differently from a return-mid-day. Both stay in
- * observation voice, never directive.
+ * Per Phase 4 #2 (locked May 16, 2026): copy refreshed across all beats
+ * to align with beatConfig.js's variant configs.
  *
- * Wind-down: NO actionLabel. The directive IS the practice (phone down).
- * Canon §10: no review content within ~2h of sleep (Walker, Stickgold).
+ * Two-state variants where the beat has a "done" signal we can read
+ * from threadLength:
+ *   - main: fresh (no entries yet) vs underway (>=1 entry)
+ *   - morning: fresh (no entries yet) vs done (>=1 entry, anchor already
+ *     set — body shifts from invitation to acknowledgment, no action)
+ *
+ * Wind-down: now HAS an actionLabel ("Begin") because Phase 4 #5 ships
+ * the minimal wind-down flow (tomorrow anchor → Deep Regulate → close).
+ * Canon §10's no-review-within-2h-of-sleep concern is preserved — the
+ * wind-down flow is forward-anchor + breathing, never retrospective.
+ * EOD owns the retrospective close.
  * -------------------------------------------------------------------- */
 
 const FALLBACK_PROMPTS = {
-  morning: {
-    headline: "Morning has weight on it.",
-    body: "Set today's reps with a short check-in.",
+  morning_fresh: {
+    headline: "Today opens here.",
+    body: "Set what it needs from you.",
     actionLabel: "Begin",
+  },
+  morning_done: {
+    headline: "Today's anchor is set.",
+    body: "Use the day.",
+    actionLabel: null,
   },
   main_fresh: {
     headline: "The day waits for a first rep.",
@@ -67,15 +80,14 @@ const FALLBACK_PROMPTS = {
     actionLabel: "Begin",
   },
   eod: {
-    headline: "The day held weight.",
-    body: "Two sentences. What stayed.",
+    headline: "Day's been carried.",
+    body: "Close it with care.",
     actionLabel: "Begin",
   },
-  // Wind-down: no action. The directive IS the practice.
   "wind-down": {
-    headline: "Phone down.",
-    body: "Tomorrow's reps begin where today's ended.",
-    actionLabel: null,
+    headline: "Phone down soon.",
+    body: "Tomorrow's one anchor?",
+    actionLabel: "Begin",
   },
 };
 
@@ -84,6 +96,11 @@ const FALLBACK_PROMPTS = {
  * during render before any AI fetch resolves, and as the final fallback
  * when AI returns nothing.
  *
+ * Main and morning both use threadLength to split between fresh and
+ * "underway"/"done" variants. The signal is imperfect (a thread entry
+ * could be from any beat earlier in the day) but reasonable for Phase 4;
+ * the AI generation path will refine it later with full session context.
+ *
  * @param {"morning"|"main"|"eod"|"wind-down"} beat
  * @param {number} threadLength  number of entries in today's thread
  * @returns {{headline: string, body: string, actionLabel: string|null, source: "fallback"}}
@@ -91,6 +108,10 @@ const FALLBACK_PROMPTS = {
 export function getFallbackActivePrompt(beat, threadLength) {
   if (beat === "main") {
     const variant = threadLength > 0 ? FALLBACK_PROMPTS.main_underway : FALLBACK_PROMPTS.main_fresh;
+    return { ...variant, source: "fallback" };
+  }
+  if (beat === "morning") {
+    const variant = threadLength > 0 ? FALLBACK_PROMPTS.morning_done : FALLBACK_PROMPTS.morning_fresh;
     return { ...variant, source: "fallback" };
   }
   const variant = FALLBACK_PROMPTS[beat] || FALLBACK_PROMPTS.main_fresh;
@@ -138,7 +159,9 @@ export async function getActivePromptAsync({ beat, threadLength, sessionCount })
     const ai = {
       headline: data.headline.trim(),
       body: typeof data.body === "string" ? data.body.trim() : "",
-      actionLabel: beat === "wind-down" ? null : (typeof data.actionLabel === "string" ? data.actionLabel : "Begin"),
+      // Phase 4 #2: wind-down no longer forces null actionLabel — the
+      // wind-down flow (tomorrow anchor + Deep Regulate) ships in #5.
+      actionLabel: typeof data.actionLabel === "string" ? data.actionLabel : "Begin",
     };
 
     writeCache(beat, ai);

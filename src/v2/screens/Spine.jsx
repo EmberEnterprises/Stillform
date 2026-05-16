@@ -7,6 +7,7 @@ import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
+import { getBeatConfig } from "../lib/beatConfig.js";
 import { routeMode } from "../lib/reframeApi.js";
 
 /**
@@ -43,6 +44,17 @@ import { routeMode } from "../lib/reframeApi.js";
  * @param {function(): void} onExit  Called when user exits or returns home.
  */
 export default function Spine({ onExit }) {
+  // Phase 4 #2 (locked May 16, 2026): beat is locked at session mount.
+  // A session belongs to the beat it started in, even if it crosses a
+  // beat boundary mid-flow (e.g., user starts at 8:59pm in main beat and
+  // finishes at 9:01pm in wind-down — stays a main-beat session).
+  // Lazy useState init guarantees one read at mount, never per-render.
+  const [beat] = useState(() => getBeatOverride() || getCurrentBeat());
+  // Resolve the variant config once from the locked beat. Pure object,
+  // no per-render cost; passed to spine surfaces (Notice now; Reframe /
+  // Close in later #6–#7 steps).
+  const config = getBeatConfig(beat);
+
   const [step, setStep] = useState("notice");
   const [precisionName, setPrecisionName] = useState("");
   const [selectedChip, setSelectedChip] = useState(null);
@@ -75,7 +87,9 @@ export default function Spine({ onExit }) {
   // landed in Close and tapped Return home. Persists session + thread,
   // then exits the spine.
   const handleCloseReturn = (userTakeaway) => {
-    const beat = getBeatOverride() || getCurrentBeat();
+    // Phase 4 #2: use the beat locked at mount (not re-read fresh here),
+    // so the session record matches the variant the user actually
+    // experienced if they crossed a beat boundary mid-flow.
     const mode = selfMode ? "self" : routeMode(selectedChip, precisionName);
 
     // The session is now committed. takeaway = USER's named takeaway;
@@ -113,7 +127,11 @@ export default function Spine({ onExit }) {
   };
 
   if (step === "notice") {
-    return <Notice onContinue={handleNoticeContinue} onExit={onExit} />;
+    // Phase 4 #2: pass the variant config down. Notice resolves its
+    // headline / body / placeholder / chips from config.notice, falling
+    // back to main-beat defaults if config is absent (it isn't, but the
+    // component is defensive).
+    return <Notice config={config} onContinue={handleNoticeContinue} onExit={onExit} />;
   }
 
   if (step === "reframe") {
