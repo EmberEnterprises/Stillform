@@ -5,6 +5,7 @@ import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry } from "../lib/thread.js";
+import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
 import { routeMode } from "../lib/reframeApi.js";
 
@@ -71,9 +72,15 @@ export default function Spine({ onExit }) {
     // Append to today's thread so the home reflects the named work
     // immediately on return. Thread is the visible-on-home compounding;
     // the session record is the deeper data layer behind it.
+    //
+    // Phase 3.5 item #1: pass the precision through deriveThreadName() so
+    // long free-typed input renders as a glanceable short name in the
+    // thread, while the FULL precisionName is preserved on the session
+    // record (sessions.js) for downstream surfaces.
     const threadSource = beat === "eod" ? "eod" : (beat === "morning" ? "morning" : "main");
-    if (precisionName && precisionName.trim()) {
-      appendTodayEntry({ text: precisionName.trim(), source: threadSource });
+    const threadText = deriveThreadName(precisionName, selectedChip);
+    if (threadText) {
+      appendTodayEntry({ text: threadText, source: threadSource });
     }
 
     setStep("close");
