@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 ✅ complete — Reframe is now structured metacognitive practice, not a smart journal; Phase 4 next)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 4 scope locked — beat-aware spine variants + achievement credits + breathing routing; wind-down design call: tomorrow anchor)**
 
 ---
 
@@ -107,13 +107,107 @@ This works because the user was always the one doing the practice — AI absence
   - Reframe conversation runs 2–4 turn arc: each turn does different metacognitive work, no repetition of user input as options
   - Test typo case → matches decided policy
 
-- **4** — Morning + EOD + wind-down spine variants
-  - Today's Brief generation (morning)
-  - EOD artifact (daily closing)
-  - Post-event reflection (addresses freeze / high-stakes events specifically)
-  - Achievement micro-credits in confidant voice across all closes
-  - Deep Regulate embedded in wind-down
-  - AI breathing-pattern routing per spine variant
+- **4** ⏳ NEXT — Beat-aware spine variants + achievement credits + breathing routing (scope locked May 16, 2026)
+
+  **Why this exists:** v2 spine currently runs identical Notice → Reframe → Close for all four beats. SmartScreen home routes by beat correctly, but the spine itself is beat-blind — same opening, same chips, same AI behavior, same close. Without beat-aware variants, morning check-in doesn't feel different from noon reframe doesn't feel different from EOD close — defeating the purpose of having beats. Phase 4 makes the spine respond to the beat it's entered from.
+
+  Architecturally introduces a **variant config layer** keyed by beat. Each beat (morning / main / eod / wind-down) gets a config object driving Notice screen content, AI system prompt addition, Reframe behavior, Close treatment, storage flags, breathing offer, and micro-credit derivation. Designed extensible to post-event as a 5th beat type — Phase 6 ships the post-event entry trigger + config with minimal new infrastructure.
+
+  **Scope (locked):**
+
+  1. **Variant config architecture.** New `src/v2/lib/beatConfig.js` exports `getBeatConfig(beat)`. Returns config object with: `notice.{shape, headline, body, placeholder, chips}` · `reframe.{systemPromptAddition, minTurns, contextExtras}` · `close.{headline, body, takeawayPlaceholder, breathingOffer, completionFlag, completionShape}`. `notice.shape` is `"standard"` (Notice → Reframe → Close) or `"minimal"` (wind-down's direct flow). Extensible — adding post-event = one new config object in Phase 6.
+
+  2. **Morning variant — "Anchor today."**
+     - Notice headline: *"Anchor today."* Body: *"Name what today needs from you."*
+     - Placeholder: *"What's the one thing — focus, presence, patience, something specific…"*
+     - Chips (forward-looking): EXCITED · FOCUSED · ANTICIPATING · HEAVY · ANXIOUS · UNSURE · SETTLED · MIXED
+     - Reframe AI receives `beat: "morning"` + prompt addition: *"MORNING BEAT — Stage 3 anticipation (Gollwitzer 1999 implementation intentions). Help user form a when-then anchor for today, NOT pattern-naming. Probe what 'anchor' means for them today; close with the specific moment that's likely to test it."*
+     - Reframe `minTurns = 1` (Phase 3.5 #3 gate still applies)
+     - Close artifact = the anchor + when-then (the Today's Brief in v2's shape)
+     - Marks `stillform_checkin_today` in v1-compatible shape `{date: "YYYY-MM-DD", anchor, takeaway, completedAt}` so v1 beat detection stays correct during dual-live
+     - Breathing offer at Close: Box breathing (4-4-4-4) — sustained focus pattern
+     - Micro-credit derivation triggers: first anchor this week / consecutive days running / first morning this week
+
+  3. **EOD variant — "Close the day."**
+     - Notice headline: *"Close the day."* Body: *"What did today carry?"*
+     - Placeholder: *"The weight of it. The shape. What stayed with you…"*
+     - Chips (retrospective): SETTLED · CHARGED · DEPLETED · CLEAR · UNFINISHED · GRATEFUL · HEAVY · FLAT
+     - Today's thread entries (from `getTodayThread()`) pass into AI context as new `todayThreadContext` parameter — small addition to existing context stack in `reframe.js`
+     - Reframe AI receives `beat: "eod"` + prompt addition: *"EOD BEAT — Stage 5 integration (Walker/Stickgold consolidation; Wells 2009 closure ritual). User is closing today and has a thread of named work from today (in context). Help them distill what landed, what to keep, what to leave. Integrative, not opening. Do NOT re-open patterns from earlier in the day — close them."*
+     - Reframe `minTurns = 1`
+     - Close artifact = takeaway from the day (EOD artifact in v2's shape)
+     - Marks `stillform_eod_today` in v1-compatible shape `{date, takeaway, completedAt}`
+     - Breathing offer at Close: Deep Regulate (coherent ~5–6 bpm)
+     - Micro-credit derivation: composure-frequency / days running / cross-day pattern signal
+     - **v1 backend reuse:** existing `netlify/functions/eod-artifact.js` (Build #10, shipped May 8) generates structured server-side artifact. v2 fires it post-save; no rebuild needed.
+
+  4. **Wind-down variant — Minimal: tomorrow's anchor + Deep Regulate + phone down.**
+     - `notice.shape = "minimal"` — NOT Notice → Reframe → Close. Direct flow.
+     - Single screen: headline *"Tomorrow's one anchor?"*, textarea (no chips), submit advances to breathing
+     - Per locked design call May 16: anchor over offload because (a) EOD already handles retrospective offload — wind-down repeating is redundant, (b) Scullin et al. 2018 — writing tomorrow's anchor before bed cuts sleep onset latency ~10 min vs writing about completed tasks; anticipatory cognitive load is the bigger sleep blocker, (c) forward direction matches sovereign self-mastery framing — anchor tomorrow's move, don't relitigate today
+     - Breathing: Deep Regulate, 2–3 min, skippable
+     - Close: *"Phone down. See you tomorrow."* — no artifact, no review (canon §10: no review near sleep)
+     - Marks `stillform_winddown_today` (new flag, separate from EOD)
+     - Tomorrow's anchor saves to `stillform_tomorrow_anchor` which morning beat surfaces NEXT morning as concierge context (Pillar 3 — "things easier than they should be")
+     - No micro-credit on wind-down (no review near sleep)
+     - SmartScreen wind-down treatment already correct (canon §10) — thread/Mirror/Trajectory hidden during wind-down beat
+
+  5. **Achievement micro-credit on standard Closes.**
+     - New helper `src/v2/lib/microCredit.js` exports `deriveMicroCredit({beat, sessionCount, distinctDays, todayCount, weekCount})` → string | null
+     - Renders quietly above "What landed" textarea in Close when non-null
+     - Voice: confidant-grade observation, never gamified pep. Examples:
+       - Morning, first this week: *"First anchor this week. The library starts here."*
+       - Morning, 3rd consecutive: *"Third morning running. The pattern is setting."*
+       - Main, 3rd rep today: *"Third rep today. Each one sharper."*
+       - EOD, 3rd composed close this week: *"Third settled close this week. The signal is forming."*
+     - Returns null on sparse data — silent rather than fabricated
+     - Wind-down: always null (per #4)
+     - Reads from `sessions.js` + new cross-day pattern helpers
+
+  6. **AI breathing-pattern routing per beat at Close.**
+     - Close component receives `breathingOffer` from variant config
+     - Renders quiet mono affordance below Return home: *"↩ Anchor with Box"* / *"↩ Anchor with Deep Regulate"* / null for wind-down (embedded inline) / null for main beat (existing AI routing in Reframe close-readiness handles)
+     - Tap routes to the relevant breathing surface with return-to-home flow
+     - Existing Quick Breathe pill (Cyclic Sighing locked) remains always-available regardless of beat
+     - Honors v2 truth line 26: "AI auto-routes among all three in Reframe close, morning check-in, EOD, and in-the-moment surfaces"
+
+  **Cross-cutting:**
+
+  - Beat-aware AI prompt routing in `netlify/functions/reframe.js`: new `BEAT_ADDITIONS` map injected into contextParts when beat ∈ {morning, eod}. Main and wind-down keep current behavior (wind-down doesn't use Reframe).
+  - v1 storage shape compatibility: `stillform_checkin_today`, `stillform_eod_today` written in shapes v1's `beat.js` / TimeKeeper can read, so beat detection stays correct during v1/v2 dual-live period.
+  - Concierge surfacing: morning Today's Brief context includes previous night's `stillform_tomorrow_anchor` if present.
+
+  **Files affected:**
+  - `src/v2/lib/beatConfig.js` (new)
+  - `src/v2/lib/microCredit.js` (new)
+  - `src/v2/lib/thread.js` — `getTodayThread()` already exists; may need helper to extract for AI context
+  - `src/v2/screens/Spine.jsx` — read beat config, route shape, pass props
+  - `src/v2/screens/spine/Notice.jsx` — accept config props (headline/body/placeholder/chips)
+  - `src/v2/screens/spine/Reframe.jsx` — pass beat + contextExtras to API
+  - `src/v2/screens/spine/Close.jsx` — render micro-credit + breathing offer, completionFlag write
+  - `src/v2/screens/spine/WindDown.jsx` (new) — minimal flow screen
+  - `netlify/functions/reframe.js` — `BEAT_ADDITIONS` map + injection
+  - `Stillform_Master_Todo.md` + `STILLFORM_CANON.md` — per step
+
+  **Verification on completion:**
+  - `?beat=morning` → Notice shows "Anchor today." + forward-looking chips
+  - `?beat=eod` → Notice shows "Close the day." + retrospective chips + AI receives today's thread context
+  - `?beat=wind-down` → minimal flow: tomorrow's anchor → Deep Regulate → phone-down close
+  - All three completion flags written correctly (verify SmartScreen advances beat)
+  - Morning Close offers Box; EOD Close offers Deep Regulate; main Close offers AI-routed (existing); wind-down embeds inline
+  - Micro-credit renders above "What landed" when signal exists, silent otherwise
+  - Reframe AI first response differs by beat — forward-looking for morning, integrative for EOD
+  - v1 frontend keeps working — storage shape compatibility verified
+
+  **Sub-item commit order (each follows operating rule: lock scope → commit doc → start code → commit code → update doc):**
+
+  1. Variant config infrastructure (`beatConfig.js`) — foundation
+  2. Notice.jsx accepts config props (decouple from hardcoded "Name what's present")
+  3. Morning variant — config + AI prompt addition + completion flag write
+  4. EOD variant — config + AI prompt addition + thread context wiring + completion flag write
+  5. Wind-down minimal flow (`WindDown.jsx`) + Spine route switch + tomorrow-anchor storage
+  6. Achievement micro-credit derivation + Close render
+  7. Breathing offer + Close render
 
 - **5** — My Progress
   - Library (external curated knowledge — human behavior, neuroscience, ethics)
@@ -124,9 +218,10 @@ This works because the user was always the one doing the practice — AI absence
   - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter)
   - Signal Log (long-term past-session review)
 
-- **6** — Support Sheet (Move card + Scripts)
+- **6** — Support Sheet (Move card + Scripts) + post-event reflection variant
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
   - Scripts confidant-voice rewrite
+  - **Post-event reflection** — registers as 5th beat type in the variant config architecture built in Phase 4. Notice headline: *"What just happened?"* Forward into Reframe with post-mortem framing (what worked / what didn't / what to keep). Close = post-event artifact (lessons + carry-forward). Entry trigger lives in Support Sheet (manual *"Post-event reflection"* affordance) and optionally from calendar detection (Phase 9 ties in). Minimal new code thanks to Phase 4 architecture — one config object + one entry surface.
 
 - **7** — Pre-event Brief v2
   - Hardware status check, Risks, Moves, Recovery anchor
