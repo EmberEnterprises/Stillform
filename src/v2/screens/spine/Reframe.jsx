@@ -120,6 +120,20 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onSwi
     });
   };
 
+  // Phase 3.5 #3: at least one user reply in Reframe is required before
+  // Close is reachable. Without this gate, a user could type one Notice
+  // precision, receive one AI response, and close — meaning the AI did
+  // all the metacognitive work and the user did none. Audit on May 16
+  // surfaced this exact pattern. The user-led principle (CANON §7.1)
+  // requires the user to engage in the back-and-forth before the
+  // session is reachable to close.
+  //
+  // Counting: history[0] is always the precisionName from Notice. So
+  // we require ≥2 user messages — Notice precision + at least one
+  // genuine reply in the Reframe arc.
+  const userMessageCount = history.filter((m) => m.role === "user").length;
+  const hasUserReplied = userMessageCount >= 2;
+
   return (
     <main className="sf-page">
       <div className="sf-fade-enter" style={{ marginBottom: "var(--sf-space-32)" }}>
@@ -234,8 +248,14 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onSwi
             <Button
               variant="secondary"
               onClick={handleClose}
-              disabled={thinking}
-              aria-disabled={thinking}
+              disabled={thinking || !hasUserReplied}
+              aria-disabled={thinking || !hasUserReplied}
+              aria-label={!hasUserReplied ? "Reply at least once before closing" : "Close the session"}
+              style={
+                !hasUserReplied && !thinking
+                  ? { opacity: 0.4, cursor: "default", pointerEvents: "none" }
+                  : undefined
+              }
             >
               I'm done
             </Button>
@@ -243,6 +263,25 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onSwi
               Back
             </Button>
           </div>
+
+          {/* Phase 3.5 #3: quiet helper when the close gate is engaged.
+              Affordances should explain themselves once the user looks. */}
+          {initialized && !error && !hasUserReplied && !thinking ? (
+            <p
+              style={{
+                marginTop: "var(--sf-space-16)",
+                marginBottom: 0,
+                color: "var(--sf-text-quiet)",
+                fontFamily: "var(--sf-font-mono)",
+                fontSize: "11px",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                opacity: 0.7,
+              }}
+            >
+              Reply first — then close
+            </p>
+          ) : null}
         </div>
       ) : null}
     </main>
