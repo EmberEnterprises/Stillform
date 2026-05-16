@@ -6,7 +6,7 @@ import Close from "./spine/Close.jsx";
 import { saveSession } from "../lib/sessions.js";
 import { appendTodayEntry } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
-import { getCurrentBeat, getBeatOverride } from "../lib/beat.js";
+import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
 import { getBeatConfig } from "../lib/beatConfig.js";
 import { routeMode } from "../lib/reframeApi.js";
 
@@ -117,6 +117,46 @@ export default function Spine({ onExit }) {
       appendTodayEntry({ text: threadText, source: threadSource });
     }
 
+    // Phase 4 #3 (May 16, 2026): write the per-beat completion flag so
+    // the beat router (getCurrentBeat) advances to the next beat on
+    // subsequent loads. Schema matches v1 — { date: "YYYY-MM-DD", ... }
+    // — so v1 readers (stillform_checkin_today, stillform_eod_today,
+    // stillform_winddown_today) recognize v2-completed beats. The
+    // selectedChip is carried as a lightweight "mood" hint; remaining
+    // v1 fields (energy / bio / tension / etc.) are null because the
+    // v2 spine doesn't ask those questions — Notice + chip is the
+    // entire morning check-in surface in v2.
+    if (config.completionFlag) {
+      try {
+        const payload = {
+          date: localDateKey(),
+          mood: selectedChip || null,
+          precision: precisionName || null,
+          source: "v2-spine",
+          beat,
+        };
+        localStorage.setItem(config.completionFlag, JSON.stringify(payload));
+      } catch {
+        /* localStorage write failure is non-fatal — session is still saved */
+      }
+    }
+
+    // Phase 4 #3 (May 16, 2026): Plausible event for beat completion
+    // telemetry. Props mirror the session record so we can correlate
+    // beats with mode / selfMode / conversation depth.
+    try {
+      window.plausible?.("Beat Completed", {
+        props: {
+          beat,
+          mode,
+          self_mode: selfMode ? "yes" : "no",
+          conversation_length: conversationLength,
+        }
+      });
+    } catch {
+      /* analytics failure is non-fatal */
+    }
+
     onExit();
   };
 
@@ -146,6 +186,7 @@ export default function Spine({ onExit }) {
     }
     return (
       <Reframe
+        beat={beat}
         precisionName={precisionName}
         selectedChip={selectedChip}
         onContinue={handleReframeContinue}

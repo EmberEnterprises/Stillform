@@ -63,9 +63,12 @@ export function routeMode(feelState, input = "") {
  * @param {string} params.input               user message text
  * @param {Array<{role:"user"|"assistant",text:string}>} params.history  prior messages
  * @param {string|null} params.feelState      named state from Notice
+ * @param {"morning"|"main"|"eod"|"wind-down"|null} [params.beat]
+ *   The locked beat for this session (from Spine.jsx). The backend uses
+ *   it to inject BEAT_ADDITIONS into contextParts. Defaults to null.
  * @returns {Promise<{reframe: string, question?: string, next_step?: string, error?: string, crisisDetected?: boolean}>}
  */
-export async function sendReframeMessage({ input, history = [], feelState = null }) {
+export async function sendReframeMessage({ input, history = [], feelState = null, beat = null }) {
   const install_id = getOrCreateInstallId();
   if (!install_id) {
     return { reframe: "", error: "Could not establish session identity. Check browser storage permissions." };
@@ -83,6 +86,10 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         mode,
         feelState,
         install_id,
+        // Phase 4 #3 (May 16, 2026): pass beat through so backend can
+        // inject BEAT_ADDITIONS. Null for any pre-Phase-4 caller is
+        // back-compat — backend treats absent beat as no addition.
+        beat,
         // Phase 2 minimal context. These all default safely on the backend.
         bioFilter: null,
         signalProfile: null,

@@ -1337,6 +1337,48 @@ When paraphrasing or narrating the user's meaning in your own words — outside 
 This is the user-led principle in microcosm: the user's voice is theirs to shape. Your job is to mirror it accurately when echoing, not to "fix" it.`;
 
 
+/*
+ * BEAT_ADDITIONS — per-beat additions to the Reframe metacognitive arc.
+ *
+ * Phase 4 #3 (locked May 16, 2026): the spine's beat (morning / main /
+ * eod / wind-down) is sent on each Reframe API call. When the beat is
+ * a non-default one (morning, eod), the corresponding BEAT_ADDITIONS
+ * entry is appended to contextParts AFTER METACOGNITIVE_ARC. The arc
+ * stays the structural floor; the beat addition refines technique
+ * weighting and time-orientation for the specific beat.
+ *
+ * Main beat: no addition. The base METACOGNITIVE_ARC already targets
+ * in-the-moment naming-and-anchor work, which is main's purpose.
+ *
+ * Wind-down beat: no addition here either. Wind-down does not go
+ * through the Reframe surface (per Phase 4 #5 scope — wind-down has a
+ * minimal WindDown.jsx flow: tomorrow-anchor → Deep Regulate → close).
+ * So no Reframe-side prompt is needed.
+ *
+ * Morning addition (Option C, picked May 16, 2026): anticipatory two-
+ * move work — "read what's load-bearing" (affective forecasting bias /
+ * constructed-emotion granularity, Barrett 2017) followed by "anchor
+ * one thing" (implementation intention, Gollwitzer 1999). Forbids
+ * opening yesterday's patterns (morning is for TODAY); forbids wellness-
+ * language ("set intentions," "manifest," "seize the day," "win the
+ * day"). Operator-tier voice only. Closes pointing toward action.
+ *
+ * EOD addition: ships in Phase 4 #4. Placeholder key so #4 only needs
+ * to fill the string, not re-touch the routing logic.
+ */
+const BEAT_ADDITIONS = {
+  morning: `MORNING BEAT — anticipatory orientation. The user is opening today, not reflecting on one. The work has two moves:
+
+1. READ WHAT'S LOAD-BEARING. Affective forecasting bias is the watch-out — users overweight what's vivid (the dreaded meeting) and underweight what's quietly structural (cumulative friction, depleted starting state, a relationship they've been avoiding). Surface granularly using constructed-emotion technique (Barrett 2017) — "nervous" becomes "pre-meeting tension that lifts after ten minutes" or "anticipatory dread that's actually about something else."
+
+2. ANCHOR ONE THING. Help the user name ONE element (a person, a moment, a stretch of the day) they want to be deliberate about. The closing move is implementation intention (Gollwitzer 1999) — "if X surfaces today, then Y." If-then shape, not open reflection.
+
+Do NOT open patterns from yesterday or last week — morning is for today; that work belongs to main beat or EOD. Do NOT use wellness-language ("set intentions," "manifest," "seize the day," "win the day") — operator-tier voice only. End pointing toward action — the day is about to happen.`,
+
+  // eod: filled in Phase 4 #4.
+};
+
+
 exports.handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers: createCorsHeaders(event), body: "" };
@@ -1400,7 +1442,11 @@ exports.handler = async function(event) {
       calendarContext = null,
       healthContext = null,
       install_id = null,
-      user_id = null
+      user_id = null,
+      // Phase 4 #3 (May 16, 2026): v2 spine sends `beat` (locked at
+      // session mount in Spine.jsx). Used to inject BEAT_ADDITIONS into
+      // contextParts. Defaults to null for v1 callers and back-compat.
+      beat = null
     } = JSON.parse(event.body);
 
     if (!user_id && !install_id) {
@@ -1940,6 +1986,16 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     // is already tightly tuned for that case.
     if (mode === "calm" || mode === "clarity") {
       contextParts.push(METACOGNITIVE_ARC);
+
+      // Phase 4 #3 (May 16, 2026): if the v2 spine sent a beat with a
+      // matching BEAT_ADDITIONS entry, append it as the next contextPart
+      // so it sits adjacent to the arc. Morning ships in #3, EOD in #4.
+      // No-op for main, wind-down, unknown beats, or v1 callers (beat
+      // is null). Hype mode skips both arc and beat additions per the
+      // existing structure — pre-event prep runs its own routing.
+      if (beat && Object.prototype.hasOwnProperty.call(BEAT_ADDITIONS, beat) && BEAT_ADDITIONS[beat]) {
+        contextParts.push(BEAT_ADDITIONS[beat]);
+      }
     }
 
     // Phase 3.5 #5 (decided May 16, 2026): user voice preservation policy

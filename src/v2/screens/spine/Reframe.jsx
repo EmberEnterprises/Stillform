@@ -30,7 +30,7 @@ import { sendReframeMessage } from "../../lib/reframeApi.js";
  * @param {function(): void} onSwitchToSelfMode  switch to SelfReframe (offered on API error)
  * @param {function(): void} onExit
  */
-export default function Reframe({ precisionName, selectedChip, onContinue, onSwitchToSelfMode, onExit }) {
+export default function Reframe({ beat = null, precisionName, selectedChip, onContinue, onSwitchToSelfMode, onExit }) {
   // history is the wire-shape sent to the backend: [{role, text}]
   const [history, setHistory] = useState([]);
   const [draft, setDraft] = useState("");
@@ -50,6 +50,7 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onSwi
         input: precisionName,
         history: [],
         feelState: selectedChip,
+        beat,
       });
       if (cancelled) return;
 
@@ -95,6 +96,7 @@ export default function Reframe({ precisionName, selectedChip, onContinue, onSwi
       input: text,
       history: nextHistory,
       feelState: selectedChip,
+      beat,
     });
 
     if (result.error) {

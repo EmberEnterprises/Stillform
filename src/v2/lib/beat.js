@@ -32,8 +32,12 @@
  * which means a 2-3am session reads as the prior day. This is acceptable
  * for Phase 1 visual audit; full TimeKeeper integration lands when the
  * spine ships in Phase 2 and storage writes happen in v2).
+ *
+ * Phase 4 #3 (May 16, 2026): exported for use in Spine.jsx so completion-
+ * flag writes (stillform_checkin_today / stillform_eod_today) use the
+ * same date key the beat reader checks against. Single source of truth.
  */
-function localDateKey(d = new Date()) {
+export function localDateKey(d = new Date()) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
