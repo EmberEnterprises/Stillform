@@ -1,5 +1,116 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 15, 2026 late afternoon (Phase 6 mediation pipeline shipped end-to-end)**
+**ARA Embers LLC · last updated May 16, 2026 (v2 rebuild truth locked + Phase 6 mediation pipeline shipped end-to-end)**
+
+---
+
+## 🟢 v2 REBUILD — TRUTH LOCKED (May 16, 2026)
+
+**v2 lives under `?v=2`. v1 frontend stays live until v2 reaches parity. Backend untouched — v2 reads the same backend (Supabase, 28 Netlify functions, LemonSqueezy).**
+
+**Build state:** Phases 0–2 ✅ shipped (design tokens, atomic components, Notice → Reframe → Close spine). Phase 2.5 ⏳ — Quick Breathe pill (`f096a7a`) + Self Mode (`5c8a2db`) shipped; pill rebuild to Cyclic Sighing pending; morning + EOD + wind-down spine variants pending. Phase 3 NEXT.
+
+**Smart-screen pivot (May 15):** Home is not a notebook. User goes from AUTHOR (writing into blank) to SUBJECT (system observes, reports back). AI talks, user mostly reads. Editorial composition by phase. Aesthetic: Bloomberg terminal redesigned by Hermès.
+
+**Four surface categories** (every Stillform surface fits exactly one):
+1. **Spine** — Notice → Reframe → Close. Full practice, ~5–15 min.
+2. **Stabilizers** — body down-regulation. Quick Breathe pill (Cyclic Sighing, locked); Body Scan (6 acupressure points + scan-pace toggle); embedded breathing in Pre-event Brief / wind-down with AI pattern routing.
+3. **Disruptors** — cognitive pattern interruption. Move card (~30–90 sec). Behind Support Sheet.
+4. **Application takeaways** — Today's Brief, Pre-event Brief, Scripts, EOD artifact. Life-bridge.
+
+**5-stage Roadmap stays.** NOTICING → NAMING → ANTICIPATING → RECOGNIZING → HOLDING. Spine (3 steps) = session flow. Roadmap (5 stages) = lifetime capacity arc. Spine "Notice" exercises Stages 1+2 every session; Stage 3 lives in Pre-event Brief; Stage 5 measured by practice under load. Roadmap surface placement TBD Phase 5.
+
+**Breathing patterns (Balban 2023 evidence-aligned):**
+- **Cyclic Sighing** — Quick Breathe pill, LOCKED (acute relief, no AI override at pill entry)
+- **Box breathing 4-4-4-4** — Pre-event Brief default (sustained focus for anticipation)
+- **Deep Regulate** (coherent breathing ~5–6 bpm or extended cyclic sighing) — wind-down default (5+ min, sleep prep)
+- AI auto-routes among all three in Reframe close, morning check-in, EOD, and in-the-moment surfaces based on user state + time + use case. Pill is the only place where pattern is fixed.
+
+**v2 sharpening from v1 doctrine:**
+- Audience → affluence orientation (sophisticated principals operating at a level)
+- Voice → confidant-grade third-person observation (AI as user's own awareness externalized)
+- Home rule → multiple substantive sections composed editorially OK; never surface-level widgets
+- Achievement credits → quiet observation, never gamified pep
+- Pricing → IS positioning. Current $14.99/mo likely under-priced. Specific change deferred to Phase 8.
+- Felt outcome → **stabilized composure** (external/customer-facing). Internal note: this is sovereignty by another name — owning yourself, free from inherited noise. "Sovereign" never appears in user-facing surfaces.
+
+**Architectural integrity principle (locked):** Stillform PRESENTS the science (via Library — external curated knowledge users encounter) AND faithfully executes the metacognitive steps from it (via spine + surfaces). Practice doesn't lecture; Library does. Both layers respect the same scientific integrity.
+
+**How the practice produces the outcome** (internal description, not customer-facing): Users arrive with cognitive frameworks built from inherited information — cultural assumptions, parental scripts, professional conditioning, generational misinformation. The practice gives them tools to (1) see what they're running on — metacognition surfaces the operating system; (2) distinguish inherited from chosen — Library provides the science to check against; (3) rebuild deliberately — practice creates capacity to integrate corrections. The felt result is stabilized composure (customer-facing term) / sovereignty (internal note).
+
+**v1 doctrine carried unchanged:** Product definition ("metacognition for self-mastery via cognitive expansion / neuroplasticity"). Three pillars (metacognition / emotional honesty / **concierge as Pillar 3** — distributed across surfaces, never a surface itself). Banned framings (regulation app / composure app / wellness app / crisis tool / intensity audience / gamified achievement). B2B privacy wall (three-layer architectural enforcement, no SSO exception, license-only relationship). Diagnostic stack inputs (Signal / Bias / Trigger Profiles + Bio-filter). See CANON for full.
+
+**Concierge per-surface manifestation** (Pillar 3 in practice):
+- Morning: anticipatory context (calendar-aware Brief)
+- In-the-moment: state-aware Reframe
+- EOD: integration without interrogation (close, don't review)
+- Wind-down: phone-down only (one prompt + cyclic sigh if HRV low)
+- Integration: "things are easier than they should be"
+- The smart screen IS concierge made visible.
+
+**Phase plan** (all pre-launch except where noted):
+
+- **2.5** ⏳ — Quick Breathe pill rebuild to Cyclic Sighing protocol; AI pattern-routing groundwork for Reframe close; morning + EOD + wind-down spine variants pending
+
+- **3** — Smart Screen home + session persistence
+
+- **4** — Morning + EOD + wind-down spine variants
+  - Today's Brief generation (morning)
+  - EOD artifact (daily closing)
+  - Post-event reflection (addresses freeze / high-stakes events specifically)
+  - Achievement micro-credits in confidant voice across all closes
+  - Deep Regulate embedded in wind-down
+  - AI breathing-pattern routing per spine variant
+
+- **5** — My Progress
+  - Library (external curated knowledge — human behavior, neuroscience, ethics)
+  - Roadmap (5-stage full screen)
+  - Mirror Strip (one-line teaser anchor to Roadmap)
+  - Pattern Disruption Layer (recurring pattern transparency + disruptor sessions)
+  - AI Mediation approval queue (post-EOD AI proposals to Trigger Profile / Anchors / Baseline)
+  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter)
+  - Signal Log (long-term past-session review)
+
+- **6** — Support Sheet (Move card + Scripts)
+  - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
+  - Scripts confidant-voice rewrite
+
+- **7** — Pre-event Brief v2
+  - Hardware status check, Risks, Moves, Recovery anchor
+  - **Spec addition: rehearsal component** — draft + practice 2–3 likely exchanges, not just context
+  - Box breathing embedded as default with AI override on acute state
+
+- **8** — Pricing surface redesign (paywall framing + timing per UAT — paywall after 3 days / 3 sessions vs. immediately post-calibration)
+
+- **9** — Integrations stack + Native Surfaces
+  - **Data inputs:** Calendar, HRV silent input, Sleep, Screenshot, Focus modes, Weather
+  - **Phone widgets:** Quick Breathe widget + Reframe widget. Two separate widgets OR one widget with swipe between either/both. Home-screen entry points outside the app.
+  - **Watch app (Galaxy Watch Ultra, Wear OS):**
+    - Watch-native Quick Breathe (Cyclic Sighing) with haptic guidance
+    - Watch-native Reframe via voice-to-text (full conversation on watch)
+    - Smart prompts: pre-event detection notifications (user chooses watch or phone), HRV-elevated intervention prompts ("HRV is high — Quick Breathe? Or Reframe?")
+    - Watch ↔ phone handoff on every notification
+    - EOD nudge
+  - **Built on:** Capacitor + HealthKit / Health Connect / push / haptics / biometric lock / Wear OS bridge / iOS WidgetKit / Android App Widgets
+
+- **10** — Onboarding + calibration redo
+
+- **11** — Translations
+  - **Launch set (per Apr 27 lock):** English baseline + Spanish + Brazilian Portuguese + Armenian. Specialist clinical translator approach maintained — science-grounded prompts cannot go generic for the first impression to affluence audience.
+  - **Post-launch adds:** German, French, Mandarin, Japanese, Korean, Hindi, Arabic. **Hybrid model (MTPE — machine translation post-editing)** — AI draft (DeepL / Claude) + native-speaker reviewer with clinical/psych background. Reviewer doubles as cultural consultant. 30–50% cheaper than full human translation per 2026 industry data. Crisis content + system prompts get extra-careful human review; marketing copy can be AI-heavy with light review.
+  - **Dynamic conversation layer** handled at runtime by GPT-4o native multilingual support — no translation step needed for the Reframe conversation itself; translation work is only the static layers above.
+
+- **12+** — Settings + Launch mechanics
+  - Settings: daily reminder, audio toggles, screen-light mode, reduced motion, biometric lock, cloud sync settings
+  - Crisis resources / 988
+  - Privacy policy / Terms
+  - Error boundary
+  - FAQ
+  - Launch mechanics (Lemon Squeezy live verify, TestFlight, Apple Store submission)
+  - **Post-launch enhancements:** Monthly digest, CFM revisit, low-priority integrations (Weather, possibly Voice)
+
+**Cross-cutting concern — Smart Prompt Mechanism:** Signal-watching + intervention proposal (e.g., HRV elevated → "Quick Breathe? Or Reframe?"; pre-event detected → notification with watch/phone choice). Concierge philosophy embodied. Lives in Phase 5 (AI Mediation reads signals) + surfaces via Phase 9 (Watch / widget notifications) + smart-screen Mirror strip (Phase 3). Not a separate phase; cross-cuts existing architecture.
+
+**Item count:** ~45 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements and additions).
 
 ---
 
