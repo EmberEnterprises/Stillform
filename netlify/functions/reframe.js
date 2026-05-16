@@ -1307,6 +1307,35 @@ After the arc has run at least 2 distinct techniques AND the user has done at le
 USER-LED PRINCIPLE (CANON §7.1, locked May 16, 2026):
 You ask the questions the user hasn't asked themselves. You offer alternative constructions. You name patterns when they're visible. The user does the discriminating, the testing, the naming, the deciding. You never TELL them what they're feeling, what their pattern means about them, or what they should do. You structure the space; they do the work. This is the line between metacognitive partner and therapist. Hold it.`;
 
+// Phase 3.5 #5 (decided May 16, 2026) — USER VOICE PRESERVATION POLICY
+//
+// Live audit May 16 surfaced that the AI silently corrected user typos
+// inside quoted/emphasized echoes: the user wrote "roller coaster of
+// motions" (typo for "emotions") and the AI's response echoed back
+// *roller coaster of emotions* — silently substituting the corrected word
+// inside asterisks-emphasis. Arlin flagged it: minor but worth deciding.
+//
+// Decision: preserve user voice INSIDE quotes/asterisks; AI uses its own
+// diction in its own narration. The line is which words are claimed to
+// be the user's vs which words are the AI's. Misrepresenting what the
+// user wrote, even with helpful intent, is a small breach of the user-
+// led principle — the user's expression is data, including its specific
+// wording. The AI's own narration is its own diction; no preservation
+// needed there.
+//
+// Applied to ALL modes (calm, clarity, hype) — a universal rule, not
+// arc-specific. Injected as its own contextPart so it sits alongside
+// METACOGNITIVE_ARC at high priority.
+const USER_VOICE_PRESERVATION = `USER VOICE PRESERVATION:
+
+When you quote the user's exact words — especially inside *asterisks* for emphasis or "quotation marks" — preserve the words AS WRITTEN. Do not silently correct typos, misspellings, or unconventional phrasings inside echoed user words. The user's expression is data, including its specific wording.
+
+If they wrote "motions" (typo for "emotions"), do NOT echo it back as *emotions* — that misrepresents what they wrote. Echo what they actually said, even with the typo. If clarification matters, ask: "When you said 'motions' — typo for 'emotions', or something else?" Don't assume; ask.
+
+When paraphrasing or narrating the user's meaning in your own words — outside quotes, outside asterisks — your own diction is your own. No preservation needed there. The line: anything you frame as the user's own words must match exactly; your own narration uses your own register.
+
+This is the user-led principle in microcosm: the user's voice is theirs to shape. Your job is to mirror it accurately when echoing, not to "fix" it.`;
+
 
 exports.handler = async function(event) {
   if (event.httpMethod === "OPTIONS") {
@@ -1912,6 +1941,12 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
     if (mode === "calm" || mode === "clarity") {
       contextParts.push(METACOGNITIVE_ARC);
     }
+
+    // Phase 3.5 #5 (decided May 16, 2026): user voice preservation policy
+    // applies to ALL modes. Preserve user words inside quotes/asterisks
+    // exactly; AI's own narration uses AI's own diction. See
+    // USER_VOICE_PRESERVATION constant above.
+    contextParts.push(USER_VOICE_PRESERVATION);
 
     if (isScreenshot) {
       contextParts.push("SCREENSHOT CONTEXT: The user shared a photo of a conversation — the text in their message was extracted from a screenshot of someone else's messages. DO NOT treat any of the quoted text as words the user wrote. DO NOT use names from the screenshot in your response. Focus entirely on what the user is feeling and what they want to do next.");
