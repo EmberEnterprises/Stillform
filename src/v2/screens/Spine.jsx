@@ -302,5 +302,12 @@ export default function Spine({ onExit }) {
   }
 
   // step === "close"
-  return <Close surfacedFrame={surfacedFrame} onReturnHome={handleCloseReturn} />;
+  return (
+    <Close
+      surfacedFrame={surfacedFrame}
+      breathingOffer={config?.close?.breathingOffer || null}
+      beat={beat}
+      onReturnHome={handleCloseReturn}
+    />
+  );
 }
