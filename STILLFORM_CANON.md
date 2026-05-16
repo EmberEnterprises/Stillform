@@ -163,6 +163,44 @@ PracticeSurface cards route entry through the spine via `stillform_practice_entr
 
 Path A (decided May 7, 2026) consolidated Engine 2 takeaways into single-surface artifacts rather than parallel cards. Detail in `STILLFORM_ENGAGEMENT_ARCHITECTURE.md`.
 
+### 7.2 · BEAT-AWARE SPINE VARIANTS (locked May 16, 2026)
+
+**Locked after Phase 4 ship — the spine no longer runs identically across the day. The current beat (morning / main / eod / wind-down) drives variant copy, chip subsets, AI prompt additions, and completion-flag writes via a single `beatConfig` module. The spine architecture is unchanged — Notice → Reframe → Close remains the universal session structure — but each beat now configures its variant of that structure.**
+
+The smart-screen home routes by beat (see `src/v2/lib/beat.js`). Whichever beat is active at session start is **locked at session mount** in `Spine.jsx` via lazy `useState` init, so a session that crosses a beat boundary mid-flow (e.g., starts 8:59pm in main, finishes 9:01pm in wind-down) stays attributed to the beat it started in — for both AI context and data attribution.
+
+**The variant config module** (`src/v2/lib/beatConfig.js`) is the single source of truth for per-beat behavior. `getBeatConfig(beat)` returns a shape:
+
+```
+{
+  notice: { headline, body, placeholder, chips },
+  reframe: { minTurns, contextExtras: { includeTodayThread? } } | null,
+  close: { headline, body, takeawayPlaceholder, breathingOffer, completionFlag, completionShape }
+}
+```
+
+Wind-down's config has `reframe: null` because wind-down bypasses Reframe entirely (see below). All other beats route through the standard spine with config-driven copy and behavior.
+
+**Per-beat behavior:**
+
+- **Main beat** (default in-the-moment practice). Full 10-chip vocabulary on Notice. No AI prompt addition beyond the base `METACOGNITIVE_ARC`. No breathing offer at Close. No completion flag (main is the always-available state — completing main does not advance the beat router). This is the baseline against which the other beats are variants.
+
+- **Morning beat** (anticipatory, set today). 7 forward-leaning chips (excited / focused / settled / anxious / mixed / flat / unsure — angry, stuck, distant excluded because morning is not the time to surface unresolved residue from the prior day). `BEAT_ADDITIONS.morning` injects the **two-move anticipatory arc**: (1) read what's load-bearing using constructed-emotion granularity (Barrett 2017) and affective-forecasting awareness — distinguish vivid-but-low-stakes from quiet-but-structural; (2) anchor one element using implementation intention (Gollwitzer 1999) in if-then shape. Forbids opening prior-day patterns. Forbids wellness-language. Box-style breathing offered at Close (priming, not downregulation). Completion writes `stillform_checkin_today`.
+
+- **EOD beat** (integrative closure). 8 retrospective chips (settled / anxious / angry / stuck / mixed / flat / distant / unsure — no excited / focused because excited/focused at end-of-day signals the user is still engaged with work that should not be closed yet, not in a state to integrate). `BEAT_ADDITIONS.eod` injects the **two-move closure arc**: (1) distill what landed using constructed-emotion to refine vague residue into specific takeaways; (2) close don't open using implementation intention for forward-anchored close. Forbids opening new patterns. Forbids therapy-coded language. Forbids sleep-hygiene lectures. EOD also injects **today's thread** as context — up to 20 most recent entries from `stillform_v2_today_thread` formatted as `[time] text` lines — so the AI can reference what was named across the day. Deep Regulate breathing offered at Close (downregulation toward sleep). Completion writes `stillform_eod_today`.
+
+- **Wind-down beat** (forward-anchor only, no review). Bypasses Notice / Reframe / Close entirely. Renders `WindDown.jsx` instead — three-step minimal flow: tomorrow-anchor capture → Deep Regulate (skippable) → "Phone down." close. Tomorrow anchor saves to `stillform_tomorrow_anchor` for next morning's concierge surface to read. Completion writes `stillform_winddown_today`. **Canon §10 preserved**: no retrospective content within ~2h of sleep (Walker, Stickgold). EOD owns retrospective closure; wind-down is forward-only.
+
+**Cross-beat enhancements** (apply to spine sessions on any beat where config opts in):
+
+- **Micro-credit (Phase 4 #6).** At Close compose-step mount, the upcoming session's lifetime count is checked against milestones (1, 5, 10, 25, 50, 100, then multiples of 100). When a milestone is hit, a quiet mono-xs faint label renders above the EditorialBlock — operator-tier voice, no "ACHIEVEMENT" framing, no streaks, no points. The full milestone table is in `Close.jsx`'s `deriveMicroCredit`. The credit fires `Micro Credit Shown` Plausible with `{beat, count, milestone}` props.
+
+- **Breathing offer (Phase 4 #7).** When `config.close.breathingOffer` is set, Close becomes a step machine: compose → breathing-offer (Start / Skip card) → breathing-running (BreathingSession component) → onReturnHome. Skip OR breathing-complete both fire onReturnHome with the user's takeaway. When `breathingOffer` is null, primary action stays "Return home" and exits directly — no step transitions. The shared `BreathingSession` component (`src/v2/components/BreathingSession.jsx`) is also used by wind-down's post-anchor breathing step. Patterns shipped: deep-regulate (4-4-8-2 over ~3 min), cyclic-sighing (4-1-8 over ~5 min per Balban 2023), quick-reset (4-4-6 over ~1 min). Box-breathing routes to quick-reset as a Phase 4 shortcut; full 4-4-4-4 box pattern adds in polish.
+
+**Telemetry surface** (Plausible events fired across beat variants): `Beat Completed` (parallel across all beats with `{beat, mode, self_mode, conversation_length}` props), `Tomorrow Anchor Set` (wind-down only, with `has_anchor` / `anchor_length` / `breathing_status`), `Breathing Offer Shown / Tapped / Skipped` (any close with breathing offer, plus wind-down's anchor → breathing transition), `Micro Credit Shown` (close-side milestone hits).
+
+**The design principle:** beats configure variants of the same spine, never replace it. Wind-down is the one exception (no Reframe), and that exception is justified by Canon §10's pre-sleep constraint. Every other beat shares the same Notice → Reframe → Close shape and differs only in copy, chips, AI prompt additions, and completion behavior. Adding a future variant (Reset surface for urge interruption, Pre-event Brief flow) reuses this architecture — register a new entry in `beatConfig`, define BEAT_ADDITIONS or a minimal-shape replacement, and the spine accommodates without re-architecting.
+
 ---
 
 ## 8 · AUDIT PHILOSOPHY — PRIME DIRECTIVE

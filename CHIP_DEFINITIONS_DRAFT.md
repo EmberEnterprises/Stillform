@@ -76,6 +76,28 @@ The authoritative voice for chip-state language is the `feelMap` in `netlify/fun
 
 ---
 
+### Unsure
+
+**Unsure.** You can't locate what you're feeling clearly — maybe several things at once, maybe nothing legible, maybe the body's giving you signal but it hasn't resolved into a name yet. Different from Mixed — Mixed is two recognizable states at once; Unsure is one state that hasn't surfaced into language. Selecting Unsure tells Stillform you want to start with naming itself as the work, not skip past it. The system slows down and gives the practice of finding the name space, instead of pretending to already know.
+
+---
+
+## Phase 4 — per-beat chip subsets (locked May 16, 2026)
+
+When the v2 spine ships beat-aware variants (`src/v2/lib/beatConfig.js`), the chip vocabulary above is not surfaced as a flat 10-chip row on every beat. Each beat exposes a subset that matches the cognitive work that beat is for. The 10-chip canon stays the single source of truth — chip subsets are filters, not redefinitions.
+
+**Main beat:** all 10 chips. Default in-the-moment surface; user may be in any state.
+
+**Morning beat (7 chips):** Excited, Focused, Settled, Anxious, Mixed, Flat, Unsure. Excludes Angry, Stuck, Distant — morning is not the time to surface unresolved residue from the prior day; that work belongs to main beat or EOD. If a user wakes feeling angry/stuck/distant, the framing of "anchor today" doesn't fit, and we'd rather they route to main beat than try to ship those states through anticipatory work.
+
+**EOD beat (8 chips):** Settled, Anxious, Angry, Stuck, Mixed, Flat, Distant, Unsure. Excludes Excited, Focused — excitement and focus at end-of-day signal the user is still engaged with work that hasn't closed yet, not in a state to integrate. EOD asks for retrospective distillation; a user still riding excited/focused state isn't done with the day yet.
+
+**Wind-down beat:** no chips. Wind-down bypasses Notice entirely and uses its own minimal flow (tomorrow-anchor → Deep Regulate → close). The work is forward-anchor, not state-naming.
+
+These subsets are configured in `beatConfig.js` (`selectChips()` helper) and rendered conditionally by `Notice.jsx` per the variant config. If chip definitions are ever revised, this section MUST be updated to reflect any new chip's per-beat inclusion before the change ships.
+
+---
+
 ## What's coming next (after copy approval)
 
 If you approve the copy:
@@ -84,9 +106,10 @@ If you approve the copy:
 2. **ⓘ button next to each chip** — small ⓘ glyph in the chip row, tappable, opens existing `setInfoModal` with the chip's definition. Same pattern as bio-filter ⓘ, Lock-in ⓘ, etc.
 3. **Wired across all chip render sites** — three locations: `feelChips` in showPostRating block (~line 6512), `feelChips` in PresentStateChips component (~line 8140), `feelChips` in Body Scan What Shifted screen (~line 4224 of staged file). Single registry, three wirings.
 4. **No copy duplication** — the AI prompt feelMap in reframe.js stays the operational voice for AI behavior; the registry is the user-facing voice. Both reference the same state, in different audiences' languages.
+5. **v2 spine ⓘ wiring** — the v2 `Notice.jsx` chip row should also surface the ⓘ definitions. Same registry, fourth wiring point.
 
-If you want changes to any of the 9 definitions, mark them up and I'll redraft. If a chip definition needs to lean harder in any direction (more body-focused, more contrast with adjacent chips, more on what the system does when it's selected), tell me which way.
+If you want changes to any of the 10 definitions, mark them up and I'll redraft. If a chip definition needs to lean harder in any direction (more body-focused, more contrast with adjacent chips, more on what the system does when it's selected), tell me which way.
 
 ---
 
-*ARA Embers LLC · Chip Definitions Draft · April 30, 2026*
+*ARA Embers LLC · Chip Definitions Draft · April 30, 2026 · last updated May 16, 2026 (Unsure added + Phase 4 beat-subset reconciliation)*
