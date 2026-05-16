@@ -3,7 +3,7 @@ import AppHeader from "../components/AppHeader.jsx";
 import QuickBreathe from "../components/QuickBreathe.jsx";
 import HomeFooter from "../components/HomeFooter.jsx";
 import MonoLabel from "../components/MonoLabel.jsx";
-import Today from "./Today.jsx";
+import SmartScreen from "./SmartScreen.jsx";
 import BreatheOverlay from "./BreatheOverlay.jsx";
 
 /**
@@ -12,22 +12,22 @@ import BreatheOverlay from "./BreatheOverlay.jsx";
  * Renders the four persistent layers of the home:
  *
  *   1. AppHeader (top) — the quiet Stillform wordmark, nothing else
- *   2. Today (main) — the ONE unified beat (thread + active prompt)
+ *   2. SmartScreen (main) — Phase 3 smart screen (Mirror + Thread +
+ *      Active prompt + Trajectory, progressively activating per practice).
  *   3. HomeFooter (below main) — Progress · Library · FAQ · Settings
  *   4. QuickBreathe (fixed bottom-right) — stabilization safety valve
  *
- * Plus the crisis sub-footer (App Store / safety baseline) under the
- * nav row, visually subordinate so it doesn't signal crisis-tool framing.
- *
  * Quick Breathe wiring: the pill opens BreatheOverlay (the actual breath
- * pacer surface). Bounded six-cycle box-breathing pass per canon framing
- * law (breath is a tool, not the product).
+ * pacer surface).
  *
- * The journey content lives in Today.jsx. Home is just the page-level
- * composition — the shell that contains it.
+ * Phase 3 swapped the prior single-card "Today" surface for the smart
+ * screen — same compounding-visible-on-home spirit, but with editorial
+ * composition of multiple substantive sections per the locked v2 truth
+ * (Mirror strip + Thread + Active prompt + Trajectory). Today.jsx is
+ * kept in the repo for git history but is no longer mounted.
  *
  * @param {function(): void} onBeginSession — opens the spine when the
- *   Today card's Begin button is tapped.
+ *   Active prompt's Begin button is tapped.
  */
 export default function Home({ onBeginSession }) {
   const [breatheOpen, setBreatheOpen] = useState(false);
@@ -36,10 +36,10 @@ export default function Home({ onBeginSession }) {
     <>
       <AppHeader />
 
-      <Today onBeginSession={onBeginSession} />
+      <SmartScreen onBeginSession={onBeginSession} />
 
       <div className="sf-fade-enter sf-fade-enter--delay-2">
-        <HomeFooter onNavigate={() => { /* Phase 3+ */ }} />
+        <HomeFooter onNavigate={() => { /* Phase 5+ */ }} />
       </div>
 
       <QuickBreathe onTap={() => setBreatheOpen(true)} />
@@ -57,7 +57,7 @@ export default function Home({ onBeginSession }) {
         }}
       >
         <MonoLabel size="xs" tone="faint">
-          v2 · phase 2 · today thread
+          v2 · phase 3 · smart screen
         </MonoLabel>
       </div>
     </>
