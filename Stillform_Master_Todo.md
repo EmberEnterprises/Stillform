@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 #1 shipped — variant config infrastructure; beats wired into Notice next)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 4 #1 shipped; dopamine mechanisms + nutrition cross-cutting concerns locked concrete; #2 next)**
 
 ---
 
@@ -236,19 +236,19 @@ This works because the user was always the one doing the practice — AI absence
   8. CANON §7.2 + CHIP_DEFINITIONS_DRAFT.md reconciliation (closing-doc commit)
 
 - **5** — My Progress
-  - Library (external curated knowledge — human behavior, neuroscience, ethics). **Includes dopamine science entry** per cross-cutting concern below — Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder.
+  - Library (external curated knowledge — human behavior, neuroscience, ethics). **Includes:** (a) dopamine science entry — Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder; (b) gut-brain axis entry — Mayer 2016, Cryan & Dinan on vagus-microbiome signaling; (c) brain fog entry — blood sugar, inflammation, ultra-processed foods; (d) neuroplasticity-supporting nutrition entry — omega-3, flavonoids, polyphenols, curcumin, Mediterranean / time-restricted eating (Mattson 2018). Strictly educational — Library only, no tracking surface, no prescription. Per nutrition cross-cutting concern below.
   - Roadmap (5-stage full screen)
   - Mirror Strip (one-line teaser anchor to Roadmap)
   - Pattern Disruption Layer (recurring pattern transparency + disruptor sessions)
   - AI Mediation approval queue (post-EOD AI proposals to Trigger Profile / Anchors / Baseline)
-  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter). **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
+  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter). **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per dopamine cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
   - Signal Log (long-term past-session review)
 
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
   - Scripts confidant-voice rewrite
   - **Post-event reflection** — registers as 5th beat type in the variant config architecture built in Phase 4. Notice headline: *"What just happened?"* Forward into Reframe with post-mortem framing (what worked / what didn't / what to keep). Close = post-event artifact (lessons + carry-forward). Entry trigger lives in Support Sheet (manual *"Post-event reflection"* affordance) and optionally from calendar detection (Phase 9 ties in). Minimal new code thanks to Phase 4 architecture — one config object + one entry surface.
-  - **Reset surface** — dedicated short flow for acute dopamine-crash moments per cross-cutting dopamine awareness concern. Notice headline e.g. *"Reset point."* Body acknowledges the state without judgment. NOT Notice → Reframe → Close — minimal shape like wind-down. Sequence: brief somatic anchor (cold splash / cyclic sighing / deliberate boredom prompt) → optional one-line capture ("What did the urge feel like?") → close. Physiological-first because depleted PFC can't sustain deep metacognition. Routes to Move card if user wants behavioral disruptor. Registers as another minimal-shape variant in Phase 4's architecture.
+  - **Reset surface — urge-interruption flow** per dopamine cross-cutting concern. 30-second flow for acute compulsion moments (scroll / scratch / check / refresh pull). Sequence: name the urge → watch it without acting (interoception, ~20 sec) → either act or don't (user decision, never forced). Marlatt's urge-surfing research applied. Pattern is the freeze-restart sequence adapted for compulsion instead of freeze. Registers as a minimal-shape variant in Phase 4's beatConfig architecture (notice.shape = "minimal", no Reframe step). Routes to Move card if user wants a behavioral disruptor instead. **NOT gamified** — no streak, no count, no score.
 
 - **7** — Pre-event Brief v2
   - Hardware status check, Risks, Moves, Recovery anchor
@@ -286,13 +286,30 @@ This works because the user was always the one doing the practice — AI absence
 
 **Cross-cutting concern — Smart Prompt Mechanism:** Signal-watching + intervention proposal (e.g., HRV elevated → "Quick Breathe? Or Reframe?"; pre-event detected → notification with watch/phone choice). Concierge philosophy embodied. Lives in Phase 5 (AI Mediation reads signals) + surfaces via Phase 9 (Watch / widget notifications) + smart-screen Mirror strip (Phase 3). Not a separate phase; cross-cuts existing architecture.
 
-**Cross-cutting concern — Dopamine awareness (locked May 16, 2026):** Users with depleted dopamine (chronic overstimulation, screen/social-media compulsion, post-binge crashes, substance use, ADHD with downregulated D2 receptors) fight their physiology when attempting metacognitive practice. Depleted dopamine = depleted prefrontal capacity = the exact tool the practice asks for. Science: Lembke 2021 (*Dopamine Nation*, pleasure-pain balance), Volkow on D2 receptor downregulation in addiction, Lustig on cheap-dopamine substitutes, polyvagal disruption from chronic overstimulation. Stillform's core practice IS already anti-dopamine-addiction by virtue of being slow-pleasure / tolerance-for-unresolved-tension work — but this needs explicit surfaces. Lives in:
-- **Phase 5 Library** — entry on dopamine science / pleasure-pain balance / why cheap hits make composure harder. External curated knowledge, Library's job.
-- **Phase 5 Bio-filter editor** — new flag *"overstimulated"* or *"post-binge"* alongside existing *"depleted"*. AI prompts adapt per flag — depleted-from-stimulation calls for different framing than depleted-from-effort.
-- **Phase 6 Support Sheet — Reset surface** (new addition to Phase 6 scope): dedicated short flow for acute dopamine-crash moments ("just doomscrolled three hours, feel terrible, can't get back"). Sits alongside Move card and Scripts. Physiological-first (cold splash, slow breathing, deliberate boredom anchor) rather than metacognitive — depleted PFC can't do the deeper practice in that state. Routes to Move card if user wants a behavioral disruptor.
-- **Reframe AI awareness (Phase 3.5 #4 prompt refinement, ongoing)** — the metacognitive arc already has the tools (distortion-naming for compulsive patterns, implementation intention for anchoring against pulls). The AI just needs to recognize the state when user input surfaces it. This is prompt tuning, not new infrastructure.
+**Cross-cutting concern — Dopamine awareness (locked May 16, 2026):** Users with depleted dopamine (chronic overstimulation, screen/social-media compulsion, post-binge crashes, substance use, ADHD with downregulated D2 receptors) fight their physiology when attempting metacognitive practice. Depleted dopamine = depleted prefrontal capacity = the exact tool the practice asks for. Science: Lembke 2021 (*Dopamine Nation*, pleasure-pain balance), Volkow on D2 receptor downregulation in addiction, Lustig on cheap-dopamine substitutes, polyvagal disruption from chronic overstimulation. Marlatt on urge surfing.
 
-Cross-cuts existing architecture. Not a separate phase. Phase 4's variant config architecture is the substrate Phase 5/6 dopamine surfaces will build on (e.g., the Reset surface in Phase 6 may register as its own variant with notice.shape = "minimal" matching the wind-down pattern).
+Stillform's core practice IS already anti-dopamine-addiction by virtue of being slow-pleasure / tolerance-for-unresolved-tension work. The retraining mechanism is making Stillform reachable at the moments cheap dopamine wins, with the right tool for that moment. **NEVER gamified.** No streaks, no scores, no "dopamine points." Three concrete mechanisms ship across existing phases:
+
+1. **Urge-interruption surface (Phase 6 Reset).** When user feels the pull — scroll / scratch / check / refresh — they open Stillform and get a 30-second urge-surf flow: name the urge, watch it without acting (interoception), then either act or don't. Marlatt's urge-surfing research. Pure impulse-control practice. Pattern is the freeze-restart sequence adapted for compulsion instead of freeze. Lives behind Support Sheet alongside Move card. Minimal-shape variant in Phase 4's architecture.
+
+2. **Concierge urge detection (Phase 5 Smart Prompt Mechanism + Phase 9 Watch surfacing).** System notices the pattern — multiple opens in short window, post-21:00 with no wind-down, HRV elevated late evening, repeated check-without-action — and gently surfaces the right intervention. Not *"your usage is concerning."* More like: *"Loud pull right now. Quick Breathe?"* Concierge philosophy in operation; friction-reducing at the vulnerable moment. Builds on existing Smart Prompt Mechanism cross-cutting concern.
+
+3. **Reframe AI stimulation-hierarchy technique (Phase 3.5 #4 prompt refinement, ongoing).** When user surfaces compulsive language (*"can't stop checking," "keep refreshing," "doomscrolling"*), AI names what need the stim is filling (novelty / connection / escape / numbness) and surfaces a slower alternative that satisfies the same function. *"Scrolling is filling the need for novelty. What's a slower novelty available right now — a walk, a real conversation, the book you started?"* Adds as a 7th technique to METACOGNITIVE_ARC. Prompt tuning, not new infrastructure.
+
+4. **Phase 5 Library — dopamine science entry.** Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder. External curated knowledge — read if interested, no pressure.
+
+5. **Phase 5 Bio-filter — overstimulated / post-binge flags.** Alongside existing *"depleted"*. AI prompts adapt per flag — depleted-from-stimulation calls for different framing than depleted-from-effort.
+
+Cross-cuts existing architecture. Not a separate phase. Phase 4's variant config architecture is the substrate Phase 5/6 dopamine surfaces will build on (the Reset surface registers as a minimal-shape variant matching wind-down's pattern).
+
+**Cross-cutting concern — Nutrition + cognition (locked May 16, 2026):** Diet affects dopamine regulation, brain fog, and neuroplasticity. The gut-brain axis is real (Mayer 2016 *The Mind-Gut Connection*; Cryan & Dinan on vagus-microbiome-brain signaling). Refined sugars and ultra-processed foods drive neuroinflammation and dopamine dysregulation. Omega-3 (EPA/DHA), flavonoids, polyphenols, curcumin support BDNF expression and synaptic plasticity (Gomez-Pinilla 2008 review; Wu et al. 2004; Spencer 2010). Mediterranean diet has the strongest evidence base for cognitive aging.
+
+**Strictly Library-only. NOT a tracking feature. NOT a prescription. NOT a logging surface.** Stillform doesn't moralize about food, doesn't ask what users ate, doesn't suggest meal plans. Users who want to learn how nutrition affects their cognition can read; users who don't, never see it. The boundary: educational layer, never practice layer.
+
+Lives in:
+- **Phase 5 Library** — three entries: (a) gut-brain axis basics + vagus-microbiome science, (b) brain fog and what drives it (blood sugar, inflammation, ultra-processed foods), (c) foods that support neuroplasticity (omega-3, flavonoids, polyphenols, curcumin, fermented foods) + dietary patterns (Mediterranean, time-restricted eating per Mattson 2018).
+
+No Phase 6 surface, no Bio-filter change, no AI behavior change. Library-only.
 
 **Item count:** ~47 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements + 2 paired user-AI relationship principles added in patch on `0d673d0`).
 
