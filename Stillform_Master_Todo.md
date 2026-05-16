@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1–#4 shipped — metacognitive arc complete; #5 typo policy remaining)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 ✅ complete — Reframe is now structured metacognitive practice, not a smart journal; Phase 4 next)**
 
 ---
 
@@ -7,7 +7,7 @@
 
 **v2 lives under `?v=2`. v1 frontend stays live until v2 reaches parity. Backend untouched — v2 reads the same backend (Supabase, 28 Netlify functions, LemonSqueezy).**
 
-**Build state:** Phases 0–2 ✅ shipped (design tokens, atomic components, Notice → Reframe → Close spine). Phase 2.5 ⏳ — Quick Breathe pill (`f096a7a`) + Self Mode (`5c8a2db`) shipped; pill rebuild to Cyclic Sighing pending; morning + EOD + wind-down spine variants pending. Phase 3 ✅ shipped (`a2ca390`) — Smart Screen home + session persistence wired end-to-end. **Phase 3.5 NEXT** — Reframe quality elevation + spine integrity (scope locked from May 16 live audit). Phase 4+ unchanged below.
+**Build state:** Phases 0–2 ✅ shipped (design tokens, atomic components, Notice → Reframe → Close spine). Phase 2.5 ⏳ — Quick Breathe pill (`f096a7a`) + Self Mode (`5c8a2db`) shipped; pill rebuild to Cyclic Sighing pending; morning + EOD + wind-down spine variants pending. Phase 3 ✅ shipped (`a2ca390`) — Smart Screen home + session persistence. Phase 3.5 ✅ shipped May 16 (`8156761` `686b7d0` `453420f` `f052022` `ce79fb8`) — Reframe is now structured metacognitive practice via 5-item rebuild (thread name derivation, user-takeaway input on Close, user-reply gate before Close, AI metacognitive arc with 6 techniques, user voice preservation). **Phase 4 NEXT** — morning + EOD + wind-down spine variants. Phase 4+ unchanged below.
 
 **Smart-screen pivot (May 15):** Home is not a notebook. User goes from AUTHOR (writing into blank) to SUBJECT (system observes, reports back). AI talks, user mostly reads. Editorial composition by phase. Aesthetic: Bloomberg terminal redesigned by Hermès.
 
@@ -74,7 +74,7 @@ This works because the user was always the one doing the practice — AI absence
   - Builds with Self Mode fallback architecture from day one
   - **Live audit May 16:** persistence verified end-to-end (both test sessions threaded correctly into TODAY). Four issues surfaced → moved to Phase 3.5.
 
-- **3.5** ⏳ NEXT — Reframe quality elevation + spine integrity (locked May 16 from live audit)
+- **3.5** ✅ shipped May 16, 2026 — Reframe quality elevation + spine integrity (5 commits: `8156761` `686b7d0` `453420f` `f052022` `ce79fb8`)
 
   **Why this exists:** Live audit of Phase 3 deploy surfaced that Reframe currently does Stage 2 work (affect labeling — Lieberman 2007) and calls it Stage 4 work (metacognitive therapy — Wells 2009). The AI mirrors what the user said and offers what they already said back as multiple-choice options. Result: Reframe feels like a smart journal, not metacognitive practice. Spine architecture also allows a user to close after a single AI turn with the AI's own response auto-credited as their "takeaway" — meaning the metacognitive work never has to happen. Both problems violate the user-led principle (Pillar A) and the practice-grade integrity the spine claims.
 
@@ -88,7 +88,7 @@ This works because the user was always the one doing the practice — AI absence
 
   4. **Reframe AI: structured metacognitive arc, not reflective mirror.** ✅ shipped `f052022` — New `METACOGNITIVE_ARC` constant in `netlify/functions/reframe.js` (~90 lines) injected as the FIRST contextPart after the mode prompt for calm and clarity modes (not hype — pre-event prep runs a different arc). The arc: (a) sharpens turn-1 candidates from RESTATE to PROBE with audit case good/bad examples; (b) defines the six techniques for turns 2+ with example phrasings — probe deeper, self-distance (Kross 2014), surface distortion (Beck / Wells 2009), fact vs forecast, reframe via constructed emotion (Barrett 2017), implementation intention (Gollwitzer 1999); (c) forbids restate-as-options after turn 1, generic validation, therapeutic life-interpretation, repeating prior question/technique; (d) reinforces user-led principle architecturally — AI structures space, user does the work. Existing CALM/CLARITY/HYPE prompts unchanged; arc layers on top preserving all voice rules, banned phrases, presence-first guidance, bio-filter handling, crisis detection, low-demand override. Together with #2 + #3: Reframe is now structured metacognitive practice, not a smart journal.
 
-  5. **AI typo correction policy decision.** Current AI silently normalizes user typos in its responses (e.g. "motions" → "emotions"). Decide: keep (clarity) or preserve user voice (authenticity). Document the decision either way.
+  5. **AI typo correction policy decision.** ✅ shipped `ce79fb8` — Decision: preserve user voice INSIDE quotes/asterisks; AI uses its own diction in its own narration. New `USER_VOICE_PRESERVATION` constant injected as a contextPart for ALL modes (calm, clarity, hype) — universal rule, not arc-specific. Rule operationalized: anything in *asterisks* or "quotes" must match user's exact writing; AI's narration outside quotes uses its own register; if clarification matters, ask explicitly ("typo for X, or something else?") rather than silently substituting. The user's expression is data, including specific wording.
 
   **User-led principle held throughout:** AI asks the questions the user hasn't asked themselves; user does the discriminating, naming, and closing. AI doesn't TELL the user what they're feeling — it structures the space where the user does the metacognitive work. Line between metacognitive partner and therapist enforced via #1 (user names the takeaway) and #2 (user must reply before close).
 
