@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 #2 shipped — Notice/activePrompt/Spine wired to beatConfig; #3 next — morning AI prompt + completion flag)**
+**ARA Embers LLC · last updated May 16, 2026 (Principle C locked — pattern recognition as concierge layer; two-layer detection architecture; Context Profile + AI Mediation expansion + nutrition Library final + pricing flagged for launch; Phase 4 #3 next)**
 
 ---
 
@@ -49,6 +49,27 @@ This refines how every surface talks:
 **B. Self Mode as architecture.** Every AI-driven surface has a defined fallback for AI unavailability. Fallback is either (a) a structured non-AI alternative (Self Mode metacognitive sequence for Reframe), (b) a static-but-functional default in confidant voice (per-beat copy for Active prompt), or (c) honest absence with cached fallback (Mirror shows last cached observation if exists, hidden otherwise — never fake). Failures never block practice. The user can always engage the spine even with no AI. Self Mode generalized: not just a Reframe feature, but a platform-wide architectural principle.
 
 This works because the user was always the one doing the practice — AI absence is a degraded guide, not a broken experience.
+
+**C. Pattern recognition is the concierge layer's defining job (locked May 16, 2026).** Every AI surface in the app reads the full diagnostic stack and surfaces correlations to the user — Today's Brief, Pre-event Brief, Reframe, Active Prompt, Mirror Strip, AI Mediation queue, Smart Prompt Mechanism, future Watch surfaces, future Context Profile surfaces. The user names what they observe; the system sees patterns across what they've named (Notice text, Reframe content, takeaways, profile entries), what they've flagged (bio-filter state), what beat they're in, what's in their thread, what's in their profiles. Pattern recognition is what makes the concierge layer FEEL like concierge rather than like a series of independent AI tools that happen to share a brand. Not a feature of specific phases — the floor every AI surface stands on. Cross-cuts EVERY phase already locked.
+
+What the system reads vs. doesn't read — important boundary:
+- **Reads:** meaningful named/reflective data the user has produced (Notice precision, Reframe content, takeaways, Trigger Profile entries, Context Profile entries, journal-equivalent surfaces), bio-filter state, beat, thread entries, profile data, session metadata (mode, conversationLength, surfacedFrame). This is signal.
+- **Does NOT read for AI consumption:** raw behavioral telemetry — button taps, app open frequencies, screen dwell times, every single nav event. That's surveillance-feel + token waste + privacy-coded.
+
+**Two-layer pattern recognition architecture (locked May 16, 2026):** Pattern detection runs in two layers, mirroring Principle B's Self Mode logic. Both layers are non-negotiable from day one of any AI surface:
+
+1. **Smart-coded layer** — deterministic, local, always-on. Pure JavaScript logic running client-side. Counts, frequencies, recency windows, co-occurrence detection. Examples: *"bio-filter flagged depleted 4 days running" / "app opened 4 times in 20 minutes" / "user named brain fog 5 times this week" / "EOD not done in 3 days" / "Trigger Profile entry X has encounterCount 12, lastSeen yesterday."* Runs offline. Instant. Free. Powers the **gates** — *when* to surface *what*. This is the layer that decides whether to fire an AI call at all.
+
+2. **AI layer** — semantic, generative, online-only. Once the coded layer detects a pattern, AI generates the proposal text, the rich correlation analysis, the voice-matched surface copy. Examples: *"Cold weather flagged 6 days running, fog named twice in those days — add 'low pressure days' to your Context Profile?"* — the FRAMING is AI-generated; the DETECTION ("6 days running, fog twice in those days") was coded-layer work.
+
+When AI is down: the coded layer still detects patterns and surfaces interventions, just with static fallback copy in confidant voice (per Principle B). When AI is up: same coded layer triggers, AI enriches. **This means the concierge layer stays smart even when AI is unavailable** — it just speaks in static voice instead of generative voice. The system is also faster, cheaper, and more reliable because the always-on detection runs locally and the AI call only fires when there's something worth saying.
+
+Why this matters beyond reliability:
+- **Privacy boundary:** some behavioral signals (open frequency, time-of-night patterns) shouldn't go to AI at all. Coded layer handles them locally; AI never sees them. Conscience surveillance, not data surveillance.
+- **Cost economy:** an AI call per app open would burn margin. Coded gates prevent that.
+- **Latency:** instant detection vs API call latency.
+
+This is the architectural floor under Principle C. Every AI surface ships with a coded detection layer underneath it from day one.
 
 **How the practice produces the outcome** (internal description, not customer-facing): Users arrive with cognitive frameworks built from inherited information — cultural assumptions, parental scripts, professional conditioning, generational misinformation. The practice gives them tools to (1) see what they're running on — metacognition surfaces the operating system; (2) distinguish inherited from chosen — Library provides the science to check against; (3) rebuild deliberately — practice creates capacity to integrate corrections. The felt result is stabilized composure (customer-facing term) / sovereignty (internal note).
 
@@ -240,8 +261,10 @@ This works because the user was always the one doing the practice — AI absence
   - Roadmap (5-stage full screen)
   - Mirror Strip (one-line teaser anchor to Roadmap)
   - Pattern Disruption Layer (recurring pattern transparency + disruptor sessions)
-  - AI Mediation approval queue (post-EOD AI proposals to Trigger Profile / Anchors / Baseline)
-  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter). **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per dopamine cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
+  - AI Mediation approval queue. **Scope (expanded May 16, 2026):** post-EOD AI proposals across the FULL diagnostic stack — Trigger Profile, Context Profile (new), Bias Profile, Signal Profile, Bio-filter additions, Anchors, Baseline — AND explicit cross-stack correlation proposals. Bio-filter state is a primary correlation anchor because it's the recurring hardware diagnostic that ties many states together. Example correlations: *"Cold weather flagged 6 days running, bio-filter showed depleted in 4 of those, you named tightness in chest twice — add this correlation to Context Profile?"* / *"You named 'critical voice' across 3 sessions this week, all flagged anxious on bio-filter — Trigger Profile candidate?"* User approves or rejects each proposal; AI never adds to the user's diagnostic stack without consent. Per Principle C (pattern recognition as concierge layer's defining job); per two-layer architecture (coded detection of the patterns; AI-generated proposal framing).
+  - Diagnostic stack editors (Trigger Profile, Context Profile, Bias Profile, Signal Profile, Bio-filter).
+    - **Context Profile** (new, locked May 16, 2026): user-named ambient/ongoing conditions and observed correlations with state shifts. Captures environmental factors (cold weather, low pressure days, fluorescent rooms, travel/jetlag), physiological inputs (gluten, third coffee, hydration drop, hormonal phase), dietary observations (food → fog correlations), and other recurring context the user has noticed correlates with cognitive/emotional states. Different from Trigger Profile because Triggers = external/situational provocations (events that happen TO the user); Context = ambient/ongoing conditions (states the user is IN). Different surfacing patterns: Triggers surface as *"this thing came up again"*; Context surfaces as *"you've named fog 5 times this week, all on rainy days."* **Boundary held strictly:** Stillform doesn't claim causation, doesn't propose causes, doesn't track symptoms, doesn't capture medical data. The label is the user's hypothesis. Stillform NEVER asks what the user ate, never lists foods, never prescribes, never moralizes about food. Just helps the user surface patterns they've already observed in their own data. Especially valuable for users with chronic conditions (autoimmune, Lyme/babesia, inflammation history) who fail mass-prescriptive diet/wellness apps because the apps assume baseline the apps don't have. User has the baseline; Stillform helps them see what they've already noticed.
+    - **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per dopamine cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
   - Signal Log (long-term past-session review)
 
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
@@ -306,10 +329,16 @@ Cross-cuts existing architecture. Not a separate phase. Phase 4's variant config
 
 **Strictly Library-only. NOT a tracking feature. NOT a prescription. NOT a logging surface.** Stillform doesn't moralize about food, doesn't ask what users ate, doesn't suggest meal plans. Users who want to learn how nutrition affects their cognition can read; users who don't, never see it. The boundary: educational layer, never practice layer.
 
-Lives in:
+Where users' actual food → cognition observations live: **Context Profile** (Phase 5 diagnostic-stack item, see above). User-named correlations about themselves — *"foggy after refined carbs," "third coffee makes me numb"* — go in Context Profile as user-named recurring patterns, not in a separate food feature. The user is the only one with the baseline; Stillform never prescribes, only helps the user surface patterns they've already noticed. Context Profile also captures the much wider variable set the user notices — environmental factors, weather, hydration, hormonal phase, light exposure, etc. — because food is just one input in the system of state-shifters.
+
+Library lives in:
 - **Phase 5 Library** — three entries: (a) gut-brain axis basics + vagus-microbiome science, (b) brain fog and what drives it (blood sugar, inflammation, ultra-processed foods), (c) foods that support neuroplasticity (omega-3, flavonoids, polyphenols, curcumin, fermented foods) + dietary patterns (Mediterranean, time-restricted eating per Mattson 2018).
 
-No Phase 6 surface, no Bio-filter change, no AI behavior change. Library-only.
+No Phase 6 surface, no Bio-filter change, no AI behavior change beyond Context Profile's pattern recognition. Library-only.
+
+**Pricing — launch consideration flagged May 16, 2026 (not yet locked).** App-wide pattern recognition (Principle C) + AI Mediation cross-stack correlation expansion + Context Profile work will increase API token consumption per user — estimated 30–50% over current scope, mostly from AI Mediation becoming a real surface and the increased context payload on existing surfaces. Current pricing is $14.99/mo or $9.99/mo annual. Premium concierge-AI metacognition positioning could justify $19.99/mo at launch; competitive landscape: Calm $14.99, Headspace $12.99, Notion AI $10 on top of base. **Decision deferred until launch-readiness window** — pricing should be set based on actual cost-per-user from testing + competitive landscape at launch time, not pre-committed mid-build. Re-open this question when Lemon Squeezy paywall test is complete and we have real usage data.
+
+
 
 **Item count:** ~47 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements + 2 paired user-AI relationship principles added in patch on `0d673d0`).
 
