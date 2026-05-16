@@ -66,9 +66,13 @@ export function routeMode(feelState, input = "") {
  * @param {"morning"|"main"|"eod"|"wind-down"|null} [params.beat]
  *   The locked beat for this session (from Spine.jsx). The backend uses
  *   it to inject BEAT_ADDITIONS into contextParts. Defaults to null.
+ * @param {Array<{time:string,text:string,source:string}>|null} [params.todayThread]
+ *   Today's named thread entries (Phase 4 #4). Only EOD beat uses this
+ *   — backend injects as context so AI can help user distill what
+ *   landed across the day. Null/empty for non-EOD beats.
  * @returns {Promise<{reframe: string, question?: string, next_step?: string, error?: string, crisisDetected?: boolean}>}
  */
-export async function sendReframeMessage({ input, history = [], feelState = null, beat = null }) {
+export async function sendReframeMessage({ input, history = [], feelState = null, beat = null, todayThread = null }) {
   const install_id = getOrCreateInstallId();
   if (!install_id) {
     return { reframe: "", error: "Could not establish session identity. Check browser storage permissions." };
@@ -90,6 +94,10 @@ export async function sendReframeMessage({ input, history = [], feelState = null
         // inject BEAT_ADDITIONS. Null for any pre-Phase-4 caller is
         // back-compat — backend treats absent beat as no addition.
         beat,
+        // Phase 4 #4 (May 16, 2026): pass today's thread for EOD beat
+        // so AI can distill what landed. Null for non-EOD beats —
+        // backend only injects when beat === "eod".
+        todayThread,
         // Phase 2 minimal context. These all default safely on the backend.
         bioFilter: null,
         signalProfile: null,

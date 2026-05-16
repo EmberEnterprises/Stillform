@@ -4,7 +4,7 @@ import Reframe from "./spine/Reframe.jsx";
 import SelfReframe from "./spine/SelfReframe.jsx";
 import Close from "./spine/Close.jsx";
 import { saveSession } from "../lib/sessions.js";
-import { appendTodayEntry } from "../lib/thread.js";
+import { appendTodayEntry, getTodayThread } from "../lib/thread.js";
 import { deriveThreadName } from "../lib/threadEntry.js";
 import { getCurrentBeat, getBeatOverride, localDateKey } from "../lib/beat.js";
 import { getBeatConfig } from "../lib/beatConfig.js";
@@ -54,6 +54,23 @@ export default function Spine({ onExit }) {
   // no per-render cost; passed to spine surfaces (Notice now; Reframe /
   // Close in later #6–#7 steps).
   const config = getBeatConfig(beat);
+
+  // Phase 4 #4 (May 16, 2026): for beats that opt in via config.reframe
+  // .contextExtras.includeTodayThread (EOD currently), read today's
+  // thread once at session mount and pass to Reframe. The thread is
+  // what the user named earlier today; EOD uses it to help distill
+  // what landed. Locked at mount so the AI sees a stable snapshot of
+  // "the day before this close" — entries added during this session
+  // shouldn't recursively show up in the same session's context.
+  const [todayThread] = useState(() => {
+    const includeThread = config?.reframe?.contextExtras?.includeTodayThread === true;
+    if (!includeThread) return null;
+    try {
+      return getTodayThread(beat);
+    } catch {
+      return null;
+    }
+  });
 
   const [step, setStep] = useState("notice");
   const [precisionName, setPrecisionName] = useState("");
@@ -187,6 +204,7 @@ export default function Spine({ onExit }) {
     return (
       <Reframe
         beat={beat}
+        todayThread={todayThread}
         precisionName={precisionName}
         selectedChip={selectedChip}
         onContinue={handleReframeContinue}

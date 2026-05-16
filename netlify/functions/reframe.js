@@ -1375,7 +1375,13 @@ const BEAT_ADDITIONS = {
 
 Do NOT open patterns from yesterday or last week — morning is for today; that work belongs to main beat or EOD. Do NOT use wellness-language ("set intentions," "manifest," "seize the day," "win the day") — operator-tier voice only. End pointing toward action — the day is about to happen.`,
 
-  // eod: filled in Phase 4 #4.
+  eod: `EOD BEAT — integrative closure. The user is closing today, not opening one. TODAY'S THREAD is provided as context below — the named work the user produced through the day. The work has two moves:
+
+1. DISTILL WHAT LANDED. Help the user name what from today actually deserves to be kept — distilling, not summarizing. Reference today's thread when it's relevant; you see what was named, the user does the picking. Use constructed-emotion technique (Barrett 2017) to refine vague residue into specific named takeaways — "the day was a lot" becomes "the morning meeting that's still echoing" or "the conversation I cut short." Close with precision, not fuzz.
+
+2. CLOSE, DON'T OPEN. This is closure, not new analysis. Use implementation intention (Gollwitzer 1999) for the close move — "if [thing still echoing] surfaces tomorrow, then [planned response]" — so the day ends with a forward-anchored close rather than an open thread.
+
+Do NOT open new patterns or surface new work — closure is putting down, not picking up. Do NOT use therapy-coded language ("let yourself feel," "honor your emotions," "be gentle with yourself"). Do NOT lecture about sleep hygiene or recovery. Pre-sleep cognitive consolidation favors what gets rehearsed last (Walker, Stickgold) — help the user rehearse what they want to carry forward, not what they're leaving behind.`,
 };
 
 
@@ -1446,7 +1452,13 @@ exports.handler = async function(event) {
       // Phase 4 #3 (May 16, 2026): v2 spine sends `beat` (locked at
       // session mount in Spine.jsx). Used to inject BEAT_ADDITIONS into
       // contextParts. Defaults to null for v1 callers and back-compat.
-      beat = null
+      beat = null,
+      // Phase 4 #4 (May 16, 2026): v2 EOD spine sends today's thread
+      // entries so the AI can help the user distill what landed across
+      // the day. Array of {time, text, source}. Empty/null for any beat
+      // that doesn't include today's thread. Backend only injects this
+      // when beat === "eod" — other beats ignore it.
+      todayThread = null
     } = JSON.parse(event.body);
 
     if (!user_id && !install_id) {
@@ -1995,6 +2007,30 @@ Propose 0-3 updates. Empty array is correct when evidence is thin.`;
       // existing structure — pre-event prep runs its own routing.
       if (beat && Object.prototype.hasOwnProperty.call(BEAT_ADDITIONS, beat) && BEAT_ADDITIONS[beat]) {
         contextParts.push(BEAT_ADDITIONS[beat]);
+      }
+
+      // Phase 4 #4 (May 16, 2026): for EOD beat, inject today's thread
+      // entries so the AI can reference what the user named across the
+      // day when helping them distill. Only EOD uses this — morning is
+      // anticipatory (no prior thread to integrate), main runs in-the-
+      // moment without retrospective scope, wind-down doesn't go
+      // through Reframe at all. Other beats ignore todayThread even if
+      // sent. Trimmed to 20 most recent entries as a safety cap so a
+      // very heavy day doesn't blow out the prompt token budget.
+      if (beat === "eod" && Array.isArray(todayThread) && todayThread.length > 0) {
+        const recentEntries = todayThread.slice(-20);
+        const formattedEntries = recentEntries
+          .map(entry => {
+            const t = (entry && typeof entry.time === "string") ? entry.time : "";
+            const txt = (entry && typeof entry.text === "string") ? entry.text.trim() : "";
+            if (!txt) return null;
+            return t ? `[${t}] ${txt}` : txt;
+          })
+          .filter(Boolean)
+          .join("\n");
+        if (formattedEntries) {
+          contextParts.push(`TODAY'S THREAD (what the user named across the day, oldest to most recent):\n${formattedEntries}\n\nReference these naturally when helping the user distill. The user may not remember everything they named earlier today — that's part of what you're for. Surface the ones that seem load-bearing for the close, but let the user pick which to actually carry forward.`);
+        }
       }
     }
 
