@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1 + #2 shipped — thread name + Close takeaway)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1 + #2 + #3 shipped — spine integrity complete; #4 AI arc + #5 typo policy remaining)**
 
 ---
 
@@ -82,7 +82,7 @@ This works because the user was always the one doing the practice — AI absence
 
   1. **Close: user-takeaway input required.** ✅ shipped `686b7d0` — Close was previously a passive display showing the AI's final reframe verbatim as "What landed", auto-crediting AI text as the user's takeaway (Pillar A violation). Rebuilt as active step: headline *"Name what landed."*, textarea, Return home disabled until ≥4 chars trimmed. Optional "↩ Anchor on what surfaced" mono link seeds textarea with the AI/SelfReframe frame for users who want to anchor — they can edit or keep. Persistence relocated: saveSession + appendTodayEntry moved from reframe→close transition into the close→home handler. If user abandons Close, no session record written. Schema: new `surfacedFrame` field preserves what was surfaced (Mirror / Library / Pattern Disruption use it downstream); `takeaway` field now semantic = USER's named takeaway.
 
-  2. **Spine: user reply required before Close is reachable.** At least one user reply in Reframe after the AI's first response. Cannot close after a single AI turn. Prevents the discrimination-skip pattern observed in audit.
+  2. **Spine: user reply required before Close is reachable.** ✅ shipped `453420f` — "I'm done" button in Reframe disabled until `userMessageCount >= 2` in history (Notice precision + at least one Reframe reply). Renders 40% opacity / pointer-events:none when gated. Quiet mono helper "Reply first — then close" appears below the button row when gated and conversation is functional. SelfReframe needs no equivalent gate — its structured-prompt advancement is already user-required structurally. Together with #2: user must reply AND name takeaway. AI cannot do the user's metacognitive work.
 
   3. **Thread: derived precision name for free-typed sessions.** ✅ shipped `8156761` — Free-typed Notice input was appearing verbatim in TODAY thread (entire paragraph, 177 chars in audit case). New util `src/v2/lib/threadEntry.js` exports `deriveThreadName(precision, chip)`. Deterministic, zero AI dependency. Logic: ≤50c return as-is; clause-break (`,.;:—`) on first segment if 4–50c; otherwise first N words within 49c + ellipsis; hard truncate single huge word. Wired into Spine.jsx; FULL precisionName preserved on session record (downstream surfaces still see full input). Verified against 7 test cases including the May 16 audit case. Chip-only sessions already worked correctly.
 
