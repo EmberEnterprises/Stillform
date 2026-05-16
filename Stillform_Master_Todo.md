@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 4 scope locked — beat-aware spine variants + achievement credits + breathing routing; wind-down design call: tomorrow anchor)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 4 scope fully locked — beat variants + 5 added cross-cutting gaps + dopamine awareness flagged across Phase 5/6)**
 
 ---
 
@@ -174,54 +174,81 @@ This works because the user was always the one doing the practice — AI absence
   **Cross-cutting:**
 
   - Beat-aware AI prompt routing in `netlify/functions/reframe.js`: new `BEAT_ADDITIONS` map injected into contextParts when beat ∈ {morning, eod}. Main and wind-down keep current behavior (wind-down doesn't use Reframe).
-  - v1 storage shape compatibility: `stillform_checkin_today`, `stillform_eod_today` written in shapes v1's `beat.js` / TimeKeeper can read, so beat detection stays correct during v1/v2 dual-live period.
+  - v1 storage shape compatibility: `stillform_checkin_today`, `stillform_eod_today` written in shapes v1's `beat.js` / TimeKeeper can read, so beat detection stays correct during v1/v2 dual-live period. Reads also accept v1 shape — v2 users upgrading don't lose their flag.
   - Concierge surfacing: morning Today's Brief context includes previous night's `stillform_tomorrow_anchor` if present.
+  - **Plausible events per variant** (analytics observability — fire from client on completion):
+    - `Beat Completed` props: `{beat: "morning" | "eod" | "wind-down", precisionLength, turnCount}`
+    - `Tomorrow Anchor Set` props: `{length}` (fired from wind-down)
+    - `Breathing Offer Tapped` props: `{beat, pattern: "box" | "deep-regulate"}`
+    - `Breathing Offer Shown` props: `{beat, pattern}` (denominator for tap rate)
+    - `Micro Credit Shown` props: `{beat, credit_type: "first_week" | "streak" | "frequency" | "today_count"}`
+  - **Self Mode fallback per variant.** Variant config includes `selfModeShape` per beat:
+    - Morning: SelfReframe with morning prompts (anchor-naming, not pattern-naming). Phase 4 ships with generic SelfReframe; **beat-aware self-prompts deferred** (acceptable degradation — SelfReframe still functions).
+    - EOD: same — generic SelfReframe acceptable; beat-aware self-prompts deferred.
+    - Wind-down: NO SelfReframe (minimal flow has no Reframe step at all). AI failure on tomorrow anchor → user types directly into the textarea, no AI involved in capture. Tomorrow's anchor is user-named regardless of AI state. Breathing screen has no AI dependency. So wind-down has zero AI-failure surface.
+  - **Active prompt fallback updates in `src/v2/lib/activePrompt.js`.** Current fallback copy is generic; refresh per beat to match the variant flow:
+    - Morning fresh: *"Today opens here. Set what it needs from you."* (action: "Begin")
+    - Morning after check-in done (returns to home): *"Today's anchor is set. Use the day."* (no action — main beat active prompt takes over after this)
+    - EOD: *"Day's been carried. Close it with care."* (action: "Begin")
+    - Wind-down: *"Phone down soon. Tomorrow's one anchor?"* (action: "Begin" → routes to minimal flow)
+    - These ship as fallback copy; AI-generated prompt path (when wired) overrides as before.
+  - **CANON §7 update.** New subsection §7.2 *"Beat-Aware Spine Variants"* documenting: variant config layer as architectural concept; the four beats and their distinct jobs (morning anticipation / main pattern-naming / EOD integration / wind-down forward anchor + power-down); shape distinction (standard Notice → Reframe → Close vs minimal direct flow); rationale for wind-down's separate shape (canon §10 no review near sleep + Scullin 2018 forward anchor over offload). Locked at canon level so future variants (post-event, etc.) follow the same architecture.
+  - **CHIP_DEFINITIONS_DRAFT.md cross-reference.** Chip sets per beat in scope #2 and #3 above should be reconciled against the existing draft doc before lock. If chip definitions diverge, update the draft doc as the chips ship — keep it the source of chip semantics across the app.
+  - **Dopamine awareness — flagged as cross-cutting (see end of phase plan).** Not Phase 4 work, but Phase 4's variant config architecture is the substrate Phase 5/6 dopamine surfaces will build on.
 
   **Files affected:**
   - `src/v2/lib/beatConfig.js` (new)
   - `src/v2/lib/microCredit.js` (new)
   - `src/v2/lib/thread.js` — `getTodayThread()` already exists; may need helper to extract for AI context
+  - `src/v2/lib/activePrompt.js` — fallback copy refresh per beat
   - `src/v2/screens/Spine.jsx` — read beat config, route shape, pass props
   - `src/v2/screens/spine/Notice.jsx` — accept config props (headline/body/placeholder/chips)
   - `src/v2/screens/spine/Reframe.jsx` — pass beat + contextExtras to API
   - `src/v2/screens/spine/Close.jsx` — render micro-credit + breathing offer, completionFlag write
   - `src/v2/screens/spine/WindDown.jsx` (new) — minimal flow screen
   - `netlify/functions/reframe.js` — `BEAT_ADDITIONS` map + injection
-  - `Stillform_Master_Todo.md` + `STILLFORM_CANON.md` — per step
+  - `Stillform_Master_Todo.md` + `STILLFORM_CANON.md` (§7.2 new subsection)
+  - `CHIP_DEFINITIONS_DRAFT.md` — reconcile chip sets if divergent
 
   **Verification on completion:**
   - `?beat=morning` → Notice shows "Anchor today." + forward-looking chips
   - `?beat=eod` → Notice shows "Close the day." + retrospective chips + AI receives today's thread context
   - `?beat=wind-down` → minimal flow: tomorrow's anchor → Deep Regulate → phone-down close
-  - All three completion flags written correctly (verify SmartScreen advances beat)
+  - All three completion flags written correctly (verify SmartScreen advances beat); v1 frontend reads them too
   - Morning Close offers Box; EOD Close offers Deep Regulate; main Close offers AI-routed (existing); wind-down embeds inline
   - Micro-credit renders above "What landed" when signal exists, silent otherwise
   - Reframe AI first response differs by beat — forward-looking for morning, integrative for EOD
-  - v1 frontend keeps working — storage shape compatibility verified
+  - Plausible events fire on each beat completion + breathing offer surface/tap + micro-credit show
+  - Self Mode works on morning + EOD (generic prompts acceptable for Phase 4)
+  - Active prompt fallback copy on SmartScreen matches variant flow at each beat
+  - CANON §7.2 added documenting variant config architecture
+  - CHIP_DEFINITIONS_DRAFT.md reconciled with chip sets shipped
 
   **Sub-item commit order (each follows operating rule: lock scope → commit doc → start code → commit code → update doc):**
 
   1. Variant config infrastructure (`beatConfig.js`) — foundation
-  2. Notice.jsx accepts config props (decouple from hardcoded "Name what's present")
-  3. Morning variant — config + AI prompt addition + completion flag write
-  4. EOD variant — config + AI prompt addition + thread context wiring + completion flag write
-  5. Wind-down minimal flow (`WindDown.jsx`) + Spine route switch + tomorrow-anchor storage
-  6. Achievement micro-credit derivation + Close render
-  7. Breathing offer + Close render
+  2. Notice.jsx accepts config props (decouple from hardcoded "Name what's present"); active prompt fallback copy refresh
+  3. Morning variant — config + AI prompt addition (`BEAT_ADDITIONS.morning` in reframe.js) + completion flag write + Plausible event
+  4. EOD variant — config + AI prompt addition + thread context wiring + completion flag write + Plausible event
+  5. Wind-down minimal flow (`WindDown.jsx`) + Spine route switch + tomorrow-anchor storage + Plausible events
+  6. Achievement micro-credit derivation + Close render + Plausible event
+  7. Breathing offer + Close render + Plausible events
+  8. CANON §7.2 + CHIP_DEFINITIONS_DRAFT.md reconciliation (closing-doc commit)
 
 - **5** — My Progress
-  - Library (external curated knowledge — human behavior, neuroscience, ethics)
+  - Library (external curated knowledge — human behavior, neuroscience, ethics). **Includes dopamine science entry** per cross-cutting concern below — Lembke 2021, Volkow on D2 receptor downregulation, pleasure-pain balance, why cheap hits make composure harder.
   - Roadmap (5-stage full screen)
   - Mirror Strip (one-line teaser anchor to Roadmap)
   - Pattern Disruption Layer (recurring pattern transparency + disruptor sessions)
   - AI Mediation approval queue (post-EOD AI proposals to Trigger Profile / Anchors / Baseline)
-  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter)
+  - Diagnostic stack editors (Trigger Profile, Bias Profile, Signal Profile, Bio-filter). **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
   - Signal Log (long-term past-session review)
 
-- **6** — Support Sheet (Move card + Scripts) + post-event reflection variant
+- **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
   - Scripts confidant-voice rewrite
   - **Post-event reflection** — registers as 5th beat type in the variant config architecture built in Phase 4. Notice headline: *"What just happened?"* Forward into Reframe with post-mortem framing (what worked / what didn't / what to keep). Close = post-event artifact (lessons + carry-forward). Entry trigger lives in Support Sheet (manual *"Post-event reflection"* affordance) and optionally from calendar detection (Phase 9 ties in). Minimal new code thanks to Phase 4 architecture — one config object + one entry surface.
+  - **Reset surface** — dedicated short flow for acute dopamine-crash moments per cross-cutting dopamine awareness concern. Notice headline e.g. *"Reset point."* Body acknowledges the state without judgment. NOT Notice → Reframe → Close — minimal shape like wind-down. Sequence: brief somatic anchor (cold splash / cyclic sighing / deliberate boredom prompt) → optional one-line capture ("What did the urge feel like?") → close. Physiological-first because depleted PFC can't sustain deep metacognition. Routes to Move card if user wants behavioral disruptor. Registers as another minimal-shape variant in Phase 4's architecture.
 
 - **7** — Pre-event Brief v2
   - Hardware status check, Risks, Moves, Recovery anchor
@@ -258,6 +285,14 @@ This works because the user was always the one doing the practice — AI absence
   - **Post-launch enhancements:** Monthly digest, CFM revisit, low-priority integrations (Weather, possibly Voice)
 
 **Cross-cutting concern — Smart Prompt Mechanism:** Signal-watching + intervention proposal (e.g., HRV elevated → "Quick Breathe? Or Reframe?"; pre-event detected → notification with watch/phone choice). Concierge philosophy embodied. Lives in Phase 5 (AI Mediation reads signals) + surfaces via Phase 9 (Watch / widget notifications) + smart-screen Mirror strip (Phase 3). Not a separate phase; cross-cuts existing architecture.
+
+**Cross-cutting concern — Dopamine awareness (locked May 16, 2026):** Users with depleted dopamine (chronic overstimulation, screen/social-media compulsion, post-binge crashes, substance use, ADHD with downregulated D2 receptors) fight their physiology when attempting metacognitive practice. Depleted dopamine = depleted prefrontal capacity = the exact tool the practice asks for. Science: Lembke 2021 (*Dopamine Nation*, pleasure-pain balance), Volkow on D2 receptor downregulation in addiction, Lustig on cheap-dopamine substitutes, polyvagal disruption from chronic overstimulation. Stillform's core practice IS already anti-dopamine-addiction by virtue of being slow-pleasure / tolerance-for-unresolved-tension work — but this needs explicit surfaces. Lives in:
+- **Phase 5 Library** — entry on dopamine science / pleasure-pain balance / why cheap hits make composure harder. External curated knowledge, Library's job.
+- **Phase 5 Bio-filter editor** — new flag *"overstimulated"* or *"post-binge"* alongside existing *"depleted"*. AI prompts adapt per flag — depleted-from-stimulation calls for different framing than depleted-from-effort.
+- **Phase 6 Support Sheet — Reset surface** (new addition to Phase 6 scope): dedicated short flow for acute dopamine-crash moments ("just doomscrolled three hours, feel terrible, can't get back"). Sits alongside Move card and Scripts. Physiological-first (cold splash, slow breathing, deliberate boredom anchor) rather than metacognitive — depleted PFC can't do the deeper practice in that state. Routes to Move card if user wants a behavioral disruptor.
+- **Reframe AI awareness (Phase 3.5 #4 prompt refinement, ongoing)** — the metacognitive arc already has the tools (distortion-naming for compulsive patterns, implementation intention for anchoring against pulls). The AI just needs to recognize the state when user input surfaces it. This is prompt tuning, not new infrastructure.
+
+Cross-cuts existing architecture. Not a separate phase. Phase 4's variant config architecture is the substrate Phase 5/6 dopamine surfaces will build on (e.g., the Reset surface in Phase 6 may register as its own variant with notice.shape = "minimal" matching the wind-down pattern).
 
 **Item count:** ~47 distinct decisions / specs / sharpenings folded in (original 27 audit items + ~18 conversation refinements + 2 paired user-AI relationship principles added in patch on `0d673d0`).
 
