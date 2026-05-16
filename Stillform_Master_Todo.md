@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1 + #2 + #3 shipped — spine integrity complete; #4 AI arc + #5 typo policy remaining)**
+**ARA Embers LLC · last updated May 16, 2026 (Phase 3.5 #1–#4 shipped — metacognitive arc complete; #5 typo policy remaining)**
 
 ---
 
@@ -86,13 +86,7 @@ This works because the user was always the one doing the practice — AI absence
 
   3. **Thread: derived precision name for free-typed sessions.** ✅ shipped `8156761` — Free-typed Notice input was appearing verbatim in TODAY thread (entire paragraph, 177 chars in audit case). New util `src/v2/lib/threadEntry.js` exports `deriveThreadName(precision, chip)`. Deterministic, zero AI dependency. Logic: ≤50c return as-is; clause-break (`,.;:—`) on first segment if 4–50c; otherwise first N words within 49c + ellipsis; hard truncate single huge word. Wired into Spine.jsx; FULL precisionName preserved on session record (downstream surfaces still see full input). Verified against 7 test cases including the May 16 audit case. Chip-only sessions already worked correctly.
 
-  4. **Reframe AI: structured metacognitive arc, not reflective mirror.** System prompt rebuild + conversational arc over 2–4 turns minimum. The arc runs the techniques the spine has been claiming all along:
-     - **Probe deeper** — ask what user hasn't asked themselves; don't restate what they said
-     - **Self-distance** (Kross 2014) — third-person reframe: *"If a friend told you this, what would you tell them?"*
-     - **Surface distortions** (Beck / Wells 2009) — NAME the cognitive pattern when present (perfectionism + catastrophization, all-or-nothing, mind-reading, etc.); don't just hold it
-     - **Fact vs forecast** — separate body data ("exhausted, in pain") from forecast ("going to fall") and have the user check evidence on each
-     - **Reframe via constructed emotion** (Barrett 2017) — offer an alternative construction of the chemical/nervous-system state, not just an inventory of what the user said
-     - **Implementation intention** (Gollwitzer 1999) — close the arc with action, not feeling: *"If X comes back, what's the move?"*
+  4. **Reframe AI: structured metacognitive arc, not reflective mirror.** ✅ shipped `f052022` — New `METACOGNITIVE_ARC` constant in `netlify/functions/reframe.js` (~90 lines) injected as the FIRST contextPart after the mode prompt for calm and clarity modes (not hype — pre-event prep runs a different arc). The arc: (a) sharpens turn-1 candidates from RESTATE to PROBE with audit case good/bad examples; (b) defines the six techniques for turns 2+ with example phrasings — probe deeper, self-distance (Kross 2014), surface distortion (Beck / Wells 2009), fact vs forecast, reframe via constructed emotion (Barrett 2017), implementation intention (Gollwitzer 1999); (c) forbids restate-as-options after turn 1, generic validation, therapeutic life-interpretation, repeating prior question/technique; (d) reinforces user-led principle architecturally — AI structures space, user does the work. Existing CALM/CLARITY/HYPE prompts unchanged; arc layers on top preserving all voice rules, banned phrases, presence-first guidance, bio-filter handling, crisis detection, low-demand override. Together with #2 + #3: Reframe is now structured metacognitive practice, not a smart journal.
 
   5. **AI typo correction policy decision.** Current AI silently normalizes user typos in its responses (e.g. "motions" → "emotions"). Decide: keep (clarity) or preserve user voice (authenticity). Document the decision either way.
 
