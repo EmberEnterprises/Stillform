@@ -1,5 +1,5 @@
 # STILLFORM MASTER TODO
-**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅. Phase 4 ✅. Phase 4.5/4.5b ✅. Nothing outstanding pre-Phase 5. Phase 5 ⏳ STARTED — sub-item #1: Context Profile foundation, locked scope: data layer + editor UI + route. Pure CRUD; Reframe API plumbing + autodetection split to later sub-items. Diagnostic stack editor pattern established by Context Profile, then Trigger/Bias/Signal/Bio-filter editors follow same template.)**
+**ARA Embers LLC · last updated May 17, 2026 (Phase 2.5 ✅. Phase 4 ✅. Phase 4.5/4.5b ✅. Phase 5 ⏳ IN PROGRESS — sub-item #1 Context Profile foundation ✅ shipped `fffd12d`: data layer + editor UI + Progress route placeholder. Pattern established for subsequent diagnostic-stack editors. Next sub-item TBD with Arlin — Trigger Profile editor UI (data layer already exists in v1), Bias/Signal/Bio-filter editors, AI Mediation queue, or My Progress landing surface.)**
 
 ---
 
@@ -367,28 +367,7 @@ This is the architectural floor under Principle C. Every AI surface ships with a
     - **Bio-filter expands with dopamine-aware flags** (*"overstimulated"* / *"post-binge"*) per dopamine cross-cutting concern below — AI prompts adapt per flag because depleted-from-stimulation needs different framing than depleted-from-effort.
   - Signal Log (long-term past-session review)
 
-  **Phase 5 sub-item #1 — Context Profile foundation (locked May 17, 2026):**
-
-  Starting Phase 5 with Context Profile because (a) it's new — no v1 baggage; (b) it establishes the editor pattern for Trigger/Bias/Signal/Bio-filter editors that follow; (c) unblocks the expanded AI Mediation queue which references Context Profile heavily; (d) has the strictest guardrails — getting them right first means subsequent editors inherit the discipline.
-
-  Sub-item #1 scope is INTENTIONALLY TIGHT — data layer + editor UI + route only. No Reframe API plumbing yet (that's AI Mediation queue scope, separate). No autodetection of correlations yet (that's the two-layer pattern detection scope, also separate). Pure CRUD interface for the user to name what they've already observed.
-
-  **Files affected:**
-  - `src/v2/lib/contextProfile.js` (NEW) — pure data module. Mirrors v1 Trigger Profile pattern (`src/App.jsx:5611-5704`) but adapted for context semantics. Schema: `{ contexts: [{ id, label, description, createdAt, lastSeen, encounterCount }], updatedAt }`. Helpers: `getContextProfile`, `saveContextProfile`, `addContextEntry`, `updateContextEntry`, `deleteContextEntry`, `incrementContextEncounter`, `formatContextProfileForAI` (forward-looking — used by AI Mediation queue in later sub-item). NO category enum (freeform labels, per guardrail #1). NO food/symptom/medical fields (per guardrail #2). Optional `description` field for longer notes the user writes themselves. v2 plain-localStorage pattern matching `src/v2/lib/sessions.js` (fail-silent on storage unavailable; cloud sync layers later via Supabase). Storage key: `stillform_context_profile`.
-  - `src/v2/screens/ContextProfile.jsx` (NEW) — editor UI. List of entries with add/edit/delete affordances. Editorial header with hard-coded copy that orients the user to the right mental model: "Conditions you've noticed correlate with how you feel. Name what you observe — Stillform doesn't prescribe, doesn't track symptoms, just helps you see what you've already noticed." Input placeholder shows examples of the SHAPE: "e.g., rainy days, after long calls, when I haven't eaten enough." Each entry shows label + optional description + last-seen date + encounter count (mono-faint, faint enough not to feel like surveillance metrics).
-  - `src/v2/AppV2.jsx` — add `context-profile` screen state. Route from Home via HomeFooter's "Progress" link (placeholder route until full My Progress landing exists).
-  - `src/v2/components/HomeFooter.jsx` — wire "Progress" `onNavigate` to set screen to `context-profile` for now. NOTE: this is intentionally a temporary direct-link until a proper My Progress landing exists (Phase 5 sub-item later). Pattern established: Progress link works, content flows in.
-
-  **Out of scope for sub-item #1:**
-  - Reframe API plumbing (`contextProfile` field in request body) — AI Mediation queue scope
-  - Two-layer pattern detection (coded counts/frequencies + AI generative framing) — separate sub-item
-  - Trigger / Bias / Signal / Bio-filter editors — separate sub-items
-  - My Progress landing surface (tab navigation, etc.) — separate sub-item; for now Progress → ContextProfile directly
-  - Audit history integration (the `appendArtifactHistoryEntry` call from v1's addTrigger) — bigger architectural piece; v2 will get an artifact history system but not in this sub-item
-
-  **Success criterion:** User can navigate from Home → Progress → see ContextProfile editor → add a label like "rainy days" with optional description → see it in the list → edit it → delete it. The label persists across reloads. No Stillform-side prompts to enter food/symptoms/medical info. The guardrail copy makes the mental model clear.
-
-  **Risk:** Low. Pure greenfield code. v1 unchanged. Even if the editor UI is rough, the data layer is the load-bearing piece for downstream Mediation queue work.
+  **Phase 5 sub-item #1 — Context Profile foundation:** ✅ shipped `fffd12d` — data layer (`src/v2/lib/contextProfile.js`, 7 helpers, schema mirrors v1 Trigger Profile pattern but freeform-label without category enum, optional description field, dedup by case-insensitive label) + editor UI (`src/v2/screens/ContextProfile.jsx`, inline add/edit form with two-step delete confirmation, guardrail copy oriented to "name what you observe" not "log your symptoms," placeholder text shows shape: "e.g., rainy days, after long calls, when I haven't eaten enough") + routing (AppV2 adds `context-profile` screen state; HomeFooter "progress" nav id routes here as placeholder until full My Progress landing surface ships). Established pattern for subsequent diagnostic stack editors. Build clean. All locked guardrails held — no category enum, no medical/food/symptom prompts, description is freeform user note. **Out of scope per lock (separate sub-items):** Reframe API plumbing (`contextProfile` field in request body), autodetection of correlations, other diagnostic stack editors, full My Progress landing, audit history integration.
 
 - **6** — Support Sheet (Move card + Scripts) + post-event reflection variant + Reset surface
   - Move card library spec addition: **freeze-restart sequence** — physiological sigh → silent affect label ("I'm frozen") → self-distance with name ("Arlin, what do you know?") → single first fact; ~30 sec; for in-the-moment freeze under load (Beilock choke research, Wells 2009, Kross 2014, Lieberman 2007)
